@@ -8,13 +8,13 @@ from . import constants
 class ApiException(Exception):
     pass
 
-
 class Client:
-    def __init__(self,
+    def __init__(
+        self,
         api_key: str,
         api_url: str = "https://api.anthropic.com",
         proxy_url: Optional[str] = None,
-        default_request_timeout: Optional[Union[float, Tuple[float, float]]] = 600
+        default_request_timeout: Optional[Union[float, Tuple[float, float]]] = 600,
     ):
         self.api_key = api_key
         self.api_url = api_url
@@ -51,12 +51,12 @@ class Client:
             **(headers or {}),
         }
 
-        if params.get('disable_checks'):
-            del params['disable_checks']
+        if params.get("disable_checks"):
+            del params["disable_checks"]
         else:
             # NOTE: disabling_checks can lead to very poor sampling quality from our API.
             # _Please_ read the docs on "Claude instructions when using the API" before disabling this
-            _validate_prompt(params['prompt'])
+            _validate_prompt(params["prompt"])
 
         data = None
         if params:
@@ -72,14 +72,16 @@ class Client:
                 raise ValueError(f"Unrecognized method: {method}")
 
         # If we're requesting a stream from the server, let's tell requests to expect the same
-        stream = params.get('stream', None)
+        stream = params.get("stream", None)
         result = self._session.request(
             method,
             abs_url,
             headers=final_headers,
             data=data,
             stream=stream,
-            timeout=request_timeout if request_timeout else self.default_request_timeout,
+            timeout=request_timeout
+            if request_timeout
+            else self.default_request_timeout,
         )
         return result
 
@@ -113,24 +115,32 @@ class Client:
             try:
                 json_body = json.loads(line)
             except json.decoder.JSONDecodeError as e:
-                raise ApiException(e, f'Error processing stream data', line)
+                raise ApiException(e, f"Error processing stream data", line)
             yield json_body
 
     def completion_stream(self, **kwargs) -> Iterator[dict]:
-        new_kwargs = {'stream': True, **kwargs}
-        return self._request_as_stream("post", "/v1/complete",
+        new_kwargs = {"stream": True, **kwargs}
+        return self._request_as_stream(
+            "post",
+            "/v1/complete",
             params=new_kwargs,
         )
 
     def completion(self, **kwargs) -> dict:
-        return self._request_as_json("post", "/v1/complete",
+        return self._request_as_json(
+            "post",
+            "/v1/complete",
             params=kwargs,
         )
 
 def _validate_prompt(prompt: str) -> None:
     if not prompt.startswith(constants.HUMAN_PROMPT):
-        raise ValueError(f"Prompt must start with anthropic.HUMAN_PROMPT ({repr(constants.HUMAN_PROMPT)})")
+        raise ValueError(
+            f"Prompt must start with anthropic.HUMAN_PROMPT ({repr(constants.HUMAN_PROMPT)})"
+        )
     if constants.AI_PROMPT not in prompt:
-        raise ValueError(f"Prompt must contain anthropic.AI_PROMPT ({repr(constants.AI_PROMPT)})")
-    if prompt.endswith(' '):
+        raise ValueError(
+            f"Prompt must contain anthropic.AI_PROMPT ({repr(constants.AI_PROMPT)})"
+        )
+    if prompt.endswith(" "):
         raise ValueError(f"Prompt must not end with a space character")
