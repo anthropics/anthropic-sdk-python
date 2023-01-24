@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anthropic"
+description = "Library for accessing the anthropic API"
+readme = "README.md"
+requires-python = ">=3.8"
+version = "0.2.1"
+dependencies = [
+    "requests",
+    'importlib-metadata; python_version<"3.8"',
+]
+
+[project.optional-dependencies]
+dev = [
+    "black >= 22.3.0",
+    "pytest",
+]
