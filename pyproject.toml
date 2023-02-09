@@ -1,17 +1,35 @@
 [build-system]
-requires = ["setuptools"]
+requires = [
+  "setuptools >= 61.0.0",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "anthropic"
+version = "0.2.2"
 description = "Library for accessing the anthropic API"
 readme = "README.md"
 requires-python = ">=3.8"
-version = "0.2.1"
+keywords = ["anthropic", "anthropicai"]
+license = {text = "MIT"}
+authors = [
+    {name = "Anthropic"}
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent"
+]
 dependencies = [
     "requests",
     'importlib-metadata; python_version<"3.8"',
 ]
+
+[project.urls]
+homepage = "https://github.com/anthropics/anthropic-sdk-python"
+repository = "https://github.com/anthropics/anthropic-sdk-python.git"
+#documentation = "https://readthedocs.org"
+#changelog = "https://github.com/anthropics/anthropic-sdk-python/"
 
 [project.optional-dependencies]
 dev = [
