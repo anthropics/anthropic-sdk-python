@@ -11,4 +11,5 @@ pip install .
 export ANTHROPIC_API_KEY=<insert token here>
 python examples/basic_sync.py
 python examples/basic_stream.py
+python examples/count_tokens.py
 ```

@@ -2,3 +2,6 @@
 __pycache__
 .DS_Store
 **/.DS_Store
+
+anthropic.egg-info/
+build/
