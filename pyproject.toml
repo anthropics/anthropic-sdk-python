@@ -21,8 +21,10 @@ classifiers = [
   "Operating System :: OS Independent"
 ]
 dependencies = [
-    "requests",
+    "httpx",
     'importlib-metadata; python_version<"3.8"',
+    "requests",
+    "tokenizers",
 ]
 
 [project.urls]
