@@ -83,6 +83,16 @@ class Client:
             if request_timeout
             else self.default_request_timeout,
         )
+        if result.status_code != 200:
+            content = result.content.decode("utf-8")
+            try:
+                formatted_content = json.loads(content)
+            except json.decoder.JSONDecodeError:
+                formatted_content = content
+            raise ApiException(
+                f'{method} request failed with status code: {result.status_code}',
+                formatted_content
+            )
         return result
 
     def _request_as_json(self, *args, **kwargs) -> dict:
