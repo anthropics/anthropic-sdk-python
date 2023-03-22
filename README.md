@@ -2,7 +2,7 @@
 
 This python repo provides access to Anthropic's safety-first language model APIs.
 
-For more information on our APIs, please check the confidential documentation portal.
+For more information on our APIs, please check out [Anthropic's documentation](https://console.anthropic.com/docs).
 
 ## How to use
 
