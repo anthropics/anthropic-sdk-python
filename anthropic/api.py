@@ -4,6 +4,7 @@ import requests.adapters
 import urllib.parse
 import json
 from . import constants
+from . import tokenizer
 
 class ApiException(Exception):
     pass
@@ -44,7 +45,7 @@ class Client:
         method = method.lower()
 
         abs_url = urllib.parse.urljoin(self.api_url, path)
-        final_headers = {
+        final_headers: dict[str, str] = {
             "Accept": "application/json",
             "Client": constants.ANTHROPIC_CLIENT_VERSION,
             "X-API-Key": self.api_key,
@@ -55,8 +56,10 @@ class Client:
             del params["disable_checks"]
         else:
             # NOTE: disabling_checks can lead to very poor sampling quality from our API.
-            # _Please_ read the docs on "Claude instructions when using the API" before disabling this
-            _validate_prompt(params["prompt"])
+            # _Please_ read the docs on "Claude instructions when using the API" before disabling this.
+            # Also note, future versions of the API will enforce these as hard constraints automatically,
+            # so please consider these SDK-side checks as things you'll need to handle regardless.
+            _validate_request(params)
 
         data = None
         if params:
@@ -143,14 +146,26 @@ class Client:
             params=kwargs,
         )
 
-def _validate_prompt(prompt: str) -> None:
+def _validate_request(params: dict) -> None:
+    prompt: str = params["prompt"]
     if not prompt.startswith(constants.HUMAN_PROMPT):
-        raise ValueError(
+        raise ApiException(
             f"Prompt must start with anthropic.HUMAN_PROMPT ({repr(constants.HUMAN_PROMPT)})"
         )
     if constants.AI_PROMPT not in prompt:
-        raise ValueError(
+        raise ApiException(
             f"Prompt must contain anthropic.AI_PROMPT ({repr(constants.AI_PROMPT)})"
         )
     if prompt.endswith(" "):
-        raise ValueError(f"Prompt must not end with a space character")
+        raise ApiException(f"Prompt must not end with a space character")
+    _validate_prompt_length(params)
+
+def _validate_prompt_length(params: dict) -> None:
+    prompt: str = params["prompt"]
+    prompt_tokens = tokenizer.count_tokens(prompt)
+    max_tokens_to_sample: int = params["max_tokens_to_sample"]
+    token_limit = 9 * 1024
+    if prompt_tokens + max_tokens_to_sample > token_limit:
+        raise ApiException(
+            f"Prompt tokens ({prompt_tokens}) + max-sampled tokens ({max_tokens_to_sample}) exceeds max ({token_limit})",
+        )
