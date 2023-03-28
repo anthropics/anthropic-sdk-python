@@ -4,6 +4,9 @@ import requests
 import requests.adapters
 import urllib.parse
 import json
+
+from aiohttp import ClientResponse
+
 from . import constants
 
 class ApiException(Exception):
@@ -19,8 +22,9 @@ class Request(NamedTuple):
     timeout: Optional[Union[float, Tuple[float, float]]]
 
 
-def _process_request_error(method, result):
-    if result.status_code != 200:
+def _process_request_error(method: str, result: Union[requests.Response, ClientResponse]):
+    status_code = result.status if isinstance(result, ClientResponse) else result.status_code
+    if status_code != 200:
         content = result.content.decode("utf-8")
         try:
             formatted_content = json.loads(content)
@@ -115,6 +119,28 @@ class Client:
         _process_request_error(method, result)
         return result
 
+    async def _arequest_as_json(
+        self,
+        method: str,
+        path: str,
+        params: dict,
+        headers: Optional[Dict[str, str]] = None,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+    ) -> dict:
+        request = self._request_params(headers, method, params, path, request_timeout)
+        async with aiohttp.ClientSession() as session:
+            async with session.request(
+                request.method,
+                request.url,
+                headers=request.headers,
+                data=request.data,
+                timeout=request.timeout,
+            ) as result:
+                _process_request_error(method, result)
+                content = await result.text()
+                json_body = json.loads(content)
+                return json_body
+
     def _request_as_json(self, *args, **kwargs) -> dict:
         result = self._request_raw(*args, **kwargs)
         content = result.content.decode("utf-8")
@@ -163,10 +189,14 @@ class Client:
             params=kwargs,
         )
 
-    async def acompletion_stream(self, **kwargs) -> Iterator[dict]:
-        pass
-
     async def acompletion(self, **kwargs) -> dict:
+        return await self._arequest_as_json(
+            "post",
+            "/v1/complete",
+            params=kwargs,
+        )
+
+    async def acompletion_stream(self, **kwargs) -> Iterator[dict]:
         pass
 
 def _validate_prompt(prompt: str) -> None:
