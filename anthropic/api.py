@@ -9,6 +9,7 @@ from aiohttp import ClientResponse
 
 from . import constants
 
+
 class ApiException(Exception):
     pass
 
@@ -22,8 +23,12 @@ class Request(NamedTuple):
     timeout: Optional[Union[float, Tuple[float, float]]]
 
 
-def _process_request_error(method: str, result: Union[requests.Response, ClientResponse]):
-    status_code = result.status if isinstance(result, ClientResponse) else result.status_code
+def _process_request_error(
+    method: str, result: Union[requests.Response, ClientResponse]
+):
+    status_code = (
+        result.status if isinstance(result, ClientResponse) else result.status_code
+    )
     if status_code != 200:
         content = result.content.decode("utf-8")
         try:
@@ -31,8 +36,8 @@ def _process_request_error(method: str, result: Union[requests.Response, ClientR
         except json.decoder.JSONDecodeError:
             formatted_content = content
         raise ApiException(
-            f'{method} request failed with status code: {result.status_code}',
-            formatted_content
+            f"{method} request failed with status code: {result.status_code}",
+            formatted_content,
         )
 
 
@@ -61,13 +66,14 @@ class Client:
         )
         return self._session
 
-    def _request_params(self,
-                        headers: Optional[Dict[str, str]],
-                        method: str,
-                        params: dict,
-                        path: str,
-                        request_timeout: Optional[Union[float, Tuple[float, float]]],
-                        ) -> Request:
+    def _request_params(
+        self,
+        headers: Optional[Dict[str, str]],
+        method: str,
+        params: dict,
+        path: str,
+        request_timeout: Optional[Union[float, Tuple[float, float]]],
+    ) -> Request:
         method = method.lower()
         abs_url = urllib.parse.urljoin(self.api_url, path)
         final_headers = {
@@ -96,7 +102,14 @@ class Client:
                 raise ValueError(f"Unrecognized method: {method}")
         # If we're requesting a stream from the server, let's tell requests to expect the same
         stream = params.get("stream", None)
-        return Request(method, abs_url, final_headers, data, stream, request_timeout or self.default_request_timeout)
+        return Request(
+            method,
+            abs_url,
+            final_headers,
+            data,
+            stream,
+            request_timeout or self.default_request_timeout,
+        )
 
     def _request_raw(
         self,
@@ -178,7 +191,7 @@ class Client:
 
                     prefix = "data: "
                     if line.startswith(prefix):
-                        line = line[len(prefix):]
+                        line = line[len(prefix) :]
                     yield json.loads(line)
 
     def _request_as_json(self, *args, **kwargs) -> dict:
@@ -243,6 +256,7 @@ class Client:
             "/v1/complete",
             params=new_kwargs,
         )
+
 
 def _validate_prompt(prompt: str) -> None:
     if not prompt.startswith(constants.HUMAN_PROMPT):
