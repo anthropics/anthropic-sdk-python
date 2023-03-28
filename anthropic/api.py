@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, Optional, Tuple, NamedTuple, Union
+from typing import Dict, AsyncIterator, Iterator, Optional, Tuple, NamedTuple, Union
 import aiohttp
 import requests
 import requests.adapters
@@ -141,6 +141,46 @@ class Client:
                 json_body = json.loads(content)
                 return json_body
 
+    async def _arequest_as_stream(
+        self,
+        method: str,
+        path: str,
+        params: dict,
+        headers: Optional[Dict[str, str]] = None,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+    ) -> AsyncIterator[dict]:
+        request = self._request_params(headers, method, params, path, request_timeout)
+        awaiting_ping_data = False
+        async with aiohttp.ClientSession() as session:
+            async with session.request(
+                request.method,
+                request.url,
+                headers=request.headers,
+                data=request.data,
+                timeout=request.timeout,
+            ) as result:
+                _process_request_error(method, result)
+                async for line in result.content:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    if line == b"event: ping":
+                        awaiting_ping_data = True
+                        continue
+                    if awaiting_ping_data:
+                        awaiting_ping_data = False
+                        continue
+
+                    if line == b"data: [DONE]":
+                        continue
+
+                    line = line.decode("utf-8")
+
+                    prefix = "data: "
+                    if line.startswith(prefix):
+                        line = line[len(prefix):]
+                    yield json.loads(line)
+
     def _request_as_json(self, *args, **kwargs) -> dict:
         result = self._request_raw(*args, **kwargs)
         content = result.content.decode("utf-8")
@@ -196,8 +236,13 @@ class Client:
             params=kwargs,
         )
 
-    async def acompletion_stream(self, **kwargs) -> Iterator[dict]:
-        pass
+    async def acompletion_stream(self, **kwargs) -> AsyncIterator[dict]:
+        new_kwargs = {"stream": True, **kwargs}
+        return self._arequest_as_stream(
+            "post",
+            "/v1/complete",
+            params=new_kwargs,
+        )
 
 def _validate_prompt(prompt: str) -> None:
     if not prompt.startswith(constants.HUMAN_PROMPT):
