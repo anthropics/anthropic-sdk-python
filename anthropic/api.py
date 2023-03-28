@@ -1,4 +1,5 @@
-from typing import Dict, Iterator, Optional, Tuple, Union
+from typing import Dict, Iterator, Optional, Tuple, NamedTuple, Union
+import aiohttp
 import requests
 import requests.adapters
 import urllib.parse
@@ -7,6 +8,29 @@ from . import constants
 
 class ApiException(Exception):
     pass
+
+
+class Request(NamedTuple):
+    method: str
+    url: str
+    headers: Optional[Dict[str, str]]
+    data: bytes
+    stream: bool
+    timeout: Optional[Union[float, Tuple[float, float]]]
+
+
+def _process_request_error(method, result):
+    if result.status_code != 200:
+        content = result.content.decode("utf-8")
+        try:
+            formatted_content = json.loads(content)
+        except json.decoder.JSONDecodeError:
+            formatted_content = content
+        raise ApiException(
+            f'{method} request failed with status code: {result.status_code}',
+            formatted_content
+        )
+
 
 class Client:
     def __init__(
@@ -33,16 +57,14 @@ class Client:
         )
         return self._session
 
-    def _request_raw(
-        self,
-        method: str,
-        path: str,
-        params: dict,
-        headers: Optional[Dict[str, str]] = None,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-    ) -> requests.Response:
+    def _request_params(self,
+                        headers: Optional[Dict[str, str]],
+                        method: str,
+                        params: dict,
+                        path: str,
+                        request_timeout: Optional[Union[float, Tuple[float, float]]],
+                        ) -> Request:
         method = method.lower()
-
         abs_url = urllib.parse.urljoin(self.api_url, path)
         final_headers = {
             "Accept": "application/json",
@@ -50,14 +72,12 @@ class Client:
             "X-API-Key": self.api_key,
             **(headers or {}),
         }
-
         if params.get("disable_checks"):
             del params["disable_checks"]
         else:
             # NOTE: disabling_checks can lead to very poor sampling quality from our API.
             # _Please_ read the docs on "Claude instructions when using the API" before disabling this
             _validate_prompt(params["prompt"])
-
         data = None
         if params:
             if method in {"get"}:
@@ -70,29 +90,29 @@ class Client:
                 final_headers["Content-Type"] = "application/json"
             else:
                 raise ValueError(f"Unrecognized method: {method}")
-
         # If we're requesting a stream from the server, let's tell requests to expect the same
         stream = params.get("stream", None)
+        return Request(method, abs_url, final_headers, data, stream, request_timeout or self.default_request_timeout)
+
+    def _request_raw(
+        self,
+        method: str,
+        path: str,
+        params: dict,
+        headers: Optional[Dict[str, str]] = None,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+    ) -> requests.Response:
+        request = self._request_params(headers, method, params, path, request_timeout)
         result = self._session.request(
-            method,
-            abs_url,
-            headers=final_headers,
-            data=data,
-            stream=stream,
-            timeout=request_timeout
-            if request_timeout
-            else self.default_request_timeout,
+            request.method,
+            request.url,
+            headers=request.headers,
+            data=request.data,
+            stream=request.stream,
+            timeout=request.timeout,
         )
-        if result.status_code != 200:
-            content = result.content.decode("utf-8")
-            try:
-                formatted_content = json.loads(content)
-            except json.decoder.JSONDecodeError:
-                formatted_content = content
-            raise ApiException(
-                f'{method} request failed with status code: {result.status_code}',
-                formatted_content
-            )
+
+        _process_request_error(method, result)
         return result
 
     def _request_as_json(self, *args, **kwargs) -> dict:
@@ -142,6 +162,12 @@ class Client:
             "/v1/complete",
             params=kwargs,
         )
+
+    async def acompletion_stream(self, **kwargs) -> Iterator[dict]:
+        pass
+
+    async def acompletion(self, **kwargs) -> dict:
+        pass
 
 def _validate_prompt(prompt: str) -> None:
     if not prompt.startswith(constants.HUMAN_PROMPT):
