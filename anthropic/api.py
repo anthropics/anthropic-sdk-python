@@ -5,8 +5,6 @@ import requests.adapters
 import urllib.parse
 import json
 
-from aiohttp import ClientResponse
-
 from . import constants
 from . import tokenizer
 
@@ -24,20 +22,14 @@ class Request(NamedTuple):
     timeout: Optional[Union[float, Tuple[float, float]]]
 
 
-def _process_request_error(
-    method: str, result: Union[requests.Response, ClientResponse]
-):
-    status_code = (
-        result.status if isinstance(result, ClientResponse) else result.status_code
-    )
+def _process_request_error(method: str, content: str, status_code: int):
     if status_code != 200:
-        content = result.content.decode("utf-8")
         try:
             formatted_content = json.loads(content)
         except json.decoder.JSONDecodeError:
             formatted_content = content
         raise ApiException(
-            f"{method} request failed with status code: {result.status_code}",
+            f"{method} request failed with status code: {status_code}",
             formatted_content,
         )
 
@@ -132,7 +124,9 @@ class Client:
             timeout=request.timeout,
         )
 
-        _process_request_error(method, result)
+        _process_request_error(
+            method, result.content.decode("utf-8"), result.status_code
+        )
         return result
 
     async def _arequest_as_json(
@@ -152,8 +146,8 @@ class Client:
                 data=request.data,
                 timeout=request.timeout,
             ) as result:
-                _process_request_error(method, result)
                 content = await result.text()
+                _process_request_error(method, content, result.status)
                 json_body = json.loads(content)
                 return json_body
 
@@ -175,7 +169,8 @@ class Client:
                 data=request.data,
                 timeout=request.timeout,
             ) as result:
-                _process_request_error(method, result)
+                content = await result.text()
+                _process_request_error(method, content, result.status)
                 async for line in result.content:
                     line = line.strip()
                     if not line:
@@ -274,6 +269,7 @@ def _validate_request(params: dict) -> None:
     if prompt.endswith(" "):
         raise ApiException(f"Prompt must not end with a space character")
     _validate_prompt_length(params)
+
 
 def _validate_prompt_length(params: dict) -> None:
     prompt: str = params["prompt"]
