@@ -11,12 +11,15 @@ claude_tokenizer = None
 class TokenizerException(Exception):
     pass
 
-def _get_cached_tokenizer_file_as_str() -> str:
+def _get_tokenizer_filename() -> str:
     cache_dir = os.path.join(tempfile.gettempdir(), "anthropic")
-
+    os.makedirs(cache_dir, exist_ok=True)
     tokenizer_file = os.path.join(cache_dir, 'claude_tokenizer_file.json')
+    return tokenizer_file
+
+def _get_cached_tokenizer_file_as_str() -> str:
+    tokenizer_file = _get_tokenizer_filename()
     if not os.path.exists(tokenizer_file):
-        os.makedirs(cache_dir, exist_ok=True)
         response = httpx.get(CLAUDE_TOKENIZER_REMOTE_FILE)
         response.raise_for_status()
         with open(tokenizer_file, 'w') as f:
