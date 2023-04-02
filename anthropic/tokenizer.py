@@ -39,6 +39,11 @@ def get_tokenizer() -> Tokenizer:
         try:
             claude_tokenizer = Tokenizer.from_str(tokenizer_data)
         except Exception as e:
+            # If the tokenizer file is unparseable, let's delete it here and clean things up
+            try:
+                os.remove(_get_tokenizer_filename())
+            except FileNotFoundError:
+                pass
             raise TokenizerException(f'Failed to load tokenizer: {e}')
 
     return claude_tokenizer
