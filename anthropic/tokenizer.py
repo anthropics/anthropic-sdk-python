@@ -14,7 +14,7 @@ class TokenizerException(Exception):
 def _get_tokenizer_filename() -> str:
     cache_dir = os.path.join(tempfile.gettempdir(), "anthropic")
     os.makedirs(cache_dir, exist_ok=True)
-    tokenizer_file = os.path.join(cache_dir, 'claude_tokenizer_file.json')
+    tokenizer_file = os.path.join(cache_dir, 'claude_tokenizer.json')
     return tokenizer_file
 
 def _get_cached_tokenizer_file_as_str() -> str:
