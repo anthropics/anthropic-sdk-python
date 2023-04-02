@@ -1,5 +1,6 @@
 from typing import Dict, AsyncIterator, Iterator, Optional, Tuple, NamedTuple, Union
 import aiohttp
+import logging
 import requests
 import requests.adapters
 import urllib.parse
@@ -281,5 +282,5 @@ def _validate_prompt_length(params: dict) -> None:
             raise ApiException(
                 f"Prompt tokens ({prompt_tokens}) + max-sampled tokens ({max_tokens_to_sample}) exceeds max ({token_limit})",
             )
-    except tokenizer.TokenizerException:
-        pass
+    except tokenizer.TokenizerException as e:
+        logging.warning(f"Cannot guarantee proper prompt lengths, because failed to use tokenizer: {e}")
