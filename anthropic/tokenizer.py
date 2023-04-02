@@ -8,6 +8,9 @@ CLAUDE_TOKENIZER_REMOTE_FILE = "https://public-json-tokenization-0d8763e8-0d7e-4
 
 claude_tokenizer = None
 
+class TokenizerException(Exception):
+    pass
+
 def _get_cached_tokenizer_file_as_str() -> str:
     cache_dir = os.path.join(tempfile.gettempdir(), "anthropic")
 
@@ -15,6 +18,7 @@ def _get_cached_tokenizer_file_as_str() -> str:
     if not os.path.exists(tokenizer_file):
         os.makedirs(cache_dir, exist_ok=True)
         response = httpx.get(CLAUDE_TOKENIZER_REMOTE_FILE)
+        response.raise_for_status()
         with open(tokenizer_file, 'w') as f:
             f.write(response.text)
 
@@ -25,8 +29,14 @@ def get_tokenizer() -> Tokenizer:
     global claude_tokenizer
 
     if not claude_tokenizer:
-        tokenizer_data = _get_cached_tokenizer_file_as_str()
-        claude_tokenizer = Tokenizer.from_str(tokenizer_data)
+        try:
+            tokenizer_data = _get_cached_tokenizer_file_as_str()
+        except httpx.HTTPError as e:
+            raise TokenizerException(f'Failed to download tokenizer: {e}')
+        try:
+            claude_tokenizer = Tokenizer.from_str(tokenizer_data)
+        except Exception as e:
+            raise TokenizerException(f'Failed to load tokenizer: {e}')
 
     return claude_tokenizer
 
