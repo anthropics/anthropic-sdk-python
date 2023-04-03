@@ -23,15 +23,14 @@ class Request(NamedTuple):
 
 
 def _process_request_error(method: str, content: str, status_code: int):
-    if status_code != 200:
-        try:
-            formatted_content = json.loads(content)
-        except json.decoder.JSONDecodeError:
-            formatted_content = content
-        raise ApiException(
-            f"{method} request failed with status code: {status_code}",
-            formatted_content,
-        )
+    try:
+        formatted_content = json.loads(content)
+    except json.decoder.JSONDecodeError:
+        formatted_content = content
+    raise ApiException(
+        f"{method} request failed with status code: {status_code}",
+        formatted_content,
+    )
 
 
 class Client:
@@ -124,9 +123,10 @@ class Client:
             timeout=request.timeout,
         )
 
-        _process_request_error(
-            method, result.content.decode("utf-8"), result.status_code
-        )
+        if result.status_code != 200:
+            _process_request_error(
+                method, result.content.decode("utf-8"), result.status_code
+            )
         return result
 
     async def _arequest_as_json(
@@ -147,7 +147,8 @@ class Client:
                 timeout=request.timeout,
             ) as result:
                 content = await result.text()
-                _process_request_error(method, content, result.status)
+                if result.status != 200:
+                    _process_request_error(method, content, result.status)
                 json_body = json.loads(content)
                 return json_body
 
@@ -169,8 +170,8 @@ class Client:
                 data=request.data,
                 timeout=request.timeout,
             ) as result:
-                content = await result.text()
-                _process_request_error(method, content, result.status)
+                if result.status != 200:
+                    _process_request_error(method, await result.text(), result.status)
                 async for line in result.content:
                     line = line.strip()
                     if not line:
