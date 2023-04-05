@@ -22,10 +22,10 @@ def _get_cached_tokenizer_file_as_str() -> str:
     if not os.path.exists(tokenizer_file):
         response = httpx.get(CLAUDE_TOKENIZER_REMOTE_FILE)
         response.raise_for_status()
-        with open(tokenizer_file, 'w') as f:
+        with open(tokenizer_file, 'w', encoding="utf-8") as f:
             f.write(response.text)
 
-    with open(tokenizer_file, 'r') as f:
+    with open(tokenizer_file, 'r', encoding="utf-8") as f:
         return f.read()
 
 def get_tokenizer() -> Tokenizer:
