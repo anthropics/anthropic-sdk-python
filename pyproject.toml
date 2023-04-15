@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anthropic"
-version = "0.2.6"
+version = "0.2.7"
 description = "Library for accessing the anthropic API"
 readme = "README.md"
 requires-python = ">=3.8"
