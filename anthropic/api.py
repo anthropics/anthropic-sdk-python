@@ -7,7 +7,6 @@ import urllib.parse
 import json
 
 from . import constants
-from . import tokenizer
 
 
 class ApiException(Exception):
@@ -270,18 +269,3 @@ def _validate_request(params: dict) -> None:
         )
     if prompt.endswith(" "):
         raise ApiException(f"Prompt must not end with a space character")
-    _validate_prompt_length(params)
-
-
-def _validate_prompt_length(params: dict) -> None:
-    prompt: str = params["prompt"]
-    try:
-        prompt_tokens = tokenizer.count_tokens(prompt)
-        max_tokens_to_sample: int = params["max_tokens_to_sample"]
-        token_limit = 9 * 1024
-        if prompt_tokens + max_tokens_to_sample > token_limit:
-            raise ApiException(
-                f"Prompt tokens ({prompt_tokens}) + max-sampled tokens ({max_tokens_to_sample}) exceeds max ({token_limit})",
-            )
-    except tokenizer.TokenizerException as e:
-        logging.warning(f"Cannot guarantee proper prompt lengths, because failed to use tokenizer: {e}")
