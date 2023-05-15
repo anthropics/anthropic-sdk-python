@@ -1,23 +1,28 @@
 import os
 import tempfile
+import threading
 
 import httpx
 from tokenizers import Tokenizer
 
 CLAUDE_TOKENIZER_REMOTE_FILE = "https://public-json-tokenization-0d8763e8-0d7e-441b-a1e2-1c73b8e79dc3.storage.googleapis.com/claude-v1-tokenization.json"
 
+_claude_tokenizer_lock = threading.Lock()
+# _claude_tokenizer_lock must be held when modifying claude_tokenizer
 claude_tokenizer = None
 
 class TokenizerException(Exception):
     pass
 
 def _get_tokenizer_filename() -> str:
+    # _claude_tokenizer_lock must be held when this is called
     cache_dir = os.path.join(tempfile.gettempdir(), "anthropic")
     os.makedirs(cache_dir, exist_ok=True)
     tokenizer_file = os.path.join(cache_dir, 'claude_tokenizer.json')
     return tokenizer_file
 
 def _get_cached_tokenizer_file_as_str() -> str:
+    # _claude_tokenizer_lock must be held when this is called
     tokenizer_file = _get_tokenizer_filename()
     if not os.path.exists(tokenizer_file):
         response = httpx.get(CLAUDE_TOKENIZER_REMOTE_FILE)
@@ -31,20 +36,21 @@ def _get_cached_tokenizer_file_as_str() -> str:
 def get_tokenizer() -> Tokenizer:
     global claude_tokenizer
 
-    if not claude_tokenizer:
-        try:
-            tokenizer_data = _get_cached_tokenizer_file_as_str()
-        except httpx.HTTPError as e:
-            raise TokenizerException(f'Failed to download tokenizer: {e}')
-        try:
-            claude_tokenizer = Tokenizer.from_str(tokenizer_data)
-        except Exception as e:
-            # If the tokenizer file is unparseable, let's delete it here and clean things up
+    with _claude_tokenizer_lock:
+        if not claude_tokenizer:
             try:
-                os.remove(_get_tokenizer_filename())
-            except FileNotFoundError:
-                pass
-            raise TokenizerException(f'Failed to load tokenizer: {e}')
+                tokenizer_data = _get_cached_tokenizer_file_as_str()
+            except httpx.HTTPError as e:
+                raise TokenizerException(f'Failed to download tokenizer: {e}')
+            try:
+                claude_tokenizer = Tokenizer.from_str(tokenizer_data)
+            except Exception as e:
+                # If the tokenizer file is unparseable, let's delete it here and clean things up
+                try:
+                    os.remove(_get_tokenizer_filename())
+                except FileNotFoundError:
+                    pass
+                raise TokenizerException(f'Failed to load tokenizer: {e}')
 
     return claude_tokenizer
 
