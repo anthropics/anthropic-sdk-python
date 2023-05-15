@@ -230,21 +230,21 @@ class Client:
         new_kwargs = {"stream": True, **kwargs}
         return self._request_as_stream(
             "post",
-            "/v1/complete",
+            "v1/complete",
             params=new_kwargs,
         )
 
     def completion(self, **kwargs) -> dict:
         return self._request_as_json(
             "post",
-            "/v1/complete",
+            "v1/complete",
             params=kwargs,
         )
 
     async def acompletion(self, **kwargs) -> dict:
         return await self._arequest_as_json(
             "post",
-            "/v1/complete",
+            "v1/complete",
             params=kwargs,
         )
 
@@ -252,7 +252,7 @@ class Client:
         new_kwargs = {"stream": True, **kwargs}
         return self._arequest_as_stream(
             "post",
-            "/v1/complete",
+            "v1/complete",
             params=new_kwargs,
         )
 
