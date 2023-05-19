@@ -88,7 +88,7 @@ class Client:
                 encoded_params = urllib.parse.urlencode(
                     [(k, v) for k, v in params.items() if v is not None]
                 )
-                abs_url += "&%s" % encoded_params
+                abs_url += f"&{encoded_params}"
             elif method in {"post", "put"}:
                 data = json.dumps(params).encode()
                 final_headers["Content-Type"] = "application/json"
