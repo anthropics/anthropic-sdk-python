@@ -62,13 +62,13 @@ class Client:
         self,
         headers: Optional[Dict[str, str]],
         method: str,
-        params: dict,
+        params: Dict,
         path: str,
         request_timeout: Optional[Union[float, Tuple[float, float]]],
     ) -> Request:
         method = method.lower()
         abs_url = urllib.parse.urljoin(self.api_url, path)
-        final_headers: dict[str, str] = {
+        final_headers: Dict[str, str] = {
             "Accept": "application/json",
             "Client": constants.ANTHROPIC_CLIENT_VERSION,
             "X-API-Key": self.api_key,
@@ -109,7 +109,7 @@ class Client:
         self,
         method: str,
         path: str,
-        params: dict,
+        params: Dict,
         headers: Optional[Dict[str, str]] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
     ) -> requests.Response:
@@ -133,10 +133,10 @@ class Client:
         self,
         method: str,
         path: str,
-        params: dict,
+        params: Dict,
         headers: Optional[Dict[str, str]] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-    ) -> dict:
+    ) -> Dict:
         request = self._request_params(headers, method, params, path, request_timeout)
         async with aiohttp.ClientSession() as session:
             async with session.request(
@@ -156,10 +156,10 @@ class Client:
         self,
         method: str,
         path: str,
-        params: dict,
+        params: Dict,
         headers: Optional[Dict[str, str]] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-    ) -> AsyncIterator[dict]:
+    ) -> AsyncIterator[Dict]:
         request = self._request_params(headers, method, params, path, request_timeout)
         awaiting_ping_data = False
         async with aiohttp.ClientSession() as session:
@@ -193,13 +193,13 @@ class Client:
                         line = line[len(prefix) :]
                     yield json.loads(line)
 
-    def _request_as_json(self, *args, **kwargs) -> dict:
+    def _request_as_json(self, *args, **kwargs) -> Dict:
         result = self._request_raw(*args, **kwargs)
         content = result.content.decode("utf-8")
         json_body = json.loads(content)
         return json_body
 
-    def _request_as_stream(self, *args, **kwargs) -> Iterator[dict]:
+    def _request_as_stream(self, *args, **kwargs) -> Iterator[Dict]:
         result = self._request_raw(*args, **kwargs)
 
         awaiting_ping_data = False
@@ -226,7 +226,7 @@ class Client:
                 raise ApiException(e, f"Error processing stream data", line)
             yield json_body
 
-    def completion_stream(self, **kwargs) -> Iterator[dict]:
+    def completion_stream(self, **kwargs) -> Iterator[Dict]:
         new_kwargs = {"stream": True, **kwargs}
         return self._request_as_stream(
             "post",
@@ -234,21 +234,21 @@ class Client:
             params=new_kwargs,
         )
 
-    def completion(self, **kwargs) -> dict:
+    def completion(self, **kwargs) -> Dict:
         return self._request_as_json(
             "post",
             "v1/complete",
             params=kwargs,
         )
 
-    async def acompletion(self, **kwargs) -> dict:
+    async def acompletion(self, **kwargs) -> Dict:
         return await self._arequest_as_json(
             "post",
             "v1/complete",
             params=kwargs,
         )
 
-    async def acompletion_stream(self, **kwargs) -> AsyncIterator[dict]:
+    async def acompletion_stream(self, **kwargs) -> AsyncIterator[Dict]:
         new_kwargs = {"stream": True, **kwargs}
         return self._arequest_as_stream(
             "post",
@@ -257,7 +257,7 @@ class Client:
         )
 
 
-def _validate_request(params: dict) -> None:
+def _validate_request(params: Dict):
     prompt: str = params["prompt"]
     if not prompt.startswith(constants.HUMAN_PROMPT):
         raise ApiException(
