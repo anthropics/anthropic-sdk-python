@@ -72,7 +72,7 @@ class Client:
             "Accept": "application/json",
             "Client": constants.ANTHROPIC_CLIENT_VERSION,
             "X-API-Key": self.api_key,
-            **(headers or {}),
+            **(params.get("headers") or headers or {}),
         }
         if params.get("disable_checks"):
             del params["disable_checks"]
