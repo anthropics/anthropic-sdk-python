@@ -70,7 +70,8 @@ class Client:
         abs_url = urllib.parse.urljoin(self.api_url, path)
         final_headers: dict[str, str] = {
             "Accept": "application/json",
-            "Client": constants.ANTHROPIC_CLIENT_VERSION,
+            "Anthropic-SDK": constants.ANTHROPIC_CLIENT_VERSION,
+            "Anthropic-Version": constants.ANTHROPIC_VERSION,
             "X-API-Key": self.api_key,
             **(headers or {}),
         }
