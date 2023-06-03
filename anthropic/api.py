@@ -1,10 +1,11 @@
-from typing import Dict, AsyncIterator, Iterator, Optional, Tuple, NamedTuple, Union
+from typing import AsyncIterator, Dict, Iterator, NamedTuple, Optional, Tuple, Union
 import aiohttp
+import json
 import logging
 import requests
 import requests.adapters
 import urllib.parse
-import json
+
 
 from . import constants
 
@@ -22,7 +23,7 @@ class Request(NamedTuple):
     timeout: Optional[Union[float, Tuple[float, float]]]
 
 
-def _process_request_error(method: str, content: str, status_code: int):
+def _process_request_error(method: str, content: str, status_code: int) -> None:
     try:
         formatted_content = json.loads(content)
     except json.decoder.JSONDecodeError:
@@ -37,7 +38,7 @@ class Client:
     def __init__(
         self,
         api_key: str,
-        api_url: str = "https://api.anthropic.com",
+        api_url: str = constants.DEFAULT_API_URL,
         proxy_url: Optional[str] = None,
         default_request_timeout: Optional[Union[float, Tuple[float, float]]] = 600,
     ):
@@ -68,7 +69,7 @@ class Client:
     ) -> Request:
         method = method.lower()
         abs_url = urllib.parse.urljoin(self.api_url, path)
-        final_headers: dict[str, str] = {
+        final_headers: Dict[str, str] = {
             "Accept": "application/json",
             "Anthropic-SDK": constants.ANTHROPIC_CLIENT_VERSION,
             "Anthropic-Version": constants.ANTHROPIC_VERSION,
@@ -89,7 +90,7 @@ class Client:
                 encoded_params = urllib.parse.urlencode(
                     [(k, v) for k, v in params.items() if v is not None]
                 )
-                abs_url += "&%s" % encoded_params
+                abs_url += f"&{encoded_params}"
             elif method in {"post", "put"}:
                 data = json.dumps(params).encode()
                 final_headers["Content-Type"] = "application/json"

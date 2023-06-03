@@ -8,6 +8,7 @@ except importlib.metadata.PackageNotFoundError:
 
 ANTHROPIC_CLIENT_VERSION = "anthropic-python/" + _pkg_version
 ANTHROPIC_VERSION = "2023-01-01"
+DEFAULT_API_URL = "https://api.anthropic.com"
 
 HUMAN_PROMPT = '\n\nHuman:'
 
