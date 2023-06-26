@@ -1,8 +1,9 @@
-.env
-__pycache__
-.DS_Store
-.idea/
-**/.DS_Store
+.vscode
+_dev
 
-anthropic.egg-info/
-build/
+__pycache__
+.mypy_cache
+
+dist
+
+.env
