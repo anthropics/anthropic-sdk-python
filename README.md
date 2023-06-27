@@ -6,6 +6,70 @@ The Anthropic Python library provides convenient access to the Anthropic REST AP
 application. It includes type definitions for all request params and response fields,
 and offers both synchronous and asynchronous clients powered by [httpx](https://github.com/encode/httpx).
 
+## Migration from v0.2.x and below
+
+In `v0.3.0`, we introduced a fully rewritten SDK.
+
+The new version uses separate sync and async clients, unified streaming, typed params and structured response objects, and resource-oriented methods:
+
+**Sync before/after:**
+
+```diff
+- client = anthropic.Client(os.environ["ANTHROPIC_API_KEY"])
++ client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+  # or, simply provide an ANTHROPIC_API_KEY environment variable:
++ client = anthropic.Anthropic();
+
+- rsp = client.completion(**params)
+- rsp["completion"]
++ rsp = client.completions.create(**params)
++ rsp.completion
+```
+
+**Async before/after:**
+
+```diff
+- client = anthropic.Client(os.environ["ANTHROPIC_API_KEY"])
++ client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+
+- await client.acompletion(**params)
++ await client.completions.create(**params)
+```
+
+The `.completion_stream()` and `.acompletion_stream()` methods have been removed;
+simply pass `stream=True`to `.completions.create()`.
+
+Streaming responses are now incremental; the full text is not sent in each message,
+as v0.3 sends the `Anthropic-Version: 2023-06-01` header.
+
+<details>
+<summary>Example streaming diff</summary>
+
+```diff py
+  import anthropic
+
+- client = anthropic.Client(os.environ["ANTHROPIC_API_KEY"])
++ client = anthropic.Anthropic()
+
+  # Streams are now incremental diffs of text
+  # rather than sending the whole message every time:
+  text = "
+- stream = client.completion_stream(**params)
+- for data in stream:
+-     diff = data["completion"].replace(text, "")
+-     text = data["completion"]
++ stream = client.completions.create(**params, stream=True)
++ for data in stream:
++     diff = data.completion # incremental text
++     text += data.completion
+      print(diff, end="")
+
+  print("Done. Final text is:")
+  print(text)
+```
+
+</details>
+
 ## Documentation
 
 The API documentation can be found [here](https://docs.anthropic.com/claude/reference/).
