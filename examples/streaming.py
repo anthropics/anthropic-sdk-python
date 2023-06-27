@@ -14,7 +14,7 @@ Hey Claude! How can I recursively list all files in a directory in Python?
 
 def sync_stream() -> None:
     stream = client.completions.create(
-        prompt=f"\n\nHuman: {question}\n\nAssistant:",
+        prompt=f"{HUMAN_PROMPT} {question}{AI_PROMPT}",
         model="claude-v1",
         stream=True,
         max_tokens_to_sample=300,
@@ -28,7 +28,7 @@ def sync_stream() -> None:
 
 async def async_stream() -> None:
     stream = await async_client.completions.create(
-        prompt=f"{HUMAN_PROMPT}{question}{AI_PROMPT}",
+        prompt=f"{HUMAN_PROMPT} {question}{AI_PROMPT}",
         model="claude-v1",
         stream=True,
         max_tokens_to_sample=300,
