@@ -1,12 +1,32 @@
 #!/usr/bin/env poetry run python
 
-from anthropic import Anthropic
+import asyncio
 
-client = Anthropic()
+from anthropic import Anthropic, AsyncAnthropic
 
-text = "hello world!"
 
-tokens = client.count_tokens(text)
-print(f"'{text}' is {tokens} tokens")
+def sync_tokens() -> None:
+    client = Anthropic()
 
-assert tokens == 3
+    text = "hello world!"
+
+    tokens = client.count_tokens(text)
+    print(f"'{text}' is {tokens} tokens")
+
+    assert tokens == 3
+
+
+async def async_tokens() -> None:
+    anthropic = AsyncAnthropic()
+
+    text = "fist message"
+    tokens = await anthropic.count_tokens(text)
+    print(f"'{text}' is {tokens} tokens")
+
+    text = "second message"
+    tokens = await anthropic.count_tokens(text)
+    print(f"'{text}' is {tokens} tokens")
+
+
+sync_tokens()
+asyncio.run(async_tokens())

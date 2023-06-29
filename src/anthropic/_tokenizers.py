@@ -14,14 +14,17 @@ def _get_tokenizer_cache_path() -> Path:
 
 
 @lru_cache(maxsize=None)
+def _load_tokenizer(raw: str) -> Tokenizer:
+    return Tokenizer.from_str(raw)
+
+
 def sync_get_tokenizer() -> Tokenizer:
     tokenizer_path = _get_tokenizer_cache_path()
     text = tokenizer_path.read_text()
-    return Tokenizer.from_str(text)
+    return _load_tokenizer(text)
 
 
-@lru_cache(maxsize=None)
 async def async_get_tokenizer() -> Tokenizer:
     tokenizer_path = AsyncPath(_get_tokenizer_cache_path())
     text = await tokenizer_path.read_text()
-    return Tokenizer.from_str(text)
+    return _load_tokenizer(text)
