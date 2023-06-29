@@ -1,5 +1,7 @@
+from __future__ import annotations
+
+from typing import cast
 from pathlib import Path
-from functools import lru_cache
 
 from anyio import Path as AsyncPath
 
@@ -13,15 +15,29 @@ def _get_tokenizer_cache_path() -> Path:
     return Path(__file__).parent / "tokenizer.json"
 
 
-@lru_cache(maxsize=None)
+_tokenizer: Tokenizer | None = None
+
+
+def _load_tokenizer(raw: str) -> Tokenizer:
+    global _tokenizer
+
+    _tokenizer = cast(Tokenizer, Tokenizer.from_str(raw))
+    return _tokenizer
+
+
 def sync_get_tokenizer() -> Tokenizer:
+    if _tokenizer is not None:
+        return _tokenizer
+
     tokenizer_path = _get_tokenizer_cache_path()
     text = tokenizer_path.read_text()
-    return Tokenizer.from_str(text)
+    return _load_tokenizer(text)
 
 
-@lru_cache(maxsize=None)
 async def async_get_tokenizer() -> Tokenizer:
+    if _tokenizer is not None:
+        return _tokenizer
+
     tokenizer_path = AsyncPath(_get_tokenizer_cache_path())
     text = await tokenizer_path.read_text()
-    return Tokenizer.from_str(text)
+    return _load_tokenizer(text)
