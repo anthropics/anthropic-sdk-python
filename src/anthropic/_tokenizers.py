@@ -30,7 +30,7 @@ def sync_get_tokenizer() -> Tokenizer:
         return _tokenizer
 
     tokenizer_path = _get_tokenizer_cache_path()
-    text = tokenizer_path.read_text()
+    text = tokenizer_path.read_text(encoding='utf-8')
     return _load_tokenizer(text)
 
 
@@ -39,5 +39,5 @@ async def async_get_tokenizer() -> Tokenizer:
         return _tokenizer
 
     tokenizer_path = AsyncPath(_get_tokenizer_cache_path())
-    text = await tokenizer_path.read_text()
+    text = await tokenizer_path.read_text(encoding='utf-8')
     return _load_tokenizer(text)
