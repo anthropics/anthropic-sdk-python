@@ -18,7 +18,7 @@ The new version uses separate sync and async clients, unified streaming, typed p
 - client = anthropic.Client(os.environ["ANTHROPIC_API_KEY"])
 + client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
   # or, simply provide an ANTHROPIC_API_KEY environment variable:
-+ client = anthropic.Anthropic();
++ client = anthropic.Anthropic()
 
 - rsp = client.completion(**params)
 - rsp["completion"]
