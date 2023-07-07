@@ -34,7 +34,7 @@ class Completions(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | None | NotGiven = NOT_GIVEN,
+        timeout: float | None | NotGiven = 600000,
     ) -> Completion:
         """
         Create a completion
@@ -165,7 +165,7 @@ class Completions(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | None | NotGiven = NOT_GIVEN,
+        timeout: float | None | NotGiven = 600000,
     ) -> Stream[Completion]:
         """
         Create a completion
@@ -298,7 +298,7 @@ class Completions(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | None | NotGiven = NOT_GIVEN,
+        timeout: float | None | NotGiven = 600000,
     ) -> Completion | Stream[Completion]:
         return self._post(
             "/v1/complete",
@@ -344,7 +344,7 @@ class AsyncCompletions(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | None | NotGiven = NOT_GIVEN,
+        timeout: float | None | NotGiven = 600000,
     ) -> Completion:
         """
         Create a completion
@@ -475,7 +475,7 @@ class AsyncCompletions(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | None | NotGiven = NOT_GIVEN,
+        timeout: float | None | NotGiven = 600000,
     ) -> AsyncStream[Completion]:
         """
         Create a completion
@@ -608,7 +608,7 @@ class AsyncCompletions(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | None | NotGiven = NOT_GIVEN,
+        timeout: float | None | NotGiven = 600000,
     ) -> Completion | AsyncStream[Completion]:
         return await self._post(
             "/v1/complete",
