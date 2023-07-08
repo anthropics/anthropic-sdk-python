@@ -12,11 +12,11 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-httpx = ">= 0.23.0"
+httpx = ">= 0.23.0, < 1"
 pydantic = "^1.9.0"
-typing-extensions = ">= 4.1.1"
-anyio = ">= 3.5.0"
-distro = ">= 1.7.0"
+typing-extensions = ">= 4.1.1, < 5"
+anyio = ">= 3.5.0, < 4"
+distro = ">= 1.7.0, < 2"
 tokenizers = ">= 0.13.0"
 
 [tool.poetry.group.dev.dependencies]
