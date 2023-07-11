@@ -91,7 +91,7 @@ anthropic = Anthropic(
 )
 
 completion = anthropic.completions.create(
-    model="claude-1",
+    model="claude-2",
     max_tokens_to_sample=300,
     prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court? {AI_PROMPT}",
 )
@@ -116,7 +116,7 @@ anthropic = AsyncAnthropic(
 
 async def main():
     completion = await anthropic.completions.create(
-        model="claude-1",
+        model="claude-2",
         max_tokens_to_sample=300,
         prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court? {AI_PROMPT}",
     )
@@ -140,7 +140,7 @@ anthropic = Anthropic()
 stream = anthropic.completions.create(
     prompt=f"{HUMAN_PROMPT} Your prompt here {AI_PROMPT}",
     max_tokens_to_sample=300,
-    model="claude-1",
+    model="claude-2",
     stream=True,
 )
 for completion in stream:
@@ -157,7 +157,7 @@ anthropic = AsyncAnthropic()
 stream = await anthropic.completions.create(
     prompt=f"{HUMAN_PROMPT} Your prompt here {AI_PROMPT}",
     max_tokens_to_sample=300,
-    model="claude-1",
+    model="claude-2",
     stream=True,
 )
 async for completion in stream:
@@ -188,7 +188,7 @@ try:
     anthropic.completions.create(
         prompt=f"{HUMAN_PROMPT} Your prompt here {AI_PROMPT}",
         max_tokens_to_sample=300,
-        model="claude-1",
+        model="claude-2",
     )
 except anthropic.APIConnectionError as e:
     print("The server could not be reached")
@@ -235,7 +235,7 @@ anthropic = Anthropic(
 anthropic.with_options(max_retries=5).completions.create(
     prompt=f"{HUMAN_PROMPT} Can you help me effectively ask for a raise at work? {AI_PROMPT}",
     max_tokens_to_sample=300,
-    model="claude-1",
+    model="claude-2",
 )
 ```
 
@@ -262,7 +262,7 @@ anthropic = Anthropic(
 anthropic.with_options(timeout=5 * 1000).completions.create(
     prompt=f"{HUMAN_PROMPT} Where can I get a good coffee in my neighbourhood? {AI_PROMPT}",
     max_tokens_to_sample=300,
-    model="claude-1",
+    model="claude-2",
 )
 ```
 
