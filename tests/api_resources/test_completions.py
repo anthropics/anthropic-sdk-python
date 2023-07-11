@@ -27,7 +27,7 @@ class TestCompletions:
     def test_method_create_overload_1(self, client: Anthropic) -> None:
         completion = client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-1",
+            model="claude-2",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
         )
         assert_matches_type(Completion, completion, path=["response"])
@@ -36,12 +36,12 @@ class TestCompletions:
     def test_method_create_with_all_params_overload_1(self, client: Anthropic) -> None:
         completion = client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-1",
+            model="claude-2",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
             stream=False,
-            temperature=0.7,
+            temperature=1,
             top_k=5,
             top_p=0.7,
         )
@@ -51,7 +51,7 @@ class TestCompletions:
     def test_method_create_overload_2(self, client: Anthropic) -> None:
         client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-1",
+            model="claude-2",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         )
@@ -60,12 +60,12 @@ class TestCompletions:
     def test_method_create_with_all_params_overload_2(self, client: Anthropic) -> None:
         client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-1",
+            model="claude-2",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
-            temperature=0.7,
+            temperature=1,
             top_k=5,
             top_p=0.7,
         )
@@ -84,7 +84,7 @@ class TestAsyncCompletions:
     async def test_method_create_overload_1(self, client: AsyncAnthropic) -> None:
         completion = await client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-1",
+            model="claude-2",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
         )
         assert_matches_type(Completion, completion, path=["response"])
@@ -93,12 +93,12 @@ class TestAsyncCompletions:
     async def test_method_create_with_all_params_overload_1(self, client: AsyncAnthropic) -> None:
         completion = await client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-1",
+            model="claude-2",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
             stream=False,
-            temperature=0.7,
+            temperature=1,
             top_k=5,
             top_p=0.7,
         )
@@ -108,7 +108,7 @@ class TestAsyncCompletions:
     async def test_method_create_overload_2(self, client: AsyncAnthropic) -> None:
         await client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-1",
+            model="claude-2",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         )
@@ -117,12 +117,12 @@ class TestAsyncCompletions:
     async def test_method_create_with_all_params_overload_2(self, client: AsyncAnthropic) -> None:
         await client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-1",
+            model="claude-2",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
-            temperature=0.7,
+            temperature=1,
             top_k=5,
             top_p=0.7,
         )
