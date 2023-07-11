@@ -48,51 +48,11 @@ class Completions(SyncAPIResource):
           model: The model that will complete your prompt.
 
               As we improve Claude, we develop new versions of it that you can query. This
-              controls which version of Claude answers your request. Right now we are offering
-              two model families: Claude and Claude Instant.
-
-              Specifiying any of the following models will automatically switch to you the
-              newest compatible models as they are released:
-
-              - `"claude-1"`: Our largest model, ideal for a wide range of more complex tasks.
-              - `"claude-1-100k"`: An enhanced version of `claude-1` with a 100,000 token
-                (roughly 75,000 word) context window. Ideal for summarizing, analyzing, and
-                querying long documents and conversations for nuanced understanding of complex
-                topics and relationships across very long spans of text.
-              - `"claude-instant-1"`: A smaller model with far lower latency, sampling at
-                roughly 40 words/sec! Its output quality is somewhat lower than the latest
-                `claude-1` model, particularly for complex tasks. However, it is much less
-                expensive and blazing fast. We believe that this model provides more than
-                adequate performance on a range of tasks including text classification,
-                summarization, and lightweight chat applications, as well as search result
-                summarization.
-              - `"claude-instant-1-100k"`: An enhanced version of `claude-instant-1` with a
-                100,000 token context window that retains its performance. Well-suited for
-                high throughput use cases needing both speed and additional context, allowing
-                deeper understanding from extended conversations and documents.
-
-              You can also select specific sub-versions of the above models:
-
-              - `"claude-1.3"`: Compared to `claude-1.2`, it's more robust against red-team
-                inputs, better at precise instruction-following, better at code, and better
-                and non-English dialogue and writing.
-              - `"claude-1.3-100k"`: An enhanced version of `claude-1.3` with a 100,000 token
-                (roughly 75,000 word) context window.
-              - `"claude-1.2"`: An improved version of `claude-1`. It is slightly improved at
-                general helpfulness, instruction following, coding, and other tasks. It is
-                also considerably better with non-English languages. This model also has the
-                ability to role play (in harmless ways) more consistently, and it defaults to
-                writing somewhat longer and more thorough responses.
-              - `"claude-1.0"`: An earlier version of `claude-1`.
-              - `"claude-instant-1.1"`: Our latest version of `claude-instant-1`. It is better
-                than `claude-instant-1.0` at a wide variety of tasks including writing,
-                coding, and instruction following. It performs better on academic benchmarks,
-                including math, reading comprehension, and coding tests. It is also more
-                robust against red-teaming inputs.
-              - `"claude-instant-1.1-100k"`: An enhanced version of `claude-instant-1.1` with
-                a 100,000 token context window that retains its lightning fast 40 word/sec
-                performance.
-              - `"claude-instant-1.0"`: An earlier version of `claude-instant-1`.
+              parameter controls which version of Claude answers your request. Right now we
+              are offering two model families: Claude, and Claude Instant. You can use them by
+              setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+              [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              additional details.
 
           prompt: The prompt that you want Claude to complete.
 
@@ -103,7 +63,8 @@ class Completions(SyncAPIResource):
               const prompt = `\n\nHuman: ${userQuestion}\n\nAssistant:`;
               ```
 
-              See our [comments on prompts](https://console.anthropic.com/docs/prompt-design)
+              See our
+              [comments on prompts](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
               for more context.
 
           metadata: An object describing metadata about the request.
@@ -179,51 +140,11 @@ class Completions(SyncAPIResource):
           model: The model that will complete your prompt.
 
               As we improve Claude, we develop new versions of it that you can query. This
-              controls which version of Claude answers your request. Right now we are offering
-              two model families: Claude and Claude Instant.
-
-              Specifiying any of the following models will automatically switch to you the
-              newest compatible models as they are released:
-
-              - `"claude-1"`: Our largest model, ideal for a wide range of more complex tasks.
-              - `"claude-1-100k"`: An enhanced version of `claude-1` with a 100,000 token
-                (roughly 75,000 word) context window. Ideal for summarizing, analyzing, and
-                querying long documents and conversations for nuanced understanding of complex
-                topics and relationships across very long spans of text.
-              - `"claude-instant-1"`: A smaller model with far lower latency, sampling at
-                roughly 40 words/sec! Its output quality is somewhat lower than the latest
-                `claude-1` model, particularly for complex tasks. However, it is much less
-                expensive and blazing fast. We believe that this model provides more than
-                adequate performance on a range of tasks including text classification,
-                summarization, and lightweight chat applications, as well as search result
-                summarization.
-              - `"claude-instant-1-100k"`: An enhanced version of `claude-instant-1` with a
-                100,000 token context window that retains its performance. Well-suited for
-                high throughput use cases needing both speed and additional context, allowing
-                deeper understanding from extended conversations and documents.
-
-              You can also select specific sub-versions of the above models:
-
-              - `"claude-1.3"`: Compared to `claude-1.2`, it's more robust against red-team
-                inputs, better at precise instruction-following, better at code, and better
-                and non-English dialogue and writing.
-              - `"claude-1.3-100k"`: An enhanced version of `claude-1.3` with a 100,000 token
-                (roughly 75,000 word) context window.
-              - `"claude-1.2"`: An improved version of `claude-1`. It is slightly improved at
-                general helpfulness, instruction following, coding, and other tasks. It is
-                also considerably better with non-English languages. This model also has the
-                ability to role play (in harmless ways) more consistently, and it defaults to
-                writing somewhat longer and more thorough responses.
-              - `"claude-1.0"`: An earlier version of `claude-1`.
-              - `"claude-instant-1.1"`: Our latest version of `claude-instant-1`. It is better
-                than `claude-instant-1.0` at a wide variety of tasks including writing,
-                coding, and instruction following. It performs better on academic benchmarks,
-                including math, reading comprehension, and coding tests. It is also more
-                robust against red-teaming inputs.
-              - `"claude-instant-1.1-100k"`: An enhanced version of `claude-instant-1.1` with
-                a 100,000 token context window that retains its lightning fast 40 word/sec
-                performance.
-              - `"claude-instant-1.0"`: An earlier version of `claude-instant-1`.
+              parameter controls which version of Claude answers your request. Right now we
+              are offering two model families: Claude, and Claude Instant. You can use them by
+              setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+              [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              additional details.
 
           prompt: The prompt that you want Claude to complete.
 
@@ -234,7 +155,8 @@ class Completions(SyncAPIResource):
               const prompt = `\n\nHuman: ${userQuestion}\n\nAssistant:`;
               ```
 
-              See our [comments on prompts](https://console.anthropic.com/docs/prompt-design)
+              See our
+              [comments on prompts](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
               for more context.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -358,51 +280,11 @@ class AsyncCompletions(AsyncAPIResource):
           model: The model that will complete your prompt.
 
               As we improve Claude, we develop new versions of it that you can query. This
-              controls which version of Claude answers your request. Right now we are offering
-              two model families: Claude and Claude Instant.
-
-              Specifiying any of the following models will automatically switch to you the
-              newest compatible models as they are released:
-
-              - `"claude-1"`: Our largest model, ideal for a wide range of more complex tasks.
-              - `"claude-1-100k"`: An enhanced version of `claude-1` with a 100,000 token
-                (roughly 75,000 word) context window. Ideal for summarizing, analyzing, and
-                querying long documents and conversations for nuanced understanding of complex
-                topics and relationships across very long spans of text.
-              - `"claude-instant-1"`: A smaller model with far lower latency, sampling at
-                roughly 40 words/sec! Its output quality is somewhat lower than the latest
-                `claude-1` model, particularly for complex tasks. However, it is much less
-                expensive and blazing fast. We believe that this model provides more than
-                adequate performance on a range of tasks including text classification,
-                summarization, and lightweight chat applications, as well as search result
-                summarization.
-              - `"claude-instant-1-100k"`: An enhanced version of `claude-instant-1` with a
-                100,000 token context window that retains its performance. Well-suited for
-                high throughput use cases needing both speed and additional context, allowing
-                deeper understanding from extended conversations and documents.
-
-              You can also select specific sub-versions of the above models:
-
-              - `"claude-1.3"`: Compared to `claude-1.2`, it's more robust against red-team
-                inputs, better at precise instruction-following, better at code, and better
-                and non-English dialogue and writing.
-              - `"claude-1.3-100k"`: An enhanced version of `claude-1.3` with a 100,000 token
-                (roughly 75,000 word) context window.
-              - `"claude-1.2"`: An improved version of `claude-1`. It is slightly improved at
-                general helpfulness, instruction following, coding, and other tasks. It is
-                also considerably better with non-English languages. This model also has the
-                ability to role play (in harmless ways) more consistently, and it defaults to
-                writing somewhat longer and more thorough responses.
-              - `"claude-1.0"`: An earlier version of `claude-1`.
-              - `"claude-instant-1.1"`: Our latest version of `claude-instant-1`. It is better
-                than `claude-instant-1.0` at a wide variety of tasks including writing,
-                coding, and instruction following. It performs better on academic benchmarks,
-                including math, reading comprehension, and coding tests. It is also more
-                robust against red-teaming inputs.
-              - `"claude-instant-1.1-100k"`: An enhanced version of `claude-instant-1.1` with
-                a 100,000 token context window that retains its lightning fast 40 word/sec
-                performance.
-              - `"claude-instant-1.0"`: An earlier version of `claude-instant-1`.
+              parameter controls which version of Claude answers your request. Right now we
+              are offering two model families: Claude, and Claude Instant. You can use them by
+              setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+              [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              additional details.
 
           prompt: The prompt that you want Claude to complete.
 
@@ -413,7 +295,8 @@ class AsyncCompletions(AsyncAPIResource):
               const prompt = `\n\nHuman: ${userQuestion}\n\nAssistant:`;
               ```
 
-              See our [comments on prompts](https://console.anthropic.com/docs/prompt-design)
+              See our
+              [comments on prompts](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
               for more context.
 
           metadata: An object describing metadata about the request.
@@ -489,51 +372,11 @@ class AsyncCompletions(AsyncAPIResource):
           model: The model that will complete your prompt.
 
               As we improve Claude, we develop new versions of it that you can query. This
-              controls which version of Claude answers your request. Right now we are offering
-              two model families: Claude and Claude Instant.
-
-              Specifiying any of the following models will automatically switch to you the
-              newest compatible models as they are released:
-
-              - `"claude-1"`: Our largest model, ideal for a wide range of more complex tasks.
-              - `"claude-1-100k"`: An enhanced version of `claude-1` with a 100,000 token
-                (roughly 75,000 word) context window. Ideal for summarizing, analyzing, and
-                querying long documents and conversations for nuanced understanding of complex
-                topics and relationships across very long spans of text.
-              - `"claude-instant-1"`: A smaller model with far lower latency, sampling at
-                roughly 40 words/sec! Its output quality is somewhat lower than the latest
-                `claude-1` model, particularly for complex tasks. However, it is much less
-                expensive and blazing fast. We believe that this model provides more than
-                adequate performance on a range of tasks including text classification,
-                summarization, and lightweight chat applications, as well as search result
-                summarization.
-              - `"claude-instant-1-100k"`: An enhanced version of `claude-instant-1` with a
-                100,000 token context window that retains its performance. Well-suited for
-                high throughput use cases needing both speed and additional context, allowing
-                deeper understanding from extended conversations and documents.
-
-              You can also select specific sub-versions of the above models:
-
-              - `"claude-1.3"`: Compared to `claude-1.2`, it's more robust against red-team
-                inputs, better at precise instruction-following, better at code, and better
-                and non-English dialogue and writing.
-              - `"claude-1.3-100k"`: An enhanced version of `claude-1.3` with a 100,000 token
-                (roughly 75,000 word) context window.
-              - `"claude-1.2"`: An improved version of `claude-1`. It is slightly improved at
-                general helpfulness, instruction following, coding, and other tasks. It is
-                also considerably better with non-English languages. This model also has the
-                ability to role play (in harmless ways) more consistently, and it defaults to
-                writing somewhat longer and more thorough responses.
-              - `"claude-1.0"`: An earlier version of `claude-1`.
-              - `"claude-instant-1.1"`: Our latest version of `claude-instant-1`. It is better
-                than `claude-instant-1.0` at a wide variety of tasks including writing,
-                coding, and instruction following. It performs better on academic benchmarks,
-                including math, reading comprehension, and coding tests. It is also more
-                robust against red-teaming inputs.
-              - `"claude-instant-1.1-100k"`: An enhanced version of `claude-instant-1.1` with
-                a 100,000 token context window that retains its lightning fast 40 word/sec
-                performance.
-              - `"claude-instant-1.0"`: An earlier version of `claude-instant-1`.
+              parameter controls which version of Claude answers your request. Right now we
+              are offering two model families: Claude, and Claude Instant. You can use them by
+              setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+              [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              additional details.
 
           prompt: The prompt that you want Claude to complete.
 
@@ -544,7 +387,8 @@ class AsyncCompletions(AsyncAPIResource):
               const prompt = `\n\nHuman: ${userQuestion}\n\nAssistant:`;
               ```
 
-              See our [comments on prompts](https://console.anthropic.com/docs/prompt-design)
+              See our
+              [comments on prompts](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
               for more context.
 
           stream: Whether to incrementally stream the response using server-sent events.
