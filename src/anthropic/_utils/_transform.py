@@ -4,7 +4,10 @@ from typing import Any, List, Mapping, TypeVar, cast
 from datetime import date, datetime
 from typing_extensions import Literal, get_args, get_type_hints
 
-from pydantic.typing import is_typeddict
+try:
+    from pydantic.v1.typing import is_typeddict
+except ImportError:
+    from pydantic.typing import is_typeddict
 
 from ._utils import (
     is_list,

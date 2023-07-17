@@ -28,9 +28,11 @@ from typing_extensions import Literal, get_origin
 import anyio
 import httpx
 import distro
-import pydantic
 from httpx import URL, Limits
-from pydantic import PrivateAttr
+try:
+    from pydantic import v1 as pydantic
+except ImportError:
+    import pydantic
 
 from . import _base_exceptions as exceptions
 from ._qs import Querystring
@@ -129,8 +131,8 @@ class PageInfo:
 
 
 class BasePage(GenericModel, Generic[ModelT]):
-    _options: FinalRequestOptions = PrivateAttr()
-    _model: Type[ModelT] = PrivateAttr()
+    _options: FinalRequestOptions = pydantic.PrivateAttr()
+    _model: Type[ModelT] = pydantic.PrivateAttr()
 
     def has_next_page(self) -> bool:
         items = self._get_page_items()

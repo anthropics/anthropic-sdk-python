@@ -17,7 +17,10 @@ from typing import (
 from typing_extensions import Literal, Protocol, TypedDict, runtime_checkable
 
 import httpx
-import pydantic
+try:
+    from pydantic import v1 as pydantic
+except ImportError:
+    import pydantic
 from httpx import Proxy, Timeout, Response, BaseTransport
 
 if TYPE_CHECKING:
