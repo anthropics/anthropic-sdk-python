@@ -22,7 +22,7 @@ class CompletionRequestNonStreaming(TypedDict, total=False):
     only specifies the absolute maximum number of tokens to generate.
     """
 
-    model: Required[str]
+    model: Required[Union[str, Literal["claude-2", "claude-instant-1"]]]
     """The model that will complete your prompt.
 
     As we improve Claude, we develop new versions of it that you can query. This
@@ -109,7 +109,7 @@ class CompletionRequestStreaming(TypedDict, total=False):
     only specifies the absolute maximum number of tokens to generate.
     """
 
-    model: Required[str]
+    model: Required[Union[str, Literal["claude-2", "claude-instant-1"]]]
     """The model that will complete your prompt.
 
     As we improve Claude, we develop new versions of it that you can query. This
