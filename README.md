@@ -180,13 +180,13 @@ response), a subclass of `anthropic.APIStatusError` will be raised, containing `
 All errors inherit from `anthropic.APIError`.
 
 ```python
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+import anthropic
 
-anthropic = Anthropic()
+client = anthropic.Anthropic()
 
 try:
-    anthropic.completions.create(
-        prompt=f"{HUMAN_PROMPT} Your prompt here {AI_PROMPT}",
+    client.completions.create(
+        prompt=f"{anthropic.HUMAN_PROMPT} Your prompt here {anthropic.AI_PROMPT}",
         max_tokens_to_sample=300,
         model="claude-2",
     )
