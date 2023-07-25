@@ -229,6 +229,15 @@ class Anthropic(SyncAPIClient):
     def get_tokenizer(self) -> Tokenizer:
         return sync_get_tokenizer()
 
+    def close(self) -> None:
+        self._client.close()
+
+    def __enter__(self) -> Anthropic:
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        self.close()
+
 
 class AsyncAnthropic(AsyncAPIClient):
     completions: resources.AsyncCompletions
