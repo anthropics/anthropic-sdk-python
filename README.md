@@ -281,7 +281,7 @@ Be aware that doing so may result in incorrect types and other unexpected or und
 ```python
 from anthropic import Anthropic
 
-anthropic = Anthropic(
+client = Anthropic(
     default_headers={"anthropic-version": "My-Custom-Value"},
 )
 ```
@@ -294,7 +294,7 @@ You can configure the following keyword arguments when instantiating the client:
 import httpx
 from anthropic import Anthropic
 
-anthropic = Anthropic(
+client = Anthropic(
     # Use a custom base URL
     base_url="http://my.test.server.example.com:8083",
     proxies="http://my.test.proxy.example.com",
