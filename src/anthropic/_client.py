@@ -87,7 +87,7 @@ class Anthropic(SyncAPIClient):
         api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
 
         if base_url is None:
-            base_url = "https://api.anthropic.com"
+            base_url = f"https://api.anthropic.com"
 
         super().__init__(
             version=__version__,
@@ -272,7 +272,7 @@ class AsyncAnthropic(AsyncAPIClient):
         api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
 
         if base_url is None:
-            base_url = "https://api.anthropic.com"
+            base_url = f"https://api.anthropic.com"
 
         super().__init__(
             version=__version__,

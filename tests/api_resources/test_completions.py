@@ -15,12 +15,8 @@ api_key = os.environ.get("API_KEY", "something1234")
 
 
 class TestCompletions:
-    strict_client = Anthropic(
-        base_url=base_url, api_key=api_key, _strict_response_validation=True, auth_token="my-auth-token"
-    )
-    loose_client = Anthropic(
-        base_url=base_url, api_key=api_key, _strict_response_validation=False, auth_token="my-auth-token"
-    )
+    strict_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+    loose_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=False)
     parametrize = pytest.mark.parametrize("client", [strict_client, loose_client], ids=["strict", "loose"])
 
     @parametrize
@@ -72,12 +68,8 @@ class TestCompletions:
 
 
 class TestAsyncCompletions:
-    strict_client = AsyncAnthropic(
-        base_url=base_url, api_key=api_key, _strict_response_validation=True, auth_token="my-auth-token"
-    )
-    loose_client = AsyncAnthropic(
-        base_url=base_url, api_key=api_key, _strict_response_validation=False, auth_token="my-auth-token"
-    )
+    strict_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+    loose_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=False)
     parametrize = pytest.mark.parametrize("client", [strict_client, loose_client], ids=["strict", "loose"])
 
     @parametrize
