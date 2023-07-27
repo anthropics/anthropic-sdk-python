@@ -27,7 +27,7 @@ def _get_params(client: BaseClient) -> dict[str, str]:
 
 
 class TestAnthropic:
-    client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, auth_token="my-auth-token")
+    client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 
     def test_copy(self) -> None:
         copied = self.client.copy()
@@ -58,11 +58,7 @@ class TestAnthropic:
 
     def test_copy_default_headers(self) -> None:
         client = Anthropic(
-            base_url=base_url,
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
-            default_headers={"X-Foo": "bar"},
+            base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         assert client.default_headers["X-Foo"] == "bar"
 
@@ -96,11 +92,7 @@ class TestAnthropic:
 
     def test_copy_default_query(self) -> None:
         client = Anthropic(
-            base_url=base_url,
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
-            default_query={"foo": "bar"},
+            base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"foo": "bar"}
         )
         assert _get_params(client)["foo"] == "bar"
 
@@ -152,11 +144,7 @@ class TestAnthropic:
 
     def test_default_headers_option(self) -> None:
         client = Anthropic(
-            base_url=base_url,
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
-            default_headers={"X-Foo": "bar"},
+            base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("x-foo") == "bar"
@@ -166,7 +154,6 @@ class TestAnthropic:
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
-            auth_token="my-auth-token",
             default_headers={
                 "X-Foo": "stainless",
                 "X-Stainless-Lang": "my-overriding-header",
@@ -177,15 +164,11 @@ class TestAnthropic:
         assert request.headers.get("x-stainless-lang") == "my-overriding-header"
 
     def test_validate_headers(self) -> None:
-        client = Anthropic(
-            base_url=base_url, api_key=api_key, _strict_response_validation=True, auth_token="my-auth-token"
-        )
+        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        client2 = Anthropic(
-            base_url=base_url, api_key=None, _strict_response_validation=True, auth_token="my-auth-token"
-        )
+        client2 = Anthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
         with pytest.raises(
             TypeError,
             match="Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
@@ -197,11 +180,7 @@ class TestAnthropic:
 
     def test_default_query_option(self) -> None:
         client = Anthropic(
-            base_url=base_url,
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
-            default_query={"query_param": "bar"},
+            base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"query_param": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         url = httpx.URL(request.url)
@@ -352,10 +331,7 @@ class TestAnthropic:
 
     def test_base_url_trailing_slash(self) -> None:
         client = Anthropic(
-            base_url="http://localhost:5000/custom/path/",
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
+            base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True
         )
         request = client._build_request(
             FinalRequestOptions(
@@ -368,10 +344,7 @@ class TestAnthropic:
 
     def test_base_url_no_trailing_slash(self) -> None:
         client = Anthropic(
-            base_url="http://localhost:5000/custom/path",
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
+            base_url="http://localhost:5000/custom/path", api_key=api_key, _strict_response_validation=True
         )
         request = client._build_request(
             FinalRequestOptions(
@@ -394,9 +367,7 @@ class TestAnthropic:
 
 
 class TestAsyncAnthropic:
-    client = AsyncAnthropic(
-        base_url=base_url, api_key=api_key, _strict_response_validation=True, auth_token="my-auth-token"
-    )
+    client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 
     def test_copy(self) -> None:
         copied = self.client.copy()
@@ -427,11 +398,7 @@ class TestAsyncAnthropic:
 
     def test_copy_default_headers(self) -> None:
         client = AsyncAnthropic(
-            base_url=base_url,
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
-            default_headers={"X-Foo": "bar"},
+            base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         assert client.default_headers["X-Foo"] == "bar"
 
@@ -465,11 +432,7 @@ class TestAsyncAnthropic:
 
     def test_copy_default_query(self) -> None:
         client = AsyncAnthropic(
-            base_url=base_url,
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
-            default_query={"foo": "bar"},
+            base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"foo": "bar"}
         )
         assert _get_params(client)["foo"] == "bar"
 
@@ -521,11 +484,7 @@ class TestAsyncAnthropic:
 
     def test_default_headers_option(self) -> None:
         client = AsyncAnthropic(
-            base_url=base_url,
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
-            default_headers={"X-Foo": "bar"},
+            base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("x-foo") == "bar"
@@ -535,7 +494,6 @@ class TestAsyncAnthropic:
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
-            auth_token="my-auth-token",
             default_headers={
                 "X-Foo": "stainless",
                 "X-Stainless-Lang": "my-overriding-header",
@@ -546,15 +504,11 @@ class TestAsyncAnthropic:
         assert request.headers.get("x-stainless-lang") == "my-overriding-header"
 
     def test_validate_headers(self) -> None:
-        client = AsyncAnthropic(
-            base_url=base_url, api_key=api_key, _strict_response_validation=True, auth_token="my-auth-token"
-        )
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        client2 = AsyncAnthropic(
-            base_url=base_url, api_key=None, _strict_response_validation=True, auth_token="my-auth-token"
-        )
+        client2 = AsyncAnthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
         with pytest.raises(
             TypeError,
             match="Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
@@ -566,11 +520,7 @@ class TestAsyncAnthropic:
 
     def test_default_query_option(self) -> None:
         client = AsyncAnthropic(
-            base_url=base_url,
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
-            default_query={"query_param": "bar"},
+            base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"query_param": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         url = httpx.URL(request.url)
@@ -721,10 +671,7 @@ class TestAsyncAnthropic:
 
     def test_base_url_trailing_slash(self) -> None:
         client = AsyncAnthropic(
-            base_url="http://localhost:5000/custom/path/",
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
+            base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True
         )
         request = client._build_request(
             FinalRequestOptions(
@@ -737,10 +684,7 @@ class TestAsyncAnthropic:
 
     def test_base_url_no_trailing_slash(self) -> None:
         client = AsyncAnthropic(
-            base_url="http://localhost:5000/custom/path",
-            api_key=api_key,
-            _strict_response_validation=True,
-            auth_token="my-auth-token",
+            base_url="http://localhost:5000/custom/path", api_key=api_key, _strict_response_validation=True
         )
         request = client._build_request(
             FinalRequestOptions(
