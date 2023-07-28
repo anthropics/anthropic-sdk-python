@@ -304,6 +304,10 @@ client = Anthropic(
 
 See the httpx documentation for information about the [`proxies`](https://www.python-httpx.org/advanced/#http-proxying) and [`transport`](https://www.python-httpx.org/advanced/#custom-transports) keyword arguments.
 
+## Advanced: Managing HTTP resources
+
+By default we will close the underlying HTTP connections whenever the client is [garbage collected](https://docs.python.org/3/reference/datamodel.html#object.__del__) is called but you can also manually close the client using the `.close()` method if desired, or with a context manager that closes when exiting.
+
 ## Status
 
 This package is in beta. Its internals and interfaces are not stable and subject to change without a major semver bump;
