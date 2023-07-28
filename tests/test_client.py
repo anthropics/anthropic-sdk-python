@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import json
+import asyncio
 import inspect
 from typing import Any, Dict, Union, cast
 
@@ -355,6 +356,22 @@ class TestAnthropic:
         )
         assert request.url == "http://localhost:5000/custom/path/foo"
 
+    def test_client_del(self) -> None:
+        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        assert not client.is_closed()
+
+        client.__del__()
+
+        assert client.is_closed()
+
+    def test_client_context_manager(self) -> None:
+        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        with client as c2:
+            assert c2 is client
+            assert not c2.is_closed()
+            assert not client.is_closed()
+        assert client.is_closed()
+
     @pytest.mark.respx(base_url=base_url)
     def test_default_stream_cls(self, respx_mock: MockRouter) -> None:
         class Model(BaseModel):
@@ -694,6 +711,23 @@ class TestAsyncAnthropic:
             ),
         )
         assert request.url == "http://localhost:5000/custom/path/foo"
+
+    async def test_client_del(self) -> None:
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        assert not client.is_closed()
+
+        client.__del__()
+
+        await asyncio.sleep(0.2)
+        assert client.is_closed()
+
+    async def test_client_context_manager(self) -> None:
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        async with client as c2:
+            assert c2 is client
+            assert not c2.is_closed()
+            assert not client.is_closed()
+        assert client.is_closed()
 
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.asyncio
