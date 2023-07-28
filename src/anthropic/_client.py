@@ -84,7 +84,7 @@ class Anthropic(SyncAPIClient):
         - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
         - `api_key` from `ANTHROPIC_API_KEY`
         """
-        api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
+        api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", None)
 
         if base_url is None:
             base_url = f"https://api.anthropic.com"
@@ -269,7 +269,7 @@ class AsyncAnthropic(AsyncAPIClient):
         - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
         - `api_key` from `ANTHROPIC_API_KEY`
         """
-        api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
+        api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", None)
 
         if base_url is None:
             base_url = f"https://api.anthropic.com"
