@@ -82,10 +82,14 @@ class Anthropic(SyncAPIClient):
         """Construct a new synchronous anthropic client instance.
 
         This automatically infers the following arguments from their corresponding environment variables if they are not provided:
-        - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
         - `api_key` from `ANTHROPIC_API_KEY`
+        - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
         """
         api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", None)
+        self.api_key = api_key
+
+        auth_token_envvar = os.environ.get("ANTHROPIC_AUTH_TOKEN", None)
+        self.auth_token = auth_token or auth_token_envvar or None
 
         if base_url is None:
             base_url = f"https://api.anthropic.com"
@@ -102,11 +106,6 @@ class Anthropic(SyncAPIClient):
             custom_query=default_query,
             _strict_response_validation=_strict_response_validation,
         )
-
-        self.api_key = api_key
-
-        auth_token_envvar = os.environ.get("ANTHROPIC_AUTH_TOKEN", None)
-        self.auth_token = auth_token or auth_token_envvar or None
 
         self._default_stream_cls = Stream
 
@@ -270,10 +269,14 @@ class AsyncAnthropic(AsyncAPIClient):
         """Construct a new async anthropic client instance.
 
         This automatically infers the following arguments from their corresponding environment variables if they are not provided:
-        - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
         - `api_key` from `ANTHROPIC_API_KEY`
+        - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
         """
         api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", None)
+        self.api_key = api_key
+
+        auth_token_envvar = os.environ.get("ANTHROPIC_AUTH_TOKEN", None)
+        self.auth_token = auth_token or auth_token_envvar or None
 
         if base_url is None:
             base_url = f"https://api.anthropic.com"
@@ -290,11 +293,6 @@ class AsyncAnthropic(AsyncAPIClient):
             custom_query=default_query,
             _strict_response_validation=_strict_response_validation,
         )
-
-        self.api_key = api_key
-
-        auth_token_envvar = os.environ.get("ANTHROPIC_AUTH_TOKEN", None)
-        self.auth_token = auth_token or auth_token_envvar or None
 
         self._default_stream_cls = AsyncStream
 
