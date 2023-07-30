@@ -1,4 +1,4 @@
-#!/usr/bin/env poetry run python
+#!/usr/bin/env -S poetry run python
 
 import anthropic
 from anthropic import Anthropic
