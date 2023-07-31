@@ -834,7 +834,7 @@ class SyncAPIClient(BaseClient):
         page: Type[SyncPageT],
         options: FinalRequestOptions,
     ) -> SyncPageT:
-        resp = cast(SyncPageT, self.request(page, options, stream=False))
+        resp = self.request(page, options, stream=False)
         resp._set_private_attributes(  # pyright: ignore[reportPrivateUsage]
             client=self,
             model=model,
@@ -955,7 +955,7 @@ class SyncAPIClient(BaseClient):
         options: RequestOptions = {},
     ) -> ResponseT:
         opts = FinalRequestOptions.construct(method="patch", url=path, json_data=body, **options)
-        return cast(ResponseT, self.request(cast_to, opts))
+        return self.request(cast_to, opts)
 
     def put(
         self,
@@ -967,7 +967,7 @@ class SyncAPIClient(BaseClient):
         options: RequestOptions = {},
     ) -> ResponseT:
         opts = FinalRequestOptions.construct(method="put", url=path, json_data=body, files=files, **options)
-        return cast(ResponseT, self.request(cast_to, opts))
+        return self.request(cast_to, opts)
 
     def delete(
         self,
@@ -978,7 +978,7 @@ class SyncAPIClient(BaseClient):
         options: RequestOptions = {},
     ) -> ResponseT:
         opts = FinalRequestOptions.construct(method="delete", url=path, json_data=body, **options)
-        return cast(ResponseT, self.request(cast_to, opts))
+        return self.request(cast_to, opts)
 
     def get_api_list(
         self,
