@@ -9,7 +9,7 @@ from typing import Union, Mapping, Optional
 import httpx
 from tokenizers import Tokenizer  # type: ignore[import]
 
-from . import resources
+from . import resources, _constants
 from ._qs import Querystring
 from ._types import (
     NOT_GIVEN,
@@ -52,6 +52,10 @@ class Anthropic(SyncAPIClient):
     # client options
     api_key: str | None
     auth_token: str | None
+
+    # constants
+    HUMAN_PROMPT = _constants.HUMAN_PROMPT
+    AI_PROMPT = _constants.AI_PROMPT
 
     def __init__(
         self,
@@ -239,6 +243,10 @@ class AsyncAnthropic(AsyncAPIClient):
     # client options
     api_key: str | None
     auth_token: str | None
+
+    # constants
+    HUMAN_PROMPT = _constants.HUMAN_PROMPT
+    AI_PROMPT = _constants.AI_PROMPT
 
     def __init__(
         self,
