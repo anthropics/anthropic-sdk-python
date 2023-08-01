@@ -170,6 +170,15 @@ Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typ
 
 If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `"basic"`.
 
+## Token counting
+
+You can estimate billing for a given request with the `client.count_tokens()` method, eg:
+
+```py
+client = Anthropic()
+client.count_tokens('Hello world!')  # 3
+```
+
 ## Handling errors
 
 When the library is unable to connect to the API (e.g., due to network connection problems or a timeout), a subclass of `anthropic.APIConnectionError` is raised.
@@ -241,7 +250,7 @@ anthropic.with_options(max_retries=5).completions.create(
 
 ### Timeouts
 
-Requests time out after 60 seconds by default. You can configure this with a `timeout` option,
+Requests time out after 10 minutes by default. You can configure this with a `timeout` option,
 which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/#fine-tuning-the-configuration):
 
 ```python
@@ -249,7 +258,7 @@ from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 
 # Configure the default for all requests:
 anthropic = Anthropic(
-    # default is 60s
+    # default is 10 minutes
     timeout=20.0,
 )
 
