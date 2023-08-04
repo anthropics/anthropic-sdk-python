@@ -26,7 +26,7 @@ black = "22.10.0"
 respx = "0.19.2"
 pytest = "7.1.1"
 pytest-asyncio = "0.18.3"
-ruff = "0.0.239"
+ruff = "0.0.282"
 isort = "5.10.1"
 time-machine = "^2.9.0"
 
