@@ -106,7 +106,7 @@ and adding `ANTHROPIC_API_KEY="my api key"` to your `.env` file so that your API
 Simply import `AsyncAnthropic` instead of `Anthropic` and use `await` with each API call:
 
 ```python
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+from anthropic import AsyncAnthropic, HUMAN_PROMPT, AI_PROMPT
 
 anthropic = AsyncAnthropic(
     # defaults to os.environ.get("ANTHROPIC_API_KEY")
@@ -150,7 +150,7 @@ for completion in stream:
 The async client uses the exact same interface.
 
 ```python
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+from anthropic import AsyncAnthropic, HUMAN_PROMPT, AI_PROMPT
 
 anthropic = AsyncAnthropic()
 
