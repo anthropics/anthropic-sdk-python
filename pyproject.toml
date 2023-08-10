@@ -22,7 +22,7 @@ tokenizers = ">= 0.13.0"
 [tool.poetry.group.dev.dependencies]
 pyright = "1.1.318"
 mypy = "1.4.1"
-black = "22.10.0"
+black = "23.3.0"
 respx = "0.19.2"
 pytest = "7.1.1"
 pytest-asyncio = "0.18.3"
