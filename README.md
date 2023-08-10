@@ -93,7 +93,7 @@ anthropic = Anthropic(
 completion = anthropic.completions.create(
     model="claude-2",
     max_tokens_to_sample=300,
-    prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court? {AI_PROMPT}",
+    prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court?{AI_PROMPT}",
 )
 print(completion.completion)
 ```
@@ -118,7 +118,7 @@ async def main():
     completion = await anthropic.completions.create(
         model="claude-2",
         max_tokens_to_sample=300,
-        prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court? {AI_PROMPT}",
+        prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court?{AI_PROMPT}",
     )
     print(completion.completion)
 
@@ -138,7 +138,7 @@ from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 anthropic = Anthropic()
 
 stream = anthropic.completions.create(
-    prompt=f"{HUMAN_PROMPT} Your prompt here {AI_PROMPT}",
+    prompt=f"{HUMAN_PROMPT} Your prompt here{AI_PROMPT}",
     max_tokens_to_sample=300,
     model="claude-2",
     stream=True,
@@ -155,7 +155,7 @@ from anthropic import AsyncAnthropic, HUMAN_PROMPT, AI_PROMPT
 anthropic = AsyncAnthropic()
 
 stream = await anthropic.completions.create(
-    prompt=f"{HUMAN_PROMPT} Your prompt here {AI_PROMPT}",
+    prompt=f"{HUMAN_PROMPT} Your prompt here{AI_PROMPT}",
     max_tokens_to_sample=300,
     model="claude-2",
     stream=True,
@@ -242,7 +242,7 @@ anthropic = Anthropic(
 
 # Or, configure per-request:
 anthropic.with_options(max_retries=5).completions.create(
-    prompt=f"{HUMAN_PROMPT} Can you help me effectively ask for a raise at work? {AI_PROMPT}",
+    prompt=f"{HUMAN_PROMPT} Can you help me effectively ask for a raise at work?{AI_PROMPT}",
     max_tokens_to_sample=300,
     model="claude-2",
 )
@@ -269,7 +269,7 @@ anthropic = Anthropic(
 
 # Override per-request:
 anthropic.with_options(timeout=5 * 1000).completions.create(
-    prompt=f"{HUMAN_PROMPT} Where can I get a good coffee in my neighbourhood? {AI_PROMPT}",
+    prompt=f"{HUMAN_PROMPT} Where can I get a good coffee in my neighbourhood?{AI_PROMPT}",
     max_tokens_to_sample=300,
     model="claude-2",
 )

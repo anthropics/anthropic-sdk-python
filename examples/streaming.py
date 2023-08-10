@@ -43,7 +43,7 @@ async def async_stream() -> None:
 def stream_error() -> None:
     try:
         client.completions.create(
-            prompt=f"{HUMAN_PROMPT}{question}{AI_PROMPT}",
+            prompt=f"{HUMAN_PROMPT} {question}{AI_PROMPT}",
             model="claude-unknown-model",
             stream=True,
             max_tokens_to_sample=300,
