@@ -14,7 +14,7 @@ packages = [
 python = "^3.7"
 httpx = ">= 0.23.0, < 1"
 pydantic = "^1.9.0"
-typing-extensions = ">= 4.1.1, < 5"
+typing-extensions = ">= 4.5, < 5"
 anyio = ">= 3.5.0, < 4"
 distro = ">= 1.7.0, < 2"
 tokenizers = ">= 0.13.0"
