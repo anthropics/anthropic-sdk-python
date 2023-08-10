@@ -207,9 +207,7 @@ class Completions(SyncAPIResource):
         max_tokens_to_sample: int,
         model: Union[str, Literal["claude-2", "claude-instant-1"]],
         prompt: str,
-        metadata: completion_create_params.CompletionRequestNonStreamingMetadata
-        | completion_create_params.CompletionRequestStreamingMetadata
-        | NotGiven = NOT_GIVEN,
+        metadata: completion_create_params.CompletionRequestNonStreamingMetadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -439,9 +437,7 @@ class AsyncCompletions(AsyncAPIResource):
         max_tokens_to_sample: int,
         model: Union[str, Literal["claude-2", "claude-instant-1"]],
         prompt: str,
-        metadata: completion_create_params.CompletionRequestNonStreamingMetadata
-        | completion_create_params.CompletionRequestStreamingMetadata
-        | NotGiven = NOT_GIVEN,
+        metadata: completion_create_params.CompletionRequestNonStreamingMetadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
