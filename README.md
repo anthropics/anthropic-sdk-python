@@ -195,7 +195,7 @@ client = anthropic.Anthropic()
 
 try:
     client.completions.create(
-        prompt=f"{anthropic.HUMAN_PROMPT} Your prompt here {anthropic.AI_PROMPT}",
+        prompt=f"{anthropic.HUMAN_PROMPT} Your prompt here{anthropic.AI_PROMPT}",
         max_tokens_to_sample=300,
         model="claude-2",
     )
