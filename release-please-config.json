@@ -56,6 +56,9 @@
       "hidden": true
     }
   ],
+  "reviewers": [
+    "RobertCraigie"
+  ],
   "release-type": "python",
   "extra-files": [
     "src/anthropic/_version.py"
