@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "anthropic"
-version = "0.3.9"
+version = "0.3.10"
 description = "Client library for the anthropic API"
 readme = "README.md"
 authors = ["Anthropic <support@anthropic.com>"]
