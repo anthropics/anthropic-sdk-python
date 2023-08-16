@@ -21,7 +21,7 @@ def sync_stream() -> None:
     )
 
     for completion in stream:
-        print(completion.completion, end="")
+        print(completion.completion, end="", flush=True)
 
     print()
 
@@ -35,7 +35,7 @@ async def async_stream() -> None:
     )
 
     async for completion in stream:
-        print(completion.completion, end="")
+        print(completion.completion, end="", flush=True)
 
     print()
 
