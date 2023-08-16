@@ -5,27 +5,46 @@ from typing import Any, TypeVar, cast
 from datetime import date, datetime
 from typing_extensions import Literal, get_args, get_origin, assert_type
 
+from anthropic._types import NoneType
 from anthropic._utils import is_dict, is_list, is_list_type, is_union_type
+from anthropic._compat import PYDANTIC_V2, field_outer_type, get_model_fields
 from anthropic._models import BaseModel
 
 BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
 
 
 def assert_matches_model(model: type[BaseModelT], value: BaseModelT, *, path: list[str]) -> bool:
-    for name, field in model.__fields__.items():
+    for name, field in get_model_fields(model).items():
         field_value = getattr(value, name)
+        if PYDANTIC_V2:
+            allow_none = False
+        else:
+            # in v1 nullability was structured differently
+            # https://docs.pydantic.dev/2.0/migration/#required-optional-and-nullable-fields
+            allow_none = getattr(field, "allow_none", False)
 
-        if field.allow_none and field_value is None:
-            continue
-
-        assert_matches_type(field.outer_type_, field_value, path=[*path, name])
+        assert_matches_type(
+            field_outer_type(field),
+            field_value,
+            path=[*path, name],
+            allow_none=allow_none,
+        )
 
     return True
 
 
 # Note: the `path` argument is only used to improve error messages when `--showlocals` is used
-def assert_matches_type(type_: Any, value: object, *, path: list[str]) -> None:
-    if type_ is None:
+def assert_matches_type(
+    type_: Any,
+    value: object,
+    *,
+    path: list[str],
+    allow_none: bool = False,
+) -> None:
+    if allow_none and value is None:
+        return
+
+    if type_ is None or type_ is NoneType:
         assert value is None
         return
 
