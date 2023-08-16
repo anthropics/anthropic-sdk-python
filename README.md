@@ -144,7 +144,7 @@ stream = anthropic.completions.create(
     stream=True,
 )
 for completion in stream:
-    print(completion.completion)
+    print(completion.completion, end="", flush=True)
 ```
 
 The async client uses the exact same interface.
@@ -161,7 +161,7 @@ stream = await anthropic.completions.create(
     stream=True,
 )
 async for completion in stream:
-    print(completion.completion)
+    print(completion.completion, end="", flush=True)
 ```
 
 ## Using Types
