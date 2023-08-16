@@ -5,6 +5,7 @@ from typing_extensions import Literal
 import pytest
 from pydantic import Field
 
+from anthropic._compat import PYDANTIC_V2, parse_obj, model_dump, model_json
 from anthropic._models import BaseModel
 
 
@@ -150,18 +151,18 @@ def test_unknown_fields() -> None:
     assert m2.foo == "foo"
     assert cast(Any, m2).unknown == {"foo_bar": True}
 
-    assert m2.dict() == {"foo": "foo", "unknown": {"foo_bar": True}}
+    assert model_dump(m2) == {"foo": "foo", "unknown": {"foo_bar": True}}
 
 
 def test_strict_validation_unknown_fields() -> None:
     class Model(BaseModel):
         foo: str
 
-    model = Model.parse_obj(dict(foo="hello!", user="Robert"))
+    model = parse_obj(Model, dict(foo="hello!", user="Robert"))
     assert model.foo == "hello!"
     assert cast(Any, model).user == "Robert"
 
-    assert model.dict() == {"foo": "hello!", "user": "Robert"}
+    assert model_dump(model) == {"foo": "hello!", "user": "Robert"}
 
 
 def test_aliases() -> None:
@@ -290,8 +291,12 @@ def test_nested_union_invalid_data() -> None:
     assert cast(bool, m.foo) is True
 
     m = Model.construct(foo={"name": 3})
-    assert isinstance(m.foo, Submodel2)
-    assert m.foo.name == "3"
+    if PYDANTIC_V2:
+        assert isinstance(m.foo, Submodel1)
+        assert m.foo.name == 3  # type: ignore
+    else:
+        assert isinstance(m.foo, Submodel2)
+        assert m.foo.name == "3"
 
 
 def test_list_of_unions() -> None:
@@ -417,15 +422,19 @@ def test_iso8601_datetime() -> None:
         created_at: datetime
 
     expected = datetime(2019, 12, 27, 18, 11, 19, 117000, tzinfo=timezone.utc)
-    expected_json = '{"created_at": "2019-12-27T18:11:19.117000+00:00"}'
+
+    if PYDANTIC_V2:
+        expected_json = '{"created_at":"2019-12-27T18:11:19.117Z"}'
+    else:
+        expected_json = '{"created_at": "2019-12-27T18:11:19.117000+00:00"}'
 
     model = Model.construct(created_at="2019-12-27T18:11:19.117Z")
     assert model.created_at == expected
-    assert model.json() == expected_json
+    assert model_json(model) == expected_json
 
-    model = Model.parse_obj(dict(created_at="2019-12-27T18:11:19.117Z"))
+    model = parse_obj(Model, dict(created_at="2019-12-27T18:11:19.117Z"))
     assert model.created_at == expected
-    assert model.json() == expected_json
+    assert model_json(model) == expected_json
 
 
 def test_coerces_int() -> None:
@@ -443,3 +452,22 @@ def test_coerces_int() -> None:
     # mismatched types are left as-is
     m = Model.construct(bar={"foo": "bar"})
     assert m.bar == {"foo": "bar"}  # type: ignore[comparison-overlap]
+
+
+def test_deprecated_alias() -> None:
+    class Model(BaseModel):
+        resource_id: str = Field(alias="model_id")
+
+        @property
+        def model_id(self) -> str:
+            return self.resource_id
+
+    m = Model.construct(model_id="id")
+    assert m.model_id == "id"
+    assert m.resource_id == "id"
+    assert m.resource_id is m.model_id
+
+    m = parse_obj(Model, {"model_id": "id"})
+    assert m.model_id == "id"
+    assert m.resource_id == "id"
+    assert m.resource_id is m.model_id

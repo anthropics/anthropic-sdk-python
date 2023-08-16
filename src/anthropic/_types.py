@@ -154,3 +154,5 @@ ResponseT = TypeVar(
     "ResponseT",
     bound="Union[str, None, BaseModel, List[Any], Dict[str, Any], httpx.Response, UnknownResponse, ModelBuilderProtocol]",
 )
+
+StrBytesIntFloat = Union[str, bytes, int, float]
