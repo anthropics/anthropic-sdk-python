@@ -13,7 +13,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.7"
 httpx = ">= 0.23.0, < 1"
-pydantic = "^1.9.0"
+pydantic = ">= 1.9.0, < 3"
 typing-extensions = ">= 4.5, < 5"
 anyio = ">= 3.5.0, < 4"
 distro = ">= 1.7.0, < 2"
@@ -30,6 +30,8 @@ pytest-asyncio = "0.21.1"
 ruff = "0.0.282"
 isort = "5.10.1"
 time-machine = "^2.9.0"
+nox = "^2023.4.22"
+nox-poetry = "^1.0.3"
 
 
 [build-system]
@@ -60,7 +62,8 @@ pythonVersion = "3.7"
 
 exclude = [
     "_dev",
-    ".venv"
+    ".venv",
+    ".nox",
 ]
 reportImportCycles = false
 reportPrivateUsage = false

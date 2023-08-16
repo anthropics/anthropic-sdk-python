@@ -4,8 +4,6 @@ from typing import Any, List, Mapping, TypeVar, cast
 from datetime import date, datetime
 from typing_extensions import Literal, get_args, get_type_hints
 
-from pydantic.typing import is_typeddict
-
 from ._utils import (
     is_list,
     is_mapping,
@@ -16,6 +14,7 @@ from ._utils import (
     is_annotated_type,
     strip_annotated_type,
 )
+from .._compat import is_typeddict
 
 _T = TypeVar("_T")
 

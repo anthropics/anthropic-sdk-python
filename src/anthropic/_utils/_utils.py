@@ -7,13 +7,10 @@ from typing import Any, Mapping, TypeVar, Callable, Iterable, Sequence, cast, ov
 from pathlib import Path
 from typing_extensions import Required, Annotated, TypeGuard, get_args, get_origin
 
-from pydantic.typing import is_union as _is_union
-
-# re-export for forwards compat
-from pydantic.datetime_parse import parse_date as parse_date
-from pydantic.datetime_parse import parse_datetime as parse_datetime
-
 from .._types import NotGiven, FileTypes
+from .._compat import is_union as _is_union
+from .._compat import parse_date as parse_date
+from .._compat import parse_datetime as parse_datetime
 
 _T = TypeVar("_T")
 CallableT = TypeVar("CallableT", bound=Callable[..., Any])

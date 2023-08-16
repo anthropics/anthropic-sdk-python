@@ -55,6 +55,7 @@ from ._types import (
     ModelBuilderProtocol,
 )
 from ._utils import is_dict, is_mapping
+from ._compat import model_copy
 from ._models import (
     BaseModel,
     GenericModel,
@@ -151,7 +152,7 @@ class BasePage(GenericModel, Generic[ModelT]):
         return httpx.QueryParams(cast(Any, self._options.params)).merge(url.params)
 
     def _info_to_options(self, info: PageInfo) -> FinalRequestOptions:
-        options = self._options.copy()
+        options = model_copy(self._options)
 
         if not isinstance(info.params, NotGiven):
             options.params = {**options.params, **info.params}
