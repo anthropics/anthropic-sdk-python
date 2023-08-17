@@ -424,7 +424,7 @@ def test_iso8601_datetime() -> None:
     expected = datetime(2019, 12, 27, 18, 11, 19, 117000, tzinfo=timezone.utc)
 
     if PYDANTIC_V2:
-        expected_json = '{"created_at":"2019-12-27T18:11:19.117Z"}'
+        expected_json = '{"created_at":"2019-12-27T18:11:19.117000Z"}'
     else:
         expected_json = '{"created_at": "2019-12-27T18:11:19.117000+00:00"}'
 
