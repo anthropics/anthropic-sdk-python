@@ -147,6 +147,7 @@ else:
             ...
 
     else:
+        import pydantic.generics
 
         class GenericModel(pydantic.generics.GenericModel, pydantic.BaseModel):
             ...
