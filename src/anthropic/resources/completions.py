@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, overload
+from typing import List, Union, overload
 from typing_extensions import Literal
 
 from ..types import Completion, completion_create_params
@@ -21,7 +21,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: str | Literal["claude-2", "claude-instant-1"],
+        model: Union[str, Literal["claude-2", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.CompletionRequestNonStreamingMetadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -113,7 +113,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: str | Literal["claude-2", "claude-instant-1"],
+        model: Union[str, Literal["claude-2", "claude-instant-1"]],
         prompt: str,
         stream: Literal[True],
         metadata: completion_create_params.CompletionRequestStreamingMetadata | NotGiven = NOT_GIVEN,
@@ -205,7 +205,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: str | Literal["claude-2", "claude-instant-1"],
+        model: Union[str, Literal["claude-2", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.CompletionRequestNonStreamingMetadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -251,7 +251,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: str | Literal["claude-2", "claude-instant-1"],
+        model: Union[str, Literal["claude-2", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.CompletionRequestNonStreamingMetadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -343,7 +343,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: str | Literal["claude-2", "claude-instant-1"],
+        model: Union[str, Literal["claude-2", "claude-instant-1"]],
         prompt: str,
         stream: Literal[True],
         metadata: completion_create_params.CompletionRequestStreamingMetadata | NotGiven = NOT_GIVEN,
@@ -435,7 +435,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: str | Literal["claude-2", "claude-instant-1"],
+        model: Union[str, Literal["claude-2", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.CompletionRequestNonStreamingMetadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
