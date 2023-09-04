@@ -5,6 +5,7 @@ import time
 import uuid
 import inspect
 import platform
+import ssl
 from types import TracebackType
 from random import random
 from typing import (
@@ -657,6 +658,7 @@ class SyncAPIClient(BaseClient):
         transport: Transport | None = None,
         proxies: ProxiesTypes | None = None,
         limits: Limits | None = DEFAULT_LIMITS,
+        verify: bool | str | ssl.SSLContext = True,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
         _strict_response_validation: bool,
@@ -677,6 +679,7 @@ class SyncAPIClient(BaseClient):
             proxies=proxies,  # type: ignore
             transport=transport,  # type: ignore
             limits=limits,
+            verify=verify,
             headers={"Accept": "application/json"},
         )
 
@@ -1011,6 +1014,7 @@ class AsyncAPIClient(BaseClient):
         transport: Transport | None = None,
         proxies: ProxiesTypes | None = None,
         limits: Limits | None = DEFAULT_LIMITS,
+        verify: bool | str | ssl.SSLContext = True,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
     ) -> None:
@@ -1030,6 +1034,7 @@ class AsyncAPIClient(BaseClient):
             proxies=proxies,  # type: ignore
             transport=transport,  # type: ignore
             limits=limits,
+            verify=verify,
             headers={"Accept": "application/json"},
         )
 

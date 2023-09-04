@@ -73,6 +73,8 @@ class Anthropic(SyncAPIClient):
         proxies: Optional[ProxiesTypes] = None,
         # See httpx documentation for [limits](https://www.python-httpx.org/advanced/#pool-limit-configuration)
         connection_pool_limits: httpx.Limits | None = DEFAULT_LIMITS,
+        # See httpx documentation for [verify](https://www.python-httpx.org/advanced/#ssl-certificates)
+        verify: bool | str | ssl.SSLContext = True,
         # Enable or disable schema validation for data returned by the API.
         # When enabled an error APIResponseValidationError is raised
         # if the API responds with invalid data for the expected schema.
@@ -106,6 +108,7 @@ class Anthropic(SyncAPIClient):
             transport=transport,
             proxies=proxies,
             limits=connection_pool_limits,
+            verify=verify,
             custom_headers=default_headers,
             custom_query=default_query,
             _strict_response_validation=_strict_response_validation,
@@ -264,6 +267,8 @@ class AsyncAnthropic(AsyncAPIClient):
         proxies: Optional[ProxiesTypes] = None,
         # See httpx documentation for [limits](https://www.python-httpx.org/advanced/#pool-limit-configuration)
         connection_pool_limits: httpx.Limits | None = DEFAULT_LIMITS,
+        # See httpx documentation for [verify](https://www.python-httpx.org/advanced/#ssl-certificates)
+        verify: bool | str | ssl.SSLContext = True,
         # Enable or disable schema validation for data returned by the API.
         # When enabled an error APIResponseValidationError is raised
         # if the API responds with invalid data for the expected schema.
@@ -297,6 +302,7 @@ class AsyncAnthropic(AsyncAPIClient):
             transport=transport,
             proxies=proxies,
             limits=connection_pool_limits,
+            verify=verify,
             custom_headers=default_headers,
             custom_query=default_query,
             _strict_response_validation=_strict_response_validation,
