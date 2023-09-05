@@ -27,6 +27,20 @@ def extract_files(
     *,
     paths: Sequence[Sequence[str]],
 ) -> list[tuple[str, FileTypes]]:
+    """
+    Extract files from the given `query` based on specified `paths`.
+
+    Args:
+        query (Mapping[str, object]): The query containing data to extract files from.
+        paths (Sequence[Sequence[str]]): A sequence of paths specifying where to find files.
+
+    Returns:
+        list[tuple[str, FileTypes]]: A list of tuples containing file paths and their types.
+
+    This function extracts files from the provided `query` based on the specified `paths`. It iterates
+    through the `paths` and calls the `_extract_items` function to extract files from the query using
+    each path. The resulting file paths and their types are collected in a list of tuples.
+    """
     files: list[tuple[str, FileTypes]] = []
     for path in paths:
         files.extend(_extract_items(query, path, index=0, flattened_key=None))
@@ -41,6 +55,28 @@ def _extract_items(
     # TODO: rename
     flattened_key: str | None,
 ) -> list[tuple[str, FileTypes]]:
+    """
+    Recursively extract items from the `obj` based on the specified `path`.
+
+    Args:
+        obj (object): The object to extract items from.
+        path (Sequence[str]): The sequence of strings representing the path to locate items.
+        index (int): The current index in the path.
+        flattened_key (str | None): The flattened key path, used for error messages and tuple labels.
+
+    Returns:
+        list[tuple[str, FileTypes]]: A list of tuples containing file paths and their types.
+
+    This function is designed to recursively extract items from the `obj` based on the specified `path`.
+    It iterates through the `path` and, depending on the type of the `obj`, either traverses a dictionary
+    or processes a list. If it reaches the end of the path, it returns the item found as a tuple containing
+    the flattened key and the item's type (cast to `FileTypes`).
+
+    Note:
+        - The `obj` can be a dictionary or a list.
+        - The `path` should be a sequence of strings specifying the path to locate items.
+        - The `flattened_key` is used to construct labels for error messages and tuple entries.
+    """
     try:
         key = path[index]
     except IndexError:

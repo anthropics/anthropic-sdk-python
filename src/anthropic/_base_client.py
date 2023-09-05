@@ -132,6 +132,24 @@ class PageInfo:
 
 
 class BasePage(GenericModel, Generic[ModelT]):
+    """
+    Base class for paginated pages of data.
+
+    Args:
+        GenericModel: The base generic model class.
+        Generic[ModelT]: A generic type parameter representing the model type for the page.
+
+    Attributes:
+        _options (FinalRequestOptions): The final request options.
+        _model (Type[ModelT]): The type of the model.
+
+    Methods:
+        has_next_page(): Check if there is a next page of data.
+        next_page_info(): Get information about the next page.
+        _get_page_items(): Get the items on the current page.
+        _params_from_url(url: URL): Extract query parameters from a URL and merge them with options.
+        _info_to_options(info: PageInfo): Convert PageInfo to FinalRequestOptions.
+    """
     _options: FinalRequestOptions = PrivateAttr()
     _model: Type[ModelT] = PrivateAttr()
 
@@ -169,6 +187,23 @@ class BasePage(GenericModel, Generic[ModelT]):
 
 
 class BaseSyncPage(BasePage[ModelT], Generic[ModelT]):
+    """
+    Synchronous base class for paginated pages of data.
+
+    Args:
+        BasePage[ModelT]: The base class for paginated pages.
+        Generic[ModelT]: A generic type parameter representing the model type for the page.
+
+    Attributes:
+        _client (SyncAPIClient): The synchronous API client.
+    
+    Methods:
+        _set_private_attributes(client: SyncAPIClient, model: Type[ModelT], options: FinalRequestOptions):
+            Set private attributes for the page.
+        __iter__(): Provide iterator support for the page's items.
+        iter_pages(): Iterate through pages of data.
+        get_next_page(): Get the next page of data.
+    """
     _client: SyncAPIClient = pydantic.PrivateAttr()
 
     def _set_private_attributes(
@@ -250,6 +285,20 @@ class AsyncPaginator(Generic[ModelT, AsyncPageT]):
 
 
 class BaseAsyncPage(BasePage[ModelT], Generic[ModelT]):
+    """
+    Asynchronous paginator for retrieving paginated data.
+
+    Args:
+        client (AsyncAPIClient): The asynchronous API client.
+        options (FinalRequestOptions): The final request options.
+        page_cls (Type[AsyncPageT]): The class representing the asynchronous paginated page.
+        model (Type[ModelT]): The model type for the paginated data.
+
+    Methods:
+        __await__(): Asynchronously retrieve the paginated page.
+        _get_page(): Asynchronously fetch and configure the paginated page.
+        __aiter__(): Asynchronously iterate through the items in the paginated data.
+    """
     _client: AsyncAPIClient = pydantic.PrivateAttr()
 
     def _set_private_attributes(

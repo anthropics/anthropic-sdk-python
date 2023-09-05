@@ -108,6 +108,16 @@ def _get_annoted_type(type_: type) -> type | None:
 
 
 def _maybe_transform_key(key: str, type_: type) -> str:
+    """
+    Transform the given `key` based on the annotations in the provided `type_`.
+
+    Args:
+        key (str): The key to potentially transform.
+        type_ (type): The type with annotations to check for key transformation.
+
+    Returns:
+        str: The transformed key, if any annotations specify an alias; otherwise, the original key.
+    """
     annotated_type = _get_annoted_type(type_)
     if annotated_type is None:
         # no `Annotated` definition for this type, no transformation needed
@@ -164,6 +174,22 @@ def _transform_recursive(
 
 
 def _transform_value(data: object, type_: type) -> object:
+    """
+    Transform the given `data` based on the annotations in the provided `type_`.
+
+    Args:
+        data (object): The data to potentially transform.
+        type_ (type): The type with annotations to check for data transformation.
+
+    Returns:
+        object: The transformed data, if any annotations specify a format and template;
+        otherwise, the original data.
+
+    This function checks for annotations in the provided type and looks for `PropertyInfo`
+    instances with non-None `format` attributes. If such a format is found, it uses the
+    `_format_data` function to transform the data accordingly, using the specified format
+    and template. If no format is specified, it returns the original data.
+    """
     annotated_type = _get_annoted_type(type_)
     if annotated_type is None:
         return data
@@ -192,6 +218,29 @@ def _transform_typeddict(
     data: Mapping[str, object],
     expected_type: type,
 ) -> Mapping[str, object]:
+    """
+    Transform the given `data` based on the expected type annotations.
+
+    Args:
+        data (Mapping[str, object]): The data to transform.
+        expected_type (type): The expected type with annotations to guide the transformation.
+
+    Returns:
+        Mapping[str, object]: The transformed data as a dictionary.
+
+    This function transforms the input `data` based on the expected type's annotations. It iterates
+    through the keys and values of the input data and, for each key, checks if there is a type
+    annotation specified in the expected type. If a type annotation is found, it uses the
+    `_maybe_transform_key` function to potentially transform the key and the `_transform_recursive`
+    function to transform the value recursively based on the type annotation. If no type annotation
+    is found for a key, it leaves that key-value pair unchanged in the result.
+
+    This function is recursive in the sense that it calls itself to transform the values of the
+    input data. The recursion happens when the expected type annotation is a container type, such
+    as `List[T]`, in which case the function calls itself on each value in the list. This is
+    necessary because the type annotation for the container type is not sufficient to transform
+    the values in the container, so we need to call the function recursively on each value.
+    """
     result: dict[str, object] = {}
     annotations = get_type_hints(expected_type, include_extras=True)
     for key, value in data.items():
