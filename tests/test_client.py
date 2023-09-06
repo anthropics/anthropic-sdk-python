@@ -12,9 +12,10 @@ import httpx
 import pytest
 from respx import MockRouter
 
-from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
+from anthropic import Anthropic, AsyncAnthropic
 from anthropic._types import Omit
 from anthropic._models import BaseModel, FinalRequestOptions
+from anthropic._streaming import Stream, AsyncStream
 from anthropic._base_client import BaseClient, make_request_options
 
 base_url = os.environ.get("API_BASE_URL", "http://127.0.0.1:4010")
