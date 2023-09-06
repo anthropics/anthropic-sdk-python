@@ -38,12 +38,15 @@ def _extract_items(
     path: Sequence[str],
     *,
     index: int,
-    # TODO: rename
     flattened_key: str | None,
 ) -> list[tuple[str, FileTypes]]:
     try:
         key = path[index]
     except IndexError:
+        if isinstance(obj, NotGiven):
+            # no value was provided - we can safely ignore
+            return []
+
         # We have exhausted the path, return the entry we found.
         if not isinstance(obj, bytes) and not isinstance(obj, tuple):
             raise RuntimeError(
