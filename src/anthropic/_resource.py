@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import time
+import asyncio
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -20,6 +22,9 @@ class SyncAPIResource:
         self._delete = client.delete
         self._get_api_list = client.get_api_list
 
+    def _sleep(self, seconds: float) -> None:
+        time.sleep(seconds)
+
 
 class AsyncAPIResource:
     _client: AsyncAnthropic
@@ -32,3 +37,6 @@ class AsyncAPIResource:
         self._put = client.put
         self._delete = client.delete
         self._get_api_list = client.get_api_list
+
+    async def _sleep(self, seconds: float) -> None:
+        await asyncio.sleep(seconds)
