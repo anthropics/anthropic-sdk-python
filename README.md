@@ -82,6 +82,8 @@ pip install anthropic
 
 ## Usage
 
+The full API of this library can be found in [api.md](https://www.github.com/anthropics/anthropic-sdk-python/blob/main/api.md).
+
 ```python
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 
