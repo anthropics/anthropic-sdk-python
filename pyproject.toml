@@ -21,7 +21,7 @@ tokenizers = ">= 0.13.0"
 
 
 [tool.poetry.group.dev.dependencies]
-pyright = "1.1.318"
+pyright = "1.1.326"
 mypy = "1.4.1"
 black = "23.3.0"
 respx = "0.19.2"

@@ -215,7 +215,7 @@ def validate_type(*, type_: type[_T], value: object) -> _T:
     if inspect.isclass(type_) and issubclass(type_, pydantic.BaseModel):
         return cast(_T, parse_obj(type_, value))
 
-    return _validate_non_model_type(type_=type_, value=value)
+    return cast(_T, _validate_non_model_type(type_=type_, value=value))
 
 
 # our use of subclasssing here causes weirdness for type checkers,
