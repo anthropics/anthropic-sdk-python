@@ -108,6 +108,10 @@ def _get_annoted_type(type_: type) -> type | None:
 
 
 def _maybe_transform_key(key: str, type_: type) -> str:
+    """Transform the given `data` based on the annotations provided in `type_`.
+
+    Note: this function only looks at `Annotated` types that contain `PropertInfo` metadata.
+    """
     annotated_type = _get_annoted_type(type_)
     if annotated_type is None:
         # no `Annotated` definition for this type, no transformation needed
