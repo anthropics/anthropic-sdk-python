@@ -132,6 +132,17 @@ class PageInfo:
 
 
 class BasePage(GenericModel, Generic[ModelT]):
+    """
+    Defines the core interface for pagination.
+
+    Type Args:
+        ModelT: The pydantic model that represents an item in the response.
+
+    Methods:
+        has_next_page(): Check if there is another page available
+        next_page_info(): Get the necesary information to make a request for the next page
+    """
+
     _options: FinalRequestOptions = PrivateAttr()
     _model: Type[ModelT] = PrivateAttr()
 
