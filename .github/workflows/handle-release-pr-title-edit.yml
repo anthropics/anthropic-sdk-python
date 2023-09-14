@@ -1,0 +1,23 @@
+name: Handle release PR title edits
+on:
+  pull_request:
+    types:
+      - edited
+      - unlabeled
+
+jobs:
+  update_pr_content:
+    name: Update pull request content
+    if: |
+      (github.event.type == 'edited' && github.event.changes.title.from != github.event.pull_request.title) ||
+      (github.event.type == 'unlabeled' && github.event.label.name == 'autorelease: custom version') &&
+      github.event.pull_request.state == 'open' &&
+      github.event.sender.login != 'stainless-bot' &&
+      github.repository == 'anthropics/anthropic-sdk-python'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: stainless-api/trigger-release-please@v1
+        with:
+          repo: ${{ github.event.repository.full_name }}
+          stainless-api-key: ${{ secrets.STAINLESS_API_KEY }}
