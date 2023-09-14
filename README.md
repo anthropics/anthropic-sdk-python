@@ -228,8 +228,8 @@ Error codes are as followed:
 ### Retries
 
 Certain errors will be automatically retried 2 times by default, with a short exponential backoff.
-Connection errors (for example, due to a network connectivity problem), 409 Conflict, 429 Rate Limit,
-and >=500 Internal errors will all be retried by default.
+Connection errors (for example, due to a network connectivity problem), 408 Request Timeout, 409 Conflict,
+429 Rate Limit, and >=500 Internal errors will all be retried by default.
 
 You can use the `max_retries` option to configure or disable this:
 
