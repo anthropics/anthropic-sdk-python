@@ -644,6 +644,10 @@ class BaseClient:
         if should_retry_header == "false":
             return False
 
+        # Retry on request timeouts.
+        if response.status_code == 408:
+            return True
+
         # Retry on lock timeouts.
         if response.status_code == 409:
             return True
