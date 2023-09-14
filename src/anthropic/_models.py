@@ -49,6 +49,11 @@ class BaseModel(pydantic.BaseModel):
         model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
     else:
 
+        @property
+        def model_fields_set(self) -> set[str]:
+            # a forwards-compat shim for pydantic v2
+            return self.__fields_set__  # type: ignore
+
         class Config(pydantic.BaseConfig):  # pyright: ignore[reportDeprecated]
             extra: Any = Extra.allow  # type: ignore
 
@@ -74,6 +79,9 @@ class BaseModel(pydantic.BaseModel):
             else config.get("populate_by_name")
         )
 
+        if _fields_set is None:
+            _fields_set = set()
+
         model_fields = get_model_fields(cls)
         for name, field in model_fields.items():
             key = field.alias
@@ -82,6 +90,7 @@ class BaseModel(pydantic.BaseModel):
 
             if key in values:
                 fields_values[name] = _construct_field(value=values[key], field=field, key=key)
+                _fields_set.add(name)
             else:
                 fields_values[name] = field_get_default(field)
 
@@ -94,8 +103,6 @@ class BaseModel(pydantic.BaseModel):
                     fields_values[key] = value
 
         object.__setattr__(m, "__dict__", fields_values)
-        if _fields_set is None:
-            _fields_set = set(fields_values.keys())
 
         if PYDANTIC_V2:
             # these properties are copied from Pydantic's `model_construct()` method

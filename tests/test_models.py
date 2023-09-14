@@ -471,3 +471,17 @@ def test_deprecated_alias() -> None:
     assert m.model_id == "id"
     assert m.resource_id == "id"
     assert m.resource_id is m.model_id
+
+
+def test_omitted_fields() -> None:
+    class Model(BaseModel):
+        resource_id: Optional[str] = None
+
+    m = Model.construct()
+    assert "resource_id" not in m.model_fields_set
+
+    m = Model.construct(resource_id=None)
+    assert "resource_id" in m.model_fields_set
+
+    m = Model.construct(resource_id="foo")
+    assert "resource_id" in m.model_fields_set
