@@ -304,6 +304,8 @@ class BaseClient:
     max_retries: int
     timeout: Union[float, Timeout, None]
     _limits: httpx.Limits
+    _proxies: ProxiesTypes | None
+    _transport: Transport | None
     _strict_response_validation: bool
     _idempotency_header: str | None
 
@@ -315,6 +317,8 @@ class BaseClient:
         max_retries: int = DEFAULT_MAX_RETRIES,
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         limits: httpx.Limits,
+        transport: Transport | None,
+        proxies: ProxiesTypes | None,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
     ) -> None:
@@ -322,6 +326,8 @@ class BaseClient:
         self.max_retries = max_retries
         self.timeout = timeout
         self._limits = limits
+        self._proxies = proxies
+        self._transport = transport
         self._custom_headers = custom_headers or {}
         self._custom_query = custom_query or {}
         self._strict_response_validation = _strict_response_validation
@@ -590,6 +596,11 @@ class BaseClient:
     def base_url(self) -> URL:
         return self._client.base_url
 
+    @base_url.setter
+    def base_url(self, url: URL | str) -> None:
+        # mypy doesn't use the type from the setter
+        self._client.base_url = url  # type: ignore[assignment]
+
     @lru_cache(maxsize=None)
     def platform_headers(self) -> Dict[str, str]:
         return {
@@ -689,6 +700,8 @@ class SyncAPIClient(BaseClient):
             version=version,
             limits=limits,
             timeout=timeout,
+            proxies=proxies,
+            transport=transport,
             max_retries=max_retries,
             custom_query=custom_query,
             custom_headers=custom_headers,
@@ -1045,6 +1058,8 @@ class AsyncAPIClient(BaseClient):
             version=version,
             limits=limits,
             timeout=timeout,
+            proxies=proxies,
+            transport=transport,
             max_retries=max_retries,
             custom_query=custom_query,
             custom_headers=custom_headers,

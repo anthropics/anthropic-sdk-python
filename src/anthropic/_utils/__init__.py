@@ -1,3 +1,4 @@
+from ._proxy import LazyProxy as LazyProxy
 from ._utils import flatten as flatten
 from ._utils import is_dict as is_dict
 from ._utils import is_list as is_list
