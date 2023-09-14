@@ -297,7 +297,21 @@ client = Anthropic(
 )
 ```
 
-## Advanced: Configuring custom URLs, proxies, and transports
+## Advanced
+
+### How to tell whether `None` means `null` or missing
+
+In an API response, a field may be explicitly null, or missing entirely; in either case, its value is `None` in this library. You can differentiate the two cases with `.model_fields_set`:
+
+```py
+if response.my_field is None:
+  if 'my_field' not in response.model_fields_set:
+    print('Got json like {}, without a "my_field" key present at all.')
+  else:
+    print('Got json like {"my_field": null}.')
+```
+
+### Configuring custom URLs, proxies, and transports
 
 You can configure the following keyword arguments when instantiating the client:
 
@@ -315,7 +329,7 @@ client = Anthropic(
 
 See the httpx documentation for information about the [`proxies`](https://www.python-httpx.org/advanced/#http-proxying) and [`transport`](https://www.python-httpx.org/advanced/#custom-transports) keyword arguments.
 
-## Advanced: Managing HTTP resources
+### Managing HTTP resources
 
 By default we will close the underlying HTTP connections whenever the client is [garbage collected](https://docs.python.org/3/reference/datamodel.html#object.__del__) is called but you can also manually close the client using the `.close()` method if desired, or with a context manager that closes when exiting.
 
