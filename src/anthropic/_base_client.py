@@ -250,6 +250,23 @@ class BaseSyncPage(BasePage[ModelT], Generic[ModelT]):
 
 
 class AsyncPaginator(Generic[ModelT, AsyncPageT]):
+    """
+    Asynchronous paginator for retrieving paginated data.
+
+    Args:
+        client (AsyncAPIClient): The asynchronous API client.
+        options (FinalRequestOptions): The final request options for retrieving data.
+        page_cls (Type[AsyncPageT]): The type of the asynchronous page containing paginated data.
+        model (Type[ModelT]): The model type for the data.
+
+    Attributes:
+        _model (Type[ModelT]): The model type for the data.
+        _client (AsyncAPIClient): The asynchronous API client.
+        _options (FinalRequestOptions): The final request options for retrieving data.
+        _page_cls (Type[AsyncPageT]): The type of the asynchronous page containing paginated data.
+
+    """
+
     def __init__(
         self,
         client: AsyncAPIClient,
@@ -257,15 +274,29 @@ class AsyncPaginator(Generic[ModelT, AsyncPageT]):
         page_cls: Type[AsyncPageT],
         model: Type[ModelT],
     ) -> None:
+        """
+        Initialize the AsyncPaginator instance.
+
+        Args:
+            client (AsyncAPIClient): The asynchronous API client.
+            options (FinalRequestOptions): The final request options for retrieving data.
+            page_cls (Type[AsyncPageT]): The type of the asynchronous page containing paginated data.
+            model (Type[ModelT]): The model type for the data.
+
+        """
         self._model = model
         self._client = client
         self._options = options
         self._page_cls = page_cls
 
-    def __await__(self) -> Generator[Any, None, AsyncPageT]:
-        return self._get_page().__await__()
-
     async def _get_page(self) -> AsyncPageT:
+        """
+        Internal method to retrieve an asynchronous page containing paginated data.
+
+        Returns:
+            AsyncPageT: An asynchronous page with paginated data.
+
+        """
         page = await self._client.request(self._page_cls, self._options)
         page._set_private_attributes(  # pyright: ignore[reportPrivateUsage]
             model=self._model,
@@ -275,6 +306,13 @@ class AsyncPaginator(Generic[ModelT, AsyncPageT]):
         return page
 
     async def __aiter__(self) -> AsyncIterator[ModelT]:
+        """
+        Asynchronously iterate over the paginated data.
+
+        Yields:
+            ModelT: An item from the paginated data.
+
+        """
         # https://github.com/microsoft/pyright/issues/3464
         page = cast(
             AsyncPageT,
@@ -282,6 +320,16 @@ class AsyncPaginator(Generic[ModelT, AsyncPageT]):
         )
         async for item in page:
             yield item
+
+    def __await__(self) -> Generator[Any, None, AsyncPageT]:
+        """
+        Asynchronously retrieve an asynchronous page containing paginated data.
+
+        Returns:
+            Generator[Any, None, AsyncPageT]: A generator yielding an asynchronous page with paginated data.
+
+        """
+        return self._get_page().__await__()
 
 
 class BaseAsyncPage(BasePage[ModelT], Generic[ModelT]):
@@ -337,6 +385,29 @@ class BaseAsyncPage(BasePage[ModelT], Generic[ModelT]):
 
 
 class BaseClient:
+    """
+    Base client for making HTTP requests to an API.
+
+    Args:
+        version (str): The version of the API being used.
+        _strict_response_validation (bool): Whether strict response validation is enabled.
+        max_retries (int, optional): The maximum number of retries for failed requests.
+        timeout (float or Timeout or None, optional): The timeout for each HTTP request.
+        limits (Limits): The HTTP limits configuration for the client.
+        custom_headers (Mapping[str, str] or None, optional): Custom headers to include in requests.
+        custom_query (Mapping[str, object] or None, optional): Custom query parameters to include in requests.
+
+    Attributes:
+        _version (str): The version of the API being used.
+        max_retries (int): The maximum number of retries for failed requests.
+        timeout (float or Timeout or None): The timeout for each HTTP request.
+        _limits (Limits): The HTTP limits configuration for the client.
+        _custom_headers (dict[str, str]): Custom headers to include in requests.
+        _custom_query (dict[str, object]): Custom query parameters to include in requests.
+        _strict_response_validation (bool): Whether strict response validation is enabled.
+        _idempotency_header (str or None): Header for idempotent requests.
+
+    """
     _client: httpx.Client | httpx.AsyncClient
     _version: str
     max_retries: int
@@ -356,6 +427,19 @@ class BaseClient:
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
     ) -> None:
+        """
+        Initialize the BaseClient instance.
+
+        Args:
+            version (str): The version of the API being used.
+            _strict_response_validation (bool): Whether strict response validation is enabled.
+            max_retries (int, optional): The maximum number of retries for failed requests.
+            timeout (float or Timeout or None, optional): The timeout for each HTTP request.
+            limits (Limits): The HTTP limits configuration for the client.
+            custom_headers (Mapping[str, str] or None, optional): Custom headers to include in requests.
+            custom_query (Mapping[str, object] or None, optional): Custom query parameters to include in requests.
+
+        """
         self._version = version
         self.max_retries = max_retries
         self.timeout = timeout
@@ -370,6 +454,17 @@ class BaseClient:
         request: httpx.Request,
         response: httpx.Response,
     ) -> APIStatusError:
+        """
+        Create an APIStatusError from an HTTP response.
+
+        Args:
+            request (httpx.Request): The HTTP request.
+            response (httpx.Response): The HTTP response.
+
+        Returns:
+            APIStatusError: An APIStatusError object representing the error.
+
+        """
         err_text = response.text.strip()
         body = err_text
 
@@ -389,6 +484,19 @@ class BaseClient:
         request: httpx.Request,
         response: httpx.Response,
     ) -> APIStatusError:
+        """
+        Create an APIStatusError with the provided error message and details.
+
+        Args:
+            err_msg (str): The error message.
+            body (object): The response body.
+            request (httpx.Request): The HTTP request.
+            response (httpx.Response): The HTTP response.
+
+        Returns:
+            APIStatusError: An APIStatusError object representing the error.
+
+        """
         if response.status_code == 400:
             return exceptions.BadRequestError(err_msg, request=request, response=response, body=body)
         if response.status_code == 401:
@@ -412,9 +520,30 @@ class BaseClient:
         remaining_retries: Optional[int],
         options: FinalRequestOptions,
     ) -> int:
+        """
+        Get the number of remaining retries for a request.
+
+        Args:
+            remaining_retries (int or None, optional): The remaining retries.
+            options (FinalRequestOptions): The request options.
+
+        Returns:
+            int: The number of remaining retries.
+
+        """
         return remaining_retries if remaining_retries is not None else options.get_max_retries(self.max_retries)
 
     def _build_headers(self, options: FinalRequestOptions) -> httpx.Headers:
+        """
+        Build the HTTP headers for a request.
+
+        Args:
+            options (FinalRequestOptions): The request options.
+
+        Returns:
+            httpx.Headers: The HTTP headers.
+
+        """
         custom_headers = options.headers or {}
         headers_dict = _merge_mappings(self.default_headers, custom_headers)
         self._validate_headers(headers_dict, custom_headers)
@@ -443,6 +572,16 @@ class BaseClient:
         self,
         options: FinalRequestOptions,
     ) -> httpx.Request:
+        """
+        Build an HTTP request.
+
+        Args:
+            options (FinalRequestOptions): The request options.
+
+        Returns:
+            httpx.Request: The HTTP request.
+
+        """
         headers = self._build_headers(options)
 
         kwargs: dict[str, Any] = {}
@@ -494,6 +633,19 @@ class BaseClient:
         return request
 
     def _serialize_multipartform(self, data: Mapping[object, object]) -> dict[str, object]:
+        """
+        Serialize data for a multipart form request.
+
+        Args:
+            data (Mapping[object, object]): The data to be serialized.
+
+        Returns:
+            dict[str, object]: The serialized data.
+
+        Raises:
+            ValueError: If a duplicate key is encountered.
+
+        """
         items = self.qs.stringify_items(
             # TODO: type ignore is required as stringify_items is well typed but we can't be
             # well typed without heavy validation.
@@ -508,6 +660,19 @@ class BaseClient:
         return serialized
 
     def _extract_stream_chunk_type(self, stream_cls: type) -> type:
+        """
+        Extract the chunk type from a stream class.
+
+        Args:
+            stream_cls (type): The stream class.
+
+        Returns:
+            type: The type of chunks in the stream.
+
+        Raises:
+            TypeError: If the stream class does not have a generic type argument.
+
+        """
         args = get_args(stream_cls)
         if not args:
             raise TypeError(
@@ -522,6 +687,22 @@ class BaseClient:
         options: FinalRequestOptions,
         response: httpx.Response,
     ) -> ResponseT:
+        """
+        Process an HTTP response and cast it to the specified type.
+
+        Args:
+            cast_to (Type[ResponseT]): The type to cast the response to.
+            options (FinalRequestOptions): The request options.
+            response (httpx.Response): The HTTP response.
+
+        Returns:
+            ResponseT: The processed response.
+
+        Raises:
+            ValueError: If the cast_to type is invalid.
+            ValueError: If the Content-Type response header is not 'application/json'.
+
+        """
         if cast_to is NoneType:
             return cast(ResponseT, None)
 
@@ -577,6 +758,18 @@ class BaseClient:
         cast_to: type[ResponseT],
         response: httpx.Response,
     ) -> ResponseT:
+        """
+        Process the data from an HTTP response and cast it to the specified type.
+
+        Args:
+            data (object): The response data.
+            cast_to (type[ResponseT]): The type to cast the data to.
+            response (httpx.Response): The HTTP response.
+
+        Returns:
+            ResponseT: The processed response data.
+
+        """
         if data is None:
             return cast(ResponseT, None)
 
@@ -593,18 +786,46 @@ class BaseClient:
 
     @property
     def qs(self) -> Querystring:
+        """
+        Get the query string object for building query parameters.
+
+        Returns:
+            Querystring: The query string object.
+
+        """
         return Querystring()
 
     @property
     def custom_auth(self) -> httpx.Auth | None:
+        """
+        Get the custom authentication method.
+
+        Returns:
+            httpx.Auth | None: The custom authentication method or None if not defined.
+
+        """
         return None
 
     @property
     def auth_headers(self) -> dict[str, str]:
+        """
+        Get the authentication headers.
+
+        Returns:
+            dict[str, str]: The authentication headers.
+
+        """
         return {}
 
     @property
     def default_headers(self) -> dict[str, str | Omit]:
+        """
+        Get the default headers for HTTP requests.
+
+        Returns:
+            dict[str, str | Omit]: The default headers.
+
+        """
         return {
             "Content-Type": "application/json",
             "User-Agent": self.user_agent,
@@ -614,22 +835,49 @@ class BaseClient:
         }
 
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
-        """Validate the given default headers and custom headers.
+        """
+        Validate the given default headers and custom headers.
+
+        Args:
+            headers (Headers): The default headers.
+            custom_headers (Headers): The custom headers.
 
         Does nothing by default.
+
         """
         return
 
     @property
     def user_agent(self) -> str:
+        """
+        Get the user agent string for the client.
+
+        Returns:
+            str: The user agent string.
+
+        """
         return f"{self.__class__.__name__}/Python {self._version}"
 
     @property
     def base_url(self) -> URL:
+        """
+        Get the base URL for the HTTP client.
+
+        Returns:
+            URL: The base URL.
+
+        """
         return self._client.base_url
 
     @lru_cache(maxsize=None)
     def platform_headers(self) -> Dict[str, str]:
+        """
+        Get platform-specific headers.
+
+        Returns:
+            Dict[str, str]: Platform-specific headers.
+
+        """
         return {
             "X-Stainless-Lang": "python",
             "X-Stainless-Package-Version": self._version,
@@ -645,6 +893,18 @@ class BaseClient:
         options: FinalRequestOptions,
         response_headers: Optional[httpx.Headers] = None,
     ) -> float:
+        """
+        Calculate the retry timeout for failed requests.
+
+        Args:
+            remaining_retries (int): The number of remaining retries.
+            options (FinalRequestOptions): The request options.
+            response_headers (httpx.Headers, optional): The response headers.
+
+        Returns:
+            float: The retry timeout.
+
+        """
         max_retries = options.get_max_retries(self.max_retries)
         try:
             # About the Retry-After header: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
@@ -673,6 +933,16 @@ class BaseClient:
         return timeout if timeout >= 0 else 0
 
     def _should_retry(self, response: httpx.Response) -> bool:
+        """
+        Determine whether a failed request should be retried.
+
+        Args:
+            response (httpx.Response): The HTTP response.
+
+        Returns:
+            bool: True if the request should be retried, False otherwise.
+
+        """
         # Note: this is not a standard header
         should_retry_header = response.headers.get("x-should-retry")
 
@@ -697,10 +967,53 @@ class BaseClient:
         return False
 
     def _idempotency_key(self) -> str:
+        """
+        Generate an idempotency key for requests.
+
+        Returns:
+            str: The idempotency key.
+
+        """
         return f"stainless-python-retry-{uuid.uuid4()}"
 
 
 class SyncAPIClient(BaseClient):
+    """
+    Synchronous API client based on `BaseClient`.
+
+    This class extends `BaseClient` to provide synchronous API request methods.
+
+    Args:
+        version (str): The API version.
+        base_url (str): The base URL for API requests.
+        max_retries (int, optional): The maximum number of retries for failed requests.
+        timeout (float | Timeout | None, optional): The request timeout.
+        transport (Transport | None, optional): The HTTP transport layer.
+        proxies (ProxiesTypes | None, optional): Proxies configuration for HTTP requests.
+        limits (Limits | None, optional): Request rate limiting configuration.
+        custom_headers (Mapping[str, str] | None, optional): Custom headers to include in requests.
+        custom_query (Mapping[str, object] | None, optional): Custom query parameters for requests.
+        _strict_response_validation (bool): Whether to perform strict response validation.
+
+    Attributes:
+        _client (httpx.Client): The underlying HTTPX client instance.
+        _default_stream_cls (type[Stream[Any]] | None): The default stream class for streamed responses.
+
+    Methods:
+        is_closed(): Check if the underlying HTTPX client is closed.
+        close(): Close the underlying HTTPX client.
+        request(): Perform an API request, with optional streaming support.
+        _request(): Internal method to handle API requests and retries.
+        _retry_request(): Retry an API request with appropriate delay.
+        _request_api_list(): Request an API list resource.
+        get(): Perform a GET request.
+        post(): Perform a POST request.
+        patch(): Perform a PATCH request.
+        put(): Perform a PUT request.
+        delete(): Perform a DELETE request.
+        get_api_list(): Get a list resource from the API.
+    """
+
     _client: httpx.Client
     _default_stream_cls: type[Stream[Any]] | None = None
 
@@ -738,12 +1051,19 @@ class SyncAPIClient(BaseClient):
         )
 
     def is_closed(self) -> bool:
+        """
+        Check if the underlying HTTPX client is closed.
+
+        Returns:
+            bool: True if the client is closed, False otherwise.
+        """
         return self._client.is_closed
 
     def close(self) -> None:
-        """Close the underlying HTTPX client.
+        """
+        Close the underlying HTTPX client.
 
-        The client will *not* be usable after this.
+        The client will not be usable after this.
         """
         self._client.close()
 
@@ -802,6 +1122,17 @@ class SyncAPIClient(BaseClient):
         stream: bool = False,
         stream_cls: type[_StreamT] | None = None,
     ) -> ResponseT | _StreamT:
+        """
+        Perform an API request.
+
+        This method can perform both synchronous and streaming requests based on the 'stream' parameter.
+
+        Args:
+            ... (various): Request parameters, see class docstring for details.
+
+        Returns:
+            ResponseT | _StreamT: The API response or a stream, depending on the request type.
+        """
         return self._request(
             cast_to=cast_to,
             options=options,
@@ -819,6 +1150,15 @@ class SyncAPIClient(BaseClient):
         stream: bool,
         stream_cls: type[_StreamT] | None,
     ) -> ResponseT | _StreamT:
+        """
+        Internal method to handle API requests and retries.
+
+        Args:
+            ... (various): Request parameters, see class docstring for details.
+
+        Returns:
+            ResponseT | _StreamT: The API response or a stream, depending on the request type.
+        """
         retries = self._remaining_retries(remaining_retries, options)
         request = self._build_request(options)
 
@@ -875,6 +1215,15 @@ class SyncAPIClient(BaseClient):
         stream: bool,
         stream_cls: type[_StreamT] | None,
     ) -> ResponseT | _StreamT:
+        """
+        Retry an API request with an appropriate delay.
+
+        Args:
+            ... (various): Request parameters, see class docstring for details.
+
+        Returns:
+            ResponseT | _StreamT: The API response or a stream, depending on the request type.
+        """
         remaining = remaining_retries - 1
         timeout = self._calculate_retry_timeout(remaining, options, response_headers)
 
@@ -896,6 +1245,16 @@ class SyncAPIClient(BaseClient):
         page: Type[SyncPageT],
         options: FinalRequestOptions,
     ) -> SyncPageT:
+        """
+        Request an API list resource.
+
+        Args:
+            ... (various): Request parameters, see class docstring for details.
+
+        Returns:
+            SyncPageT: The API list response.
+        """
+
         resp = self.request(page, options, stream=False)
         resp._set_private_attributes(  # pyright: ignore[reportPrivateUsage]
             client=self,
@@ -948,6 +1307,13 @@ class SyncAPIClient(BaseClient):
         stream: bool = False,
         stream_cls: type[_StreamT] | None = None,
     ) -> ResponseT | _StreamT:
+        """
+        Perform a GET request.
+
+        Returns:
+            ResponseT | _StreamT: The GET request response.
+        """
+
         opts = FinalRequestOptions.construct(method="get", url=path, **options)
         # cast is required because mypy complains about returning Any even though
         # it understands the type variables
@@ -964,6 +1330,12 @@ class SyncAPIClient(BaseClient):
         files: RequestFiles | None = None,
         stream: Literal[False] = False,
     ) -> ResponseT:
+        """
+        Perform a POST request.
+
+        Returns:
+            ResponseT | _StreamT: The POST request response.
+        """
         ...
 
     @overload
@@ -1016,6 +1388,12 @@ class SyncAPIClient(BaseClient):
         body: Body | None = None,
         options: RequestOptions = {},
     ) -> ResponseT:
+        """
+        Perform a PATCH request.
+
+        Returns:
+            ResponseT: The PATCH request response.
+        """
         opts = FinalRequestOptions.construct(method="patch", url=path, json_data=body, **options)
         return self.request(cast_to, opts)
 
@@ -1028,6 +1406,13 @@ class SyncAPIClient(BaseClient):
         files: RequestFiles | None = None,
         options: RequestOptions = {},
     ) -> ResponseT:
+        """
+        Perform a PUT request.
+
+        Returns:
+            ResponseT: The PUT request response.
+        """
+
         opts = FinalRequestOptions.construct(method="put", url=path, json_data=body, files=files, **options)
         return self.request(cast_to, opts)
 
@@ -1039,6 +1424,12 @@ class SyncAPIClient(BaseClient):
         body: Body | None = None,
         options: RequestOptions = {},
     ) -> ResponseT:
+        """
+        Perform a DELETE request.
+
+        Returns:
+            ResponseT: The DELETE request response.
+        """
         opts = FinalRequestOptions.construct(method="delete", url=path, json_data=body, **options)
         return self.request(cast_to, opts)
 
@@ -1052,6 +1443,12 @@ class SyncAPIClient(BaseClient):
         options: RequestOptions = {},
         method: str = "get",
     ) -> SyncPageT:
+        """
+        Get a list resource from the API.
+
+        Returns:
+            SyncPageT: The API list response.
+        """
         opts = FinalRequestOptions.construct(method=method, url=path, json_data=body, **options)
         return self._request_api_list(model, page, opts)
 

@@ -21,6 +21,19 @@ Params = Mapping[str, Data]
 
 
 class Querystring:
+    """
+    Represents a query string formatter and parser.
+
+    Args:
+        array_format (ArrayFormat, optional): The format for arrays in the query string. Defaults to "repeat".
+        nested_format (NestedFormat, optional): The format for nested objects in the query string. Defaults to "brackets".
+
+    Attributes:
+        array_format (ArrayFormat): The format for arrays in the query string.
+        nested_format (NestedFormat): The format for nested objects in the query string.
+
+    """
+
     array_format: ArrayFormat
     nested_format: NestedFormat
 
@@ -30,10 +43,28 @@ class Querystring:
         array_format: ArrayFormat = "repeat",
         nested_format: NestedFormat = "brackets",
     ) -> None:
+        """
+        Initialize the Querystring instance with formatting options.
+
+        Args:
+            array_format (ArrayFormat, optional): The format for arrays in the query string. Defaults to "repeat".
+            nested_format (NestedFormat, optional): The format for nested objects in the query string. Defaults to "brackets".
+
+        """
         self.array_format = array_format
         self.nested_format = nested_format
 
     def parse(self, query: str) -> Mapping[str, object]:
+        """
+        Parse a query string into a dictionary.
+
+        Args:
+            query (str): The query string to parse.
+
+        Returns:
+            Mapping[str, object]: A dictionary representing the parsed query parameters.
+
+        """
         # Note: custom format syntax is not supported yet
         return parse_qs(query)
 
@@ -44,6 +75,18 @@ class Querystring:
         array_format: NotGivenOr[ArrayFormat] = NOT_GIVEN,
         nested_format: NotGivenOr[NestedFormat] = NOT_GIVEN,
     ) -> str:
+        """
+        Convert a dictionary of query parameters into a query string.
+
+        Args:
+            params (Params): A dictionary of query parameters.
+            array_format (NotGivenOr[ArrayFormat], optional): The format for arrays in the query string. Defaults to NOT_GIVEN.
+            nested_format (NotGivenOr[NestedFormat], optional): The format for nested objects in the query string. Defaults to NOT_GIVEN.
+
+        Returns:
+            str: The query string representation of the parameters.
+
+        """
         return urlencode(
             self.stringify_items(
                 params,
@@ -58,7 +101,19 @@ class Querystring:
         *,
         array_format: NotGivenOr[ArrayFormat] = NOT_GIVEN,
         nested_format: NotGivenOr[NestedFormat] = NOT_GIVEN,
-    ) -> list[tuple[str, str]]:
+    ) -> List[Tuple[str, str]]:
+        """
+        Convert a dictionary of query parameters into a list of key-value pairs.
+
+        Args:
+            params (Params): A dictionary of query parameters.
+            array_format (NotGivenOr[ArrayFormat], optional): The format for arrays in the query string. Defaults to NOT_GIVEN.
+            nested_format (NotGivenOr[NestedFormat], optional): The format for nested objects in the query string. Defaults to NOT_GIVEN.
+
+        Returns:
+            List[Tuple[str, str]]: A list of key-value pairs representing the query parameters.
+
+        """
         opts = Options(
             qs=self,
             array_format=array_format,
@@ -71,14 +126,26 @@ class Querystring:
         key: str,
         value: Data,
         opts: Options,
-    ) -> list[tuple[str, str]]:
+    ) -> List[Tuple[str, str]]:
+        """
+        Convert a single key-value pair into a list of key-value pairs.
+
+        Args:
+            key (str): The parameter key.
+            value (Data): The parameter value.
+            opts (Options): Query string formatting options.
+
+        Returns:
+            List[Tuple[str, str]]: A list of key-value pairs representing the parameter.
+
+        """
         if isinstance(value, Mapping):
-            items: list[tuple[str, str]] = []
+            items: List[Tuple[str, str]] = []
             nested_format = opts.nested_format
             for subkey, subvalue in value.items():
                 items.extend(
                     self._stringify_item(
-                        # TODO: error if unknown format
+
                         f"{key}.{subkey}" if nested_format == "dots" else f"{key}[{subkey}]",
                         subvalue,
                         opts,
@@ -119,6 +186,16 @@ class Querystring:
         return [(key, serialised)]
 
     def _primitive_value_to_str(self, value: PrimitiveData) -> str:
+        """
+        Convert a primitive value to its string representation.
+
+        Args:
+            value (PrimitiveData): The primitive value to convert.
+
+        Returns:
+            str: The string representation of the value.
+
+        """
         # copied from httpx
         if value is True:
             return "true"
@@ -136,6 +213,19 @@ stringify_items = _qs.stringify_items
 
 
 class Options:
+    """
+    Represents formatting options for query parameters.
+
+    Args:
+        qs (Querystring, optional): The query string formatter and parser. Defaults to _qs.
+        array_format (NotGivenOr[ArrayFormat], optional): The format for arrays in the query string. Defaults to NOT_GIVEN.
+        nested_format (NotGivenOr[NestedFormat], optional): The format for nested objects in the query string. Defaults to NOT_GIVEN.
+
+    Attributes:
+        array_format (ArrayFormat): The format for arrays in the query string.
+        nested_format (NestedFormat): The format for nested objects in the query string.
+
+    """
     array_format: ArrayFormat
     nested_format: NestedFormat
 

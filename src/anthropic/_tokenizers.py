@@ -19,6 +19,16 @@ _tokenizer: Tokenizer | None = None
 
 
 def _load_tokenizer(raw: str) -> Tokenizer:
+    """
+    Load and return a tokenizer from a raw string.
+
+    Args:
+        raw (str): A string representing the tokenizer.
+
+    Returns:
+        Tokenizer: The loaded tokenizer.
+
+    """
     global _tokenizer
 
     _tokenizer = cast(Tokenizer, Tokenizer.from_str(raw))
@@ -26,6 +36,13 @@ def _load_tokenizer(raw: str) -> Tokenizer:
 
 
 def sync_get_tokenizer() -> Tokenizer:
+    """
+    Synchronously get the tokenizer instance.
+
+    Returns:
+        Tokenizer: The tokenizer instance.
+
+    """
     if _tokenizer is not None:
         return _tokenizer
 
@@ -35,6 +52,13 @@ def sync_get_tokenizer() -> Tokenizer:
 
 
 async def async_get_tokenizer() -> Tokenizer:
+    """
+    Asynchronously get the tokenizer instance.
+
+    Returns:
+        Tokenizer: The tokenizer instance.
+
+    """
     if _tokenizer is not None:
         return _tokenizer
 

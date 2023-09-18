@@ -220,6 +220,33 @@ class Completions(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | None | NotGiven = 600,
     ) -> Completion | Stream[Completion]:
+        """
+        Create a new completion request.
+
+        Args:
+            max_tokens_to_sample (int): The maximum number of tokens to sample in the completion.
+            model (Union[str, Literal["claude-2", "claude-instant-1"]]): The model to use for the completion,
+                either 'claude-2' or 'claude-instant-1'.
+            prompt (str): The input prompt for the completion.
+            metadata (completion_create_params.Metadata | NotGiven, optional): Metadata associated with the request.
+            stop_sequences (List[str] | NotGiven, optional): List of stop sequences for the completion.
+            stream (Literal[False] | Literal[True] | NotGiven, optional): Whether to stream the response or not.
+            temperature (float | NotGiven, optional): The temperature for randomness in the generated text.
+            top_k (int | NotGiven, optional): The top-k value for controlling the diversity of the output.
+            top_p (float | NotGiven, optional): The top-p value for controlling the diversity of the output.
+            extra_headers (Headers | None, optional): Extra HTTP headers to include in the request.
+            extra_query (Query | None, optional): Extra query parameters to include in the request.
+            extra_body (Body | None, optional): Extra body content to include in the request.
+            timeout (float | None | NotGiven, optional): The maximum time in seconds to wait for the completion.
+
+        Returns:
+            Completion | Stream[Completion]: The completion response or a stream of completion responses.
+
+        Note:
+            - If `stream` is set to True, the method will return a stream of completions.
+            - `timeout` specifies the maximum time to wait for the completion response.
+
+        """
         return self._post(
             "/v1/complete",
             body=maybe_transform(
