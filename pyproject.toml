@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "anthropic"
-version = "0.3.12"
+version = "0.3.13"
 description = "Client library for the anthropic API"
 readme = "README.md"
 authors = ["Anthropic <support@anthropic.com>"]
@@ -21,7 +21,7 @@ tokenizers = ">= 0.13.0"
 
 
 [tool.poetry.group.dev.dependencies]
-pyright = "1.1.318"
+pyright = "1.1.326"
 mypy = "1.4.1"
 black = "23.3.0"
 respx = "0.19.2"
@@ -32,6 +32,7 @@ isort = "5.10.1"
 time-machine = "^2.9.0"
 nox = "^2023.4.22"
 nox-poetry = "^1.0.3"
+
 
 
 [build-system]

@@ -31,7 +31,8 @@ ModelT = TypeVar("ModelT", bound=pydantic.BaseModel)
 _T = TypeVar("_T")
 
 # Approximates httpx internal ProxiesTypes and RequestFiles types
-ProxiesTypes = Union[str, Proxy, Dict[str, Union[None, str, Proxy]]]
+ProxiesDict = Dict[str, Union[None, str, Proxy]]
+ProxiesTypes = Union[str, Proxy, ProxiesDict]
 FileContent = Union[IO[bytes], bytes]
 FileTypes = Union[
     # file (or bytes)

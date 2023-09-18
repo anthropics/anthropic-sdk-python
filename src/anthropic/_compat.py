@@ -120,16 +120,22 @@ def model_copy(model: _ModelT) -> _ModelT:
     return model.copy()  # type: ignore
 
 
-def model_json(model: pydantic.BaseModel) -> str:
+def model_json(model: pydantic.BaseModel, *, indent: int | None = None) -> str:
     if PYDANTIC_V2:
-        return model.model_dump_json()
-    return model.json()  # type: ignore
+        return model.model_dump_json(indent=indent)
+    return model.json(indent=indent)  # type: ignore
 
 
 def model_dump(model: pydantic.BaseModel) -> dict[str, Any]:
     if PYDANTIC_V2:
         return model.model_dump()
     return cast("dict[str, Any]", model.dict())  # pyright: ignore[reportDeprecated, reportUnnecessaryCast]
+
+
+def model_parse(model: type[_ModelT], data: Any) -> _ModelT:
+    if PYDANTIC_V2:
+        return model.model_validate(data)
+    return model.parse_obj(data)  # pyright: ignore[reportDeprecated]
 
 
 # generic models
@@ -147,6 +153,7 @@ else:
             ...
 
     else:
+        import pydantic.generics
 
         class GenericModel(pydantic.generics.GenericModel, pydantic.BaseModel):
             ...

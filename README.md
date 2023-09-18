@@ -82,6 +82,8 @@ pip install anthropic
 
 ## Usage
 
+The full API of this library can be found in [api.md](https://www.github.com/anthropics/anthropic-sdk-python/blob/main/api.md).
+
 ```python
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 
@@ -166,9 +168,9 @@ async for completion in stream:
 
 ## Using Types
 
-Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typing.html#typing.TypedDict), while responses are [Pydantic](https://pydantic-docs.helpmanual.io/) models. This helps provide autocomplete and documentation within your editor.
+Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typing.html#typing.TypedDict). Responses are [Pydantic models](https://docs.pydantic.dev), which provide helper methods for things like serializing back into json ([v1](https://docs.pydantic.dev/1.10/usage/models/), [v2](https://docs.pydantic.dev/latest/usage/serialization/)). To get a dictionary, you can call `dict(model)`.
 
-If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `"basic"`.
+This helps provide autocomplete and documentation within your editor. If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `"basic"`.
 
 ## Token counting
 

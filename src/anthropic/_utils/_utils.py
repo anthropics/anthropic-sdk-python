@@ -7,7 +7,7 @@ from typing import Any, Mapping, TypeVar, Callable, Iterable, Sequence, cast, ov
 from pathlib import Path
 from typing_extensions import Required, Annotated, TypeGuard, get_args, get_origin
 
-from .._types import NotGiven, FileTypes
+from .._types import NotGiven, FileTypes, NotGivenOr
 from .._compat import is_union as _is_union
 from .._compat import parse_date as parse_date
 from .._compat import parse_datetime as parse_datetime
@@ -52,7 +52,6 @@ def _extract_items(
     path: Sequence[str],
     *,
     index: int,
-    # TODO: rename
     flattened_key: str | None,
 ) -> list[tuple[str, FileTypes]]:
     """
@@ -80,6 +79,10 @@ def _extract_items(
     try:
         key = path[index]
     except IndexError:
+        if isinstance(obj, NotGiven):
+            # no value was provided - we can safely ignore
+            return []
+
         # We have exhausted the path, return the entry we found.
         if not isinstance(obj, bytes) and not isinstance(obj, tuple):
             raise RuntimeError(
@@ -131,6 +134,10 @@ def _extract_items(
 
     # Something unexpected was passed, just ignore it.
     return []
+
+
+def is_given(obj: NotGivenOr[_T]) -> TypeGuard[_T]:
+    return not isinstance(obj, NotGiven)
 
 
 # Type safe methods for narrowing types with TypeVars.
