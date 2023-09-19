@@ -8,10 +8,12 @@ from typing_extensions import Literal, Required, TypedDict
 __all__ = [
     "CompletionRequestStreamingMetadata",
     "CompletionRequestNonStreamingMetadata",
-    "CompletionCreateParamsBase",
-    "Metadata",
     "CompletionRequestNonStreaming",
     "CompletionRequestStreaming",
+    "CompletionCreateParamsBase",
+    "Metadata",
+    "CompletionCreateParamsNonStreaming",
+    "CompletionCreateParamsStreaming",
 ]
 
 
@@ -94,7 +96,7 @@ class Metadata(TypedDict, total=False):
     """
 
 
-class CompletionRequestNonStreaming(CompletionCreateParamsBase):
+class CompletionCreateParamsNonStreaming(CompletionCreateParamsBase):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
@@ -104,7 +106,7 @@ class CompletionRequestNonStreaming(CompletionCreateParamsBase):
     """
 
 
-class CompletionRequestStreaming(CompletionCreateParamsBase):
+class CompletionCreateParamsStreaming(CompletionCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
@@ -120,4 +122,10 @@ CompletionRequestStreamingMetadata = Metadata
 CompletionRequestNonStreamingMetadata = Metadata
 """This is deprecated, `Metadata` should be used instead"""
 
-CompletionCreateParams = Union[CompletionRequestNonStreaming, CompletionRequestStreaming]
+CompletionRequestNonStreaming = CompletionCreateParamsNonStreaming
+"""This is deprecated, `CompletionCreateParamsNonStreaming` should be used instead"""
+
+CompletionRequestStreaming = CompletionCreateParamsStreaming
+"""This is deprecated, `CompletionCreateParamsStreaming` should be used instead"""
+
+CompletionCreateParams = Union[CompletionCreateParamsNonStreaming, CompletionCreateParamsStreaming]
