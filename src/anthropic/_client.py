@@ -47,6 +47,29 @@ __all__ = [
 
 
 class Anthropic(SyncAPIClient):
+    """
+    Synchronous client for the Anthropic API.
+
+    Attributes:
+        completions (resources.Completions): Resource for working with completions.
+
+    Constants:
+        HUMAN_PROMPT (str): The prompt for human input.
+        AI_PROMPT (str): The prompt for AI-generated input.
+
+    Args:
+        auth_token (str | None, optional): The authentication token. Defaults to None.
+        base_url (str | None, optional): The base URL of the API. Defaults to None.
+        api_key (str | None, optional): The API key. Defaults to None.
+        timeout (float | Timeout | None, optional): The request timeout. Defaults to DEFAULT_TIMEOUT.
+        max_retries (int, optional): The maximum number of retries for requests. Defaults to DEFAULT_MAX_RETRIES.
+        default_headers (Mapping[str, str] | None, optional): Default HTTP headers. Defaults to None.
+        default_query (Mapping[str, object] | None, optional): Default query parameters. Defaults to None.
+        transport (Optional[Transport], optional): The HTTP transport. Defaults to None.
+        proxies (Optional[ProxiesTypes], optional): HTTP proxies. Defaults to None.
+        connection_pool_limits (httpx.Limits | None, optional): Connection pool limits. Defaults to DEFAULT_LIMITS.
+        _strict_response_validation (bool, optional): Enable or disable schema validation for API responses. Defaults to False.
+    """
     completions: resources.Completions
 
     # client options
@@ -117,10 +140,22 @@ class Anthropic(SyncAPIClient):
 
     @property
     def qs(self) -> Querystring:
+        """
+        Get a querystring object with an array format of "comma".
+
+        Returns:
+            Querystring: A querystring object with array_format set to "comma".
+        """
         return Querystring(array_format="comma")
 
     @property
     def auth_headers(self) -> dict[str, str]:
+        """
+        Get authentication headers.
+
+        Returns:
+            dict[str, str]: Authentication headers.
+        """
         if self._api_key_header:
             return self._api_key_header
         if self._auth_token_bearer:
@@ -143,6 +178,12 @@ class Anthropic(SyncAPIClient):
 
     @property
     def default_headers(self) -> dict[str, str | Omit]:
+        """
+        Get default HTTP headers.
+
+        Returns:
+            dict[str, str | Omit]: Default HTTP headers.
+        """
         return {
             **super().default_headers,
             "anthropic-version": "2023-06-01",
@@ -181,8 +222,20 @@ class Anthropic(SyncAPIClient):
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
 
-        It should be noted that this does not share the underlying httpx client class which may lead
-        to performance issues.
+        Args:
+            auth_token (str | None, optional): The authentication token. Defaults to None.
+            api_key (str | None, optional): The API key. Defaults to None.
+            base_url (str | None, optional): The base URL of the API. Defaults to None.
+            timeout (float | Timeout | None | NotGiven, optional): The request timeout. Defaults to NOT_GIVEN.
+            connection_pool_limits (httpx.Limits | NotGiven, optional): Connection pool limits. Defaults to NOT_GIVEN.
+            max_retries (int | NotGiven, optional): The maximum number of retries for requests. Defaults to NOT_GIVEN.
+            default_headers (Mapping[str, str] | None, optional): Default HTTP headers. Defaults to None.
+            set_default_headers (Mapping[str, str] | None, optional): Set default HTTP headers. Defaults to None.
+            default_query (Mapping[str, object] | None, optional): Default query parameters. Defaults to None.
+            set_default_query (Mapping[str, object] | None, optional): Set default query parameters. Defaults to None.
+
+        Returns:
+            Anthropic: A new client instance with the specified options.
         """
         if default_headers is not None and set_default_headers is not None:
             raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
@@ -227,17 +280,55 @@ class Anthropic(SyncAPIClient):
         self,
         text: str,
     ) -> int:
-        """Count the number of tokens in a given string"""
+        """
+        Count the number of tokens in a given string.
+
+        Args:
+            text (str): The input text.
+
+        Returns:
+            int: The number of tokens in the input text.
+        """
         # Note: tokenizer is untyped
         tokenizer = self.get_tokenizer()
         encoded_text = tokenizer.encode(text)  # type: ignore
         return len(encoded_text.ids)  # type: ignore
 
     def get_tokenizer(self) -> Tokenizer:
+        """
+        Get the tokenizer for the client.
+
+        Returns:
+            Tokenizer: The tokenizer instance.
+        """
+
         return sync_get_tokenizer()
 
 
 class AsyncAnthropic(AsyncAPIClient):
+    """
+    Asynchronous client for the Anthropic API.
+
+    Attributes:
+        completions (resources.AsyncCompletions): Resource for working with completions.
+
+    Constants:
+        HUMAN_PROMPT (str): The prompt for human input.
+        AI_PROMPT (str): The prompt for AI-generated input.
+
+    Args:
+        auth_token (str | None, optional): The authentication token. Defaults to None.
+        base_url (str | None, optional): The base URL of the API. Defaults to None.
+        api_key (str | None, optional): The API key. Defaults to None.
+        timeout (float | Timeout | None, optional): The request timeout. Defaults to DEFAULT_TIMEOUT.
+        max_retries (int, optional): The maximum number of retries for requests. Defaults to DEFAULT_MAX_RETRIES.
+        default_headers (Mapping[str, str] | None, optional): Default HTTP headers. Defaults to None.
+        default_query (Mapping[str, object] | None, optional): Default query parameters. Defaults to None.
+        transport (Optional[Transport], optional): The HTTP transport. Defaults to None.
+        proxies (Optional[ProxiesTypes], optional): HTTP proxies. Defaults to None.
+        connection_pool_limits (httpx.Limits | None, optional): Connection pool limits. Defaults to DEFAULT_LIMITS.
+        _strict_response_validation (bool, optional): Enable or disable schema validation for API responses. Defaults to False.
+    """
     completions: resources.AsyncCompletions
 
     # client options
@@ -421,13 +512,28 @@ class AsyncAnthropic(AsyncAPIClient):
         self,
         text: str,
     ) -> int:
-        """Count the number of tokens in a given string"""
+        """
+        Count the number of tokens in a given string asynchronously.
+
+        Args:
+            text (str): The input text.
+
+        Returns:
+            int: The number of tokens in the input text.
+        """
+
         # Note: tokenizer is untyped
         tokenizer = await self.get_tokenizer()
         encoded_text = tokenizer.encode(text)  # type: ignore
         return len(encoded_text.ids)  # type: ignore
 
     async def get_tokenizer(self) -> Tokenizer:
+        """
+        Get the tokenizer for the client asynchronously.
+
+        Returns:
+            Tokenizer: The tokenizer instance.
+        """
         return await async_get_tokenizer()
 
 

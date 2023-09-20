@@ -55,7 +55,7 @@ class Querystring:
         self.nested_format = nested_format
 
     def parse(self, query: str) -> Mapping[str, object]:
-        """
+        """"
         Parse a query string into a dictionary.
 
         Args:

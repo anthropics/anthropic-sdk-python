@@ -45,6 +45,25 @@ class _ConfigProtocol(Protocol):
 
 
 class BaseModel(pydantic.BaseModel):
+    """
+    Base class for Pydantic models with extended functionality.
+
+    This class extends Pydantic's BaseModel to support additional features and custom behavior.
+
+    Attributes:
+        model_config (ClassVar[ConfigDict]): Configuration dictionary for the model. It allows extra fields by default.
+        Config (pydantic.BaseConfig): Pydantic configuration class defining extra field handling.
+
+    Methods:
+        __str__(): Get a string representation of the model.
+        construct(_fields_set: set[str] | None = None, **values: object) -> ModelT: Construct a model with support for recursive parsing without validation.
+
+    Note:
+        The `model_construct` attribute is an alias for the `construct` method. It is provided for compatibility with type checkers.
+
+    See Also:
+        Pydantic Base Models: https://pydantic-docs.helpmanual.io/models/#base-models
+    """
     if PYDANTIC_V2:
         model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
     else:
@@ -53,8 +72,15 @@ class BaseModel(pydantic.BaseModel):
             extra: Any = Extra.allow  # type: ignore
 
     def __str__(self) -> str:
+        """
+        Get a string representation of the model.
+
+        Returns:
+            str: A string representation of the model.
+        """
         # mypy complains about an invalid self arg
-        return f'{self.__repr_name__()}({self.__repr_str__(", ")})'  # type: ignore[misc]
+        # type: ignore[misc]
+        return f'{self.__repr_name__()}({self.__repr_str__(", ")})'
 
     # Override the 'construct' method in a way that supports recursive parsing without validation.
     # Based on https://github.com/samuelcolvin/pydantic/issues/1168#issuecomment-817742836.
@@ -64,6 +90,17 @@ class BaseModel(pydantic.BaseModel):
         _fields_set: set[str] | None = None,
         **values: object,
     ) -> ModelT:
+        """
+        Construct a model with support for recursive parsing without validation.
+
+        Args:
+            cls (Type[ModelT]): The model class.
+            _fields_set (set[str] | None, optional): A set of field names. Defaults to None.
+            **values (object): Field values.
+
+        Returns:
+            ModelT: An instance of the model.
+        """
         m = cls.__new__(cls)
         fields_values: dict[str, object] = {}
 
@@ -81,7 +118,8 @@ class BaseModel(pydantic.BaseModel):
                 key = name
 
             if key in values:
-                fields_values[name] = _construct_field(value=values[key], field=field, key=key)
+                fields_values[name] = _construct_field(
+                    value=values[key], field=field, key=key)
             else:
                 fields_values[name] = field_get_default(field)
 
@@ -119,6 +157,20 @@ class BaseModel(pydantic.BaseModel):
 
 
 def _construct_field(value: object, field: FieldInfo, key: str) -> object:
+    """
+    Construct a field with support for loose coercion to the expected type.
+
+    Args:
+        value (object): The field's value.
+        field (FieldInfo): Information about the field.
+        key (str): The field's key.
+
+    Returns:
+        object: The constructed field value.
+
+    Raises:
+        RuntimeError: If an unexpected field type is None for the given key.
+    """
     if value is None:
         return field_get_default(field)
 
@@ -134,9 +186,18 @@ def _construct_field(value: object, field: FieldInfo, key: str) -> object:
 
 
 def construct_type(*, value: object, type_: type) -> object:
-    """Loose coercion to the expected type with construction of nested values.
+    """
+    Loose coercion to the expected type with construction of nested values.
 
-    If the given value does not match the expected type then it is returned as-is.
+    Args:
+        value (object): The value to coerce and construct.
+        type_ (type): The expected type.
+
+    Returns:
+        object: The coerced and constructed value.
+
+    Notes:
+        If the given value does not match the expected type, it is returned as-is.
     """
 
     # we need to use the origin class for any types that are subscripted generics
@@ -157,7 +218,8 @@ def construct_type(*, value: object, type_: type) -> object:
             except Exception:
                 continue
 
-        raise RuntimeError(f"Could not convert data into a valid instance of {type_}")
+        raise RuntimeError(
+            f"Could not convert data into a valid instance of {type_}")
 
     if origin == dict:
         if not is_mapping(value):
@@ -211,7 +273,20 @@ def construct_type(*, value: object, type_: type) -> object:
 
 
 def validate_type(*, type_: type[_T], value: object) -> _T:
-    """Strict validation that the given value matches the expected type"""
+    """
+    Strict validation that the given value matches the expected type.
+
+    Args:
+        type_ (type[_T]): The expected type.
+        value (object): The value to validate.
+
+    Returns:
+        _T: The validated value.
+
+    Notes:
+        This function performs strict validation that the given value matches the expected type.
+        If the value is not valid for the type, an exception is raised.
+    """
     if inspect.isclass(type_) and issubclass(type_, pydantic.BaseModel):
         return cast(_T, parse_obj(type_, value))
 
@@ -259,6 +334,34 @@ elif not TYPE_CHECKING:  # TODO: condition is weird
 
 @final
 class FinalRequestOptions(pydantic.BaseModel):
+    """
+    Represents the final request options for making an HTTP request.
+
+    Attributes:
+        method (str): The HTTP request method (e.g., GET, POST, PUT).
+        url (str): The URL to which the request will be sent.
+        params (Query, optional): The query parameters for the request.
+        headers (Union[Headers, NotGiven], optional): The headers for the request.
+        max_retries (Union[int, NotGiven], optional): The maximum number of retries for the request.
+        timeout (Union[float, Timeout, None, NotGiven], optional): The request timeout duration.
+        files (Union[RequestFiles, None], optional): Files to be included in the request.
+        idempotency_key (Union[str, None], optional): An idempotency key for the request.
+        json_data (Union[Body, None], optional): JSON data to be included in the request body.
+        extra_json (Union[AnyMapping, None], optional): Additional JSON data for the request.
+
+    Notes:
+        This class represents the options for making an HTTP request. It includes various parameters
+        such as method, URL, query parameters, headers, and more. Some attributes have default values
+        or are marked as optional.
+
+    Methods:
+        get_max_retries(max_retries: int) -> int:
+            Get the maximum number of retries for the request, considering any "NotGiven" value.
+            If max_retries is not specified in the instance, the provided max_retries value is used.
+
+    Class Attributes:
+        model_config (ClassVar[ConfigDict]): The model configuration for Pydantic (v2) or configuration class (v1).
+    """
     method: str
     url: str
     params: Query = {}
@@ -274,7 +377,8 @@ class FinalRequestOptions(pydantic.BaseModel):
     extra_json: Union[AnyMapping, None] = None
 
     if PYDANTIC_V2:
-        model_config: ClassVar[ConfigDict] = ConfigDict(arbitrary_types_allowed=True)
+        model_config: ClassVar[ConfigDict] = ConfigDict(
+            arbitrary_types_allowed=True)
     else:
 
         class Config(pydantic.BaseConfig):  # pyright: ignore[reportDeprecated]
@@ -303,7 +407,8 @@ class FinalRequestOptions(pydantic.BaseModel):
         }
         if PYDANTIC_V2:
             return super().model_construct(_fields_set, **kwargs)
-        return cast(FinalRequestOptions, super().construct(_fields_set, **kwargs))  # pyright: ignore[reportDeprecated]
+        # pyright: ignore[reportDeprecated]
+        return cast(FinalRequestOptions, super().construct(_fields_set, **kwargs))
 
     if not TYPE_CHECKING:
         # type checkers incorrectly complain about this assignment

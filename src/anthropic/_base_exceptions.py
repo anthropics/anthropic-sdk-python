@@ -4,27 +4,58 @@ from httpx import Request, Response
 
 
 class APIError(Exception):
-    message: str
-    request: Request
+    """
+    Base exception class for API-related errors.
+
+    Attributes:
+        message (str): The error message.
+        request (Request): The HTTP request associated with the error.
+    """
 
     def __init__(self, message: str, request: Request) -> None:
+        """
+        Initialize an APIError.
+
+        Args:
+            message (str): The error message.
+            request (Request): The HTTP request associated with the error.
+        """
         super().__init__(message)
         self.request = request
         self.message = message
 
 
 class APIResponseValidationError(APIError):
-    response: Response
-    status_code: int
+    """
+    Exception raised when the data returned by the API is invalid for the expected schema.
+
+    Attributes:
+        response (Response): The HTTP response associated with the error.
+        status_code (int): The HTTP status code of the response.
+    """
 
     def __init__(self, request: Request, response: Response) -> None:
+        """
+        Initialize an APIResponseValidationError.
+
+        Args:
+            request (Request): The HTTP request associated with the error.
+            response (Response): The HTTP response associated with the error.
+        """
         super().__init__("Data returned by API invalid for expected schema.", request)
         self.response = response
         self.status_code = response.status_code
 
 
 class APIStatusError(APIError):
-    """Raised when an API response has a status code of 4xx or 5xx."""
+    """
+    Exception raised when an API response has a status code of 4xx or 5xx.
+
+    Attributes:
+        response (Response): The HTTP response associated with the error.
+        status_code (int): The HTTP status code of the response.
+        body (object): The API response body. If it's valid JSON, it's decoded; otherwise, it's the raw response.
+    """
 
     response: Response
     status_code: int
@@ -37,6 +68,16 @@ class APIStatusError(APIError):
     """
 
     def __init__(self, message: str, *, request: Request, response: Response, body: object) -> None:
+        """
+        Initialize an APIStatusError.
+
+        Args:
+            message (str): The error message.
+            request (Request): The HTTP request associated with the error.
+            response (Response): The HTTP response associated with the error.
+            body (object): The API response body.
+        """
+
         super().__init__(message, request)
         self.response = response
         self.status_code = response.status_code
@@ -44,6 +85,12 @@ class APIStatusError(APIError):
 
 
 class BadRequestError(APIStatusError):
+    """
+    Exception raised when an API response has a status code of 400 (Bad Request).
+
+    Attributes:
+        status_code (Literal[400]): The HTTP status code (400) of the response.
+    """
     status_code: Literal[400]
 
     def __init__(self, message: str, *, request: Request, response: Response, body: object) -> None:

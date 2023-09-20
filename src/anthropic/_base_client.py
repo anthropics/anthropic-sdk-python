@@ -196,7 +196,7 @@ class BaseSyncPage(BasePage[ModelT], Generic[ModelT]):
 
     Attributes:
         _client (SyncAPIClient): The synchronous API client.
-    
+
     Methods:
         _set_private_attributes(client: SyncAPIClient, model: Type[ModelT], options: FinalRequestOptions):
             Set private attributes for the page.
@@ -593,7 +593,8 @@ class BaseClient:
             elif is_mapping(json_data):
                 json_data = _merge_mappings(json_data, options.extra_json)
             else:
-                raise RuntimeError(f"Unexpected JSON data type, {type(json_data)}, cannot merge with `extra_body`")
+                raise RuntimeError(
+                    f"Unexpected JSON data type, {type(json_data)}, cannot merge with `extra_body`")
 
         params = _merge_mappings(self._custom_query, options.params)
 
@@ -617,14 +618,16 @@ class BaseClient:
         # TODO: report this error to httpx
         request = self._client.build_request(  # pyright: ignore[reportUnknownMemberType]
             headers=headers,
-            timeout=self.timeout if isinstance(options.timeout, NotGiven) else options.timeout,
+            timeout=self.timeout if isinstance(
+                options.timeout, NotGiven) else options.timeout,
             method=options.method,
             url=options.url,
             # the `Query` type that we use is incompatible with qs'
             # `Params` type as it needs to be typed as `Mapping[str, object]`
             # so that passing a `TypedDict` doesn't cause an error.
             # https://github.com/microsoft/pyright/issues/3526#event-6715453066
-            params=self.qs.stringify(cast(Mapping[str, Any], params)) if params else None,
+            params=self.qs.stringify(
+                cast(Mapping[str, Any], params)) if params else None,
             json=json_data,
             files=options.files,
             **kwargs,
@@ -655,7 +658,8 @@ class BaseClient:
         serialized: dict[str, object] = {}
         for key, value in items:
             if key in serialized:
-                raise ValueError(f"Duplicate key encountered: {key}; This behaviour is not supported")
+                raise ValueError(
+                    f"Duplicate key encountered: {key}; This behaviour is not supported")
             serialized[key] = value
         return serialized
 
@@ -718,7 +722,8 @@ class BaseClient:
             # the response class ourselves but that is something that should be supported directly in httpx
             # as it would be easy to incorrectly construct the Response object due to the multitude of arguments.
             if cast_to != httpx.Response:
-                raise ValueError(f"Subclasses of httpx.Response cannot be passed to `cast_to`")
+                raise ValueError(
+                    f"Subclasses of httpx.Response cannot be passed to `cast_to`")
             return cast(ResponseT, response)
 
         # The check here is necessary as we are subverting the the type system
@@ -912,7 +917,9 @@ class BaseClient:
             # TODO: we may want to handle the case where the header is using the http-date syntax: "Retry-After:
             # <http-date>". See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After#syntax for
             # details.
-            retry_after = -1 if response_headers is None else int(response_headers.get("retry-after"))
+            retry_after = - \
+                1 if response_headers is None else int(
+                    response_headers.get("retry-after"))
         except Exception:
             retry_after = -1
 
@@ -925,7 +932,8 @@ class BaseClient:
         nb_retries = max_retries - remaining_retries
 
         # Apply exponential backoff, but not more than the max.
-        sleep_seconds = min(initial_retry_delay * pow(nb_retries - 1, 2), max_retry_delay)
+        sleep_seconds = min(initial_retry_delay *
+                            pow(nb_retries - 1, 2), max_retry_delay)
 
         # Apply some jitter, plus-or-minus half a second.
         jitter = random() - 0.5
@@ -1163,7 +1171,8 @@ class SyncAPIClient(BaseClient):
         request = self._build_request(options)
 
         try:
-            response = self._client.send(request, auth=self.custom_auth, stream=stream)
+            response = self._client.send(
+                request, auth=self.custom_auth, stream=stream)
             response.raise_for_status()
         except httpx.HTTPStatusError as err:  # thrown on 4xx and 5xx status code
             if retries > 0 and self._should_retry(err.response):
@@ -1179,7 +1188,8 @@ class SyncAPIClient(BaseClient):
             # If the response is streamed then we need to explicitly read the response
             # to completion before attempting to access the response text.
             err.response.read()
-            raise self._make_status_error_from_response(request, err.response) from None
+            raise self._make_status_error_from_response(
+                request, err.response) from None
         except httpx.TimeoutException as err:
             if retries > 0:
                 return self._retry_request(options, cast_to, retries, stream=stream, stream_cls=stream_cls)
@@ -1193,15 +1203,18 @@ class SyncAPIClient(BaseClient):
             if stream_cls:
                 return stream_cls(cast_to=self._extract_stream_chunk_type(stream_cls), response=response, client=self)
 
-            stream_cls = cast("type[_StreamT] | None", self._default_stream_cls)
+            stream_cls = cast("type[_StreamT] | None",
+                              self._default_stream_cls)
             if stream_cls is None:
                 raise MissingStreamClassError()
             return stream_cls(cast_to=cast_to, response=response, client=self)
 
         try:
-            rsp = self._process_response(cast_to=cast_to, options=options, response=response)
+            rsp = self._process_response(
+                cast_to=cast_to, options=options, response=response)
         except pydantic.ValidationError as err:
-            raise APIResponseValidationError(request=request, response=response) from err
+            raise APIResponseValidationError(
+                request=request, response=response) from err
 
         return rsp
 
@@ -1225,7 +1238,8 @@ class SyncAPIClient(BaseClient):
             ResponseT | _StreamT: The API response or a stream, depending on the request type.
         """
         remaining = remaining_retries - 1
-        timeout = self._calculate_retry_timeout(remaining, options, response_headers)
+        timeout = self._calculate_retry_timeout(
+            remaining, options, response_headers)
 
         # In a synchronous context we are blocking the entire thread. Up to the library user to run the client in a
         # different thread if necessary.
@@ -1377,7 +1391,8 @@ class SyncAPIClient(BaseClient):
         stream: bool = False,
         stream_cls: type[_StreamT] | None = None,
     ) -> ResponseT | _StreamT:
-        opts = FinalRequestOptions.construct(method="post", url=path, json_data=body, files=files, **options)
+        opts = FinalRequestOptions.construct(
+            method="post", url=path, json_data=body, files=files, **options)
         return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
 
     def patch(
@@ -1394,7 +1409,8 @@ class SyncAPIClient(BaseClient):
         Returns:
             ResponseT: The PATCH request response.
         """
-        opts = FinalRequestOptions.construct(method="patch", url=path, json_data=body, **options)
+        opts = FinalRequestOptions.construct(
+            method="patch", url=path, json_data=body, **options)
         return self.request(cast_to, opts)
 
     def put(
@@ -1413,7 +1429,8 @@ class SyncAPIClient(BaseClient):
             ResponseT: The PUT request response.
         """
 
-        opts = FinalRequestOptions.construct(method="put", url=path, json_data=body, files=files, **options)
+        opts = FinalRequestOptions.construct(
+            method="put", url=path, json_data=body, files=files, **options)
         return self.request(cast_to, opts)
 
     def delete(
@@ -1430,7 +1447,8 @@ class SyncAPIClient(BaseClient):
         Returns:
             ResponseT: The DELETE request response.
         """
-        opts = FinalRequestOptions.construct(method="delete", url=path, json_data=body, **options)
+        opts = FinalRequestOptions.construct(
+            method="delete", url=path, json_data=body, **options)
         return self.request(cast_to, opts)
 
     def get_api_list(
@@ -1449,11 +1467,29 @@ class SyncAPIClient(BaseClient):
         Returns:
             SyncPageT: The API list response.
         """
-        opts = FinalRequestOptions.construct(method=method, url=path, json_data=body, **options)
+        opts = FinalRequestOptions.construct(
+            method=method, url=path, json_data=body, **options)
         return self._request_api_list(model, page, opts)
 
 
 class AsyncAPIClient(BaseClient):
+    """
+    Asynchronous API Client for making HTTP requests.
+
+    This client provides methods for making various HTTP requests asynchronously.
+
+    Args:
+        version (str): The API version.
+        base_url (str): The base URL for the API.
+        _strict_response_validation (bool): Flag to enable strict response validation.
+        max_retries (int, optional): The maximum number of retries for failed requests. Defaults to DEFAULT_MAX_RETRIES.
+        timeout (float | Timeout | None, optional): The request timeout. Defaults to DEFAULT_TIMEOUT.
+        transport (Transport | None, optional): The HTTP transport. Defaults to None.
+        proxies (ProxiesTypes | None, optional): The proxies to use. Defaults to None.
+        limits (Limits | None, optional): The request rate limits. Defaults to DEFAULT_LIMITS.
+        custom_headers (Mapping[str, str] | None, optional): Custom HTTP headers. Defaults to None.
+        custom_query (Mapping[str, object] | None, optional): Custom query parameters. Defaults to None.
+    """
     _client: httpx.AsyncClient
     _default_stream_cls: type[AsyncStream[Any]] | None = None
 
@@ -1471,6 +1507,21 @@ class AsyncAPIClient(BaseClient):
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
     ) -> None:
+        """
+        Initialize the AsyncAPIClient.
+
+        Args:
+            version (str): The API version.
+            base_url (str): The base URL for the API.
+            _strict_response_validation (bool): Flag to enable strict response validation.
+            max_retries (int, optional): The maximum number of retries for failed requests. Defaults to DEFAULT_MAX_RETRIES.
+            timeout (float | Timeout | None, optional): The request timeout. Defaults to DEFAULT_TIMEOUT.
+            transport (Transport | None, optional): The HTTP transport. Defaults to None.
+            proxies (ProxiesTypes | None, optional): The proxies to use. Defaults to None.
+            limits (Limits | None, optional): The request rate limits. Defaults to DEFAULT_LIMITS.
+            custom_headers (Mapping[str, str] | None, optional): Custom HTTP headers. Defaults to None.
+            custom_query (Mapping[str, object] | None, optional): Custom query parameters. Defaults to None.
+        """
         limits = limits or DEFAULT_LIMITS
         super().__init__(
             version=version,
@@ -1491,6 +1542,12 @@ class AsyncAPIClient(BaseClient):
         )
 
     def is_closed(self) -> bool:
+        """
+        Check if the underlying HTTPX client is closed.
+
+        Returns:
+            bool: True if the client is closed, False otherwise.
+        """
         return self._client.is_closed
 
     async def close(self) -> None:
@@ -1501,6 +1558,9 @@ class AsyncAPIClient(BaseClient):
         await self._client.aclose()
 
     async def __aenter__(self: _T) -> _T:
+        """
+        Asynchronous context manager entry method.
+        """
         return self
 
     async def __aexit__(
@@ -1509,6 +1569,19 @@ class AsyncAPIClient(BaseClient):
         exc: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
+        """
+        Make an HTTP request asynchronously.
+
+        Args:
+            cast_to (Type[ResponseT]): The expected response type.
+            options (FinalRequestOptions): The request options.
+            stream (bool, optional): Whether to stream the response. Defaults to False.
+            stream_cls (type[_AsyncStreamT] | None, optional): The stream class. Defaults to None.
+            remaining_retries (int | None, optional): The remaining retry attempts. Defaults to None.
+
+        Returns:
+            ResponseT | _AsyncStreamT: The response or a stream, depending on the 'stream' parameter.
+        """
         await self.close()
 
     @overload
@@ -1572,6 +1645,19 @@ class AsyncAPIClient(BaseClient):
         stream_cls: type[_AsyncStreamT] | None,
         remaining_retries: int | None,
     ) -> ResponseT | _AsyncStreamT:
+        """
+        Internal method for making an HTTP request asynchronously.
+
+        Args:
+            cast_to (Type[ResponseT]): The expected response type.
+            options (FinalRequestOptions): The request options.
+            stream (bool): Whether to stream the response.
+            stream_cls (type[_AsyncStreamT] | None): The stream class.
+            remaining_retries (int | None): The remaining retry attempts.
+
+        Returns:
+            ResponseT | _AsyncStreamT: The response or a stream, depending on the 'stream' parameter.
+        """
         retries = self._remaining_retries(remaining_retries, options)
         request = self._build_request(options)
 
@@ -1592,7 +1678,8 @@ class AsyncAPIClient(BaseClient):
             # If the response is streamed then we need to explicitly read the response
             # to completion before attempting to access the response text.
             await err.response.aread()
-            raise self._make_status_error_from_response(request, err.response) from None
+            raise self._make_status_error_from_response(
+                request, err.response) from None
         except httpx.ConnectTimeout as err:
             if retries > 0:
                 return await self._retry_request(options, cast_to, retries, stream=stream, stream_cls=stream_cls)
@@ -1616,15 +1703,18 @@ class AsyncAPIClient(BaseClient):
             if stream_cls:
                 return stream_cls(cast_to=self._extract_stream_chunk_type(stream_cls), response=response, client=self)
 
-            stream_cls = cast("type[_AsyncStreamT] | None", self._default_stream_cls)
+            stream_cls = cast("type[_AsyncStreamT] | None",
+                              self._default_stream_cls)
             if stream_cls is None:
                 raise MissingStreamClassError()
             return stream_cls(cast_to=cast_to, response=response, client=self)
 
         try:
-            rsp = self._process_response(cast_to=cast_to, options=options, response=response)
+            rsp = self._process_response(
+                cast_to=cast_to, options=options, response=response)
         except pydantic.ValidationError as err:
-            raise APIResponseValidationError(request=request, response=response) from err
+            raise APIResponseValidationError(
+                request=request, response=response) from err
 
         return rsp
 
@@ -1638,8 +1728,23 @@ class AsyncAPIClient(BaseClient):
         stream: bool,
         stream_cls: type[_AsyncStreamT] | None,
     ) -> ResponseT | _AsyncStreamT:
+        """
+        Retry an HTTP request asynchronously.
+
+        Args:
+            options (FinalRequestOptions): The request options.
+            cast_to (Type[ResponseT]): The expected response type.
+            remaining_retries (int): The remaining retry attempts.
+            response_headers (Optional[httpx.Headers], optional): Response headers. Defaults to None.
+            stream (bool): Whether to stream the response.
+            stream_cls (type[_AsyncStreamT] | None): The stream class.
+
+        Returns:
+            ResponseT | _AsyncStreamT: The response or a stream, depending on the 'stream' parameter.
+        """
         remaining = remaining_retries - 1
-        timeout = self._calculate_retry_timeout(remaining, options, response_headers)
+        timeout = self._calculate_retry_timeout(
+            remaining, options, response_headers)
 
         await anyio.sleep(timeout)
 
@@ -1657,6 +1762,17 @@ class AsyncAPIClient(BaseClient):
         page: Type[AsyncPageT],
         options: FinalRequestOptions,
     ) -> AsyncPaginator[ModelT, AsyncPageT]:
+        """
+        Request an API list asynchronously and return a paginator.
+
+        Args:
+            model (Type[ModelT]): The model type.
+            page (Type[AsyncPageT]): The page type.
+            options (FinalRequestOptions): The request options.
+
+        Returns:
+            AsyncPaginator[ModelT, AsyncPageT]: An asynchronous paginator for the API list.
+        """
         return AsyncPaginator(client=self, options=options, page_cls=page, model=model)
 
     @overload
@@ -1703,6 +1819,19 @@ class AsyncAPIClient(BaseClient):
         stream: bool = False,
         stream_cls: type[_AsyncStreamT] | None = None,
     ) -> ResponseT | _AsyncStreamT:
+        """
+        Make an HTTP GET request asynchronously.
+
+        Args:
+            path (str): The API endpoint path.
+            cast_to (Type[ResponseT]): The expected response type.
+            options (RequestOptions, optional): Additional request options. Defaults to {}.
+            stream (bool, optional): Whether to stream the response. Defaults to False.
+            stream_cls (type[_AsyncStreamT] | None, optional): The stream class. Defaults to None.
+
+        Returns:
+            ResponseT | _AsyncStreamT: The response or a stream, depending on the 'stream' parameter.
+        """
         opts = FinalRequestOptions.construct(method="get", url=path, **options)
         return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
 
@@ -1758,7 +1887,23 @@ class AsyncAPIClient(BaseClient):
         stream: bool = False,
         stream_cls: type[_AsyncStreamT] | None = None,
     ) -> ResponseT | _AsyncStreamT:
-        opts = FinalRequestOptions.construct(method="post", url=path, json_data=body, files=files, **options)
+        """
+        Make an HTTP POST request asynchronously.
+
+        Args:
+            path (str): The API endpoint path.
+            cast_to (Type[ResponseT]): The expected response type.
+            body (Body | None, optional): The request body. Defaults to None.
+            files (RequestFiles | None, optional): Files to include in the request. Defaults to None.
+            options (RequestOptions, optional): Additional request options. Defaults to {}.
+            stream (bool, optional): Whether to stream the response. Defaults to False.
+            stream_cls (type[_AsyncStreamT] | None, optional): The stream class. Defaults to None.
+
+        Returns:
+            ResponseT | _AsyncStreamT: The response or a stream, depending on the 'stream' parameter.
+        """
+        opts = FinalRequestOptions.construct(
+            method="post", url=path, json_data=body, files=files, **options)
         return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
 
     async def patch(
@@ -1769,7 +1914,20 @@ class AsyncAPIClient(BaseClient):
         body: Body | None = None,
         options: RequestOptions = {},
     ) -> ResponseT:
-        opts = FinalRequestOptions.construct(method="patch", url=path, json_data=body, **options)
+        """
+        Make an HTTP PATCH request asynchronously.
+
+        Args:
+            path (str): The API endpoint path.
+            cast_to (Type[ResponseT]): The expected response type.
+            body (Body | None, optional): The request body. Defaults to None.
+            options (RequestOptions, optional): Additional request options. Defaults to {}.
+
+        Returns:
+            ResponseT: The response.
+        """
+        opts = FinalRequestOptions.construct(
+            method="patch", url=path, json_data=body, **options)
         return await self.request(cast_to, opts)
 
     async def put(
@@ -1781,7 +1939,21 @@ class AsyncAPIClient(BaseClient):
         files: RequestFiles | None = None,
         options: RequestOptions = {},
     ) -> ResponseT:
-        opts = FinalRequestOptions.construct(method="put", url=path, json_data=body, files=files, **options)
+        """
+        Make an HTTP PUT request asynchronously.
+
+        Args:
+            path (str): The API endpoint path.
+            cast_to (Type[ResponseT]): The expected response type.
+            body (Body | None, optional): The request body. Defaults to None.
+            files (RequestFiles | None, optional): Files to include in the request. Defaults to None.
+            options (RequestOptions, optional): Additional request options. Defaults to {}.
+
+        Returns:
+            ResponseT: The response.
+        """
+        opts = FinalRequestOptions.construct(
+            method="put", url=path, json_data=body, files=files, **options)
         return await self.request(cast_to, opts)
 
     async def delete(
@@ -1792,7 +1964,21 @@ class AsyncAPIClient(BaseClient):
         body: Body | None = None,
         options: RequestOptions = {},
     ) -> ResponseT:
-        opts = FinalRequestOptions.construct(method="delete", url=path, json_data=body, **options)
+        """
+        Make an HTTP DELETE request asynchronously.
+
+        Args:
+            path (str): The API endpoint path.
+            cast_to (Type[ResponseT]): The expected response type.
+            body (Body | None, optional): The request body. Defaults to None.
+            options (RequestOptions, optional): Additional request options. Defaults to {}.
+
+        Returns:
+            ResponseT: The response.
+        """
+
+        opts = FinalRequestOptions.construct(
+            method="delete", url=path, json_data=body, **options)
         return await self.request(cast_to, opts)
 
     def get_api_list(
@@ -1806,7 +1992,22 @@ class AsyncAPIClient(BaseClient):
         options: RequestOptions = {},
         method: str = "get",
     ) -> AsyncPaginator[ModelT, AsyncPageT]:
-        opts = FinalRequestOptions.construct(method=method, url=path, json_data=body, **options)
+        """
+        Get an API list and return an asynchronous paginator.
+
+        Args:
+            path (str): The API endpoint path.
+            model (Type[ModelT]): The model type.
+            page (Type[AsyncPageT]): The page type.
+            body (Body | None, optional): The request body. Defaults to None.
+            options (RequestOptions, optional): Additional request options. Defaults to {}.
+            method (str, optional): The HTTP method to use. Defaults to "get".
+
+        Returns:
+            AsyncPaginator[ModelT, AsyncPageT]: An asynchronous paginator for the API list.
+        """
+        opts = FinalRequestOptions.construct(
+            method=method, url=path, json_data=body, **options)
         return self._request_api_list(model, page, opts)
 
 
@@ -1819,7 +2020,20 @@ def make_request_options(
     idempotency_key: str | None = None,
     timeout: float | None | NotGiven = NOT_GIVEN,
 ) -> RequestOptions:
-    """Create a dict of type RequestOptions without keys of NotGiven values."""
+    """
+    Create a dictionary of request options without keys of NotGiven values.
+
+    Args:
+        query (Query | None, optional): The query parameters. Defaults to None.
+        extra_headers (Headers | None, optional): Extra HTTP headers. Defaults to None.
+        extra_query (Query | None, optional): Extra query parameters. Defaults to None.
+        extra_body (Body | None, optional): Extra request body. Defaults to None.
+        idempotency_key (str | None, optional): The idempotency key. Defaults to None.
+        timeout (float | None | NotGiven, optional): The request timeout. Defaults to NOT_GIVEN.
+
+    Returns:
+        RequestOptions: A dictionary of request options without keys of NotGiven values.
+    """
     options: RequestOptions = {}
     if extra_headers is not None:
         options["headers"] = extra_headers
@@ -1866,6 +2080,21 @@ Platform = Union[
 
 
 def get_platform() -> Platform:
+    """
+    Get the platform information.
+
+    Returns:
+        Platform: The platform information, which can be one of the following:
+            - "MacOS"
+            - "Linux"
+            - "Windows"
+            - "FreeBSD"
+            - "OpenBSD"
+            - "iOS"
+            - "Android"
+            - OtherPlatform: Custom platform information for unknown platforms.
+            - "Unknown": If the platform cannot be determined.
+    """
     system = platform.system().lower()
     platform_name = platform.platform().lower()
     if "iphone" in platform_name or "ipad" in platform_name:
@@ -1915,6 +2144,18 @@ Arch = Union[OtherArch, Literal["x32", "x64", "arm", "arm64", "unknown"]]
 
 
 def get_architecture() -> Arch:
+    """
+    Get the architecture information.
+
+    Returns:
+        Arch: The architecture information, which can be one of the following:
+            - "arm64" for ARM64 architecture.
+            - "arm" for ARM architecture (untested).
+            - "x64" for x86_64 architecture.
+            - "x32" for x32 architecture (untested).
+            - OtherArch: Custom architecture information for unknown architectures.
+            - "unknown" if the architecture cannot be determined.
+    """
     python_bitness, _ = platform.architecture()
     machine = platform.machine().lower()
     if machine in ("arm64", "aarch64"):
@@ -1941,9 +2182,17 @@ def _merge_mappings(
     obj1: Mapping[_T_co, Union[_T, Omit]],
     obj2: Mapping[_T_co, Union[_T, Omit]],
 ) -> Dict[_T_co, _T]:
-    """Merge two mappings of the same type, removing any values that are instances of `Omit`.
+    """
+    Merge two mappings of the same type, removing any values that are instances of `Omit`.
 
-    In cases with duplicate keys the second mapping takes precedence.
+    In cases with duplicate keys, the values from the second mapping take precedence.
+
+    Args:
+        obj1 (Mapping[_T_co, Union[_T, Omit]]): The first mapping.
+        obj2 (Mapping[_T_co, Union[_T, Omit]]): The second mapping.
+
+    Returns:
+        Dict[_T_co, _T]: A merged dictionary with omitted values removed.
     """
     merged = {**obj1, **obj2}
     return {key: value for key, value in merged.items() if not isinstance(value, Omit)}
