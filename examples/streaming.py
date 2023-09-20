@@ -13,6 +13,16 @@ Hey Claude! How can I recursively list all files in a directory in Python?
 
 
 def sync_stream() -> None:
+    """
+    Synchronously initiate a streaming completion process.
+
+    This function sends a prompt to a model and streams back completions as they become available. It prints the generated
+    completions to the console.
+
+    Raises:
+        APIStatusError: If there is an issue with the API response.
+
+    """
     stream = client.completions.create(
         prompt=f"{HUMAN_PROMPT} {question}{AI_PROMPT}",
         model="claude-2",
@@ -27,6 +37,16 @@ def sync_stream() -> None:
 
 
 async def async_stream() -> None:
+    """
+    Asynchronously initiate a streaming completion process.
+
+    This function sends a prompt to a model asynchronously and streams back completions as they become available. It prints
+    the generated completions to the console.
+
+    Raises:
+        APIStatusError: If there is an issue with the API response.
+
+    """
     stream = await async_client.completions.create(
         prompt=f"{HUMAN_PROMPT} {question}{AI_PROMPT}",
         model="claude-2",
@@ -41,6 +61,13 @@ async def async_stream() -> None:
 
 
 def stream_error() -> None:
+    """
+    Simulate an error while attempting to initiate a streaming completion process.
+
+    This function intentionally triggers an API status error by using an unknown model, demonstrating how to handle such
+    errors.
+
+    """
     try:
         client.completions.create(
             prompt=f"{HUMAN_PROMPT} {question}{AI_PROMPT}",
