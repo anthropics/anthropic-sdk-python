@@ -65,7 +65,6 @@ class Stream(Generic[ResponseT]):
                     err_msg,
                     body=body,
                     response=self.response,
-                    request=self.response.request,
                 )
 
 
@@ -123,7 +122,6 @@ class AsyncStream(Generic[ResponseT]):
                     err_msg,
                     body=body,
                     response=self.response,
-                    request=self.response.request,
                 )
 
 

@@ -11,11 +11,13 @@ from typing import Any, Dict, Union, cast
 import httpx
 import pytest
 from respx import MockRouter
+from pydantic import ValidationError
 
 from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
 from anthropic._types import Omit
 from anthropic._models import BaseModel, FinalRequestOptions
 from anthropic._streaming import Stream, AsyncStream
+from anthropic._exceptions import APIResponseValidationError
 from anthropic._base_client import BaseClient, make_request_options
 
 base_url = os.environ.get("API_BASE_URL", "http://127.0.0.1:4010")
@@ -372,6 +374,18 @@ class TestAnthropic:
             assert not c2.is_closed()
             assert not client.is_closed()
         assert client.is_closed()
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_client_response_validation_error(self, respx_mock: MockRouter) -> None:
+        class Model(BaseModel):
+            foo: str
+
+        respx_mock.get("/foo").mock(return_value=httpx.Response(200, json={"foo": {"invalid": True}}))
+
+        with pytest.raises(APIResponseValidationError) as exc:
+            self.client.get("/foo", cast_to=Model)
+
+        assert isinstance(exc.value.__cause__, ValidationError)
 
     @pytest.mark.respx(base_url=base_url)
     def test_default_stream_cls(self, respx_mock: MockRouter) -> None:
@@ -746,6 +760,19 @@ class TestAsyncAnthropic:
             assert not c2.is_closed()
             assert not client.is_closed()
         assert client.is_closed()
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.asyncio
+    async def test_client_response_validation_error(self, respx_mock: MockRouter) -> None:
+        class Model(BaseModel):
+            foo: str
+
+        respx_mock.get("/foo").mock(return_value=httpx.Response(200, json={"foo": {"invalid": True}}))
+
+        with pytest.raises(APIResponseValidationError) as exc:
+            await self.client.get("/foo", cast_to=Model)
+
+        assert isinstance(exc.value.__cause__, ValidationError)
 
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.asyncio

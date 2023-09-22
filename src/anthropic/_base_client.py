@@ -33,7 +33,7 @@ import pydantic
 from httpx import URL, Limits
 from pydantic import PrivateAttr
 
-from . import _base_exceptions as exceptions
+from . import _exceptions
 from ._qs import Querystring
 from ._types import (
     NOT_GIVEN,
@@ -64,7 +64,7 @@ from ._models import (
     construct_type,
 )
 from ._streaming import Stream, AsyncStream
-from ._base_exceptions import (
+from ._exceptions import (
     APIStatusError,
     APITimeoutError,
     APIConnectionError,
@@ -335,7 +335,6 @@ class BaseClient:
 
     def _make_status_error_from_response(
         self,
-        request: httpx.Request,
         response: httpx.Response,
     ) -> APIStatusError:
         err_text = response.text.strip()
@@ -347,33 +346,16 @@ class BaseClient:
         except Exception:
             err_msg = err_text or f"Error code: {response.status_code}"
 
-        return self._make_status_error(err_msg, body=body, request=request, response=response)
+        return self._make_status_error(err_msg, body=body, response=response)
 
     def _make_status_error(
         self,
         err_msg: str,
         *,
         body: object,
-        request: httpx.Request,
         response: httpx.Response,
-    ) -> APIStatusError:
-        if response.status_code == 400:
-            return exceptions.BadRequestError(err_msg, request=request, response=response, body=body)
-        if response.status_code == 401:
-            return exceptions.AuthenticationError(err_msg, request=request, response=response, body=body)
-        if response.status_code == 403:
-            return exceptions.PermissionDeniedError(err_msg, request=request, response=response, body=body)
-        if response.status_code == 404:
-            return exceptions.NotFoundError(err_msg, request=request, response=response, body=body)
-        if response.status_code == 409:
-            return exceptions.ConflictError(err_msg, request=request, response=response, body=body)
-        if response.status_code == 422:
-            return exceptions.UnprocessableEntityError(err_msg, request=request, response=response, body=body)
-        if response.status_code == 429:
-            return exceptions.RateLimitError(err_msg, request=request, response=response, body=body)
-        if response.status_code >= 500:
-            return exceptions.InternalServerError(err_msg, request=request, response=response, body=body)
-        return APIStatusError(err_msg, request=request, response=response, body=body)
+    ) -> _exceptions.APIStatusError:
+        raise NotImplementedError()
 
     def _remaining_retries(
         self,
@@ -532,10 +514,10 @@ class BaseClient:
         content_type, *_ = response.headers.get("content-type").split(";")
         if content_type != "application/json":
             if self._strict_response_validation:
-                raise exceptions.APIResponseValidationError(
+                raise APIResponseValidationError(
                     response=response,
-                    request=response.request,
                     message=f"Expected Content-Type response header to be `application/json` but received `{content_type}` instead.",
+                    body=response.text,
                 )
 
             # If the API responds with content that isn't JSON then we just return
@@ -544,7 +526,11 @@ class BaseClient:
             return response.text  # type: ignore
 
         data = response.json()
-        return self._process_response_data(data=data, cast_to=cast_to, response=response)
+
+        try:
+            return self._process_response_data(data=data, cast_to=cast_to, response=response)
+        except pydantic.ValidationError as err:
+            raise APIResponseValidationError(response=response, body=data) from err
 
     def _process_response_data(
         self,
@@ -826,7 +812,7 @@ class SyncAPIClient(BaseClient):
             # If the response is streamed then we need to explicitly read the response
             # to completion before attempting to access the response text.
             err.response.read()
-            raise self._make_status_error_from_response(request, err.response) from None
+            raise self._make_status_error_from_response(err.response) from None
         except httpx.TimeoutException as err:
             if retries > 0:
                 return self._retry_request(options, cast_to, retries, stream=stream, stream_cls=stream_cls)
@@ -845,12 +831,7 @@ class SyncAPIClient(BaseClient):
                 raise MissingStreamClassError()
             return stream_cls(cast_to=cast_to, response=response, client=self)
 
-        try:
-            rsp = self._process_response(cast_to=cast_to, options=options, response=response)
-        except pydantic.ValidationError as err:
-            raise APIResponseValidationError(request=request, response=response) from err
-
-        return rsp
+        return self._process_response(cast_to=cast_to, options=options, response=response)
 
     def _retry_request(
         self,
@@ -1184,7 +1165,7 @@ class AsyncAPIClient(BaseClient):
             # If the response is streamed then we need to explicitly read the response
             # to completion before attempting to access the response text.
             await err.response.aread()
-            raise self._make_status_error_from_response(request, err.response) from None
+            raise self._make_status_error_from_response(err.response) from None
         except httpx.ConnectTimeout as err:
             if retries > 0:
                 return await self._retry_request(options, cast_to, retries, stream=stream, stream_cls=stream_cls)
@@ -1213,12 +1194,7 @@ class AsyncAPIClient(BaseClient):
                 raise MissingStreamClassError()
             return stream_cls(cast_to=cast_to, response=response, client=self)
 
-        try:
-            rsp = self._process_response(cast_to=cast_to, options=options, response=response)
-        except pydantic.ValidationError as err:
-            raise APIResponseValidationError(request=request, response=response) from err
-
-        return rsp
+        return self._process_response(cast_to=cast_to, options=options, response=response)
 
     async def _retry_request(
         self,
