@@ -1,31 +1,103 @@
 # File generated from our OpenAPI spec by Stainless.
 
-from ._base_exceptions import APIError as APIError
-from ._base_exceptions import ConflictError as ConflictError
-from ._base_exceptions import NotFoundError as NotFoundError
-from ._base_exceptions import APIStatusError as APIStatusError
-from ._base_exceptions import RateLimitError as RateLimitError
-from ._base_exceptions import APITimeoutError as APITimeoutError
-from ._base_exceptions import BadRequestError as BadRequestError
-from ._base_exceptions import APIConnectionError as APIConnectionError
-from ._base_exceptions import AuthenticationError as AuthenticationError
-from ._base_exceptions import InternalServerError as InternalServerError
-from ._base_exceptions import PermissionDeniedError as PermissionDeniedError
-from ._base_exceptions import UnprocessableEntityError as UnprocessableEntityError
-from ._base_exceptions import APIResponseValidationError as APIResponseValidationError
+from __future__ import annotations
+
+from typing_extensions import Literal
+
+import httpx
 
 __all__ = [
-    "APIError",
-    "APIConnectionError",
-    "APIResponseValidationError",
-    "APIStatusError",
-    "APITimeoutError",
-    "AuthenticationError",
     "BadRequestError",
-    "ConflictError",
-    "InternalServerError",
-    "NotFoundError",
+    "AuthenticationError",
     "PermissionDeniedError",
-    "RateLimitError",
+    "NotFoundError",
+    "ConflictError",
     "UnprocessableEntityError",
+    "RateLimitError",
+    "InternalServerError",
 ]
+
+
+class APIError(Exception):
+    message: str
+    request: httpx.Request
+
+    body: object | None
+    """The API response body.
+
+    If the API responded with a valid JSON structure then this property will be the
+    decoded result.
+
+    If it isn't a valid JSON structure then this will be the raw response.
+
+    If there was no response associated with this error then it will be `None`.
+    """
+
+    def __init__(self, message: str, request: httpx.Request, *, body: object | None) -> None:
+        super().__init__(message)
+        self.request = request
+        self.message = message
+
+
+class APIResponseValidationError(APIError):
+    response: httpx.Response
+    status_code: int
+
+    def __init__(self, response: httpx.Response, body: object | None, *, message: str | None = None) -> None:
+        super().__init__(message or "Data returned by API invalid for expected schema.", response.request, body=body)
+        self.response = response
+        self.status_code = response.status_code
+
+
+class APIStatusError(APIError):
+    """Raised when an API response has a status code of 4xx or 5xx."""
+
+    response: httpx.Response
+    status_code: int
+
+    def __init__(self, message: str, *, response: httpx.Response, body: object | None) -> None:
+        super().__init__(message, response.request, body=body)
+        self.response = response
+        self.status_code = response.status_code
+
+
+class APIConnectionError(APIError):
+    def __init__(self, *, message: str = "Connection error.", request: httpx.Request) -> None:
+        super().__init__(message, request, body=None)
+
+
+class APITimeoutError(APIConnectionError):
+    def __init__(self, request: httpx.Request) -> None:
+        super().__init__(message="Request timed out.", request=request)
+
+
+class BadRequestError(APIStatusError):
+    status_code: Literal[400] = 400
+
+
+class AuthenticationError(APIStatusError):
+    status_code: Literal[401] = 401
+
+
+class PermissionDeniedError(APIStatusError):
+    status_code: Literal[403] = 403
+
+
+class NotFoundError(APIStatusError):
+    status_code: Literal[404] = 404
+
+
+class ConflictError(APIStatusError):
+    status_code: Literal[409] = 409
+
+
+class UnprocessableEntityError(APIStatusError):
+    status_code: Literal[422] = 422
+
+
+class RateLimitError(APIStatusError):
+    status_code: Literal[429] = 429
+
+
+class InternalServerError(APIStatusError):
+    pass
