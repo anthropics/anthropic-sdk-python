@@ -41,18 +41,18 @@ __all__ = [
     "Transport",
     "ProxiesTypes",
     "APIError",
-    "APIConnectionError",
-    "APIResponseValidationError",
     "APIStatusError",
     "APITimeoutError",
-    "AuthenticationError",
+    "APIConnectionError",
+    "APIResponseValidationError",
     "BadRequestError",
-    "ConflictError",
-    "InternalServerError",
-    "NotFoundError",
+    "AuthenticationError",
     "PermissionDeniedError",
-    "RateLimitError",
+    "NotFoundError",
+    "ConflictError",
     "UnprocessableEntityError",
+    "RateLimitError",
+    "InternalServerError",
     "Timeout",
     "RequestOptions",
     "Client",
@@ -69,7 +69,7 @@ __all__ = [
 # Update the __module__ attribute for exported symbols so that
 # error messages point to this module instead of the module
 # it was originally defined in, e.g.
-# anthropic._base_exceptions.NotFoundError -> anthropic.NotFoundError
+# anthropic._exceptions.NotFoundError -> anthropic.NotFoundError
 __locals = locals()
 for __name in __all__:
     if not __name.startswith("__"):
