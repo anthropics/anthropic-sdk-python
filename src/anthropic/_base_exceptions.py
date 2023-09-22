@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing_extensions import Literal
 
 from httpx import Request, Response
@@ -17,8 +19,8 @@ class APIResponseValidationError(APIError):
     response: Response
     status_code: int
 
-    def __init__(self, request: Request, response: Response) -> None:
-        super().__init__("Data returned by API invalid for expected schema.", request)
+    def __init__(self, request: Request, response: Response, *, message: str | None = None) -> None:
+        super().__init__(message or "Data returned by API invalid for expected schema.", request)
         self.response = response
         self.status_code = response.status_code
 

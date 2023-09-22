@@ -12,7 +12,7 @@ import httpx
 import pytest
 from respx import MockRouter
 
-from anthropic import Anthropic, AsyncAnthropic
+from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
 from anthropic._types import Omit
 from anthropic._models import BaseModel, FinalRequestOptions
 from anthropic._streaming import Stream, AsyncStream
@@ -383,6 +383,23 @@ class TestAnthropic:
         response = self.client.post("/foo", cast_to=Model, stream=True)
         assert isinstance(response, Stream)
 
+    @pytest.mark.respx(base_url=base_url)
+    def test_received_text_for_expected_json(self, respx_mock: MockRouter) -> None:
+        class Model(BaseModel):
+            name: str
+
+        respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
+
+        strict_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+
+        with pytest.raises(APIResponseValidationError):
+            strict_client.get("/foo", cast_to=Model)
+
+        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=False)
+
+        response = client.get("/foo", cast_to=Model)
+        assert isinstance(response, str)  # type: ignore[unreachable]
+
 
 class TestAsyncAnthropic:
     client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
@@ -740,3 +757,21 @@ class TestAsyncAnthropic:
 
         response = await self.client.post("/foo", cast_to=Model, stream=True)
         assert isinstance(response, AsyncStream)
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.asyncio
+    async def test_received_text_for_expected_json(self, respx_mock: MockRouter) -> None:
+        class Model(BaseModel):
+            name: str
+
+        respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
+
+        strict_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+
+        with pytest.raises(APIResponseValidationError):
+            await strict_client.get("/foo", cast_to=Model)
+
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=False)
+
+        response = await client.get("/foo", cast_to=Model)
+        assert isinstance(response, str)  # type: ignore[unreachable]
