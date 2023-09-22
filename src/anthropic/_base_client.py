@@ -531,9 +531,17 @@ class BaseClient:
         # in the response, e.g. application/json; charset=utf-8
         content_type, *_ = response.headers.get("content-type").split(";")
         if content_type != "application/json":
-            raise ValueError(
-                f"Expected Content-Type response header to be `application/json` but received {content_type} instead."
-            )
+            if self._strict_response_validation:
+                raise exceptions.APIResponseValidationError(
+                    response=response,
+                    request=response.request,
+                    message=f"Expected Content-Type response header to be `application/json` but received `{content_type}` instead.",
+                )
+
+            # If the API responds with content that isn't JSON then we just return
+            # the (decoded) text without performing any parsing so that you can still
+            # handle the response however you need to.
+            return response.text  # type: ignore
 
         data = response.json()
         return self._process_response_data(data=data, cast_to=cast_to, response=response)
