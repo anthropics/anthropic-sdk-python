@@ -18,7 +18,11 @@ __all__ = [
 ]
 
 
-class APIError(Exception):
+class AnthropicError(Exception):
+    pass
+
+
+class APIError(AnthropicError):
     message: str
     request: httpx.Request
 
