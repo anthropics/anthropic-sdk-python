@@ -9,8 +9,9 @@ jobs:
   update_pr_content:
     name: Update pull request content
     if: |
-      (github.event.action == 'edited' && github.event.changes.title.from != github.event.pull_request.title) ||
-      (github.event.action == 'unlabeled' && github.event.label.name == 'autorelease: custom version') &&
+      ((github.event.action == 'edited' && github.event.changes.title.from != github.event.pull_request.title) ||
+      (github.event.action == 'unlabeled' && github.event.label.name == 'autorelease: custom version')) &&
+      startsWith(github.event.pull_request.head.ref, 'release-please--') &&
       github.event.pull_request.state == 'open' &&
       github.event.sender.login != 'stainless-bot' &&
       github.repository == 'anthropics/anthropic-sdk-python'
