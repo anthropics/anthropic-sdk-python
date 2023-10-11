@@ -74,7 +74,7 @@ as v0.3 sends the `Anthropic-Version: 2023-06-01` header.
 
 ## Documentation
 
-The API documentation can be found at [https://docs.anthropic.com/claude/reference/](https://docs.anthropic.com/claude/reference/).
+The API documentation can be found [here](https://docs.anthropic.com/claude/reference/).
 
 ## Installation
 
@@ -340,7 +340,7 @@ By default the library closes underlying HTTP connections whenever the client is
 
 ## Versioning
 
-This package generally attempts to follow [SemVer](https://semver.org/spec/v2.0.0.html) conventions, though certain backwards-incompatible changes may be released as minor versions:
+This package generally follows [SemVer](https://semver.org/spec/v2.0.0.html) conventions, though certain backwards-incompatible changes may be released as minor versions:
 
 1. Changes that only affect static types, without breaking runtime behavior.
 2. Changes to library internals which are technically public but not intended or documented for external use. _(Please open a GitHub issue to let us know if you are relying on such internals)_.
