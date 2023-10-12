@@ -170,12 +170,6 @@ async for completion in stream:
     print(completion.completion, end="", flush=True)
 ```
 
-## Using types
-
-Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typing.html#typing.TypedDict). Responses are [Pydantic models](https://docs.pydantic.dev), which provide helper methods for things like serializing back into JSON ([v1](https://docs.pydantic.dev/1.10/usage/models/), [v2](https://docs.pydantic.dev/latest/usage/serialization/)). To get a dictionary, call `dict(model)`.
-
-Typed requests and responses provide autocomplete and documentation within your editor. If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `basic`.
-
 ## Token counting
 
 You can estimate billing for a given request with the `client.count_tokens()` method, eg:
@@ -184,6 +178,12 @@ You can estimate billing for a given request with the `client.count_tokens()` me
 client = Anthropic()
 client.count_tokens('Hello world!')  # 3
 ```
+
+## Using types
+
+Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typing.html#typing.TypedDict). Responses are [Pydantic models](https://docs.pydantic.dev), which provide helper methods for things like serializing back into JSON ([v1](https://docs.pydantic.dev/1.10/usage/models/), [v2](https://docs.pydantic.dev/latest/usage/serialization/)). To get a dictionary, call `dict(model)`.
+
+Typed requests and responses provide autocomplete and documentation within your editor. If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `basic`.
 
 ## Handling errors
 
