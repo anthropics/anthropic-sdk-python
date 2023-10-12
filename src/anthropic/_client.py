@@ -62,9 +62,9 @@ class Anthropic(SyncAPIClient):
     def __init__(
         self,
         *,
-        auth_token: str | None = None,
+        api_key: str | None = os.environ.get("ANTHROPIC_API_KEY", None),
+        auth_token: str | None = os.environ.get("ANTHROPIC_AUTH_TOKEN", None),
         base_url: Optional[str] = None,
-        api_key: Optional[str] = None,
         timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -93,11 +93,9 @@ class Anthropic(SyncAPIClient):
         - `api_key` from `ANTHROPIC_API_KEY`
         - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
         """
-        api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", None)
         self.api_key = api_key
 
-        auth_token_envvar = os.environ.get("ANTHROPIC_AUTH_TOKEN", None)
-        self.auth_token = auth_token or auth_token_envvar or None
+        self.auth_token = auth_token
 
         if base_url is None:
             base_url = f"https://api.anthropic.com"
@@ -126,21 +124,21 @@ class Anthropic(SyncAPIClient):
 
     @property
     def auth_headers(self) -> dict[str, str]:
-        if self._api_key_header:
-            return self._api_key_header
-        if self._auth_token_bearer:
-            return self._auth_token_bearer
+        if self._api_key_auth:
+            return self._api_key_auth
+        if self._bearer_auth:
+            return self._bearer_auth
         return {}
 
     @property
-    def _api_key_header(self) -> dict[str, str]:
+    def _api_key_auth(self) -> dict[str, str]:
         api_key = self.api_key
         if api_key is None:
             return {}
         return {"X-Api-Key": api_key}
 
     @property
-    def _auth_token_bearer(self) -> dict[str, str]:
+    def _bearer_auth(self) -> dict[str, str]:
         auth_token = self.auth_token
         if auth_token is None:
             return {}
@@ -172,8 +170,8 @@ class Anthropic(SyncAPIClient):
     def copy(
         self,
         *,
-        auth_token: str | None = None,
         api_key: str | None = None,
+        auth_token: str | None = None,
         base_url: str | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.Client | None = None,
@@ -227,9 +225,9 @@ class Anthropic(SyncAPIClient):
             http_client = http_client or self._client
 
         return self.__class__(
+            api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
             base_url=base_url or str(self.base_url),
-            api_key=api_key or self.api_key,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             connection_pool_limits=connection_pool_limits,
@@ -312,9 +310,9 @@ class AsyncAnthropic(AsyncAPIClient):
     def __init__(
         self,
         *,
-        auth_token: str | None = None,
+        api_key: str | None = os.environ.get("ANTHROPIC_API_KEY", None),
+        auth_token: str | None = os.environ.get("ANTHROPIC_AUTH_TOKEN", None),
         base_url: Optional[str] = None,
-        api_key: Optional[str] = None,
         timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -343,11 +341,9 @@ class AsyncAnthropic(AsyncAPIClient):
         - `api_key` from `ANTHROPIC_API_KEY`
         - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
         """
-        api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", None)
         self.api_key = api_key
 
-        auth_token_envvar = os.environ.get("ANTHROPIC_AUTH_TOKEN", None)
-        self.auth_token = auth_token or auth_token_envvar or None
+        self.auth_token = auth_token
 
         if base_url is None:
             base_url = f"https://api.anthropic.com"
@@ -376,21 +372,21 @@ class AsyncAnthropic(AsyncAPIClient):
 
     @property
     def auth_headers(self) -> dict[str, str]:
-        if self._api_key_header:
-            return self._api_key_header
-        if self._auth_token_bearer:
-            return self._auth_token_bearer
+        if self._api_key_auth:
+            return self._api_key_auth
+        if self._bearer_auth:
+            return self._bearer_auth
         return {}
 
     @property
-    def _api_key_header(self) -> dict[str, str]:
+    def _api_key_auth(self) -> dict[str, str]:
         api_key = self.api_key
         if api_key is None:
             return {}
         return {"X-Api-Key": api_key}
 
     @property
-    def _auth_token_bearer(self) -> dict[str, str]:
+    def _bearer_auth(self) -> dict[str, str]:
         auth_token = self.auth_token
         if auth_token is None:
             return {}
@@ -422,8 +418,8 @@ class AsyncAnthropic(AsyncAPIClient):
     def copy(
         self,
         *,
-        auth_token: str | None = None,
         api_key: str | None = None,
+        auth_token: str | None = None,
         base_url: str | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.AsyncClient | None = None,
@@ -477,9 +473,9 @@ class AsyncAnthropic(AsyncAPIClient):
             http_client = http_client or self._client
 
         return self.__class__(
+            api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
             base_url=base_url or str(self.base_url),
-            api_key=api_key or self.api_key,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             connection_pool_limits=connection_pool_limits,
