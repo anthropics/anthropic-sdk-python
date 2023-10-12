@@ -303,6 +303,16 @@ client = Anthropic(
 
 ## Advanced
 
+### Logging
+
+We use the standard library [`logging`](https://docs.python.org/3/library/logging.html) module.
+
+You can enable logging by setting the environment variable `ANTHROPIC_LOG` to `debug`.
+
+```shell
+$ export ANTHROPIC_LOG=debug
+```
+
 ### How to tell whether `None` means `null` or missing
 
 In an API response, a field may be explicitly `null`, or missing entirely; in either case, its value is `None` in this library. You can differentiate the two cases with `.model_fields_set`:
