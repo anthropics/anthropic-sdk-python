@@ -27,7 +27,7 @@ from anthropic._base_client import (
 )
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
-api_key = os.environ.get("API_KEY", "something1234")
+api_key = "my-anthropic-api-key"
 
 
 def _get_params(client: BaseClient) -> dict[str, str]:
@@ -52,12 +52,9 @@ class TestAnthropic:
         copied = self.client.copy()
         assert id(copied) != id(self.client)
 
-        copied = self.client.copy(api_key="my new api key")
-        assert copied.api_key == "my new api key"
-        assert self.client.api_key == api_key
-
-        copied = self.client.copy(auth_token="my-auth-token")
-        assert copied.auth_token == "my-auth-token"
+        copied = self.client.copy(api_key="another my-anthropic-api-key")
+        assert copied.api_key == "another my-anthropic-api-key"
+        assert self.client.api_key == "my-anthropic-api-key"
 
     def test_copy_default_options(self) -> None:
         # options that have a default are overridden correctly
@@ -669,12 +666,9 @@ class TestAsyncAnthropic:
         copied = self.client.copy()
         assert id(copied) != id(self.client)
 
-        copied = self.client.copy(api_key="my new api key")
-        assert copied.api_key == "my new api key"
-        assert self.client.api_key == api_key
-
-        copied = self.client.copy(auth_token="my-auth-token")
-        assert copied.auth_token == "my-auth-token"
+        copied = self.client.copy(api_key="another my-anthropic-api-key")
+        assert copied.api_key == "another my-anthropic-api-key"
+        assert self.client.api_key == "my-anthropic-api-key"
 
     def test_copy_default_options(self) -> None:
         # options that have a default are overridden correctly
