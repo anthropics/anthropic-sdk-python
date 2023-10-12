@@ -62,8 +62,8 @@ class Anthropic(SyncAPIClient):
     def __init__(
         self,
         *,
-        api_key: str | None = os.environ.get("ANTHROPIC_API_KEY", None),
-        auth_token: str | None = os.environ.get("ANTHROPIC_AUTH_TOKEN", None),
+        api_key: str | None = None,
+        auth_token: str | None = None,
         base_url: Optional[str] = None,
         timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -93,8 +93,12 @@ class Anthropic(SyncAPIClient):
         - `api_key` from `ANTHROPIC_API_KEY`
         - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
         """
+        if api_key is None:
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
         self.api_key = api_key
 
+        if auth_token is None:
+            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
         self.auth_token = auth_token
 
         if base_url is None:
@@ -310,8 +314,8 @@ class AsyncAnthropic(AsyncAPIClient):
     def __init__(
         self,
         *,
-        api_key: str | None = os.environ.get("ANTHROPIC_API_KEY", None),
-        auth_token: str | None = os.environ.get("ANTHROPIC_AUTH_TOKEN", None),
+        api_key: str | None = None,
+        auth_token: str | None = None,
         base_url: Optional[str] = None,
         timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -341,8 +345,12 @@ class AsyncAnthropic(AsyncAPIClient):
         - `api_key` from `ANTHROPIC_API_KEY`
         - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
         """
+        if api_key is None:
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
         self.api_key = api_key
 
+        if auth_token is None:
+            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
         self.auth_token = auth_token
 
         if base_url is None:
