@@ -811,7 +811,10 @@ class SyncAPIClient(BaseClient):
 
         The client will *not* be usable after this.
         """
-        self._client.close()
+        # If an error is thrown while constructing a client, self._client
+        # may not be present
+        if hasattr(self, "_client"):
+            self._client.close()
 
     def __enter__(self: _T) -> _T:
         return self
