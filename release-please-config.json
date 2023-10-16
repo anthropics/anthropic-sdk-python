@@ -58,7 +58,7 @@
     }
   ],
   "reviewers": [
-    "RobertCraigie"
+    "@anthropics/sdk"
   ],
   "release-type": "python",
   "extra-files": [

@@ -17,3 +17,4 @@ jobs:
           bash ./bin/check-release-environment
         env:
           STAINLESS_API_KEY: ${{ secrets.STAINLESS_API_KEY }}
+          PYPI_TOKEN: ${{ secrets.ANTHROPIC_PYPI_TOKEN }}
