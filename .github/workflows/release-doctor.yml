@@ -1,12 +1,15 @@
 name: Release Doctor
 on:
-  pull_request:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   release_doctor:
     name: release doctor
     runs-on: ubuntu-latest
+    environment: production-release
     if: github.repository == 'anthropics/anthropic-sdk-python' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'release-please') || github.head_ref == 'next')
 
     steps:
