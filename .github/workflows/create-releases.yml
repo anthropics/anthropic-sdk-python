@@ -9,6 +9,7 @@ jobs:
     name: release
     if: github.ref == 'refs/heads/main' && github.repository == 'anthropics/anthropic-sdk-python'
     runs-on: ubuntu-latest
+    environment: production-release
 
     steps:
       - uses: actions/checkout@v3
