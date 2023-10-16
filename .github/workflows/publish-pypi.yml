@@ -1,0 +1,25 @@
+# workflow for re-running publishing to PyPI in case it fails for some reason
+# you can run this workflow by navigating to https://www.github.com/anthropics/anthropic-sdk-python/actions/workflows/publish-pypi.yml
+name: Publish PyPI
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.7'
+
+      - name: Publish to PyPI
+        run: |
+          pipx install poetry
+          bash ./bin/publish-pypi
+        env:
+          PYPI_TOKEN: ${{ secrets.ANTHROPIC_PYPI_TOKEN }}
