@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import asyncio
-from typing import Union, Mapping, Optional
+from typing import Union, Mapping
 
 import httpx
 from tokenizers import Tokenizer  # type: ignore[import]
@@ -64,7 +64,7 @@ class Anthropic(SyncAPIClient):
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
-        base_url: Optional[str] = None,
+        base_url: str | httpx.URL | None = None,
         timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -176,7 +176,7 @@ class Anthropic(SyncAPIClient):
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
-        base_url: str | None = None,
+        base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.Client | None = None,
         connection_pool_limits: httpx.Limits | None = None,
@@ -316,7 +316,7 @@ class AsyncAnthropic(AsyncAPIClient):
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
-        base_url: Optional[str] = None,
+        base_url: str | httpx.URL | None = None,
         timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -428,7 +428,7 @@ class AsyncAnthropic(AsyncAPIClient):
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
-        base_url: str | None = None,
+        base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.AsyncClient | None = None,
         connection_pool_limits: httpx.Limits | None = None,
