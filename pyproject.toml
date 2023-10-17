@@ -1,43 +1,69 @@
-[tool.poetry]
+[project]
 name = "anthropic"
 version = "0.4.1"
 description = "Client library for the anthropic API"
 readme = "README.md"
-authors = ["Anthropic <support@anthropic.com>"]
 license = "MIT"
-repository = "https://github.com/anthropics/anthropic-sdk-python"
-packages = [
-  { include = "anthropic", from = "src" }
+authors = [
+{ name = "Anthropic", email = "support@anthropic.com" },
+]
+dependencies = [
+  "httpx>=0.23.0, <1",
+  "pydantic>=1.9.0, <3",
+  "typing-extensions>=4.5, <5",
+  "anyio>=3.5.0, <4",
+  "distro>=1.7.0, <2",
+  "tokenizers >= 0.13.0"
+]
+requires-python = ">= 3.7"
+
+
+
+[project.urls]
+Homepage = "https://github.com/anthropics/anthropic-sdk-python"
+Repository = "https://github.com/anthropics/anthropic-sdk-python"
+
+
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+  "pyright==1.1.326",
+  "mypy==1.4.1",
+  "black==23.3.0",
+  "respx==0.19.2",
+  "pytest==7.1.1",
+  "pytest-asyncio==0.21.1",
+  "ruff==0.0.282",
+  "isort==5.10.1",
+  "time-machine==2.9.0",
+  "nox==2023.4.22",
+  
 ]
 
-[tool.poetry.dependencies]
-python = "^3.7"
-httpx = ">= 0.23.0, < 1"
-pydantic = ">= 1.9.0, < 3"
-typing-extensions = ">= 4.5, < 5"
-anyio = ">= 3.5.0, < 4"
-distro = ">= 1.7.0, < 2"
-tokenizers = ">= 0.13.0"
-
-
-[tool.poetry.group.dev.dependencies]
-pyright = "1.1.326"
-mypy = "1.4.1"
-black = "23.3.0"
-respx = "0.19.2"
-pytest = "7.1.1"
-pytest-asyncio = "0.21.1"
-ruff = "0.0.282"
-isort = "5.10.1"
-time-machine = "^2.9.0"
-nox = "^2023.4.22"
-nox-poetry = "^1.0.3"
-
-
+[tool.rye.scripts]
+format = { chain = [
+  "format:black",
+  "format:docs",
+  "format:ruff",
+  "format:isort",
+]}
+"format:black" = "black ."
+"format:docs" = "python bin/blacken-docs.py README.md api.md"
+"format:ruff" = "ruff --fix ."
+"format:isort" = "isort ."
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = [
+  "src/*"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/anthropic"]
 
 [tool.black]
 line-length = 120
