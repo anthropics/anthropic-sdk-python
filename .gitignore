@@ -10,4 +10,5 @@ dist
 .idea
 
 .env
+.envrc
 codegen.log
