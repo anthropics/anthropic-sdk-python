@@ -28,7 +28,7 @@ huggingface-hub==0.16.4
 idna==3.4
 iniconfig==2.0.0
 isort==5.10.1
-mypy==1.4.1
+mypy==1.6.1
 mypy-extensions==1.0.0
 nodeenv==1.8.0
 nox==2023.4.22
