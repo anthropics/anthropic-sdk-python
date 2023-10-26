@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import asyncio
 from typing import Union, Mapping
+from typing_extensions import override
 
 import httpx
 from tokenizers import Tokenizer  # type: ignore[import]
@@ -123,10 +124,12 @@ class Anthropic(SyncAPIClient):
         self.completions = resources.Completions(self)
 
     @property
+    @override
     def qs(self) -> Querystring:
         return Querystring(array_format="comma")
 
     @property
+    @override
     def auth_headers(self) -> dict[str, str]:
         if self._api_key_auth:
             return self._api_key_auth
@@ -149,6 +152,7 @@ class Anthropic(SyncAPIClient):
         return {"Authorization": f"Bearer {auth_token}"}
 
     @property
+    @override
     def default_headers(self) -> dict[str, str | Omit]:
         return {
             **super().default_headers,
@@ -156,6 +160,7 @@ class Anthropic(SyncAPIClient):
             **self._custom_headers,
         }
 
+    @override
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
         if self.api_key and headers.get("X-Api-Key"):
             return
@@ -267,6 +272,7 @@ class Anthropic(SyncAPIClient):
     def get_tokenizer(self) -> Tokenizer:
         return sync_get_tokenizer()
 
+    @override
     def _make_status_error(
         self,
         err_msg: str,
@@ -375,10 +381,12 @@ class AsyncAnthropic(AsyncAPIClient):
         self.completions = resources.AsyncCompletions(self)
 
     @property
+    @override
     def qs(self) -> Querystring:
         return Querystring(array_format="comma")
 
     @property
+    @override
     def auth_headers(self) -> dict[str, str]:
         if self._api_key_auth:
             return self._api_key_auth
@@ -401,6 +409,7 @@ class AsyncAnthropic(AsyncAPIClient):
         return {"Authorization": f"Bearer {auth_token}"}
 
     @property
+    @override
     def default_headers(self) -> dict[str, str | Omit]:
         return {
             **super().default_headers,
@@ -408,6 +417,7 @@ class AsyncAnthropic(AsyncAPIClient):
             **self._custom_headers,
         }
 
+    @override
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
         if self.api_key and headers.get("X-Api-Key"):
             return
@@ -522,6 +532,7 @@ class AsyncAnthropic(AsyncAPIClient):
     async def get_tokenizer(self) -> Tokenizer:
         return await async_get_tokenizer()
 
+    @override
     def _make_status_error(
         self,
         err_msg: str,
