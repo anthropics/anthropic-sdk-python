@@ -102,6 +102,9 @@ exclude = [
     ".venv",
     ".nox",
 ]
+
+reportImplicitOverride = true
+
 reportImportCycles = false
 reportPrivateUsage = false
 
