@@ -7,6 +7,7 @@ import os
 import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
+from anthropic._client import Anthropic, AsyncAnthropic
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"

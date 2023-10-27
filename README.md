@@ -325,6 +325,28 @@ if response.my_field is None:
     print('Got json like {"my_field": null}.')
 ```
 
+### Accessing raw response data (e.g. headers)
+
+The "raw" Response object can be accessed by prefixing `.with_raw_response.` to any HTTP method call.
+
+```py
+from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+
+anthropic = Anthropic()
+
+response = anthropic.completions.with_raw_response.create(
+    model="claude-2",
+    max_tokens_to_sample=300,
+    prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court?{AI_PROMPT}",
+)
+print(response.headers.get('X-My-Header'))
+
+completion = response.parse()  # get the object that `completions.create()` would have returned
+print(completion.completion)
+```
+
+These methods return an [`APIResponse`](https://github.com/anthropics/anthropic-sdk-python/src/anthropic/_response.py) object.
+
 ### Configuring the HTTP client
 
 You can directly override the [httpx client](https://www.python-httpx.org/api/#client) to customize it for your use case, including:
