@@ -39,7 +39,7 @@ dev-dependencies = [
     "time-machine==2.9.0",
     "nox==2023.4.22",
     "dirty-equals>=0.6.0",
-    
+
 ]
 
 [tool.rye.scripts]
