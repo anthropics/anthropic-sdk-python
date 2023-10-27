@@ -9,6 +9,7 @@ import pytest
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
 from anthropic.types import Completion
+from anthropic._client import Anthropic, AsyncAnthropic
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -44,6 +45,17 @@ class TestCompletions:
         assert_matches_type(Completion, completion, path=["response"])
 
     @parametrize
+    def test_raw_response_create_overload_1(self, client: Anthropic) -> None:
+        response = client.completions.with_raw_response.create(
+            max_tokens_to_sample=256,
+            model="claude-2",
+            prompt="\n\nHuman: Hello, world!\n\nAssistant:",
+        )
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        completion = response.parse()
+        assert_matches_type(Completion, completion, path=["response"])
+
+    @parametrize
     def test_method_create_overload_2(self, client: Anthropic) -> None:
         client.completions.create(
             max_tokens_to_sample=256,
@@ -65,6 +77,17 @@ class TestCompletions:
             top_k=5,
             top_p=0.7,
         )
+
+    @parametrize
+    def test_raw_response_create_overload_2(self, client: Anthropic) -> None:
+        response = client.completions.with_raw_response.create(
+            max_tokens_to_sample=256,
+            model="claude-2",
+            prompt="\n\nHuman: Hello, world!\n\nAssistant:",
+            stream=True,
+        )
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        response.parse()
 
 
 class TestAsyncCompletions:
@@ -97,6 +120,17 @@ class TestAsyncCompletions:
         assert_matches_type(Completion, completion, path=["response"])
 
     @parametrize
+    async def test_raw_response_create_overload_1(self, client: AsyncAnthropic) -> None:
+        response = await client.completions.with_raw_response.create(
+            max_tokens_to_sample=256,
+            model="claude-2",
+            prompt="\n\nHuman: Hello, world!\n\nAssistant:",
+        )
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        completion = response.parse()
+        assert_matches_type(Completion, completion, path=["response"])
+
+    @parametrize
     async def test_method_create_overload_2(self, client: AsyncAnthropic) -> None:
         await client.completions.create(
             max_tokens_to_sample=256,
@@ -118,3 +152,14 @@ class TestAsyncCompletions:
             top_k=5,
             top_p=0.7,
         )
+
+    @parametrize
+    async def test_raw_response_create_overload_2(self, client: AsyncAnthropic) -> None:
+        response = await client.completions.with_raw_response.create(
+            max_tokens_to_sample=256,
+            model="claude-2",
+            prompt="\n\nHuman: Hello, world!\n\nAssistant:",
+            stream=True,
+        )
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        response.parse()

@@ -2,20 +2,30 @@
 
 from __future__ import annotations
 
-from typing import List, Union, overload
+from typing import TYPE_CHECKING, List, Union, overload
 from typing_extensions import Literal
 
 from ..types import Completion, completion_create_params
 from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven
 from .._utils import required_args, maybe_transform
 from .._resource import SyncAPIResource, AsyncAPIResource
+from .._response import to_raw_response_wrapper, async_to_raw_response_wrapper
 from .._streaming import Stream, AsyncStream
 from .._base_client import make_request_options
+
+if TYPE_CHECKING:
+    from .._client import Anthropic, AsyncAnthropic
 
 __all__ = ["Completions", "AsyncCompletions"]
 
 
 class Completions(SyncAPIResource):
+    with_raw_response: CompletionsWithRawResponse
+
+    def __init__(self, client: Anthropic) -> None:
+        super().__init__(client)
+        self.with_raw_response = CompletionsWithRawResponse(self)
+
     @overload
     def create(
         self,
@@ -338,6 +348,12 @@ class Completions(SyncAPIResource):
 
 
 class AsyncCompletions(AsyncAPIResource):
+    with_raw_response: AsyncCompletionsWithRawResponse
+
+    def __init__(self, client: AsyncAnthropic) -> None:
+        super().__init__(client)
+        self.with_raw_response = AsyncCompletionsWithRawResponse(self)
+
     @overload
     async def create(
         self,
@@ -656,4 +672,18 @@ class AsyncCompletions(AsyncAPIResource):
             cast_to=Completion,
             stream=stream or False,
             stream_cls=AsyncStream[Completion],
+        )
+
+
+class CompletionsWithRawResponse:
+    def __init__(self, completions: Completions) -> None:
+        self.create = to_raw_response_wrapper(
+            completions.create,
+        )
+
+
+class AsyncCompletionsWithRawResponse:
+    def __init__(self, completions: AsyncCompletions) -> None:
+        self.create = async_to_raw_response_wrapper(
+            completions.create,
         )
