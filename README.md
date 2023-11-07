@@ -345,7 +345,7 @@ completion = response.parse()  # get the object that `completions.create()` woul
 print(completion.completion)
 ```
 
-These methods return an [`APIResponse`](https://github.com/anthropics/anthropic-sdk-python/src/anthropic/_response.py) object.
+These methods return an [`APIResponse`](https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/_response.py) object.
 
 ### Configuring the HTTP client
 
