@@ -104,6 +104,8 @@ class Anthropic(SyncAPIClient):
         self.auth_token = auth_token
 
         if base_url is None:
+            base_url = os.environ.get("ANTHROPIC_BASE_URL")
+        if base_url is None:
             base_url = f"https://api.anthropic.com"
 
         super().__init__(
@@ -362,6 +364,8 @@ class AsyncAnthropic(AsyncAPIClient):
             auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
         self.auth_token = auth_token
 
+        if base_url is None:
+            base_url = os.environ.get("ANTHROPIC_BASE_URL")
         if base_url is None:
             base_url = f"https://api.anthropic.com"
 
