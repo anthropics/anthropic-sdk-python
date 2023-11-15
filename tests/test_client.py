@@ -27,6 +27,8 @@ from anthropic._base_client import (
     make_request_options,
 )
 
+from .utils import update_env
+
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
 
@@ -407,6 +409,11 @@ class TestAnthropic:
         response = self.client.get("/foo", cast_to=cast(Any, Union[Model1, Model2]))
         assert isinstance(response, Model1)
         assert response.foo == 1
+
+    def test_base_url_env(self) -> None:
+        with update_env(ANTHROPIC_BASE_URL="http://localhost:5000/from/env"):
+            client = Anthropic(api_key=api_key, _strict_response_validation=True)
+            assert client.base_url == "http://localhost:5000/from/env/"
 
     @pytest.mark.parametrize(
         "client",
@@ -1035,6 +1042,11 @@ class TestAsyncAnthropic:
         response = await self.client.get("/foo", cast_to=cast(Any, Union[Model1, Model2]))
         assert isinstance(response, Model1)
         assert response.foo == 1
+
+    def test_base_url_env(self) -> None:
+        with update_env(ANTHROPIC_BASE_URL="http://localhost:5000/from/env"):
+            client = AsyncAnthropic(api_key=api_key, _strict_response_validation=True)
+            assert client.base_url == "http://localhost:5000/from/env/"
 
     @pytest.mark.parametrize(
         "client",

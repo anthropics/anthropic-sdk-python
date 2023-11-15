@@ -360,6 +360,7 @@ import httpx
 from anthropic import Anthropic
 
 client = Anthropic(
+    # Or use the `ANTHROPIC_BASE_URL` env var
     base_url="http://my.test.server.example.com:8083",
     http_client=httpx.Client(
         proxies="http://my.test.proxy.example.com",
