@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.2 (2023-11-17)
+
+Full Changelog: [v0.7.1...v0.7.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.1...v0.7.2)
+
+### Chores
+
+* **internal:** update type hint for helper function ([#241](https://github.com/anthropics/anthropic-sdk-python/issues/241)) ([3179104](https://github.com/anthropics/anthropic-sdk-python/commit/31791042c52e825d1763123b14f44b9e68cc3466))
+
 ## 0.7.1 (2023-11-16)
 
 Full Changelog: [v0.7.0...v0.7.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.0...v0.7.1)
