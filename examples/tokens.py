@@ -19,7 +19,7 @@ def sync_tokens() -> None:
 async def async_tokens() -> None:
     anthropic = AsyncAnthropic()
 
-    text = "fist message"
+    text = "first message"
     tokens = await anthropic.count_tokens(text)
     print(f"'{text}' is {tokens} tokens")
 
