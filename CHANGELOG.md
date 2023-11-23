@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.4 (2023-11-23)
+
+Full Changelog: [v0.7.3...v0.7.4](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.3...v0.7.4)
+
+### Chores
+
+* **internal:** options updates ([#248](https://github.com/anthropics/anthropic-sdk-python/issues/248)) ([5a3b236](https://github.com/anthropics/anthropic-sdk-python/commit/5a3b2362af3b7556babb99095df88443c56579ec))
+
 ## 0.7.3 (2023-11-21)
 
 Full Changelog: [v0.7.2...v0.7.3](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.2...v0.7.3)
