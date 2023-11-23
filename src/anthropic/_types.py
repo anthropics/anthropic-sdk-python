@@ -257,7 +257,6 @@ else:
 class RequestOptions(TypedDict, total=False):
     headers: Headers
     max_retries: int
-    stream: bool
     timeout: float | Timeout | None
     params: Query
     extra_json: AnyMapping
