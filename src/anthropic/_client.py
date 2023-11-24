@@ -23,7 +23,7 @@ from ._types import (
     AsyncTransport,
     RequestOptions,
 )
-from ._utils import is_given
+from ._utils import is_given, get_async_library
 from ._version import __version__
 from ._streaming import Stream as Stream
 from ._streaming import AsyncStream as AsyncStream
@@ -160,6 +160,7 @@ class Anthropic(SyncAPIClient):
     def default_headers(self) -> dict[str, str | Omit]:
         return {
             **super().default_headers,
+            "X-Stainless-Async": "false",
             "anthropic-version": "2023-06-01",
             **self._custom_headers,
         }
@@ -420,6 +421,7 @@ class AsyncAnthropic(AsyncAPIClient):
     def default_headers(self) -> dict[str, str | Omit]:
         return {
             **super().default_headers,
+            "X-Stainless-Async": f"async:{get_async_library()}",
             "anthropic-version": "2023-06-01",
             **self._custom_headers,
         }
