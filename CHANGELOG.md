@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.5 (2023-11-24)
+
+Full Changelog: [v0.7.4...v0.7.5](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.4...v0.7.5)
+
+### Chores
+
+* **internal:** revert recent options change ([#252](https://github.com/anthropics/anthropic-sdk-python/issues/252)) ([d60d5c3](https://github.com/anthropics/anthropic-sdk-python/commit/d60d5c33aec2964b3dbbc69bdf8556b4100a684f))
+* **internal:** send more detailed x-stainless headers ([#254](https://github.com/anthropics/anthropic-sdk-python/issues/254)) ([a268d4b](https://github.com/anthropics/anthropic-sdk-python/commit/a268d4bf4f2fb17707c5328e1ba25e623e7b9b78))
+
 ## 0.7.4 (2023-11-23)
 
 Full Changelog: [v0.7.3...v0.7.4](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.3...v0.7.4)
