@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.6 (2023-11-28)
+
+Full Changelog: [v0.7.5...v0.7.6](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.5...v0.7.6)
+
+### Chores
+
+* **deps:** bump mypy to v1.7.1 ([#256](https://github.com/anthropics/anthropic-sdk-python/issues/256)) ([02d4ed8](https://github.com/anthropics/anthropic-sdk-python/commit/02d4ed8ae8e4fb9221fc9bfb5f45357ed239de5e))
+
 ## 0.7.5 (2023-11-24)
 
 Full Changelog: [v0.7.4...v0.7.5](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.4...v0.7.5)
