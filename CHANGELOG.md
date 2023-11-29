@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.7 (2023-11-29)
+
+Full Changelog: [v0.7.6...v0.7.7](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.6...v0.7.7)
+
+### Chores
+
+* **internal:** add tests for proxy change ([#260](https://github.com/anthropics/anthropic-sdk-python/issues/260)) ([3b52136](https://github.com/anthropics/anthropic-sdk-python/commit/3b521362f6ee33c3ff66371e4f2d3bdcea2827bb))
+* **internal:** updates to proxy helper ([#258](https://github.com/anthropics/anthropic-sdk-python/issues/258)) ([94c4de8](https://github.com/anthropics/anthropic-sdk-python/commit/94c4de88b9d202d780c4dfbee6db138d7a663373))
+
 ## 0.7.6 (2023-11-28)
 
 Full Changelog: [v0.7.5...v0.7.6](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.5...v0.7.6)
