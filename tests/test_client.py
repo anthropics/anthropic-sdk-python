@@ -19,7 +19,12 @@ from anthropic._types import Omit
 from anthropic._client import Anthropic, AsyncAnthropic
 from anthropic._models import BaseModel, FinalRequestOptions
 from anthropic._streaming import Stream, AsyncStream
-from anthropic._exceptions import APIResponseValidationError
+from anthropic._exceptions import (
+    APIStatusError,
+    APITimeoutError,
+    APIConnectionError,
+    APIResponseValidationError,
+)
 from anthropic._base_client import (
     DEFAULT_TIMEOUT,
     HTTPX_DEFAULT_TIMEOUT,
@@ -37,6 +42,24 @@ def _get_params(client: BaseClient[Any, Any]) -> dict[str, str]:
     request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
     url = httpx.URL(request.url)
     return dict(url.params)
+
+
+_original_response_init = cast(Any, httpx.Response.__init__)  # type: ignore
+
+
+def _low_retry_response_init(*args: Any, **kwargs: Any) -> Any:
+    headers = cast("list[tuple[bytes, bytes]]", kwargs["headers"])
+    headers.append((b"retry-after", b"0.1"))
+
+    return _original_response_init(*args, **kwargs)
+
+
+def _get_open_connections(client: Anthropic | AsyncAnthropic) -> int:
+    transport = client._client._transport
+    assert isinstance(transport, httpx.HTTPTransport) or isinstance(transport, httpx.AsyncHTTPTransport)
+
+    pool = transport._pool
+    return len(pool._requests)
 
 
 class TestAnthropic:
@@ -689,6 +712,92 @@ class TestAnthropic:
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
         calculated = client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
+
+    @mock.patch("httpx.Response.__init__", _low_retry_response_init)
+    def test_retrying_timeout_errors_doesnt_leak(self) -> None:
+        def raise_for_status(response: httpx.Response) -> None:
+            raise httpx.TimeoutException("Test timeout error", request=response.request)
+
+        with mock.patch("httpx.Response.raise_for_status", raise_for_status):
+            with pytest.raises(APITimeoutError):
+                self.client.post(
+                    "/v1/complete",
+                    body=dict(
+                        max_tokens_to_sample=300,
+                        model="claude-2",
+                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                    ),
+                    cast_to=httpx.Response,
+                    options={"headers": {"X-Stainless-Streamed-Raw-Response": "true"}},
+                )
+
+        assert _get_open_connections(self.client) == 0
+
+    @mock.patch("httpx.Response.__init__", _low_retry_response_init)
+    def test_retrying_runtime_errors_doesnt_leak(self) -> None:
+        def raise_for_status(_response: httpx.Response) -> None:
+            raise RuntimeError("Test error")
+
+        with mock.patch("httpx.Response.raise_for_status", raise_for_status):
+            with pytest.raises(APIConnectionError):
+                self.client.post(
+                    "/v1/complete",
+                    body=dict(
+                        max_tokens_to_sample=300,
+                        model="claude-2",
+                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                    ),
+                    cast_to=httpx.Response,
+                    options={"headers": {"X-Stainless-Streamed-Raw-Response": "true"}},
+                )
+
+        assert _get_open_connections(self.client) == 0
+
+    @mock.patch("httpx.Response.__init__", _low_retry_response_init)
+    def test_retrying_status_errors_doesnt_leak(self) -> None:
+        def raise_for_status(response: httpx.Response) -> None:
+            response.status_code = 500
+            raise httpx.HTTPStatusError("Test 500 error", response=response, request=response.request)
+
+        with mock.patch("httpx.Response.raise_for_status", raise_for_status):
+            with pytest.raises(APIStatusError):
+                self.client.post(
+                    "/v1/complete",
+                    body=dict(
+                        max_tokens_to_sample=300,
+                        model="claude-2",
+                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                    ),
+                    cast_to=httpx.Response,
+                    options={"headers": {"X-Stainless-Streamed-Raw-Response": "true"}},
+                )
+
+        assert _get_open_connections(self.client) == 0
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_status_error_within_httpx(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+
+        def on_response(response: httpx.Response) -> None:
+            raise httpx.HTTPStatusError(
+                "Simulating an error inside httpx",
+                response=response,
+                request=response.request,
+            )
+
+        client = Anthropic(
+            base_url=base_url,
+            api_key=api_key,
+            _strict_response_validation=True,
+            http_client=httpx.Client(
+                event_hooks={
+                    "response": [on_response],
+                }
+            ),
+            max_retries=0,
+        )
+        with pytest.raises(APIStatusError):
+            client.post("/foo", cast_to=httpx.Response)
 
 
 class TestAsyncAnthropic:
@@ -1357,3 +1466,90 @@ class TestAsyncAnthropic:
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
         calculated = client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
+
+    @mock.patch("httpx.Response.__init__", _low_retry_response_init)
+    async def test_retrying_timeout_errors_doesnt_leak(self) -> None:
+        def raise_for_status(response: httpx.Response) -> None:
+            raise httpx.TimeoutException("Test timeout error", request=response.request)
+
+        with mock.patch("httpx.Response.raise_for_status", raise_for_status):
+            with pytest.raises(APITimeoutError):
+                await self.client.post(
+                    "/v1/complete",
+                    body=dict(
+                        max_tokens_to_sample=300,
+                        model="claude-2",
+                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                    ),
+                    cast_to=httpx.Response,
+                    options={"headers": {"X-Stainless-Streamed-Raw-Response": "true"}},
+                )
+
+        assert _get_open_connections(self.client) == 0
+
+    @mock.patch("httpx.Response.__init__", _low_retry_response_init)
+    async def test_retrying_runtime_errors_doesnt_leak(self) -> None:
+        def raise_for_status(_response: httpx.Response) -> None:
+            raise RuntimeError("Test error")
+
+        with mock.patch("httpx.Response.raise_for_status", raise_for_status):
+            with pytest.raises(APIConnectionError):
+                await self.client.post(
+                    "/v1/complete",
+                    body=dict(
+                        max_tokens_to_sample=300,
+                        model="claude-2",
+                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                    ),
+                    cast_to=httpx.Response,
+                    options={"headers": {"X-Stainless-Streamed-Raw-Response": "true"}},
+                )
+
+        assert _get_open_connections(self.client) == 0
+
+    @mock.patch("httpx.Response.__init__", _low_retry_response_init)
+    async def test_retrying_status_errors_doesnt_leak(self) -> None:
+        def raise_for_status(response: httpx.Response) -> None:
+            response.status_code = 500
+            raise httpx.HTTPStatusError("Test 500 error", response=response, request=response.request)
+
+        with mock.patch("httpx.Response.raise_for_status", raise_for_status):
+            with pytest.raises(APIStatusError):
+                await self.client.post(
+                    "/v1/complete",
+                    body=dict(
+                        max_tokens_to_sample=300,
+                        model="claude-2",
+                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                    ),
+                    cast_to=httpx.Response,
+                    options={"headers": {"X-Stainless-Streamed-Raw-Response": "true"}},
+                )
+
+        assert _get_open_connections(self.client) == 0
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.asyncio
+    async def test_status_error_within_httpx(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+
+        def on_response(response: httpx.Response) -> None:
+            raise httpx.HTTPStatusError(
+                "Simulating an error inside httpx",
+                response=response,
+                request=response.request,
+            )
+
+        client = AsyncAnthropic(
+            base_url=base_url,
+            api_key=api_key,
+            _strict_response_validation=True,
+            http_client=httpx.AsyncClient(
+                event_hooks={
+                    "response": [on_response],
+                }
+            ),
+            max_retries=0,
+        )
+        with pytest.raises(APIStatusError):
+            await client.post("/foo", cast_to=httpx.Response)
