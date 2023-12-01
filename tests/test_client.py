@@ -454,6 +454,14 @@ class TestAnthropic:
         assert isinstance(response, Model)
         assert response.foo == 2
 
+    def test_base_url_setter(self) -> None:
+        client = Anthropic(base_url="https://example.com/from_init", api_key=api_key, _strict_response_validation=True)
+        assert client.base_url == "https://example.com/from_init/"
+
+        client.base_url = "https://example.com/from_setter"  # type: ignore[assignment]
+
+        assert client.base_url == "https://example.com/from_setter/"
+
     def test_base_url_env(self) -> None:
         with update_env(ANTHROPIC_BASE_URL="http://localhost:5000/from/env"):
             client = Anthropic(api_key=api_key, _strict_response_validation=True)
@@ -1193,6 +1201,16 @@ class TestAsyncAnthropic:
         response = await self.client.get("/foo", cast_to=Model)
         assert isinstance(response, Model)
         assert response.foo == 2
+
+    def test_base_url_setter(self) -> None:
+        client = AsyncAnthropic(
+            base_url="https://example.com/from_init", api_key=api_key, _strict_response_validation=True
+        )
+        assert client.base_url == "https://example.com/from_init/"
+
+        client.base_url = "https://example.com/from_setter"  # type: ignore[assignment]
+
+        assert client.base_url == "https://example.com/from_setter/"
 
     def test_base_url_env(self) -> None:
         with update_env(ANTHROPIC_BASE_URL="http://localhost:5000/from/env"):
