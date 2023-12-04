@@ -6,7 +6,7 @@ import os
 import json
 import asyncio
 import inspect
-from typing import Any, Dict, Union, cast
+from typing import Any, Union, cast
 from unittest import mock
 
 import httpx
@@ -366,7 +366,7 @@ class TestAnthropic:
                 ),
             ),
         )
-        params = cast(Dict[str, str], dict(request.url.params))
+        params = dict(request.url.params)
         assert params == {"my_query_param": "Foo"}
 
         # if both `query` and `extra_query` are given, they are merged
@@ -380,7 +380,7 @@ class TestAnthropic:
                 ),
             ),
         )
-        params = cast(Dict[str, str], dict(request.url.params))
+        params = dict(request.url.params)
         assert params == {"bar": "1", "foo": "2"}
 
         # `extra_query` takes priority over `query` when keys clash
@@ -394,7 +394,7 @@ class TestAnthropic:
                 ),
             ),
         )
-        params = cast(Dict[str, str], dict(request.url.params))
+        params = dict(request.url.params)
         assert params == {"foo": "2"}
 
     @pytest.mark.respx(base_url=base_url)
@@ -541,7 +541,9 @@ class TestAnthropic:
             DeprecationWarning,
             match="The `transport` argument is deprecated. The `http_client` argument should be passed instead",
         ):
-            transport = httpx.MockTransport(lambda: None)
+            transport = httpx.MockTransport(
+                lambda: None,  # type: ignore
+            )
 
             client = Anthropic(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, transport=transport
@@ -557,7 +559,9 @@ class TestAnthropic:
                         base_url=base_url,
                         api_key=api_key,
                         _strict_response_validation=True,
-                        transport=httpx.MockTransport(lambda: None),
+                        transport=httpx.MockTransport(
+                            lambda: None,  # type: ignore
+                        ),
                         http_client=http_client,
                     )
 
@@ -1114,7 +1118,7 @@ class TestAsyncAnthropic:
                 ),
             ),
         )
-        params = cast(Dict[str, str], dict(request.url.params))
+        params = dict(request.url.params)
         assert params == {"my_query_param": "Foo"}
 
         # if both `query` and `extra_query` are given, they are merged
@@ -1128,7 +1132,7 @@ class TestAsyncAnthropic:
                 ),
             ),
         )
-        params = cast(Dict[str, str], dict(request.url.params))
+        params = dict(request.url.params)
         assert params == {"bar": "1", "foo": "2"}
 
         # `extra_query` takes priority over `query` when keys clash
@@ -1142,7 +1146,7 @@ class TestAsyncAnthropic:
                 ),
             ),
         )
-        params = cast(Dict[str, str], dict(request.url.params))
+        params = dict(request.url.params)
         assert params == {"foo": "2"}
 
     @pytest.mark.respx(base_url=base_url)
@@ -1297,7 +1301,9 @@ class TestAsyncAnthropic:
             DeprecationWarning,
             match="The `transport` argument is deprecated. The `http_client` argument should be passed instead",
         ):
-            transport = httpx.MockTransport(lambda: None)
+            transport = httpx.MockTransport(
+                lambda: None,  # type: ignore
+            )
 
             client = AsyncAnthropic(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, transport=transport
@@ -1313,7 +1319,9 @@ class TestAsyncAnthropic:
                         base_url=base_url,
                         api_key=api_key,
                         _strict_response_validation=True,
-                        transport=httpx.MockTransport(lambda: None),
+                        transport=httpx.MockTransport(
+                            lambda: None,  # type: ignore
+                        ),
                         http_client=http_client,
                     )
 
