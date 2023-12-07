@@ -70,7 +70,7 @@ class Stream(Generic[ResponseT]):
                 )
 
         # Ensure the entire stream is consumed
-        for sse in iterator:
+        for _sse in iterator:
             ...
 
 
@@ -132,7 +132,7 @@ class AsyncStream(Generic[ResponseT]):
                 )
 
         # Ensure the entire stream is consumed
-        async for sse in iterator:
+        async for _sse in iterator:
             ...
 
 
