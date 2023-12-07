@@ -46,16 +46,16 @@ Repository = "https://github.com/anthropics/anthropic-sdk-python"
 [tool.rye]
 managed = true
 dev-dependencies = [
-    # version pins are in requirements-dev.lock
-    "pyright",
-    "mypy",
-    "black",
-    "respx",
-    "pytest",
-    "pytest-asyncio",
-    "ruff",
-    "time-machine",
-    "nox",
+    "pyright==1.1.332",
+    "mypy==1.7.1",
+    "black==23.3.0",
+    "respx==0.20.2",
+    "pytest==7.1.1",
+    "pytest-asyncio==0.21.1",
+    "ruff==0.0.282",
+    "isort==5.10.1",
+    "time-machine==2.9.0",
+    "nox==2023.4.22",
     "dirty-equals>=0.6.0",
 
 ]
@@ -65,10 +65,12 @@ format = { chain = [
   "format:black",
   "format:docs",
   "format:ruff",
+  "format:isort",
 ]}
 "format:black" = "black ."
 "format:docs" = "python bin/blacken-docs.py README.md api.md"
 "format:ruff" = "ruff --fix ."
+"format:isort" = "isort ."
 
 "check:ruff" = "ruff ."
 
@@ -123,13 +125,16 @@ reportImplicitOverride = true
 reportImportCycles = false
 reportPrivateUsage = false
 
+[tool.isort]
+profile = "black"
+length_sort = true
+extra_standard_library = ["typing_extensions"]
+
 [tool.ruff]
 line-length = 120
-output-format = "grouped"
+format = "grouped"
 target-version = "py37"
 select = [
-  # isort
-  "I",
   # remove unused imports
   "F401",
   # bare except statements
@@ -147,12 +152,6 @@ unfixable = [
 ]
 ignore-init-module-imports = true
 
-[tool.ruff.lint.isort]
-length-sort = true
-length-sort-straight = true
-combine-as-imports = true
-extra-standard-library = ["typing_extensions"]
-known-first-party = ["anthropic", "tests"]
 
 [tool.ruff.per-file-ignores]
 "bin/**.py" = ["T201", "T203"]
