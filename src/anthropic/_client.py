@@ -239,7 +239,7 @@ class Anthropic(SyncAPIClient):
         return self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
-            base_url=base_url or str(self.base_url),
+            base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             connection_pool_limits=connection_pool_limits,
@@ -500,7 +500,7 @@ class AsyncAnthropic(AsyncAPIClient):
         return self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
-            base_url=base_url or str(self.base_url),
+            base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             connection_pool_limits=connection_pool_limits,
