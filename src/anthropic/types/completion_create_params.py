@@ -25,13 +25,13 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     only specifies the absolute maximum number of tokens to generate.
     """
 
-    model: Required[Union[str, Literal["claude-2", "claude-instant-1"]]]
+    model: Required[Union[str, Literal["claude-2.1", "claude-instant-1"]]]
     """The model that will complete your prompt.
 
     As we improve Claude, we develop new versions of it that you can query. This
     parameter controls which version of Claude answers your request. Right now we
     are offering two model families: Claude, and Claude Instant. You can use them by
-    setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+    setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
     [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
     additional details.
     """

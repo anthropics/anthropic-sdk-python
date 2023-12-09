@@ -799,7 +799,7 @@ class TestAnthropic:
                     "/v1/complete",
                     body=dict(
                         max_tokens_to_sample=300,
-                        model="claude-2",
+                        model="claude-2.1",
                         prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                     ),
                     cast_to=httpx.Response,
@@ -819,7 +819,7 @@ class TestAnthropic:
                     "/v1/complete",
                     body=dict(
                         max_tokens_to_sample=300,
-                        model="claude-2",
+                        model="claude-2.1",
                         prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                     ),
                     cast_to=httpx.Response,
@@ -840,7 +840,7 @@ class TestAnthropic:
                     "/v1/complete",
                     body=dict(
                         max_tokens_to_sample=300,
-                        model="claude-2",
+                        model="claude-2.1",
                         prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                     ),
                     cast_to=httpx.Response,
@@ -1628,7 +1628,7 @@ class TestAsyncAnthropic:
                     "/v1/complete",
                     body=dict(
                         max_tokens_to_sample=300,
-                        model="claude-2",
+                        model="claude-2.1",
                         prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                     ),
                     cast_to=httpx.Response,
@@ -1648,7 +1648,7 @@ class TestAsyncAnthropic:
                     "/v1/complete",
                     body=dict(
                         max_tokens_to_sample=300,
-                        model="claude-2",
+                        model="claude-2.1",
                         prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                     ),
                     cast_to=httpx.Response,
@@ -1669,7 +1669,7 @@ class TestAsyncAnthropic:
                     "/v1/complete",
                     body=dict(
                         max_tokens_to_sample=300,
-                        model="claude-2",
+                        model="claude-2.1",
                         prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                     ),
                     cast_to=httpx.Response,
