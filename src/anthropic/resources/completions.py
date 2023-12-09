@@ -33,7 +33,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2", "claude-instant-1"]],
+        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -62,7 +62,7 @@ class Completions(SyncAPIResource):
               As we improve Claude, we develop new versions of it that you can query. This
               parameter controls which version of Claude answers your request. Right now we
               are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
               [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
               additional details.
 
@@ -125,7 +125,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2", "claude-instant-1"]],
+        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
         prompt: str,
         stream: Literal[True],
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -154,7 +154,7 @@ class Completions(SyncAPIResource):
               As we improve Claude, we develop new versions of it that you can query. This
               parameter controls which version of Claude answers your request. Right now we
               are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
               [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
               additional details.
 
@@ -217,7 +217,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2", "claude-instant-1"]],
+        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
         prompt: str,
         stream: bool,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -246,7 +246,7 @@ class Completions(SyncAPIResource):
               As we improve Claude, we develop new versions of it that you can query. This
               parameter controls which version of Claude answers your request. Right now we
               are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
               [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
               additional details.
 
@@ -309,7 +309,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2", "claude-instant-1"]],
+        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -361,7 +361,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2", "claude-instant-1"]],
+        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -390,7 +390,7 @@ class AsyncCompletions(AsyncAPIResource):
               As we improve Claude, we develop new versions of it that you can query. This
               parameter controls which version of Claude answers your request. Right now we
               are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
               [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
               additional details.
 
@@ -453,7 +453,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2", "claude-instant-1"]],
+        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
         prompt: str,
         stream: Literal[True],
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -482,7 +482,7 @@ class AsyncCompletions(AsyncAPIResource):
               As we improve Claude, we develop new versions of it that you can query. This
               parameter controls which version of Claude answers your request. Right now we
               are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
               [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
               additional details.
 
@@ -545,7 +545,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2", "claude-instant-1"]],
+        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
         prompt: str,
         stream: bool,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -574,7 +574,7 @@ class AsyncCompletions(AsyncAPIResource):
               As we improve Claude, we develop new versions of it that you can query. This
               parameter controls which version of Claude answers your request. Right now we
               are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2"` or `"claude-instant-1"`, respectively. See
+              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
               [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
               additional details.
 
@@ -637,7 +637,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2", "claude-instant-1"]],
+        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
