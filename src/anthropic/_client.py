@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import asyncio
 from typing import Any, Union, Mapping
 from typing_extensions import Self, override
 
@@ -34,6 +33,8 @@ from ._base_client import (
     DEFAULT_MAX_RETRIES,
     SyncAPIClient,
     AsyncAPIClient,
+    SyncHttpxClientWrapper,
+    AsyncHttpxClientWrapper,
 )
 
 __all__ = [
@@ -222,7 +223,7 @@ class Anthropic(SyncAPIClient):
             if http_client is not None:
                 raise ValueError("The 'http_client' argument is mutually exclusive with 'connection_pool_limits'")
 
-            if self._has_custom_http_client:
+            if not isinstance(self._client, SyncHttpxClientWrapper):
                 raise ValueError(
                     "A custom HTTP client has been set and is mutually exclusive with the 'connection_pool_limits' argument"
                 )
@@ -252,16 +253,6 @@ class Anthropic(SyncAPIClient):
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)
     with_options = copy
-
-    def __del__(self) -> None:
-        if not hasattr(self, "_has_custom_http_client") or not hasattr(self, "close"):
-            # this can happen if the '__init__' method raised an error
-            return
-
-        if self._has_custom_http_client:
-            return
-
-        self.close()
 
     def count_tokens(
         self,
@@ -483,7 +474,7 @@ class AsyncAnthropic(AsyncAPIClient):
             if http_client is not None:
                 raise ValueError("The 'http_client' argument is mutually exclusive with 'connection_pool_limits'")
 
-            if self._has_custom_http_client:
+            if not isinstance(self._client, AsyncHttpxClientWrapper):
                 raise ValueError(
                     "A custom HTTP client has been set and is mutually exclusive with the 'connection_pool_limits' argument"
                 )
@@ -513,19 +504,6 @@ class AsyncAnthropic(AsyncAPIClient):
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)
     with_options = copy
-
-    def __del__(self) -> None:
-        if not hasattr(self, "_has_custom_http_client") or not hasattr(self, "close"):
-            # this can happen if the '__init__' method raised an error
-            return
-
-        if self._has_custom_http_client:
-            return
-
-        try:
-            asyncio.get_running_loop().create_task(self.close())
-        except Exception:
-            pass
 
     async def count_tokens(
         self,
