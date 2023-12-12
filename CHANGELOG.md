@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.7.8 (2023-12-12)
+
+Full Changelog: [v0.7.7...v0.7.8](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.7...v0.7.8)
+
+### Bug Fixes
+
+* avoid leaking memory when Client.with_options is used ([#275](https://github.com/anthropics/anthropic-sdk-python/issues/275)) ([5e51ebd](https://github.com/anthropics/anthropic-sdk-python/commit/5e51ebdbc6e5c23c8c237b5e0231ef66f585f964))
+* **client:** correct base_url setter implementation ([#265](https://github.com/anthropics/anthropic-sdk-python/issues/265)) ([29d0c8b](https://github.com/anthropics/anthropic-sdk-python/commit/29d0c8b0eb174b499a904e02cce7fe7a6aaa1a01))
+* **client:** ensure retried requests are closed ([#261](https://github.com/anthropics/anthropic-sdk-python/issues/261)) ([5d9aa75](https://github.com/anthropics/anthropic-sdk-python/commit/5d9aa754ace5d53eb90c1055dd6b1ca8e7deee4f))
+* **errors:** properly assign APIError.body ([#274](https://github.com/anthropics/anthropic-sdk-python/issues/274)) ([342846f](https://github.com/anthropics/anthropic-sdk-python/commit/342846fa4d424a4d18dd2289d2b652bf53c97901))
+
+
+### Chores
+
+* **internal:** enable more lint rules ([#273](https://github.com/anthropics/anthropic-sdk-python/issues/273)) ([0ac62bc](https://github.com/anthropics/anthropic-sdk-python/commit/0ac62bc127ddf0367561427836ff19c1272fb0e1))
+* **internal:** reformat imports ([#270](https://github.com/anthropics/anthropic-sdk-python/issues/270)) ([dc55724](https://github.com/anthropics/anthropic-sdk-python/commit/dc55724673dfa59911a05fe4827b8804beba0b05))
+* **internal:** reformat imports ([#272](https://github.com/anthropics/anthropic-sdk-python/issues/272)) ([0d82ce4](https://github.com/anthropics/anthropic-sdk-python/commit/0d82ce4784c3a6c9599e6c09b8190e97ea028dc3))
+* **internal:** remove unused file ([#264](https://github.com/anthropics/anthropic-sdk-python/issues/264)) ([1bfc69b](https://github.com/anthropics/anthropic-sdk-python/commit/1bfc69b0e2a1eb79598409cbfcba060f699d28a7))
+* **internal:** replace string concatenation with f-strings ([#263](https://github.com/anthropics/anthropic-sdk-python/issues/263)) ([f545c35](https://github.com/anthropics/anthropic-sdk-python/commit/f545c350dd802079d057d34ff29444e32dc7bdcb))
+* **internal:** update formatting ([#271](https://github.com/anthropics/anthropic-sdk-python/issues/271)) ([802ab59](https://github.com/anthropics/anthropic-sdk-python/commit/802ab59401b06986b8023e9ef0d0f9e0d6858b86))
+* **package:** lift anyio v4 restriction ([#266](https://github.com/anthropics/anthropic-sdk-python/issues/266)) ([a217e99](https://github.com/anthropics/anthropic-sdk-python/commit/a217e9955569852d35ab1bc1351dd66ba807fc44))
+
+
+### Documentation
+
+* update examples to show claude-2.1 ([#276](https://github.com/anthropics/anthropic-sdk-python/issues/276)) ([8f562f4](https://github.com/anthropics/anthropic-sdk-python/commit/8f562f47f13ffaaab93f08b9b4c59d06e4a18b6c))
+
+
+### Refactors
+
+* **client:** simplify cleanup ([#278](https://github.com/anthropics/anthropic-sdk-python/issues/278)) ([3611ae2](https://github.com/anthropics/anthropic-sdk-python/commit/3611ae24d93fa33e55f2e9193a3c787bfd041da5))
+* simplify internal error handling ([#279](https://github.com/anthropics/anthropic-sdk-python/issues/279)) ([993b51a](https://github.com/anthropics/anthropic-sdk-python/commit/993b51aa4f41bae3938a12d60919065c4865a734))
+
 ## 0.7.7 (2023-11-29)
 
 Full Changelog: [v0.7.6...v0.7.7](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.6...v0.7.7)
