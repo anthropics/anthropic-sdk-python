@@ -170,6 +170,44 @@ async for completion in stream:
     print(completion.completion, end="", flush=True)
 ```
 
+### Streaming Helpers
+
+This library provides several conveniences for streaming messages, for example:
+
+```py
+import asyncio
+from anthropic import AsyncAnthropic
+
+client = AsyncAnthropic()
+
+async def main() -> None:
+    async with client.beta.messages.stream(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="claude-2.1",
+    ) as stream:
+        async for text in stream.text_stream:
+            print(text, end="", flush=True)
+        print()
+
+    # you can still get the accumulated final message outside of
+    # the context manager, as long as the entire stream was consumed
+    # inside of the context manager
+    accumulated = await stream.get_final_message()
+    print(accumulated.model_dump_json(indent=2))
+
+asyncio.run(main())
+```
+
+Streaming with `client.beta.messages.stream(...)` exposes [various helpers for your convenience](helpers.md) including event handlers and accumulation.
+
+Alternatively, you can use `client.beta.messages.create(..., stream=True)` which only returns an async iterable of the events in the stream and thus uses less memory (it does not build up a final message object for you).
+
 ## Token counting
 
 You can estimate billing for a given request with the `client.count_tokens()` method, eg:
