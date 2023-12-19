@@ -10,7 +10,7 @@ import httpx
 from ._types import ResponseT
 
 if TYPE_CHECKING:
-    from ._base_client import SyncAPIClient, AsyncAPIClient
+    from ._client import Anthropic, AsyncAnthropic
 
 
 class Stream(Generic[ResponseT]):
@@ -23,7 +23,7 @@ class Stream(Generic[ResponseT]):
         *,
         cast_to: type[ResponseT],
         response: httpx.Response,
-        client: SyncAPIClient,
+        client: Anthropic,
     ) -> None:
         self.response = response
         self._cast_to = cast_to
@@ -84,7 +84,7 @@ class AsyncStream(Generic[ResponseT]):
         *,
         cast_to: type[ResponseT],
         response: httpx.Response,
-        client: AsyncAPIClient,
+        client: AsyncAnthropic,
     ) -> None:
         self.response = response
         self._cast_to = cast_to
