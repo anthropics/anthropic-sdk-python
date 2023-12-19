@@ -52,6 +52,7 @@ __all__ = [
 
 class Anthropic(SyncAPIClient):
     completions: resources.Completions
+    beta: resources.Beta
     with_raw_response: AnthropicWithRawResponse
 
     # client options
@@ -126,6 +127,7 @@ class Anthropic(SyncAPIClient):
         self._default_stream_cls = Stream
 
         self.completions = resources.Completions(self)
+        self.beta = resources.Beta(self)
         self.with_raw_response = AnthropicWithRawResponse(self)
 
     @property
@@ -303,6 +305,7 @@ class Anthropic(SyncAPIClient):
 
 class AsyncAnthropic(AsyncAPIClient):
     completions: resources.AsyncCompletions
+    beta: resources.AsyncBeta
     with_raw_response: AsyncAnthropicWithRawResponse
 
     # client options
@@ -377,6 +380,7 @@ class AsyncAnthropic(AsyncAPIClient):
         self._default_stream_cls = AsyncStream
 
         self.completions = resources.AsyncCompletions(self)
+        self.beta = resources.AsyncBeta(self)
         self.with_raw_response = AsyncAnthropicWithRawResponse(self)
 
     @property
@@ -555,11 +559,13 @@ class AsyncAnthropic(AsyncAPIClient):
 class AnthropicWithRawResponse:
     def __init__(self, client: Anthropic) -> None:
         self.completions = resources.CompletionsWithRawResponse(client.completions)
+        self.beta = resources.BetaWithRawResponse(client.beta)
 
 
 class AsyncAnthropicWithRawResponse:
     def __init__(self, client: AsyncAnthropic) -> None:
         self.completions = resources.AsyncCompletionsWithRawResponse(client.completions)
+        self.beta = resources.AsyncBetaWithRawResponse(client.beta)
 
 
 Client = Anthropic

@@ -49,7 +49,7 @@ class Completions(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion:
         """
-        Create a completion
+        Create a Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -59,29 +59,33 @@ class Completions(SyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. This
-              parameter controls which version of Claude answers your request. Right now we
-              are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
-              [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
-              additional details.
+              As we improve Claude, we develop new versions of it that you can query. The
+              `model` parameter controls which version of Claude responds to your request.
+              Right now we offer two model families: Claude, and Claude Instant. You can use
+              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
+              respectively.
+
+              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              additional details and options.
 
           prompt: The prompt that you want Claude to complete.
 
-              For proper response generation you will need to format your prompt as follows:
+              For proper response generation you will need to format your prompt using
+              alternating `\n\nHuman:` and `\n\nAssistant:` conversational turns. For example:
 
-              ```javascript
-              const userQuestion = r"Why is the sky blue?";
-              const prompt = `\n\nHuman: ${userQuestion}\n\nAssistant:`;
+              ```
+              "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See our
-              [comments on prompts](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more context.
+              See
+              [prompt validation](https://anthropic.readme.io/claude/reference/prompt-validation)
+              and our guide to
+              [prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
+              for more details.
 
           metadata: An object describing metadata about the request.
 
-          stop_sequences: Sequences that will cause the model to stop generating completion text.
+          stop_sequences: Sequences that will cause the model to stop generating.
 
               Our models stop on `"\n\nHuman:"`, and may include additional built-in stop
               sequences in the future. By providing the stop_sequences parameter, you may
@@ -89,9 +93,8 @@ class Completions(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See
-              [this guide to SSE events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-              for details.
+              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
+              details.
 
           temperature: Amount of randomness injected into the response.
 
@@ -141,7 +144,7 @@ class Completions(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Stream[Completion]:
         """
-        Create a completion
+        Create a Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -151,35 +154,38 @@ class Completions(SyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. This
-              parameter controls which version of Claude answers your request. Right now we
-              are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
-              [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
-              additional details.
+              As we improve Claude, we develop new versions of it that you can query. The
+              `model` parameter controls which version of Claude responds to your request.
+              Right now we offer two model families: Claude, and Claude Instant. You can use
+              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
+              respectively.
+
+              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              additional details and options.
 
           prompt: The prompt that you want Claude to complete.
 
-              For proper response generation you will need to format your prompt as follows:
+              For proper response generation you will need to format your prompt using
+              alternating `\n\nHuman:` and `\n\nAssistant:` conversational turns. For example:
 
-              ```javascript
-              const userQuestion = r"Why is the sky blue?";
-              const prompt = `\n\nHuman: ${userQuestion}\n\nAssistant:`;
+              ```
+              "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See our
-              [comments on prompts](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more context.
+              See
+              [prompt validation](https://anthropic.readme.io/claude/reference/prompt-validation)
+              and our guide to
+              [prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
+              for more details.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See
-              [this guide to SSE events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-              for details.
+              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
+              details.
 
           metadata: An object describing metadata about the request.
 
-          stop_sequences: Sequences that will cause the model to stop generating completion text.
+          stop_sequences: Sequences that will cause the model to stop generating.
 
               Our models stop on `"\n\nHuman:"`, and may include additional built-in stop
               sequences in the future. By providing the stop_sequences parameter, you may
@@ -233,7 +239,7 @@ class Completions(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion | Stream[Completion]:
         """
-        Create a completion
+        Create a Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -243,35 +249,38 @@ class Completions(SyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. This
-              parameter controls which version of Claude answers your request. Right now we
-              are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
-              [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
-              additional details.
+              As we improve Claude, we develop new versions of it that you can query. The
+              `model` parameter controls which version of Claude responds to your request.
+              Right now we offer two model families: Claude, and Claude Instant. You can use
+              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
+              respectively.
+
+              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              additional details and options.
 
           prompt: The prompt that you want Claude to complete.
 
-              For proper response generation you will need to format your prompt as follows:
+              For proper response generation you will need to format your prompt using
+              alternating `\n\nHuman:` and `\n\nAssistant:` conversational turns. For example:
 
-              ```javascript
-              const userQuestion = r"Why is the sky blue?";
-              const prompt = `\n\nHuman: ${userQuestion}\n\nAssistant:`;
+              ```
+              "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See our
-              [comments on prompts](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more context.
+              See
+              [prompt validation](https://anthropic.readme.io/claude/reference/prompt-validation)
+              and our guide to
+              [prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
+              for more details.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See
-              [this guide to SSE events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-              for details.
+              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
+              details.
 
           metadata: An object describing metadata about the request.
 
-          stop_sequences: Sequences that will cause the model to stop generating completion text.
+          stop_sequences: Sequences that will cause the model to stop generating.
 
               Our models stop on `"\n\nHuman:"`, and may include additional built-in stop
               sequences in the future. By providing the stop_sequences parameter, you may
@@ -377,7 +386,7 @@ class AsyncCompletions(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion:
         """
-        Create a completion
+        Create a Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -387,29 +396,33 @@ class AsyncCompletions(AsyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. This
-              parameter controls which version of Claude answers your request. Right now we
-              are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
-              [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
-              additional details.
+              As we improve Claude, we develop new versions of it that you can query. The
+              `model` parameter controls which version of Claude responds to your request.
+              Right now we offer two model families: Claude, and Claude Instant. You can use
+              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
+              respectively.
+
+              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              additional details and options.
 
           prompt: The prompt that you want Claude to complete.
 
-              For proper response generation you will need to format your prompt as follows:
+              For proper response generation you will need to format your prompt using
+              alternating `\n\nHuman:` and `\n\nAssistant:` conversational turns. For example:
 
-              ```javascript
-              const userQuestion = r"Why is the sky blue?";
-              const prompt = `\n\nHuman: ${userQuestion}\n\nAssistant:`;
+              ```
+              "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See our
-              [comments on prompts](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more context.
+              See
+              [prompt validation](https://anthropic.readme.io/claude/reference/prompt-validation)
+              and our guide to
+              [prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
+              for more details.
 
           metadata: An object describing metadata about the request.
 
-          stop_sequences: Sequences that will cause the model to stop generating completion text.
+          stop_sequences: Sequences that will cause the model to stop generating.
 
               Our models stop on `"\n\nHuman:"`, and may include additional built-in stop
               sequences in the future. By providing the stop_sequences parameter, you may
@@ -417,9 +430,8 @@ class AsyncCompletions(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See
-              [this guide to SSE events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-              for details.
+              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
+              details.
 
           temperature: Amount of randomness injected into the response.
 
@@ -469,7 +481,7 @@ class AsyncCompletions(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> AsyncStream[Completion]:
         """
-        Create a completion
+        Create a Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -479,35 +491,38 @@ class AsyncCompletions(AsyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. This
-              parameter controls which version of Claude answers your request. Right now we
-              are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
-              [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
-              additional details.
+              As we improve Claude, we develop new versions of it that you can query. The
+              `model` parameter controls which version of Claude responds to your request.
+              Right now we offer two model families: Claude, and Claude Instant. You can use
+              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
+              respectively.
+
+              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              additional details and options.
 
           prompt: The prompt that you want Claude to complete.
 
-              For proper response generation you will need to format your prompt as follows:
+              For proper response generation you will need to format your prompt using
+              alternating `\n\nHuman:` and `\n\nAssistant:` conversational turns. For example:
 
-              ```javascript
-              const userQuestion = r"Why is the sky blue?";
-              const prompt = `\n\nHuman: ${userQuestion}\n\nAssistant:`;
+              ```
+              "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See our
-              [comments on prompts](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more context.
+              See
+              [prompt validation](https://anthropic.readme.io/claude/reference/prompt-validation)
+              and our guide to
+              [prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
+              for more details.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See
-              [this guide to SSE events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-              for details.
+              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
+              details.
 
           metadata: An object describing metadata about the request.
 
-          stop_sequences: Sequences that will cause the model to stop generating completion text.
+          stop_sequences: Sequences that will cause the model to stop generating.
 
               Our models stop on `"\n\nHuman:"`, and may include additional built-in stop
               sequences in the future. By providing the stop_sequences parameter, you may
@@ -561,7 +576,7 @@ class AsyncCompletions(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion | AsyncStream[Completion]:
         """
-        Create a completion
+        Create a Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -571,35 +586,38 @@ class AsyncCompletions(AsyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. This
-              parameter controls which version of Claude answers your request. Right now we
-              are offering two model families: Claude, and Claude Instant. You can use them by
-              setting `model` to `"claude-2.1"` or `"claude-instant-1"`, respectively. See
-              [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
-              additional details.
+              As we improve Claude, we develop new versions of it that you can query. The
+              `model` parameter controls which version of Claude responds to your request.
+              Right now we offer two model families: Claude, and Claude Instant. You can use
+              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
+              respectively.
+
+              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              additional details and options.
 
           prompt: The prompt that you want Claude to complete.
 
-              For proper response generation you will need to format your prompt as follows:
+              For proper response generation you will need to format your prompt using
+              alternating `\n\nHuman:` and `\n\nAssistant:` conversational turns. For example:
 
-              ```javascript
-              const userQuestion = r"Why is the sky blue?";
-              const prompt = `\n\nHuman: ${userQuestion}\n\nAssistant:`;
+              ```
+              "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See our
-              [comments on prompts](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more context.
+              See
+              [prompt validation](https://anthropic.readme.io/claude/reference/prompt-validation)
+              and our guide to
+              [prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
+              for more details.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See
-              [this guide to SSE events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-              for details.
+              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
+              details.
 
           metadata: An object describing metadata about the request.
 
-          stop_sequences: Sequences that will cause the model to stop generating completion text.
+          stop_sequences: Sequences that will cause the model to stop generating.
 
               Our models stop on `"\n\nHuman:"`, and may include additional built-in stop
               sequences in the future. By providing the stop_sequences parameter, you may
