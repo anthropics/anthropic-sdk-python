@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from pathlib import Path
 
 from anyio import Path as AsyncPath
@@ -8,24 +8,31 @@ from anyio import Path as AsyncPath
 # tokenizers is untyped, https://github.com/huggingface/tokenizers/issues/811
 # note: this comment affects the entire file
 # pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false
-from tokenizers import Tokenizer  # type: ignore[import]
+if TYPE_CHECKING:
+    # we only import this at the type-level as deferring the import
+    # avoids issues like this: https://github.com/anthropics/anthropic-sdk-python/issues/280
+    from tokenizers import Tokenizer as TokenizerType  # type: ignore[import]
+else:
+    TokenizerType = None
 
 
 def _get_tokenizer_cache_path() -> Path:
     return Path(__file__).parent / "tokenizer.json"
 
 
-_tokenizer: Tokenizer | None = None
+_tokenizer: TokenizerType | None = None
 
 
-def _load_tokenizer(raw: str) -> Tokenizer:
+def _load_tokenizer(raw: str) -> TokenizerType:
     global _tokenizer
 
-    _tokenizer = cast(Tokenizer, Tokenizer.from_str(raw))
+    from tokenizers import Tokenizer
+
+    _tokenizer = cast(TokenizerType, Tokenizer.from_str(raw))
     return _tokenizer
 
 
-def sync_get_tokenizer() -> Tokenizer:
+def sync_get_tokenizer() -> TokenizerType:
     if _tokenizer is not None:
         return _tokenizer
 
@@ -34,7 +41,7 @@ def sync_get_tokenizer() -> Tokenizer:
     return _load_tokenizer(text)
 
 
-async def async_get_tokenizer() -> Tokenizer:
+async def async_get_tokenizer() -> TokenizerType:
     if _tokenizer is not None:
         return _tokenizer
 

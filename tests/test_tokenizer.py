@@ -1,3 +1,4 @@
+import sys
 import asyncio
 import threading
 import concurrent.futures
@@ -18,6 +19,17 @@ def _sync_tokenizer_test() -> None:
     tokenizer = _tokenizers.sync_get_tokenizer()
     encoded_text = tokenizer.encode("hello world")  # type: ignore
     assert len(encoded_text.ids) == 2  # type: ignore
+
+
+def test_tokenizers_is_not_imported() -> None:
+    # note: this test relies on being executed before any of the
+    # other tests but is a valuable test to avoid issues like this
+    # https://github.com/anthropics/anthropic-sdk-python/issues/280
+    assert "tokenizers" not in sys.modules
+
+    _sync_tokenizer_test()
+
+    assert "tokenizers" in sys.modules
 
 
 def test_threading() -> None:

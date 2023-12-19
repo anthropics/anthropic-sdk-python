@@ -7,7 +7,6 @@ from typing import Any, Union, Mapping
 from typing_extensions import Self, override
 
 import httpx
-from tokenizers import Tokenizer  # type: ignore[import]
 
 from . import resources, _constants, _exceptions
 from ._qs import Querystring
@@ -27,6 +26,7 @@ from ._version import __version__
 from ._streaming import Stream as Stream
 from ._streaming import AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
+from ._tokenizers import TokenizerType  # type: ignore[import]
 from ._tokenizers import sync_get_tokenizer, async_get_tokenizer
 from ._base_client import (
     DEFAULT_LIMITS,
@@ -264,7 +264,7 @@ class Anthropic(SyncAPIClient):
         encoded_text = tokenizer.encode(text)  # type: ignore
         return len(encoded_text.ids)  # type: ignore
 
-    def get_tokenizer(self) -> Tokenizer:
+    def get_tokenizer(self) -> TokenizerType:
         return sync_get_tokenizer()
 
     @override
@@ -515,7 +515,7 @@ class AsyncAnthropic(AsyncAPIClient):
         encoded_text = tokenizer.encode(text)  # type: ignore
         return len(encoded_text.ids)  # type: ignore
 
-    async def get_tokenizer(self) -> Tokenizer:
+    async def get_tokenizer(self) -> TokenizerType:
         return await async_get_tokenizer()
 
     @override
