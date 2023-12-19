@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.8.0 (2023-12-19)
+
+Full Changelog: [v0.7.8...v0.8.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.8...v0.8.0)
+
+### Features
+
+* **api:** add messages endpoint with streaming helpers ([#286](https://github.com/anthropics/anthropic-sdk-python/issues/286)) ([c464b87](https://github.com/anthropics/anthropic-sdk-python/commit/c464b87b72ebbf9255418a02c627b0f0c52d03dd))
+
+
+### Chores
+
+* **ci:** run release workflow once per day ([#282](https://github.com/anthropics/anthropic-sdk-python/issues/282)) ([3a23912](https://github.com/anthropics/anthropic-sdk-python/commit/3a239127713c68ae53fa8b338e1f60ca25840a90))
+* **client:** only import tokenizers when needed ([#284](https://github.com/anthropics/anthropic-sdk-python/issues/284)) ([b9e38b2](https://github.com/anthropics/anthropic-sdk-python/commit/b9e38b2a2e2be2b5fb31842fa409b95abcbccbc6))
+* **streaming:** update constructor to use direct client names ([#285](https://github.com/anthropics/anthropic-sdk-python/issues/285)) ([0c55c84](https://github.com/anthropics/anthropic-sdk-python/commit/0c55c84ab3527199401f387fbc3338572b264fef))
+
 ## 0.7.8 (2023-12-12)
 
 Full Changelog: [v0.7.7...v0.7.8](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.7...v0.7.8)
