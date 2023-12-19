@@ -69,6 +69,8 @@ __all__ = [
     "AI_PROMPT",
 ]
 
+from .lib.streaming import *
+
 _setup_logging()
 
 # Update the __module__ attribute for exported symbols so that
