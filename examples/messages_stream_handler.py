@@ -1,9 +1,8 @@
 import asyncio
 from typing_extensions import override
 
-from anthropic import AsyncAnthropic
+from anthropic import AsyncAnthropic, AsyncMessageStream
 from anthropic.types.beta import MessageStreamEvent
-from anthropic.lib.streaming import AsyncMessageStream
 
 client = AsyncAnthropic()
 

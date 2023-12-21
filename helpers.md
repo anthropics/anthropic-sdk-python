@@ -21,7 +21,7 @@ async with client.beta.messages.stream(
 `client.beta.messages.stream()` returns a `MessageStreamManager`, which is a context manager that yields a `MessageStream` which is iterable, emits events and accumulates messages.
 
 Alternatively, you can use `client.beta.messages.create(..., stream=True)` which returns an
-iteratable of the events in the stream and uses less memory (most notably, it does not accumulate a final message
+iterable of the events in the stream and uses less memory (most notably, it does not accumulate a final message
 object for you).
 
 The stream will be cancelled when the context manager exits but you can also close it prematurely by calling `stream.close()`.
@@ -44,6 +44,44 @@ print()
 ```
 
 ### Events
+
+You can pass an `event_handler` argument to `client.beta.messages.stream` to register callback methods that are fired when certain events happen:
+
+```py
+import asyncio
+from typing_extensions import override
+
+from anthropic import AsyncAnthropic, AsyncMessageStream
+from anthropic.types.beta import MessageStreamEvent
+
+client = AsyncAnthropic()
+
+class MyStream(AsyncMessageStream):
+    @override
+    async def on_text(self, delta: str) -> None:
+        print(text, end="", flush=True)
+
+    @override
+    async def on_stream_event(self, event: MessageStreamEvent) -> None:
+        print("on_event fired with:", event)
+
+async def main() -> None:
+    async with client.beta.messages.stream(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="claude-2.1",
+        event_handler=MyStream,
+    ) as stream:
+        message = await stream.get_final_message()
+        print("accumulated message: ", message.model_dump_json(indent=2))
+
+asyncio.run(main())
+```
 
 #### `await on_stream_event(event: MessageStreamEvent)`
 
