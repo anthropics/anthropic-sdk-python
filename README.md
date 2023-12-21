@@ -131,11 +131,8 @@ async def main() -> None:
             print(text, end="", flush=True)
         print()
 
-    # you can still get the accumulated final message outside of
-    # the context manager, as long as the entire stream was consumed
-    # inside of the context manager
-    accumulated = await stream.get_final_message()
-    print(accumulated.model_dump_json(indent=2))
+    message = await stream.get_final_message()
+    print(message.model_dump_json(indent=2))
 
 asyncio.run(main())
 ```
