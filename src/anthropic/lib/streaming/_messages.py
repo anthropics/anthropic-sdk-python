@@ -105,9 +105,9 @@ class MessageStream(Stream[MessageStreamEvent]):
         text, for example:
 
         ```py
-        on_text('Hello', 'Hello')
-        on_text(' there', 'Hello there')
-        on_text('!', 'Hello there!')
+        on_text("Hello", "Hello")
+        on_text(" there", "Hello there")
+        on_text("!", "Hello there!")
         ```
         """
 
@@ -295,9 +295,9 @@ class AsyncMessageStream(AsyncStream[MessageStreamEvent]):
         text, for example:
 
         ```
-        on_text('Hello', 'Hello')
-        on_text(' there', 'Hello there')
-        on_text('!', 'Hello there!')
+        on_text("Hello", "Hello")
+        on_text(" there", "Hello there")
+        on_text("!", "Hello there!")
         ```
         """
 
