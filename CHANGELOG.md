@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.8.1 (2023-12-22)
+
+Full Changelog: [v0.8.0...v0.8.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.8.0...v0.8.1)
+
+### Chores
+
+* **internal:** add bin script ([#292](https://github.com/anthropics/anthropic-sdk-python/issues/292)) ([ba2953d](https://github.com/anthropics/anthropic-sdk-python/commit/ba2953dcaa8a8fcebaa7e8891304687c95b17499))
+* **internal:** fix typos ([#287](https://github.com/anthropics/anthropic-sdk-python/issues/287)) ([4ffbcdf](https://github.com/anthropics/anthropic-sdk-python/commit/4ffbcdf1d3c8c2fbaf7152d207b24cdb0ea82ac9))
+* **internal:** use ruff instead of black for formatting ([#294](https://github.com/anthropics/anthropic-sdk-python/issues/294)) ([1753887](https://github.com/anthropics/anthropic-sdk-python/commit/1753887a776f41bdc2d648329cfe6f20c91125e5))
+* **package:** bump minimum typing-extensions to 4.7 ([#290](https://github.com/anthropics/anthropic-sdk-python/issues/290)) ([9ec5c57](https://github.com/anthropics/anthropic-sdk-python/commit/9ec5c57ba9a14a769d540e48755b05a1c190b45b))
+
+
+### Documentation
+
+* **messages:** improvements to helpers reference + typos ([#291](https://github.com/anthropics/anthropic-sdk-python/issues/291)) ([d18a895](https://github.com/anthropics/anthropic-sdk-python/commit/d18a895d380fc0c6610443486d73247b0cd97376))
+* **readme:** remove old migration guide ([#289](https://github.com/anthropics/anthropic-sdk-python/issues/289)) ([eec4574](https://github.com/anthropics/anthropic-sdk-python/commit/eec4574f1f6668804c88bda67b901db10400fbc3))
+
 ## 0.8.0 (2023-12-19)
 
 Full Changelog: [v0.7.8...v0.8.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.7.8...v0.8.0)
