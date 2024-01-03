@@ -4,12 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .messages import (
-    Messages,
-    AsyncMessages,
-    MessagesWithRawResponse,
-    AsyncMessagesWithRawResponse,
-)
+from .messages import Messages, AsyncMessages, MessagesWithRawResponse, AsyncMessagesWithRawResponse
 from ..._resource import SyncAPIResource, AsyncAPIResource
 
 if TYPE_CHECKING:
