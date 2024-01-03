@@ -8,7 +8,13 @@ from typing_extensions import Literal
 
 import httpx
 
-from ..._types import NOT_GIVEN, Body, Query, Headers, NotGiven
+from ..._types import (
+    NOT_GIVEN,
+    Body,
+    Query,
+    Headers,
+    NotGiven,
+)
 from ..._utils import required_args, maybe_transform
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import to_raw_response_wrapper, async_to_raw_response_wrapper
@@ -19,7 +25,9 @@ from ...types.beta import (
     MessageStreamEvent,
     message_create_params,
 )
-from ..._base_client import make_request_options
+from ..._base_client import (
+    make_request_options,
+)
 from ...lib.streaming import (
     MessageStream,
     MessageStreamT,

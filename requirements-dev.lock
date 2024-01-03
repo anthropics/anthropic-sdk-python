@@ -27,7 +27,6 @@ huggingface-hub==0.16.4
 idna==3.4
 importlib-metadata==7.0.0
 iniconfig==2.0.0
-isort==5.10.1
 mypy==1.7.1
 mypy-extensions==1.0.0
 nodeenv==1.8.0
