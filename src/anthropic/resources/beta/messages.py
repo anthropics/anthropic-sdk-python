@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, overload
+from typing import List, overload
 from functools import partial
 from typing_extensions import Literal
 
@@ -16,15 +16,11 @@ from ..._types import (
     NotGiven,
 )
 from ..._utils import required_args, maybe_transform
+from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import to_raw_response_wrapper, async_to_raw_response_wrapper
 from ..._streaming import Stream, AsyncStream
-from ...types.beta import (
-    Message,
-    MessageParam,
-    MessageStreamEvent,
-    message_create_params,
-)
+from ...types.beta import Message, MessageParam, MessageStreamEvent, message_create_params
 from ..._base_client import (
     make_request_options,
 )
@@ -37,18 +33,13 @@ from ...lib.streaming import (
     AsyncMessageStreamManager,
 )
 
-if TYPE_CHECKING:
-    from ..._client import Anthropic, AsyncAnthropic
-
 __all__ = ["Messages", "AsyncMessages"]
 
 
 class Messages(SyncAPIResource):
-    with_raw_response: MessagesWithRawResponse
-
-    def __init__(self, client: Anthropic) -> None:
-        super().__init__(client)
-        self.with_raw_response = MessagesWithRawResponse(self)
+    @cached_property
+    def with_raw_response(self) -> MessagesWithRawResponse:
+        return MessagesWithRawResponse(self)
 
     @overload
     def create(
@@ -671,11 +662,9 @@ class Messages(SyncAPIResource):
 
 
 class AsyncMessages(AsyncAPIResource):
-    with_raw_response: AsyncMessagesWithRawResponse
-
-    def __init__(self, client: AsyncAnthropic) -> None:
-        super().__init__(client)
-        self.with_raw_response = AsyncMessagesWithRawResponse(self)
+    @cached_property
+    def with_raw_response(self) -> AsyncMessagesWithRawResponse:
+        return AsyncMessagesWithRawResponse(self)
 
     @overload
     async def create(
