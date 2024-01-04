@@ -63,7 +63,7 @@ class Message(BaseModel):
     This will always be `"assistant"`.
     """
 
-    stop_reason: Optional[Literal["end_turn", "max_tokens", "stop_sequence"]]
+    stop_reason: Optional[Literal["end_turn", "max_tokens", "stop_sequence"]] = None
     """The reason that we stopped.
 
     This may be one the following values:
@@ -79,7 +79,7 @@ class Message(BaseModel):
     null in the `message_start` event and non-null otherwise.
     """
 
-    stop_sequence: Optional[str]
+    stop_sequence: Optional[str] = None
     """Which custom stop sequence was generated.
 
     This value will be non-null if one of your custom stop sequences was generated.
