@@ -2,35 +2,31 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from .messages import Messages, AsyncMessages, MessagesWithRawResponse, AsyncMessagesWithRawResponse
+from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-
-if TYPE_CHECKING:
-    from ..._client import Anthropic, AsyncAnthropic
 
 __all__ = ["Beta", "AsyncBeta"]
 
 
 class Beta(SyncAPIResource):
-    messages: Messages
-    with_raw_response: BetaWithRawResponse
+    @cached_property
+    def messages(self) -> Messages:
+        return Messages(self._client)
 
-    def __init__(self, client: Anthropic) -> None:
-        super().__init__(client)
-        self.messages = Messages(client)
-        self.with_raw_response = BetaWithRawResponse(self)
+    @cached_property
+    def with_raw_response(self) -> BetaWithRawResponse:
+        return BetaWithRawResponse(self)
 
 
 class AsyncBeta(AsyncAPIResource):
-    messages: AsyncMessages
-    with_raw_response: AsyncBetaWithRawResponse
+    @cached_property
+    def messages(self) -> AsyncMessages:
+        return AsyncMessages(self._client)
 
-    def __init__(self, client: AsyncAnthropic) -> None:
-        super().__init__(client)
-        self.messages = AsyncMessages(client)
-        self.with_raw_response = AsyncBetaWithRawResponse(self)
+    @cached_property
+    def with_raw_response(self) -> AsyncBetaWithRawResponse:
+        return AsyncBetaWithRawResponse(self)
 
 
 class BetaWithRawResponse:
