@@ -9,9 +9,9 @@ __all__ = ["MessageDeltaEvent", "Delta"]
 
 
 class Delta(BaseModel):
-    stop_reason: Optional[Literal["end_turn", "max_tokens", "stop_sequence"]]
+    stop_reason: Optional[Literal["end_turn", "max_tokens", "stop_sequence"]] = None
 
-    stop_sequence: Optional[str]
+    stop_sequence: Optional[str] = None
 
 
 class MessageDeltaEvent(BaseModel):
