@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.9.0 (2024-01-08)
+
+Full Changelog: [v0.8.1...v0.9.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.8.1...v0.9.0)
+
+### Features
+
+* add `None` default value to nullable response properties ([#299](https://github.com/anthropics/anthropic-sdk-python/issues/299)) ([da423db](https://github.com/anthropics/anthropic-sdk-python/commit/da423db5c14b213c52fe0986981c4f01aff0d2c3))
+
+
+### Bug Fixes
+
+* **client:** correctly use custom http client auth ([#296](https://github.com/anthropics/anthropic-sdk-python/issues/296)) ([6289d6e](https://github.com/anthropics/anthropic-sdk-python/commit/6289d6e205f872c02114f05333d5426055f2416f))
+
+
+### Chores
+
+* add .keep files for examples and custom code directories ([#302](https://github.com/anthropics/anthropic-sdk-python/issues/302)) ([73a07ea](https://github.com/anthropics/anthropic-sdk-python/commit/73a07ea7a5254d205b68e25c46c1f2267604ac9b))
+* **internal:** loosen type var restrictions ([#301](https://github.com/anthropics/anthropic-sdk-python/issues/301)) ([5e5e1e7](https://github.com/anthropics/anthropic-sdk-python/commit/5e5e1e716a8732af66e2234307521b4620b07361))
+* **internal:** replace isort with ruff ([#298](https://github.com/anthropics/anthropic-sdk-python/issues/298)) ([7c60904](https://github.com/anthropics/anthropic-sdk-python/commit/7c60904f5da10c4ef6ab8af4e8631bc938b35131))
+* use property declarations for resource members ([#300](https://github.com/anthropics/anthropic-sdk-python/issues/300)) ([8671297](https://github.com/anthropics/anthropic-sdk-python/commit/8671297b87105635accefd574c44dbffd8a4f9e9))
+
 ## 0.8.1 (2023-12-22)
 
 Full Changelog: [v0.8.0...v0.8.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.8.0...v0.8.1)
