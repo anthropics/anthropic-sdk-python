@@ -10,7 +10,7 @@ For the AWS Bedrock API, see [`anthropic-bedrock`](https://github.com/anthropics
 
 ## Documentation
 
-The API documentation can be found [here](https://docs.anthropic.com/claude/reference/).
+The REST API documentation can be found [on docs.anthropic.com](https://docs.anthropic.com/claude/reference/). The full API of this library can be found in [api.md](https://www.github.com/anthropics/anthropic-sdk-python/blob/main/api.md).
 
 ## Installation
 
