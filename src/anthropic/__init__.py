@@ -15,6 +15,7 @@ from ._client import (
     RequestOptions,
 )
 from ._version import __title__, __version__
+from ._response import APIResponse as APIResponse, AsyncAPIResponse as AsyncAPIResponse
 from ._constants import AI_PROMPT as AI_PROMPT, HUMAN_PROMPT as HUMAN_PROMPT
 from ._exceptions import (
     APIError,
