@@ -20,6 +20,8 @@ from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
 from anthropic._types import Omit
 from anthropic._client import Anthropic, AsyncAnthropic
 from anthropic._models import BaseModel, FinalRequestOptions
+from anthropic._response import APIResponse, AsyncAPIResponse
+from anthropic._constants import RAW_RESPONSE_HEADER
 from anthropic._streaming import Stream, AsyncStream
 from anthropic._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
 from anthropic._base_client import (
@@ -226,6 +228,7 @@ class TestAnthropic:
                         # to_raw_response_wrapper leaks through the @functools.wraps() decorator.
                         #
                         # removing the decorator fixes the leak for reasons we don't understand.
+                        "anthropic/_legacy_response.py",
                         "anthropic/_response.py",
                         # pydantic.BaseModel.model_dump || pydantic.BaseModel.dict leak memory for some reason.
                         "anthropic/_compat.py",
@@ -719,8 +722,9 @@ class TestAnthropic:
 
         respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
-        response = self.client.post("/foo", cast_to=Model, stream=True)
-        assert isinstance(response, Stream)
+        stream = self.client.post("/foo", cast_to=Model, stream=True, stream_cls=Stream[Model])
+        assert isinstance(stream, Stream)
+        stream.response.close()
 
     @pytest.mark.respx(base_url=base_url)
     def test_received_text_for_expected_json(self, respx_mock: MockRouter) -> None:
@@ -770,6 +774,29 @@ class TestAnthropic:
 
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
+    def test_streaming_response(self) -> None:
+        response = self.client.post(
+            "/v1/complete",
+            body=dict(
+                max_tokens_to_sample=300,
+                model="claude-2.1",
+                prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+            ),
+            cast_to=APIResponse[bytes],
+            options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
+        )
+
+        assert not cast(Any, response.is_closed)
+        assert _get_open_connections(self.client) == 1
+
+        for _ in response.iter_bytes():
+            ...
+
+        assert cast(Any, response.is_closed)
+        assert _get_open_connections(self.client) == 0
+
+    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @pytest.mark.respx(base_url=base_url)
     def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/complete").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
@@ -782,7 +809,7 @@ class TestAnthropic:
                     prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                 ),
                 cast_to=httpx.Response,
-                options={"headers": {"X-Stainless-Streamed-Raw-Response": "true"}},
+                options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
             )
 
         assert _get_open_connections(self.client) == 0
@@ -801,7 +828,7 @@ class TestAnthropic:
                     prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                 ),
                 cast_to=httpx.Response,
-                options={"headers": {"X-Stainless-Streamed-Raw-Response": "true"}},
+                options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
             )
 
         assert _get_open_connections(self.client) == 0
@@ -982,6 +1009,7 @@ class TestAsyncAnthropic:
                         # to_raw_response_wrapper leaks through the @functools.wraps() decorator.
                         #
                         # removing the decorator fixes the leak for reasons we don't understand.
+                        "anthropic/_legacy_response.py",
                         "anthropic/_response.py",
                         # pydantic.BaseModel.model_dump || pydantic.BaseModel.dict leak memory for some reason.
                         "anthropic/_compat.py",
@@ -1488,8 +1516,9 @@ class TestAsyncAnthropic:
 
         respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
-        response = await self.client.post("/foo", cast_to=Model, stream=True)
-        assert isinstance(response, AsyncStream)
+        stream = await self.client.post("/foo", cast_to=Model, stream=True, stream_cls=AsyncStream[Model])
+        assert isinstance(stream, AsyncStream)
+        await stream.response.aclose()
 
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.asyncio
@@ -1541,6 +1570,29 @@ class TestAsyncAnthropic:
 
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
+    async def test_streaming_response(self) -> None:
+        response = await self.client.post(
+            "/v1/complete",
+            body=dict(
+                max_tokens_to_sample=300,
+                model="claude-2.1",
+                prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+            ),
+            cast_to=AsyncAPIResponse[bytes],
+            options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
+        )
+
+        assert not cast(Any, response.is_closed)
+        assert _get_open_connections(self.client) == 1
+
+        async for _ in response.iter_bytes():
+            ...
+
+        assert cast(Any, response.is_closed)
+        assert _get_open_connections(self.client) == 0
+
+    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @pytest.mark.respx(base_url=base_url)
     async def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/complete").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
@@ -1553,7 +1605,7 @@ class TestAsyncAnthropic:
                     prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                 ),
                 cast_to=httpx.Response,
-                options={"headers": {"X-Stainless-Streamed-Raw-Response": "true"}},
+                options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
             )
 
         assert _get_open_connections(self.client) == 0
@@ -1572,7 +1624,7 @@ class TestAsyncAnthropic:
                     prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                 ),
                 cast_to=httpx.Response,
-                options={"headers": {"X-Stainless-Streamed-Raw-Response": "true"}},
+                options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
             )
 
         assert _get_open_connections(self.client) == 0

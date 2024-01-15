@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 
-from .messages import Messages, AsyncMessages, MessagesWithRawResponse, AsyncMessagesWithRawResponse
+from .messages import (
+    Messages,
+    AsyncMessages,
+    MessagesWithRawResponse,
+    AsyncMessagesWithRawResponse,
+    MessagesWithStreamingResponse,
+    AsyncMessagesWithStreamingResponse,
+)
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 
@@ -18,6 +25,10 @@ class Beta(SyncAPIResource):
     def with_raw_response(self) -> BetaWithRawResponse:
         return BetaWithRawResponse(self)
 
+    @cached_property
+    def with_streaming_response(self) -> BetaWithStreamingResponse:
+        return BetaWithStreamingResponse(self)
+
 
 class AsyncBeta(AsyncAPIResource):
     @cached_property
@@ -28,6 +39,10 @@ class AsyncBeta(AsyncAPIResource):
     def with_raw_response(self) -> AsyncBetaWithRawResponse:
         return AsyncBetaWithRawResponse(self)
 
+    @cached_property
+    def with_streaming_response(self) -> AsyncBetaWithStreamingResponse:
+        return AsyncBetaWithStreamingResponse(self)
+
 
 class BetaWithRawResponse:
     def __init__(self, beta: Beta) -> None:
@@ -37,3 +52,13 @@ class BetaWithRawResponse:
 class AsyncBetaWithRawResponse:
     def __init__(self, beta: AsyncBeta) -> None:
         self.messages = AsyncMessagesWithRawResponse(beta.messages)
+
+
+class BetaWithStreamingResponse:
+    def __init__(self, beta: Beta) -> None:
+        self.messages = MessagesWithStreamingResponse(beta.messages)
+
+
+class AsyncBetaWithStreamingResponse:
+    def __init__(self, beta: AsyncBeta) -> None:
+        self.messages = AsyncMessagesWithStreamingResponse(beta.messages)
