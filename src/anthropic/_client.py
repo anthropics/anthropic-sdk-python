@@ -59,6 +59,7 @@ class Anthropic(SyncAPIClient):
     completions: resources.Completions
     beta: resources.Beta
     with_raw_response: AnthropicWithRawResponse
+    with_streaming_response: AnthropicWithStreamedResponse
 
     # client options
     api_key: str | None
@@ -134,6 +135,7 @@ class Anthropic(SyncAPIClient):
         self.completions = resources.Completions(self)
         self.beta = resources.Beta(self)
         self.with_raw_response = AnthropicWithRawResponse(self)
+        self.with_streaming_response = AnthropicWithStreamedResponse(self)
 
     @property
     @override
@@ -312,6 +314,7 @@ class AsyncAnthropic(AsyncAPIClient):
     completions: resources.AsyncCompletions
     beta: resources.AsyncBeta
     with_raw_response: AsyncAnthropicWithRawResponse
+    with_streaming_response: AsyncAnthropicWithStreamedResponse
 
     # client options
     api_key: str | None
@@ -387,6 +390,7 @@ class AsyncAnthropic(AsyncAPIClient):
         self.completions = resources.AsyncCompletions(self)
         self.beta = resources.AsyncBeta(self)
         self.with_raw_response = AsyncAnthropicWithRawResponse(self)
+        self.with_streaming_response = AsyncAnthropicWithStreamedResponse(self)
 
     @property
     @override
@@ -571,6 +575,18 @@ class AsyncAnthropicWithRawResponse:
     def __init__(self, client: AsyncAnthropic) -> None:
         self.completions = resources.AsyncCompletionsWithRawResponse(client.completions)
         self.beta = resources.AsyncBetaWithRawResponse(client.beta)
+
+
+class AnthropicWithStreamedResponse:
+    def __init__(self, client: Anthropic) -> None:
+        self.completions = resources.CompletionsWithStreamingResponse(client.completions)
+        self.beta = resources.BetaWithStreamingResponse(client.beta)
+
+
+class AsyncAnthropicWithStreamedResponse:
+    def __init__(self, client: AsyncAnthropic) -> None:
+        self.completions = resources.AsyncCompletionsWithStreamingResponse(client.completions)
+        self.beta = resources.AsyncBetaWithStreamingResponse(client.beta)
 
 
 Client = Anthropic

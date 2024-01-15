@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from typing import Any, cast
 
 import pytest
 
@@ -51,22 +52,40 @@ class TestCompletions:
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
         )
+
+        assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         completion = response.parse()
         assert_matches_type(Completion, completion, path=["response"])
 
     @parametrize
+    def test_streaming_response_create_overload_1(self, client: Anthropic) -> None:
+        with client.completions.with_streaming_response.create(
+            max_tokens_to_sample=256,
+            model="claude-2.1",
+            prompt="\n\nHuman: Hello, world!\n\nAssistant:",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            completion = response.parse()
+            assert_matches_type(Completion, completion, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
     def test_method_create_overload_2(self, client: Anthropic) -> None:
-        client.completions.create(
+        completion_stream = client.completions.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         )
+        completion_stream.response.close()
 
     @parametrize
     def test_method_create_with_all_params_overload_2(self, client: Anthropic) -> None:
-        client.completions.create(
+        completion_stream = client.completions.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
@@ -77,6 +96,7 @@ class TestCompletions:
             top_k=5,
             top_p=0.7,
         )
+        completion_stream.response.close()
 
     @parametrize
     def test_raw_response_create_overload_2(self, client: Anthropic) -> None:
@@ -86,8 +106,26 @@ class TestCompletions:
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         )
+
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        response.parse()
+        stream = response.parse()
+        stream.close()
+
+    @parametrize
+    def test_streaming_response_create_overload_2(self, client: Anthropic) -> None:
+        with client.completions.with_streaming_response.create(
+            max_tokens_to_sample=256,
+            model="claude-2.1",
+            prompt="\n\nHuman: Hello, world!\n\nAssistant:",
+            stream=True,
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            stream = response.parse()
+            stream.close()
+
+        assert cast(Any, response.is_closed) is True
 
 
 class TestAsyncCompletions:
@@ -126,22 +164,40 @@ class TestAsyncCompletions:
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
         )
+
+        assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         completion = response.parse()
         assert_matches_type(Completion, completion, path=["response"])
 
     @parametrize
+    async def test_streaming_response_create_overload_1(self, client: AsyncAnthropic) -> None:
+        async with client.completions.with_streaming_response.create(
+            max_tokens_to_sample=256,
+            model="claude-2.1",
+            prompt="\n\nHuman: Hello, world!\n\nAssistant:",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            completion = await response.parse()
+            assert_matches_type(Completion, completion, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
     async def test_method_create_overload_2(self, client: AsyncAnthropic) -> None:
-        await client.completions.create(
+        completion_stream = await client.completions.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         )
+        await completion_stream.response.aclose()
 
     @parametrize
     async def test_method_create_with_all_params_overload_2(self, client: AsyncAnthropic) -> None:
-        await client.completions.create(
+        completion_stream = await client.completions.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
@@ -152,6 +208,7 @@ class TestAsyncCompletions:
             top_k=5,
             top_p=0.7,
         )
+        await completion_stream.response.aclose()
 
     @parametrize
     async def test_raw_response_create_overload_2(self, client: AsyncAnthropic) -> None:
@@ -161,5 +218,23 @@ class TestAsyncCompletions:
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         )
+
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        response.parse()
+        stream = response.parse()
+        await stream.close()
+
+    @parametrize
+    async def test_streaming_response_create_overload_2(self, client: AsyncAnthropic) -> None:
+        async with client.completions.with_streaming_response.create(
+            max_tokens_to_sample=256,
+            model="claude-2.1",
+            prompt="\n\nHuman: Hello, world!\n\nAssistant:",
+            stream=True,
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            stream = await response.parse()
+            await stream.close()
+
+        assert cast(Any, response.is_closed) is True

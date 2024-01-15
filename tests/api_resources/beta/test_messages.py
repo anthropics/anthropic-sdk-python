@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from typing import Any, cast
 
 import pytest
 
@@ -67,13 +68,35 @@ class TestMessages:
             ],
             model="claude-2.1",
         )
+
+        assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         message = response.parse()
         assert_matches_type(Message, message, path=["response"])
 
     @parametrize
+    def test_streaming_response_create_overload_1(self, client: Anthropic) -> None:
+        with client.beta.messages.with_streaming_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "In one sentence, what is good about the color blue?",
+                }
+            ],
+            model="claude-2.1",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            message = response.parse()
+            assert_matches_type(Message, message, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
     def test_method_create_overload_2(self, client: Anthropic) -> None:
-        client.beta.messages.create(
+        message_stream = client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -84,10 +107,11 @@ class TestMessages:
             model="claude-2.1",
             stream=True,
         )
+        message_stream.response.close()
 
     @parametrize
     def test_method_create_with_all_params_overload_2(self, client: Anthropic) -> None:
-        client.beta.messages.create(
+        message_stream = client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -104,6 +128,7 @@ class TestMessages:
             top_k=5,
             top_p=0.7,
         )
+        message_stream.response.close()
 
     @parametrize
     def test_raw_response_create_overload_2(self, client: Anthropic) -> None:
@@ -118,8 +143,31 @@ class TestMessages:
             model="claude-2.1",
             stream=True,
         )
+
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        response.parse()
+        stream = response.parse()
+        stream.close()
+
+    @parametrize
+    def test_streaming_response_create_overload_2(self, client: Anthropic) -> None:
+        with client.beta.messages.with_streaming_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "In one sentence, what is good about the color blue?",
+                }
+            ],
+            model="claude-2.1",
+            stream=True,
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            stream = response.parse()
+            stream.close()
+
+        assert cast(Any, response.is_closed) is True
 
 
 class TestAsyncMessages:
@@ -174,13 +222,35 @@ class TestAsyncMessages:
             ],
             model="claude-2.1",
         )
+
+        assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         message = response.parse()
         assert_matches_type(Message, message, path=["response"])
 
     @parametrize
+    async def test_streaming_response_create_overload_1(self, client: AsyncAnthropic) -> None:
+        async with client.beta.messages.with_streaming_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "In one sentence, what is good about the color blue?",
+                }
+            ],
+            model="claude-2.1",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            message = await response.parse()
+            assert_matches_type(Message, message, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
     async def test_method_create_overload_2(self, client: AsyncAnthropic) -> None:
-        await client.beta.messages.create(
+        message_stream = await client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -191,10 +261,11 @@ class TestAsyncMessages:
             model="claude-2.1",
             stream=True,
         )
+        await message_stream.response.aclose()
 
     @parametrize
     async def test_method_create_with_all_params_overload_2(self, client: AsyncAnthropic) -> None:
-        await client.beta.messages.create(
+        message_stream = await client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -211,6 +282,7 @@ class TestAsyncMessages:
             top_k=5,
             top_p=0.7,
         )
+        await message_stream.response.aclose()
 
     @parametrize
     async def test_raw_response_create_overload_2(self, client: AsyncAnthropic) -> None:
@@ -225,5 +297,28 @@ class TestAsyncMessages:
             model="claude-2.1",
             stream=True,
         )
+
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        response.parse()
+        stream = response.parse()
+        await stream.close()
+
+    @parametrize
+    async def test_streaming_response_create_overload_2(self, client: AsyncAnthropic) -> None:
+        async with client.beta.messages.with_streaming_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "In one sentence, what is good about the color blue?",
+                }
+            ],
+            model="claude-2.1",
+            stream=True,
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            stream = await response.parse()
+            await stream.close()
+
+        assert cast(Any, response.is_closed) is True
