@@ -1290,6 +1290,8 @@ class AsyncMessages(AsyncAPIResource):
 
 class MessagesWithRawResponse:
     def __init__(self, messages: Messages) -> None:
+        self._messages = messages
+
         self.create = _legacy_response.to_raw_response_wrapper(
             messages.create,
         )
@@ -1297,6 +1299,8 @@ class MessagesWithRawResponse:
 
 class AsyncMessagesWithRawResponse:
     def __init__(self, messages: AsyncMessages) -> None:
+        self._messages = messages
+
         self.create = _legacy_response.async_to_raw_response_wrapper(
             messages.create,
         )
@@ -1304,6 +1308,8 @@ class AsyncMessagesWithRawResponse:
 
 class MessagesWithStreamingResponse:
     def __init__(self, messages: Messages) -> None:
+        self._messages = messages
+
         self.create = to_streamed_response_wrapper(
             messages.create,
         )
@@ -1311,6 +1317,8 @@ class MessagesWithStreamingResponse:
 
 class AsyncMessagesWithStreamingResponse:
     def __init__(self, messages: AsyncMessages) -> None:
+        self._messages = messages
+
         self.create = async_to_streamed_response_wrapper(
             messages.create,
         )

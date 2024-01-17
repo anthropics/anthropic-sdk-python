@@ -46,19 +46,35 @@ class AsyncBeta(AsyncAPIResource):
 
 class BetaWithRawResponse:
     def __init__(self, beta: Beta) -> None:
-        self.messages = MessagesWithRawResponse(beta.messages)
+        self._beta = beta
+
+    @cached_property
+    def messages(self) -> MessagesWithRawResponse:
+        return MessagesWithRawResponse(self._beta.messages)
 
 
 class AsyncBetaWithRawResponse:
     def __init__(self, beta: AsyncBeta) -> None:
-        self.messages = AsyncMessagesWithRawResponse(beta.messages)
+        self._beta = beta
+
+    @cached_property
+    def messages(self) -> AsyncMessagesWithRawResponse:
+        return AsyncMessagesWithRawResponse(self._beta.messages)
 
 
 class BetaWithStreamingResponse:
     def __init__(self, beta: Beta) -> None:
-        self.messages = MessagesWithStreamingResponse(beta.messages)
+        self._beta = beta
+
+    @cached_property
+    def messages(self) -> MessagesWithStreamingResponse:
+        return MessagesWithStreamingResponse(self._beta.messages)
 
 
 class AsyncBetaWithStreamingResponse:
     def __init__(self, beta: AsyncBeta) -> None:
-        self.messages = AsyncMessagesWithStreamingResponse(beta.messages)
+        self._beta = beta
+
+    @cached_property
+    def messages(self) -> AsyncMessagesWithStreamingResponse:
+        return AsyncMessagesWithStreamingResponse(self._beta.messages)
