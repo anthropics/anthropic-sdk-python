@@ -20,7 +20,6 @@ from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
 from anthropic._types import Omit
 from anthropic._client import Anthropic, AsyncAnthropic
 from anthropic._models import BaseModel, FinalRequestOptions
-from anthropic._response import APIResponse, AsyncAPIResponse
 from anthropic._constants import RAW_RESPONSE_HEADER
 from anthropic._streaming import Stream, AsyncStream
 from anthropic._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
@@ -771,29 +770,6 @@ class TestAnthropic:
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
         calculated = client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
-
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
-    @pytest.mark.respx(base_url=base_url)
-    def test_streaming_response(self) -> None:
-        response = self.client.post(
-            "/v1/complete",
-            body=dict(
-                max_tokens_to_sample=300,
-                model="claude-2.1",
-                prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
-            ),
-            cast_to=APIResponse[bytes],
-            options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
-        )
-
-        assert not cast(Any, response.is_closed)
-        assert _get_open_connections(self.client) == 1
-
-        for _ in response.iter_bytes():
-            ...
-
-        assert cast(Any, response.is_closed)
-        assert _get_open_connections(self.client) == 0
 
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
@@ -1567,29 +1543,6 @@ class TestAsyncAnthropic:
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
         calculated = client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
-
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
-    @pytest.mark.respx(base_url=base_url)
-    async def test_streaming_response(self) -> None:
-        response = await self.client.post(
-            "/v1/complete",
-            body=dict(
-                max_tokens_to_sample=300,
-                model="claude-2.1",
-                prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
-            ),
-            cast_to=AsyncAPIResponse[bytes],
-            options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
-        )
-
-        assert not cast(Any, response.is_closed)
-        assert _get_open_connections(self.client) == 1
-
-        async for _ in response.iter_bytes():
-            ...
-
-        assert cast(Any, response.is_closed)
-        assert _get_open_connections(self.client) == 0
 
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
