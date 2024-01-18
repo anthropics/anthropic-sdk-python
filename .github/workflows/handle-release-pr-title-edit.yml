@@ -14,6 +14,7 @@ jobs:
       startsWith(github.event.pull_request.head.ref, 'release-please--') &&
       github.event.pull_request.state == 'open' &&
       github.event.sender.login != 'stainless-bot' &&
+      github.event.sender.login != 'stainless-app' &&
       github.repository == 'anthropics/anthropic-sdk-python'
     runs-on: ubuntu-latest
     steps:
