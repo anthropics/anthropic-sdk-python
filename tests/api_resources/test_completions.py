@@ -10,16 +10,12 @@ import pytest
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
 from anthropic.types import Completion
-from anthropic._client import Anthropic, AsyncAnthropic
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
-api_key = "my-anthropic-api-key"
 
 
 class TestCompletions:
-    strict_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
-    loose_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=False)
-    parametrize = pytest.mark.parametrize("client", [strict_client, loose_client], ids=["strict", "loose"])
+    parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
     @parametrize
     def test_method_create_overload_1(self, client: Anthropic) -> None:
@@ -129,13 +125,11 @@ class TestCompletions:
 
 
 class TestAsyncCompletions:
-    strict_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
-    loose_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=False)
-    parametrize = pytest.mark.parametrize("client", [strict_client, loose_client], ids=["strict", "loose"])
+    parametrize = pytest.mark.parametrize("async_client", [False, True], indirect=True, ids=["loose", "strict"])
 
     @parametrize
-    async def test_method_create_overload_1(self, client: AsyncAnthropic) -> None:
-        completion = await client.completions.create(
+    async def test_method_create_overload_1(self, async_client: AsyncAnthropic) -> None:
+        completion = await async_client.completions.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
@@ -143,8 +137,8 @@ class TestAsyncCompletions:
         assert_matches_type(Completion, completion, path=["response"])
 
     @parametrize
-    async def test_method_create_with_all_params_overload_1(self, client: AsyncAnthropic) -> None:
-        completion = await client.completions.create(
+    async def test_method_create_with_all_params_overload_1(self, async_client: AsyncAnthropic) -> None:
+        completion = await async_client.completions.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
@@ -158,8 +152,8 @@ class TestAsyncCompletions:
         assert_matches_type(Completion, completion, path=["response"])
 
     @parametrize
-    async def test_raw_response_create_overload_1(self, client: AsyncAnthropic) -> None:
-        response = await client.completions.with_raw_response.create(
+    async def test_raw_response_create_overload_1(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.completions.with_raw_response.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
@@ -171,8 +165,8 @@ class TestAsyncCompletions:
         assert_matches_type(Completion, completion, path=["response"])
 
     @parametrize
-    async def test_streaming_response_create_overload_1(self, client: AsyncAnthropic) -> None:
-        async with client.completions.with_streaming_response.create(
+    async def test_streaming_response_create_overload_1(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.completions.with_streaming_response.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
@@ -186,8 +180,8 @@ class TestAsyncCompletions:
         assert cast(Any, response.is_closed) is True
 
     @parametrize
-    async def test_method_create_overload_2(self, client: AsyncAnthropic) -> None:
-        completion_stream = await client.completions.create(
+    async def test_method_create_overload_2(self, async_client: AsyncAnthropic) -> None:
+        completion_stream = await async_client.completions.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
@@ -196,8 +190,8 @@ class TestAsyncCompletions:
         await completion_stream.response.aclose()
 
     @parametrize
-    async def test_method_create_with_all_params_overload_2(self, client: AsyncAnthropic) -> None:
-        completion_stream = await client.completions.create(
+    async def test_method_create_with_all_params_overload_2(self, async_client: AsyncAnthropic) -> None:
+        completion_stream = await async_client.completions.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
@@ -211,8 +205,8 @@ class TestAsyncCompletions:
         await completion_stream.response.aclose()
 
     @parametrize
-    async def test_raw_response_create_overload_2(self, client: AsyncAnthropic) -> None:
-        response = await client.completions.with_raw_response.create(
+    async def test_raw_response_create_overload_2(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.completions.with_raw_response.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
@@ -224,8 +218,8 @@ class TestAsyncCompletions:
         await stream.close()
 
     @parametrize
-    async def test_streaming_response_create_overload_2(self, client: AsyncAnthropic) -> None:
-        async with client.completions.with_streaming_response.create(
+    async def test_streaming_response_create_overload_2(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.completions.with_streaming_response.create(
             max_tokens_to_sample=256,
             model="claude-2.1",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
