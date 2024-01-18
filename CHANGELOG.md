@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.10.0 (2024-01-18)
+
+Full Changelog: [v0.9.0...v0.10.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.9.0...v0.10.0)
+
+### Features
+
+* **client:** add support for streaming raw responses ([#307](https://github.com/anthropics/anthropic-sdk-python/issues/307)) ([f295982](https://github.com/anthropics/anthropic-sdk-python/commit/f2959827fe2cd555db38a62c1b3df1a12e6dee40))
+
+
+### Bug Fixes
+
+* **ci:** ignore stainless-app edits to release PR title ([#315](https://github.com/anthropics/anthropic-sdk-python/issues/315)) ([69e8b03](https://github.com/anthropics/anthropic-sdk-python/commit/69e8b03cd12e3c12de7c528a0b2c064f709a239a))
+
+
+### Chores
+
+* add write_to_file binary helper method ([#309](https://github.com/anthropics/anthropic-sdk-python/issues/309)) ([8ac7988](https://github.com/anthropics/anthropic-sdk-python/commit/8ac7988dee11745495290f38fa5a2b8fddd0b993))
+* **client:** improve debug logging for failed requests ([#303](https://github.com/anthropics/anthropic-sdk-python/issues/303)) ([5e58c25](https://github.com/anthropics/anthropic-sdk-python/commit/5e58c2537eccadbccef9aadcd6433cf35328e678))
+* **internal:** fix typing util function ([#310](https://github.com/anthropics/anthropic-sdk-python/issues/310)) ([3671aa6](https://github.com/anthropics/anthropic-sdk-python/commit/3671aa6b3b05776b727a727020366bb6c349f66a))
+* **internal:** remove redundant client test ([#311](https://github.com/anthropics/anthropic-sdk-python/issues/311)) ([d7140f7](https://github.com/anthropics/anthropic-sdk-python/commit/d7140f7c16554dfacdac642173516625f2540496))
+* **internal:** share client instances between all tests ([#314](https://github.com/anthropics/anthropic-sdk-python/issues/314)) ([ccf731b](https://github.com/anthropics/anthropic-sdk-python/commit/ccf731b047809264d073f86c08c7f36ee360fda1))
+* **internal:** speculative retry-after-ms support ([#312](https://github.com/anthropics/anthropic-sdk-python/issues/312)) ([4b27da9](https://github.com/anthropics/anthropic-sdk-python/commit/4b27da9d05ce90944f566c20b122653adc0b9ab1))
+* **internal:** updates to proxy helper ([#308](https://github.com/anthropics/anthropic-sdk-python/issues/308)) ([a0b3cdb](https://github.com/anthropics/anthropic-sdk-python/commit/a0b3cdb655d150d3703f793c82e4a3945f45c82f))
+* lazy load raw resource class properties ([#313](https://github.com/anthropics/anthropic-sdk-python/issues/313)) ([b13f824](https://github.com/anthropics/anthropic-sdk-python/commit/b13f8249be1a4f77611598b4cce465481af35d83))
+
+
+### Documentation
+
+* **readme:** improve api reference ([#306](https://github.com/anthropics/anthropic-sdk-python/issues/306)) ([c3ab836](https://github.com/anthropics/anthropic-sdk-python/commit/c3ab836e4654dff259f19071bf0e1cdff249a268))
+
 ## 0.9.0 (2024-01-08)
 
 Full Changelog: [v0.8.1...v0.9.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.8.1...v0.9.0)
