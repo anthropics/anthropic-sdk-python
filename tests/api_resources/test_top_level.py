@@ -7,27 +7,21 @@ import os
 import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
-from anthropic._client import Anthropic, AsyncAnthropic
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
-api_key = "my-anthropic-api-key"
 
 
 class TestTopLevel:
-    strict_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
-    loose_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=False)
-    parametrize = pytest.mark.parametrize("client", [strict_client, loose_client], ids=["strict", "loose"])
+    parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
-    def test_count_tokens(self) -> None:
-        tokens = self.strict_client.count_tokens("hello world!")
+    def test_count_tokens(self, client: Anthropic) -> None:
+        tokens = client.count_tokens("hello world!")
         assert tokens == 3
 
 
 class TestAsyncTopLevel:
-    strict_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
-    loose_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=False)
-    parametrize = pytest.mark.parametrize("client", [strict_client, loose_client], ids=["strict", "loose"])
+    parametrize = pytest.mark.parametrize("async_client", [False, True], indirect=True, ids=["loose", "strict"])
 
-    async def test_count_tokens(self) -> None:
-        tokens = await self.strict_client.count_tokens("hello world!")
+    async def test_count_tokens(self, async_client: AsyncAnthropic) -> None:
+        tokens = await async_client.count_tokens("hello world!")
         assert tokens == 3
