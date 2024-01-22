@@ -4,16 +4,14 @@ from __future__ import annotations
 
 import time
 import asyncio
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from ._client import Anthropic, AsyncAnthropic
+from ._base_client import SyncAPIClient, AsyncAPIClient
 
 
 class SyncAPIResource:
-    _client: Anthropic
+    _client: SyncAPIClient
 
-    def __init__(self, client: Anthropic) -> None:
+    def __init__(self, client: SyncAPIClient) -> None:
         self._client = client
         self._get = client.get
         self._post = client.post
@@ -27,9 +25,9 @@ class SyncAPIResource:
 
 
 class AsyncAPIResource:
-    _client: AsyncAnthropic
+    _client: AsyncAPIClient
 
-    def __init__(self, client: AsyncAnthropic) -> None:
+    def __init__(self, client: AsyncAPIClient) -> None:
         self._client = client
         self._get = client.get
         self._post = client.post
