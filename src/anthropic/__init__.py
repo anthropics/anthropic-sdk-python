@@ -69,6 +69,7 @@ __all__ = [
     "AI_PROMPT",
 ]
 
+from .lib.vertex import *
 from .lib.streaming import *
 
 _setup_logging()
