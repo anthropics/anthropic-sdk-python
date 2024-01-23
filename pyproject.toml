@@ -36,7 +36,8 @@ classifiers = [
   "License :: OSI Approved :: MIT License"
 ]
 
-
+[project.optional-dependencies]
+vertex = ["google-auth >=2, <3"]
 
 [project.urls]
 Homepage = "https://github.com/anthropics/anthropic-sdk-python"
