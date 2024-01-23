@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.11.0 (2024-01-23)
+
+Full Changelog: [v0.10.0...v0.11.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.10.0...v0.11.0)
+
+### Features
+
+* **vertex:** add support for google vertex ([#319](https://github.com/anthropics/anthropic-sdk-python/issues/319)) ([5324415](https://github.com/anthropics/anthropic-sdk-python/commit/53244155d657e782d4ec9cc85f557233ee3698be))
+
+
+### Chores
+
+* **internal:** add internal helpers ([#316](https://github.com/anthropics/anthropic-sdk-python/issues/316)) ([8c75cdf](https://github.com/anthropics/anthropic-sdk-python/commit/8c75cdfe5e236c08bb6ecc09e27f69932cc523f1))
+* **internal:** update resource client type ([#318](https://github.com/anthropics/anthropic-sdk-python/issues/318)) ([bdd8d84](https://github.com/anthropics/anthropic-sdk-python/commit/bdd8d84023814f390b8f5eca7bd64cb340c1e8a8))
+
 ## 0.10.0 (2024-01-18)
 
 Full Changelog: [v0.9.0...v0.10.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.9.0...v0.10.0)
