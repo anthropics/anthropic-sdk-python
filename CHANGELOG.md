@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.0 (2024-01-25)
+
+Full Changelog: [v0.11.0...v0.12.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.11.0...v0.12.0)
+
+### Features
+
+* **client:** enable follow redirects by default ([#320](https://github.com/anthropics/anthropic-sdk-python/issues/320)) ([9959c32](https://github.com/anthropics/anthropic-sdk-python/commit/9959c32d24acd7199e6ce8124a18bcfa263fac85))
+
 ## 0.11.0 (2024-01-23)
 
 Full Changelog: [v0.10.0...v0.11.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.10.0...v0.11.0)
