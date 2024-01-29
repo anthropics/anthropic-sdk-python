@@ -808,10 +808,13 @@ class TestAnthropic:
         with pytest.raises(APITimeoutError):
             self.client.post(
                 "/v1/complete",
-                body=dict(
-                    max_tokens_to_sample=300,
-                    model="claude-2.1",
-                    prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                body=cast(
+                    object,
+                    dict(
+                        max_tokens_to_sample=300,
+                        model="claude-2.1",
+                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                    ),
                 ),
                 cast_to=httpx.Response,
                 options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
@@ -827,10 +830,13 @@ class TestAnthropic:
         with pytest.raises(APIStatusError):
             self.client.post(
                 "/v1/complete",
-                body=dict(
-                    max_tokens_to_sample=300,
-                    model="claude-2.1",
-                    prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                body=cast(
+                    object,
+                    dict(
+                        max_tokens_to_sample=300,
+                        model="claude-2.1",
+                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                    ),
                 ),
                 cast_to=httpx.Response,
                 options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
@@ -1610,10 +1616,13 @@ class TestAsyncAnthropic:
         with pytest.raises(APITimeoutError):
             await self.client.post(
                 "/v1/complete",
-                body=dict(
-                    max_tokens_to_sample=300,
-                    model="claude-2.1",
-                    prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                body=cast(
+                    object,
+                    dict(
+                        max_tokens_to_sample=300,
+                        model="claude-2.1",
+                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                    ),
                 ),
                 cast_to=httpx.Response,
                 options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
@@ -1629,10 +1638,13 @@ class TestAsyncAnthropic:
         with pytest.raises(APIStatusError):
             await self.client.post(
                 "/v1/complete",
-                body=dict(
-                    max_tokens_to_sample=300,
-                    model="claude-2.1",
-                    prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                body=cast(
+                    object,
+                    dict(
+                        max_tokens_to_sample=300,
+                        model="claude-2.1",
+                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
+                    ),
                 ),
                 cast_to=httpx.Response,
                 options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
