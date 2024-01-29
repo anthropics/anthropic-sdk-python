@@ -14,6 +14,7 @@ from ._client import (
     AsyncAnthropic,
     RequestOptions,
 )
+from ._models import BaseModel
 from ._version import __title__, __version__
 from ._response import APIResponse as APIResponse, AsyncAPIResponse as AsyncAPIResponse
 from ._constants import AI_PROMPT as AI_PROMPT, HUMAN_PROMPT as HUMAN_PROMPT
@@ -65,6 +66,7 @@ __all__ = [
     "Anthropic",
     "AsyncAnthropic",
     "file_from_path",
+    "BaseModel",
     "HUMAN_PROMPT",
     "AI_PROMPT",
 ]
