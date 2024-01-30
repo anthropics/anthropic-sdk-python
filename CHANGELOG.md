@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.13.0 (2024-01-30)
+
+Full Changelog: [v0.12.0...v0.13.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.12.0...v0.13.0)
+
+### Features
+
+* **client:** support parsing custom response types ([#325](https://github.com/anthropics/anthropic-sdk-python/issues/325)) ([416633f](https://github.com/anthropics/anthropic-sdk-python/commit/416633fedb962d207fb841e80d7d7947fe52bb33))
+
+
+### Chores
+
+* **internal:** cast type in mocked test ([#326](https://github.com/anthropics/anthropic-sdk-python/issues/326)) ([fd22d8e](https://github.com/anthropics/anthropic-sdk-python/commit/fd22d8e584c5f3d6a029b4b0e87b98827746fda9))
+* **internal:** enable ruff type checking misuse lint rule ([#324](https://github.com/anthropics/anthropic-sdk-python/issues/324)) ([6587598](https://github.com/anthropics/anthropic-sdk-python/commit/6587598162387c0aada958df22610a93198e813d))
+* **internal:** support multipart data with overlapping keys ([#322](https://github.com/anthropics/anthropic-sdk-python/issues/322)) ([9ecab60](https://github.com/anthropics/anthropic-sdk-python/commit/9ecab6048afeca544146b9629bcdaa5250012cc9))
+* **internal:** support pre-release versioning ([#327](https://github.com/anthropics/anthropic-sdk-python/issues/327)) ([78b1bfe](https://github.com/anthropics/anthropic-sdk-python/commit/78b1bfe3e694e0400477fc25ae1aaab34c28e61e))
+
 ## 0.12.0 (2024-01-25)
 
 Full Changelog: [v0.11.0...v0.12.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.11.0...v0.12.0)
