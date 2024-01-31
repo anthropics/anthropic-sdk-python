@@ -72,6 +72,7 @@ __all__ = [
 ]
 
 from .lib.vertex import *
+from .lib.bedrock import *
 from .lib.streaming import *
 
 _setup_logging()
