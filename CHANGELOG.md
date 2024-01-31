@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.0 (2024-01-31)
+
+Full Changelog: [v0.13.0...v0.14.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.13.0...v0.14.0)
+
+### Features
+
+* **bedrock:** include bedrock SDK ([#328](https://github.com/anthropics/anthropic-sdk-python/issues/328)) ([a03f21f](https://github.com/anthropics/anthropic-sdk-python/commit/a03f21fef1ab3225f9839002b69aa5cb5840b375))
+
 ## 0.13.0 (2024-01-30)
 
 Full Changelog: [v0.12.0...v0.13.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.12.0...v0.13.0)
