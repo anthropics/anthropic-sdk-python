@@ -141,6 +141,31 @@ Streaming with `client.beta.messages.stream(...)` exposes [various helpers for y
 
 Alternatively, you can use `client.beta.messages.create(..., stream=True)` which only returns an async iterable of the events in the stream and thus uses less memory (it does not build up a final message object for you).
 
+## AWS Bedrock
+
+This library also provides support for the [Anthropic Bedrock API](https://aws.amazon.com/bedrock/claude/) if you install this library with the `bedrock` extra, e.g. `pip install -U anthropic[bedrock]`.
+
+You can then import and instantiate a separate `AnthropicBedrock` class, the rest of the API is the same.
+
+```py
+from anthropic import AI_PROMPT, HUMAN_PROMPT, AnthropicBedrock
+
+client = AnthropicBedrock()
+
+completion = client.completions.create(
+    model="anthropic.claude-instant-v1",
+    prompt=f"{HUMAN_PROMPT} hey!{AI_PROMPT}",
+    stop_sequences=[HUMAN_PROMPT],
+    max_tokens_to_sample=500,
+    temperature=0.5,
+    top_k=250,
+    top_p=0.5,
+)
+print(completion.completion)
+```
+
+For a more fully fledged example see [`examples/bedrock.py`](https://github.com/anthropics/anthropic-sdk-python/blob/main/examples/bedrock.py).
+
 ## Token counting
 
 You can estimate billing for a given request with the `client.count_tokens()` method, eg:
