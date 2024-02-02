@@ -52,7 +52,7 @@ class Completions(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion:
         """
-        Create a Completion
+        Create a Text Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -96,8 +96,9 @@ class Completions(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See
+              [streaming](https://docs.anthropic.com/claude/reference/text-completions-streaming)
+              for details.
 
           temperature: Amount of randomness injected into the response.
 
@@ -147,7 +148,7 @@ class Completions(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Stream[Completion]:
         """
-        Create a Completion
+        Create a Text Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -183,8 +184,9 @@ class Completions(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See
+              [streaming](https://docs.anthropic.com/claude/reference/text-completions-streaming)
+              for details.
 
           metadata: An object describing metadata about the request.
 
@@ -242,7 +244,7 @@ class Completions(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion | Stream[Completion]:
         """
-        Create a Completion
+        Create a Text Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -278,8 +280,9 @@ class Completions(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See
+              [streaming](https://docs.anthropic.com/claude/reference/text-completions-streaming)
+              for details.
 
           metadata: An object describing metadata about the request.
 
@@ -391,7 +394,7 @@ class AsyncCompletions(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion:
         """
-        Create a Completion
+        Create a Text Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -435,8 +438,9 @@ class AsyncCompletions(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See
+              [streaming](https://docs.anthropic.com/claude/reference/text-completions-streaming)
+              for details.
 
           temperature: Amount of randomness injected into the response.
 
@@ -486,7 +490,7 @@ class AsyncCompletions(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> AsyncStream[Completion]:
         """
-        Create a Completion
+        Create a Text Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -522,8 +526,9 @@ class AsyncCompletions(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See
+              [streaming](https://docs.anthropic.com/claude/reference/text-completions-streaming)
+              for details.
 
           metadata: An object describing metadata about the request.
 
@@ -581,7 +586,7 @@ class AsyncCompletions(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion | AsyncStream[Completion]:
         """
-        Create a Completion
+        Create a Text Completion
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -617,8 +622,9 @@ class AsyncCompletions(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See
+              [streaming](https://docs.anthropic.com/claude/reference/text-completions-streaming)
+              for details.
 
           metadata: An object describing metadata about the request.
 
