@@ -10,7 +10,7 @@ For the AWS Bedrock API, see [`anthropic-bedrock`](https://github.com/anthropics
 
 ## Documentation
 
-The REST API documentation can be found [on docs.anthropic.com](https://docs.anthropic.com/claude/reference/). The full API of this library can be found in [api.md](https://www.github.com/anthropics/anthropic-sdk-python/blob/main/api.md).
+The REST API documentation can be found [on docs.anthropic.com](https://docs.anthropic.com/claude/reference/). The full API of this library can be found in [api.md](api.md).
 
 ## Installation
 
@@ -20,7 +20,7 @@ pip install anthropic
 
 ## Usage
 
-The full API of this library can be found in [api.md](https://www.github.com/anthropics/anthropic-sdk-python/blob/main/api.md).
+The full API of this library can be found in [api.md](api.md).
 
 ```python
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
