@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.15.0 (2024-02-02)
+
+Full Changelog: [v0.14.1...v0.15.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.14.1...v0.15.0)
+
+### Features
+
+* **api:** add new usage response fields ([#332](https://github.com/anthropics/anthropic-sdk-python/issues/332)) ([554098e](https://github.com/anthropics/anthropic-sdk-python/commit/554098e544d49575d2d9d24edfb46f2fa0f77ba1))
+
 ## 0.14.1 (2024-02-02)
 
 Full Changelog: [v0.14.0...v0.14.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.14.0...v0.14.1)
