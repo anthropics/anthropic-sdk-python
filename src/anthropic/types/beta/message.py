@@ -3,6 +3,7 @@
 from typing import List, Optional
 from typing_extensions import Literal
 
+from .usage import Usage
 from ..._models import BaseModel
 from .content_block import ContentBlock
 
@@ -86,3 +87,6 @@ class Message(BaseModel):
     """
 
     type: Literal["message"]
+
+    usage: Usage
+    """Container for the number of tokens used."""

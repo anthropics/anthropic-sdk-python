@@ -4,6 +4,7 @@ from typing import Optional
 from typing_extensions import Literal
 
 from ..._models import BaseModel
+from .message_delta_usage import MessageDeltaUsage
 
 __all__ = ["MessageDeltaEvent", "Delta"]
 
@@ -18,3 +19,6 @@ class MessageDeltaEvent(BaseModel):
     delta: Delta
 
     type: Literal["message_delta"]
+
+    usage: MessageDeltaUsage
+    """Container for the number of tokens used."""

@@ -1,5 +1,6 @@
 # File generated from our OpenAPI spec by Stainless.
 
+from typing import Optional
 from typing_extensions import Literal
 
 from .._models import BaseModel
@@ -20,7 +21,7 @@ class Completion(BaseModel):
     model: str
     """The model that handled the request."""
 
-    stop_reason: str
+    stop_reason: Optional[str] = None
     """The reason that we stopped.
 
     This may be one the following values:

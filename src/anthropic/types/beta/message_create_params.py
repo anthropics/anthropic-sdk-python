@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Union
+from typing import List, Union, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from .message_param import MessageParam
@@ -82,6 +82,11 @@ class MessageCreateParamsBase(TypedDict, total=False):
     See our
     [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
     for more details on how to best construct prompts.
+
+    Note that if you want to include a
+    [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
+    you can use the top-level `system` parameter — there is no `"system"` role for
+    input messages in the Messages API.
     """
 
     model: Required[str]
@@ -145,7 +150,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
 
 class Metadata(TypedDict, total=False):
-    user_id: str
+    user_id: Optional[str]
     """An external identifier for the user who is associated with the request.
 
     This should be a uuid, hash value, or other opaque identifier. Anthropic may use
@@ -158,8 +163,8 @@ class MessageCreateParamsNonStreaming(MessageCreateParamsBase):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-    details.
+    See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
+    for details.
     """
 
 
@@ -167,8 +172,8 @@ class MessageCreateParamsStreaming(MessageCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-    details.
+    See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
+    for details.
     """
 
 
