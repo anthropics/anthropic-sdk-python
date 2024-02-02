@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.1 (2024-02-02)
+
+Full Changelog: [v0.14.0...v0.14.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.14.0...v0.14.1)
+
+### Chores
+
+* **interal:** make link to api.md relative ([#330](https://github.com/anthropics/anthropic-sdk-python/issues/330)) ([e393317](https://github.com/anthropics/anthropic-sdk-python/commit/e393317362d8cd74442d7a802ea965211c913115))
+
 ## 0.14.0 (2024-01-31)
 
 Full Changelog: [v0.13.0...v0.14.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.13.0...v0.14.0)
