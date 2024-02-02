@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Union
+from typing import List, Union, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 __all__ = [
@@ -91,7 +91,7 @@ class CompletionCreateParamsBase(TypedDict, total=False):
 
 
 class Metadata(TypedDict, total=False):
-    user_id: str
+    user_id: Optional[str]
     """An external identifier for the user who is associated with the request.
 
     This should be a uuid, hash value, or other opaque identifier. Anthropic may use
@@ -104,8 +104,9 @@ class CompletionCreateParamsNonStreaming(CompletionCreateParamsBase):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-    details.
+    See
+    [streaming](https://docs.anthropic.com/claude/reference/text-completions-streaming)
+    for details.
     """
 
 
@@ -113,8 +114,9 @@ class CompletionCreateParamsStreaming(CompletionCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-    details.
+    See
+    [streaming](https://docs.anthropic.com/claude/reference/text-completions-streaming)
+    for details.
     """
 
 

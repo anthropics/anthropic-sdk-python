@@ -64,7 +64,15 @@ class Messages(SyncAPIResource):
         """
         Create a Message.
 
-        The Messages API is currently in beta.
+        Send a structured list of input messages, and the model will generate the next
+        message in the conversation.
+
+        Messages can be used for either single queries to the model or for multi-turn
+        conversations.
+
+        The Messages API is currently in beta. During beta, you must send the
+        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
+        our client SDKs, this is handled for you automatically.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -136,6 +144,11 @@ class Messages(SyncAPIResource):
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
               for more details on how to best construct prompts.
 
+              Note that if you want to include a
+              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
+
           model: The model that will complete your prompt.
 
               As we improve Claude, we develop new versions of it that you can query. The
@@ -161,8 +174,8 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
+              for details.
 
           system: System prompt.
 
@@ -221,7 +234,15 @@ class Messages(SyncAPIResource):
         """
         Create a Message.
 
-        The Messages API is currently in beta.
+        Send a structured list of input messages, and the model will generate the next
+        message in the conversation.
+
+        Messages can be used for either single queries to the model or for multi-turn
+        conversations.
+
+        The Messages API is currently in beta. During beta, you must send the
+        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
+        our client SDKs, this is handled for you automatically.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -293,6 +314,11 @@ class Messages(SyncAPIResource):
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
               for more details on how to best construct prompts.
 
+              Note that if you want to include a
+              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
+
           model: The model that will complete your prompt.
 
               As we improve Claude, we develop new versions of it that you can query. The
@@ -306,8 +332,8 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
+              for details.
 
           metadata: An object describing metadata about the request.
 
@@ -378,7 +404,15 @@ class Messages(SyncAPIResource):
         """
         Create a Message.
 
-        The Messages API is currently in beta.
+        Send a structured list of input messages, and the model will generate the next
+        message in the conversation.
+
+        Messages can be used for either single queries to the model or for multi-turn
+        conversations.
+
+        The Messages API is currently in beta. During beta, you must send the
+        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
+        our client SDKs, this is handled for you automatically.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -450,6 +484,11 @@ class Messages(SyncAPIResource):
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
               for more details on how to best construct prompts.
 
+              Note that if you want to include a
+              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
+
           model: The model that will complete your prompt.
 
               As we improve Claude, we develop new versions of it that you can query. The
@@ -463,8 +502,8 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
+              for details.
 
           metadata: An object describing metadata about the request.
 
@@ -693,7 +732,15 @@ class AsyncMessages(AsyncAPIResource):
         """
         Create a Message.
 
-        The Messages API is currently in beta.
+        Send a structured list of input messages, and the model will generate the next
+        message in the conversation.
+
+        Messages can be used for either single queries to the model or for multi-turn
+        conversations.
+
+        The Messages API is currently in beta. During beta, you must send the
+        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
+        our client SDKs, this is handled for you automatically.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -765,6 +812,11 @@ class AsyncMessages(AsyncAPIResource):
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
               for more details on how to best construct prompts.
 
+              Note that if you want to include a
+              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
+
           model: The model that will complete your prompt.
 
               As we improve Claude, we develop new versions of it that you can query. The
@@ -790,8 +842,8 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
+              for details.
 
           system: System prompt.
 
@@ -850,7 +902,15 @@ class AsyncMessages(AsyncAPIResource):
         """
         Create a Message.
 
-        The Messages API is currently in beta.
+        Send a structured list of input messages, and the model will generate the next
+        message in the conversation.
+
+        Messages can be used for either single queries to the model or for multi-turn
+        conversations.
+
+        The Messages API is currently in beta. During beta, you must send the
+        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
+        our client SDKs, this is handled for you automatically.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -922,6 +982,11 @@ class AsyncMessages(AsyncAPIResource):
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
               for more details on how to best construct prompts.
 
+              Note that if you want to include a
+              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
+
           model: The model that will complete your prompt.
 
               As we improve Claude, we develop new versions of it that you can query. The
@@ -935,8 +1000,8 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
+              for details.
 
           metadata: An object describing metadata about the request.
 
@@ -1007,7 +1072,15 @@ class AsyncMessages(AsyncAPIResource):
         """
         Create a Message.
 
-        The Messages API is currently in beta.
+        Send a structured list of input messages, and the model will generate the next
+        message in the conversation.
+
+        Messages can be used for either single queries to the model or for multi-turn
+        conversations.
+
+        The Messages API is currently in beta. During beta, you must send the
+        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
+        our client SDKs, this is handled for you automatically.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1079,6 +1152,11 @@ class AsyncMessages(AsyncAPIResource):
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
               for more details on how to best construct prompts.
 
+              Note that if you want to include a
+              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
+
           model: The model that will complete your prompt.
 
               As we improve Claude, we develop new versions of it that you can query. The
@@ -1092,8 +1170,8 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/streaming) for
-              details.
+              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
+              for details.
 
           metadata: An object describing metadata about the request.
 

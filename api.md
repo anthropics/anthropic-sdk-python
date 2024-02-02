@@ -30,12 +30,14 @@ from anthropic.types.beta import (
     ContentBlockStopEvent,
     Message,
     MessageDeltaEvent,
+    MessageDeltaUsage,
     MessageParam,
     MessageStartEvent,
     MessageStopEvent,
     MessageStreamEvent,
     TextBlock,
     TextDelta,
+    Usage,
 )
 ```
 
