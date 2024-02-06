@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Union, Optional
+from typing import List, Union, Iterable, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from .message_param import MessageParam
@@ -22,7 +22,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     for details.
     """
 
-    messages: Required[List[MessageParam]]
+    messages: Required[Iterable[MessageParam]]
     """Input messages.
 
     Our models are trained to operate on alternating `user` and `assistant`
