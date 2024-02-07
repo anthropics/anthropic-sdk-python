@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.15.1 (2024-02-07)
+
+Full Changelog: [v0.15.0...v0.15.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.15.0...v0.15.1)
+
+### Bug Fixes
+
+* prevent crash when platform.architecture() is not allowed ([#334](https://github.com/anthropics/anthropic-sdk-python/issues/334)) ([fefb5c1](https://github.com/anthropics/anthropic-sdk-python/commit/fefb5c10c10054f28fcccf0d9f44204de93e9fe3))
+* **types:** loosen most List params types to Iterable ([#338](https://github.com/anthropics/anthropic-sdk-python/issues/338)) ([6e7761b](https://github.com/anthropics/anthropic-sdk-python/commit/6e7761b89c9ef226bd8f7df465445526c08fdb2f))
+
+
+### Chores
+
+* **internal:** add lint command ([#337](https://github.com/anthropics/anthropic-sdk-python/issues/337)) ([2ebaf1d](https://github.com/anthropics/anthropic-sdk-python/commit/2ebaf1d6a85b638b502661735e3ffc5b58d5c241))
+* **internal:** support serialising iterable types ([#336](https://github.com/anthropics/anthropic-sdk-python/issues/336)) ([ea3ed7b](https://github.com/anthropics/anthropic-sdk-python/commit/ea3ed7b8b91314721129480d164d7bf3bafec26c))
+
 ## 0.15.0 (2024-02-02)
 
 Full Changelog: [v0.14.1...v0.15.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.14.1...v0.15.0)
