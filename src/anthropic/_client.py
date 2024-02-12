@@ -57,7 +57,7 @@ __all__ = [
 
 class Anthropic(SyncAPIClient):
     completions: resources.Completions
-    beta: resources.Beta
+    messages: resources.Messages
     with_raw_response: AnthropicWithRawResponse
     with_streaming_response: AnthropicWithStreamedResponse
 
@@ -133,7 +133,7 @@ class Anthropic(SyncAPIClient):
         self._default_stream_cls = Stream
 
         self.completions = resources.Completions(self)
-        self.beta = resources.Beta(self)
+        self.messages = resources.Messages(self)
         self.with_raw_response = AnthropicWithRawResponse(self)
         self.with_streaming_response = AnthropicWithStreamedResponse(self)
 
@@ -312,7 +312,7 @@ class Anthropic(SyncAPIClient):
 
 class AsyncAnthropic(AsyncAPIClient):
     completions: resources.AsyncCompletions
-    beta: resources.AsyncBeta
+    messages: resources.AsyncMessages
     with_raw_response: AsyncAnthropicWithRawResponse
     with_streaming_response: AsyncAnthropicWithStreamedResponse
 
@@ -388,7 +388,7 @@ class AsyncAnthropic(AsyncAPIClient):
         self._default_stream_cls = AsyncStream
 
         self.completions = resources.AsyncCompletions(self)
-        self.beta = resources.AsyncBeta(self)
+        self.messages = resources.AsyncMessages(self)
         self.with_raw_response = AsyncAnthropicWithRawResponse(self)
         self.with_streaming_response = AsyncAnthropicWithStreamedResponse(self)
 
@@ -568,25 +568,25 @@ class AsyncAnthropic(AsyncAPIClient):
 class AnthropicWithRawResponse:
     def __init__(self, client: Anthropic) -> None:
         self.completions = resources.CompletionsWithRawResponse(client.completions)
-        self.beta = resources.BetaWithRawResponse(client.beta)
+        self.messages = resources.MessagesWithRawResponse(client.messages)
 
 
 class AsyncAnthropicWithRawResponse:
     def __init__(self, client: AsyncAnthropic) -> None:
         self.completions = resources.AsyncCompletionsWithRawResponse(client.completions)
-        self.beta = resources.AsyncBetaWithRawResponse(client.beta)
+        self.messages = resources.AsyncMessagesWithRawResponse(client.messages)
 
 
 class AnthropicWithStreamedResponse:
     def __init__(self, client: Anthropic) -> None:
         self.completions = resources.CompletionsWithStreamingResponse(client.completions)
-        self.beta = resources.BetaWithStreamingResponse(client.beta)
+        self.messages = resources.MessagesWithStreamingResponse(client.messages)
 
 
 class AsyncAnthropicWithStreamedResponse:
     def __init__(self, client: AsyncAnthropic) -> None:
         self.completions = resources.AsyncCompletionsWithStreamingResponse(client.completions)
-        self.beta = resources.AsyncBetaWithStreamingResponse(client.beta)
+        self.messages = resources.AsyncMessagesWithStreamingResponse(client.messages)
 
 
 Client = Anthropic

@@ -76,9 +76,6 @@ class MessageCreateParamsBase(TypedDict, total=False):
     { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
     ```
 
-    During beta, the Messages API only accepts content blocks of type `"text"`, and
-    at most one block per message.
-
     See our
     [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
     for more details on how to best construct prompts.

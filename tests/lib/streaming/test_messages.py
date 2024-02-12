@@ -10,8 +10,8 @@ from respx import MockRouter
 
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic.lib.streaming import MessageStream, AsyncMessageStream
-from anthropic.types.beta.message import Message
-from anthropic.types.beta.message_stream_event import MessageStreamEvent
+from anthropic.types.message import Message
+from anthropic.types.message_stream_event import MessageStreamEvent
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -113,7 +113,7 @@ class TestSyncMessages:
     def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
 
-        with client.beta.messages.stream(
+        with client.messages.stream(
             max_tokens=1024,
             messages=[
                 {
@@ -130,7 +130,7 @@ class TestSyncMessages:
     def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
 
-        with client.beta.messages.stream(
+        with client.messages.stream(
             max_tokens=1024,
             messages=[
                 {
@@ -152,7 +152,7 @@ class TestAsyncMessages:
     async def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=to_async_iter(basic_response())))
 
-        async with async_client.beta.messages.stream(
+        async with async_client.messages.stream(
             max_tokens=1024,
             messages=[
                 {
@@ -170,7 +170,7 @@ class TestAsyncMessages:
     async def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=to_async_iter(basic_response())))
 
-        async with async_client.beta.messages.stream(
+        async with async_client.messages.stream(
             max_tokens=1024,
             messages=[
                 {

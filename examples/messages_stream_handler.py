@@ -2,7 +2,7 @@ import asyncio
 from typing_extensions import override
 
 from anthropic import AsyncAnthropic, AsyncMessageStream
-from anthropic.types.beta import MessageStreamEvent
+from anthropic.types import MessageStreamEvent
 
 client = AsyncAnthropic()
 
@@ -14,7 +14,7 @@ class MyStream(AsyncMessageStream):
 
 
 async def main() -> None:
-    async with client.beta.messages.stream(
+    async with client.messages.stream(
         max_tokens=1024,
         messages=[
             {

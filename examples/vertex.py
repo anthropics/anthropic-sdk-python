@@ -8,7 +8,7 @@ def sync_client() -> None:
 
     client = AnthropicVertex()
 
-    message = client.beta.messages.create(
+    message = client.messages.create(
         model="claude-instant-1p2",
         max_tokens=100,
         messages=[
@@ -26,7 +26,7 @@ async def async_client() -> None:
 
     client = AsyncAnthropicVertex()
 
-    message = await client.beta.messages.create(
+    message = await client.messages.create(
         model="claude-instant-1p2",
         max_tokens=1024,
         messages=[
