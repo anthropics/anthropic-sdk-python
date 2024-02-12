@@ -1,12 +1,12 @@
 # File generated from our OpenAPI spec by Stainless.
 
-from .beta import (
-    Beta,
-    AsyncBeta,
-    BetaWithRawResponse,
-    AsyncBetaWithRawResponse,
-    BetaWithStreamingResponse,
-    AsyncBetaWithStreamingResponse,
+from .messages import (
+    Messages,
+    AsyncMessages,
+    MessagesWithRawResponse,
+    AsyncMessagesWithRawResponse,
+    MessagesWithStreamingResponse,
+    AsyncMessagesWithStreamingResponse,
 )
 from .completions import (
     Completions,
@@ -24,10 +24,10 @@ __all__ = [
     "AsyncCompletionsWithRawResponse",
     "CompletionsWithStreamingResponse",
     "AsyncCompletionsWithStreamingResponse",
-    "Beta",
-    "AsyncBeta",
-    "BetaWithRawResponse",
-    "AsyncBetaWithRawResponse",
-    "BetaWithStreamingResponse",
-    "AsyncBetaWithStreamingResponse",
+    "Messages",
+    "AsyncMessages",
+    "MessagesWithRawResponse",
+    "AsyncMessagesWithRawResponse",
+    "MessagesWithStreamingResponse",
+    "AsyncMessagesWithStreamingResponse",
 ]

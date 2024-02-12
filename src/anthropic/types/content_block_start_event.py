@@ -2,7 +2,7 @@
 
 from typing_extensions import Literal
 
-from ..._models import BaseModel
+from .._models import BaseModel
 from .content_block import ContentBlock
 
 __all__ = ["ContentBlockStartEvent"]

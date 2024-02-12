@@ -16,7 +16,7 @@ from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import APIStatusError
 from ..._base_client import DEFAULT_MAX_RETRIES, BaseClient, SyncAPIClient, AsyncAPIClient
-from ...resources.beta.beta import Beta, AsyncBeta
+from ...resources.messages import Messages, AsyncMessages
 
 if TYPE_CHECKING:
     from google.auth.credentials import Credentials as GoogleCredentials  # type: ignore
@@ -109,7 +109,7 @@ class BaseVertexClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
 
 
 class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient):
-    beta: Beta
+    messages: Messages
 
     def __init__(
         self,
@@ -165,10 +165,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         self.access_token = access_token
         self._credentials: GoogleCredentials | None = None
 
-        self.beta = Beta(
-            # TODO: fix types here
-            self  # type: ignore
-        )
+        self.messages = Messages(self)
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
@@ -199,7 +196,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
 
 
 class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
-    beta: AsyncBeta
+    messages: AsyncMessages
 
     def __init__(
         self,
@@ -255,10 +252,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         self.access_token = access_token
         self._credentials: GoogleCredentials | None = None
 
-        self.beta = AsyncBeta(
-            # TODO: fix types here
-            self  # type: ignore
-        )
+        self.messages = AsyncMessages(self)
 
     @override
     async def _prepare_request(self, request: httpx.Request) -> None:

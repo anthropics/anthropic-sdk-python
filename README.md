@@ -23,19 +23,25 @@ pip install anthropic
 The full API of this library can be found in [api.md](api.md).
 
 ```python
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+import os
+from anthropic import Anthropic
 
-anthropic = Anthropic(
-    # defaults to os.environ.get("ANTHROPIC_API_KEY")
-    api_key="my api key",
+client = Anthropic(
+    # This is the default and can be omitted
+    api_key=os.environ.get("ANTHROPIC_API_KEY"),
 )
 
-completion = anthropic.completions.create(
+message = client.messages.create(
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": "How does a court case get to the supreme court?",
+        }
+    ],
     model="claude-2.1",
-    max_tokens_to_sample=300,
-    prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court?{AI_PROMPT}",
 )
-print(completion.completion)
+print(message.content)
 ```
 
 While you can provide an `api_key` keyword argument,
@@ -48,21 +54,28 @@ so that your API Key is not stored in source control.
 Simply import `AsyncAnthropic` instead of `Anthropic` and use `await` with each API call:
 
 ```python
-from anthropic import AsyncAnthropic, HUMAN_PROMPT, AI_PROMPT
+import os
+import asyncio
+from anthropic import AsyncAnthropic
 
-anthropic = AsyncAnthropic(
-    # defaults to os.environ.get("ANTHROPIC_API_KEY")
-    api_key="my api key",
+client = AsyncAnthropic(
+    # This is the default and can be omitted
+    api_key=os.environ.get("ANTHROPIC_API_KEY"),
 )
 
 
-async def main():
-    completion = await anthropic.completions.create(
+async def main() -> None:
+    message = await client.messages.create(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": "How does a court case get to the supreme court?",
+            }
+        ],
         model="claude-2.1",
-        max_tokens_to_sample=300,
-        prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court?{AI_PROMPT}",
     )
-    print(completion.completion)
+    print(message.content)
 
 
 asyncio.run(main())
@@ -75,35 +88,45 @@ Functionality between the synchronous and asynchronous clients is otherwise iden
 We provide support for streaming responses using Server Side Events (SSE).
 
 ```python
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+from anthropic import Anthropic
 
-anthropic = Anthropic()
+client = Anthropic()
 
-stream = anthropic.completions.create(
-    prompt=f"{HUMAN_PROMPT} Your prompt here{AI_PROMPT}",
-    max_tokens_to_sample=300,
+stream = client.messages.create(
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": "your prompt here",
+        }
+    ],
     model="claude-2.1",
     stream=True,
 )
-for completion in stream:
-    print(completion.completion, end="", flush=True)
+for event in stream:
+    print(event.type)
 ```
 
 The async client uses the exact same interface.
 
 ```python
-from anthropic import AsyncAnthropic, HUMAN_PROMPT, AI_PROMPT
+from anthropic import Anthropic
 
-anthropic = AsyncAnthropic()
+client = Anthropic()
 
-stream = await anthropic.completions.create(
-    prompt=f"{HUMAN_PROMPT} Your prompt here{AI_PROMPT}",
-    max_tokens_to_sample=300,
+stream = await client.messages.create(
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": "your prompt here",
+        }
+    ],
     model="claude-2.1",
     stream=True,
 )
-async for completion in stream:
-    print(completion.completion, end="", flush=True)
+async for event in stream:
+    print(event.type)
 ```
 
 ### Streaming Helpers
@@ -117,7 +140,7 @@ from anthropic import AsyncAnthropic
 client = AsyncAnthropic()
 
 async def main() -> None:
-    async with client.beta.messages.stream(
+    async with client.messages.stream(
         max_tokens=1024,
         messages=[
             {
@@ -137,9 +160,9 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-Streaming with `client.beta.messages.stream(...)` exposes [various helpers for your convenience](helpers.md) including event handlers and accumulation.
+Streaming with `client.messages.stream(...)` exposes [various helpers for your convenience](helpers.md) including event handlers and accumulation.
 
-Alternatively, you can use `client.beta.messages.create(..., stream=True)` which only returns an async iterable of the events in the stream and thus uses less memory (it does not build up a final message object for you).
+Alternatively, you can use `client.messages.create(..., stream=True)` which only returns an async iterable of the events in the stream and thus uses less memory (it does not build up a final message object for you).
 
 ## AWS Bedrock
 
@@ -195,13 +218,19 @@ All errors inherit from `anthropic.APIError`.
 
 ```python
 import anthropic
+from anthropic import Anthropic
 
-client = anthropic.Anthropic()
+client = Anthropic()
 
 try:
-    client.completions.create(
-        prompt=f"{anthropic.HUMAN_PROMPT} Your prompt here{anthropic.AI_PROMPT}",
-        max_tokens_to_sample=300,
+    client.messages.create(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": "your prompt here",
+            }
+        ],
         model="claude-2.1",
     )
 except anthropic.APIConnectionError as e:
@@ -237,18 +266,23 @@ Connection errors (for example, due to a network connectivity problem), 408 Requ
 You can use the `max_retries` option to configure or disable retry settings:
 
 ```python
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+from anthropic import Anthropic
 
 # Configure the default for all requests:
-anthropic = Anthropic(
+client = Anthropic(
     # default is 2
     max_retries=0,
 )
 
 # Or, configure per-request:
-anthropic.with_options(max_retries=5).completions.create(
-    prompt=f"{HUMAN_PROMPT} Can you help me effectively ask for a raise at work?{AI_PROMPT}",
-    max_tokens_to_sample=300,
+client.with_options(max_retries=5).messages.create(
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": "Can you help me effectively ask for a raise at work?",
+        }
+    ],
     model="claude-2.1",
 )
 ```
@@ -259,23 +293,28 @@ By default requests time out after 10 minutes. You can configure this with a `ti
 which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/#fine-tuning-the-configuration) object:
 
 ```python
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+from anthropic import Anthropic
 
 # Configure the default for all requests:
-anthropic = Anthropic(
-    # default is 10 minutes
+client = Anthropic(
+    # 20 seconds (default is 10 minutes)
     timeout=20.0,
 )
 
 # More granular control:
-anthropic = Anthropic(
+client = Anthropic(
     timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
 )
 
 # Override per-request:
-anthropic.with_options(timeout=5 * 1000).completions.create(
-    prompt=f"{HUMAN_PROMPT} Where can I get a good coffee in my neighbourhood?{AI_PROMPT}",
-    max_tokens_to_sample=300,
+client.with_options(timeout=5 * 1000).messages.create(
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": "Where can I get a good coffee in my neighbourhood?",
+        }
+    ],
     model="claude-2.1",
 )
 ```
@@ -329,19 +368,21 @@ if response.my_field is None:
 The "raw" Response object can be accessed by prefixing `.with_raw_response.` to any HTTP method call, e.g.,
 
 ```py
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+from anthropic import Anthropic
 
-anthropic = Anthropic()
-
-response = anthropic.completions.with_raw_response.create(
+client = Anthropic()
+response = client.messages.with_raw_response.create(
+    max_tokens=1024,
+    messages=[{
+        "role": "user",
+        "content": "Where can I get a good coffee in my neighbourhood?",
+    }],
     model="claude-2.1",
-    max_tokens_to_sample=300,
-    prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court?{AI_PROMPT}",
 )
 print(response.headers.get('X-My-Header'))
 
-completion = response.parse()  # get the object that `completions.create()` would have returned
-print(completion.completion)
+message = response.parse()  # get the object that `messages.create()` would have returned
+print(message.content)
 ```
 
 These methods return an [`LegacyAPIResponse`](https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/_legacy_response.py) object. This is a legacy class as we're changing it slightly in the next major version.
@@ -362,10 +403,15 @@ To stream the response body, use `.with_streaming_response` instead, which requi
 As such, `.with_streaming_response` methods return a different [`APIResponse`](https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/_response.py) object, and the async client returns an [`AsyncAPIResponse`](https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/_response.py) object.
 
 ```python
-with client.completions.with_streaming_response.create(
-    max_tokens_to_sample=300,
+with client.messages.with_streaming_response.create(
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": "Where can I get a good coffee in my neighbourhood?",
+        }
+    ],
     model="claude-2.1",
-    prompt=f"{HUMAN_PROMPT} Where can I get a good coffee in my neighbourhood?{AI_PROMPT}",
 ) as response:
     print(response.headers.get("X-My-Header"))
 

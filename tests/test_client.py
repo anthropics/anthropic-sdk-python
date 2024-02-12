@@ -803,17 +803,22 @@ class TestAnthropic:
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/complete").mock(side_effect=httpx.TimeoutException("Test timeout error"))
+        respx_mock.post("/v1/messages").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
             self.client.post(
-                "/v1/complete",
+                "/v1/messages",
                 body=cast(
                     object,
                     dict(
-                        max_tokens_to_sample=300,
+                        max_tokens=1024,
+                        messages=[
+                            {
+                                "role": "user",
+                                "content": "Where can I get a good coffee in my neighbourhood?",
+                            }
+                        ],
                         model="claude-2.1",
-                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -825,17 +830,22 @@ class TestAnthropic:
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/complete").mock(return_value=httpx.Response(500))
+        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
             self.client.post(
-                "/v1/complete",
+                "/v1/messages",
                 body=cast(
                     object,
                     dict(
-                        max_tokens_to_sample=300,
+                        max_tokens=1024,
+                        messages=[
+                            {
+                                "role": "user",
+                                "content": "Where can I get a good coffee in my neighbourhood?",
+                            }
+                        ],
                         model="claude-2.1",
-                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -1611,17 +1621,22 @@ class TestAsyncAnthropic:
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/complete").mock(side_effect=httpx.TimeoutException("Test timeout error"))
+        respx_mock.post("/v1/messages").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
             await self.client.post(
-                "/v1/complete",
+                "/v1/messages",
                 body=cast(
                     object,
                     dict(
-                        max_tokens_to_sample=300,
+                        max_tokens=1024,
+                        messages=[
+                            {
+                                "role": "user",
+                                "content": "Where can I get a good coffee in my neighbourhood?",
+                            }
+                        ],
                         model="claude-2.1",
-                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -1633,17 +1648,22 @@ class TestAsyncAnthropic:
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/complete").mock(return_value=httpx.Response(500))
+        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
             await self.client.post(
-                "/v1/complete",
+                "/v1/messages",
                 body=cast(
                     object,
                     dict(
-                        max_tokens_to_sample=300,
+                        max_tokens=1024,
+                        messages=[
+                            {
+                                "role": "user",
+                                "content": "Where can I get a good coffee in my neighbourhood?",
+                            }
+                        ],
                         model="claude-2.1",
-                        prompt="\n\nHuman:Where can I get a good coffee in my neighbourhood?\n\nAssistant:",
                     ),
                 ),
                 cast_to=httpx.Response,
