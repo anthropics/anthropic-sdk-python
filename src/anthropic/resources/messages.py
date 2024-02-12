@@ -8,18 +8,18 @@ from typing_extensions import Literal
 
 import httpx
 
-from ... import _legacy_response
-from ..._types import NOT_GIVEN, Body, Query, Headers, NotGiven
-from ..._utils import required_args, maybe_transform
-from ..._compat import cached_property
-from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
-from ..._streaming import Stream, AsyncStream
-from ...types.beta import Message, MessageParam, MessageStreamEvent, message_create_params
-from ..._base_client import (
+from .. import _legacy_response
+from ..types import Message, MessageParam, MessageStreamEvent, message_create_params
+from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven
+from .._utils import required_args, maybe_transform
+from .._compat import cached_property
+from .._resource import SyncAPIResource, AsyncAPIResource
+from .._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from .._streaming import Stream, AsyncStream
+from .._base_client import (
     make_request_options,
 )
-from ...lib.streaming import (
+from ..lib.streaming import (
     MessageStream,
     MessageStreamT,
     AsyncMessageStream,
@@ -69,10 +69,6 @@ class Messages(SyncAPIResource):
 
         Messages can be used for either single queries to the model or for multi-turn
         conversations.
-
-        The Messages API is currently in beta. During beta, you must send the
-        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
-        our client SDKs, this is handled for you automatically.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -136,9 +132,6 @@ class Messages(SyncAPIResource):
               ```json
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
-
-              During beta, the Messages API only accepts content blocks of type `"text"`, and
-              at most one block per message.
 
               See our
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
@@ -240,10 +233,6 @@ class Messages(SyncAPIResource):
         Messages can be used for either single queries to the model or for multi-turn
         conversations.
 
-        The Messages API is currently in beta. During beta, you must send the
-        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
-        our client SDKs, this is handled for you automatically.
-
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
 
@@ -306,9 +295,6 @@ class Messages(SyncAPIResource):
               ```json
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
-
-              During beta, the Messages API only accepts content blocks of type `"text"`, and
-              at most one block per message.
 
               See our
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
@@ -410,10 +396,6 @@ class Messages(SyncAPIResource):
         Messages can be used for either single queries to the model or for multi-turn
         conversations.
 
-        The Messages API is currently in beta. During beta, you must send the
-        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
-        our client SDKs, this is handled for you automatically.
-
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
 
@@ -476,9 +458,6 @@ class Messages(SyncAPIResource):
               ```json
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
-
-              During beta, the Messages API only accepts content blocks of type `"text"`, and
-              at most one block per message.
 
               See our
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
@@ -571,7 +550,6 @@ class Messages(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Message | Stream[MessageStreamEvent]:
-        extra_headers = {"Anthropic-Beta": "messages-2023-12-15", **(extra_headers or {})}
         return self._post(
             "/v1/messages",
             body=maybe_transform(
@@ -666,7 +644,6 @@ class Messages(SyncAPIResource):
     ) -> MessageStreamManager[MessageStream] | MessageStreamManager[MessageStreamT]:
         """Create a Message stream"""
         extra_headers = {
-            "Anthropic-Beta": "messages-2023-12-15",
             "X-Stainless-Stream-Helper": "messages",
             "X-Stainless-Custom-Event-Handler": "true" if event_handler != MessageStream else "false",
             **(extra_headers or {}),
@@ -738,10 +715,6 @@ class AsyncMessages(AsyncAPIResource):
         Messages can be used for either single queries to the model or for multi-turn
         conversations.
 
-        The Messages API is currently in beta. During beta, you must send the
-        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
-        our client SDKs, this is handled for you automatically.
-
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
 
@@ -804,9 +777,6 @@ class AsyncMessages(AsyncAPIResource):
               ```json
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
-
-              During beta, the Messages API only accepts content blocks of type `"text"`, and
-              at most one block per message.
 
               See our
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
@@ -908,10 +878,6 @@ class AsyncMessages(AsyncAPIResource):
         Messages can be used for either single queries to the model or for multi-turn
         conversations.
 
-        The Messages API is currently in beta. During beta, you must send the
-        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
-        our client SDKs, this is handled for you automatically.
-
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
 
@@ -974,9 +940,6 @@ class AsyncMessages(AsyncAPIResource):
               ```json
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
-
-              During beta, the Messages API only accepts content blocks of type `"text"`, and
-              at most one block per message.
 
               See our
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
@@ -1078,10 +1041,6 @@ class AsyncMessages(AsyncAPIResource):
         Messages can be used for either single queries to the model or for multi-turn
         conversations.
 
-        The Messages API is currently in beta. During beta, you must send the
-        `anthropic-beta: messages-2023-12-15` header in your requests. If you are using
-        our client SDKs, this is handled for you automatically.
-
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
 
@@ -1144,9 +1103,6 @@ class AsyncMessages(AsyncAPIResource):
               ```json
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
-
-              During beta, the Messages API only accepts content blocks of type `"text"`, and
-              at most one block per message.
 
               See our
               [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
@@ -1239,7 +1195,6 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Message | AsyncStream[MessageStreamEvent]:
-        extra_headers = {"Anthropic-Beta": "messages-2023-12-15", **(extra_headers or {})}
         return await self._post(
             "/v1/messages",
             body=maybe_transform(
@@ -1334,7 +1289,6 @@ class AsyncMessages(AsyncAPIResource):
     ) -> AsyncMessageStreamManager[AsyncMessageStream] | AsyncMessageStreamManager[AsyncMessageStreamT]:
         """Create a Message stream"""
         extra_headers = {
-            "Anthropic-Beta": "messages-2023-12-15",
             "X-Stainless-Stream-Helper": "messages",
             "X-Stainless-Custom-Event-Handler": "true" if event_handler != AsyncMessageStream else "false",
             **(extra_headers or {}),

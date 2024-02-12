@@ -2,7 +2,7 @@
 
 from typing_extensions import Literal
 
-from ..._models import BaseModel
+from .._models import BaseModel
 from .text_delta import TextDelta
 
 __all__ = ["ContentBlockDeltaEvent"]

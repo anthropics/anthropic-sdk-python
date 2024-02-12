@@ -2,7 +2,7 @@ from anthropic import Anthropic
 
 client = Anthropic()
 
-response = client.beta.messages.create(
+response = client.messages.create(
     max_tokens=1024,
     messages=[
         {
@@ -14,7 +14,7 @@ response = client.beta.messages.create(
 )
 print(response)
 
-response2 = client.beta.messages.create(
+response2 = client.messages.create(
     max_tokens=1024,
     messages=[
         {

@@ -3,7 +3,7 @@
 ## Streaming Responses
 
 ```python
-async with client.beta.messages.stream(
+async with client.messages.stream(
     max_tokens=1024,
     messages=[
         {
@@ -18,9 +18,9 @@ async with client.beta.messages.stream(
     print()
 ```
 
-`client.beta.messages.stream()` returns a `MessageStreamManager`, which is a context manager that yields a `MessageStream` which is iterable, emits events and accumulates messages.
+`client.messages.stream()` returns a `MessageStreamManager`, which is a context manager that yields a `MessageStream` which is iterable, emits events and accumulates messages.
 
-Alternatively, you can use `client.beta.messages.create(..., stream=True)` which returns an
+Alternatively, you can use `client.messages.create(..., stream=True)` which returns an
 iterable of the events in the stream and uses less memory (most notably, it does not accumulate a final message
 object for you).
 
@@ -45,14 +45,14 @@ print()
 
 ### Events
 
-You can pass an `event_handler` argument to `client.beta.messages.stream` to register callback methods that are fired when certain events happen:
+You can pass an `event_handler` argument to `client.messages.stream` to register callback methods that are fired when certain events happen:
 
 ```py
 import asyncio
 from typing_extensions import override
 
 from anthropic import AsyncAnthropic, AsyncMessageStream
-from anthropic.types.beta import MessageStreamEvent
+from anthropic.types import MessageStreamEvent
 
 client = AsyncAnthropic()
 
@@ -66,7 +66,7 @@ class MyStream(AsyncMessageStream):
         print("on_event fired with:", event)
 
 async def main() -> None:
-    async with client.beta.messages.stream(
+    async with client.messages.stream(
         max_tokens=1024,
         messages=[
             {

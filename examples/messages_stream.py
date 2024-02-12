@@ -6,7 +6,7 @@ client = AsyncAnthropic()
 
 
 async def main() -> None:
-    async with client.beta.messages.stream(
+    async with client.messages.stream(
         max_tokens=1024,
         messages=[
             {

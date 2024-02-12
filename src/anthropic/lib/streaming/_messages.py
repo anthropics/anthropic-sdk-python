@@ -7,10 +7,10 @@ from typing_extensions import Iterator, Awaitable, AsyncIterator, override, asse
 
 import httpx
 
+from ...types import Message, MessageStreamEvent
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._streaming import Stream, AsyncStream
-from ...types.beta import Message, MessageStreamEvent
-from ...types.beta.message import ContentBlock
+from ...types.message import ContentBlock
 
 if TYPE_CHECKING:
     from ..._client import Anthropic, AsyncAnthropic
@@ -182,7 +182,7 @@ class MessageStreamManager(Generic[MessageStreamT]):
     """Wrapper over MessageStream that is returned by `.stream()`.
 
     ```py
-    with client.beta.messages.stream(...) as stream:
+    with client.messages.stream(...) as stream:
         for chunk in stream:
             ...
     ```
@@ -383,7 +383,7 @@ class AsyncMessageStreamManager(Generic[AsyncMessageStreamT]):
     original client call.
 
     ```py
-    async with client.beta.messages.stream(...) as stream:
+    async with client.messages.stream(...) as stream:
         async for chunk in stream:
             ...
     ```

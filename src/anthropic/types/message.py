@@ -4,7 +4,7 @@ from typing import List, Optional
 from typing_extensions import Literal
 
 from .usage import Usage
-from ..._models import BaseModel
+from .._models import BaseModel
 from .content_block import ContentBlock
 
 __all__ = ["Message"]
