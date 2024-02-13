@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.16.0 (2024-02-13)
+
+Full Changelog: [v0.15.1...v0.16.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.15.1...v0.16.0)
+
+### Features
+
+* **api:** messages is generally available ([#343](https://github.com/anthropics/anthropic-sdk-python/issues/343)) ([f682594](https://github.com/anthropics/anthropic-sdk-python/commit/f6825941acc09b33af386b40718bd2f3c01b29ef))
+* **messages:** allow message response in params ([#339](https://github.com/anthropics/anthropic-sdk-python/issues/339)) ([86c63f0](https://github.com/anthropics/anthropic-sdk-python/commit/86c63f0e7441a9fe894b3ae7cd7e871060d5ebbf))
+
+
+### Documentation
+
+* add CONTRIBUTING.md ([#340](https://github.com/anthropics/anthropic-sdk-python/issues/340)) ([78469ad](https://github.com/anthropics/anthropic-sdk-python/commit/78469ade1658bf6b12b7cb947136e228d6992303))
+
 ## 0.15.1 (2024-02-07)
 
 Full Changelog: [v0.15.0...v0.15.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.15.0...v0.15.1)
