@@ -51,8 +51,17 @@ class Completions(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -147,8 +156,17 @@ class Completions(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Stream[Completion]:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -243,8 +261,17 @@ class Completions(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion | Stream[Completion]:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -393,8 +420,17 @@ class AsyncCompletions(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -489,8 +525,17 @@ class AsyncCompletions(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> AsyncStream[Completion]:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -585,8 +630,17 @@ class AsyncCompletions(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion | AsyncStream[Completion]:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
