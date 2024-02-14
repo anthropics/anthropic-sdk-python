@@ -6,8 +6,6 @@ The Anthropic Python library provides convenient access to the Anthropic REST AP
 application. It includes type definitions for all request params and response fields,
 and offers both synchronous and asynchronous clients powered by [httpx](https://github.com/encode/httpx).
 
-For the AWS Bedrock API, see [`anthropic-bedrock`](https://github.com/anthropics/anthropic-bedrock-python).
-
 ## Documentation
 
 The REST API documentation can be found [on docs.anthropic.com](https://docs.anthropic.com/claude/reference/). The full API of this library can be found in [api.md](api.md).
