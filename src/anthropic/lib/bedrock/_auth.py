@@ -39,4 +39,4 @@ def get_auth_headers(
 
     prepped = request.prepare()
 
-    return dict(prepped.headers)
+    return {key: value for key, value in dict(prepped.headers).items() if value is not None}
