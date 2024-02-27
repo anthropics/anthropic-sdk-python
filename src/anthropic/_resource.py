@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import time
-import asyncio
+
+import anyio
 
 from ._base_client import SyncAPIClient, AsyncAPIClient
 
@@ -37,4 +38,4 @@ class AsyncAPIResource:
         self._get_api_list = client.get_api_list
 
     async def _sleep(self, seconds: float) -> None:
-        await asyncio.sleep(seconds)
+        await anyio.sleep(seconds)
