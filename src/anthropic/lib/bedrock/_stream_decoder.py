@@ -27,7 +27,7 @@ class AWSEventStreamDecoder:
 
         self.parser = EventStreamJSONParser()
 
-    def iter(self, iterator: Iterator[bytes]) -> Iterator[ServerSentEvent]:
+    def iter_bytes(self, iterator: Iterator[bytes]) -> Iterator[ServerSentEvent]:
         """Given an iterator that yields lines, iterate over it & yield every event encountered"""
         from botocore.eventstream import EventStreamBuffer
 
@@ -39,7 +39,7 @@ class AWSEventStreamDecoder:
                 if message:
                     yield ServerSentEvent(data=message, event="completion")
 
-    async def aiter(self, iterator: AsyncIterator[bytes]) -> AsyncIterator[ServerSentEvent]:
+    async def aiter_bytes(self, iterator: AsyncIterator[bytes]) -> AsyncIterator[ServerSentEvent]:
         """Given an async iterator that yields lines, iterate over it & yield every event encountered"""
         from botocore.eventstream import EventStreamBuffer
 
