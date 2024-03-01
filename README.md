@@ -13,6 +13,7 @@ The REST API documentation can be found [on docs.anthropic.com](https://docs.ant
 ## Installation
 
 ```sh
+# install from PyPI
 pip install anthropic
 ```
 
