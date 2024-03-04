@@ -9,6 +9,7 @@ from .text_delta import TextDelta as TextDelta
 from .content_block import ContentBlock as ContentBlock
 from .message_param import MessageParam as MessageParam
 from .text_block_param import TextBlockParam as TextBlockParam
+from .image_block_param import ImageBlockParam as ImageBlockParam
 from .message_stop_event import MessageStopEvent as MessageStopEvent
 from .message_delta_event import MessageDeltaEvent as MessageDeltaEvent
 from .message_delta_usage import MessageDeltaUsage as MessageDeltaUsage

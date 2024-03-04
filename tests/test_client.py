@@ -815,10 +815,10 @@ class TestAnthropic:
                         messages=[
                             {
                                 "role": "user",
-                                "content": "Where can I get a good coffee in my neighbourhood?",
+                                "content": "Hello, Claude",
                             }
                         ],
-                        model="claude-2.1",
+                        model="claude-3-opus-20240229",
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -842,10 +842,10 @@ class TestAnthropic:
                         messages=[
                             {
                                 "role": "user",
-                                "content": "Where can I get a good coffee in my neighbourhood?",
+                                "content": "Hello, Claude",
                             }
                         ],
-                        model="claude-2.1",
+                        model="claude-3-opus-20240229",
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -1633,10 +1633,10 @@ class TestAsyncAnthropic:
                         messages=[
                             {
                                 "role": "user",
-                                "content": "Where can I get a good coffee in my neighbourhood?",
+                                "content": "Hello, Claude",
                             }
                         ],
-                        model="claude-2.1",
+                        model="claude-3-opus-20240229",
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -1660,10 +1660,10 @@ class TestAsyncAnthropic:
                         messages=[
                             {
                                 "role": "user",
-                                "content": "Where can I get a good coffee in my neighbourhood?",
+                                "content": "Hello, Claude",
                             }
                         ],
-                        model="claude-2.1",
+                        model="claude-3-opus-20240229",
                     ),
                 ),
                 cast_to=httpx.Response,

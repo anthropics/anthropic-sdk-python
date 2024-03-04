@@ -24,7 +24,7 @@ _T = TypeVar("_T")
 # copied from the real API
 stream_example = """
 event: message_start
-data: {"type":"message_start","message":{"id":"msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK","type":"message","role":"assistant","content":[],"model":"claude-2.1","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":11,"output_tokens":1}}}
+data: {"type":"message_start","message":{"id":"msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK","type":"message","role":"assistant","content":[],"model":"claude-3-opus-20240229","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":11,"output_tokens":1}}}
 
 event: content_block_start
 data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
@@ -86,7 +86,7 @@ class AsyncEventTracker(AsyncMessageStream):
 
 def assert_basic_response(stream: SyncEventTracker | AsyncEventTracker, message: Message) -> None:
     assert message.id == "msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK"
-    assert message.model == "claude-2.1"
+    assert message.model == "claude-3-opus-20240229"
     assert message.role == "assistant"
     assert message.stop_reason == "end_turn"
     assert message.stop_sequence is None
@@ -121,7 +121,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             event_handler=SyncEventTracker,
         ) as stream:
             assert_basic_response(stream, stream.get_final_message())
@@ -138,7 +138,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
         ) as stream:
             assert not stream.response.is_closed
 
@@ -160,7 +160,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             event_handler=AsyncEventTracker,
         ) as stream:
             assert_basic_response(stream, await stream.get_final_message())
@@ -178,7 +178,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
         ) as stream:
             assert not stream.response.is_closed
 
