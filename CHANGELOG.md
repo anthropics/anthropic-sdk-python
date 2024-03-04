@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.18.1 (2024-03-04)
+
+Full Changelog: [v0.18.0...v0.18.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.18.0...v0.18.1)
+
+### Chores
+
+* **readme:** update bedrock example ([#364](https://github.com/anthropics/anthropic-sdk-python/issues/364)) ([81e4d10](https://github.com/anthropics/anthropic-sdk-python/commit/81e4d10f6b7c5e06d5d2844441350731dbddbfad))
+
 ## 0.18.0 (2024-03-04)
 
 Full Changelog: [v0.17.0...v0.18.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.17.0...v0.18.0)

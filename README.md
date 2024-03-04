@@ -170,20 +170,21 @@ This library also provides support for the [Anthropic Bedrock API](https://aws.a
 You can then import and instantiate a separate `AnthropicBedrock` class, the rest of the API is the same.
 
 ```py
-from anthropic import AI_PROMPT, HUMAN_PROMPT, AnthropicBedrock
+from anthropic import AnthropicBedrock
 
 client = AnthropicBedrock()
 
-completion = client.completions.create(
-    model="anthropic.claude-instant-v1",
-    prompt=f"{HUMAN_PROMPT} hey!{AI_PROMPT}",
-    stop_sequences=[HUMAN_PROMPT],
-    max_tokens_to_sample=500,
-    temperature=0.5,
-    top_k=250,
-    top_p=0.5,
+message = client.messages.create(
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": "Hello!",
+        }
+    ],
+    model="anthropic.claude-3-sonnet-20240229-v1:0",
 )
-print(completion.completion)
+print(message)
 ```
 
 For a more fully fledged example see [`examples/bedrock.py`](https://github.com/anthropics/anthropic-sdk-python/blob/main/examples/bedrock.py).
