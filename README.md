@@ -109,9 +109,9 @@ for event in stream:
 The async client uses the exact same interface.
 
 ```python
-from anthropic import Anthropic
+from anthropic import AsyncAnthropic
 
-client = Anthropic()
+client = AsyncAnthropic()
 
 stream = await client.messages.create(
     max_tokens=1024,
