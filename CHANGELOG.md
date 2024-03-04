@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.18.0 (2024-03-04)
+
+Full Changelog: [v0.17.0...v0.18.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.17.0...v0.18.0)
+
+### Features
+
+* **bedrock:** add messages API ([#362](https://github.com/anthropics/anthropic-sdk-python/issues/362)) ([5409be9](https://github.com/anthropics/anthropic-sdk-python/commit/5409be98d0fd4e65e6dd766238fc8789efb3cb49))
+
+
+### Chores
+
+* remove old examples ([4895381](https://github.com/anthropics/anthropic-sdk-python/commit/489538163ada7de07c3f4b5237c551949fee4232))
+
 ## 0.17.0 (2024-03-04)
 
 Full Changelog: [v0.16.0...v0.17.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.16.0...v0.17.0)
