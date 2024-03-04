@@ -11,7 +11,7 @@ async with client.messages.stream(
             "content": "Say hello there!",
         }
     ],
-    model="claude-2.1",
+    model="claude-3-opus-20240229",
 ) as stream:
     async for text in stream.text_stream:
         print(text, end="", flush=True)
@@ -74,7 +74,7 @@ async def main() -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="claude-2.1",
+        model="claude-3-opus-20240229",
         event_handler=MyStream,
     ) as stream:
         message = await stream.get_final_message()

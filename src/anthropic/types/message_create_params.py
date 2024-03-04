@@ -18,8 +18,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     only specifies the absolute maximum number of tokens to generate.
 
     Different models have different maximum values for this parameter. See
-    [input and output sizes](https://docs.anthropic.com/claude/reference/input-and-output-sizes)
-    for details.
+    [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
     """
 
     messages: Required[Iterable[MessageParam]]
@@ -58,15 +57,18 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     ```json
     [
-      { "role": "user", "content": "Please describe yourself using only JSON" },
-      { "role": "assistant", "content": "Here is my JSON description:\n{" }
+      {
+        "role": "user",
+        "content": "What's the Greek name for Sun? (A) Sol (B) Helios (C) Sun"
+      },
+      { "role": "assistant", "content": "The best answer is (" }
     ]
     ```
 
     Each input message `content` may be either a single `string` or an array of
-    content blocks, where each block has a specific `type`. Using a `string` is
-    shorthand for an array of one content block of type `"text"`. The following
-    input messages are equivalent:
+    content blocks, where each block has a specific `type`. Using a `string` for
+    `content` is shorthand for an array of one content block of type `"text"`. The
+    following input messages are equivalent:
 
     ```json
     { "role": "user", "content": "Hello, Claude" }
@@ -76,26 +78,41 @@ class MessageCreateParamsBase(TypedDict, total=False):
     { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
     ```
 
-    See our
-    [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-    for more details on how to best construct prompts.
+    Starting with Claude 3 models, you can also send image content blocks:
+
+    ```json
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "image",
+          "source": {
+            "type": "base64",
+            "media_type": "image/jpeg",
+            "data": "/9j/4AAQSkZJRg..."
+          }
+        },
+        { "type": "text", "text": "What is in this image?" }
+      ]
+    }
+    ```
+
+    We currently support the `base64` source type for images, and the `image/jpeg`,
+    `image/png`, `image/gif`, and `image/webp` media types.
+
+    See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
+    for more input examples.
 
     Note that if you want to include a
-    [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
-    you can use the top-level `system` parameter — there is no `"system"` role for
-    input messages in the Messages API.
+    [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
+    use the top-level `system` parameter — there is no `"system"` role for input
+    messages in the Messages API.
     """
 
     model: Required[str]
     """The model that will complete your prompt.
 
-    As we improve Claude, we develop new versions of it that you can query. The
-    `model` parameter controls which version of Claude responds to your request.
-    Right now we offer two model families: Claude, and Claude Instant. You can use
-    them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-    respectively.
-
-    See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+    See [models](https://docs.anthropic.com/claude/docs/models-overview) for
     additional details and options.
     """
 
@@ -119,14 +136,18 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     A system prompt is a way of providing context and instructions to Claude, such
     as specifying a particular goal or role. See our
-    [guide to system prompts](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts).
+    [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
     """
 
     temperature: float
     """Amount of randomness injected into the response.
 
-    Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-    multiple choice, and closer to 1 for creative and generative tasks.
+    Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+    for analytical / multiple choice, and closer to `1.0` for creative and
+    generative tasks.
+
+    Note that even with `temperature` of `0.0`, the results will not be fully
+    deterministic.
     """
 
     top_k: int
@@ -134,6 +155,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     Used to remove "long tail" low probability responses.
     [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+    Recommended for advanced use cases only. You usually only need to use
+    `temperature`.
     """
 
     top_p: float
@@ -143,6 +167,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
     for each subsequent token in decreasing probability order and cut it off once it
     reaches a particular probability specified by `top_p`. You should either alter
     `temperature` or `top_p`, but not both.
+
+    Recommended for advanced use cases only. You usually only need to use
+    `temperature`.
     """
 
 

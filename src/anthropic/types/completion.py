@@ -32,3 +32,7 @@ class Completion(BaseModel):
     """
 
     type: Literal["completion"]
+    """Object type.
+
+    For Text Completions, this is always `"completion"`.
+    """

@@ -10,7 +10,11 @@ import httpx
 from .. import _legacy_response
 from ..types import Completion, completion_create_params
 from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven
-from .._utils import required_args, maybe_transform
+from .._utils import (
+    required_args,
+    maybe_transform,
+    async_maybe_transform,
+)
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
@@ -36,7 +40,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
+        model: Union[str, Literal["claude-3-opus-20240229", "claude-2.1", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -51,8 +55,17 @@ class Completions(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -62,13 +75,7 @@ class Completions(SyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -102,13 +109,20 @@ class Completions(SyncAPIResource):
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -116,6 +130,9 @@ class Completions(SyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -132,7 +149,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
+        model: Union[str, Literal["claude-3-opus-20240229", "claude-2.1", "claude-instant-1"]],
         prompt: str,
         stream: Literal[True],
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -147,8 +164,17 @@ class Completions(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Stream[Completion]:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -158,13 +184,7 @@ class Completions(SyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -198,13 +218,20 @@ class Completions(SyncAPIResource):
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -212,6 +239,9 @@ class Completions(SyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -228,7 +258,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
+        model: Union[str, Literal["claude-3-opus-20240229", "claude-2.1", "claude-instant-1"]],
         prompt: str,
         stream: bool,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -243,8 +273,17 @@ class Completions(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion | Stream[Completion]:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -254,13 +293,7 @@ class Completions(SyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -294,13 +327,20 @@ class Completions(SyncAPIResource):
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -308,6 +348,9 @@ class Completions(SyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -324,7 +367,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
+        model: Union[str, Literal["claude-3-opus-20240229", "claude-2.1", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -378,7 +421,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
+        model: Union[str, Literal["claude-3-opus-20240229", "claude-2.1", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -393,8 +436,17 @@ class AsyncCompletions(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -404,13 +456,7 @@ class AsyncCompletions(AsyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -444,13 +490,20 @@ class AsyncCompletions(AsyncAPIResource):
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -458,6 +511,9 @@ class AsyncCompletions(AsyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -474,7 +530,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
+        model: Union[str, Literal["claude-3-opus-20240229", "claude-2.1", "claude-instant-1"]],
         prompt: str,
         stream: Literal[True],
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -489,8 +545,17 @@ class AsyncCompletions(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> AsyncStream[Completion]:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -500,13 +565,7 @@ class AsyncCompletions(AsyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -540,13 +599,20 @@ class AsyncCompletions(AsyncAPIResource):
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -554,6 +620,9 @@ class AsyncCompletions(AsyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -570,7 +639,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
+        model: Union[str, Literal["claude-3-opus-20240229", "claude-2.1", "claude-instant-1"]],
         prompt: str,
         stream: bool,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -585,8 +654,17 @@ class AsyncCompletions(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
     ) -> Completion | AsyncStream[Completion]:
-        """
-        Create a Text Completion
+        """[Legacy] Create a Text Completion.
+
+        The Text Completions API is a legacy API.
+
+        We recommend using the
+        [Messages API](https://docs.anthropic.com/claude/reference/messages_post) going
+        forward.
+
+        Future models and features will not be compatible with Text Completions. See our
+        [migration guide](https://docs.anthropic.com/claude/reference/migrating-from-text-completions-to-messages)
+        for guidance in migrating from Text Completions to Messages.
 
         Args:
           max_tokens_to_sample: The maximum number of tokens to generate before stopping.
@@ -596,13 +674,7 @@ class AsyncCompletions(AsyncAPIResource):
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -636,13 +708,20 @@ class AsyncCompletions(AsyncAPIResource):
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -650,6 +729,9 @@ class AsyncCompletions(AsyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -666,7 +748,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.1", "claude-instant-1"]],
+        model: Union[str, Literal["claude-3-opus-20240229", "claude-2.1", "claude-instant-1"]],
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -683,7 +765,7 @@ class AsyncCompletions(AsyncAPIResource):
     ) -> Completion | AsyncStream[Completion]:
         return await self._post(
             "/v1/complete",
-            body=maybe_transform(
+            body=await async_maybe_transform(
                 {
                     "max_tokens_to_sample": max_tokens_to_sample,
                     "model": model,

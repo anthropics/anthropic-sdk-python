@@ -2,19 +2,18 @@ from __future__ import annotations
 
 import os
 from typing import Any, Union, Mapping, TypeVar
-from typing_extensions import override, get_origin
+from typing_extensions import override
 
 import httpx
 
 from ... import _exceptions
-from ._stream import BedrockStream, AsyncBedrockStream
-from ..._types import NOT_GIVEN, NotGiven, ResponseT
+from ..._types import NOT_GIVEN, NotGiven
 from ..._utils import is_dict
 from ..._version import __version__
-from ..._response import extract_stream_chunk_type
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import APIStatusError
 from ..._base_client import DEFAULT_MAX_RETRIES, BaseClient, SyncAPIClient, AsyncAPIClient, FinalRequestOptions
+from ._stream_decoder import AWSEventStreamDecoder
 from ...resources.completions import Completions, AsyncCompletions
 
 DEFAULT_VERSION = "bedrock-2023-05-31"
@@ -131,9 +130,11 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             _strict_response_validation=_strict_response_validation,
         )
 
-        self._default_stream_cls = BedrockStream
-
         self.completions = Completions(self)
+
+    @override
+    def _make_sse_decoder(self) -> AWSEventStreamDecoder:
+        return AWSEventStreamDecoder()
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
@@ -152,31 +153,6 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             data=data,
         )
         request.headers.update(headers)
-
-    @override
-    def _process_response(
-        self,
-        *,
-        cast_to: type[ResponseT],
-        options: FinalRequestOptions,
-        response: httpx.Response,
-        stream: bool,
-        stream_cls: type[Stream[Any]] | type[AsyncStream[Any]] | None,
-    ) -> ResponseT:
-        if stream_cls is not None and get_origin(stream_cls) == Stream:
-            chunk_type = extract_stream_chunk_type(stream_cls)
-
-            # the type: ignore is required as mypy doesn't like us
-            # dynamically created a concrete type like this
-            stream_cls = BedrockStream[chunk_type]  # type: ignore
-
-        return super()._process_response(
-            cast_to=cast_to,
-            options=options,
-            response=response,
-            stream=stream,
-            stream_cls=stream_cls,
-        )
 
 
 class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
@@ -231,9 +207,11 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             _strict_response_validation=_strict_response_validation,
         )
 
-        self._default_stream_cls = AsyncBedrockStream
-
         self.completions = AsyncCompletions(self)
+
+    @override
+    def _make_sse_decoder(self) -> AWSEventStreamDecoder:
+        return AWSEventStreamDecoder()
 
     @override
     async def _prepare_request(self, request: httpx.Request) -> None:
@@ -252,28 +230,3 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             data=data,
         )
         request.headers.update(headers)
-
-    @override
-    async def _process_response(
-        self,
-        *,
-        cast_to: type[ResponseT],
-        options: FinalRequestOptions,
-        response: httpx.Response,
-        stream: bool,
-        stream_cls: type[Stream[Any]] | type[AsyncStream[Any]] | None,
-    ) -> ResponseT:
-        if stream_cls is not None and get_origin(stream_cls) == AsyncStream:
-            chunk_type = extract_stream_chunk_type(stream_cls)
-
-            # the type: ignore is required as mypy doesn't like us
-            # dynamically created a concrete type like this
-            stream_cls = AsyncBedrockStream[chunk_type]  # type: ignore
-
-        return await super()._process_response(
-            cast_to=cast_to,
-            options=options,
-            response=response,
-            stream=stream,
-            stream_cls=stream_cls,
-        )

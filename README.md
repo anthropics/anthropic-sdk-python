@@ -6,8 +6,6 @@ The Anthropic Python library provides convenient access to the Anthropic REST AP
 application. It includes type definitions for all request params and response fields,
 and offers both synchronous and asynchronous clients powered by [httpx](https://github.com/encode/httpx).
 
-For the AWS Bedrock API, see [`anthropic-bedrock`](https://github.com/anthropics/anthropic-bedrock-python).
-
 ## Documentation
 
 The REST API documentation can be found [on docs.anthropic.com](https://docs.anthropic.com/claude/reference/). The full API of this library can be found in [api.md](api.md).
@@ -15,6 +13,7 @@ The REST API documentation can be found [on docs.anthropic.com](https://docs.ant
 ## Installation
 
 ```sh
+# install from PyPI
 pip install anthropic
 ```
 
@@ -36,10 +35,10 @@ message = client.messages.create(
     messages=[
         {
             "role": "user",
-            "content": "How does a court case get to the supreme court?",
+            "content": "Hello, Claude",
         }
     ],
-    model="claude-2.1",
+    model="claude-3-opus-20240229",
 )
 print(message.content)
 ```
@@ -70,10 +69,10 @@ async def main() -> None:
         messages=[
             {
                 "role": "user",
-                "content": "How does a court case get to the supreme court?",
+                "content": "Hello, Claude",
             }
         ],
-        model="claude-2.1",
+        model="claude-3-opus-20240229",
     )
     print(message.content)
 
@@ -97,10 +96,10 @@ stream = client.messages.create(
     messages=[
         {
             "role": "user",
-            "content": "your prompt here",
+            "content": "Hello, Claude",
         }
     ],
-    model="claude-2.1",
+    model="claude-3-opus-20240229",
     stream=True,
 )
 for event in stream:
@@ -119,10 +118,10 @@ stream = await client.messages.create(
     messages=[
         {
             "role": "user",
-            "content": "your prompt here",
+            "content": "Hello, Claude",
         }
     ],
-    model="claude-2.1",
+    model="claude-3-opus-20240229",
     stream=True,
 )
 async for event in stream:
@@ -148,7 +147,7 @@ async def main() -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="claude-2.1",
+        model="claude-3-opus-20240229",
     ) as stream:
         async for text in stream.text_stream:
             print(text, end="", flush=True)
@@ -191,11 +190,12 @@ For a more fully fledged example see [`examples/bedrock.py`](https://github.com/
 
 ## Token counting
 
-You can estimate billing for a given request with the `client.count_tokens()` method, eg:
+You can see the exact usage for a given request through the `usage` response property, e.g.
 
 ```py
-client = Anthropic()
-client.count_tokens('Hello world!')  # 3
+message = client.messages.create(...)
+message.usage
+# Usage(input_tokens=25, output_tokens=13)
 ```
 
 ## Using types
@@ -228,10 +228,10 @@ try:
         messages=[
             {
                 "role": "user",
-                "content": "your prompt here",
+                "content": "Hello, Claude",
             }
         ],
-        model="claude-2.1",
+        model="claude-3-opus-20240229",
     )
 except anthropic.APIConnectionError as e:
     print("The server could not be reached")
@@ -280,10 +280,10 @@ client.with_options(max_retries=5).messages.create(
     messages=[
         {
             "role": "user",
-            "content": "Can you help me effectively ask for a raise at work?",
+            "content": "Hello, Claude",
         }
     ],
-    model="claude-2.1",
+    model="claude-3-opus-20240229",
 )
 ```
 
@@ -312,10 +312,10 @@ client.with_options(timeout=5 * 1000).messages.create(
     messages=[
         {
             "role": "user",
-            "content": "Where can I get a good coffee in my neighbourhood?",
+            "content": "Hello, Claude",
         }
     ],
-    model="claude-2.1",
+    model="claude-3-opus-20240229",
 )
 ```
 
@@ -375,9 +375,9 @@ response = client.messages.with_raw_response.create(
     max_tokens=1024,
     messages=[{
         "role": "user",
-        "content": "Where can I get a good coffee in my neighbourhood?",
+        "content": "Hello, Claude",
     }],
-    model="claude-2.1",
+    model="claude-3-opus-20240229",
 )
 print(response.headers.get('X-My-Header'))
 
@@ -408,10 +408,10 @@ with client.messages.with_streaming_response.create(
     messages=[
         {
             "role": "user",
-            "content": "Where can I get a good coffee in my neighbourhood?",
+            "content": "Hello, Claude",
         }
     ],
-    model="claude-2.1",
+    model="claude-3-opus-20240229",
 ) as response:
     print(response.headers.get("X-My-Header"))
 

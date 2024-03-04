@@ -11,7 +11,11 @@ import httpx
 from .. import _legacy_response
 from ..types import Message, MessageParam, MessageStreamEvent, message_create_params
 from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven
-from .._utils import required_args, maybe_transform
+from .._utils import (
+    required_args,
+    maybe_transform,
+    async_maybe_transform,
+)
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
@@ -64,11 +68,11 @@ class Messages(SyncAPIResource):
         """
         Create a Message.
 
-        Send a structured list of input messages, and the model will generate the next
-        message in the conversation.
+        Send a structured list of input messages with text and/or image content, and the
+        model will generate the next message in the conversation.
 
-        Messages can be used for either single queries to the model or for multi-turn
-        conversations.
+        The Messages API can be used for for either single queries or stateless
+        multi-turn conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -77,8 +81,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [input and output sizes](https://docs.anthropic.com/claude/reference/input-and-output-sizes)
-              for details.
+              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -115,15 +118,18 @@ class Messages(SyncAPIResource):
 
               ```json
               [
-                { "role": "user", "content": "Please describe yourself using only JSON" },
-                { "role": "assistant", "content": "Here is my JSON description:\n{" }
+                {
+                  "role": "user",
+                  "content": "What's the Greek name for Sun? (A) Sol (B) Helios (C) Sun"
+                },
+                { "role": "assistant", "content": "The best answer is (" }
               ]
               ```
 
               Each input message `content` may be either a single `string` or an array of
-              content blocks, where each block has a specific `type`. Using a `string` is
-              shorthand for an array of one content block of type `"text"`. The following
-              input messages are equivalent:
+              content blocks, where each block has a specific `type`. Using a `string` for
+              `content` is shorthand for an array of one content block of type `"text"`. The
+              following input messages are equivalent:
 
               ```json
               { "role": "user", "content": "Hello, Claude" }
@@ -133,24 +139,39 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See our
-              [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more details on how to best construct prompts.
+              Starting with Claude 3 models, you can also send image content blocks:
+
+              ```json
+              {
+                "role": "user",
+                "content": [
+                  {
+                    "type": "image",
+                    "source": {
+                      "type": "base64",
+                      "media_type": "image/jpeg",
+                      "data": "/9j/4AAQSkZJRg..."
+                    }
+                  },
+                  { "type": "text", "text": "What is in this image?" }
+                ]
+              }
+              ```
+
+              We currently support the `base64` source type for images, and the `image/jpeg`,
+              `image/png`, `image/gif`, and `image/webp` media types.
+
+              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
+              for more input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
+              use the top-level `system` parameter — there is no `"system"` role for input
+              messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           metadata: An object describing metadata about the request.
@@ -174,17 +195,24 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -192,6 +220,9 @@ class Messages(SyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -227,11 +258,11 @@ class Messages(SyncAPIResource):
         """
         Create a Message.
 
-        Send a structured list of input messages, and the model will generate the next
-        message in the conversation.
+        Send a structured list of input messages with text and/or image content, and the
+        model will generate the next message in the conversation.
 
-        Messages can be used for either single queries to the model or for multi-turn
-        conversations.
+        The Messages API can be used for for either single queries or stateless
+        multi-turn conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -240,8 +271,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [input and output sizes](https://docs.anthropic.com/claude/reference/input-and-output-sizes)
-              for details.
+              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -278,15 +308,18 @@ class Messages(SyncAPIResource):
 
               ```json
               [
-                { "role": "user", "content": "Please describe yourself using only JSON" },
-                { "role": "assistant", "content": "Here is my JSON description:\n{" }
+                {
+                  "role": "user",
+                  "content": "What's the Greek name for Sun? (A) Sol (B) Helios (C) Sun"
+                },
+                { "role": "assistant", "content": "The best answer is (" }
               ]
               ```
 
               Each input message `content` may be either a single `string` or an array of
-              content blocks, where each block has a specific `type`. Using a `string` is
-              shorthand for an array of one content block of type `"text"`. The following
-              input messages are equivalent:
+              content blocks, where each block has a specific `type`. Using a `string` for
+              `content` is shorthand for an array of one content block of type `"text"`. The
+              following input messages are equivalent:
 
               ```json
               { "role": "user", "content": "Hello, Claude" }
@@ -296,24 +329,39 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See our
-              [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more details on how to best construct prompts.
+              Starting with Claude 3 models, you can also send image content blocks:
+
+              ```json
+              {
+                "role": "user",
+                "content": [
+                  {
+                    "type": "image",
+                    "source": {
+                      "type": "base64",
+                      "media_type": "image/jpeg",
+                      "data": "/9j/4AAQSkZJRg..."
+                    }
+                  },
+                  { "type": "text", "text": "What is in this image?" }
+                ]
+              }
+              ```
+
+              We currently support the `base64` source type for images, and the `image/jpeg`,
+              `image/png`, `image/gif`, and `image/webp` media types.
+
+              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
+              for more input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
+              use the top-level `system` parameter — there is no `"system"` role for input
+              messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -337,17 +385,24 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -355,6 +410,9 @@ class Messages(SyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -390,11 +448,11 @@ class Messages(SyncAPIResource):
         """
         Create a Message.
 
-        Send a structured list of input messages, and the model will generate the next
-        message in the conversation.
+        Send a structured list of input messages with text and/or image content, and the
+        model will generate the next message in the conversation.
 
-        Messages can be used for either single queries to the model or for multi-turn
-        conversations.
+        The Messages API can be used for for either single queries or stateless
+        multi-turn conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -403,8 +461,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [input and output sizes](https://docs.anthropic.com/claude/reference/input-and-output-sizes)
-              for details.
+              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -441,15 +498,18 @@ class Messages(SyncAPIResource):
 
               ```json
               [
-                { "role": "user", "content": "Please describe yourself using only JSON" },
-                { "role": "assistant", "content": "Here is my JSON description:\n{" }
+                {
+                  "role": "user",
+                  "content": "What's the Greek name for Sun? (A) Sol (B) Helios (C) Sun"
+                },
+                { "role": "assistant", "content": "The best answer is (" }
               ]
               ```
 
               Each input message `content` may be either a single `string` or an array of
-              content blocks, where each block has a specific `type`. Using a `string` is
-              shorthand for an array of one content block of type `"text"`. The following
-              input messages are equivalent:
+              content blocks, where each block has a specific `type`. Using a `string` for
+              `content` is shorthand for an array of one content block of type `"text"`. The
+              following input messages are equivalent:
 
               ```json
               { "role": "user", "content": "Hello, Claude" }
@@ -459,24 +519,39 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See our
-              [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more details on how to best construct prompts.
+              Starting with Claude 3 models, you can also send image content blocks:
+
+              ```json
+              {
+                "role": "user",
+                "content": [
+                  {
+                    "type": "image",
+                    "source": {
+                      "type": "base64",
+                      "media_type": "image/jpeg",
+                      "data": "/9j/4AAQSkZJRg..."
+                    }
+                  },
+                  { "type": "text", "text": "What is in this image?" }
+                ]
+              }
+              ```
+
+              We currently support the `base64` source type for images, and the `image/jpeg`,
+              `image/png`, `image/gif`, and `image/webp` media types.
+
+              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
+              for more input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
+              use the top-level `system` parameter — there is no `"system"` role for input
+              messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -500,17 +575,24 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -518,6 +600,9 @@ class Messages(SyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -709,11 +794,11 @@ class AsyncMessages(AsyncAPIResource):
         """
         Create a Message.
 
-        Send a structured list of input messages, and the model will generate the next
-        message in the conversation.
+        Send a structured list of input messages with text and/or image content, and the
+        model will generate the next message in the conversation.
 
-        Messages can be used for either single queries to the model or for multi-turn
-        conversations.
+        The Messages API can be used for for either single queries or stateless
+        multi-turn conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -722,8 +807,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [input and output sizes](https://docs.anthropic.com/claude/reference/input-and-output-sizes)
-              for details.
+              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -760,15 +844,18 @@ class AsyncMessages(AsyncAPIResource):
 
               ```json
               [
-                { "role": "user", "content": "Please describe yourself using only JSON" },
-                { "role": "assistant", "content": "Here is my JSON description:\n{" }
+                {
+                  "role": "user",
+                  "content": "What's the Greek name for Sun? (A) Sol (B) Helios (C) Sun"
+                },
+                { "role": "assistant", "content": "The best answer is (" }
               ]
               ```
 
               Each input message `content` may be either a single `string` or an array of
-              content blocks, where each block has a specific `type`. Using a `string` is
-              shorthand for an array of one content block of type `"text"`. The following
-              input messages are equivalent:
+              content blocks, where each block has a specific `type`. Using a `string` for
+              `content` is shorthand for an array of one content block of type `"text"`. The
+              following input messages are equivalent:
 
               ```json
               { "role": "user", "content": "Hello, Claude" }
@@ -778,24 +865,39 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See our
-              [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more details on how to best construct prompts.
+              Starting with Claude 3 models, you can also send image content blocks:
+
+              ```json
+              {
+                "role": "user",
+                "content": [
+                  {
+                    "type": "image",
+                    "source": {
+                      "type": "base64",
+                      "media_type": "image/jpeg",
+                      "data": "/9j/4AAQSkZJRg..."
+                    }
+                  },
+                  { "type": "text", "text": "What is in this image?" }
+                ]
+              }
+              ```
+
+              We currently support the `base64` source type for images, and the `image/jpeg`,
+              `image/png`, `image/gif`, and `image/webp` media types.
+
+              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
+              for more input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
+              use the top-level `system` parameter — there is no `"system"` role for input
+              messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           metadata: An object describing metadata about the request.
@@ -819,17 +921,24 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -837,6 +946,9 @@ class AsyncMessages(AsyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -872,11 +984,11 @@ class AsyncMessages(AsyncAPIResource):
         """
         Create a Message.
 
-        Send a structured list of input messages, and the model will generate the next
-        message in the conversation.
+        Send a structured list of input messages with text and/or image content, and the
+        model will generate the next message in the conversation.
 
-        Messages can be used for either single queries to the model or for multi-turn
-        conversations.
+        The Messages API can be used for for either single queries or stateless
+        multi-turn conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -885,8 +997,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [input and output sizes](https://docs.anthropic.com/claude/reference/input-and-output-sizes)
-              for details.
+              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -923,15 +1034,18 @@ class AsyncMessages(AsyncAPIResource):
 
               ```json
               [
-                { "role": "user", "content": "Please describe yourself using only JSON" },
-                { "role": "assistant", "content": "Here is my JSON description:\n{" }
+                {
+                  "role": "user",
+                  "content": "What's the Greek name for Sun? (A) Sol (B) Helios (C) Sun"
+                },
+                { "role": "assistant", "content": "The best answer is (" }
               ]
               ```
 
               Each input message `content` may be either a single `string` or an array of
-              content blocks, where each block has a specific `type`. Using a `string` is
-              shorthand for an array of one content block of type `"text"`. The following
-              input messages are equivalent:
+              content blocks, where each block has a specific `type`. Using a `string` for
+              `content` is shorthand for an array of one content block of type `"text"`. The
+              following input messages are equivalent:
 
               ```json
               { "role": "user", "content": "Hello, Claude" }
@@ -941,24 +1055,39 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See our
-              [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more details on how to best construct prompts.
+              Starting with Claude 3 models, you can also send image content blocks:
+
+              ```json
+              {
+                "role": "user",
+                "content": [
+                  {
+                    "type": "image",
+                    "source": {
+                      "type": "base64",
+                      "media_type": "image/jpeg",
+                      "data": "/9j/4AAQSkZJRg..."
+                    }
+                  },
+                  { "type": "text", "text": "What is in this image?" }
+                ]
+              }
+              ```
+
+              We currently support the `base64` source type for images, and the `image/jpeg`,
+              `image/png`, `image/gif`, and `image/webp` media types.
+
+              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
+              for more input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
+              use the top-level `system` parameter — there is no `"system"` role for input
+              messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -982,17 +1111,24 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -1000,6 +1136,9 @@ class AsyncMessages(AsyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -1035,11 +1174,11 @@ class AsyncMessages(AsyncAPIResource):
         """
         Create a Message.
 
-        Send a structured list of input messages, and the model will generate the next
-        message in the conversation.
+        Send a structured list of input messages with text and/or image content, and the
+        model will generate the next message in the conversation.
 
-        Messages can be used for either single queries to the model or for multi-turn
-        conversations.
+        The Messages API can be used for for either single queries or stateless
+        multi-turn conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1048,8 +1187,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [input and output sizes](https://docs.anthropic.com/claude/reference/input-and-output-sizes)
-              for details.
+              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -1086,15 +1224,18 @@ class AsyncMessages(AsyncAPIResource):
 
               ```json
               [
-                { "role": "user", "content": "Please describe yourself using only JSON" },
-                { "role": "assistant", "content": "Here is my JSON description:\n{" }
+                {
+                  "role": "user",
+                  "content": "What's the Greek name for Sun? (A) Sol (B) Helios (C) Sun"
+                },
+                { "role": "assistant", "content": "The best answer is (" }
               ]
               ```
 
               Each input message `content` may be either a single `string` or an array of
-              content blocks, where each block has a specific `type`. Using a `string` is
-              shorthand for an array of one content block of type `"text"`. The following
-              input messages are equivalent:
+              content blocks, where each block has a specific `type`. Using a `string` for
+              `content` is shorthand for an array of one content block of type `"text"`. The
+              following input messages are equivalent:
 
               ```json
               { "role": "user", "content": "Hello, Claude" }
@@ -1104,24 +1245,39 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See our
-              [guide to prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-              for more details on how to best construct prompts.
+              Starting with Claude 3 models, you can also send image content blocks:
+
+              ```json
+              {
+                "role": "user",
+                "content": [
+                  {
+                    "type": "image",
+                    "source": {
+                      "type": "base64",
+                      "media_type": "image/jpeg",
+                      "data": "/9j/4AAQSkZJRg..."
+                    }
+                  },
+                  { "type": "text", "text": "What is in this image?" }
+                ]
+              }
+              ```
+
+              We currently support the `base64` source type for images, and the `image/jpeg`,
+              `image/png`, `image/gif`, and `image/webp` media types.
+
+              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
+              for more input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
+              use the top-level `system` parameter — there is no `"system"` role for input
+              messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              As we improve Claude, we develop new versions of it that you can query. The
-              `model` parameter controls which version of Claude responds to your request.
-              Right now we offer two model families: Claude, and Claude Instant. You can use
-              them by setting `model` to `"claude-2.1"` or `"claude-instant-1.2"`,
-              respectively.
-
-              See [models](https://docs.anthropic.com/claude/reference/selecting-a-model) for
+              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
               additional details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -1145,17 +1301,24 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/how-to-use-system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
-              Defaults to 1. Ranges from 0 to 1. Use temp closer to 0 for analytical /
-              multiple choice, and closer to 1 for creative and generative tasks.
+              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
+              for analytical / multiple choice, and closer to `1.0` for creative and
+              generative tasks.
+
+              Note that even with `temperature` of `0.0`, the results will not be fully
+              deterministic.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           top_p: Use nucleus sampling.
 
@@ -1163,6 +1326,9 @@ class AsyncMessages(AsyncAPIResource):
               for each subsequent token in decreasing probability order and cut it off once it
               reaches a particular probability specified by `top_p`. You should either alter
               `temperature` or `top_p`, but not both.
+
+              Recommended for advanced use cases only. You usually only need to use
+              `temperature`.
 
           extra_headers: Send extra headers
 
@@ -1197,7 +1363,7 @@ class AsyncMessages(AsyncAPIResource):
     ) -> Message | AsyncStream[MessageStreamEvent]:
         return await self._post(
             "/v1/messages",
-            body=maybe_transform(
+            body=await async_maybe_transform(
                 {
                     "max_tokens": max_tokens,
                     "messages": messages,

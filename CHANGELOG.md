@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.17.0 (2024-03-04)
+
+Full Changelog: [v0.16.0...v0.17.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.16.0...v0.17.0)
+
+### Features
+
+* **messages:** add support for image inputs ([#359](https://github.com/anthropics/anthropic-sdk-python/issues/359)) ([579f013](https://github.com/anthropics/anthropic-sdk-python/commit/579f013dd294f34b3c44e2b331a4aa25b6cdfd6a))
+
+
+### Chores
+
+* **client:** use anyio.sleep instead of asyncio.sleep ([#351](https://github.com/anthropics/anthropic-sdk-python/issues/351)) ([2778a22](https://github.com/anthropics/anthropic-sdk-python/commit/2778a2228e82704dde9176d970274e806422c02b))
+* **docs:** mention install from git repo ([#356](https://github.com/anthropics/anthropic-sdk-python/issues/356)) ([9d503ba](https://github.com/anthropics/anthropic-sdk-python/commit/9d503ba9cc462e33166594ca19f666819a3a5a87))
+* **docs:** remove references to old bedrock package ([#344](https://github.com/anthropics/anthropic-sdk-python/issues/344)) ([3323883](https://github.com/anthropics/anthropic-sdk-python/commit/3323883750b9d61fa084cadc99519b2f6cf8d39c))
+* **internal:** bump pyright ([#350](https://github.com/anthropics/anthropic-sdk-python/issues/350)) ([ee0161c](https://github.com/anthropics/anthropic-sdk-python/commit/ee0161c2d7d2fefd06ee5b1001131cd6d6d236d7))
+* **internal:** bump rye to v0.24.0 ([#348](https://github.com/anthropics/anthropic-sdk-python/issues/348)) ([be8597b](https://github.com/anthropics/anthropic-sdk-python/commit/be8597b33c2f2f6e8b9ae77738f4c898e48c8e91))
+* **internal:** improve bedrock streaming setup ([#354](https://github.com/anthropics/anthropic-sdk-python/issues/354)) ([2b55c68](https://github.com/anthropics/anthropic-sdk-python/commit/2b55c688514e4b13abce547362f0c0a3e7f0e97f))
+* **internal:** refactor release environment script ([#347](https://github.com/anthropics/anthropic-sdk-python/issues/347)) ([a87443a](https://github.com/anthropics/anthropic-sdk-python/commit/a87443a90374aedaac80451f61046c6f1aefeaa9))
+* **internal:** split up transforms into sync / async ([#357](https://github.com/anthropics/anthropic-sdk-python/issues/357)) ([f55ee71](https://github.com/anthropics/anthropic-sdk-python/commit/f55ee71b0b517f3e605bfd7a4aa948a9c2fc6552))
+* **internal:** support more input types ([#358](https://github.com/anthropics/anthropic-sdk-python/issues/358)) ([35b0347](https://github.com/anthropics/anthropic-sdk-python/commit/35b0347bfddecc94fc8ac09b42ff3d96f4523bf8))
+* **internal:** update deps ([#349](https://github.com/anthropics/anthropic-sdk-python/issues/349)) ([ab82b2d](https://github.com/anthropics/anthropic-sdk-python/commit/ab82b2d7ce16f3fed4b20e60f0c8e7981c22c191))
+
+
+### Documentation
+
+* **contributing:** improve wording ([#355](https://github.com/anthropics/anthropic-sdk-python/issues/355)) ([f9093a0](https://github.com/anthropics/anthropic-sdk-python/commit/f9093a0ee8d590185f572749d58280f7eda5ed8b))
+
+
+### Refactors
+
+* **api:** mark completions API as legacy ([#346](https://github.com/anthropics/anthropic-sdk-python/issues/346)) ([2bb25a1](https://github.com/anthropics/anthropic-sdk-python/commit/2bb25a12509b87557f3da2125ab955b60e32713f))
+
 ## 0.16.0 (2024-02-13)
 
 Full Changelog: [v0.15.1...v0.16.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.15.1...v0.16.0)
