@@ -3,7 +3,7 @@
 # Note: you must have installed `anthropic` with the `bedrock` extra
 # e.g. `pip install -U anthropic[bedrock]`
 
-from anthropic import AI_PROMPT, HUMAN_PROMPT, AnthropicBedrock
+from anthropic import AnthropicBedrock
 
 # Note: this assumes you have AWS credentials configured.
 #
@@ -11,29 +11,36 @@ from anthropic import AI_PROMPT, HUMAN_PROMPT, AnthropicBedrock
 client = AnthropicBedrock()
 
 print("------ standard response ------")
-completion = client.completions.create(
-    model="anthropic.claude-instant-v1",
-    prompt=f"{HUMAN_PROMPT} hey!{AI_PROMPT}",
-    stop_sequences=[HUMAN_PROMPT],
-    max_tokens_to_sample=500,
-    temperature=0.5,
-    top_k=250,
-    top_p=0.5,
+message = client.messages.create(
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": "Hello!",
+        }
+    ],
+    model="anthropic.claude-3-sonnet-20240229-v1:0",
 )
-print(completion.completion)
-
-
-question = """
-Hey Claude! How can I recursively list all files in a directory in Python?
-"""
+print(message.model_dump_json(indent=2))
 
 print("------ streamed response ------")
-stream = client.completions.create(
-    model="anthropic.claude-instant-v1",
-    prompt=f"{HUMAN_PROMPT} {question}{AI_PROMPT}",
-    max_tokens_to_sample=500,
-    stream=True,
-)
-for item in stream:
-    print(item.completion, end="")
-print()
+
+with client.messages.stream(
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": "Say hello there!",
+        }
+    ],
+    model="anthropic.claude-3-sonnet-20240229-v1:0",
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+    print()
+
+    # you can still get the accumulated final message outside of
+    # the context manager, as long as the entire stream was consumed
+    # inside of the context manager
+    accumulated = stream.get_final_message()
+    print("accumulated message: ", accumulated.model_dump_json(indent=2))
