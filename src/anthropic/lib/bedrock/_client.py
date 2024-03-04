@@ -14,6 +14,7 @@ from ..._streaming import Stream, AsyncStream
 from ..._exceptions import APIStatusError
 from ..._base_client import DEFAULT_MAX_RETRIES, BaseClient, SyncAPIClient, AsyncAPIClient, FinalRequestOptions
 from ._stream_decoder import AWSEventStreamDecoder
+from ...resources.messages import Messages, AsyncMessages
 from ...resources.completions import Completions, AsyncCompletions
 
 DEFAULT_VERSION = "bedrock-2023-05-31"
@@ -31,7 +32,7 @@ class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         if is_dict(options.json_data):
             options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
 
-        if options.url == "/v1/complete" and options.method == "post":
+        if options.url in {"/v1/complete", "/v1/messages"} and options.method == "post":
             if not is_dict(options.json_data):
                 raise RuntimeError("Expected dictionary json_data for post /completions endpoint")
 
@@ -79,6 +80,7 @@ class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
 
 
 class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClient):
+    messages: Messages
     completions: Completions
 
     def __init__(
@@ -130,6 +132,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             _strict_response_validation=_strict_response_validation,
         )
 
+        self.messages = Messages(self)
         self.completions = Completions(self)
 
     @override
@@ -156,6 +159,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
 
 
 class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
+    messages: AsyncMessages
     completions: AsyncCompletions
 
     def __init__(
@@ -207,6 +211,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             _strict_response_validation=_strict_response_validation,
         )
 
+        self.messages = AsyncMessages(self)
         self.completions = AsyncCompletions(self)
 
     @override
