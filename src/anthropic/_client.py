@@ -267,7 +267,12 @@ class Anthropic(SyncAPIClient):
         self,
         text: str,
     ) -> int:
-        """Count the number of tokens in a given string"""
+        """Count the number of tokens in a given string.
+
+        Note that this is only accurate for older models, e.g. `claude-2.1`. For newer
+        models this can only be used as a _very_ rough estimate, instead you should rely
+        on the `usage` property in the response for exact counts.
+        """
         # Note: tokenizer is untyped
         tokenizer = self.get_tokenizer()
         encoded_text = tokenizer.encode(text)  # type: ignore
@@ -522,7 +527,12 @@ class AsyncAnthropic(AsyncAPIClient):
         self,
         text: str,
     ) -> int:
-        """Count the number of tokens in a given string"""
+        """Count the number of tokens in a given string.
+
+        Note that this is only accurate for older models, e.g. `claude-2.1`. For newer
+        models this can only be used as a _very_ rough estimate, instead you should rely
+        on the `usage` property in the response for exact counts.
+        """
         # Note: tokenizer is untyped
         tokenizer = await self.get_tokenizer()
         encoded_text = tokenizer.encode(text)  # type: ignore

@@ -421,7 +421,8 @@ def accumulate_event(*, event: MessageStreamEvent, current_snapshot: Message | N
         )
     elif event.type == "content_block_delta":
         content = current_snapshot.content[event.index]
-        content.text += event.delta.text
+        if content.type == "text" and event.delta.type == "text_delta":
+            content.text += event.delta.text
     elif event.type == "message_delta":
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence

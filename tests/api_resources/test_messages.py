@@ -24,10 +24,10 @@ class TestMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -38,10 +38,10 @@ class TestMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
             stream=False,
@@ -59,10 +59,10 @@ class TestMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
         )
 
         assert response.is_closed is True
@@ -77,10 +77,10 @@ class TestMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -97,10 +97,10 @@ class TestMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             stream=True,
         )
         message_stream.response.close()
@@ -112,10 +112,10 @@ class TestMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
@@ -133,10 +133,10 @@ class TestMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             stream=True,
         )
 
@@ -151,10 +151,10 @@ class TestMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -176,10 +176,10 @@ class TestAsyncMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -190,10 +190,10 @@ class TestAsyncMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
             stream=False,
@@ -211,10 +211,10 @@ class TestAsyncMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
         )
 
         assert response.is_closed is True
@@ -229,10 +229,10 @@ class TestAsyncMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -249,10 +249,10 @@ class TestAsyncMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             stream=True,
         )
         await message_stream.response.aclose()
@@ -264,10 +264,10 @@ class TestAsyncMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
@@ -285,10 +285,10 @@ class TestAsyncMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             stream=True,
         )
 
@@ -303,10 +303,10 @@ class TestAsyncMessages:
             messages=[
                 {
                     "role": "user",
-                    "content": "In one sentence, what is good about the color blue?",
+                    "content": "Hello, world",
                 }
             ],
-            model="claude-2.1",
+            model="claude-3-opus-20240229",
             stream=True,
         ) as response:
             assert not response.is_closed

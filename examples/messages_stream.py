@@ -14,7 +14,7 @@ async def main() -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="claude-2.1",
+        model="claude-3-opus-20240229",
     ) as stream:
         async for text in stream.text_stream:
             print(text, end="", flush=True)

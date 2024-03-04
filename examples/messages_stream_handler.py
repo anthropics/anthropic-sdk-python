@@ -22,7 +22,7 @@ async def main() -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="claude-2.1",
+        model="claude-3-opus-20240229",
         event_handler=MyStream,
     ) as stream:
         accumulated = await stream.get_final_message()
