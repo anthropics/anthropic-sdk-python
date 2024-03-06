@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Iterable, overload
+from typing import List, Union, Iterable, overload
 from functools import partial
 from typing_extensions import Literal
 
@@ -50,7 +50,12 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
@@ -240,7 +245,12 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         stream: Literal[True],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -430,7 +440,12 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         stream: bool,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -620,7 +635,12 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
@@ -666,7 +686,12 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
@@ -689,7 +714,12 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
@@ -712,7 +742,12 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
@@ -776,7 +811,12 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
@@ -966,7 +1006,12 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         stream: Literal[True],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -1156,7 +1201,12 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         stream: bool,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -1346,7 +1396,12 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
@@ -1392,7 +1447,12 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
@@ -1415,7 +1475,12 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
@@ -1438,7 +1503,12 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: str,
+        model: Union[
+            str,
+            Literal[
+                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+            ],
+        ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
