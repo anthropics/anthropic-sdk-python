@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.19.0 (2024-03-06)
+
+Full Changelog: [v0.18.1...v0.19.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.18.1...v0.19.0)
+
+### Features
+
+* **api:** add enum to model param for message ([#371](https://github.com/anthropics/anthropic-sdk-python/issues/371)) ([f96765f](https://github.com/anthropics/anthropic-sdk-python/commit/f96765f188676bb688f599a3574c16dbfb27430c))
+
+
+### Chores
+
+* **client:** improve error message for invalid http_client argument ([#367](https://github.com/anthropics/anthropic-sdk-python/issues/367)) ([2f4df72](https://github.com/anthropics/anthropic-sdk-python/commit/2f4df724410bc6213bf559739724bec0242becd7))
+
+
+### Documentation
+
+* **readme:** fix async streaming snippet ([#366](https://github.com/anthropics/anthropic-sdk-python/issues/366)) ([37c469d](https://github.com/anthropics/anthropic-sdk-python/commit/37c469deecad9f6244d42dce7d3cedc289ca129b))
+
 ## 0.18.1 (2024-03-04)
 
 Full Changelog: [v0.18.0...v0.18.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.18.0...v0.18.1)
