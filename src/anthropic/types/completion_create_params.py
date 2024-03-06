@@ -25,7 +25,7 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     only specifies the absolute maximum number of tokens to generate.
     """
 
-    model: Required[Union[str, Literal["claude-3-opus-20240229", "claude-2.1", "claude-instant-1"]]]
+    model: Required[Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]]]
     """The model that will complete your prompt.
 
     See [models](https://docs.anthropic.com/claude/docs/models-overview) for
