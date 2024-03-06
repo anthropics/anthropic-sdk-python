@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.19.1 (2024-03-06)
+
+Full Changelog: [v0.19.0...v0.19.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.19.0...v0.19.1)
+
+### Chores
+
+* **internal:** add core support for deserializing into number response ([#373](https://github.com/anthropics/anthropic-sdk-python/issues/373)) ([b62c422](https://github.com/anthropics/anthropic-sdk-python/commit/b62c4224fafe0544877ebb57278526a5ddd1955d))
+
 ## 0.19.0 (2024-03-06)
 
 Full Changelog: [v0.18.1...v0.19.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.18.1...v0.19.0)
