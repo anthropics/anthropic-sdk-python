@@ -1,14 +1,14 @@
 import json
 from typing import Any, Dict, List, Union, Optional, cast
 from datetime import datetime, timezone
-from typing_extensions import Literal
+from typing_extensions import Literal, Annotated
 
 import pytest
 import pydantic
 from pydantic import Field
 
 from anthropic._compat import PYDANTIC_V2, parse_obj, model_dump, model_json
-from anthropic._models import BaseModel
+from anthropic._models import BaseModel, construct_type
 
 
 class BasicModel(BaseModel):
@@ -571,3 +571,15 @@ def test_type_compat() -> None:
         foo: Optional[str] = None
 
     takes_pydantic(OurModel())
+
+
+def test_annotated_types() -> None:
+    class Model(BaseModel):
+        value: str
+
+    m = construct_type(
+        value={"value": "foo"},
+        type_=cast(Any, Annotated[Model, "random metadata"]),
+    )
+    assert isinstance(m, Model)
+    assert m.value == "foo"
