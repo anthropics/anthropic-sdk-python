@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.19.2 (2024-03-11)
+
+Full Changelog: [v0.19.1...v0.19.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.19.1...v0.19.2)
+
+### Bug Fixes
+
+* **vertex:** use correct auth scopes ([#385](https://github.com/anthropics/anthropic-sdk-python/issues/385)) ([e4de056](https://github.com/anthropics/anthropic-sdk-python/commit/e4de056ddc24e2d3d8f742124b0a965ff3404341))
+
+
+### Chores
+
+* export NOT_GIVEN sentinel value ([#379](https://github.com/anthropics/anthropic-sdk-python/issues/379)) ([ba127bc](https://github.com/anthropics/anthropic-sdk-python/commit/ba127bc44b70490a7c9e8ff76b7a742631e94c5c))
+* **internal:** improve deserialisation of discriminated unions ([#386](https://github.com/anthropics/anthropic-sdk-python/issues/386)) ([fbc7e0b](https://github.com/anthropics/anthropic-sdk-python/commit/fbc7e0b2cf5e8f5bcd316393a7483509ed9f790e))
+* **internal:** support parsing Annotated types ([#377](https://github.com/anthropics/anthropic-sdk-python/issues/377)) ([f44efd5](https://github.com/anthropics/anthropic-sdk-python/commit/f44efd5a587fca5021bfc2c068a715a7a550a5d0))
+
 ## 0.19.1 (2024-03-06)
 
 Full Changelog: [v0.19.0...v0.19.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.19.0...v0.19.1)
