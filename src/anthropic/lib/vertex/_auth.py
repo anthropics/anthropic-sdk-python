@@ -18,7 +18,9 @@ if TYPE_CHECKING:
 def load_auth() -> tuple[Credentials, str]:
     from google.auth.transport.requests import Request  # type: ignore[import-untyped]
 
-    credentials, project_id = google_auth.default()
+    credentials, project_id = google_auth.default(
+        scopes=["https://www.googleapis.com/auth/cloud-platform"],
+    )
     credentials.refresh(Request())
 
     if not project_id:
