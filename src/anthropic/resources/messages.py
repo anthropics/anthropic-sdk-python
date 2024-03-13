@@ -53,7 +53,12 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -248,7 +253,12 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         stream: Literal[True],
@@ -443,7 +453,12 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         stream: bool,
@@ -638,7 +653,12 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -689,7 +709,12 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -717,7 +742,12 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -745,7 +775,12 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -814,7 +849,12 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -1009,7 +1049,12 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         stream: Literal[True],
@@ -1204,7 +1249,12 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         stream: bool,
@@ -1399,7 +1449,12 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -1450,7 +1505,12 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -1478,7 +1538,12 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -1506,7 +1571,12 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
-                "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-2.1'", "claude-2.0", "claude-instant-1.2"
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1'",
+                "claude-2.0",
+                "claude-instant-1.2",
             ],
         ],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
