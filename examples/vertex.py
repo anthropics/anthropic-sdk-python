@@ -9,12 +9,12 @@ def sync_client() -> None:
     client = AnthropicVertex()
 
     message = client.messages.create(
-        model="claude-instant-1p2",
+        model="claude-3-sonnet@20240229",
         max_tokens=100,
         messages=[
             {
                 "role": "user",
-                "content": "Say hello there!",
+                "content": "Hello!",
             }
         ],
     )
@@ -27,12 +27,12 @@ async def async_client() -> None:
     client = AsyncAnthropicVertex()
 
     message = await client.messages.create(
-        model="claude-instant-1p2",
+        model="claude-3-sonnet@20240229",
         max_tokens=1024,
         messages=[
             {
                 "role": "user",
-                "content": "Say hello there!",
+                "content": "Hello!",
             }
         ],
     )
