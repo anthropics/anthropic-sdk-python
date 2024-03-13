@@ -163,6 +163,16 @@ Streaming with `client.messages.stream(...)` exposes [various helpers for your c
 
 Alternatively, you can use `client.messages.create(..., stream=True)` which only returns an async iterable of the events in the stream and thus uses less memory (it does not build up a final message object for you).
 
+## Token counting
+
+You can see the exact usage for a given request through the `usage` response property, e.g.
+
+```py
+message = client.messages.create(...)
+message.usage
+# Usage(input_tokens=25, output_tokens=13)
+```
+
 ## AWS Bedrock
 
 This library also provides support for the [Anthropic Bedrock API](https://aws.amazon.com/bedrock/claude/) if you install this library with the `bedrock` extra, e.g. `pip install -U anthropic[bedrock]`.
@@ -189,15 +199,34 @@ print(message)
 
 For a more fully fledged example see [`examples/bedrock.py`](https://github.com/anthropics/anthropic-sdk-python/blob/main/examples/bedrock.py).
 
-## Token counting
+## Google Vertex
 
-You can see the exact usage for a given request through the `usage` response property, e.g.
+> [!IMPORTANT]  
+> This API is in private preview.
+
+This library also provides support for the [Anthropic Vertex API](https://cloud.google.com/vertex-ai?hl=en) if you install this library with the `vertex` extra, e.g. `pip install -U anthropic[vertex]`.
+
+You can then import and instantiate a separate `AnthropicVertex`/`AsyncAnthropicVertexAsync` class, which has the same API as the base `Anthropic`/`AsyncAnthropic` class.
 
 ```py
-message = client.messages.create(...)
-message.usage
-# Usage(input_tokens=25, output_tokens=13)
+from anthropic import AnthropicVertex
+
+client = AnthropicVertex()
+
+message = client.messages.create(
+    model="claude-3-sonnet@20240229",
+    max_tokens=100,
+    messages=[
+        {
+            "role": "user",
+            "content": "Hello!",
+        }
+    ],
+)
+print(message)
 ```
+
+For a more complete example see [`examples/vertex.py`](https://github.com/anthropics/anthropic-sdk-python/blob/main/examples/vertex.py).
 
 ## Using types
 
