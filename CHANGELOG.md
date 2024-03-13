@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.20.0 (2024-03-13)
+
+Full Changelog: [v0.19.2...v0.20.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.19.2...v0.20.0)
+
+### Features
+
+* **api:** add haiku model ([#390](https://github.com/anthropics/anthropic-sdk-python/issues/390)) ([43b57fc](https://github.com/anthropics/anthropic-sdk-python/commit/43b57fca5426774929bfcac81bf00659740db796))
+
+
+### Documentation
+
+* **readme:** mention vertex API ([#388](https://github.com/anthropics/anthropic-sdk-python/issues/388)) ([8bb6b98](https://github.com/anthropics/anthropic-sdk-python/commit/8bb6b9841db322db8c5e8357c2c379482be15441))
+
 ## 0.19.2 (2024-03-11)
 
 Full Changelog: [v0.19.1...v0.19.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.19.1...v0.19.2)
