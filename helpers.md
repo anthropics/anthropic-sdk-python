@@ -58,8 +58,8 @@ client = AsyncAnthropic()
 
 class MyStream(AsyncMessageStream):
     @override
-    async def on_text(self, delta: str) -> None:
-        print(delta, end="", flush=True)
+    async def on_text(self, text: str, snapshot: str) -> None:
+        print(text, end="", flush=True)
 
     @override
     async def on_stream_event(self, event: MessageStreamEvent) -> None:
