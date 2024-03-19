@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 
 
 DEFAULT_VERSION = "vertex-2023-10-16"
-DEFAULT_BETA_TYPES = ["private-messages-testing"]
 
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
@@ -37,7 +36,6 @@ class BaseVertexClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
     ) -> httpx.Request:
         if is_dict(options.json_data):
             options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
-            options.json_data.setdefault("anthropic_beta", DEFAULT_BETA_TYPES)
 
         if options.url == "/v1/messages" and options.method == "post":
             project_id = self.project_id
