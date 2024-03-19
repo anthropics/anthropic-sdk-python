@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.21.0 (2024-03-19)
+
+Full Changelog: [v0.20.0...v0.21.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.20.0...v0.21.0)
+
+### Features
+
+* **vertex:** api is no longer in private beta ([#399](https://github.com/anthropics/anthropic-sdk-python/issues/399)) ([4cb0e64](https://github.com/anthropics/anthropic-sdk-python/commit/4cb0e6453ed185646b652b7942ed75f8e49be8e3))
+
+
+### Performance Improvements
+
+* cache TypeAdapters ([#396](https://github.com/anthropics/anthropic-sdk-python/issues/396)) ([a902c47](https://github.com/anthropics/anthropic-sdk-python/commit/a902c472b986d7c7bfda52fc20d737f0bcf80b6a))
+
+
+### Chores
+
+* **internal:** update generated pragma comment ([#398](https://github.com/anthropics/anthropic-sdk-python/issues/398)) ([330b61e](https://github.com/anthropics/anthropic-sdk-python/commit/330b61eccfd8af3ee587a91dd2491d66abfe159a))
+
+
+### Documentation
+
+* fix typo in CONTRIBUTING.md ([#397](https://github.com/anthropics/anthropic-sdk-python/issues/397)) ([d46629f](https://github.com/anthropics/anthropic-sdk-python/commit/d46629f385b65a0c099ca7a94ebaae9bcb0ecb2c))
+* **helpers:** fix example code ([#391](https://github.com/anthropics/anthropic-sdk-python/issues/391)) ([9fe0c8b](https://github.com/anthropics/anthropic-sdk-python/commit/9fe0c8b9b257d18e7f5fb7ac03de2073552c083d))
+
 ## 0.20.0 (2024-03-13)
 
 Full Changelog: [v0.19.2...v0.20.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.19.2...v0.20.0)
