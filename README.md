@@ -82,7 +82,7 @@ asyncio.run(main())
 
 Functionality between the synchronous and asynchronous clients is otherwise identical.
 
-## Streaming Responses
+## Streaming responses
 
 We provide support for streaming responses using Server Side Events (SSE).
 
