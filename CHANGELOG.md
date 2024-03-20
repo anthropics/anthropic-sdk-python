@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.21.1 (2024-03-20)
+
+Full Changelog: [v0.21.0...v0.21.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.21.0...v0.21.1)
+
+### Chores
+
+* **internal:** loosen input type for util function ([#402](https://github.com/anthropics/anthropic-sdk-python/issues/402)) ([9a6ca55](https://github.com/anthropics/anthropic-sdk-python/commit/9a6ca5528ee5b96577df4d657937c35cdc263f85))
+
 ## 0.21.0 (2024-03-19)
 
 Full Changelog: [v0.20.0...v0.21.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.20.0...v0.21.0)
