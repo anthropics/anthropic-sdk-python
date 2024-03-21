@@ -77,6 +77,14 @@ class TestAnthropic:
         assert isinstance(response, httpx.Response)
         assert response.json() == {"foo": "bar"}
 
+    def test_bad_api_key_constructor(self) -> None:
+        with pytest.raises(TypeError, match="api_key must be a string"):
+            Anthropic(api_key=[])
+
+    def test_bad_auth_token_constructor(self) -> None:
+        with pytest.raises(TypeError, match="auth_token must be a string"):
+            Anthropic(api_key=[])
+
     def test_copy(self) -> None:
         copied = self.client.copy()
         assert id(copied) != id(self.client)
