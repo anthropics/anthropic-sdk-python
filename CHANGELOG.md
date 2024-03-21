@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.21.3 (2024-03-21)
+
+Full Changelog: [v0.21.2...v0.21.3](https://github.com/anthropics/anthropic-sdk-python/compare/v0.21.2...v0.21.3)
+
+### Bug Fixes
+
+* **types:** correct typo claude-2.1' to claude-2.1 ([#400](https://github.com/anthropics/anthropic-sdk-python/issues/400)) ([7f82aa3](https://github.com/anthropics/anthropic-sdk-python/commit/7f82aa3aa28c7134b69eeb42d5f0b7523c7cb5df))
+* **types:** correct typo claude-2.1' to claude-2.1 ([#413](https://github.com/anthropics/anthropic-sdk-python/issues/413)) ([bb1aebe](https://github.com/anthropics/anthropic-sdk-python/commit/bb1aebe6225b7d854b8125344846e77c6e13f3f9))
+
 ## 0.21.2 (2024-03-21)
 
 Full Changelog: [v0.21.1...v0.21.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.21.1...v0.21.2)
