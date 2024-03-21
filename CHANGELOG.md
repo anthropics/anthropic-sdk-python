@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.21.2 (2024-03-21)
+
+Full Changelog: [v0.21.1...v0.21.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.21.1...v0.21.2)
+
+### Documentation
+
+* **readme:** consistent use of sentence case in headings ([#405](https://github.com/anthropics/anthropic-sdk-python/issues/405)) ([495ca87](https://github.com/anthropics/anthropic-sdk-python/commit/495ca87e95ac645d4f387614adac1a20c26729b9))
+* **readme:** document how to make undocumented requests ([#407](https://github.com/anthropics/anthropic-sdk-python/issues/407)) ([b046d0d](https://github.com/anthropics/anthropic-sdk-python/commit/b046d0dd5be5fc9a21f9ac352627b7bb5e2b9ced))
+
 ## 0.21.1 (2024-03-20)
 
 Full Changelog: [v0.21.0...v0.21.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.21.0...v0.21.1)
