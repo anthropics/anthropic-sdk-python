@@ -105,10 +105,14 @@ class Anthropic(SyncAPIClient):
         """
         if api_key is None:
             api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if type(api_key) is not str:
+            raise ValueError("api_key must be a string")
         self.api_key = api_key
 
         if auth_token is None:
             auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+        if type(auth_token) is not str:
+            raise ValueError("auth_token must be a string")
         self.auth_token = auth_token
 
         if base_url is None:
