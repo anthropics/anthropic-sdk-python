@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "0.21.3"
+version = "0.22.0"
 description = "The official Python library for the anthropic API"
 readme = "README.md"
 license = "MIT"
@@ -131,6 +131,7 @@ reportImplicitOverride = true
 
 reportImportCycles = false
 reportPrivateUsage = false
+
 
 [tool.ruff]
 line-length = 120

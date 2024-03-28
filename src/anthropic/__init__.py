@@ -17,7 +17,13 @@ from ._client import (
 from ._models import BaseModel
 from ._version import __title__, __version__
 from ._response import APIResponse as APIResponse, AsyncAPIResponse as AsyncAPIResponse
-from ._constants import AI_PROMPT as AI_PROMPT, HUMAN_PROMPT as HUMAN_PROMPT
+from ._constants import (
+    AI_PROMPT as AI_PROMPT,
+    HUMAN_PROMPT as HUMAN_PROMPT,
+    DEFAULT_TIMEOUT,
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_CONNECTION_LIMITS,
+)
 from ._exceptions import (
     APIError,
     ConflictError,
@@ -69,6 +75,9 @@ __all__ = [
     "AsyncAnthropic",
     "file_from_path",
     "BaseModel",
+    "DEFAULT_TIMEOUT",
+    "DEFAULT_MAX_RETRIES",
+    "DEFAULT_CONNECTION_LIMITS",
     "HUMAN_PROMPT",
     "AI_PROMPT",
 ]

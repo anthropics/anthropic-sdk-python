@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.22.0 (2024-03-28)
+
+Full Changelog: [v0.21.3...v0.22.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.21.3...v0.22.0)
+
+### Features
+
+* **package:** export default constants ([#423](https://github.com/anthropics/anthropic-sdk-python/issues/423)) ([0d694e1](https://github.com/anthropics/anthropic-sdk-python/commit/0d694e157b040993d937f136c5072c98b87434ff))
+
+
+### Bug Fixes
+
+* revert regression with 3.7 support ([#419](https://github.com/anthropics/anthropic-sdk-python/issues/419)) ([fa21f36](https://github.com/anthropics/anthropic-sdk-python/commit/fa21f3643714d985b10b45dc8bfc3887ed20eba7))
+
+
+### Chores
+
+* **internal:** bump dependencies ([#421](https://github.com/anthropics/anthropic-sdk-python/issues/421)) ([30e8031](https://github.com/anthropics/anthropic-sdk-python/commit/30e8031469a4c4beb0bb906920f53d5d4da2e2c3))
+* **internal:** formatting change ([#415](https://github.com/anthropics/anthropic-sdk-python/issues/415)) ([1474f44](https://github.com/anthropics/anthropic-sdk-python/commit/1474f443201949c9b8a7d0a8562968d57d421fb5))
+
+
+### Documentation
+
+* **contributing:** fix typo ([#414](https://github.com/anthropics/anthropic-sdk-python/issues/414)) ([aeaf995](https://github.com/anthropics/anthropic-sdk-python/commit/aeaf99573a9140b6bb5c0af4cefddbd6f469a6a5))
+
 ## 0.21.3 (2024-03-21)
 
 Full Changelog: [v0.21.2...v0.21.3](https://github.com/anthropics/anthropic-sdk-python/compare/v0.21.2...v0.21.3)
