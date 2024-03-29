@@ -426,5 +426,6 @@ def accumulate_event(*, event: MessageStreamEvent, current_snapshot: Message | N
     elif event.type == "message_delta":
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
+        current_snapshot.usage.output_tokens = event.usage.output_tokens
 
     return current_snapshot
