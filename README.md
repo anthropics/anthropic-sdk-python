@@ -173,6 +173,10 @@ message.usage
 # Usage(input_tokens=25, output_tokens=13)
 ```
 
+## Tool use beta
+
+This SDK provides beta support for tool use, aka function calling. More details can be found in [the documentation](https://docs.anthropic.com/claude/docs/tool-use).
+
 ## AWS Bedrock
 
 This library also provides support for the [Anthropic Bedrock API](https://aws.amazon.com/bedrock/claude/) if you install this library with the `bedrock` extra, e.g. `pip install -U anthropic[bedrock]`.
