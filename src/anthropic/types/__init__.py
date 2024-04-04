@@ -5,6 +5,7 @@ from __future__ import annotations
 from .usage import Usage as Usage
 from .message import Message as Message
 from .completion import Completion as Completion
+from .text_block import TextBlock as TextBlock
 from .text_delta import TextDelta as TextDelta
 from .content_block import ContentBlock as ContentBlock
 from .message_param import MessageParam as MessageParam

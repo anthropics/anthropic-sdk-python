@@ -3,13 +3,14 @@
 from typing_extensions import Literal
 
 from .._models import BaseModel
-from .content_block import ContentBlock
+from .text_block import TextBlock
+from .content_block import ContentBlock as ContentBlock
 
 __all__ = ["ContentBlockStartEvent"]
 
 
 class ContentBlockStartEvent(BaseModel):
-    content_block: ContentBlock
+    content_block: TextBlock
 
     index: int
 
