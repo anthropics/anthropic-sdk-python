@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.23.0 (2024-04-04)
+
+Full Changelog: [v0.22.1...v0.23.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.22.1...v0.23.0)
+
+### Features
+
+* **api:** tool use beta ([#438](https://github.com/anthropics/anthropic-sdk-python/issues/438)) ([5e35ffe](https://github.com/anthropics/anthropic-sdk-python/commit/5e35ffeec0a38055bba2f3998aa3e7c85790627a))
+
 ## 0.22.1 (2024-04-04)
 
 Full Changelog: [v0.22.0...v0.22.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.22.0...v0.22.1)
