@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.23.1 (2024-04-04)
+
+Full Changelog: [v0.23.0...v0.23.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.23.0...v0.23.1)
+
+### Documentation
+
+* **readme:** mention tool use ([#441](https://github.com/anthropics/anthropic-sdk-python/issues/441)) ([e6cd916](https://github.com/anthropics/anthropic-sdk-python/commit/e6cd916b5f4d9cbbae4610828ffb51d81404d74f))
+
 ## 0.23.0 (2024-04-04)
 
 Full Changelog: [v0.22.1...v0.23.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.22.1...v0.23.0)
