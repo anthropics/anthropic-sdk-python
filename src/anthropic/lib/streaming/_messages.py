@@ -7,10 +7,9 @@ from typing_extensions import Iterator, Awaitable, AsyncIterator, override, asse
 
 import httpx
 
-from ...types import Message, MessageStreamEvent
+from ...types import Message, ContentBlock, MessageStreamEvent
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._streaming import Stream, AsyncStream
-from ...types.message import ContentBlock
 
 if TYPE_CHECKING:
     from ..._client import Anthropic, AsyncAnthropic

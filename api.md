@@ -17,6 +17,7 @@ from anthropic.types import (
     MessageStopEvent,
     MessageStreamEvent,
     TextBlock,
+    TextBlockParam,
     TextDelta,
     Usage,
 )
