@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.23.0 (2024-04-04)
+
+Full Changelog: [v0.22.0...v0.23.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.22.0...v0.23.0)
+
+### Features
+
+* **api:** tool use beta ([#438](https://github.com/anthropics/anthropic-sdk-python/issues/438)) ([2ff4708](https://github.com/anthropics/anthropic-sdk-python/commit/2ff4708a566e3239bd85874eb1973317435962e5))
+
+
+### Bug Fixes
+
+* **types:** correctly mark type as a required property in requests ([#435](https://github.com/anthropics/anthropic-sdk-python/issues/435)) ([efc35ec](https://github.com/anthropics/anthropic-sdk-python/commit/efc35ec7b87b4e7033509431e828fdf42579f74d))
+
+
+### Chores
+
+* **types:** consistent naming for text block types ([#437](https://github.com/anthropics/anthropic-sdk-python/issues/437)) ([e979fe1](https://github.com/anthropics/anthropic-sdk-python/commit/e979fe14f868e1bc428440c00092decc590bb545))
+
 ## 0.22.0 (2024-04-04)
 
 Full Changelog: [v0.21.3...v0.22.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.21.3...v0.22.0)
