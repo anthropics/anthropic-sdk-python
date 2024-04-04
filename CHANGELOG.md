@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.22.0 (2024-04-04)
+
+Full Changelog: [v0.21.3...v0.22.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.21.3...v0.22.0)
+
+### Features
+
+* **client:** increase default HTTP max_connections to 1000 and max_keepalive_connections to 100 ([#428](https://github.com/anthropics/anthropic-sdk-python/issues/428)) ([9a43940](https://github.com/anthropics/anthropic-sdk-python/commit/9a4394008db937a9ad851589b9adfbd9e15333ef))
+* **package:** export default constants ([#423](https://github.com/anthropics/anthropic-sdk-python/issues/423)) ([0d694e1](https://github.com/anthropics/anthropic-sdk-python/commit/0d694e157b040993d937f136c5072c98b87434ff))
+
+
+### Bug Fixes
+
+* **client:** correct logic for line decoding in streaming ([#433](https://github.com/anthropics/anthropic-sdk-python/issues/433)) ([6bf9379](https://github.com/anthropics/anthropic-sdk-python/commit/6bf93794127a62a077f2e50a2acfe01464742319))
+* **project:** use absolute github links on PyPi ([#427](https://github.com/anthropics/anthropic-sdk-python/issues/427)) ([cbd8b1c](https://github.com/anthropics/anthropic-sdk-python/commit/cbd8b1c789e83d2c84ba10165778e4ad2af1ac20))
+* revert regression with 3.7 support ([#419](https://github.com/anthropics/anthropic-sdk-python/issues/419)) ([fa21f36](https://github.com/anthropics/anthropic-sdk-python/commit/fa21f3643714d985b10b45dc8bfc3887ed20eba7))
+* **streaming:** correct accumulation of output tokens ([#426](https://github.com/anthropics/anthropic-sdk-python/issues/426)) ([b50ed05](https://github.com/anthropics/anthropic-sdk-python/commit/b50ed05a991f02bccfd9f65a1c59e56540adba08))
+
+
+### Chores
+
+* **client:** validate that max_retries is not None ([#430](https://github.com/anthropics/anthropic-sdk-python/issues/430)) ([31b2a2f](https://github.com/anthropics/anthropic-sdk-python/commit/31b2a2fd4069a670c795eeaf51b641fbf2097af1))
+* **internal:** bump dependencies ([#421](https://github.com/anthropics/anthropic-sdk-python/issues/421)) ([30e8031](https://github.com/anthropics/anthropic-sdk-python/commit/30e8031469a4c4beb0bb906920f53d5d4da2e2c3))
+* **internal:** defer model build for import latency ([#431](https://github.com/anthropics/anthropic-sdk-python/issues/431)) ([51d4783](https://github.com/anthropics/anthropic-sdk-python/commit/51d47832ae44415604725bb763cf567fb9dc1b34))
+* **internal:** formatting change ([#415](https://github.com/anthropics/anthropic-sdk-python/issues/415)) ([1474f44](https://github.com/anthropics/anthropic-sdk-python/commit/1474f443201949c9b8a7d0a8562968d57d421fb5))
+
+
+### Documentation
+
+* **contributing:** fix typo ([#414](https://github.com/anthropics/anthropic-sdk-python/issues/414)) ([aeaf995](https://github.com/anthropics/anthropic-sdk-python/commit/aeaf99573a9140b6bb5c0af4cefddbd6f469a6a5))
+* **readme:** change undocumented params wording ([#429](https://github.com/anthropics/anthropic-sdk-python/issues/429)) ([1336958](https://github.com/anthropics/anthropic-sdk-python/commit/13369583fc74101e002427079c9871e05e5536e8))
+
 ## 0.21.3 (2024-03-21)
 
 Full Changelog: [v0.21.2...v0.21.3](https://github.com/anthropics/anthropic-sdk-python/compare/v0.21.2...v0.21.3)
