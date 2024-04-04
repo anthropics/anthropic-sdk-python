@@ -16,10 +16,10 @@ class Source(TypedDict, total=False):
 
     media_type: Required[Literal["image/jpeg", "image/png", "image/gif", "image/webp"]]
 
-    type: Literal["base64"]
+    type: Required[Literal["base64"]]
 
 
 class ImageBlockParam(TypedDict, total=False):
     source: Required[Source]
 
-    type: Literal["image"]
+    type: Required[Literal["image"]]

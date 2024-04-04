@@ -10,4 +10,4 @@ __all__ = ["TextBlockParam"]
 class TextBlockParam(TypedDict, total=False):
     text: Required[str]
 
-    type: Literal["text"]
+    type: Required[Literal["text"]]
