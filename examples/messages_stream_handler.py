@@ -26,7 +26,7 @@ async def main() -> None:
         event_handler=MyStream,
     ) as stream:
         accumulated = await stream.get_final_message()
-        print("accumulated message: ", accumulated.model_dump_json(indent=2))
+        print("accumulated message: ", accumulated.to_json())
 
 
 asyncio.run(main())
