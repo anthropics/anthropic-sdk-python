@@ -2,17 +2,23 @@ from __future__ import annotations
 
 import os
 from typing import Any, Union, Mapping, TypeVar
-from typing_extensions import override
+from typing_extensions import Self, override
 
 import httpx
 
 from ... import _exceptions
-from ..._types import NOT_GIVEN, NotGiven
-from ..._utils import is_dict
+from ..._types import NOT_GIVEN, Timeout, NotGiven
+from ..._utils import is_dict, is_given
 from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import APIStatusError
-from ..._base_client import DEFAULT_MAX_RETRIES, BaseClient, SyncAPIClient, AsyncAPIClient, FinalRequestOptions
+from ..._base_client import (
+    DEFAULT_MAX_RETRIES,
+    BaseClient,
+    SyncAPIClient,
+    AsyncAPIClient,
+    FinalRequestOptions,
+)
 from ._stream_decoder import AWSEventStreamDecoder
 from ...resources.messages import Messages, AsyncMessages
 from ...resources.completions import Completions, AsyncCompletions
@@ -157,6 +163,62 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         )
         request.headers.update(headers)
 
+    def copy(
+        self,
+        *,
+        aws_secret_key: str | None = None,
+        aws_access_key: str | None = None,
+        aws_region: str | None = None,
+        aws_session_token: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        http_client: httpx.Client | None = None,
+        max_retries: int | NotGiven = NOT_GIVEN,
+        default_headers: Mapping[str, str] | None = None,
+        set_default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        set_default_query: Mapping[str, object] | None = None,
+        _extra_kwargs: Mapping[str, Any] = {},
+    ) -> Self:
+        """
+        Create a new client instance re-using the same options given to the current client with optional overriding.
+        """
+        if default_headers is not None and set_default_headers is not None:
+            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
+
+        if default_query is not None and set_default_query is not None:
+            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
+
+        headers = self._custom_headers
+        if default_headers is not None:
+            headers = {**headers, **default_headers}
+        elif set_default_headers is not None:
+            headers = set_default_headers
+
+        params = self._custom_query
+        if default_query is not None:
+            params = {**params, **default_query}
+        elif set_default_query is not None:
+            params = set_default_query
+
+        return self.__class__(
+            aws_secret_key=aws_secret_key or self.aws_secret_key,
+            aws_access_key=aws_access_key or self.aws_access_key,
+            aws_region=aws_region or self.aws_region,
+            aws_session_token=aws_session_token or self.aws_session_token,
+            base_url=base_url or self.base_url,
+            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            http_client=http_client,
+            max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            default_headers=headers,
+            default_query=params,
+            **_extra_kwargs,
+        )
+
+    # Alias for `copy` for nicer inline usage, e.g.
+    # client.with_options(timeout=10).foo.create(...)
+    with_options = copy
+
 
 class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
     messages: AsyncMessages
@@ -235,3 +297,59 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             data=data,
         )
         request.headers.update(headers)
+
+    def copy(
+        self,
+        *,
+        aws_secret_key: str | None = None,
+        aws_access_key: str | None = None,
+        aws_region: str | None = None,
+        aws_session_token: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        http_client: httpx.AsyncClient | None = None,
+        max_retries: int | NotGiven = NOT_GIVEN,
+        default_headers: Mapping[str, str] | None = None,
+        set_default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        set_default_query: Mapping[str, object] | None = None,
+        _extra_kwargs: Mapping[str, Any] = {},
+    ) -> Self:
+        """
+        Create a new client instance re-using the same options given to the current client with optional overriding.
+        """
+        if default_headers is not None and set_default_headers is not None:
+            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
+
+        if default_query is not None and set_default_query is not None:
+            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
+
+        headers = self._custom_headers
+        if default_headers is not None:
+            headers = {**headers, **default_headers}
+        elif set_default_headers is not None:
+            headers = set_default_headers
+
+        params = self._custom_query
+        if default_query is not None:
+            params = {**params, **default_query}
+        elif set_default_query is not None:
+            params = set_default_query
+
+        return self.__class__(
+            aws_secret_key=aws_secret_key or self.aws_secret_key,
+            aws_access_key=aws_access_key or self.aws_access_key,
+            aws_region=aws_region or self.aws_region,
+            aws_session_token=aws_session_token or self.aws_session_token,
+            base_url=base_url or self.base_url,
+            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            http_client=http_client,
+            max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            default_headers=headers,
+            default_query=params,
+            **_extra_kwargs,
+        )
+
+    # Alias for `copy` for nicer inline usage, e.g.
+    # client.with_options(timeout=10).foo.create(...)
+    with_options = copy
