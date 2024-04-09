@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.25.0 (2024-04-09)
+
+Full Changelog: [v0.24.0...v0.25.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.24.0...v0.25.0)
+
+### Features
+
+* **bedrock:** add `copy` / `with_options` to bedrock client ([8af7c41](https://github.com/anthropics/anthropic-sdk-python/commit/8af7c41886c9e599a2199e3e496d9d04157699da))
+
+
+### Chores
+
+* unknown commit message ([8af7c41](https://github.com/anthropics/anthropic-sdk-python/commit/8af7c41886c9e599a2199e3e496d9d04157699da))
+
 ## 0.24.0 (2024-04-09)
 
 Full Changelog: [v0.23.1...v0.24.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.23.1...v0.24.0)
