@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.24.0 (2024-04-09)
+
+Full Changelog: [v0.23.1...v0.24.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.23.1...v0.24.0)
+
+### Features
+
+* **client:** add DefaultHttpxClient and DefaultAsyncHttpxClient ([#444](https://github.com/anthropics/anthropic-sdk-python/issues/444)) ([51d2427](https://github.com/anthropics/anthropic-sdk-python/commit/51d2427c0bb51cbd17d55f827da7fb9cc05f5d06))
+* **models:** add to_dict & to_json helper methods ([#446](https://github.com/anthropics/anthropic-sdk-python/issues/446)) ([6709f58](https://github.com/anthropics/anthropic-sdk-python/commit/6709f58d0980669100ea0b7935259d3c05cf9648))
+
 ## 0.23.1 (2024-04-04)
 
 Full Changelog: [v0.23.0...v0.23.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.23.0...v0.23.1)
