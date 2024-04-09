@@ -24,7 +24,7 @@ async def main() -> None:
     # the context manager, as long as the entire stream was consumed
     # inside of the context manager
     accumulated = await stream.get_final_message()
-    print("accumulated message: ", accumulated.model_dump_json(indent=2))
+    print("accumulated message: ", accumulated.to_json())
 
 
 asyncio.run(main())

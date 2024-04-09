@@ -18,7 +18,7 @@ def sync_client() -> None:
             }
         ],
     )
-    print(message.model_dump_json(indent=2))
+    print(message.to_json())
 
 
 async def async_client() -> None:
@@ -36,7 +36,7 @@ async def async_client() -> None:
             }
         ],
     )
-    print(message.model_dump_json(indent=2))
+    print(message.to_json())
 
 
 sync_client()
