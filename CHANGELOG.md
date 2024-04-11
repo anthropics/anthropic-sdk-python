@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.25.1 (2024-04-11)
+
+Full Changelog: [v0.25.0...v0.25.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.0...v0.25.1)
+
+### Chores
+
+* fix typo ([#449](https://github.com/anthropics/anthropic-sdk-python/issues/449)) ([420a6c5](https://github.com/anthropics/anthropic-sdk-python/commit/420a6c5081ecd58e16b40ca5dfca582aa704c34a))
+
 ## 0.25.0 (2024-04-09)
 
 Full Changelog: [v0.24.0...v0.25.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.24.0...v0.25.0)
