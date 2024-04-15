@@ -1,6 +1,30 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+from functools import lru_cache
+
 import httpx
+
+if TYPE_CHECKING:
+    import boto3
+
+
+@lru_cache(maxsize=512)
+def _get_session(
+    *,
+    aws_access_key: str | None,
+    aws_secret_key: str | None,
+    aws_session_token: str | None,
+    region: str | None,
+) -> boto3.Session:
+    import boto3
+
+    return boto3.Session(
+        region_name=region,
+        aws_access_key_id=aws_access_key,
+        aws_secret_access_key=aws_secret_key,
+        aws_session_token=aws_session_token,
+    )
 
 
 def get_auth_headers(
@@ -14,11 +38,10 @@ def get_auth_headers(
     region: str | None,
     data: str | None,
 ) -> dict[str, str]:
-    import boto3
     from botocore.auth import SigV4Auth
     from botocore.awsrequest import AWSRequest
 
-    session = boto3.Session(
+    session = _get_session(
         region_name=region,
         aws_access_key_id=aws_access_key,
         aws_secret_access_key=aws_secret_key,
