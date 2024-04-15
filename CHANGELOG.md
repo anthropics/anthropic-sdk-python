@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.25.2 (2024-04-15)
+
+Full Changelog: [v0.25.1...v0.25.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.1...v0.25.2)
+
+### Chores
+
+* **internal:** formatting ([#452](https://github.com/anthropics/anthropic-sdk-python/issues/452)) ([8ac016b](https://github.com/anthropics/anthropic-sdk-python/commit/8ac016b3be19247a7323f3f9fb5aad4d4f30ced5))
+
 ## 0.25.1 (2024-04-11)
 
 Full Changelog: [v0.25.0...v0.25.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.0...v0.25.1)
