@@ -42,9 +42,9 @@ def get_auth_headers(
     from botocore.awsrequest import AWSRequest
 
     session = _get_session(
-        region_name=region,
-        aws_access_key_id=aws_access_key,
-        aws_secret_access_key=aws_secret_key,
+        region=region,
+        aws_access_key=aws_access_key,
+        aws_secret_key=aws_secret_key,
         aws_session_token=aws_session_token,
     )
 
