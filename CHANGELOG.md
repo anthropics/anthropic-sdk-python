@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.25.3 (2024-04-17)
+
+Full Changelog: [v0.25.2...v0.25.3](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.2...v0.25.3)
+
+### Chores
+
+* **bedrock:** cache boto sessions ([#455](https://github.com/anthropics/anthropic-sdk-python/issues/455)) ([d58adef](https://github.com/anthropics/anthropic-sdk-python/commit/d58adefc7097d98e25bb1665be2037f968000d76))
+
 ## 0.25.2 (2024-04-15)
 
 Full Changelog: [v0.25.1...v0.25.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.1...v0.25.2)
