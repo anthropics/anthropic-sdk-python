@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from functools import lru_cache
 
 import httpx
+
+from ..._utils import lru_cache
 
 if TYPE_CHECKING:
     import boto3
@@ -42,9 +43,9 @@ def get_auth_headers(
     from botocore.awsrequest import AWSRequest
 
     session = _get_session(
-        region_name=region,
-        aws_access_key_id=aws_access_key,
-        aws_secret_access_key=aws_secret_key,
+        region=region,
+        aws_access_key=aws_access_key,
+        aws_secret_key=aws_secret_key,
         aws_session_token=aws_session_token,
     )
 
