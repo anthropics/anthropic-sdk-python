@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.25.4 (2024-04-17)
+
+Full Changelog: [v0.25.3...v0.25.4](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.3...v0.25.4)
+
+### Bug Fixes
+
+* **bedrock:** correct auth implementation ([#462](https://github.com/anthropics/anthropic-sdk-python/issues/462)) ([2f456f5](https://github.com/anthropics/anthropic-sdk-python/commit/2f456f59f42876dfabde94b6e36f9349fc409aef))
+
 ## 0.25.3 (2024-04-17)
 
 Full Changelog: [v0.25.2...v0.25.3](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.2...v0.25.3)
