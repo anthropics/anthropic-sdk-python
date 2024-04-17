@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterator, AsyncIterator
-from functools import lru_cache
 
+from ..._utils import lru_cache
 from ..._streaming import ServerSentEvent
 
 if TYPE_CHECKING:
