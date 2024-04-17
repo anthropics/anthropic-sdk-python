@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.25.5 (2024-04-17)
+
+Full Changelog: [v0.25.4...v0.25.5](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.4...v0.25.5)
+
+### Chores
+
+* **internal:** ban usage of lru_cache ([#464](https://github.com/anthropics/anthropic-sdk-python/issues/464)) ([dc8ca22](https://github.com/anthropics/anthropic-sdk-python/commit/dc8ca22b1994af994ce9502494f4df1741c0559d))
+
 ## 0.25.4 (2024-04-17)
 
 Full Changelog: [v0.25.3...v0.25.4](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.3...v0.25.4)
