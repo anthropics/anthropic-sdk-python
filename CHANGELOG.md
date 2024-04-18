@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.25.6 (2024-04-18)
+
+Full Changelog: [v0.25.5...v0.25.6](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.5...v0.25.6)
+
+### Chores
+
+* **internal:** bump pyright to 1.1.359 ([#466](https://github.com/anthropics/anthropic-sdk-python/issues/466)) ([8088160](https://github.com/anthropics/anthropic-sdk-python/commit/808816044cb33499c45e12b609f7a7664c628c88))
+
 ## 0.25.5 (2024-04-17)
 
 Full Changelog: [v0.25.4...v0.25.5](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.4...v0.25.5)
