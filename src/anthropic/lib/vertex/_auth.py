@@ -23,12 +23,6 @@ def load_auth() -> tuple[Credentials, str]:
     )
     credentials.refresh(Request())
 
-    if not project_id:
-        raise ValueError("Could not resolve project_id")
-
-    if not isinstance(project_id, str):
-        raise TypeError(f"Expected project_id to be a str but got {type(project_id)}")
-
     return credentials, project_id
 
 
