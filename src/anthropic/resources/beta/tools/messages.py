@@ -8,7 +8,6 @@ from typing_extensions import Literal
 import httpx
 
 from .... import _legacy_response
-from ....types import MessageStreamEvent
 from ...._types import NOT_GIVEN, Body, Query, Headers, NotGiven
 from ...._utils import (
     required_args,
@@ -22,7 +21,11 @@ from ...._streaming import Stream, AsyncStream
 from ...._base_client import (
     make_request_options,
 )
-from ....types.beta.tools import ToolParam, ToolsBetaMessage, ToolsBetaMessageParam, message_create_params
+from ....types.beta.tools import message_create_params
+from ....types.message_stream_event import MessageStreamEvent
+from ....types.beta.tools.tool_param import ToolParam
+from ....types.beta.tools.tools_beta_message import ToolsBetaMessage
+from ....types.beta.tools.tools_beta_message_param import ToolsBetaMessageParam
 
 __all__ = ["Messages", "AsyncMessages"]
 

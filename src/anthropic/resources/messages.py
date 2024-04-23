@@ -9,7 +9,7 @@ from typing_extensions import Literal
 import httpx
 
 from .. import _legacy_response
-from ..types import Message, MessageParam, MessageStreamEvent, message_create_params
+from ..types import message_create_params
 from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven
 from .._utils import (
     required_args,
@@ -31,6 +31,9 @@ from ..lib.streaming import (
     MessageStreamManager,
     AsyncMessageStreamManager,
 )
+from ..types.message import Message
+from ..types.message_param import MessageParam
+from ..types.message_stream_event import MessageStreamEvent
 
 __all__ = ["Messages", "AsyncMessages"]
 
