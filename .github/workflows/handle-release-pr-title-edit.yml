@@ -18,7 +18,7 @@ jobs:
       github.repository == 'anthropics/anthropic-sdk-python'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: stainless-api/trigger-release-please@v1
         with:
           repo: ${{ github.event.repository.full_name }}
