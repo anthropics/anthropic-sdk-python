@@ -18,7 +18,6 @@ from pydantic import ValidationError
 
 from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
 from anthropic._types import Omit
-from anthropic._client import Anthropic, AsyncAnthropic
 from anthropic._models import BaseModel, FinalRequestOptions
 from anthropic._constants import RAW_RESPONSE_HEADER
 from anthropic._streaming import Stream, AsyncStream
