@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.25.7 (2024-04-29)
+
+Full Changelog: [v0.25.6...v0.25.7](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.6...v0.25.7)
+
+### Bug Fixes
+
+* **docs:** doc improvements ([#472](https://github.com/anthropics/anthropic-sdk-python/issues/472)) ([1b6d4e2](https://github.com/anthropics/anthropic-sdk-python/commit/1b6d4e2c6be01dd794824a912cd78545d5bba135))
+
+
+### Chores
+
+* **internal:** minor reformatting ([#478](https://github.com/anthropics/anthropic-sdk-python/issues/478)) ([de4b2e0](https://github.com/anthropics/anthropic-sdk-python/commit/de4b2e088a997760e177abc765172bb495ccb978))
+* **internal:** reformat imports ([#477](https://github.com/anthropics/anthropic-sdk-python/issues/477)) ([553e955](https://github.com/anthropics/anthropic-sdk-python/commit/553e955de5d6aae29ee28e1edfcc24d1ee9f3c25))
+* **internal:** restructure imports ([#470](https://github.com/anthropics/anthropic-sdk-python/issues/470)) ([49e0044](https://github.com/anthropics/anthropic-sdk-python/commit/49e0044bcf1949699275d67dbed8dbf1c5412366))
+* **internal:** update test helper function ([#476](https://github.com/anthropics/anthropic-sdk-python/issues/476)) ([f46e454](https://github.com/anthropics/anthropic-sdk-python/commit/f46e454f04ccb320fed2639235f9b382f3de27cd))
+* **internal:** use actions/checkout@v4 for codeflow ([#474](https://github.com/anthropics/anthropic-sdk-python/issues/474)) ([8b18b52](https://github.com/anthropics/anthropic-sdk-python/commit/8b18b5211a200a1e09647441cd16244dfda05253))
+* **tests:** rename test file ([#473](https://github.com/anthropics/anthropic-sdk-python/issues/473)) ([5b8261c](https://github.com/anthropics/anthropic-sdk-python/commit/5b8261c251e765ac239f1c0176ec3001b12769dd))
+
 ## 0.25.6 (2024-04-18)
 
 Full Changelog: [v0.25.5...v0.25.6](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.5...v0.25.6)
