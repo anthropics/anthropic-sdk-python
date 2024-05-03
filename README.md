@@ -338,7 +338,7 @@ client = Anthropic(
 )
 
 # Override per-request:
-client.with_options(timeout=5 * 1000).messages.create(
+client.with_options(timeout=5.0).messages.create(
     max_tokens=1024,
     messages=[
         {
