@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.25.8 (2024-05-07)
+
+Full Changelog: [v0.25.7...v0.25.8](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.7...v0.25.8)
+
+### Chores
+
+* **client:** log response headers in debug mode ([#480](https://github.com/anthropics/anthropic-sdk-python/issues/480)) ([d1c4d14](https://github.com/anthropics/anthropic-sdk-python/commit/d1c4d14c881b0e754ca220cdcda4d06fe23c81ab))
+* **internal:** add link to openapi spec ([#484](https://github.com/anthropics/anthropic-sdk-python/issues/484)) ([876cd0d](https://github.com/anthropics/anthropic-sdk-python/commit/876cd0d5b30ca823c4088124ec303e0765d993b8))
+* **internal:** add scripts/test, scripts/mock and add ci job ([#486](https://github.com/anthropics/anthropic-sdk-python/issues/486)) ([6111fe8](https://github.com/anthropics/anthropic-sdk-python/commit/6111fe897d8111f8b3e301923a94eabe1cb96558))
+* **internal:** bump prism version ([#487](https://github.com/anthropics/anthropic-sdk-python/issues/487)) ([98fb3e6](https://github.com/anthropics/anthropic-sdk-python/commit/98fb3e63f16adccb6ff46d4c259d1953c91f041e))
+
+
+### Documentation
+
+* **readme:** fix misleading timeout example value ([#489](https://github.com/anthropics/anthropic-sdk-python/issues/489)) ([b465bce](https://github.com/anthropics/anthropic-sdk-python/commit/b465bce54de95d30190154dbfc53446b1586dade))
+
 ## 0.25.7 (2024-04-29)
 
 Full Changelog: [v0.25.6...v0.25.7](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.6...v0.25.7)
