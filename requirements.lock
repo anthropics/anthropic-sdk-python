@@ -13,9 +13,9 @@ annotated-types==0.6.0
 anyio==4.1.0
     # via anthropic
     # via httpx
-boto3==1.34.72
+boto3==1.34.103
     # via anthropic
-botocore==1.34.72
+botocore==1.34.103
     # via anthropic
     # via boto3
     # via s3transfer
@@ -31,7 +31,7 @@ distro==1.8.0
     # via anthropic
 exceptiongroup==1.1.3
     # via anyio
-filelock==3.13.3
+filelock==3.14.0
     # via huggingface-hub
 fsspec==2024.3.1
     # via huggingface-hub
@@ -59,9 +59,9 @@ pyasn1==0.6.0
     # via rsa
 pyasn1-modules==0.4.0
     # via google-auth
-pydantic==2.4.2
+pydantic==2.7.1
     # via anthropic
-pydantic-core==2.10.1
+pydantic-core==2.18.2
     # via pydantic
 python-dateutil==2.9.0.post0
     # via botocore
@@ -81,7 +81,7 @@ sniffio==1.3.0
     # via httpx
 tokenizers==0.14.0
     # via anthropic
-tqdm==4.66.2
+tqdm==4.66.4
     # via huggingface-hub
 typing-extensions==4.8.0
     # via anthropic
