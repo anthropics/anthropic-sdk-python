@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.25.9 (2024-05-14)
+
+Full Changelog: [v0.25.8...v0.25.9](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.8...v0.25.9)
+
+### Bug Fixes
+
+* **types:** correct type for InputSchema ([#498](https://github.com/anthropics/anthropic-sdk-python/issues/498)) ([b86936c](https://github.com/anthropics/anthropic-sdk-python/commit/b86936ccb4ebe27bfb04a8fda2cbfdf88bbdc111))
+
+
+### Chores
+
+* **docs:** add SECURITY.md ([#493](https://github.com/anthropics/anthropic-sdk-python/issues/493)) ([d5cba46](https://github.com/anthropics/anthropic-sdk-python/commit/d5cba4634213b57f39dbc0f339c3320c651cf1bc))
+* **internal:** add slightly better logging to scripts ([#497](https://github.com/anthropics/anthropic-sdk-python/issues/497)) ([acb0149](https://github.com/anthropics/anthropic-sdk-python/commit/acb0149b4659c932ca6f3abac46c4de166b5341b))
+* **internal:** bump pydantic dependency ([#495](https://github.com/anthropics/anthropic-sdk-python/issues/495)) ([00cd840](https://github.com/anthropics/anthropic-sdk-python/commit/00cd8408254622d7e95812c0208fe09396d07ca4))
+* **types:** add union discriminator metadata ([#491](https://github.com/anthropics/anthropic-sdk-python/issues/491)) ([95544a9](https://github.com/anthropics/anthropic-sdk-python/commit/95544a9e9fec7cfaab034355426a2f4634b8e26a))
+
 ## 0.25.8 (2024-05-07)
 
 Full Changelog: [v0.25.7...v0.25.8](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.7...v0.25.8)
