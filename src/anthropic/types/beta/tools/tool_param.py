@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Dict, Union, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 __all__ = ["ToolParam", "InputSchema"]
 
 
-class InputSchema(TypedDict, total=False):
+class InputSchemaTyped(TypedDict, total=False):
     type: Required[Literal["object"]]
 
     properties: Optional[object]
+
+
+InputSchema = Union[InputSchemaTyped, Dict[str, object]]
 
 
 class ToolParam(TypedDict, total=False):
