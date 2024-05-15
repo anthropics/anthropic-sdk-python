@@ -829,9 +829,9 @@ class Messages(SyncAPIResource):
             ),
             cast_to=Message,
             stream=True,
-            stream_cls=event_handler,
+            stream_cls=Stream[MessageStreamEvent],
         )
-        return MessageStreamManager(make_request)
+        return MessageStreamManager(make_request, event_handler)
 
 
 class AsyncMessages(AsyncAPIResource):
@@ -1624,9 +1624,9 @@ class AsyncMessages(AsyncAPIResource):
             ),
             cast_to=Message,
             stream=True,
-            stream_cls=event_handler,
+            stream_cls=AsyncStream[MessageStreamEvent],
         )
-        return AsyncMessageStreamManager(request)
+        return AsyncMessageStreamManager(request, event_handler)
 
 
 class MessagesWithRawResponse:
