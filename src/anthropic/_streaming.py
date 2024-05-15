@@ -9,7 +9,7 @@ from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, r
 
 import httpx
 
-from ._utils import is_dict, extract_type_var_from_base
+from ._utils import extract_type_var_from_base
 
 if TYPE_CHECKING:
     from ._client import Anthropic, AsyncAnthropic
@@ -66,11 +66,7 @@ class Stream(Generic[_T]):
                 or sse.event == "content_block_delta"
                 or sse.event == "content_block_stop"
             ):
-                data = sse.json()
-                if is_dict(data) and "type" not in data:
-                    data["type"] = sse.event
-
-                yield process_data(data=data, cast_to=cast_to, response=response)
+                yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
             if sse.event == "ping":
                 continue
@@ -163,11 +159,7 @@ class AsyncStream(Generic[_T]):
                 or sse.event == "content_block_delta"
                 or sse.event == "content_block_stop"
             ):
-                data = sse.json()
-                if is_dict(data) and "type" not in data:
-                    data["type"] = sse.event
-
-                yield process_data(data=data, cast_to=cast_to, response=response)
+                yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
             if sse.event == "ping":
                 continue

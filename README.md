@@ -3,7 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/anthropic.svg)](https://pypi.org/project/anthropic/)
 
 The Anthropic Python library provides convenient access to the Anthropic REST API from any Python 3.7+
-application. It includes type definitions for all request params and response fields,
+application. The library includes type definitions for all request params and response fields,
 and offers both synchronous and asynchronous clients powered by [httpx](https://github.com/encode/httpx).
 
 ## Documentation
@@ -127,107 +127,6 @@ stream = await client.messages.create(
 async for event in stream:
     print(event.type)
 ```
-
-### Streaming Helpers
-
-This library provides several conveniences for streaming messages, for example:
-
-```py
-import asyncio
-from anthropic import AsyncAnthropic
-
-client = AsyncAnthropic()
-
-async def main() -> None:
-    async with client.messages.stream(
-        max_tokens=1024,
-        messages=[
-            {
-                "role": "user",
-                "content": "Say hello there!",
-            }
-        ],
-        model="claude-3-opus-20240229",
-    ) as stream:
-        async for text in stream.text_stream:
-            print(text, end="", flush=True)
-        print()
-
-    message = await stream.get_final_message()
-    print(message.to_json())
-
-asyncio.run(main())
-```
-
-Streaming with `client.messages.stream(...)` exposes [various helpers for your convenience](helpers.md) including event handlers and accumulation.
-
-Alternatively, you can use `client.messages.create(..., stream=True)` which only returns an async iterable of the events in the stream and thus uses less memory (it does not build up a final message object for you).
-
-## Token counting
-
-You can see the exact usage for a given request through the `usage` response property, e.g.
-
-```py
-message = client.messages.create(...)
-message.usage
-# Usage(input_tokens=25, output_tokens=13)
-```
-
-## Tool use beta
-
-This SDK provides beta support for tool use, aka function calling. More details can be found in [the documentation](https://docs.anthropic.com/claude/docs/tool-use).
-
-## AWS Bedrock
-
-This library also provides support for the [Anthropic Bedrock API](https://aws.amazon.com/bedrock/claude/) if you install this library with the `bedrock` extra, e.g. `pip install -U anthropic[bedrock]`.
-
-You can then import and instantiate a separate `AnthropicBedrock` class, the rest of the API is the same.
-
-```py
-from anthropic import AnthropicBedrock
-
-client = AnthropicBedrock()
-
-message = client.messages.create(
-    max_tokens=1024,
-    messages=[
-        {
-            "role": "user",
-            "content": "Hello!",
-        }
-    ],
-    model="anthropic.claude-3-sonnet-20240229-v1:0",
-)
-print(message)
-```
-
-For a more fully fledged example see [`examples/bedrock.py`](https://github.com/anthropics/anthropic-sdk-python/blob/main/examples/bedrock.py).
-
-## Google Vertex
-
-This library also provides support for the [Anthropic Vertex API](https://cloud.google.com/vertex-ai?hl=en) if you install this library with the `vertex` extra, e.g. `pip install -U anthropic[vertex]`.
-
-You can then import and instantiate a separate `AnthropicVertex`/`AsyncAnthropicVertexAsync` class, which has the same API as the base `Anthropic`/`AsyncAnthropic` class.
-
-```py
-from anthropic import AnthropicVertex
-
-client = AnthropicVertex()
-
-message = client.messages.create(
-    model="claude-3-sonnet@20240229",
-    max_tokens=100,
-    messages=[
-        {
-            "role": "user",
-            "content": "Hello!",
-        }
-    ],
-)
-print(message)
-```
-
-For a more complete example see [`examples/vertex.py`](https://github.com/anthropics/anthropic-sdk-python/blob/main/examples/vertex.py).
 
 ## Using types
 
