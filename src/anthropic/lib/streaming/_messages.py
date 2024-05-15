@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from types import TracebackType
 from typing import TYPE_CHECKING, Generic, TypeVar, Callable
-from typing_extensions import Iterator, Awaitable, AsyncIterator, override, assert_never
+from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
 
 import httpx
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from ..._client import Anthropic, AsyncAnthropic
 
 
-class MessageStream(Stream[MessageStreamEvent]):
+class MessageStream:
     text_stream: Iterator[str]
     """Iterator over just the text deltas in the stream.
 
@@ -26,6 +26,8 @@ class MessageStream(Stream[MessageStreamEvent]):
     ```
     """
 
+    response: httpx.Response
+
     def __init__(
         self,
         *,
@@ -33,10 +35,42 @@ class MessageStream(Stream[MessageStreamEvent]):
         response: httpx.Response,
         client: Anthropic,
     ) -> None:
-        super().__init__(cast_to=cast_to, response=response, client=client)
+        self.response = response
+        self._cast_to = cast_to
+        self._client = client
 
         self.text_stream = self.__stream_text__()
         self.__final_message_snapshot: Message | None = None
+
+        self._iterator = self.__stream__()
+        self._raw_stream: Stream[MessageStreamEvent] = Stream(cast_to=cast_to, response=response, client=client)
+
+    def __next__(self) -> MessageStreamEvent:
+        return self._iterator.__next__()
+
+    def __iter__(self) -> Iterator[MessageStreamEvent]:
+        for item in self._iterator:
+            yield item
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def close(self) -> None:
+        """
+        Close the response and release the connection.
+
+        Automatically called if the response body is read to completion.
+        """
+        self.response.close()
+        self.on_end()
 
     def get_final_message(self) -> Message:
         """Waits until the stream has been read to completion and returns
@@ -68,11 +102,6 @@ class MessageStream(Stream[MessageStreamEvent]):
     def until_done(self) -> None:
         """Blocks until the stream has been consumed"""
         consume_sync_iterator(self)
-
-    @override
-    def close(self) -> None:
-        super().close()
-        self.on_end()
 
     # properties
     @property
@@ -118,17 +147,16 @@ class MessageStream(Stream[MessageStreamEvent]):
     def on_timeout(self) -> None:
         """Fires if the request times out"""
 
-    @override
     def __stream__(self) -> Iterator[MessageStreamEvent]:
         try:
-            for event in super().__stream__():
+            for sse_event in self._raw_stream:
                 self.__final_message_snapshot = accumulate_event(
-                    event=event,
+                    event=sse_event,
                     current_snapshot=self.__final_message_snapshot,
                 )
-                self._emit_sse_event(event)
+                self._emit_sse_event(sse_event)
 
-                yield event
+                yield sse_event
         except (httpx.TimeoutException, asyncio.TimeoutError) as exc:
             self.on_timeout()
             self.on_exception(exc)
@@ -184,13 +212,23 @@ class MessageStreamManager(Generic[MessageStreamT]):
     ```
     """
 
-    def __init__(self, api_request: Callable[[], MessageStreamT]) -> None:
-        self.__stream: MessageStreamT | None = None
+    def __init__(
+        self, api_request: Callable[[], Stream[MessageStreamEvent]], event_handler_cls: type[MessageStreamT]
+    ) -> None:
+        self.__event_handler: MessageStreamT | None = None
+        self.__event_handler_cls: type[MessageStreamT] = event_handler_cls
         self.__api_request = api_request
 
     def __enter__(self) -> MessageStreamT:
-        self.__stream = self.__api_request()
-        return self.__stream
+        raw_stream = self.__api_request()
+
+        self.__event_handler = self.__event_handler_cls(
+            cast_to=raw_stream._cast_to,
+            response=raw_stream.response,
+            client=raw_stream._client,
+        )
+
+        return self.__event_handler
 
     def __exit__(
         self,
@@ -198,11 +236,11 @@ class MessageStreamManager(Generic[MessageStreamT]):
         exc: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        if self.__stream is not None:
-            self.__stream.close()
+        if self.__event_handler is not None:
+            self.__event_handler.close()
 
 
-class AsyncMessageStream(AsyncStream[MessageStreamEvent]):
+class AsyncMessageStream:
     text_stream: AsyncIterator[str]
     """Async iterator over just the text deltas in the stream.
 
@@ -213,6 +251,8 @@ class AsyncMessageStream(AsyncStream[MessageStreamEvent]):
     ```
     """
 
+    response: httpx.Response
+
     def __init__(
         self,
         *,
@@ -220,10 +260,44 @@ class AsyncMessageStream(AsyncStream[MessageStreamEvent]):
         response: httpx.Response,
         client: AsyncAnthropic,
     ) -> None:
-        super().__init__(cast_to=cast_to, response=response, client=client)
+        self.response = response
+        self._cast_to = cast_to
+        self._client = client
 
         self.text_stream = self.__stream_text__()
         self.__final_message_snapshot: Message | None = None
+
+        self._iterator = self.__stream__()
+        self._raw_stream: AsyncStream[MessageStreamEvent] = AsyncStream(
+            cast_to=cast_to, response=response, client=client
+        )
+
+    async def __anext__(self) -> MessageStreamEvent:
+        return await self._iterator.__anext__()
+
+    async def __aiter__(self) -> AsyncIterator[MessageStreamEvent]:
+        async for item in self._iterator:
+            yield item
+
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        await self.close()
+
+    async def close(self) -> None:
+        """
+        Close the response and release the connection.
+
+        Automatically called if the response body is read to completion.
+        """
+        await self.response.aclose()
+        await self.on_end()
 
     async def get_final_message(self) -> Message:
         """Waits until the stream has been read to completion and returns
@@ -255,11 +329,6 @@ class AsyncMessageStream(AsyncStream[MessageStreamEvent]):
     async def until_done(self) -> None:
         """Waits until the stream has been consumed"""
         await consume_async_iterator(self)
-
-    @override
-    async def close(self) -> None:
-        await super().close()
-        await self.on_end()
 
     # properties
     @property
@@ -311,17 +380,16 @@ class AsyncMessageStream(AsyncStream[MessageStreamEvent]):
     async def on_timeout(self) -> None:
         """Fires if the request times out"""
 
-    @override
     async def __stream__(self) -> AsyncIterator[MessageStreamEvent]:
         try:
-            async for event in super().__stream__():
+            async for sse_event in self._raw_stream:
                 self.__final_message_snapshot = accumulate_event(
-                    event=event,
+                    event=sse_event,
                     current_snapshot=self.__final_message_snapshot,
                 )
-                await self._emit_sse_event(event)
+                await self._emit_sse_event(sse_event)
 
-                yield event
+                yield sse_event
         except (httpx.TimeoutException, asyncio.TimeoutError) as exc:
             await self.on_timeout()
             await self.on_exception(exc)
@@ -382,13 +450,23 @@ class AsyncMessageStreamManager(Generic[AsyncMessageStreamT]):
     ```
     """
 
-    def __init__(self, api_request: Awaitable[AsyncMessageStreamT]) -> None:
-        self.__stream: AsyncMessageStreamT | None = None
+    def __init__(
+        self, api_request: Awaitable[AsyncStream[MessageStreamEvent]], event_handler_cls: type[AsyncMessageStreamT]
+    ) -> None:
+        self.__event_handler: AsyncMessageStreamT | None = None
+        self.__event_handler_cls: type[AsyncMessageStreamT] = event_handler_cls
         self.__api_request = api_request
 
     async def __aenter__(self) -> AsyncMessageStreamT:
-        self.__stream = await self.__api_request
-        return self.__stream
+        raw_stream = await self.__api_request
+
+        self.__event_handler = self.__event_handler_cls(
+            cast_to=raw_stream._cast_to,
+            response=raw_stream.response,
+            client=raw_stream._client,
+        )
+
+        return self.__event_handler
 
     async def __aexit__(
         self,
@@ -396,8 +474,8 @@ class AsyncMessageStreamManager(Generic[AsyncMessageStreamT]):
         exc: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        if self.__stream is not None:
-            await self.__stream.close()
+        if self.__event_handler is not None:
+            await self.__event_handler.close()
 
 
 def accumulate_event(*, event: MessageStreamEvent, current_snapshot: Message | None) -> Message:
