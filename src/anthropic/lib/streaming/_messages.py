@@ -37,7 +37,6 @@ class MessageStream(Stream[MessageStreamEvent]):
 
         self.text_stream = self.__stream_text__()
         self.__final_message_snapshot: Message | None = None
-        self.__events: list[MessageStreamEvent] = []
 
     def get_final_message(self) -> Message:
         """Waits until the stream has been read to completion and returns
@@ -123,8 +122,6 @@ class MessageStream(Stream[MessageStreamEvent]):
     def __stream__(self) -> Iterator[MessageStreamEvent]:
         try:
             for event in super().__stream__():
-                self.__events.append(event)
-
                 self.__final_message_snapshot = accumulate_event(
                     event=event,
                     current_snapshot=self.__final_message_snapshot,
@@ -227,7 +224,6 @@ class AsyncMessageStream(AsyncStream[MessageStreamEvent]):
 
         self.text_stream = self.__stream_text__()
         self.__final_message_snapshot: Message | None = None
-        self.__events: list[MessageStreamEvent] = []
 
     async def get_final_message(self) -> Message:
         """Waits until the stream has been read to completion and returns
@@ -319,8 +315,6 @@ class AsyncMessageStream(AsyncStream[MessageStreamEvent]):
     async def __stream__(self) -> AsyncIterator[MessageStreamEvent]:
         try:
             async for event in super().__stream__():
-                self.__events.append(event)
-
                 self.__final_message_snapshot = accumulate_event(
                     event=event,
                     current_snapshot=self.__final_message_snapshot,
