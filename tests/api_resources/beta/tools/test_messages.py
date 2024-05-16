@@ -47,6 +47,7 @@ class TestMessages:
             stream=False,
             system="Today's date is 2024-01-01.",
             temperature=1,
+            tool_choice={"type": "auto"},
             tools=[
                 {
                     "description": "Get the current weather in a given location",
@@ -174,6 +175,7 @@ class TestMessages:
             stop_sequences=["string", "string", "string"],
             system="Today's date is 2024-01-01.",
             temperature=1,
+            tool_choice={"type": "auto"},
             tools=[
                 {
                     "description": "Get the current weather in a given location",
@@ -305,6 +307,7 @@ class TestAsyncMessages:
             stream=False,
             system="Today's date is 2024-01-01.",
             temperature=1,
+            tool_choice={"type": "auto"},
             tools=[
                 {
                     "description": "Get the current weather in a given location",
@@ -432,6 +435,7 @@ class TestAsyncMessages:
             stop_sequences=["string", "string", "string"],
             system="Today's date is 2024-01-01.",
             temperature=1,
+            tool_choice={"type": "auto"},
             tools=[
                 {
                     "description": "Get the current weather in a given location",
