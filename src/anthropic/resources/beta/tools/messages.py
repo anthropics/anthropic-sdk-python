@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Iterable, overload
+from functools import partial
 from typing_extensions import Literal
 
 import httpx
@@ -22,10 +23,18 @@ from ...._base_client import (
     make_request_options,
 )
 from ....types.beta.tools import message_create_params
-from ....types.message_stream_event import MessageStreamEvent
+from ....lib.streaming.beta import (
+    ToolsBetaMessageStream,
+    ToolsBetaMessageStreamT,
+    AsyncToolsBetaMessageStream,
+    AsyncToolsBetaMessageStreamT,
+    ToolsBetaMessageStreamManager,
+    AsyncToolsBetaMessageStreamManager,
+)
 from ....types.beta.tools.tool_param import ToolParam
 from ....types.beta.tools.tools_beta_message import ToolsBetaMessage
 from ....types.beta.tools.tools_beta_message_param import ToolsBetaMessageParam
+from ....types.beta.tools.tools_beta_message_stream_event import ToolsBetaMessageStreamEvent
 
 __all__ = ["Messages", "AsyncMessages"]
 
@@ -51,6 +60,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -77,7 +87,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
+              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -157,18 +167,18 @@ class Messages(SyncAPIResource):
               We currently support the `base64` source type for images, and the `image/jpeg`,
               `image/png`, `image/gif`, and `image/webp` media types.
 
-              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
-              for more input examples.
+              See [examples](https://docs.anthropic.com/en/api/messages-examples) for more
+              input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
-              use the top-level `system` parameter — there is no `"system"` role for input
+              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
+              the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
-              additional details and options.
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+              details and options.
 
           metadata: An object describing metadata about the request.
 
@@ -184,14 +194,14 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
-              for details.
+              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
+              details.
 
           system: System prompt.
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -201,6 +211,9 @@ class Messages(SyncAPIResource):
 
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
+
+          tool_choice: How the model should use the provided tools. The model can use a specific tool,
+              any available tool, or decide by itself.
 
           tools: [beta] Definitions of tools that the model may use.
 
@@ -269,7 +282,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [beta guide](https://docs.anthropic.com/claude/docs/tool-use) for more
+              See our [beta guide](https://docs.anthropic.com/en/docs/tool-use) for more
               details.
 
           top_k: Only sample from the top K options for each subsequent token.
@@ -312,6 +325,7 @@ class Messages(SyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -321,7 +335,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> Stream[MessageStreamEvent]:
+    ) -> Stream[ToolsBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -338,7 +352,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
+              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -418,23 +432,23 @@ class Messages(SyncAPIResource):
               We currently support the `base64` source type for images, and the `image/jpeg`,
               `image/png`, `image/gif`, and `image/webp` media types.
 
-              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
-              for more input examples.
+              See [examples](https://docs.anthropic.com/en/api/messages-examples) for more
+              input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
-              use the top-level `system` parameter — there is no `"system"` role for input
+              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
+              the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
-              additional details and options.
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+              details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
-              for details.
+              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
+              details.
 
           metadata: An object describing metadata about the request.
 
@@ -452,7 +466,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -462,6 +476,9 @@ class Messages(SyncAPIResource):
 
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
+
+          tool_choice: How the model should use the provided tools. The model can use a specific tool,
+              any available tool, or decide by itself.
 
           tools: [beta] Definitions of tools that the model may use.
 
@@ -530,7 +547,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [beta guide](https://docs.anthropic.com/claude/docs/tool-use) for more
+              See our [beta guide](https://docs.anthropic.com/en/docs/tool-use) for more
               details.
 
           top_k: Only sample from the top K options for each subsequent token.
@@ -573,6 +590,7 @@ class Messages(SyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -582,7 +600,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> ToolsBetaMessage | Stream[MessageStreamEvent]:
+    ) -> ToolsBetaMessage | Stream[ToolsBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -599,7 +617,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
+              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -679,23 +697,23 @@ class Messages(SyncAPIResource):
               We currently support the `base64` source type for images, and the `image/jpeg`,
               `image/png`, `image/gif`, and `image/webp` media types.
 
-              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
-              for more input examples.
+              See [examples](https://docs.anthropic.com/en/api/messages-examples) for more
+              input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
-              use the top-level `system` parameter — there is no `"system"` role for input
+              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
+              the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
-              additional details and options.
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+              details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
-              for details.
+              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
+              details.
 
           metadata: An object describing metadata about the request.
 
@@ -713,7 +731,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -723,6 +741,9 @@ class Messages(SyncAPIResource):
 
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
+
+          tool_choice: How the model should use the provided tools. The model can use a specific tool,
+              any available tool, or decide by itself.
 
           tools: [beta] Definitions of tools that the model may use.
 
@@ -791,7 +812,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [beta guide](https://docs.anthropic.com/claude/docs/tool-use) for more
+              See our [beta guide](https://docs.anthropic.com/en/docs/tool-use) for more
               details.
 
           top_k: Only sample from the top K options for each subsequent token.
@@ -834,6 +855,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -843,8 +865,8 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> ToolsBetaMessage | Stream[MessageStreamEvent]:
-        extra_headers = {"anthropic-beta": "tools-2024-04-04", **(extra_headers or {})}
+    ) -> ToolsBetaMessage | Stream[ToolsBetaMessageStreamEvent]:
+        extra_headers = {"anthropic-beta": "tools-2024-05-16", **(extra_headers or {})}
         return self._post(
             "/v1/messages?beta=tools",
             body=maybe_transform(
@@ -857,6 +879,7 @@ class Messages(SyncAPIResource):
                     "stream": stream,
                     "system": system,
                     "temperature": temperature,
+                    "tool_choice": tool_choice,
                     "tools": tools,
                     "top_k": top_k,
                     "top_p": top_p,
@@ -868,8 +891,132 @@ class Messages(SyncAPIResource):
             ),
             cast_to=ToolsBetaMessage,
             stream=stream or False,
-            stream_cls=Stream[MessageStreamEvent],
+            stream_cls=Stream[ToolsBetaMessageStreamEvent],
         )
+
+    @overload
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[ToolsBetaMessageParam],
+        model: str,
+        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        system: str | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ToolsBetaMessageStreamManager[ToolsBetaMessageStream]:
+        """Create a message stream with the beta tools API.
+
+        https://docs.anthropic.com/en/docs/tool-use-examples
+
+        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
+        """
+        ...
+
+    @overload
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[ToolsBetaMessageParam],
+        model: str,
+        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        system: str | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        event_handler: type[ToolsBetaMessageStreamT],
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ToolsBetaMessageStreamManager[ToolsBetaMessageStreamT]:
+        """Create a message stream with the beta tools API.
+
+        https://docs.anthropic.com/en/docs/tool-use-examples
+
+        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
+        """
+        ...
+
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[ToolsBetaMessageParam],
+        model: str,
+        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        system: str | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        event_handler: type[ToolsBetaMessageStreamT] = ToolsBetaMessageStream,  # type: ignore[assignment]
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ToolsBetaMessageStreamManager[ToolsBetaMessageStream] | ToolsBetaMessageStreamManager[ToolsBetaMessageStreamT]:
+        """Create a message stream with the beta tools API.
+
+        https://docs.anthropic.com/en/docs/tool-use-examples
+
+        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
+        """
+        extra_headers = {
+            "X-Stainless-Stream-Helper": "messages",
+            "X-Stainless-Custom-Event-Handler": "true" if event_handler != ToolsBetaMessageStream else "false",
+            "anthropic-beta": "tools-2024-05-16",
+            **(extra_headers or {}),
+        }
+        make_request = partial(
+            self._post,
+            "/v1/messages?beta=tools",
+            body=maybe_transform(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "metadata": metadata,
+                    "stop_sequences": stop_sequences,
+                    "stream": True,
+                    "system": system,
+                    "temperature": temperature,
+                    "tool_choice": tool_choice,
+                    "tools": tools,
+                    "top_k": top_k,
+                    "top_p": top_p,
+                },
+                message_create_params.MessageCreateParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=ToolsBetaMessage,
+            stream=True,
+            stream_cls=event_handler,
+        )
+        return ToolsBetaMessageStreamManager(make_request)
 
 
 class AsyncMessages(AsyncAPIResource):
@@ -893,6 +1040,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -919,7 +1067,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
+              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -999,18 +1147,18 @@ class AsyncMessages(AsyncAPIResource):
               We currently support the `base64` source type for images, and the `image/jpeg`,
               `image/png`, `image/gif`, and `image/webp` media types.
 
-              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
-              for more input examples.
+              See [examples](https://docs.anthropic.com/en/api/messages-examples) for more
+              input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
-              use the top-level `system` parameter — there is no `"system"` role for input
+              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
+              the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
-              additional details and options.
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+              details and options.
 
           metadata: An object describing metadata about the request.
 
@@ -1026,14 +1174,14 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
-              for details.
+              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
+              details.
 
           system: System prompt.
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -1043,6 +1191,9 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
+
+          tool_choice: How the model should use the provided tools. The model can use a specific tool,
+              any available tool, or decide by itself.
 
           tools: [beta] Definitions of tools that the model may use.
 
@@ -1111,7 +1262,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [beta guide](https://docs.anthropic.com/claude/docs/tool-use) for more
+              See our [beta guide](https://docs.anthropic.com/en/docs/tool-use) for more
               details.
 
           top_k: Only sample from the top K options for each subsequent token.
@@ -1154,6 +1305,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -1163,7 +1315,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> AsyncStream[MessageStreamEvent]:
+    ) -> AsyncStream[ToolsBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -1180,7 +1332,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
+              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -1260,23 +1412,23 @@ class AsyncMessages(AsyncAPIResource):
               We currently support the `base64` source type for images, and the `image/jpeg`,
               `image/png`, `image/gif`, and `image/webp` media types.
 
-              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
-              for more input examples.
+              See [examples](https://docs.anthropic.com/en/api/messages-examples) for more
+              input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
-              use the top-level `system` parameter — there is no `"system"` role for input
+              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
+              the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
-              additional details and options.
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+              details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
-              for details.
+              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
+              details.
 
           metadata: An object describing metadata about the request.
 
@@ -1294,7 +1446,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -1304,6 +1456,9 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
+
+          tool_choice: How the model should use the provided tools. The model can use a specific tool,
+              any available tool, or decide by itself.
 
           tools: [beta] Definitions of tools that the model may use.
 
@@ -1372,7 +1527,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [beta guide](https://docs.anthropic.com/claude/docs/tool-use) for more
+              See our [beta guide](https://docs.anthropic.com/en/docs/tool-use) for more
               details.
 
           top_k: Only sample from the top K options for each subsequent token.
@@ -1415,6 +1570,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -1424,7 +1580,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> ToolsBetaMessage | AsyncStream[MessageStreamEvent]:
+    ) -> ToolsBetaMessage | AsyncStream[ToolsBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -1441,7 +1597,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
+              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -1521,23 +1677,23 @@ class AsyncMessages(AsyncAPIResource):
               We currently support the `base64` source type for images, and the `image/jpeg`,
               `image/png`, `image/gif`, and `image/webp` media types.
 
-              See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
-              for more input examples.
+              See [examples](https://docs.anthropic.com/en/api/messages-examples) for more
+              input examples.
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
-              use the top-level `system` parameter — there is no `"system"` role for input
+              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
+              the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
           model: The model that will complete your prompt.
 
-              See [models](https://docs.anthropic.com/claude/docs/models-overview) for
-              additional details and options.
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+              details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
-              for details.
+              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
+              details.
 
           metadata: An object describing metadata about the request.
 
@@ -1555,7 +1711,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
+              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -1565,6 +1721,9 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
+
+          tool_choice: How the model should use the provided tools. The model can use a specific tool,
+              any available tool, or decide by itself.
 
           tools: [beta] Definitions of tools that the model may use.
 
@@ -1633,7 +1792,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [beta guide](https://docs.anthropic.com/claude/docs/tool-use) for more
+              See our [beta guide](https://docs.anthropic.com/en/docs/tool-use) for more
               details.
 
           top_k: Only sample from the top K options for each subsequent token.
@@ -1676,6 +1835,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: str | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -1685,8 +1845,8 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> ToolsBetaMessage | AsyncStream[MessageStreamEvent]:
-        extra_headers = {"anthropic-beta": "tools-2024-04-04", **(extra_headers or {})}
+    ) -> ToolsBetaMessage | AsyncStream[ToolsBetaMessageStreamEvent]:
+        extra_headers = {"anthropic-beta": "tools-2024-05-16", **(extra_headers or {})}
         return await self._post(
             "/v1/messages?beta=tools",
             body=await async_maybe_transform(
@@ -1699,6 +1859,7 @@ class AsyncMessages(AsyncAPIResource):
                     "stream": stream,
                     "system": system,
                     "temperature": temperature,
+                    "tool_choice": tool_choice,
                     "tools": tools,
                     "top_k": top_k,
                     "top_p": top_p,
@@ -1710,8 +1871,134 @@ class AsyncMessages(AsyncAPIResource):
             ),
             cast_to=ToolsBetaMessage,
             stream=stream or False,
-            stream_cls=AsyncStream[MessageStreamEvent],
+            stream_cls=AsyncStream[ToolsBetaMessageStreamEvent],
         )
+
+    @overload
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[ToolsBetaMessageParam],
+        model: str,
+        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        system: str | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> AsyncToolsBetaMessageStreamManager[AsyncToolsBetaMessageStream]:
+        """Create a message stream with the beta tools API.
+
+        https://docs.anthropic.com/en/docs/tool-use-examples
+
+        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
+        """
+        ...
+
+    @overload
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[ToolsBetaMessageParam],
+        model: str,
+        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        system: str | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        event_handler: type[AsyncToolsBetaMessageStreamT],
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> AsyncToolsBetaMessageStreamManager[AsyncToolsBetaMessageStreamT]:
+        """Create a message stream with the beta tools API.
+
+        https://docs.anthropic.com/en/docs/tool-use-examples
+
+        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
+        """
+        ...
+
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[ToolsBetaMessageParam],
+        model: str,
+        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        system: str | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        event_handler: type[AsyncToolsBetaMessageStreamT] = AsyncToolsBetaMessageStream,  # type: ignore[assignment]
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> (
+        AsyncToolsBetaMessageStreamManager[AsyncToolsBetaMessageStream]
+        | AsyncToolsBetaMessageStreamManager[AsyncToolsBetaMessageStreamT]
+    ):
+        """Create a message stream with the beta tools API.
+
+        https://docs.anthropic.com/en/docs/tool-use-examples
+
+        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
+        """
+        extra_headers = {
+            "X-Stainless-Stream-Helper": "messages",
+            "X-Stainless-Custom-Event-Handler": "true" if event_handler != AsyncToolsBetaMessageStream else "false",
+            "anthropic-beta": "tools-2024-05-16",
+            **(extra_headers or {}),
+        }
+        request = self._post(
+            "/v1/messages?beta=tools",
+            body=maybe_transform(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "metadata": metadata,
+                    "stop_sequences": stop_sequences,
+                    "stream": True,
+                    "system": system,
+                    "temperature": temperature,
+                    "tool_choice": tool_choice,
+                    "tools": tools,
+                    "top_k": top_k,
+                    "top_p": top_p,
+                },
+                message_create_params.MessageCreateParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=ToolsBetaMessage,
+            stream=True,
+            stream_cls=event_handler,
+        )
+        return AsyncToolsBetaMessageStreamManager(request)
 
 
 class MessagesWithRawResponse:
