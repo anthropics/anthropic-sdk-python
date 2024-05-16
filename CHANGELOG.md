@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.26.1 (2024-05-16)
+
+Full Changelog: [v0.26.0...v0.26.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.26.0...v0.26.1)
+
+### Chores
+
+* **internal:** temporarily remove some code for migration ([#503](https://github.com/anthropics/anthropic-sdk-python/issues/503)) ([1f349b6](https://github.com/anthropics/anthropic-sdk-python/commit/1f349b6dd993907153d0bfb07378055502a6e6e9))
+
 ## 0.26.0 (2024-05-16)
 
 Full Changelog: [v0.25.9...v0.26.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.9...v0.26.0)
