@@ -336,6 +336,7 @@ class TestAnthropic:
         assert request.headers.get("X-Api-Key") == api_key
 
         client2 = Anthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
+
         with pytest.raises(
             TypeError,
             match="Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
@@ -1153,6 +1154,7 @@ class TestAsyncAnthropic:
         assert request.headers.get("X-Api-Key") == api_key
 
         client2 = AsyncAnthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
+
         with pytest.raises(
             TypeError,
             match="Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
