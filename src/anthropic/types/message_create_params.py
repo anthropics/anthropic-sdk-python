@@ -18,7 +18,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     only specifies the absolute maximum number of tokens to generate.
 
     Different models have different maximum values for this parameter. See
-    [models](https://docs.anthropic.com/claude/docs/models-overview) for details.
+    [models](https://docs.anthropic.com/en/docs/models-overview) for details.
     """
 
     messages: Required[Iterable[MessageParam]]
@@ -100,12 +100,12 @@ class MessageCreateParamsBase(TypedDict, total=False):
     We currently support the `base64` source type for images, and the `image/jpeg`,
     `image/png`, `image/gif`, and `image/webp` media types.
 
-    See [examples](https://docs.anthropic.com/claude/reference/messages-examples)
-    for more input examples.
+    See [examples](https://docs.anthropic.com/en/api/messages-examples) for more
+    input examples.
 
     Note that if you want to include a
-    [system prompt](https://docs.anthropic.com/claude/docs/system-prompts), you can
-    use the top-level `system` parameter — there is no `"system"` role for input
+    [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
+    the top-level `system` parameter — there is no `"system"` role for input
     messages in the Messages API.
     """
 
@@ -124,8 +124,8 @@ class MessageCreateParamsBase(TypedDict, total=False):
     ]
     """The model that will complete your prompt.
 
-    See [models](https://docs.anthropic.com/claude/docs/models-overview) for
-    additional details and options.
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    details and options.
     """
 
     metadata: Metadata
@@ -148,7 +148,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     A system prompt is a way of providing context and instructions to Claude, such
     as specifying a particular goal or role. See our
-    [guide to system prompts](https://docs.anthropic.com/claude/docs/system-prompts).
+    [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
     """
 
     temperature: float
@@ -199,8 +199,8 @@ class MessageCreateParamsNonStreaming(MessageCreateParamsBase):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
-    for details.
+    See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
+    details.
     """
 
 
@@ -208,8 +208,8 @@ class MessageCreateParamsStreaming(MessageCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.anthropic.com/claude/reference/messages-streaming)
-    for details.
+    See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
+    details.
     """
 
 
