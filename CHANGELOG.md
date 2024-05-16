@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.26.0 (2024-05-16)
+
+Full Changelog: [v0.25.9...v0.26.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.9...v0.26.0)
+
+### Features
+
+* **api:** add `tool_choice` param, image block params inside `tool_result.content`, and streaming for `tool_use` blocks ([#502](https://github.com/anthropics/anthropic-sdk-python/issues/502)) ([e0bc274](https://github.com/anthropics/anthropic-sdk-python/commit/e0bc2749d4be57fe9f0d60635b3198de89608bb9))
+
+
+### Chores
+
+* **internal:** minor formatting changes ([#500](https://github.com/anthropics/anthropic-sdk-python/issues/500)) ([8b32558](https://github.com/anthropics/anthropic-sdk-python/commit/8b32558e95d83badea1bfe4084fb5db86f7f78cd))
+
 ## 0.25.9 (2024-05-14)
 
 Full Changelog: [v0.25.8...v0.25.9](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.8...v0.25.9)
