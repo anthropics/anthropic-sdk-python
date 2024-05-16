@@ -28,8 +28,8 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     model: Required[Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]]]
     """The model that will complete your prompt.
 
-    See [models](https://docs.anthropic.com/claude/docs/models-overview) for
-    additional details and options.
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    details and options.
     """
 
     prompt: Required[str]
@@ -42,11 +42,10 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     "\n\nHuman: {userQuestion}\n\nAssistant:"
     ```
 
-    See
-    [prompt validation](https://anthropic.readme.io/claude/reference/prompt-validation)
-    and our guide to
-    [prompt design](https://docs.anthropic.com/claude/docs/introduction-to-prompt-design)
-    for more details.
+    See [prompt validation](https://docs.anthropic.com/en/api/prompt-validation) and
+    our guide to
+    [prompt design](https://docs.anthropic.com/en/docs/intro-to-prompting) for more
+    details.
     """
 
     metadata: Metadata
@@ -108,9 +107,7 @@ class CompletionCreateParamsNonStreaming(CompletionCreateParamsBase):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See
-    [streaming](https://docs.anthropic.com/claude/reference/text-completions-streaming)
-    for details.
+    See [streaming](https://docs.anthropic.com/en/api/streaming) for details.
     """
 
 
@@ -118,9 +115,7 @@ class CompletionCreateParamsStreaming(CompletionCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See
-    [streaming](https://docs.anthropic.com/claude/reference/text-completions-streaming)
-    for details.
+    See [streaming](https://docs.anthropic.com/en/api/streaming) for details.
     """
 
 
