@@ -919,8 +919,6 @@ class Messages(SyncAPIResource):
         """Create a message stream with the beta tools API.
 
         https://docs.anthropic.com/en/docs/tool-use-examples
-
-        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
         """
         ...
 
@@ -950,8 +948,6 @@ class Messages(SyncAPIResource):
         """Create a message stream with the beta tools API.
 
         https://docs.anthropic.com/en/docs/tool-use-examples
-
-        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
         """
         ...
 
@@ -980,8 +976,6 @@ class Messages(SyncAPIResource):
         """Create a message stream with the beta tools API.
 
         https://docs.anthropic.com/en/docs/tool-use-examples
-
-        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
         """
         extra_headers = {
             "X-Stainless-Stream-Helper": "messages",
@@ -1899,8 +1893,6 @@ class AsyncMessages(AsyncAPIResource):
         """Create a message stream with the beta tools API.
 
         https://docs.anthropic.com/en/docs/tool-use-examples
-
-        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
         """
         ...
 
@@ -1930,8 +1922,6 @@ class AsyncMessages(AsyncAPIResource):
         """Create a message stream with the beta tools API.
 
         https://docs.anthropic.com/en/docs/tool-use-examples
-
-        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
         """
         ...
 
@@ -1963,8 +1953,6 @@ class AsyncMessages(AsyncAPIResource):
         """Create a message stream with the beta tools API.
 
         https://docs.anthropic.com/en/docs/tool-use-examples
-
-        Note: unlike the rest of the SDK, this method requires `pydantic >= 2.7`.
         """
         extra_headers = {
             "X-Stainless-Stream-Helper": "messages",

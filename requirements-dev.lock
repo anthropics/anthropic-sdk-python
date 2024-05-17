@@ -66,6 +66,8 @@ idna==3.4
 importlib-metadata==7.0.0
 iniconfig==2.0.0
     # via pytest
+jiter==0.1.0
+    # via anthropic
 jmespath==1.0.1
     # via boto3
     # via botocore

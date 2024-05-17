@@ -49,6 +49,8 @@ idna==3.4
     # via anyio
     # via httpx
     # via requests
+jiter==0.1.0
+    # via anthropic
 jmespath==1.0.1
     # via boto3
     # via botocore
