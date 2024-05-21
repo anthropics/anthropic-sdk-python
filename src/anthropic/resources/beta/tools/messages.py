@@ -77,8 +77,8 @@ class Messages(SyncAPIResource):
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
 
-        The Messages API can be used for for either single queries or stateless
-        multi-turn conversations.
+        The Messages API can be used for either single queries or stateless multi-turn
+        conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -342,8 +342,8 @@ class Messages(SyncAPIResource):
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
 
-        The Messages API can be used for for either single queries or stateless
-        multi-turn conversations.
+        The Messages API can be used for either single queries or stateless multi-turn
+        conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -607,8 +607,8 @@ class Messages(SyncAPIResource):
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
 
-        The Messages API can be used for for either single queries or stateless
-        multi-turn conversations.
+        The Messages API can be used for either single queries or stateless multi-turn
+        conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1051,8 +1051,8 @@ class AsyncMessages(AsyncAPIResource):
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
 
-        The Messages API can be used for for either single queries or stateless
-        multi-turn conversations.
+        The Messages API can be used for either single queries or stateless multi-turn
+        conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1316,8 +1316,8 @@ class AsyncMessages(AsyncAPIResource):
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
 
-        The Messages API can be used for for either single queries or stateless
-        multi-turn conversations.
+        The Messages API can be used for either single queries or stateless multi-turn
+        conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1581,8 +1581,8 @@ class AsyncMessages(AsyncAPIResource):
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
 
-        The Messages API can be used for for either single queries or stateless
-        multi-turn conversations.
+        The Messages API can be used for either single queries or stateless multi-turn
+        conversations.
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
