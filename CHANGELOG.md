@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.26.1 (2024-05-21)
+
+Full Changelog: [v0.26.0...v0.26.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.26.0...v0.26.1)
+
+### Chores
+
+* **docs:** fix typo ([#511](https://github.com/anthropics/anthropic-sdk-python/issues/511)) ([d7401bd](https://github.com/anthropics/anthropic-sdk-python/commit/d7401bdca637958171bad6b17406e8201c5bc6f6))
+* **tools:** rely on pydantic's JSON parser instead of pydantic ([#510](https://github.com/anthropics/anthropic-sdk-python/issues/510)) ([8e7edca](https://github.com/anthropics/anthropic-sdk-python/commit/8e7edca45525be97a4a12a365db72b1668b3e4a1))
+
 ## 0.26.0 (2024-05-16)
 
 Full Changelog: [v0.25.9...v0.26.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.25.9...v0.26.0)
