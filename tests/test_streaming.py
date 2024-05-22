@@ -216,6 +216,14 @@ async def test_multi_byte_character_multiple_chunks(
     assert sse.json() == {"content": "известни"}
 
 
+def test_isinstance_check(client: Anthropic, async_client: AsyncAnthropic) -> None:
+    async_stream = AsyncStream(cast_to=object, client=async_client, response=httpx.Response(200, content=b"foo"))
+    assert isinstance(async_stream, AsyncStream)
+
+    sync_stream = Stream(cast_to=object, client=client, response=httpx.Response(200, content=b"foo"))
+    assert isinstance(sync_stream, Stream)
+
+
 async def to_aiter(iter: Iterator[bytes]) -> AsyncIterator[bytes]:
     for chunk in iter:
         yield chunk

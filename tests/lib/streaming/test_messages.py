@@ -8,7 +8,7 @@ import httpx
 import pytest
 from respx import MockRouter
 
-from anthropic import Anthropic, AsyncAnthropic
+from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
 from anthropic.lib.streaming import MessageStream, AsyncMessageStream
 from anthropic.types.message import Message
 from anthropic.types.message_stream_event import MessageStreamEvent
@@ -124,6 +124,9 @@ class TestSyncMessages:
             model="claude-3-opus-20240229",
             event_handler=SyncEventTracker,
         ) as stream:
+            with pytest.warns(DeprecationWarning):
+                assert isinstance(stream, Stream)
+
             assert_basic_response(stream, stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
@@ -163,6 +166,9 @@ class TestAsyncMessages:
             model="claude-3-opus-20240229",
             event_handler=AsyncEventTracker,
         ) as stream:
+            with pytest.warns(DeprecationWarning):
+                assert isinstance(stream, AsyncStream)
+
             assert_basic_response(stream, await stream.get_final_message())
 
     @pytest.mark.asyncio
