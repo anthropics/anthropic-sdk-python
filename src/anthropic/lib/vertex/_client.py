@@ -180,7 +180,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
             return self.access_token
 
         if not self._credentials:
-            self._credentials, project_id = load_auth()
+            self._credentials, project_id = load_auth(project_id=self.project_id)
             if not self.project_id:
                 self.project_id = project_id
         else:
@@ -267,7 +267,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
             return self.access_token
 
         if not self._credentials:
-            self._credentials, project_id = await asyncify(load_auth)()
+            self._credentials, project_id = await asyncify(load_auth)(project_id=self.project_id)
             if not self.project_id:
                 self.project_id = project_id
         else:
