@@ -1,8 +1,10 @@
 # Note: initially copied from https://github.com/florimondmanca/httpx-sse/blob/master/src/httpx_sse/_decoders.py
 from __future__ import annotations
 
+import abc
 import json
 import inspect
+import warnings
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, Iterator, AsyncIterator, cast
 from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, runtime_checkable
@@ -18,7 +20,28 @@ if TYPE_CHECKING:
 _T = TypeVar("_T")
 
 
-class Stream(Generic[_T]):
+class _SyncStreamMeta(abc.ABCMeta):
+    @override
+    def __instancecheck__(self, instance: Any) -> bool:
+        # we override the `isinstance()` check for `Stream`
+        # as a previous version of the `MessageStream` class
+        # inherited from `Stream` & without this workaround,
+        # changing it to not inherit would be a breaking change.
+
+        from .lib.streaming import MessageStream
+
+        if isinstance(instance, MessageStream):
+            warnings.warn(
+                "Using `isinstance()` to check if a `MessageStream` object is an instance of `Stream` is deprecated & will be removed in the next major version",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            return True
+
+        return False
+
+
+class Stream(Generic[_T], metaclass=_SyncStreamMeta):
     """Provides the core interface to iterate over a synchronous stream response."""
 
     response: httpx.Response
@@ -114,7 +137,28 @@ class Stream(Generic[_T]):
         self.response.close()
 
 
-class AsyncStream(Generic[_T]):
+class _AsyncStreamMeta(abc.ABCMeta):
+    @override
+    def __instancecheck__(self, instance: Any) -> bool:
+        # we override the `isinstance()` check for `AsyncStream`
+        # as a previous version of the `AsyncMessageStream` class
+        # inherited from `AsyncStream` & without this workaround,
+        # changing it to not inherit would be a breaking change.
+
+        from .lib.streaming import AsyncMessageStream
+
+        if isinstance(instance, AsyncMessageStream):
+            warnings.warn(
+                "Using `isinstance()` to check if a `AsyncMessageStream` object is an instance of `AsyncStream` is deprecated & will be removed in the next major version",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            return True
+
+        return False
+
+
+class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
     """Provides the core interface to iterate over an asynchronous stream response."""
 
     response: httpx.Response
