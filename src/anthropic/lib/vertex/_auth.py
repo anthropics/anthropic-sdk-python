@@ -15,13 +15,16 @@ if TYPE_CHECKING:
 # cause synchronous blocking issues.
 
 
-def load_auth() -> tuple[Credentials, str]:
+def load_auth(*, project_id: str | None) -> tuple[Credentials, str]:
     from google.auth.transport.requests import Request  # type: ignore[import-untyped]
 
-    credentials, project_id = google_auth.default(
+    credentials, loaded_project_id = google_auth.default(
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
     credentials.refresh(Request())
+
+    if not project_id:
+        project_id = loaded_project_id
 
     if not project_id:
         raise ValueError("Could not resolve project_id")
