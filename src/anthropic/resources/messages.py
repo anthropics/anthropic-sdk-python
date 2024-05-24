@@ -770,7 +770,7 @@ class Messages(SyncAPIResource):
         """Create a Message stream"""
         ...
 
-    def stream(
+    def stream(  # pyright: ignore[reportInconsistentOverload]
         self,
         *,
         max_tokens: int,
@@ -1566,7 +1566,7 @@ class AsyncMessages(AsyncAPIResource):
         """Create a Message stream"""
         ...
 
-    def stream(
+    def stream(  # pyright: ignore[reportInconsistentOverload]
         self,
         *,
         max_tokens: int,
