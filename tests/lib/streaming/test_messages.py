@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, TypeVar, cast
+from typing import TypeVar
 from typing_extensions import Iterator, AsyncIterator, override
 
 import httpx
@@ -125,7 +125,7 @@ class TestSyncMessages:
             event_handler=SyncEventTracker,
         ) as stream:
             with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), Stream)
+                assert isinstance(stream, Stream)
 
             assert_basic_response(stream, stream.get_final_message())
 
@@ -167,7 +167,7 @@ class TestAsyncMessages:
             event_handler=AsyncEventTracker,
         ) as stream:
             with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), AsyncStream)
+                assert isinstance(stream, AsyncStream)
 
             assert_basic_response(stream, await stream.get_final_message())
 
