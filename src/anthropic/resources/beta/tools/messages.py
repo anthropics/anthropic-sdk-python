@@ -951,7 +951,7 @@ class Messages(SyncAPIResource):
         """
         ...
 
-    def stream(
+    def stream(  # pyright: ignore[reportInconsistentOverload]
         self,
         *,
         max_tokens: int,
@@ -1925,7 +1925,7 @@ class AsyncMessages(AsyncAPIResource):
         """
         ...
 
-    def stream(
+    def stream(  # pyright: ignore[reportInconsistentOverload]
         self,
         *,
         max_tokens: int,
