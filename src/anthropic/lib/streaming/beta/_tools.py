@@ -474,7 +474,7 @@ def accumulate_event(
             json_buf += bytes(event.delta.partial_json, "utf-8")
 
             if json_buf:
-                content.input = from_json(json_buf, allow_partial=True)
+                content.input = from_json(json_buf, partial_mode=True)
 
             setattr(content, JSON_BUF_PROPERTY, json_buf)
     elif event.type == "message_delta":
