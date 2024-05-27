@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.26.2 (2024-05-27)
+
+Full Changelog: [v0.26.1...v0.26.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.26.1...v0.26.2)
+
+### Bug Fixes
+
+* **vertex:** don't error if project_id couldn't be loaded if it was already explicitly given ([#513](https://github.com/anthropics/anthropic-sdk-python/issues/513)) ([e7159d8](https://github.com/anthropics/anthropic-sdk-python/commit/e7159d87b207592eff364c1d75bab348dd414257))
+
+
+### Chores
+
+* **ci:** update rye install location ([#516](https://github.com/anthropics/anthropic-sdk-python/issues/516)) ([a6e347a](https://github.com/anthropics/anthropic-sdk-python/commit/a6e347a2c4aa75d00ee3ada3dfa707a080d890b6))
+* **ci:** update rye install location ([#518](https://github.com/anthropics/anthropic-sdk-python/issues/518)) ([5122420](https://github.com/anthropics/anthropic-sdk-python/commit/51224208a732136caeb30d839685a91d7a26beda))
+* **internal:** bump pyright ([196e4b0](https://github.com/anthropics/anthropic-sdk-python/commit/196e4b06cb4794a06d813b4e59dd8c5fbb61d71d))
+* **internal:** remove unused __events stream property ([472b831](https://github.com/anthropics/anthropic-sdk-python/commit/472b831a552e7ebe20a9d503b129d8c1e1cef0c8))
+* **internal:** restructure streaming implementation to use composition ([b1a1c03](https://github.com/anthropics/anthropic-sdk-python/commit/b1a1c0354a9aca450a7d512fdbdeb59c0ead688a))
+* **messages:** add back-compat for isinstance() checks ([7794bcb](https://github.com/anthropics/anthropic-sdk-python/commit/7794bcb680300249cd9be48562ce190eed8b9cff))
+* **tests:** fix lints ([#521](https://github.com/anthropics/anthropic-sdk-python/issues/521)) ([d96fc53](https://github.com/anthropics/anthropic-sdk-python/commit/d96fc530902bfe4b6a0c75044bf60e90f32997e4))
+
+
+### Documentation
+
+* **contributing:** update references to rye-up.com ([6486898](https://github.com/anthropics/anthropic-sdk-python/commit/6486898e874784f39be36a0a011867dd2fe8a5d5))
+
 ## 0.26.1 (2024-05-21)
 
 Full Changelog: [v0.26.0...v0.26.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.26.0...v0.26.1)
