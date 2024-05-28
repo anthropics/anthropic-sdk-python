@@ -16,8 +16,12 @@ async def main() -> None:
         ],
         model="claude-3-opus-20240229",
     ) as stream:
-        async for text in stream.text_stream:
-            print(text, end="", flush=True)
+        async for event in stream:
+            if event.type == "text":
+                print(event.text, end="", flush=True)
+            elif event.type == "content_block_stop":
+                print()
+                print("\ncontent block finished accumulating:", event.content_block)
         print()
 
     # you can still get the accumulated final message outside of
