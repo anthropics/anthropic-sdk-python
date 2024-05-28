@@ -3,4 +3,6 @@
 
 from .text_block import TextBlock
 
+__all__ = ["ContentBlock"]
+
 ContentBlock = TextBlock
