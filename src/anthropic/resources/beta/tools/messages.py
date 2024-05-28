@@ -1008,9 +1008,9 @@ class Messages(SyncAPIResource):
             ),
             cast_to=ToolsBetaMessage,
             stream=True,
-            stream_cls=event_handler,
+            stream_cls=Stream[RawToolsBetaMessageStreamEvent],
         )
-        return ToolsBetaMessageStreamManager(make_request)
+        return ToolsBetaMessageStreamManager(make_request, event_handler)
 
 
 class AsyncMessages(AsyncAPIResource):
@@ -1984,9 +1984,9 @@ class AsyncMessages(AsyncAPIResource):
             ),
             cast_to=ToolsBetaMessage,
             stream=True,
-            stream_cls=event_handler,
+            stream_cls=AsyncStream[RawToolsBetaMessageStreamEvent],
         )
-        return AsyncToolsBetaMessageStreamManager(request)
+        return AsyncToolsBetaMessageStreamManager(request, event_handler)
 
 
 class MessagesWithRawResponse:

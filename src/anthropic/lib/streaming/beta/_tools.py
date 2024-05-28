@@ -3,20 +3,27 @@ from __future__ import annotations
 import asyncio
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, Callable, cast
-from typing_extensions import Iterator, Awaitable, AsyncIterator, override, assert_never
+from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
 
 import httpx
 
+from ._types import (
+    TextEvent,
+    ToolsBetaInputJsonEvent,
+    ToolsBetaMessageStopEvent,
+    ToolsBetaMessageStreamEvent,
+    ToolsBetaContentBlockStopEvent,
+)
 from ...._utils import consume_sync_iterator, consume_async_iterator
 from ...._models import construct_type
 from ...._streaming import Stream, AsyncStream
-from ....types.beta.tools import ToolsBetaMessage, ToolsBetaContentBlock, ToolsBetaMessageStreamEvent
+from ....types.beta.tools import ToolsBetaMessage, ToolsBetaContentBlock, RawToolsBetaMessageStreamEvent
 
 if TYPE_CHECKING:
     from ...._client import Anthropic, AsyncAnthropic
 
 
-class ToolsBetaMessageStream(Stream[ToolsBetaMessageStreamEvent]):
+class ToolsBetaMessageStream:
     text_stream: Iterator[str]
     """Iterator over just the text deltas in the stream.
 
@@ -27,18 +34,53 @@ class ToolsBetaMessageStream(Stream[ToolsBetaMessageStreamEvent]):
     ```
     """
 
+    response: httpx.Response
+
     def __init__(
         self,
         *,
-        cast_to: type[ToolsBetaMessageStreamEvent],
+        cast_to: type[RawToolsBetaMessageStreamEvent],
         response: httpx.Response,
         client: Anthropic,
     ) -> None:
-        super().__init__(cast_to=cast_to, response=response, client=client)
+        self.response = response
+        self._cast_to = cast_to
+        self._client = client
 
         self.text_stream = self.__stream_text__()
         self.__final_message_snapshot: ToolsBetaMessage | None = None
-        self.__events: list[ToolsBetaMessageStreamEvent] = []
+
+        self._iterator = self.__stream__()
+        self._raw_stream: Stream[RawToolsBetaMessageStreamEvent] = Stream(
+            cast_to=cast_to, response=response, client=client
+        )
+
+    def __next__(self) -> ToolsBetaMessageStreamEvent:
+        return self._iterator.__next__()
+
+    def __iter__(self) -> Iterator[ToolsBetaMessageStreamEvent]:
+        for item in self._iterator:
+            yield item
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def close(self) -> None:
+        """
+        Close the response and release the connection.
+
+        Automatically called if the response body is read to completion.
+        """
+        self.response.close()
+        self.on_end()
 
     def get_final_message(self) -> ToolsBetaMessage:
         """Waits until the stream has been read to completion and returns
@@ -71,11 +113,6 @@ class ToolsBetaMessageStream(Stream[ToolsBetaMessageStreamEvent]):
         """Blocks until the stream has been consumed"""
         consume_sync_iterator(self)
 
-    @override
-    def close(self) -> None:
-        super().close()
-        self.on_end()
-
     # properties
     @property
     def current_message_snapshot(self) -> ToolsBetaMessage:
@@ -83,7 +120,7 @@ class ToolsBetaMessageStream(Stream[ToolsBetaMessageStreamEvent]):
         return self.__final_message_snapshot
 
     # event handlers
-    def on_stream_event(self, event: ToolsBetaMessageStreamEvent) -> None:
+    def on_stream_event(self, event: RawToolsBetaMessageStreamEvent) -> None:
         """Callback that is fired for every Server-Sent-Event"""
 
     def on_message(self, message: ToolsBetaMessage) -> None:
@@ -132,19 +169,17 @@ class ToolsBetaMessageStream(Stream[ToolsBetaMessageStreamEvent]):
     def on_timeout(self) -> None:
         """Fires if the request times out"""
 
-    @override
     def __stream__(self) -> Iterator[ToolsBetaMessageStreamEvent]:
         try:
-            for event in super().__stream__():
-                self.__events.append(event)
-
+            for sse_event in self._raw_stream:
                 self.__final_message_snapshot = accumulate_event(
-                    event=event,
+                    event=sse_event,
                     current_snapshot=self.__final_message_snapshot,
                 )
-                self._emit_sse_event(event)
 
-                yield event
+                events_to_fire = self._emit_sse_event(sse_event)
+                for event in events_to_fire:
+                    yield event
         except (httpx.TimeoutException, asyncio.TimeoutError) as exc:
             self.on_timeout()
             self.on_exception(exc)
@@ -160,33 +195,57 @@ class ToolsBetaMessageStream(Stream[ToolsBetaMessageStreamEvent]):
             if chunk.type == "content_block_delta" and chunk.delta.type == "text_delta":
                 yield chunk.delta.text
 
-    def _emit_sse_event(self, event: ToolsBetaMessageStreamEvent) -> None:
+    def _emit_sse_event(self, event: RawToolsBetaMessageStreamEvent) -> list[ToolsBetaMessageStreamEvent]:
         self.on_stream_event(event)
 
+        events_to_fire: list[ToolsBetaMessageStreamEvent] = []
+
         if event.type == "message_start":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "message_delta":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "message_stop":
             self.on_message(self.current_message_snapshot)
+            events_to_fire.append(ToolsBetaMessageStopEvent(type="message_stop", message=self.current_message_snapshot))
         elif event.type == "content_block_start":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "content_block_delta":
-            content = self.current_message_snapshot.content[event.index]
-            if event.delta.type == "text_delta" and content.type == "text":
-                self.on_text(event.delta.text, content.text)
-            elif event.delta.type == "input_json_delta" and content.type == "tool_use":
-                self.on_input_json(event.delta.partial_json, content.input)
+            events_to_fire.append(event)
+
+            content_block = self.current_message_snapshot.content[event.index]
+            if event.delta.type == "text_delta" and content_block.type == "text":
+                self.on_text(event.delta.text, content_block.text)
+                events_to_fire.append(
+                    TextEvent(
+                        type="text",
+                        text=event.delta.text,
+                        snapshot=content_block.text,
+                    )
+                )
+            elif event.delta.type == "input_json_delta" and content_block.type == "tool_use":
+                self.on_input_json(event.delta.partial_json, content_block.input)
+                events_to_fire.append(
+                    ToolsBetaInputJsonEvent(
+                        type="input_json",
+                        partial_json=event.delta.partial_json,
+                        snapshot=content_block.input,
+                    )
+                )
         elif event.type == "content_block_stop":
-            content = self.current_message_snapshot.content[event.index]
-            self.on_content_block(content)
+            content_block = self.current_message_snapshot.content[event.index]
+            self.on_content_block(content_block)
+
+            events_to_fire.append(
+                ToolsBetaContentBlockStopEvent(
+                    type="content_block_stop", index=event.index, content_block=content_block
+                ),
+            )
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
                 assert_never(event)
+
+        return events_to_fire
 
 
 ToolsBetaMessageStreamT = TypeVar("ToolsBetaMessageStreamT", bound=ToolsBetaMessageStream)
@@ -202,13 +261,25 @@ class ToolsBetaMessageStreamManager(Generic[ToolsBetaMessageStreamT]):
     ```
     """
 
-    def __init__(self, api_request: Callable[[], ToolsBetaMessageStreamT]) -> None:
-        self.__stream: ToolsBetaMessageStreamT | None = None
+    def __init__(
+        self,
+        api_request: Callable[[], Stream[RawToolsBetaMessageStreamEvent]],
+        event_handler_cls: type[ToolsBetaMessageStreamT],
+    ) -> None:
+        self.__event_handler: ToolsBetaMessageStreamT | None = None
+        self.__event_handler_cls: type[ToolsBetaMessageStreamT] = event_handler_cls
         self.__api_request = api_request
 
     def __enter__(self) -> ToolsBetaMessageStreamT:
-        self.__stream = self.__api_request()
-        return self.__stream
+        raw_stream = self.__api_request()
+
+        self.__event_handler = self.__event_handler_cls(
+            cast_to=raw_stream._cast_to,
+            response=raw_stream.response,
+            client=raw_stream._client,
+        )
+
+        return self.__event_handler
 
     def __exit__(
         self,
@@ -216,11 +287,11 @@ class ToolsBetaMessageStreamManager(Generic[ToolsBetaMessageStreamT]):
         exc: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        if self.__stream is not None:
-            self.__stream.close()
+        if self.__event_handler is not None:
+            self.__event_handler.close()
 
 
-class AsyncToolsBetaMessageStream(AsyncStream[ToolsBetaMessageStreamEvent]):
+class AsyncToolsBetaMessageStream:
     text_stream: AsyncIterator[str]
     """Async iterator over just the text deltas in the stream.
 
@@ -231,18 +302,53 @@ class AsyncToolsBetaMessageStream(AsyncStream[ToolsBetaMessageStreamEvent]):
     ```
     """
 
+    response: httpx.Response
+
     def __init__(
         self,
         *,
-        cast_to: type[ToolsBetaMessageStreamEvent],
+        cast_to: type[RawToolsBetaMessageStreamEvent],
         response: httpx.Response,
         client: AsyncAnthropic,
     ) -> None:
-        super().__init__(cast_to=cast_to, response=response, client=client)
+        self.response = response
+        self._cast_to = cast_to
+        self._client = client
 
         self.text_stream = self.__stream_text__()
         self.__final_message_snapshot: ToolsBetaMessage | None = None
-        self.__events: list[ToolsBetaMessageStreamEvent] = []
+
+        self._iterator = self.__stream__()
+        self._raw_stream: AsyncStream[RawToolsBetaMessageStreamEvent] = AsyncStream(
+            cast_to=cast_to, response=response, client=client
+        )
+
+    async def __anext__(self) -> ToolsBetaMessageStreamEvent:
+        return await self._iterator.__anext__()
+
+    async def __aiter__(self) -> AsyncIterator[ToolsBetaMessageStreamEvent]:
+        async for item in self._iterator:
+            yield item
+
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        await self.close()
+
+    async def close(self) -> None:
+        """
+        Close the response and release the connection.
+
+        Automatically called if the response body is read to completion.
+        """
+        await self.response.aclose()
+        await self.on_end()
 
     async def get_final_message(self) -> ToolsBetaMessage:
         """Waits until the stream has been read to completion and returns
@@ -275,11 +381,6 @@ class AsyncToolsBetaMessageStream(AsyncStream[ToolsBetaMessageStreamEvent]):
         """Waits until the stream has been consumed"""
         await consume_async_iterator(self)
 
-    @override
-    async def close(self) -> None:
-        await super().close()
-        await self.on_end()
-
     # properties
     @property
     def current_message_snapshot(self) -> ToolsBetaMessage:
@@ -287,7 +388,7 @@ class AsyncToolsBetaMessageStream(AsyncStream[ToolsBetaMessageStreamEvent]):
         return self.__final_message_snapshot
 
     # event handlers
-    async def on_stream_event(self, event: ToolsBetaMessageStreamEvent) -> None:
+    async def on_stream_event(self, event: RawToolsBetaMessageStreamEvent) -> None:
         """Callback that is fired for every Server-Sent-Event"""
 
     async def on_message(self, message: ToolsBetaMessage) -> None:
@@ -342,19 +443,17 @@ class AsyncToolsBetaMessageStream(AsyncStream[ToolsBetaMessageStreamEvent]):
     async def on_timeout(self) -> None:
         """Fires if the request times out"""
 
-    @override
     async def __stream__(self) -> AsyncIterator[ToolsBetaMessageStreamEvent]:
         try:
-            async for event in super().__stream__():
-                self.__events.append(event)
-
+            async for sse_event in self._raw_stream:
                 self.__final_message_snapshot = accumulate_event(
-                    event=event,
+                    event=sse_event,
                     current_snapshot=self.__final_message_snapshot,
                 )
-                await self._emit_sse_event(event)
 
-                yield event
+                events_to_fire = await self._emit_sse_event(sse_event)
+                for event in events_to_fire:
+                    yield event
         except (httpx.TimeoutException, asyncio.TimeoutError) as exc:
             await self.on_timeout()
             await self.on_exception(exc)
@@ -370,39 +469,60 @@ class AsyncToolsBetaMessageStream(AsyncStream[ToolsBetaMessageStreamEvent]):
             if chunk.type == "content_block_delta" and chunk.delta.type == "text_delta":
                 yield chunk.delta.text
 
-    async def _emit_sse_event(self, event: ToolsBetaMessageStreamEvent) -> None:
+    async def _emit_sse_event(self, event: RawToolsBetaMessageStreamEvent) -> list[ToolsBetaMessageStreamEvent]:
         await self.on_stream_event(event)
 
+        events_to_fire: list[ToolsBetaMessageStreamEvent] = []
+
         if event.type == "message_start":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "message_delta":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "message_stop":
             await self.on_message(self.current_message_snapshot)
+            events_to_fire.append(ToolsBetaMessageStopEvent(type="message_stop", message=self.current_message_snapshot))
         elif event.type == "content_block_start":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "content_block_delta":
-            content = self.current_message_snapshot.content[event.index]
-            if event.delta.type == "text_delta" and content.type == "text":
-                await self.on_text(event.delta.text, content.text)
-            elif event.delta.type == "input_json_delta" and content.type == "tool_use":
-                await self.on_input_json(event.delta.partial_json, content.input)
-            else:
-                # TODO: warn?
-                pass
-        elif event.type == "content_block_stop":
-            content = self.current_message_snapshot.content[event.index]
-            await self.on_content_block(content)
+            events_to_fire.append(event)
 
-            if content.type == "text":
-                await self.on_final_text(content.text)
+            content_block = self.current_message_snapshot.content[event.index]
+            if event.delta.type == "text_delta" and content_block.type == "text":
+                await self.on_text(event.delta.text, content_block.text)
+                events_to_fire.append(
+                    TextEvent(
+                        type="text",
+                        text=event.delta.text,
+                        snapshot=content_block.text,
+                    )
+                )
+            elif event.delta.type == "input_json_delta" and content_block.type == "tool_use":
+                await self.on_input_json(event.delta.partial_json, content_block.input)
+                events_to_fire.append(
+                    ToolsBetaInputJsonEvent(
+                        type="input_json",
+                        partial_json=event.delta.partial_json,
+                        snapshot=content_block.input,
+                    )
+                )
+        elif event.type == "content_block_stop":
+            content_block = self.current_message_snapshot.content[event.index]
+            await self.on_content_block(content_block)
+
+            if content_block.type == "text":
+                await self.on_final_text(content_block.text)
+
+            events_to_fire.append(
+                ToolsBetaContentBlockStopEvent(
+                    type="content_block_stop", index=event.index, content_block=content_block
+                ),
+            )
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
                 assert_never(event)
+
+        return events_to_fire
 
 
 AsyncToolsBetaMessageStreamT = TypeVar("AsyncToolsBetaMessageStreamT", bound=AsyncToolsBetaMessageStream)
@@ -420,13 +540,25 @@ class AsyncToolsBetaMessageStreamManager(Generic[AsyncToolsBetaMessageStreamT]):
     ```
     """
 
-    def __init__(self, api_request: Awaitable[AsyncToolsBetaMessageStreamT]) -> None:
-        self.__stream: AsyncToolsBetaMessageStreamT | None = None
+    def __init__(
+        self,
+        api_request: Awaitable[AsyncStream[RawToolsBetaMessageStreamEvent]],
+        event_handler_cls: type[AsyncToolsBetaMessageStreamT],
+    ) -> None:
+        self.__event_handler: AsyncToolsBetaMessageStreamT | None = None
+        self.__event_handler_cls: type[AsyncToolsBetaMessageStreamT] = event_handler_cls
         self.__api_request = api_request
 
     async def __aenter__(self) -> AsyncToolsBetaMessageStreamT:
-        self.__stream = await self.__api_request
-        return self.__stream
+        raw_stream = await self.__api_request
+
+        self.__event_handler = self.__event_handler_cls(
+            cast_to=raw_stream._cast_to,
+            response=raw_stream.response,
+            client=raw_stream._client,
+        )
+
+        return self.__event_handler
 
     async def __aexit__(
         self,
@@ -434,8 +566,8 @@ class AsyncToolsBetaMessageStreamManager(Generic[AsyncToolsBetaMessageStreamT]):
         exc: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        if self.__stream is not None:
-            await self.__stream.close()
+        if self.__event_handler is not None:
+            await self.__event_handler.close()
 
 
 JSON_BUF_PROPERTY = "__json_buf"
@@ -443,7 +575,7 @@ JSON_BUF_PROPERTY = "__json_buf"
 
 def accumulate_event(
     *,
-    event: ToolsBetaMessageStreamEvent,
+    event: RawToolsBetaMessageStreamEvent,
     current_snapshot: ToolsBetaMessage | None,
 ) -> ToolsBetaMessage:
     if current_snapshot is None:

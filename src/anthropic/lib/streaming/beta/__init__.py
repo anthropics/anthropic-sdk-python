@@ -6,3 +6,9 @@ from ._tools import (
     ToolsBetaMessageStreamManager as ToolsBetaMessageStreamManager,
     AsyncToolsBetaMessageStreamManager as AsyncToolsBetaMessageStreamManager,
 )
+from ._types import (
+    ToolsBetaInputJsonEvent as ToolsBetaInputJsonEvent,
+    ToolsBetaMessageStopEvent as ToolsBetaMessageStopEvent,
+    ToolsBetaMessageStreamEvent as ToolsBetaMessageStreamEvent,
+    ToolsBetaContentBlockStopEvent as ToolsBetaContentBlockStopEvent,
+)

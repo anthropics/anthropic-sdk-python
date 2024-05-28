@@ -40,7 +40,10 @@ async def main() -> None:
         messages=[{"role": "user", "content": "What is the weather in SF?"}],
         event_handler=MyHandler,
     ) as stream:
-        await stream.until_done()
+        async for event in stream:
+            if event.type == "input_json":
+                print(f"delta: {repr(event.partial_json)}")
+                print(f"snapshot: {event.snapshot}")
 
     print()
 
