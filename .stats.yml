@@ -1,2 +1,2 @@
-configured_endpoints: 3
-openapi_spec_url: https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic-11e9f674e1fe0eb85a713c2852de663254d4e9254dea701008dcd605a04987d5.yml
+configured_endpoints: 2
+openapi_spec_url: https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic-4f6df1026ffeed840bbfada906ac51144508d1e1b099084c593aa9bac97a3362.yml

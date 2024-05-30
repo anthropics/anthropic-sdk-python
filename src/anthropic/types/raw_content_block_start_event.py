@@ -1,16 +1,20 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing_extensions import Literal
+from typing import Union
+from typing_extensions import Literal, Annotated
 
+from .._utils import PropertyInfo
 from .._models import BaseModel
 from .text_block import TextBlock
-from .content_block import ContentBlock as ContentBlock
+from .tool_use_block import ToolUseBlock
 
-__all__ = ["RawContentBlockStartEvent"]
+__all__ = ["RawContentBlockStartEvent", "ContentBlock"]
+
+ContentBlock = Annotated[Union[TextBlock, ToolUseBlock], PropertyInfo(discriminator="type")]
 
 
 class RawContentBlockStartEvent(BaseModel):
-    content_block: TextBlock
+    content_block: ContentBlock
 
     index: int
 
