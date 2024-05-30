@@ -1,13 +1,10 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing_extensions import Literal
 
-from .._models import BaseModel
+
+from .raw_content_block_stop_event import RawContentBlockStopEvent
 
 __all__ = ["ContentBlockStopEvent"]
 
-
-class ContentBlockStopEvent(BaseModel):
-    index: int
-
-    type: Literal["content_block_stop"]
+ContentBlockStopEvent = RawContentBlockStopEvent
+"""The RawContentBlockStopEvent type should be used instead"""

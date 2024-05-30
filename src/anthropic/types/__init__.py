@@ -17,7 +17,14 @@ from .message_delta_usage import MessageDeltaUsage as MessageDeltaUsage
 from .message_start_event import MessageStartEvent as MessageStartEvent
 from .message_stream_event import MessageStreamEvent as MessageStreamEvent
 from .message_create_params import MessageCreateParams as MessageCreateParams
+from .raw_message_stop_event import RawMessageStopEvent as RawMessageStopEvent
+from .raw_message_delta_event import RawMessageDeltaEvent as RawMessageDeltaEvent
+from .raw_message_start_event import RawMessageStartEvent as RawMessageStartEvent
 from .completion_create_params import CompletionCreateParams as CompletionCreateParams
 from .content_block_stop_event import ContentBlockStopEvent as ContentBlockStopEvent
+from .raw_message_stream_event import RawMessageStreamEvent as RawMessageStreamEvent
 from .content_block_delta_event import ContentBlockDeltaEvent as ContentBlockDeltaEvent
 from .content_block_start_event import ContentBlockStartEvent as ContentBlockStartEvent
+from .raw_content_block_stop_event import RawContentBlockStopEvent as RawContentBlockStopEvent
+from .raw_content_block_delta_event import RawContentBlockDeltaEvent as RawContentBlockDeltaEvent
+from .raw_content_block_start_event import RawContentBlockStartEvent as RawContentBlockStartEvent

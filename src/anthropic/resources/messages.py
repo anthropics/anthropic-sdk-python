@@ -33,7 +33,7 @@ from ..lib.streaming import (
 )
 from ..types.message import Message
 from ..types.message_param import MessageParam
-from ..types.message_stream_event import MessageStreamEvent
+from ..types.raw_message_stream_event import RawMessageStreamEvent
 
 __all__ = ["Messages", "AsyncMessages"]
 
@@ -277,7 +277,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> Stream[MessageStreamEvent]:
+    ) -> Stream[RawMessageStreamEvent]:
         """
         Create a Message.
 
@@ -477,7 +477,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> Message | Stream[MessageStreamEvent]:
+    ) -> Message | Stream[RawMessageStreamEvent]:
         """
         Create a Message.
 
@@ -677,7 +677,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> Message | Stream[MessageStreamEvent]:
+    ) -> Message | Stream[RawMessageStreamEvent]:
         return self._post(
             "/v1/messages",
             body=maybe_transform(
@@ -700,7 +700,7 @@ class Messages(SyncAPIResource):
             ),
             cast_to=Message,
             stream=stream or False,
-            stream_cls=Stream[MessageStreamEvent],
+            stream_cls=Stream[RawMessageStreamEvent],
         )
 
     @overload
@@ -829,7 +829,7 @@ class Messages(SyncAPIResource):
             ),
             cast_to=Message,
             stream=True,
-            stream_cls=Stream[MessageStreamEvent],
+            stream_cls=Stream[RawMessageStreamEvent],
         )
         return MessageStreamManager(make_request, event_handler)
 
@@ -1073,7 +1073,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> AsyncStream[MessageStreamEvent]:
+    ) -> AsyncStream[RawMessageStreamEvent]:
         """
         Create a Message.
 
@@ -1273,7 +1273,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> Message | AsyncStream[MessageStreamEvent]:
+    ) -> Message | AsyncStream[RawMessageStreamEvent]:
         """
         Create a Message.
 
@@ -1473,7 +1473,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> Message | AsyncStream[MessageStreamEvent]:
+    ) -> Message | AsyncStream[RawMessageStreamEvent]:
         return await self._post(
             "/v1/messages",
             body=await async_maybe_transform(
@@ -1496,7 +1496,7 @@ class AsyncMessages(AsyncAPIResource):
             ),
             cast_to=Message,
             stream=stream or False,
-            stream_cls=AsyncStream[MessageStreamEvent],
+            stream_cls=AsyncStream[RawMessageStreamEvent],
         )
 
     @overload
@@ -1624,7 +1624,7 @@ class AsyncMessages(AsyncAPIResource):
             ),
             cast_to=Message,
             stream=True,
-            stream_cls=AsyncStream[MessageStreamEvent],
+            stream_cls=AsyncStream[RawMessageStreamEvent],
         )
         return AsyncMessageStreamManager(request, event_handler)
 

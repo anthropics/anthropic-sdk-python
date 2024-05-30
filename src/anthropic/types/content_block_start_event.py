@@ -1,17 +1,11 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing_extensions import Literal
 
-from .._models import BaseModel
-from .text_block import TextBlock
+
 from .content_block import ContentBlock as ContentBlock
+from .raw_content_block_start_event import RawContentBlockStartEvent
 
 __all__ = ["ContentBlockStartEvent"]
 
-
-class ContentBlockStartEvent(BaseModel):
-    content_block: TextBlock
-
-    index: int
-
-    type: Literal["content_block_start"]
+ContentBlockStartEvent = RawContentBlockStartEvent
+"""The RawContentBlockStartEvent type should be used instead"""
