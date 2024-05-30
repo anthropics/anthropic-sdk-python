@@ -1,16 +1,10 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing_extensions import Literal
 
-from .._models import BaseModel
-from .text_delta import TextDelta
+
+from .raw_content_block_delta_event import RawContentBlockDeltaEvent
 
 __all__ = ["ContentBlockDeltaEvent"]
 
-
-class ContentBlockDeltaEvent(BaseModel):
-    delta: TextDelta
-
-    index: int
-
-    type: Literal["content_block_delta"]
+ContentBlockDeltaEvent = RawContentBlockDeltaEvent
+"""The RawContentBlockDeltaEvent type should be used instead"""
