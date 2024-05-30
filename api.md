@@ -16,6 +16,13 @@ from anthropic.types import (
     MessageStartEvent,
     MessageStopEvent,
     MessageStreamEvent,
+    RawContentBlockDeltaEvent,
+    RawContentBlockStartEvent,
+    RawContentBlockStopEvent,
+    RawMessageDeltaEvent,
+    RawMessageStartEvent,
+    RawMessageStopEvent,
+    RawMessageStreamEvent,
     TextBlock,
     TextBlockParam,
     TextDelta,
@@ -38,6 +45,9 @@ Types:
 ```python
 from anthropic.types.beta.tools import (
     InputJsonDelta,
+    RawToolsBetaContentBlockDeltaEvent,
+    RawToolsBetaContentBlockStartEvent,
+    RawToolsBetaMessageStreamEvent,
     Tool,
     ToolResultBlockParam,
     ToolUseBlock,
