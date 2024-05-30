@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import Union, Iterable
 from typing_extensions import Literal, Required, TypedDict
 
-from ...text_block_param import TextBlockParam
-from ...image_block_param import ImageBlockParam
+from .text_block_param import TextBlockParam
+from .image_block_param import ImageBlockParam
 
 __all__ = ["ToolResultBlockParam", "Content"]
 
