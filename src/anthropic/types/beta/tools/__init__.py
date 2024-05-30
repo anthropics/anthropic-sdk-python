@@ -12,5 +12,12 @@ from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockPara
 from .tools_beta_content_block import ToolsBetaContentBlock as ToolsBetaContentBlock
 from .tools_beta_message_param import ToolsBetaMessageParam as ToolsBetaMessageParam
 from .tools_beta_message_stream_event import ToolsBetaMessageStreamEvent as ToolsBetaMessageStreamEvent
+from .raw_tools_beta_message_stream_event import RawToolsBetaMessageStreamEvent as RawToolsBetaMessageStreamEvent
 from .tools_beta_content_block_delta_event import ToolsBetaContentBlockDeltaEvent as ToolsBetaContentBlockDeltaEvent
 from .tools_beta_content_block_start_event import ToolsBetaContentBlockStartEvent as ToolsBetaContentBlockStartEvent
+from .raw_tools_beta_content_block_delta_event import (
+    RawToolsBetaContentBlockDeltaEvent as RawToolsBetaContentBlockDeltaEvent,
+)
+from .raw_tools_beta_content_block_start_event import (
+    RawToolsBetaContentBlockStartEvent as RawToolsBetaContentBlockStartEvent,
+)

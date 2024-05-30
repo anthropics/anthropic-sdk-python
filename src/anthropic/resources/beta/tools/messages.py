@@ -25,7 +25,7 @@ from ....types.beta.tools import message_create_params
 from ....types.beta.tools.tool_param import ToolParam
 from ....types.beta.tools.tools_beta_message import ToolsBetaMessage
 from ....types.beta.tools.tools_beta_message_param import ToolsBetaMessageParam
-from ....types.beta.tools.tools_beta_message_stream_event import ToolsBetaMessageStreamEvent
+from ....types.beta.tools.raw_tools_beta_message_stream_event import RawToolsBetaMessageStreamEvent
 
 __all__ = ["Messages", "AsyncMessages"]
 
@@ -326,7 +326,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> Stream[ToolsBetaMessageStreamEvent]:
+    ) -> Stream[RawToolsBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -591,7 +591,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> ToolsBetaMessage | Stream[ToolsBetaMessageStreamEvent]:
+    ) -> ToolsBetaMessage | Stream[RawToolsBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -856,7 +856,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> ToolsBetaMessage | Stream[ToolsBetaMessageStreamEvent]:
+    ) -> ToolsBetaMessage | Stream[RawToolsBetaMessageStreamEvent]:
         extra_headers = {"anthropic-beta": "tools-2024-05-16", **(extra_headers or {})}
         return self._post(
             "/v1/messages?beta=tools",
@@ -882,7 +882,7 @@ class Messages(SyncAPIResource):
             ),
             cast_to=ToolsBetaMessage,
             stream=stream or False,
-            stream_cls=Stream[ToolsBetaMessageStreamEvent],
+            stream_cls=Stream[RawToolsBetaMessageStreamEvent],
         )
 
 
@@ -1182,7 +1182,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> AsyncStream[ToolsBetaMessageStreamEvent]:
+    ) -> AsyncStream[RawToolsBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -1447,7 +1447,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> ToolsBetaMessage | AsyncStream[ToolsBetaMessageStreamEvent]:
+    ) -> ToolsBetaMessage | AsyncStream[RawToolsBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -1712,7 +1712,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = 600,
-    ) -> ToolsBetaMessage | AsyncStream[ToolsBetaMessageStreamEvent]:
+    ) -> ToolsBetaMessage | AsyncStream[RawToolsBetaMessageStreamEvent]:
         extra_headers = {"anthropic-beta": "tools-2024-05-16", **(extra_headers or {})}
         return await self._post(
             "/v1/messages?beta=tools",
@@ -1738,7 +1738,7 @@ class AsyncMessages(AsyncAPIResource):
             ),
             cast_to=ToolsBetaMessage,
             stream=stream or False,
-            stream_cls=AsyncStream[ToolsBetaMessageStreamEvent],
+            stream_cls=AsyncStream[RawToolsBetaMessageStreamEvent],
         )
 
 
