@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.27.0 (2024-05-30)
+
+Full Changelog: [v0.26.2...v0.27.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.26.2...v0.27.0)
+
+### Features
+
+* **api:** tool use is GA and available on 3P ([#530](https://github.com/anthropics/anthropic-sdk-python/issues/530)) ([ad7adbd](https://github.com/anthropics/anthropic-sdk-python/commit/ad7adbd2a732db98665333c27065ff4f4c946f15))
+* **streaming/messages:** refactor to event iterator structure ([997af69](https://github.com/anthropics/anthropic-sdk-python/commit/997af696a713a604d4146f36caf91397ba488e33))
+* **streaming/tools:** refactor to event iterator structure ([bdcc283](https://github.com/anthropics/anthropic-sdk-python/commit/bdcc28303206fde2da01296cdae553c1e8efb60a))
+* **streaming:** add tools support ([9f00950](https://github.com/anthropics/anthropic-sdk-python/commit/9f00950b81d388f14027c48aca1ca3c044b93a03))
+
+
+### Bug Fixes
+
+* **beta:** streaming breakage due to breaking change in dependency ([afe3c87](https://github.com/anthropics/anthropic-sdk-python/commit/afe3c8726576cdc7e0503707f53fa9a80caed962))
+
+
+### Chores
+
+* add missing __all__ definitions ([#526](https://github.com/anthropics/anthropic-sdk-python/issues/526)) ([5021787](https://github.com/anthropics/anthropic-sdk-python/commit/5021787caeda8a38775c69449a5794b1072dbfe5))
+* **examples:** update tools ([56edecc](https://github.com/anthropics/anthropic-sdk-python/commit/56edecc2de1e943d6ca09a788c4fabac5978ea2d))
+* **formatting:** misc fixups ([fbad5a0](https://github.com/anthropics/anthropic-sdk-python/commit/fbad5a0e0d7f4dbeeffa8a038600c9acb88002fc))
+* **internal:** fix lint issues in tests ([d857640](https://github.com/anthropics/anthropic-sdk-python/commit/d857640c1e30b580e7e94e034a1fbc07f655acc6))
+* **internal:** update bootstrap script ([#527](https://github.com/anthropics/anthropic-sdk-python/issues/527)) ([93ae152](https://github.com/anthropics/anthropic-sdk-python/commit/93ae1528c0404631f32c49341032ca0d11314b80))
+* **internal:** update some references to rye-up.com ([00e34e7](https://github.com/anthropics/anthropic-sdk-python/commit/00e34e7fbbb3a797d55bb94c07d551ad083dc7d9))
+* **tests:** ensure messages.create() and messages.stream() stay in sync ([52bd67b](https://github.com/anthropics/anthropic-sdk-python/commit/52bd67b041283adeee662355d8df297ca4b1d560))
+
+
+### Documentation
+
+* **helpers:** mention input json event ([02d482c](https://github.com/anthropics/anthropic-sdk-python/commit/02d482c03c039bc635c4d35e04cebe4670e1762c))
+* **helpers:** update for new event iterator ([26f9533](https://github.com/anthropics/anthropic-sdk-python/commit/26f9533df19ee3da55c590238eba745051cccf6c))
+
+
+### Refactors
+
+* **api:** add Raw prefix to API stream event type names ([#529](https://github.com/anthropics/anthropic-sdk-python/issues/529)) ([bb62980](https://github.com/anthropics/anthropic-sdk-python/commit/bb629806887de6cd3e5d517af4d9615f40076542))
+
 ## 0.26.2 (2024-05-27)
 
 Full Changelog: [v0.26.1...v0.26.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.26.1...v0.26.2)
