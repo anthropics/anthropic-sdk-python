@@ -2,14 +2,21 @@ from __future__ import annotations
 
 import asyncio
 from types import TracebackType
-from typing import TYPE_CHECKING, Generic, TypeVar, Callable
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, Callable, cast
 from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
 
 import httpx
 
-from ._types import TextEvent, MessageStopEvent, MessageStreamEvent, ContentBlockStopEvent
+from ._types import (
+    TextEvent,
+    InputJsonEvent,
+    MessageStopEvent,
+    MessageStreamEvent,
+    ContentBlockStopEvent,
+)
 from ...types import Message, ContentBlock, RawMessageStreamEvent
 from ..._utils import consume_sync_iterator, consume_async_iterator
+from ..._models import construct_type
 from ..._streaming import Stream, AsyncStream
 
 if TYPE_CHECKING:
@@ -139,6 +146,18 @@ class MessageStream:
         ```
         """
 
+    def on_input_json(self, delta: str, snapshot: object) -> None:
+        """Callback that is fired whenever a `input_json_delta` ContentBlock is yielded.
+
+        The first argument is the json string delta and the second is the current accumulated
+        parsed object, for example:
+
+        ```
+        on_input_json('{"locations": ["San ', {"locations": []})
+        on_input_json('Francisco"]', {"locations": ["San Francisco"]})
+        ```
+        """
+
     def on_exception(self, exception: Exception) -> None:
         """Fires if any exception occurs"""
 
@@ -201,6 +220,15 @@ class MessageStream:
                         snapshot=content_block.text,
                     )
                 )
+            elif event.delta.type == "input_json_delta" and content_block.type == "tool_use":
+                self.on_input_json(event.delta.partial_json, content_block.input)
+                events_to_fire.append(
+                    InputJsonEvent(
+                        type="input_json",
+                        partial_json=event.delta.partial_json,
+                        snapshot=content_block.input,
+                    )
+                )
         elif event.type == "content_block_stop":
             content_block = self.current_message_snapshot.content[event.index]
             self.on_content_block(content_block)
@@ -230,7 +258,9 @@ class MessageStreamManager(Generic[MessageStreamT]):
     """
 
     def __init__(
-        self, api_request: Callable[[], Stream[RawMessageStreamEvent]], event_handler_cls: type[MessageStreamT]
+        self,
+        api_request: Callable[[], Stream[RawMessageStreamEvent]],
+        event_handler_cls: type[MessageStreamT],
     ) -> None:
         self.__event_handler: MessageStreamT | None = None
         self.__event_handler_cls: type[MessageStreamT] = event_handler_cls
@@ -382,6 +412,18 @@ class AsyncMessageStream:
         ```
         """
 
+    async def on_input_json(self, delta: str, snapshot: object) -> None:
+        """Callback that is fired whenever a `input_json_delta` ContentBlock is yielded.
+
+        The first argument is the json string delta and the second is the current accumulated
+        parsed object, for example:
+
+        ```
+        on_input_json('{"locations": ["San ', {"locations": []})
+        on_input_json('Francisco"]', {"locations": ["San Francisco"]})
+        ```
+        """
+
     async def on_final_text(self, text: str) -> None:
         """Callback that is fired whenever a full `text` ContentBlock is accumulated.
 
@@ -450,9 +492,21 @@ class AsyncMessageStream:
                         snapshot=content_block.text,
                     )
                 )
+            elif event.delta.type == "input_json_delta" and content_block.type == "tool_use":
+                await self.on_input_json(event.delta.partial_json, content_block.input)
+                events_to_fire.append(
+                    InputJsonEvent(
+                        type="input_json",
+                        partial_json=event.delta.partial_json,
+                        snapshot=content_block.input,
+                    )
+                )
         elif event.type == "content_block_stop":
             content_block = self.current_message_snapshot.content[event.index]
             await self.on_content_block(content_block)
+
+            if content_block.type == "text":
+                await self.on_final_text(content_block.text)
 
             events_to_fire.append(
                 ContentBlockStopEvent(type="content_block_stop", index=event.index, content_block=content_block),
@@ -481,7 +535,9 @@ class AsyncMessageStreamManager(Generic[AsyncMessageStreamT]):
     """
 
     def __init__(
-        self, api_request: Awaitable[AsyncStream[RawMessageStreamEvent]], event_handler_cls: type[AsyncMessageStreamT]
+        self,
+        api_request: Awaitable[AsyncStream[RawMessageStreamEvent]],
+        event_handler_cls: type[AsyncMessageStreamT],
     ) -> None:
         self.__event_handler: AsyncMessageStreamT | None = None
         self.__event_handler_cls: type[AsyncMessageStreamT] = event_handler_cls
@@ -508,22 +564,45 @@ class AsyncMessageStreamManager(Generic[AsyncMessageStreamT]):
             await self.__event_handler.close()
 
 
-def accumulate_event(*, event: RawMessageStreamEvent, current_snapshot: Message | None) -> Message:
+JSON_BUF_PROPERTY = "__json_buf"
+
+
+def accumulate_event(
+    *,
+    event: RawMessageStreamEvent,
+    current_snapshot: Message | None,
+) -> Message:
     if current_snapshot is None:
         if event.type == "message_start":
-            return event.message
+            return Message.construct(**cast(Any, event.message.to_dict()))
 
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
     if event.type == "content_block_start":
         # TODO: check index
         current_snapshot.content.append(
-            ContentBlock.construct(**event.content_block.model_dump()),
+            cast(
+                ContentBlock,
+                construct_type(type_=ContentBlock, value=event.content_block.model_dump()),
+            ),
         )
     elif event.type == "content_block_delta":
         content = current_snapshot.content[event.index]
         if content.type == "text" and event.delta.type == "text_delta":
             content.text += event.delta.text
+        elif content.type == "tool_use" and event.delta.type == "input_json_delta":
+            from jiter import from_json
+
+            # we need to keep track of the raw JSON string as well so that we can
+            # re-parse it for each delta, for now we just store it as an untyped
+            # property on the snapshot
+            json_buf = cast(bytes, getattr(content, JSON_BUF_PROPERTY, b""))
+            json_buf += bytes(event.delta.partial_json, "utf-8")
+
+            if json_buf:
+                content.input = from_json(json_buf, partial_mode=True)
+
+            setattr(content, JSON_BUF_PROPERTY, json_buf)
     elif event.type == "message_delta":
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence

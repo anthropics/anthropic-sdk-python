@@ -1,5 +1,6 @@
 from ._types import (
     TextEvent as TextEvent,
+    InputJsonEvent as InputJsonEvent,
     MessageStopEvent as MessageStopEvent,
     MessageStreamEvent as MessageStreamEvent,
     ContentBlockStopEvent as ContentBlockStopEvent,

@@ -24,6 +24,23 @@ class TextEvent(BaseModel):
     """The entire accumulated text"""
 
 
+class InputJsonEvent(BaseModel):
+    type: Literal["input_json"]
+
+    partial_json: str
+    """A partial JSON string delta
+
+    e.g. `'"San Francisco,'`
+    """
+
+    snapshot: object
+    """The currently accumulated parsed object.
+
+
+    e.g. `{'location': 'San Francisco, CA'}`
+    """
+
+
 class MessageStopEvent(RawMessageStopEvent):
     type: Literal["message_stop"]
 
@@ -38,6 +55,7 @@ class ContentBlockStopEvent(RawContentBlockStopEvent):
 
 MessageStreamEvent = Union[
     TextEvent,
+    InputJsonEvent,
     RawMessageStartEvent,
     RawMessageDeltaEvent,
     MessageStopEvent,
