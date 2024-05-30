@@ -23,14 +23,7 @@ from .._streaming import Stream, AsyncStream
 from .._base_client import (
     make_request_options,
 )
-from ..lib.streaming import (
-    MessageStream,
-    MessageStreamT,
-    AsyncMessageStream,
-    AsyncMessageStreamT,
-    MessageStreamManager,
-    AsyncMessageStreamManager,
-)
+from ..lib.streaming import MessageStreamManager, AsyncMessageStreamManager
 from ..types.message import Message
 from ..types.tool_param import ToolParam
 from ..types.message_param import MessageParam
@@ -930,7 +923,6 @@ class Messages(SyncAPIResource):
             stream_cls=Stream[RawMessageStreamEvent],
         )
 
-    @overload
     def stream(
         self,
         *,
@@ -961,82 +953,10 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> MessageStreamManager[MessageStream]:
-        """Create a Message stream"""
-        ...
-
-    @overload
-    def stream(
-        self,
-        *,
-        max_tokens: int,
-        messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
-        event_handler: type[MessageStreamT],
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> MessageStreamManager[MessageStreamT]:
-        """Create a Message stream"""
-        ...
-
-    def stream(  # pyright: ignore[reportInconsistentOverload]
-        self,
-        *,
-        max_tokens: int,
-        messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
-        event_handler: type[MessageStreamT] = MessageStream,  # type: ignore[assignment]
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> MessageStreamManager[MessageStream] | MessageStreamManager[MessageStreamT]:
+    ) -> MessageStreamManager:
         """Create a Message stream"""
         extra_headers = {
             "X-Stainless-Stream-Helper": "messages",
-            "X-Stainless-Custom-Event-Handler": "true" if event_handler != MessageStream else "false",
             **(extra_headers or {}),
         }
         make_request = partial(
@@ -1066,7 +986,7 @@ class Messages(SyncAPIResource):
             stream=True,
             stream_cls=Stream[RawMessageStreamEvent],
         )
-        return MessageStreamManager(make_request, event_handler)
+        return MessageStreamManager(make_request)
 
 
 class AsyncMessages(AsyncAPIResource):
@@ -1960,7 +1880,6 @@ class AsyncMessages(AsyncAPIResource):
             stream_cls=AsyncStream[RawMessageStreamEvent],
         )
 
-    @overload
     def stream(
         self,
         *,
@@ -1991,82 +1910,10 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncMessageStreamManager[AsyncMessageStream]:
-        """Create a Message stream"""
-        ...
-
-    @overload
-    def stream(
-        self,
-        *,
-        max_tokens: int,
-        messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
-        event_handler: type[AsyncMessageStreamT],
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncMessageStreamManager[AsyncMessageStreamT]:
-        """Create a Message stream"""
-        ...
-
-    def stream(  # pyright: ignore[reportInconsistentOverload]
-        self,
-        *,
-        max_tokens: int,
-        messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
-        event_handler: type[AsyncMessageStreamT] = AsyncMessageStream,  # type: ignore[assignment]
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncMessageStreamManager[AsyncMessageStream] | AsyncMessageStreamManager[AsyncMessageStreamT]:
+    ) -> AsyncMessageStreamManager:
         """Create a Message stream"""
         extra_headers = {
             "X-Stainless-Stream-Helper": "messages",
-            "X-Stainless-Custom-Event-Handler": "true" if event_handler != AsyncMessageStream else "false",
             **(extra_headers or {}),
         }
         request = self._post(
@@ -2095,7 +1942,7 @@ class AsyncMessages(AsyncAPIResource):
             stream=True,
             stream_cls=AsyncStream[RawMessageStreamEvent],
         )
-        return AsyncMessageStreamManager(request, event_handler)
+        return AsyncMessageStreamManager(request)
 
 
 class MessagesWithRawResponse:
