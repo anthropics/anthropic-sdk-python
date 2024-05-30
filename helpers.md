@@ -79,12 +79,22 @@ print("accumulated message: ", accumulated.to_json())
 
 #### `text`
 
-This event is yielded whenever a `content_block_delta` event is returned by the API & includes the delta and the accumulated snapshot, e.g.
+This event is yielded whenever a text `content_block_delta` event is returned by the API & includes the delta and the accumulated snapshot, e.g.
 
 ```py
 if event.type == "text":
     event.text  # " there"
     event.snapshot  # "Hello, there"
+```
+
+#### `input_json`
+
+This event is yielded whenever a JSON `content_block_delta` event is returned by the API & includes the delta and the accumulated snapshot, e.g.
+
+```py
+if event.type == "input_json":
+    event.partial_json  # ' there"'
+    event.snapshot  # '{"message": "Hello, there"'
 ```
 
 #### `message_stop`
