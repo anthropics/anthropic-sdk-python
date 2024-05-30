@@ -1,18 +1,8 @@
 import asyncio
-from typing_extensions import override
 
 from anthropic import AsyncAnthropic
-from anthropic.lib.streaming.beta import AsyncToolsBetaMessageStream
 
 client = AsyncAnthropic()
-
-
-class MyHandler(AsyncToolsBetaMessageStream):
-    @override
-    async def on_input_json(self, delta: str, snapshot: object) -> None:
-        print(f"delta: {repr(delta)}")
-        print(f"snapshot: {snapshot}")
-        print()
 
 
 async def main() -> None:
@@ -38,9 +28,11 @@ async def main() -> None:
             }
         ],
         messages=[{"role": "user", "content": "What is the weather in SF?"}],
-        event_handler=MyHandler,
     ) as stream:
-        await stream.until_done()
+        async for event in stream:
+            if event.type == "input_json":
+                print(f"delta: {repr(event.partial_json)}")
+                print(f"snapshot: {event.snapshot}")
 
     print()
 

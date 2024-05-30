@@ -7,7 +7,8 @@ from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_n
 
 import httpx
 
-from ...types import Message, ContentBlock, MessageStreamEvent
+from ._types import TextEvent, MessageStopEvent, MessageStreamEvent, ContentBlockStopEvent
+from ...types import Message, ContentBlock, RawMessageStreamEvent
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._streaming import Stream, AsyncStream
 
@@ -31,7 +32,7 @@ class MessageStream:
     def __init__(
         self,
         *,
-        cast_to: type[MessageStreamEvent],
+        cast_to: type[RawMessageStreamEvent],
         response: httpx.Response,
         client: Anthropic,
     ) -> None:
@@ -43,7 +44,7 @@ class MessageStream:
         self.__final_message_snapshot: Message | None = None
 
         self._iterator = self.__stream__()
-        self._raw_stream: Stream[MessageStreamEvent] = Stream(cast_to=cast_to, response=response, client=client)
+        self._raw_stream: Stream[RawMessageStreamEvent] = Stream(cast_to=cast_to, response=response, client=client)
 
     def __next__(self) -> MessageStreamEvent:
         return self._iterator.__next__()
@@ -110,7 +111,7 @@ class MessageStream:
         return self.__final_message_snapshot
 
     # event handlers
-    def on_stream_event(self, event: MessageStreamEvent) -> None:
+    def on_stream_event(self, event: RawMessageStreamEvent) -> None:
         """Callback that is fired for every Server-Sent-Event"""
 
     def on_message(self, message: Message) -> None:
@@ -154,9 +155,10 @@ class MessageStream:
                     event=sse_event,
                     current_snapshot=self.__final_message_snapshot,
                 )
-                self._emit_sse_event(sse_event)
 
-                yield sse_event
+                events_to_fire = self._emit_sse_event(sse_event)
+                for event in events_to_fire:
+                    yield event
         except (httpx.TimeoutException, asyncio.TimeoutError) as exc:
             self.on_timeout()
             self.on_exception(exc)
@@ -172,31 +174,46 @@ class MessageStream:
             if chunk.type == "content_block_delta" and chunk.delta.type == "text_delta":
                 yield chunk.delta.text
 
-    def _emit_sse_event(self, event: MessageStreamEvent) -> None:
+    def _emit_sse_event(self, event: RawMessageStreamEvent) -> list[MessageStreamEvent]:
         self.on_stream_event(event)
 
+        events_to_fire: list[MessageStreamEvent] = []
+
         if event.type == "message_start":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "message_delta":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "message_stop":
             self.on_message(self.current_message_snapshot)
+            events_to_fire.append(MessageStopEvent(type="message_stop", message=self.current_message_snapshot))
         elif event.type == "content_block_start":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "content_block_delta":
-            content = self.current_message_snapshot.content[event.index]
-            if event.delta.type == "text_delta" and content.type == "text":
-                self.on_text(event.delta.text, content.text)
+            events_to_fire.append(event)
+
+            content_block = self.current_message_snapshot.content[event.index]
+            if event.delta.type == "text_delta" and content_block.type == "text":
+                self.on_text(event.delta.text, content_block.text)
+                events_to_fire.append(
+                    TextEvent(
+                        type="text",
+                        text=event.delta.text,
+                        snapshot=content_block.text,
+                    )
+                )
         elif event.type == "content_block_stop":
-            content = self.current_message_snapshot.content[event.index]
-            self.on_content_block(content)
+            content_block = self.current_message_snapshot.content[event.index]
+            self.on_content_block(content_block)
+
+            events_to_fire.append(
+                ContentBlockStopEvent(type="content_block_stop", index=event.index, content_block=content_block),
+            )
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
                 assert_never(event)
+
+        return events_to_fire
 
 
 MessageStreamT = TypeVar("MessageStreamT", bound=MessageStream)
@@ -213,7 +230,7 @@ class MessageStreamManager(Generic[MessageStreamT]):
     """
 
     def __init__(
-        self, api_request: Callable[[], Stream[MessageStreamEvent]], event_handler_cls: type[MessageStreamT]
+        self, api_request: Callable[[], Stream[RawMessageStreamEvent]], event_handler_cls: type[MessageStreamT]
     ) -> None:
         self.__event_handler: MessageStreamT | None = None
         self.__event_handler_cls: type[MessageStreamT] = event_handler_cls
@@ -256,7 +273,7 @@ class AsyncMessageStream:
     def __init__(
         self,
         *,
-        cast_to: type[MessageStreamEvent],
+        cast_to: type[RawMessageStreamEvent],
         response: httpx.Response,
         client: AsyncAnthropic,
     ) -> None:
@@ -268,7 +285,7 @@ class AsyncMessageStream:
         self.__final_message_snapshot: Message | None = None
 
         self._iterator = self.__stream__()
-        self._raw_stream: AsyncStream[MessageStreamEvent] = AsyncStream(
+        self._raw_stream: AsyncStream[RawMessageStreamEvent] = AsyncStream(
             cast_to=cast_to, response=response, client=client
         )
 
@@ -337,7 +354,7 @@ class AsyncMessageStream:
         return self.__final_message_snapshot
 
     # event handlers
-    async def on_stream_event(self, event: MessageStreamEvent) -> None:
+    async def on_stream_event(self, event: RawMessageStreamEvent) -> None:
         """Callback that is fired for every Server-Sent-Event"""
 
     async def on_message(self, message: Message) -> None:
@@ -387,9 +404,10 @@ class AsyncMessageStream:
                     event=sse_event,
                     current_snapshot=self.__final_message_snapshot,
                 )
-                await self._emit_sse_event(sse_event)
 
-                yield sse_event
+                events_to_fire = await self._emit_sse_event(sse_event)
+                for event in events_to_fire:
+                    yield event
         except (httpx.TimeoutException, asyncio.TimeoutError) as exc:
             await self.on_timeout()
             await self.on_exception(exc)
@@ -405,34 +423,46 @@ class AsyncMessageStream:
             if chunk.type == "content_block_delta" and chunk.delta.type == "text_delta":
                 yield chunk.delta.text
 
-    async def _emit_sse_event(self, event: MessageStreamEvent) -> None:
+    async def _emit_sse_event(self, event: RawMessageStreamEvent) -> list[MessageStreamEvent]:
         await self.on_stream_event(event)
 
+        events_to_fire: list[MessageStreamEvent] = []
+
         if event.type == "message_start":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "message_delta":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "message_stop":
             await self.on_message(self.current_message_snapshot)
+            events_to_fire.append(MessageStopEvent(type="message_stop", message=self.current_message_snapshot))
         elif event.type == "content_block_start":
-            # nothing special we want to fire here
-            pass
+            events_to_fire.append(event)
         elif event.type == "content_block_delta":
-            content = self.current_message_snapshot.content[event.index]
-            if event.delta.type == "text_delta" and content.type == "text":
-                await self.on_text(event.delta.text, content.text)
-        elif event.type == "content_block_stop":
-            content = self.current_message_snapshot.content[event.index]
-            await self.on_content_block(content)
+            events_to_fire.append(event)
 
-            if content.type == "text":
-                await self.on_final_text(content.text)
+            content_block = self.current_message_snapshot.content[event.index]
+            if event.delta.type == "text_delta" and content_block.type == "text":
+                await self.on_text(event.delta.text, content_block.text)
+                events_to_fire.append(
+                    TextEvent(
+                        type="text",
+                        text=event.delta.text,
+                        snapshot=content_block.text,
+                    )
+                )
+        elif event.type == "content_block_stop":
+            content_block = self.current_message_snapshot.content[event.index]
+            await self.on_content_block(content_block)
+
+            events_to_fire.append(
+                ContentBlockStopEvent(type="content_block_stop", index=event.index, content_block=content_block),
+            )
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
                 assert_never(event)
+
+        return events_to_fire
 
 
 AsyncMessageStreamT = TypeVar("AsyncMessageStreamT", bound=AsyncMessageStream)
@@ -451,7 +481,7 @@ class AsyncMessageStreamManager(Generic[AsyncMessageStreamT]):
     """
 
     def __init__(
-        self, api_request: Awaitable[AsyncStream[MessageStreamEvent]], event_handler_cls: type[AsyncMessageStreamT]
+        self, api_request: Awaitable[AsyncStream[RawMessageStreamEvent]], event_handler_cls: type[AsyncMessageStreamT]
     ) -> None:
         self.__event_handler: AsyncMessageStreamT | None = None
         self.__event_handler_cls: type[AsyncMessageStreamT] = event_handler_cls
@@ -478,7 +508,7 @@ class AsyncMessageStreamManager(Generic[AsyncMessageStreamT]):
             await self.__event_handler.close()
 
 
-def accumulate_event(*, event: MessageStreamEvent, current_snapshot: Message | None) -> Message:
+def accumulate_event(*, event: RawMessageStreamEvent, current_snapshot: Message | None) -> Message:
     if current_snapshot is None:
         if event.type == "message_start":
             return event.message

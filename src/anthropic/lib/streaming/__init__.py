@@ -1,3 +1,9 @@
+from ._types import (
+    TextEvent as TextEvent,
+    MessageStopEvent as MessageStopEvent,
+    MessageStreamEvent as MessageStreamEvent,
+    ContentBlockStopEvent as ContentBlockStopEvent,
+)
 from ._messages import (
     MessageStream as MessageStream,
     MessageStreamT as MessageStreamT,
