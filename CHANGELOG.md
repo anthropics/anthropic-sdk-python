@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.28.0 (2024-05-30)
+
+Full Changelog: [v0.27.0...v0.28.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.27.0...v0.28.0)
+
+### ⚠ BREAKING CHANGES
+
+* **streaming:** remove old event_handler API ([#532](https://github.com/anthropics/anthropic-sdk-python/issues/532))
+
+### Refactors
+
+* **streaming:** remove old event_handler API ([#532](https://github.com/anthropics/anthropic-sdk-python/issues/532)) ([d9acfd4](https://github.com/anthropics/anthropic-sdk-python/commit/d9acfd427e3d7d8c6bc3d6ed8994194a07ed6a92))
+
 ## 0.27.0 (2024-05-30)
 
 Full Changelog: [v0.26.2...v0.27.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.26.2...v0.27.0)
