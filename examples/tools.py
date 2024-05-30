@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from anthropic import Anthropic
-from anthropic.types.beta.tools import ToolParam, ToolsBetaMessageParam
+from anthropic.types import ToolParam, MessageParam
 
 client = Anthropic()
 
-user_message: ToolsBetaMessageParam = {
+user_message: MessageParam = {
     "role": "user",
     "content": "What is the weather in SF?",
 }
@@ -20,7 +20,7 @@ tools: list[ToolParam] = [
     }
 ]
 
-message = client.beta.tools.messages.create(
+message = client.messages.create(
     model="claude-3-opus-20240229",
     max_tokens=1024,
     messages=[user_message],
@@ -31,7 +31,7 @@ print(f"Initial response: {message.model_dump_json(indent=2)}")
 assert message.stop_reason == "tool_use"
 
 tool = next(c for c in message.content if c.type == "tool_use")
-response = client.beta.tools.messages.create(
+response = client.messages.create(
     model="claude-3-opus-20240229",
     max_tokens=1024,
     messages=[
