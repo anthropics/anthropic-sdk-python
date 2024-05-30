@@ -3,16 +3,15 @@ from __future__ import annotations
 import os
 import inspect
 from typing import Any, TypeVar, cast
-from typing_extensions import Iterator, AsyncIterator, override
+from typing_extensions import Iterator, AsyncIterator
 
 import httpx
 import pytest
 from respx import MockRouter
 
 from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
-from anthropic.lib.streaming import MessageStream, AsyncMessageStream
+from anthropic.lib.streaming import MessageStreamEvent
 from anthropic.types.message import Message
-from anthropic.types.message_stream_event import MessageStreamEvent
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -63,29 +62,7 @@ async def to_async_iter(iter: Iterator[_T]) -> AsyncIterator[_T]:
         yield event
 
 
-class SyncEventTracker(MessageStream):
-    def __init__(self, *, cast_to: type[MessageStreamEvent], response: httpx.Response, client: Anthropic) -> None:
-        super().__init__(cast_to=cast_to, response=response, client=client)
-
-        self._events: list[MessageStreamEvent] = []
-
-    @override
-    def on_stream_event(self, event: MessageStreamEvent) -> None:
-        self._events.append(event)
-
-
-class AsyncEventTracker(AsyncMessageStream):
-    def __init__(self, *, cast_to: type[MessageStreamEvent], response: httpx.Response, client: AsyncAnthropic) -> None:
-        super().__init__(cast_to=cast_to, response=response, client=client)
-
-        self._events: list[MessageStreamEvent] = []
-
-    @override
-    async def on_stream_event(self, event: MessageStreamEvent) -> None:
-        self._events.append(event)
-
-
-def assert_basic_response(stream: SyncEventTracker | AsyncEventTracker, message: Message) -> None:
+def assert_basic_response(events: list[MessageStreamEvent], message: Message) -> None:
     assert message.id == "msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK"
     assert message.model == "claude-3-opus-20240229"
     assert message.role == "assistant"
@@ -98,12 +75,15 @@ def assert_basic_response(stream: SyncEventTracker | AsyncEventTracker, message:
     assert content.type == "text"
     assert content.text == "Hello there!"
 
-    assert [e.type for e in stream._events] == [
+    assert [e.type for e in events] == [
         "message_start",
         "content_block_start",
         "content_block_delta",
+        "text",
         "content_block_delta",
+        "text",
         "content_block_delta",
+        "text",
         "content_block_stop",
         "message_delta",
     ]
@@ -123,12 +103,11 @@ class TestSyncMessages:
                 }
             ],
             model="claude-3-opus-20240229",
-            event_handler=SyncEventTracker,
         ) as stream:
             with pytest.warns(DeprecationWarning):
                 assert isinstance(cast(Any, stream), Stream)
 
-            assert_basic_response(stream, stream.get_final_message())
+            assert_basic_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
@@ -165,12 +144,11 @@ class TestAsyncMessages:
                 }
             ],
             model="claude-3-opus-20240229",
-            event_handler=AsyncEventTracker,
         ) as stream:
             with pytest.warns(DeprecationWarning):
                 assert isinstance(cast(Any, stream), AsyncStream)
 
-            assert_basic_response(stream, await stream.get_final_message())
+            assert_basic_response([event async for event in stream], await stream.get_final_message())
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
