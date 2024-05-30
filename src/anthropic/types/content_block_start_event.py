@@ -2,7 +2,6 @@
 
 
 
-from .content_block import ContentBlock as ContentBlock
 from .raw_content_block_start_event import RawContentBlockStartEvent
 
 __all__ = ["ContentBlockStartEvent"]
