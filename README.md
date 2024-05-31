@@ -173,9 +173,9 @@ message.usage
 # Usage(input_tokens=25, output_tokens=13)
 ```
 
-## Tool use beta
+## Tool use
 
-This SDK provides beta support for tool use, aka function calling. More details can be found in [the documentation](https://docs.anthropic.com/claude/docs/tool-use).
+This SDK provides support for tool use, aka function calling. More details can be found in [the documentation](https://docs.anthropic.com/claude/docs/tool-use).
 
 ## AWS Bedrock
 
