@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.28.1 (2024-06-14)
+
+Full Changelog: [v0.28.0...v0.28.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.28.0...v0.28.1)
+
+### Documentation
+
+* **readme:** tool use is no longer in beta ([d2be3c0](https://github.com/anthropics/anthropic-sdk-python/commit/d2be3c0438429b6521fc49f5a5ff17fae71fb589))
+
 ## 0.28.0 (2024-05-30)
 
 Full Changelog: [v0.27.0...v0.28.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.27.0...v0.28.0)
