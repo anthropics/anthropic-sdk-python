@@ -27,6 +27,7 @@ from ..lib.streaming import MessageStreamManager, AsyncMessageStreamManager
 from ..types.message import Message
 from ..types.tool_param import ToolParam
 from ..types.message_param import MessageParam
+from ..types.text_block_param import TextBlockParam
 from ..types.raw_message_stream_event import RawMessageStreamEvent
 
 __all__ = ["Messages", "AsyncMessages"]
@@ -50,6 +51,7 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
@@ -61,7 +63,7 @@ class Messages(SyncAPIResource):
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
@@ -324,6 +326,7 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
@@ -335,7 +338,7 @@ class Messages(SyncAPIResource):
         stream: Literal[True],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
@@ -598,6 +601,7 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
@@ -609,7 +613,7 @@ class Messages(SyncAPIResource):
         stream: bool,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
@@ -872,6 +876,7 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
@@ -883,7 +888,7 @@ class Messages(SyncAPIResource):
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
@@ -931,6 +936,7 @@ class Messages(SyncAPIResource):
         model: Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
@@ -1007,6 +1013,7 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
@@ -1018,7 +1025,7 @@ class AsyncMessages(AsyncAPIResource):
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
@@ -1281,6 +1288,7 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
@@ -1292,7 +1300,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[True],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
@@ -1555,6 +1563,7 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
@@ -1566,7 +1575,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: bool,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
@@ -1829,6 +1838,7 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
@@ -1840,7 +1850,7 @@ class AsyncMessages(AsyncAPIResource):
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: str | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
@@ -1888,6 +1898,7 @@ class AsyncMessages(AsyncAPIResource):
         model: Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",

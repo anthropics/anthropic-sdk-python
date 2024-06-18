@@ -7,6 +7,7 @@ from typing_extensions import Literal, Required, TypedDict
 
 from .tool_param import ToolParam
 from .message_param import MessageParam
+from .text_block_param import TextBlockParam
 
 __all__ = [
     "MessageCreateParamsBase",
@@ -123,6 +124,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
         Union[
             str,
             Literal[
+                "claude-3-5-sonnet-20240620",
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
@@ -153,7 +155,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     and the response `stop_sequence` value will contain the matched stop sequence.
     """
 
-    system: str
+    system: Union[str, Iterable[TextBlockParam]]
     """System prompt.
 
     A system prompt is a way of providing context and instructions to Claude, such
