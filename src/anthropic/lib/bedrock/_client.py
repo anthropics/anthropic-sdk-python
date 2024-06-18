@@ -95,6 +95,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         aws_access_key: str | None = None,
         aws_region: str | None = None,
         aws_session_token: str | None = None,
+        aws_role_arn: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -121,6 +122,13 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         self.aws_region = aws_region
 
         self.aws_session_token = aws_session_token
+
+        if aws_role_arn is not None:
+            from ._auth import get_credentials
+            cred = get_credentials(aws_role_arn=aws_role_arn)
+            self.aws_access_key = cred["aws_access_key"]
+            self.aws_secret_key = cred["aws_secret_key"]
+            self.aws_session_token = cred["aws_session_token"]
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
