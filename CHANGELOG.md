@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.29.0 (2024-06-20)
+
+Full Changelog: [v0.28.1...v0.29.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.28.1...v0.29.0)
+
+### Features
+
+* **api:** add new claude-3-5-sonnet-20240620 model ([#545](https://github.com/anthropics/anthropic-sdk-python/issues/545)) ([5ea6b18](https://github.com/anthropics/anthropic-sdk-python/commit/5ea6b182715cd355cc405554b81f3d0f725486f6))
+
+
+### Bug Fixes
+
+* **client/async:** avoid blocking io call for platform headers ([#544](https://github.com/anthropics/anthropic-sdk-python/issues/544)) ([3c2b75f](https://github.com/anthropics/anthropic-sdk-python/commit/3c2b75fac662e48effc8ec032266d966e548007d))
+
+
+### Chores
+
+* **internal:** add a `default_query` method ([#540](https://github.com/anthropics/anthropic-sdk-python/issues/540)) ([0253ebc](https://github.com/anthropics/anthropic-sdk-python/commit/0253ebc9cda491ab909cc752d719e797086691ed))
+
 ## 0.28.1 (2024-06-14)
 
 Full Changelog: [v0.28.0...v0.28.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.28.0...v0.28.1)
