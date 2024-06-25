@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.29.1 (2024-06-25)
+
+Full Changelog: [v0.29.0...v0.29.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.29.0...v0.29.1)
+
+### Bug Fixes
+
+* **api:** add string to tool result block ([#554](https://github.com/anthropics/anthropic-sdk-python/issues/554)) ([f283b4e](https://github.com/anthropics/anthropic-sdk-python/commit/f283b4eb9e4f118bb4ada38479747b22dd5282fa))
+* **docs:** fix link to advanced python httpx docs ([#550](https://github.com/anthropics/anthropic-sdk-python/issues/550)) ([474ff7c](https://github.com/anthropics/anthropic-sdk-python/commit/474ff7cad99039f3539a787ec535b5b13e2832a9))
+
 ## 0.29.0 (2024-06-20)
 
 Full Changelog: [v0.28.1...v0.29.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.28.1...v0.29.0)
