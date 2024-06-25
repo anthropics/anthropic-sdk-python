@@ -18,6 +18,6 @@ class ToolResultBlockParam(TypedDict, total=False):
 
     type: Required[Literal["tool_result"]]
 
-    content: Iterable[Content]
+    content: Union[str, Iterable[Content]]
 
     is_error: bool
