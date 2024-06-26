@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.30.0 (2024-06-26)
+
+Full Changelog: [v0.29.2...v0.30.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.29.2...v0.30.0)
+
+### Features
+
+* **vertex:** add credentials argument ([#542](https://github.com/anthropics/anthropic-sdk-python/issues/542)) ([3bfb2ea](https://github.com/anthropics/anthropic-sdk-python/commit/3bfb2eaf59410053870c7a598bef6404f2201145))
+
 ## 0.29.2 (2024-06-26)
 
 Full Changelog: [v0.29.1...v0.29.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.29.1...v0.29.2)
