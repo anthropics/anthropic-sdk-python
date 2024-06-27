@@ -10,7 +10,7 @@
 -e file:.
 annotated-types==0.6.0
     # via pydantic
-anyio==4.1.0
+anyio==4.4.0
     # via anthropic
     # via httpx
 certifi==2023.7.22
@@ -39,5 +39,6 @@ sniffio==1.3.0
     # via httpx
 typing-extensions==4.8.0
     # via anthropic
+    # via anyio
     # via pydantic
     # via pydantic-core
