@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.30.1 (2024-07-01)
+
+Full Changelog: [v0.30.0...v0.30.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.30.0...v0.30.1)
+
+### Bug Fixes
+
+* **build:** include more files in sdist builds ([#559](https://github.com/anthropics/anthropic-sdk-python/issues/559)) ([9170d08](https://github.com/anthropics/anthropic-sdk-python/commit/9170d08e056ecb33f1441f50b8407a1c60c45d94))
+
+
+### Chores
+
+* **deps:** bump anyio to v4.4.0 ([#562](https://github.com/anthropics/anthropic-sdk-python/issues/562)) ([70fc936](https://github.com/anthropics/anthropic-sdk-python/commit/70fc9361848e4825f8036da2b76a189d602e0baf))
+* gitignore test server logs ([#567](https://github.com/anthropics/anthropic-sdk-python/issues/567)) ([f7b9283](https://github.com/anthropics/anthropic-sdk-python/commit/f7b928386b9f6dfdea6842ce729024afdc55da3f))
+* **internal:** add reflection helper function ([#565](https://github.com/anthropics/anthropic-sdk-python/issues/565)) ([9483573](https://github.com/anthropics/anthropic-sdk-python/commit/948357378f2234e7ddc3843c0427cfa0b9914a21))
+* **internal:** add rich as a dev dependency ([#568](https://github.com/anthropics/anthropic-sdk-python/issues/568)) ([07903ac](https://github.com/anthropics/anthropic-sdk-python/commit/07903acb9388ce6a3c35058880c89e1275aab1e3))
+
 ## 0.30.0 (2024-06-26)
 
 Full Changelog: [v0.29.2...v0.30.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.29.2...v0.30.0)
