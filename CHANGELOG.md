@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.30.2 (2024-07-02)
+
+Full Changelog: [v0.30.1...v0.30.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.30.1...v0.30.2)
+
+### Chores
+
+* **internal:** add helper method for constructing `BaseModel`s ([#572](https://github.com/anthropics/anthropic-sdk-python/issues/572)) ([9bd160b](https://github.com/anthropics/anthropic-sdk-python/commit/9bd160bff0427afd0dafcc687e7f52f81daa2e04))
+
 ## 0.30.1 (2024-07-01)
 
 Full Changelog: [v0.30.0...v0.30.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.30.0...v0.30.1)
