@@ -15,7 +15,7 @@ from ._types import (
 )
 from ...types import Message, ContentBlock, RawMessageStreamEvent
 from ..._utils import consume_sync_iterator, consume_async_iterator
-from ..._models import construct_type
+from ..._models import construct_type, build
 from ..._streaming import Stream, AsyncStream
 
 if TYPE_CHECKING:
@@ -334,7 +334,7 @@ def build_events(
     elif event.type == "message_delta":
         events_to_fire.append(event)
     elif event.type == "message_stop":
-        events_to_fire.append(MessageStopEvent(type="message_stop", message=message_snapshot))
+        events_to_fire.append(build(MessageStopEvent, type="message_stop", message=message_snapshot))
     elif event.type == "content_block_start":
         events_to_fire.append(event)
     elif event.type == "content_block_delta":
@@ -343,7 +343,8 @@ def build_events(
         content_block = message_snapshot.content[event.index]
         if event.delta.type == "text_delta" and content_block.type == "text":
             events_to_fire.append(
-                TextEvent(
+                build(
+                    TextEvent,
                     type="text",
                     text=event.delta.text,
                     snapshot=content_block.text,
@@ -351,7 +352,8 @@ def build_events(
             )
         elif event.delta.type == "input_json_delta" and content_block.type == "tool_use":
             events_to_fire.append(
-                InputJsonEvent(
+                build(
+                    InputJsonEvent,
                     type="input_json",
                     partial_json=event.delta.partial_json,
                     snapshot=content_block.input,
@@ -361,7 +363,7 @@ def build_events(
         content_block = message_snapshot.content[event.index]
 
         events_to_fire.append(
-            ContentBlockStopEvent(type="content_block_stop", index=event.index, content_block=content_block),
+            build(ContentBlockStopEvent, type="content_block_stop", index=event.index, content_block=content_block),
         )
     else:
         # we only want exhaustive checking for linters, not at runtime
