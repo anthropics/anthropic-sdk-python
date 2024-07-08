@@ -123,6 +123,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         region: str | NotGiven = NOT_GIVEN,
         project_id: str | NotGiven = NOT_GIVEN,
         access_token: str | None = None,
+        credentials: GoogleCredentials | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -136,7 +137,6 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         proxies: ProxiesTypes | None = None,
         # See httpx documentation for [limits](https://www.python-httpx.org/advanced/#pool-limit-configuration)
         connection_pool_limits: httpx.Limits | None = None,
-        credentials: GoogleCredentials | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         if not is_given(region):
@@ -206,6 +206,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         region: str | NotGiven = NOT_GIVEN,
         project_id: str | NotGiven = NOT_GIVEN,
         access_token: str | None = None,
+        credentials: GoogleCredentials | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.Client | None = None,
@@ -262,6 +263,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
                 self.project_id if isinstance(project_id, NotGiven) and self.project_id is not None else project_id
             ),
             access_token=access_token or self.access_token,
+            credentials=credentials or self.credentials,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
@@ -285,6 +287,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         region: str | NotGiven = NOT_GIVEN,
         project_id: str | NotGiven = NOT_GIVEN,
         access_token: str | None = None,
+        credentials: GoogleCredentials | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -298,7 +301,6 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         proxies: ProxiesTypes | None = None,
         # See httpx documentation for [limits](https://www.python-httpx.org/advanced/#pool-limit-configuration)
         connection_pool_limits: httpx.Limits | None = None,
-        credentials: GoogleCredentials | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         if not is_given(region):
@@ -362,13 +364,13 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         assert isinstance(self.credentials.token, str)
         return self.credentials.token
 
-    
     def copy(
         self,
         *,
         region: str | NotGiven = NOT_GIVEN,
         project_id: str | NotGiven = NOT_GIVEN,
         access_token: str | None = None,
+        credentials: GoogleCredentials | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.AsyncClient | None = None,
@@ -425,6 +427,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
                 self.project_id if isinstance(project_id, NotGiven) and self.project_id is not None else project_id
             ),
             access_token=access_token or self.access_token,
+            credentials=credentials or self.credentials,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
