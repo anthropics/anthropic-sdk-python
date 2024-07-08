@@ -15,7 +15,7 @@ from ._types import (
 )
 from ...types import Message, ContentBlock, RawMessageStreamEvent
 from ..._utils import consume_sync_iterator, consume_async_iterator
-from ..._models import construct_type, build
+from ..._models import build, construct_type
 from ..._streaming import Stream, AsyncStream
 
 if TYPE_CHECKING:
