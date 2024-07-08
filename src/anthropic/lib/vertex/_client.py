@@ -168,13 +168,11 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
-        access_token = self._ensure_access_token()
-
         if request.headers.get("Authorization"):
             # already authenticated, nothing for us to do
             return
 
-        request.headers["Authorization"] = f"Bearer {access_token}"
+        request.headers["Authorization"] = f"Bearer {self._ensure_access_token()}"
 
     def _ensure_access_token(self) -> str:
         if self.access_token is not None:
@@ -184,7 +182,8 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
             self.credentials, project_id = load_auth(project_id=self.project_id)
             if not self.project_id:
                 self.project_id = project_id
-        else:
+
+        if self.credentials.expired:
             refresh_auth(self.credentials)
 
         if not self.credentials.token:
@@ -256,13 +255,11 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
 
     @override
     async def _prepare_request(self, request: httpx.Request) -> None:
-        access_token = await self._ensure_access_token()
-
         if request.headers.get("Authorization"):
             # already authenticated, nothing for us to do
             return
 
-        request.headers["Authorization"] = f"Bearer {access_token}"
+        request.headers["Authorization"] = f"Bearer {await self._ensure_access_token()}"
 
     async def _ensure_access_token(self) -> str:
         if self.access_token is not None:
@@ -272,7 +269,8 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
             self.credentials, project_id = await asyncify(load_auth)(project_id=self.project_id)
             if not self.project_id:
                 self.project_id = project_id
-        else:
+
+        if self.credentials.expired:
             await asyncify(refresh_auth)(self.credentials)
 
         if not self.credentials.token:
