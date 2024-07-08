@@ -259,9 +259,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
 
         return self.__class__(
             region=region if is_given(region) else self.region,
-            project_id=(
-                self.project_id if isinstance(project_id, NotGiven) and self.project_id is not None else project_id
-            ),
+            project_id=project_id if is_given(project_id) else self.project_id or NOT_GIVEN,
             access_token=access_token or self.access_token,
             credentials=credentials or self.credentials,
             base_url=base_url or self.base_url,
@@ -423,9 +421,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
 
         return self.__class__(
             region=region if is_given(region) else self.region,
-            project_id=(
-                self.project_id if isinstance(project_id, NotGiven) and self.project_id is not None else project_id
-            ),
+            project_id=project_id if is_given(project_id) else self.project_id or NOT_GIVEN,
             access_token=access_token or self.access_token,
             credentials=credentials or self.credentials,
             base_url=base_url or self.base_url,
