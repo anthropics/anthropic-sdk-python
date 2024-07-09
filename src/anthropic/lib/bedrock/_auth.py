@@ -69,6 +69,8 @@ def get_credentials(
     *,
     aws_role_arn: str | None,
 ) -> dict:
+    import boto3
+
     response = boto3.client('sts').assume_role(RoleArn=aws_role_arn, RoleSessionName='assume-role')
     return {
         'aws_access_key': response['Credentials']['AccessKeyId'],
