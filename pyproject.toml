@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "0.28.1"
+version = "0.30.1"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "MIT"
@@ -61,7 +61,8 @@ dev-dependencies = [
     "nox",
     "dirty-equals>=0.6.0",
     "importlib-metadata>=6.7.0",
-    "boto3-stubs >= 1"
+    "boto3-stubs >= 1",
+    "rich>=13.7.1",
 ]
 
 [tool.rye.scripts]
@@ -101,6 +102,21 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/anthropic"]
+
+[tool.hatch.build.targets.sdist]
+# Basically everything except hidden files/directories (such as .github, .devcontainers, .python-version, etc)
+include = [
+  "/*.toml",
+  "/*.json",
+  "/*.lock",
+  "/*.md",
+  "/mypy.ini",
+  "/noxfile.py",
+  "bin/*",
+  "examples/*",
+  "src/*",
+  "tests/*",
+]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
 content-type = "text/markdown"

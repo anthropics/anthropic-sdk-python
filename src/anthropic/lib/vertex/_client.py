@@ -128,6 +128,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         proxies: ProxiesTypes | None = None,
         # See httpx documentation for [limits](https://www.python-httpx.org/advanced/#pool-limit-configuration)
         connection_pool_limits: httpx.Limits | None = None,
+        credentials: GoogleCredentials | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         if not is_given(region):
@@ -161,7 +162,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
 
         self.region = region
         self.access_token = access_token
-        self._credentials: GoogleCredentials | None = None
+        self.credentials = credentials
 
         self.messages = Messages(self)
 
@@ -179,18 +180,18 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         if self.access_token is not None:
             return self.access_token
 
-        if not self._credentials:
-            self._credentials, project_id = load_auth(project_id=self.project_id)
+        if not self.credentials:
+            self.credentials, project_id = load_auth(project_id=self.project_id)
             if not self.project_id:
                 self.project_id = project_id
         else:
-            refresh_auth(self._credentials)
+            refresh_auth(self.credentials)
 
-        if not self._credentials.token:
+        if not self.credentials.token:
             raise RuntimeError("Could not resolve API token from the environment")
 
-        assert isinstance(self._credentials.token, str)
-        return self._credentials.token
+        assert isinstance(self.credentials.token, str)
+        return self.credentials.token
 
 
 class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
@@ -215,6 +216,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         proxies: ProxiesTypes | None = None,
         # See httpx documentation for [limits](https://www.python-httpx.org/advanced/#pool-limit-configuration)
         connection_pool_limits: httpx.Limits | None = None,
+        credentials: GoogleCredentials | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         if not is_given(region):
@@ -248,7 +250,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
 
         self.region = region
         self.access_token = access_token
-        self._credentials: GoogleCredentials | None = None
+        self.credentials = credentials
 
         self.messages = AsyncMessages(self)
 
@@ -266,15 +268,15 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         if self.access_token is not None:
             return self.access_token
 
-        if not self._credentials:
-            self._credentials, project_id = await asyncify(load_auth)(project_id=self.project_id)
+        if not self.credentials:
+            self.credentials, project_id = await asyncify(load_auth)(project_id=self.project_id)
             if not self.project_id:
                 self.project_id = project_id
         else:
-            await asyncify(refresh_auth)(self._credentials)
+            await asyncify(refresh_auth)(self.credentials)
 
-        if not self._credentials.token:
+        if not self.credentials.token:
             raise RuntimeError("Could not resolve API token from the environment")
 
-        assert isinstance(self._credentials.token, str)
-        return self._credentials.token
+        assert isinstance(self.credentials.token, str)
+        return self.credentials.token

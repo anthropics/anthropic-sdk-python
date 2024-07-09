@@ -1,5 +1,64 @@
 # Changelog
 
+## 0.30.1 (2024-07-01)
+
+Full Changelog: [v0.30.0...v0.30.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.30.0...v0.30.1)
+
+### Bug Fixes
+
+* **build:** include more files in sdist builds ([#559](https://github.com/anthropics/anthropic-sdk-python/issues/559)) ([9170d08](https://github.com/anthropics/anthropic-sdk-python/commit/9170d08e056ecb33f1441f50b8407a1c60c45d94))
+
+
+### Chores
+
+* **deps:** bump anyio to v4.4.0 ([#562](https://github.com/anthropics/anthropic-sdk-python/issues/562)) ([70fc936](https://github.com/anthropics/anthropic-sdk-python/commit/70fc9361848e4825f8036da2b76a189d602e0baf))
+* gitignore test server logs ([#567](https://github.com/anthropics/anthropic-sdk-python/issues/567)) ([f7b9283](https://github.com/anthropics/anthropic-sdk-python/commit/f7b928386b9f6dfdea6842ce729024afdc55da3f))
+* **internal:** add reflection helper function ([#565](https://github.com/anthropics/anthropic-sdk-python/issues/565)) ([9483573](https://github.com/anthropics/anthropic-sdk-python/commit/948357378f2234e7ddc3843c0427cfa0b9914a21))
+* **internal:** add rich as a dev dependency ([#568](https://github.com/anthropics/anthropic-sdk-python/issues/568)) ([07903ac](https://github.com/anthropics/anthropic-sdk-python/commit/07903acb9388ce6a3c35058880c89e1275aab1e3))
+
+## 0.30.0 (2024-06-26)
+
+Full Changelog: [v0.29.2...v0.30.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.29.2...v0.30.0)
+
+### Features
+
+* **vertex:** add credentials argument ([#542](https://github.com/anthropics/anthropic-sdk-python/issues/542)) ([3bfb2ea](https://github.com/anthropics/anthropic-sdk-python/commit/3bfb2eaf59410053870c7a598bef6404f2201145))
+
+## 0.29.2 (2024-06-26)
+
+Full Changelog: [v0.29.1...v0.29.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.29.1...v0.29.2)
+
+### Bug Fixes
+
+* temporarily patch upstream version to fix broken release flow ([#555](https://github.com/anthropics/anthropic-sdk-python/issues/555)) ([5471710](https://github.com/anthropics/anthropic-sdk-python/commit/54717101f3844791bdde8b9b76f47abf04c6a971))
+
+## 0.29.1 (2024-06-25)
+
+Full Changelog: [v0.29.0...v0.29.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.29.0...v0.29.1)
+
+### Bug Fixes
+
+* **api:** add string to tool result block ([#554](https://github.com/anthropics/anthropic-sdk-python/issues/554)) ([f283b4e](https://github.com/anthropics/anthropic-sdk-python/commit/f283b4eb9e4f118bb4ada38479747b22dd5282fa))
+* **docs:** fix link to advanced python httpx docs ([#550](https://github.com/anthropics/anthropic-sdk-python/issues/550)) ([474ff7c](https://github.com/anthropics/anthropic-sdk-python/commit/474ff7cad99039f3539a787ec535b5b13e2832a9))
+
+## 0.29.0 (2024-06-20)
+
+Full Changelog: [v0.28.1...v0.29.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.28.1...v0.29.0)
+
+### Features
+
+* **api:** add new claude-3-5-sonnet-20240620 model ([#545](https://github.com/anthropics/anthropic-sdk-python/issues/545)) ([5ea6b18](https://github.com/anthropics/anthropic-sdk-python/commit/5ea6b182715cd355cc405554b81f3d0f725486f6))
+
+
+### Bug Fixes
+
+* **client/async:** avoid blocking io call for platform headers ([#544](https://github.com/anthropics/anthropic-sdk-python/issues/544)) ([3c2b75f](https://github.com/anthropics/anthropic-sdk-python/commit/3c2b75fac662e48effc8ec032266d966e548007d))
+
+
+### Chores
+
+* **internal:** add a `default_query` method ([#540](https://github.com/anthropics/anthropic-sdk-python/issues/540)) ([0253ebc](https://github.com/anthropics/anthropic-sdk-python/commit/0253ebc9cda491ab909cc752d719e797086691ed))
+
 ## 0.28.1 (2024-06-14)
 
 Full Changelog: [v0.28.0...v0.28.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.28.0...v0.28.1)

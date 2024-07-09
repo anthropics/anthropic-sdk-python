@@ -207,7 +207,7 @@ For a more fully fledged example see [`examples/bedrock.py`](https://github.com/
 
 This library also provides support for the [Anthropic Vertex API](https://cloud.google.com/vertex-ai?hl=en) if you install this library with the `vertex` extra, e.g. `pip install -U anthropic[vertex]`.
 
-You can then import and instantiate a separate `AnthropicVertex`/`AsyncAnthropicVertexAsync` class, which has the same API as the base `Anthropic`/`AsyncAnthropic` class.
+You can then import and instantiate a separate `AnthropicVertex`/`AsyncAnthropicVertex` class, which has the same API as the base `Anthropic`/`AsyncAnthropic` class.
 
 ```py
 from anthropic import AnthropicVertex
@@ -493,7 +493,7 @@ You can directly override the [httpx client](https://www.python-httpx.org/api/#c
 
 - Support for proxies
 - Custom transports
-- Additional [advanced](https://www.python-httpx.org/advanced/#client-instances) functionality
+- Additional [advanced](https://www.python-httpx.org/advanced/clients/) functionality
 
 ```python
 from anthropic import Anthropic, DefaultHttpxClient

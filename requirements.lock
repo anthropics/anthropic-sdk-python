@@ -10,7 +10,7 @@
 -e file:.
 annotated-types==0.6.0
     # via pydantic
-anyio==4.1.0
+anyio==4.4.0
     # via anthropic
     # via httpx
 boto3==1.34.103
@@ -87,6 +87,7 @@ tqdm==4.66.4
     # via huggingface-hub
 typing-extensions==4.8.0
     # via anthropic
+    # via anyio
     # via huggingface-hub
     # via pydantic
     # via pydantic-core
