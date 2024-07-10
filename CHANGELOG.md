@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.31.0 (2024-07-10)
+
+Full Changelog: [v0.30.1...v0.31.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.30.1...v0.31.0)
+
+### Features
+
+* **client:** make request-id header more accessible ([#581](https://github.com/anthropics/anthropic-sdk-python/issues/581)) ([130d470](https://github.com/anthropics/anthropic-sdk-python/commit/130d470fc624a25defb9d8e787462b77bdc0aad5))
+* **vertex:** add copy and with_options ([#578](https://github.com/anthropics/anthropic-sdk-python/issues/578)) ([fcd425f](https://github.com/anthropics/anthropic-sdk-python/commit/fcd425f724fee45195118aa218bd5c51fb9abed0))
+
+
+### Bug Fixes
+
+* **client:** always respect content-type multipart/form-data if provided ([#574](https://github.com/anthropics/anthropic-sdk-python/issues/574)) ([6051763](https://github.com/anthropics/anthropic-sdk-python/commit/6051763d886aa7107389d8b8aeacf74d296eed3d))
+* **streaming/messages:** more robust event type construction ([#576](https://github.com/anthropics/anthropic-sdk-python/issues/576)) ([98e2075](https://github.com/anthropics/anthropic-sdk-python/commit/98e2075869d816cd85af1a0588bd27719eff02a4))
+* **types:** allow arbitrary types in image block param ([#582](https://github.com/anthropics/anthropic-sdk-python/issues/582)) ([ebd6590](https://github.com/anthropics/anthropic-sdk-python/commit/ebd659014b63b51fa2f67fe88ef3fc9922be830d))
+* Updated doc typo ([17be06b](https://github.com/anthropics/anthropic-sdk-python/commit/17be06bf3e39eff9de588d99cd59fa509c5ee6a6))
+* **vertex:** avoid credentials refresh on every request ([#575](https://github.com/anthropics/anthropic-sdk-python/issues/575)) ([37bd433](https://github.com/anthropics/anthropic-sdk-python/commit/37bd4337828f3efa14b194fa3025638229129416))
+
+
+### Chores
+
+* **ci:** update rye to v0.35.0 ([#577](https://github.com/anthropics/anthropic-sdk-python/issues/577)) ([e271d69](https://github.com/anthropics/anthropic-sdk-python/commit/e271d694babfb4bcb506064aa353ee29a8394c1d))
+* **internal:** add helper method for constructing `BaseModel`s ([#572](https://github.com/anthropics/anthropic-sdk-python/issues/572)) ([8e626ac](https://github.com/anthropics/anthropic-sdk-python/commit/8e626ac7c88bab413bc1e2d83b7556aa4a44fb63))
+* **internal:** fix formatting ([a912917](https://github.com/anthropics/anthropic-sdk-python/commit/a912917686d6e4a46d192abf002ac69357b1d955))
+* **internal:** minor request options handling changes ([#580](https://github.com/anthropics/anthropic-sdk-python/issues/580)) ([d1dcf42](https://github.com/anthropics/anthropic-sdk-python/commit/d1dcf427ea78f57dd267d891c276b03d4010de78))
+
 ## 0.30.1 (2024-07-01)
 
 Full Changelog: [v0.30.0...v0.30.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.30.0...v0.30.1)
