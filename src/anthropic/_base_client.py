@@ -708,6 +708,11 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
             log.debug("Retrying due to status code %i", response.status_code)
             return True
 
+        # Retry on failed dependencies.
+        if response.status_code == 424:
+            log.debug("Retrying due to status code %i", response.status_code)
+            return True
+
         # Retry on rate limits.
         if response.status_code == 429:
             log.debug("Retrying due to status code %i", response.status_code)
