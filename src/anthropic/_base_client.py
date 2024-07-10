@@ -1019,6 +1019,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
             response.reason_phrase,
             response.headers,
         )
+        log.debug("request_id: %s", response.headers.get("request-id"))
 
         try:
             response.raise_for_status()
