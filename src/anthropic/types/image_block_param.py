@@ -7,6 +7,7 @@ from typing_extensions import Literal, Required, Annotated, TypedDict
 
 from .._types import Base64FileInput
 from .._utils import PropertyInfo
+from .._models import set_pydantic_config
 
 __all__ = ["ImageBlockParam", "Source"]
 
@@ -17,6 +18,9 @@ class Source(TypedDict, total=False):
     media_type: Required[Literal["image/jpeg", "image/png", "image/gif", "image/webp"]]
 
     type: Required[Literal["base64"]]
+
+
+set_pydantic_config(Source, {"arbitrary_types_allowed": True})
 
 
 class ImageBlockParam(TypedDict, total=False):
