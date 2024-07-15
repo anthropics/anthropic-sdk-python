@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.31.1 (2024-07-15)
+
+Full Changelog: [v0.31.0...v0.31.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.31.0...v0.31.1)
+
+### Bug Fixes
+
+* **bedrock:** correct request options for retries ([#593](https://github.com/anthropics/anthropic-sdk-python/issues/593)) ([f68c81d](https://github.com/anthropics/anthropic-sdk-python/commit/f68c81d072fceb46d4c0d8ee62cf274eeea99415))
+
+
+### Chores
+
+* **ci:** also run workflows for PRs targeting `next` ([#587](https://github.com/anthropics/anthropic-sdk-python/issues/587)) ([f7e49f2](https://github.com/anthropics/anthropic-sdk-python/commit/f7e49f2f2ceb62cccd6961fc1bd799655ccd83ab))
+* **internal:** minor changes to tests ([#591](https://github.com/anthropics/anthropic-sdk-python/issues/591)) ([fabd591](https://github.com/anthropics/anthropic-sdk-python/commit/fabd5910f2e769b8bfbeaaa8b65ca8383b4954e3))
+* **internal:** minor formatting changes ([a71927b](https://github.com/anthropics/anthropic-sdk-python/commit/a71927b7c7cff4e83eb485d3b0eef928a18acef6))
+* **internal:** minor import restructuring ([#588](https://github.com/anthropics/anthropic-sdk-python/issues/588)) ([1d9db4f](https://github.com/anthropics/anthropic-sdk-python/commit/1d9db4f6c1393c3879e83e1a3e1d1b4fedc33b5a))
+* **internal:** minor options / compat functions updates ([#592](https://github.com/anthropics/anthropic-sdk-python/issues/592)) ([d41a880](https://github.com/anthropics/anthropic-sdk-python/commit/d41a8807057958d4505e16325e4a06359a760260))
+* **internal:** update mypy ([#584](https://github.com/anthropics/anthropic-sdk-python/issues/584)) ([0a0edce](https://github.com/anthropics/anthropic-sdk-python/commit/0a0edce53e9eebd47770e71493302527e7f43751))
+
 ## 0.31.0 (2024-07-10)
 
 Full Changelog: [v0.30.1...v0.31.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.30.1...v0.31.0)
