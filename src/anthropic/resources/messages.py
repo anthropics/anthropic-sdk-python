@@ -20,8 +20,8 @@ from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
 from .._streaming import Stream, AsyncStream
-from ..lib.streaming import MessageStreamManager, AsyncMessageStreamManager
 from .._base_client import make_request_options
+from ..lib.streaming import MessageStreamManager, AsyncMessageStreamManager
 from ..types.message import Message
 from ..types.tool_param import ToolParam
 from ..types.message_param import MessageParam
