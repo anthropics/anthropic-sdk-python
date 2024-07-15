@@ -9,6 +9,7 @@ import httpx
 from ... import _exceptions
 from ..._types import NOT_GIVEN, Timeout, NotGiven
 from ..._utils import is_dict, is_given
+from ..._compat import model_copy
 from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import APIStatusError
@@ -29,28 +30,27 @@ _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncCl
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
+def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
+    options = model_copy(input_options, deep=True)
+
+    if is_dict(options.json_data):
+        options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
+
+    if options.url in {"/v1/complete", "/v1/messages"} and options.method == "post":
+        if not is_dict(options.json_data):
+            raise RuntimeError("Expected dictionary json_data for post /completions endpoint")
+
+        model = options.json_data.pop("model", None)
+        stream = options.json_data.pop("stream", False)
+        if stream:
+            options.url = f"/model/{model}/invoke-with-response-stream"
+        else:
+            options.url = f"/model/{model}/invoke"
+
+    return options
+
+
 class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
-    @override
-    def _build_request(
-        self,
-        options: FinalRequestOptions,
-    ) -> httpx.Request:
-        if is_dict(options.json_data):
-            options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
-
-        if options.url in {"/v1/complete", "/v1/messages"} and options.method == "post":
-            if not is_dict(options.json_data):
-                raise RuntimeError("Expected dictionary json_data for post /completions endpoint")
-
-            model = options.json_data.pop("model", None)
-            stream = options.json_data.pop("stream", False)
-            if stream:
-                options.url = f"/model/{model}/invoke-with-response-stream"
-            else:
-                options.url = f"/model/{model}/invoke"
-
-        return super()._build_request(options)
-
     @override
     def _make_status_error(
         self,
@@ -144,6 +144,10 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
     @override
     def _make_sse_decoder(self) -> AWSEventStreamDecoder:
         return AWSEventStreamDecoder()
+
+    @override
+    def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        return _prepare_options(options)
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
@@ -279,6 +283,10 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
     @override
     def _make_sse_decoder(self) -> AWSEventStreamDecoder:
         return AWSEventStreamDecoder()
+
+    @override
+    async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        return _prepare_options(options)
 
     @override
     async def _prepare_request(self, request: httpx.Request) -> None:
