@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from typing import TYPE_CHECKING, Any, Union, Mapping, TypeVar
-from typing_extensions import override
+from typing_extensions import Self, override
 
 import httpx
 
@@ -15,7 +15,15 @@ from ..._models import FinalRequestOptions
 from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import APIStatusError
-from ..._base_client import DEFAULT_MAX_RETRIES, BaseClient, SyncAPIClient, AsyncAPIClient
+from ..._base_client import (
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_CONNECTION_LIMITS,
+    BaseClient,
+    SyncAPIClient,
+    AsyncAPIClient,
+    SyncHttpxClientWrapper,
+    AsyncHttpxClientWrapper,
+)
 from ...resources.messages import Messages, AsyncMessages
 
 if TYPE_CHECKING:
@@ -115,6 +123,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         region: str | NotGiven = NOT_GIVEN,
         project_id: str | NotGiven = NOT_GIVEN,
         access_token: str | None = None,
+        credentials: GoogleCredentials | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -128,7 +137,6 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         proxies: ProxiesTypes | None = None,
         # See httpx documentation for [limits](https://www.python-httpx.org/advanced/#pool-limit-configuration)
         connection_pool_limits: httpx.Limits | None = None,
-        credentials: GoogleCredentials | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         if not is_given(region):
@@ -168,13 +176,11 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
-        access_token = self._ensure_access_token()
-
         if request.headers.get("Authorization"):
             # already authenticated, nothing for us to do
             return
 
-        request.headers["Authorization"] = f"Bearer {access_token}"
+        request.headers["Authorization"] = f"Bearer {self._ensure_access_token()}"
 
     def _ensure_access_token(self) -> str:
         if self.access_token is not None:
@@ -184,7 +190,8 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
             self.credentials, project_id = load_auth(project_id=self.project_id)
             if not self.project_id:
                 self.project_id = project_id
-        else:
+
+        if self.credentials.expired:
             refresh_auth(self.credentials)
 
         if not self.credentials.token:
@@ -192,6 +199,81 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
 
         assert isinstance(self.credentials.token, str)
         return self.credentials.token
+
+    def copy(
+        self,
+        *,
+        region: str | NotGiven = NOT_GIVEN,
+        project_id: str | NotGiven = NOT_GIVEN,
+        access_token: str | None = None,
+        credentials: GoogleCredentials | None = None,
+        base_url: str | httpx.URL | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        http_client: httpx.Client | None = None,
+        connection_pool_limits: httpx.Limits | None = None,
+        max_retries: int | NotGiven = NOT_GIVEN,
+        default_headers: Mapping[str, str] | None = None,
+        set_default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        set_default_query: Mapping[str, object] | None = None,
+        _extra_kwargs: Mapping[str, Any] = {},
+    ) -> Self:
+        """
+        Create a new client instance re-using the same options given to the current client with optional overriding.
+        """
+        if default_headers is not None and set_default_headers is not None:
+            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
+
+        if default_query is not None and set_default_query is not None:
+            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
+
+        headers = self._custom_headers
+        if default_headers is not None:
+            headers = {**headers, **default_headers}
+        elif set_default_headers is not None:
+            headers = set_default_headers
+
+        params = self._custom_query
+        if default_query is not None:
+            params = {**params, **default_query}
+        elif set_default_query is not None:
+            params = set_default_query
+
+        if connection_pool_limits is not None:
+            if http_client is not None:
+                raise ValueError("The 'http_client' argument is mutually exclusive with 'connection_pool_limits'")
+
+            if not isinstance(self._client, SyncHttpxClientWrapper):
+                raise ValueError(
+                    "A custom HTTP client has been set and is mutually exclusive with the 'connection_pool_limits' argument"
+                )
+
+            http_client = None
+        else:
+            if self._limits is not DEFAULT_CONNECTION_LIMITS:
+                connection_pool_limits = self._limits
+            else:
+                connection_pool_limits = None
+
+            http_client = http_client or self._client
+
+        return self.__class__(
+            region=region if is_given(region) else self.region,
+            project_id=project_id if is_given(project_id) else self.project_id or NOT_GIVEN,
+            access_token=access_token or self.access_token,
+            credentials=credentials or self.credentials,
+            base_url=base_url or self.base_url,
+            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            http_client=http_client,
+            max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            default_headers=headers,
+            default_query=params,
+            **_extra_kwargs,
+        )
+
+    # Alias for `copy` for nicer inline usage, e.g.
+    # client.with_options(timeout=10).foo.create(...)
+    with_options = copy
 
 
 class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
@@ -203,6 +285,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         region: str | NotGiven = NOT_GIVEN,
         project_id: str | NotGiven = NOT_GIVEN,
         access_token: str | None = None,
+        credentials: GoogleCredentials | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -216,7 +299,6 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         proxies: ProxiesTypes | None = None,
         # See httpx documentation for [limits](https://www.python-httpx.org/advanced/#pool-limit-configuration)
         connection_pool_limits: httpx.Limits | None = None,
-        credentials: GoogleCredentials | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         if not is_given(region):
@@ -256,13 +338,11 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
 
     @override
     async def _prepare_request(self, request: httpx.Request) -> None:
-        access_token = await self._ensure_access_token()
-
         if request.headers.get("Authorization"):
             # already authenticated, nothing for us to do
             return
 
-        request.headers["Authorization"] = f"Bearer {access_token}"
+        request.headers["Authorization"] = f"Bearer {await self._ensure_access_token()}"
 
     async def _ensure_access_token(self) -> str:
         if self.access_token is not None:
@@ -272,7 +352,8 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
             self.credentials, project_id = await asyncify(load_auth)(project_id=self.project_id)
             if not self.project_id:
                 self.project_id = project_id
-        else:
+
+        if self.credentials.expired:
             await asyncify(refresh_auth)(self.credentials)
 
         if not self.credentials.token:
@@ -280,3 +361,78 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
 
         assert isinstance(self.credentials.token, str)
         return self.credentials.token
+
+    def copy(
+        self,
+        *,
+        region: str | NotGiven = NOT_GIVEN,
+        project_id: str | NotGiven = NOT_GIVEN,
+        access_token: str | None = None,
+        credentials: GoogleCredentials | None = None,
+        base_url: str | httpx.URL | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        http_client: httpx.AsyncClient | None = None,
+        connection_pool_limits: httpx.Limits | None = None,
+        max_retries: int | NotGiven = NOT_GIVEN,
+        default_headers: Mapping[str, str] | None = None,
+        set_default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        set_default_query: Mapping[str, object] | None = None,
+        _extra_kwargs: Mapping[str, Any] = {},
+    ) -> Self:
+        """
+        Create a new client instance re-using the same options given to the current client with optional overriding.
+        """
+        if default_headers is not None and set_default_headers is not None:
+            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
+
+        if default_query is not None and set_default_query is not None:
+            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
+
+        headers = self._custom_headers
+        if default_headers is not None:
+            headers = {**headers, **default_headers}
+        elif set_default_headers is not None:
+            headers = set_default_headers
+
+        params = self._custom_query
+        if default_query is not None:
+            params = {**params, **default_query}
+        elif set_default_query is not None:
+            params = set_default_query
+
+        if connection_pool_limits is not None:
+            if http_client is not None:
+                raise ValueError("The 'http_client' argument is mutually exclusive with 'connection_pool_limits'")
+
+            if not isinstance(self._client, AsyncHttpxClientWrapper):
+                raise ValueError(
+                    "A custom HTTP client has been set and is mutually exclusive with the 'connection_pool_limits' argument"
+                )
+
+            http_client = None
+        else:
+            if self._limits is not DEFAULT_CONNECTION_LIMITS:
+                connection_pool_limits = self._limits
+            else:
+                connection_pool_limits = None
+
+            http_client = http_client or self._client
+
+        return self.__class__(
+            region=region if is_given(region) else self.region,
+            project_id=project_id if is_given(project_id) else self.project_id or NOT_GIVEN,
+            access_token=access_token or self.access_token,
+            credentials=credentials or self.credentials,
+            base_url=base_url or self.base_url,
+            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            http_client=http_client,
+            max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            default_headers=headers,
+            default_query=params,
+            **_extra_kwargs,
+        )
+
+    # Alias for `copy` for nicer inline usage, e.g.
+    # client.with_options(timeout=10).foo.create(...)
+    with_options = copy

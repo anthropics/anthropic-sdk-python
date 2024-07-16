@@ -6,6 +6,7 @@ on:
   pull_request:
     branches:
       - main
+      - next
 
 jobs:
   lint:
@@ -21,7 +22,7 @@ jobs:
           curl -sSf https://rye.astral.sh/get | bash
           echo "$HOME/.rye/shims" >> $GITHUB_PATH
         env:
-          RYE_VERSION: 0.24.0
+          RYE_VERSION: '0.35.0'
           RYE_INSTALL_OPTION: '--yes'
 
       - name: Install dependencies
@@ -42,7 +43,7 @@ jobs:
           curl -sSf https://rye.astral.sh/get | bash
           echo "$HOME/.rye/shims" >> $GITHUB_PATH
         env:
-          RYE_VERSION: 0.24.0
+          RYE_VERSION: '0.35.0'
           RYE_INSTALL_OPTION: '--yes'
 
       - name: Bootstrap
