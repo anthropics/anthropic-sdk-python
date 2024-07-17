@@ -1,17 +1,52 @@
 from __future__ import annotations
 
 import os
+from typing import cast
+from typing_extensions import Protocol
 
 import httpx
 import pytest
+from respx import MockRouter
 
 from anthropic import AnthropicVertex, AsyncAnthropicVertex
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 
+class MockRequestCall(Protocol):
+    request: httpx.Request
+
+
 class TestAnthropicVertex:
-    client = AnthropicVertex(region="region", project_id="project")
+    client = AnthropicVertex(region="region", project_id="project", access_token="my-access-token")
+
+    @pytest.mark.respx()
+    def test_messages_retries(self, respx_mock: MockRouter) -> None:
+        request_url = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
+        respx_mock.post(request_url).mock(
+            side_effect=[
+                httpx.Response(500, json={"error": "server error"}, headers={"retry-after-ms": "10"}),
+                httpx.Response(200, json={"foo": "bar"}),
+            ]
+        )
+
+        self.client.messages.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-3-sonnet@20240229",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+
+        assert len(calls) == 2
+
+        assert calls[0].request.url == request_url
+        assert calls[1].request.url == request_url
 
     def test_copy(self) -> None:
         copied = self.client.copy()
@@ -86,7 +121,36 @@ class TestAnthropicVertex:
 
 
 class TestAsyncAnthropicVertex:
-    client = AsyncAnthropicVertex(region="region", project_id="project")
+    client = AsyncAnthropicVertex(region="region", project_id="project", access_token="my-access-token")
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    async def test_messages_retries(self, respx_mock: MockRouter) -> None:
+        request_url = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
+        respx_mock.post(request_url).mock(
+            side_effect=[
+                httpx.Response(500, json={"error": "server error"}, headers={"retry-after-ms": "10"}),
+                httpx.Response(200, json={"foo": "bar"}),
+            ]
+        )
+
+        await self.client.with_options(timeout=0.2).messages.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-3-sonnet@20240229",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+
+        assert len(calls) == 2
+
+        assert calls[0].request.url == request_url
+        assert calls[1].request.url == request_url
 
     def test_copy(self) -> None:
         copied = self.client.copy()
