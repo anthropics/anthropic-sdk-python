@@ -42,7 +42,7 @@ class BaseVertexClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         self,
         options: FinalRequestOptions,
     ) -> httpx.Request:
-        options = options.model_copy()
+        options = options.copy()
         
         if is_dict(options.json_data):
             options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
