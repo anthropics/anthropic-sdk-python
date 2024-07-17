@@ -28,7 +28,7 @@ class MockRequestCall(Protocol):
 def test_messages_retries(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
         side_effect=[
-            httpx.Response(500, json={"error": "server error"}),
+            httpx.Response(500, json={"error": "server error"}, headers={"retry-after-ms": "10"}),
             httpx.Response(200, json={"foo": "bar"}),
         ]
     )
@@ -63,7 +63,7 @@ def test_messages_retries(respx_mock: MockRouter) -> None:
 async def test_messages_retries_async(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
         side_effect=[
-            httpx.Response(500, json={"error": "server error"}),
+            httpx.Response(500, json={"error": "server error"}, headers={"retry-after-ms": "10"}),
             httpx.Response(200, json={"foo": "bar"}),
         ]
     )
