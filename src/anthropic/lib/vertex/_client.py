@@ -164,7 +164,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
             if not self.project_id:
                 self.project_id = project_id
 
-        if self.credentials.expired:
+        if self.credentials.expired or not self.credentials.token:
             refresh_auth(self.credentials)
 
         if not self.credentials.token:
@@ -330,7 +330,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
             if not self.project_id:
                 self.project_id = project_id
 
-        if self.credentials.expired:
+        if self.credentials.expired or not self.credentials.token:
             await asyncify(refresh_auth)(self.credentials)
 
         if not self.credentials.token:
