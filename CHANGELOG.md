@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.31.2 (2024-07-17)
+
+Full Changelog: [v0.31.1...v0.31.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.31.1...v0.31.2)
+
+### Bug Fixes
+
+* **vertex:** also refresh auth if there is no token ([4a8d02d](https://github.com/anthropics/anthropic-sdk-python/commit/4a8d02d0616c04a2acc31a3179b7d50093d6371e))
+* **vertex:** correct request options in retries ([460547b](https://github.com/anthropics/anthropic-sdk-python/commit/460547b7e6bafa4044127760946d141d1e49131b))
+
+
+### Chores
+
+* **docs:** minor update to formatting of API link in README ([#594](https://github.com/anthropics/anthropic-sdk-python/issues/594)) ([113b6ac](https://github.com/anthropics/anthropic-sdk-python/commit/113b6ac65de2a670b0d957d11d48b060106150d3))
+* **internal:** update formatting ([#597](https://github.com/anthropics/anthropic-sdk-python/issues/597)) ([565dfcd](https://github.com/anthropics/anthropic-sdk-python/commit/565dfcd4610c26b598f6c72e9182e8c60bffc2a0))
+* **tests:** faster bedrock retry tests ([4ff067f](https://github.com/anthropics/anthropic-sdk-python/commit/4ff067f48e8e177ebdb8f06d6a4a0ffe9a096a8b))
+
 ## 0.31.1 (2024-07-15)
 
 Full Changelog: [v0.31.0...v0.31.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.31.0...v0.31.1)
