@@ -10,7 +10,7 @@ from ... import _exceptions
 from ._auth import load_auth, refresh_auth
 from ..._types import NOT_GIVEN, NotGiven, Transport, ProxiesTypes, AsyncTransport
 from ..._utils import is_dict, asyncify, is_given
-from ..._compat import typed_cached_property
+from ..._compat import model_copy, typed_cached_property
 from ..._models import FinalRequestOptions
 from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
@@ -37,37 +37,6 @@ _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStrea
 
 
 class BaseVertexClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
-    @override
-    def _build_request(
-        self,
-        options: FinalRequestOptions,
-    ) -> httpx.Request:
-        if is_dict(options.json_data):
-            options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
-
-        if options.url == "/v1/messages" and options.method == "post":
-            project_id = self.project_id
-            if project_id is None:
-                raise RuntimeError(
-                    "No project_id was given and it could not be resolved from credentials. The client should be instantiated with the `project_id` argument or the `ANTHROPIC_VERTEX_PROJECT_ID` environment variable should be set."
-                )
-
-            if not is_dict(options.json_data):
-                raise RuntimeError("Expected json data to be a dictionary for post /v1/messages")
-
-            model = options.json_data.pop("model")
-            stream = options.json_data.get("stream", False)
-            specifier = "streamRawPredict" if stream else "rawPredict"
-
-            options.url = (
-                f"/projects/{self.project_id}/locations/{self.region}/publishers/anthropic/models/{model}:{specifier}"
-            )
-
-            if is_dict(options.json_data):
-                options.json_data.pop("model", None)
-
-        return super()._build_request(options)
-
     @typed_cached_property
     def region(self) -> str:
         raise RuntimeError("region not set")
@@ -173,6 +142,10 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         self.credentials = credentials
 
         self.messages = Messages(self)
+
+    @override
+    def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        return _prepare_options(options, project_id=self.project_id, region=self.region)
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
@@ -337,6 +310,10 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         self.messages = AsyncMessages(self)
 
     @override
+    async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        return _prepare_options(options, project_id=self.project_id, region=self.region)
+
+    @override
     async def _prepare_request(self, request: httpx.Request) -> None:
         if request.headers.get("Authorization"):
             # already authenticated, nothing for us to do
@@ -436,3 +413,30 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)
     with_options = copy
+
+
+def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | None, region: str) -> FinalRequestOptions:
+    options = model_copy(input_options, deep=True)
+
+    if is_dict(options.json_data):
+        options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
+
+    if options.url == "/v1/messages" and options.method == "post":
+        if project_id is None:
+            raise RuntimeError(
+                "No project_id was given and it could not be resolved from credentials. The client should be instantiated with the `project_id` argument or the `ANTHROPIC_VERTEX_PROJECT_ID` environment variable should be set."
+            )
+
+        if not is_dict(options.json_data):
+            raise RuntimeError("Expected json data to be a dictionary for post /v1/messages")
+
+        model = options.json_data.pop("model")
+        stream = options.json_data.get("stream", False)
+        specifier = "streamRawPredict" if stream else "rawPredict"
+
+        options.url = f"/projects/{project_id}/locations/{region}/publishers/anthropic/models/{model}:{specifier}"
+
+        if is_dict(options.json_data):
+            options.json_data.pop("model", None)
+
+    return options
