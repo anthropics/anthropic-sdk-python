@@ -3,6 +3,7 @@
 from typing import Optional
 from typing_extensions import Literal
 
+from .model import Model
 from .._models import BaseModel
 
 __all__ = ["Completion"]
@@ -18,8 +19,12 @@ class Completion(BaseModel):
     completion: str
     """The resulting completion up to and excluding the stop sequences."""
 
-    model: str
-    """The model that handled the request."""
+    model: Model
+    """
+    The model that will complete your prompt.\n\nSee
+    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    details and options.
+    """
 
     stop_reason: Optional[str] = None
     """The reason that we stopped.

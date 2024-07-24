@@ -3,6 +3,7 @@
 from typing import List, Optional
 from typing_extensions import Literal
 
+from .model import Model
 from .usage import Usage
 from .._models import BaseModel
 from .content_block import ContentBlock, ContentBlock as ContentBlock
@@ -52,8 +53,12 @@ class Message(BaseModel):
     ```
     """
 
-    model: str
-    """The model that handled the request."""
+    model: Model
+    """
+    The model that will complete your prompt.\n\nSee
+    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    details and options.
+    """
 
     role: Literal["assistant"]
     """Conversational role of the generated message.

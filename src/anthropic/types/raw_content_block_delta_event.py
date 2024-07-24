@@ -6,11 +6,11 @@ from typing_extensions import Literal, Annotated
 from .._utils import PropertyInfo
 from .._models import BaseModel
 from .text_delta import TextDelta
-from .input_json_delta import InputJsonDelta
+from .input_json_delta import InputJSONDelta
 
 __all__ = ["RawContentBlockDeltaEvent", "Delta"]
 
-Delta = Annotated[Union[TextDelta, InputJsonDelta], PropertyInfo(discriminator="type")]
+Delta = Annotated[Union[TextDelta, InputJSONDelta], PropertyInfo(discriminator="type")]
 
 
 class RawContentBlockDeltaEvent(BaseModel):

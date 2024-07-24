@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import List, Union, Optional
 from typing_extensions import Literal, Required, TypedDict
 
+from .model_param import ModelParam
+
 __all__ = [
     "CompletionRequestStreamingMetadata",
     "CompletionRequestNonStreamingMetadata",
@@ -25,10 +27,10 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     only specifies the absolute maximum number of tokens to generate.
     """
 
-    model: Required[Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]]]
-    """The model that will complete your prompt.
-
-    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    model: Required[ModelParam]
+    """
+    The model that will complete your prompt.\n\nSee
+    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
 
