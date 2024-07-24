@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Union, overload
+from typing import List, overload
 from typing_extensions import Literal
 
 import httpx
@@ -21,6 +21,7 @@ from .._response import to_streamed_response_wrapper, async_to_streamed_response
 from .._streaming import Stream, AsyncStream
 from .._base_client import make_request_options
 from ..types.completion import Completion
+from ..types.model_param import ModelParam
 
 __all__ = ["Completions", "AsyncCompletions"]
 
@@ -39,7 +40,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]],
+        model: ModelParam,
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -71,9 +72,8 @@ class Completions(SyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -144,7 +144,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]],
+        model: ModelParam,
         prompt: str,
         stream: Literal[True],
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -176,9 +176,8 @@ class Completions(SyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -249,7 +248,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]],
+        model: ModelParam,
         prompt: str,
         stream: bool,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -281,9 +280,8 @@ class Completions(SyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -354,7 +352,7 @@ class Completions(SyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]],
+        model: ModelParam,
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -408,7 +406,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]],
+        model: ModelParam,
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -440,9 +438,8 @@ class AsyncCompletions(AsyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -513,7 +510,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]],
+        model: ModelParam,
         prompt: str,
         stream: Literal[True],
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -545,9 +542,8 @@ class AsyncCompletions(AsyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -618,7 +614,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]],
+        model: ModelParam,
         prompt: str,
         stream: bool,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
@@ -650,9 +646,8 @@ class AsyncCompletions(AsyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -723,7 +718,7 @@ class AsyncCompletions(AsyncAPIResource):
         self,
         *,
         max_tokens_to_sample: int,
-        model: Union[str, Literal["claude-2.0", "claude-2.1", "claude-instant-1.2"]],
+        model: ModelParam,
         prompt: str,
         metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,

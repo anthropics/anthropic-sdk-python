@@ -4,10 +4,10 @@ from typing_extensions import Literal
 
 from .._models import BaseModel
 
-__all__ = ["InputJsonDelta"]
+__all__ = ["InputJSONDelta"]
 
 
-class InputJsonDelta(BaseModel):
+class InputJSONDelta(BaseModel):
     partial_json: str
 
     type: Literal["input_json_delta"]

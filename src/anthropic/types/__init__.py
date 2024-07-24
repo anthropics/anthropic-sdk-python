@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
+from .model import Model as Model
 from .usage import Usage as Usage
 from .message import Message as Message
 from .completion import Completion as Completion
 from .text_block import TextBlock as TextBlock
 from .text_delta import TextDelta as TextDelta
 from .tool_param import ToolParam as ToolParam
+from .model_param import ModelParam as ModelParam
 from .content_block import ContentBlock as ContentBlock
 from .message_param import MessageParam as MessageParam
 from .tool_use_block import ToolUseBlock as ToolUseBlock
-from .input_json_delta import InputJsonDelta as InputJsonDelta
+from .input_json_delta import InputJSONDelta as InputJSONDelta
 from .text_block_param import TextBlockParam as TextBlockParam
 from .image_block_param import ImageBlockParam as ImageBlockParam
 from .message_stop_event import MessageStopEvent as MessageStopEvent

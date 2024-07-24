@@ -24,6 +24,7 @@ from .._base_client import make_request_options
 from ..lib.streaming import MessageStreamManager, AsyncMessageStreamManager
 from ..types.message import Message
 from ..types.tool_param import ToolParam
+from ..types.model_param import ModelParam
 from ..types.message_param import MessageParam
 from ..types.text_block_param import TextBlockParam
 from ..types.raw_message_stream_event import RawMessageStreamEvent
@@ -46,18 +47,7 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-5-sonnet-20240620",
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
+        model: ModelParam,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
@@ -178,9 +168,8 @@ class Messages(SyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           metadata: An object describing metadata about the request.
@@ -321,18 +310,7 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-5-sonnet-20240620",
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
+        model: ModelParam,
         stream: Literal[True],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -453,9 +431,8 @@ class Messages(SyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -596,18 +573,7 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-5-sonnet-20240620",
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
+        model: ModelParam,
         stream: bool,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -728,9 +694,8 @@ class Messages(SyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -871,18 +836,7 @@ class Messages(SyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-5-sonnet-20240620",
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
+        model: ModelParam,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
@@ -1008,18 +962,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-5-sonnet-20240620",
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
+        model: ModelParam,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
@@ -1140,9 +1083,8 @@ class AsyncMessages(AsyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           metadata: An object describing metadata about the request.
@@ -1283,18 +1225,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-5-sonnet-20240620",
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
+        model: ModelParam,
         stream: Literal[True],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -1415,9 +1346,8 @@ class AsyncMessages(AsyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -1558,18 +1488,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-5-sonnet-20240620",
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
+        model: ModelParam,
         stream: bool,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
@@ -1690,9 +1609,8 @@ class AsyncMessages(AsyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
-          model: The model that will complete your prompt.
-
-              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.\n\nSee
+              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -1833,18 +1751,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         max_tokens: int,
         messages: Iterable[MessageParam],
-        model: Union[
-            str,
-            Literal[
-                "claude-3-5-sonnet-20240620",
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ],
+        model: ModelParam,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,

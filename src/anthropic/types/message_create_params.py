@@ -6,6 +6,7 @@ from typing import List, Union, Iterable, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from .tool_param import ToolParam
+from .model_param import ModelParam
 from .message_param import MessageParam
 from .text_block_param import TextBlockParam
 
@@ -120,23 +121,10 @@ class MessageCreateParamsBase(TypedDict, total=False):
     messages in the Messages API.
     """
 
-    model: Required[
-        Union[
-            str,
-            Literal[
-                "claude-3-5-sonnet-20240620",
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307",
-                "claude-2.1",
-                "claude-2.0",
-                "claude-instant-1.2",
-            ],
-        ]
-    ]
-    """The model that will complete your prompt.
-
-    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    model: Required[ModelParam]
+    """
+    The model that will complete your prompt.\n\nSee
+    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
 
