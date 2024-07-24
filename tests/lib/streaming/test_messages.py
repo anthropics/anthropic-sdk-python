@@ -192,7 +192,7 @@ def test_stream_method_definition_in_sync(sync: bool) -> None:
 
         if custom_param.annotation != generated_param.annotation:
             errors.append(
-                f"types for the `{name}` param are do not match; generated={repr(generated_param.annotation)} custom={repr(generated_param.annotation)}"
+                f"types for the `{name}` param are do not match; generated={repr(generated_param.annotation)} custom={repr(custom_param.annotation)}"
             )
             continue
 
