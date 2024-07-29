@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.32.0 (2024-07-29)
+
+Full Changelog: [v0.31.2...v0.32.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.31.2...v0.32.0)
+
+### Features
+
+* add back compat alias for InputJsonDelta ([25a5b6c](https://github.com/anthropics/anthropic-sdk-python/commit/25a5b6c81ffb5996ef697aab22a22d8be5751bc1))
+
+
+### Bug Fixes
+
+* change signatures for the stream function ([c9eb11b](https://github.com/anthropics/anthropic-sdk-python/commit/c9eb11b1f9656202ee88e9869e59160bc37f5434))
+* **client:** correctly apply client level timeout for messages ([#615](https://github.com/anthropics/anthropic-sdk-python/issues/615)) ([5f8d88f](https://github.com/anthropics/anthropic-sdk-python/commit/5f8d88f6fcc2ba05cd9fc6f8ae7aa8c61dc6b0d0))
+
+
+### Chores
+
+* **docs:** document how to do per-request http client customization ([#603](https://github.com/anthropics/anthropic-sdk-python/issues/603)) ([5161f62](https://github.com/anthropics/anthropic-sdk-python/commit/5161f626a0bec757b96217dc0f81e8908546f29a))
+* **internal:** add type construction helper ([#613](https://github.com/anthropics/anthropic-sdk-python/issues/613)) ([5e36940](https://github.com/anthropics/anthropic-sdk-python/commit/5e36940a42e401c3f0c1e42aa248d431fdf7192c))
+* sync spec ([#605](https://github.com/anthropics/anthropic-sdk-python/issues/605)) ([6b7707f](https://github.com/anthropics/anthropic-sdk-python/commit/6b7707f62788fca2e166209e82935a2a2fa8204a))
+* **tests:** update prism version ([#607](https://github.com/anthropics/anthropic-sdk-python/issues/607)) ([1797dc6](https://github.com/anthropics/anthropic-sdk-python/commit/1797dc6139ffaca6436ed897972471e67ba1b828))
+
+
+### Refactors
+
+* extract model out to a named type and rename partialjson ([#612](https://github.com/anthropics/anthropic-sdk-python/issues/612)) ([c53efc7](https://github.com/anthropics/anthropic-sdk-python/commit/c53efc786fa95831a398f37740a81b42f7b64c94))
+
 ## 0.31.2 (2024-07-17)
 
 Full Changelog: [v0.31.1...v0.31.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.31.1...v0.31.2)
