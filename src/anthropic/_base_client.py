@@ -964,7 +964,9 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
         cast_to = self._maybe_override_cast_to(cast_to, options)
         options = self._prepare_options(options)
 
+        max_retries = options.get_max_retries(self.max_retries)
         retries = self._remaining_retries(remaining_retries, options)
+        retry_count = max_retries - retries
         request = self._build_request(options)
         self._prepare_request(request)
 
@@ -1051,6 +1053,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
             response=response,
             stream=stream,
             stream_cls=stream_cls,
+            retry_count=retry_count,
         )
 
     def _retry_request(
@@ -1092,6 +1095,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
         response: httpx.Response,
         stream: bool,
         stream_cls: type[Stream[Any]] | type[AsyncStream[Any]] | None,
+        retry_count: Optional[int] = 0,
     ) -> ResponseT:
         if response.request.headers.get(RAW_RESPONSE_HEADER) == "true":
             return cast(
@@ -1103,6 +1107,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
                     stream=stream,
                     stream_cls=stream_cls,
                     options=options,
+                    retry_count=retry_count,
                 ),
             )
 
@@ -1546,7 +1551,9 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
         cast_to = self._maybe_override_cast_to(cast_to, options)
         options = await self._prepare_options(options)
 
+        max_retries = options.get_max_retries(self.max_retries)
         retries = self._remaining_retries(remaining_retries, options)
+        retry_count = max_retries - retries
         request = self._build_request(options)
         await self._prepare_request(request)
 
@@ -1625,6 +1632,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
             response=response,
             stream=stream,
             stream_cls=stream_cls,
+            retry_count=retry_count,
         )
 
     async def _retry_request(
@@ -1664,6 +1672,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
         response: httpx.Response,
         stream: bool,
         stream_cls: type[Stream[Any]] | type[AsyncStream[Any]] | None,
+        retry_count: Optional[int] = 0,
     ) -> ResponseT:
         if response.request.headers.get(RAW_RESPONSE_HEADER) == "true":
             return cast(
@@ -1675,6 +1684,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
                     stream=stream,
                     stream_cls=stream_cls,
                     options=options,
+                    retry_count=retry_count,
                 ),
             )
 

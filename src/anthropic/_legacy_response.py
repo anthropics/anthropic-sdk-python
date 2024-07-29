@@ -5,7 +5,19 @@ import inspect
 import logging
 import datetime
 import functools
-from typing import TYPE_CHECKING, Any, Union, Generic, TypeVar, Callable, Iterator, AsyncIterator, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Union,
+    Generic,
+    TypeVar,
+    Callable,
+    Iterator,
+    Optional,
+    AsyncIterator,
+    cast,
+    overload,
+)
 from typing_extensions import Awaitable, ParamSpec, override, deprecated, get_origin
 
 import anyio
@@ -62,6 +74,7 @@ class LegacyAPIResponse(Generic[R]):
         stream: bool,
         stream_cls: type[Stream[Any]] | type[AsyncStream[Any]] | None,
         options: FinalRequestOptions,
+        retry_count: Optional[int] = 0,
     ) -> None:
         self._cast_to = cast_to
         self._client = client
@@ -70,6 +83,7 @@ class LegacyAPIResponse(Generic[R]):
         self._stream_cls = stream_cls
         self._options = options
         self.http_response = raw
+        self.retry_count = retry_count
 
     @property
     def request_id(self) -> str | None:
