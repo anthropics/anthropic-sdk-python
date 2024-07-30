@@ -13,7 +13,6 @@ from typing import (
     TypeVar,
     Callable,
     Iterator,
-    Optional,
     AsyncIterator,
     cast,
     overload,
@@ -65,6 +64,9 @@ class LegacyAPIResponse(Generic[R]):
 
     http_response: httpx.Response
 
+    retry_count: int
+    """The number of retries made. If no retries happened this will be `0`"""
+
     def __init__(
         self,
         *,
@@ -74,7 +76,7 @@ class LegacyAPIResponse(Generic[R]):
         stream: bool,
         stream_cls: type[Stream[Any]] | type[AsyncStream[Any]] | None,
         options: FinalRequestOptions,
-        retry_count: Optional[int] = 0,
+        retry_count: int = 0,
     ) -> None:
         self._cast_to = cast_to
         self._client = client
