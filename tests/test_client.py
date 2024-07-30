@@ -871,8 +871,8 @@ class TestAnthropic:
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retry_count(self, failures_before_success: int, respx_mock: MockRouter) -> None:
-        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=4)
+    def test_retry_count(self, client: Anthropic, failures_before_success: int, respx_mock: MockRouter) -> None:
+        client = client.with_options(max_retries=4)
 
         nb_retries = 0
 
@@ -897,6 +897,37 @@ class TestAnthropic:
         )
 
         assert response.retry_count == failures_before_success
+
+    @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
+    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @pytest.mark.respx(base_url=base_url)
+    def test_retry_count_new_response_class(
+        self, client: Anthropic, failures_before_success: int, respx_mock: MockRouter
+    ) -> None:
+        client = client.with_options(max_retries=4)
+
+        nb_retries = 0
+
+        def retry_handler(_request: httpx.Request) -> httpx.Response:
+            nonlocal nb_retries
+            if nb_retries < failures_before_success:
+                nb_retries += 1
+                return httpx.Response(500)
+            return httpx.Response(200)
+
+        respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
+
+        with client.messages.with_streaming_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Hello, Claude",
+                }
+            ],
+            model="claude-3-opus-20240229",
+        ) as response:
+            assert response.retry_count == failures_before_success
 
 
 class TestAsyncAnthropic:
@@ -1737,8 +1768,10 @@ class TestAsyncAnthropic:
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.asyncio
-    async def test_retry_count(self, failures_before_success: int, respx_mock: MockRouter) -> None:
-        client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=4)
+    async def test_retry_count(
+        self, async_client: AsyncAnthropic, failures_before_success: int, respx_mock: MockRouter
+    ) -> None:
+        client = async_client.with_options(max_retries=4)
 
         nb_retries = 0
 
@@ -1763,3 +1796,35 @@ class TestAsyncAnthropic:
         )
 
         assert response.retry_count == failures_before_success
+
+    @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
+    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.asyncio
+    async def test_retry_count_new_response_class(
+        self, async_client: AsyncAnthropic, failures_before_success: int, respx_mock: MockRouter
+    ) -> None:
+        client = async_client.with_options(max_retries=4)
+
+        nb_retries = 0
+
+        async def retry_handler(_request: httpx.Request) -> httpx.Response:
+            nonlocal nb_retries
+            if nb_retries < failures_before_success:
+                nb_retries += 1
+                return httpx.Response(500)
+            return httpx.Response(200)
+
+        respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
+
+        async with client.messages.with_streaming_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Hello, Claude",
+                }
+            ],
+            model="claude-3-opus-20240229",
+        ) as response:
+            assert response.retry_count == failures_before_success

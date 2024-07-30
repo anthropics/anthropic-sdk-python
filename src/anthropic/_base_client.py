@@ -1125,6 +1125,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
                     stream=stream,
                     stream_cls=stream_cls,
                     options=options,
+                    retry_count=retry_count,
                 ),
             )
 
@@ -1138,6 +1139,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
             stream=stream,
             stream_cls=stream_cls,
             options=options,
+            retry_count=retry_count,
         )
         if bool(response.request.headers.get(RAW_RESPONSE_HEADER)):
             return cast(ResponseT, api_response)
@@ -1700,6 +1702,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
                     stream=stream,
                     stream_cls=stream_cls,
                     options=options,
+                    retry_count=retry_count,
                 ),
             )
 
@@ -1713,6 +1716,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
             stream=stream,
             stream_cls=stream_cls,
             options=options,
+            retry_count=retry_count,
         )
         if bool(response.request.headers.get(RAW_RESPONSE_HEADER)):
             return cast(ResponseT, api_response)

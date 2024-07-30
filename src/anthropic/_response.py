@@ -55,6 +55,9 @@ class BaseAPIResponse(Generic[R]):
 
     http_response: httpx.Response
 
+    retry_count: int
+    """The number of retries made. If no retries happened this will be `0`"""
+
     def __init__(
         self,
         *,
@@ -64,6 +67,7 @@ class BaseAPIResponse(Generic[R]):
         stream: bool,
         stream_cls: type[Stream[Any]] | type[AsyncStream[Any]] | None,
         options: FinalRequestOptions,
+        retry_count: int = 0,
     ) -> None:
         self._cast_to = cast_to
         self._client = client
@@ -72,6 +76,7 @@ class BaseAPIResponse(Generic[R]):
         self._stream_cls = stream_cls
         self._options = options
         self.http_response = raw
+        self.retry_count = retry_count
 
     @property
     def headers(self) -> httpx.Headers:
