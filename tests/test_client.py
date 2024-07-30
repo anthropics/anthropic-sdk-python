@@ -876,7 +876,7 @@ class TestAnthropic:
 
         nb_retries = 0
 
-        def retry_handler(request):
+        def retry_handler(_request: httpx.Request) -> httpx.Response:
             nonlocal nb_retries
             if nb_retries < failures_before_success:
                 nb_retries += 1
@@ -1742,7 +1742,7 @@ class TestAsyncAnthropic:
 
         nb_retries = 0
 
-        async def retry_handler(request):
+        async def retry_handler(_request: httpx.Request) -> httpx.Response:
             nonlocal nb_retries
             if nb_retries < failures_before_success:
                 nb_retries += 1
