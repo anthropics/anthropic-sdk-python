@@ -868,6 +868,36 @@ class TestAnthropic:
 
         assert _get_open_connections(self.client) == 0
 
+    @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
+    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @pytest.mark.respx(base_url=base_url)
+    def test_retry_count(self, failures_before_success: int, respx_mock: MockRouter) -> None:
+        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=4)
+
+        nb_retries = 0
+
+        def retry_handler(request):
+            nonlocal nb_retries
+            if nb_retries < failures_before_success:
+                nb_retries += 1
+                return httpx.Response(500)
+            return httpx.Response(200)
+
+        respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
+
+        response = client.messages.with_raw_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Hello, Claude",
+                }
+            ],
+            model="claude-3-opus-20240229",
+        )
+
+        assert response.retry_count == failures_before_success
+
 
 class TestAsyncAnthropic:
     client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
@@ -1702,3 +1732,34 @@ class TestAsyncAnthropic:
             )
 
         assert _get_open_connections(self.client) == 0
+
+    @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
+    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.asyncio
+    async def test_retry_count(self, failures_before_success: int, respx_mock: MockRouter) -> None:
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=4)
+
+        nb_retries = 0
+
+        async def retry_handler(request):
+            nonlocal nb_retries
+            if nb_retries < failures_before_success:
+                nb_retries += 1
+                return httpx.Response(500)
+            return httpx.Response(200)
+
+        respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
+
+        response = await client.messages.with_raw_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Hello, Claude",
+                }
+            ],
+            model="claude-3-opus-20240229",
+        )
+
+        assert response.retry_count == failures_before_success
