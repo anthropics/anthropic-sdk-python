@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 from typing import Union, Iterable
-from typing_extensions import Literal, Required, TypedDict
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .text_block_param import TextBlockParam
 from .image_block_param import ImageBlockParam
 
 __all__ = ["ToolResultBlockParam", "Content"]
 
-Content = Union[TextBlockParam, ImageBlockParam]
+Content: TypeAlias = Union[TextBlockParam, ImageBlockParam]
 
 
 class ToolResultBlockParam(TypedDict, total=False):
