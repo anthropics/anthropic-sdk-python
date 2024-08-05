@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from typing import Union
-from typing_extensions import Literal
+from typing_extensions import Literal, TypeAlias
 
 __all__ = ["ModelParam"]
 
-ModelParam = Union[
+ModelParam: TypeAlias = Union[
     str,
     Literal[
         "claude-3-5-sonnet-20240620",
