@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable, Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .tool_param import ToolParam
 from .model_param import ModelParam
@@ -287,7 +287,7 @@ class ToolChoiceToolChoiceTool(TypedDict, total=False):
     type: Required[Literal["tool"]]
 
 
-ToolChoice = Union[ToolChoiceToolChoiceAuto, ToolChoiceToolChoiceAny, ToolChoiceToolChoiceTool]
+ToolChoice: TypeAlias = Union[ToolChoiceToolChoiceAuto, ToolChoiceToolChoiceAny, ToolChoiceToolChoiceTool]
 
 
 class MessageCreateParamsNonStreaming(MessageCreateParamsBase):

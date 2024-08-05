@@ -1,7 +1,7 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 from typing import Union
-from typing_extensions import Literal, Annotated
+from typing_extensions import Literal, Annotated, TypeAlias
 
 from .._utils import PropertyInfo
 from .._models import BaseModel
@@ -10,7 +10,7 @@ from .input_json_delta import InputJSONDelta
 
 __all__ = ["RawContentBlockDeltaEvent", "Delta"]
 
-Delta = Annotated[Union[TextDelta, InputJSONDelta], PropertyInfo(discriminator="type")]
+Delta: TypeAlias = Annotated[Union[TextDelta, InputJSONDelta], PropertyInfo(discriminator="type")]
 
 
 class RawContentBlockDeltaEvent(BaseModel):
