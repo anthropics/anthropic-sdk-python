@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Dict, Union, Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 __all__ = ["ToolParam", "InputSchema"]
 
@@ -14,7 +14,7 @@ class InputSchemaTyped(TypedDict, total=False):
     properties: Optional[object]
 
 
-InputSchema = Union[InputSchemaTyped, Dict[str, object]]
+InputSchema: TypeAlias = Union[InputSchemaTyped, Dict[str, object]]
 
 
 class ToolParam(TypedDict, total=False):
