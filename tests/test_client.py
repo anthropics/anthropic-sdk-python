@@ -335,7 +335,8 @@ class TestAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        client2 = Anthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
+        with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
+            client2 = Anthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
 
         with pytest.raises(
             TypeError,
@@ -1214,7 +1215,8 @@ class TestAsyncAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        client2 = AsyncAnthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
+        with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
+            client2 = AsyncAnthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
 
         with pytest.raises(
             TypeError,
