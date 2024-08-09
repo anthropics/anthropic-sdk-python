@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.33.0 (2024-08-09)
+
+Full Changelog: [v0.32.0...v0.33.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.32.0...v0.33.0)
+
+### Features
+
+* **client:** add `retries_taken` to raw response class ([43fb587](https://github.com/anthropics/anthropic-sdk-python/commit/43fb5874b0a2398221d1f1d0fea316faca9f6484))
+
+
+### Chores
+
+* **internal:** bump pyright ([#622](https://github.com/anthropics/anthropic-sdk-python/issues/622)) ([9480109](https://github.com/anthropics/anthropic-sdk-python/commit/9480109c380ff571487429d5f50f50e23947d788))
+* **internal:** bump ruff version ([#625](https://github.com/anthropics/anthropic-sdk-python/issues/625)) ([b1a4e7b](https://github.com/anthropics/anthropic-sdk-python/commit/b1a4e7b9a8c17184038d1816ff08619cb03f6296))
+* **internal:** test updates ([#624](https://github.com/anthropics/anthropic-sdk-python/issues/624)) ([2cea1f5](https://github.com/anthropics/anthropic-sdk-python/commit/2cea1f52bad2fb6b8f0705fd672f75d8a6281ba0))
+* **internal:** update pydantic compat helper function ([#627](https://github.com/anthropics/anthropic-sdk-python/issues/627)) ([dc18ee0](https://github.com/anthropics/anthropic-sdk-python/commit/dc18ee0af5a86429ee8bcc9d5c186493f8d5c622))
+* **internal:** updates ([#629](https://github.com/anthropics/anthropic-sdk-python/issues/629)) ([d6357a6](https://github.com/anthropics/anthropic-sdk-python/commit/d6357a6172a38d7cf5ab51d9d7b699d44d2adc21))
+* **internal:** use `TypeAlias` marker for type assignments ([#621](https://github.com/anthropics/anthropic-sdk-python/issues/621)) ([a4bff9c](https://github.com/anthropics/anthropic-sdk-python/commit/a4bff9cee99d3ee2083426ec41b40bdcf70d6b4f))
+* sync openapi version ([#617](https://github.com/anthropics/anthropic-sdk-python/issues/617)) ([9c0ad95](https://github.com/anthropics/anthropic-sdk-python/commit/9c0ad95b530f1fbd2293a15dcce7f583a982aad0))
+* sync openapi version ([#620](https://github.com/anthropics/anthropic-sdk-python/issues/620)) ([0a3f3fa](https://github.com/anthropics/anthropic-sdk-python/commit/0a3f3fa8d89f90f321c27b0cb8c4187b68161fc5))
+* sync openapi version ([#628](https://github.com/anthropics/anthropic-sdk-python/issues/628)) ([cfad41f](https://github.com/anthropics/anthropic-sdk-python/commit/cfad41f8a36836060d1b2bba0f32ee291ff8df05))
+
 ## 0.32.0 (2024-07-29)
 
 Full Changelog: [v0.31.2...v0.32.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.31.2...v0.32.0)
