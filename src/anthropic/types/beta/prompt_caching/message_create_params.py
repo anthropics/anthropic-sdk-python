@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import List, Union, Iterable, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
-from .tool_param import ToolParam
-from .model_param import ModelParam
-from .message_param import MessageParam
-from .text_block_param import TextBlockParam
+from ...model_param import ModelParam
+from .prompt_caching_beta_tool_param import PromptCachingBetaToolParam
+from .prompt_caching_beta_message_param import PromptCachingBetaMessageParam
+from .prompt_caching_beta_text_block_param import PromptCachingBetaTextBlockParam
 
 __all__ = [
     "MessageCreateParamsBase",
@@ -33,7 +33,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     [models](https://docs.anthropic.com/en/docs/models-overview) for details.
     """
 
-    messages: Required[Iterable[MessageParam]]
+    messages: Required[Iterable[PromptCachingBetaMessageParam]]
     """Input messages.
 
     Our models are trained to operate on alternating `user` and `assistant`
@@ -143,7 +143,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     and the response `stop_sequence` value will contain the matched stop sequence.
     """
 
-    system: Union[str, Iterable[TextBlockParam]]
+    system: Union[str, Iterable[PromptCachingBetaTextBlockParam]]
     """System prompt.
 
     A system prompt is a way of providing context and instructions to Claude, such
@@ -168,7 +168,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     The model can use a specific tool, any available tool, or decide by itself.
     """
 
-    tools: Iterable[ToolParam]
+    tools: Iterable[PromptCachingBetaToolParam]
     """Definitions of tools that the model may use.
 
     If you include `tools` in your API request, the model may return `tool_use`

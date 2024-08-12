@@ -3,33 +3,33 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable, overload
-from functools import partial
 from typing_extensions import Literal
 
 import httpx
 
-from .. import _legacy_response
-from ..types import message_create_params
-from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven
-from .._utils import (
+from .... import _legacy_response
+from ...._types import NOT_GIVEN, Body, Query, Headers, NotGiven
+from ...._utils import (
     is_given,
     required_args,
     maybe_transform,
     async_maybe_transform,
 )
-from .._compat import cached_property
-from .._resource import SyncAPIResource, AsyncAPIResource
-from .._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
-from .._constants import DEFAULT_TIMEOUT
-from .._streaming import Stream, AsyncStream
-from .._base_client import make_request_options
-from ..lib.streaming import MessageStreamManager, AsyncMessageStreamManager
-from ..types.message import Message
-from ..types.tool_param import ToolParam
-from ..types.model_param import ModelParam
-from ..types.message_param import MessageParam
-from ..types.text_block_param import TextBlockParam
-from ..types.raw_message_stream_event import RawMessageStreamEvent
+from ...._compat import cached_property
+from ...._resource import SyncAPIResource, AsyncAPIResource
+from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ...._constants import DEFAULT_TIMEOUT
+from ...._streaming import Stream, AsyncStream
+from ...._base_client import make_request_options
+from ....types.model_param import ModelParam
+from ....types.beta.prompt_caching import message_create_params
+from ....types.beta.prompt_caching.prompt_caching_beta_message import PromptCachingBetaMessage
+from ....types.beta.prompt_caching.prompt_caching_beta_tool_param import PromptCachingBetaToolParam
+from ....types.beta.prompt_caching.prompt_caching_beta_message_param import PromptCachingBetaMessageParam
+from ....types.beta.prompt_caching.prompt_caching_beta_text_block_param import PromptCachingBetaTextBlockParam
+from ....types.beta.prompt_caching.raw_prompt_caching_beta_message_stream_event import (
+    RawPromptCachingBetaMessageStreamEvent,
+)
 
 __all__ = ["Messages", "AsyncMessages"]
 
@@ -48,15 +48,15 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -65,7 +65,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message:
+    ) -> PromptCachingBetaMessage:
         """
         Create a Message.
 
@@ -311,15 +311,15 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -328,7 +328,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Stream[RawMessageStreamEvent]:
+    ) -> Stream[RawPromptCachingBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -574,15 +574,15 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         stream: bool,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -591,7 +591,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message | Stream[RawMessageStreamEvent]:
+    ) -> PromptCachingBetaMessage | Stream[RawPromptCachingBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -837,15 +837,15 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -854,11 +854,12 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message | Stream[RawMessageStreamEvent]:
+    ) -> PromptCachingBetaMessage | Stream[RawPromptCachingBetaMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
+        extra_headers = {"anthropic-beta": "prompt-caching-2024-07-31", **(extra_headers or {})}
         return self._post(
-            "/v1/messages",
+            "/v1/messages?beta=prompt_caching",
             body=maybe_transform(
                 {
                     "max_tokens": max_tokens,
@@ -879,65 +880,10 @@ class Messages(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=Message,
+            cast_to=PromptCachingBetaMessage,
             stream=stream or False,
-            stream_cls=Stream[RawMessageStreamEvent],
+            stream_cls=Stream[RawPromptCachingBetaMessageStreamEvent],
         )
-
-    def stream(
-        self,
-        *,
-        max_tokens: int,
-        messages: Iterable[MessageParam],
-        model: ModelParam,
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> MessageStreamManager:
-        """Create a Message stream"""
-        extra_headers = {
-            "X-Stainless-Stream-Helper": "messages",
-            **(extra_headers or {}),
-        }
-        make_request = partial(
-            self._post,
-            "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "metadata": metadata,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "temperature": temperature,
-                    "top_k": top_k,
-                    "top_p": top_p,
-                    "tools": tools,
-                    "tool_choice": tool_choice,
-                    "stream": True,
-                },
-                message_create_params.MessageCreateParams,
-            ),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=Message,
-            stream=True,
-            stream_cls=Stream[RawMessageStreamEvent],
-        )
-        return MessageStreamManager(make_request)
 
 
 class AsyncMessages(AsyncAPIResource):
@@ -954,15 +900,15 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -971,7 +917,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message:
+    ) -> PromptCachingBetaMessage:
         """
         Create a Message.
 
@@ -1217,15 +1163,15 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -1234,7 +1180,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncStream[RawMessageStreamEvent]:
+    ) -> AsyncStream[RawPromptCachingBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -1480,15 +1426,15 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         stream: bool,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -1497,7 +1443,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message | AsyncStream[RawMessageStreamEvent]:
+    ) -> PromptCachingBetaMessage | AsyncStream[RawPromptCachingBetaMessageStreamEvent]:
         """
         Create a Message.
 
@@ -1743,15 +1689,15 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -1760,11 +1706,12 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message | AsyncStream[RawMessageStreamEvent]:
+    ) -> PromptCachingBetaMessage | AsyncStream[RawPromptCachingBetaMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
+        extra_headers = {"anthropic-beta": "prompt-caching-2024-07-31", **(extra_headers or {})}
         return await self._post(
-            "/v1/messages",
+            "/v1/messages?beta=prompt_caching",
             body=await async_maybe_transform(
                 {
                     "max_tokens": max_tokens,
@@ -1785,64 +1732,10 @@ class AsyncMessages(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=Message,
+            cast_to=PromptCachingBetaMessage,
             stream=stream or False,
-            stream_cls=AsyncStream[RawMessageStreamEvent],
+            stream_cls=AsyncStream[RawPromptCachingBetaMessageStreamEvent],
         )
-
-    def stream(
-        self,
-        *,
-        max_tokens: int,
-        messages: Iterable[MessageParam],
-        model: ModelParam,
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncMessageStreamManager:
-        """Create a Message stream"""
-        extra_headers = {
-            "X-Stainless-Stream-Helper": "messages",
-            **(extra_headers or {}),
-        }
-        request = self._post(
-            "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "metadata": metadata,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "temperature": temperature,
-                    "top_k": top_k,
-                    "top_p": top_p,
-                    "tools": tools,
-                    "tool_choice": tool_choice,
-                    "stream": True,
-                },
-                message_create_params.MessageCreateParams,
-            ),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=Message,
-            stream=True,
-            stream_cls=AsyncStream[RawMessageStreamEvent],
-        )
-        return AsyncMessageStreamManager(request)
 
 
 class MessagesWithRawResponse:
