@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.33.1 (2024-08-12)
+
+Full Changelog: [v0.33.0...v0.33.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.33.0...v0.33.1)
+
+### Chores
+
+* **ci:** bump prism mock server version ([#630](https://github.com/anthropics/anthropic-sdk-python/issues/630)) ([29545ee](https://github.com/anthropics/anthropic-sdk-python/commit/29545eee2e7bfdfe73b590d9301aa68bbf2c361d))
+* **internal:** ensure package is importable in lint cmd ([#632](https://github.com/anthropics/anthropic-sdk-python/issues/632)) ([d685824](https://github.com/anthropics/anthropic-sdk-python/commit/d685824b2c080bd1b17f677f4af422b5cb0e7ed5))
+
 ## 0.33.0 (2024-08-09)
 
 Full Changelog: [v0.32.0...v0.33.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.32.0...v0.33.0)
