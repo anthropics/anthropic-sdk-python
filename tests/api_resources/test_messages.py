@@ -23,8 +23,8 @@ class TestMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -37,8 +37,8 @@ class TestMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -47,16 +47,14 @@ class TestMessages:
             stream=False,
             system=[
                 {
-                    "type": "text",
                     "text": "Today's date is 2024-06-01.",
+                    "type": "text",
                 }
             ],
             temperature=1,
             tool_choice={"type": "auto"},
             tools=[
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -70,10 +68,10 @@ class TestMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -87,10 +85,10 @@ class TestMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -104,6 +102,8 @@ class TestMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
             ],
             top_k=5,
@@ -117,8 +117,8 @@ class TestMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -135,8 +135,8 @@ class TestMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -155,8 +155,8 @@ class TestMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -170,8 +170,8 @@ class TestMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -180,16 +180,14 @@ class TestMessages:
             stop_sequences=["string", "string", "string"],
             system=[
                 {
-                    "type": "text",
                     "text": "Today's date is 2024-06-01.",
+                    "type": "text",
                 }
             ],
             temperature=1,
             tool_choice={"type": "auto"},
             tools=[
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -203,10 +201,10 @@ class TestMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -220,10 +218,10 @@ class TestMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -237,6 +235,8 @@ class TestMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
             ],
             top_k=5,
@@ -250,8 +250,8 @@ class TestMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -268,8 +268,8 @@ class TestMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -293,8 +293,8 @@ class TestAsyncMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -307,8 +307,8 @@ class TestAsyncMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -317,16 +317,14 @@ class TestAsyncMessages:
             stream=False,
             system=[
                 {
-                    "type": "text",
                     "text": "Today's date is 2024-06-01.",
+                    "type": "text",
                 }
             ],
             temperature=1,
             tool_choice={"type": "auto"},
             tools=[
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -340,10 +338,10 @@ class TestAsyncMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -357,10 +355,10 @@ class TestAsyncMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -374,6 +372,8 @@ class TestAsyncMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
             ],
             top_k=5,
@@ -387,8 +387,8 @@ class TestAsyncMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -405,8 +405,8 @@ class TestAsyncMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -425,8 +425,8 @@ class TestAsyncMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -440,8 +440,8 @@ class TestAsyncMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -450,16 +450,14 @@ class TestAsyncMessages:
             stop_sequences=["string", "string", "string"],
             system=[
                 {
-                    "type": "text",
                     "text": "Today's date is 2024-06-01.",
+                    "type": "text",
                 }
             ],
             temperature=1,
             tool_choice={"type": "auto"},
             tools=[
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -473,10 +471,10 @@ class TestAsyncMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -490,10 +488,10 @@ class TestAsyncMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
                 {
-                    "description": "Get the current weather in a given location",
-                    "name": "x",
                     "input_schema": {
                         "type": "object",
                         "properties": {
@@ -507,6 +505,8 @@ class TestAsyncMessages:
                             },
                         },
                     },
+                    "name": "x",
+                    "description": "Get the current weather in a given location",
                 },
             ],
             top_k=5,
@@ -520,8 +520,8 @@ class TestAsyncMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -538,8 +538,8 @@ class TestAsyncMessages:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",

@@ -890,8 +890,8 @@ class TestAnthropic:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -922,8 +922,8 @@ class TestAnthropic:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -1790,8 +1790,8 @@ class TestAsyncAnthropic:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
@@ -1823,8 +1823,8 @@ class TestAsyncAnthropic:
             max_tokens=1024,
             messages=[
                 {
-                    "role": "user",
                     "content": "Hello, world",
+                    "role": "user",
                 }
             ],
             model="claude-3-5-sonnet-20240620",
