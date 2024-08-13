@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable, overload
+from functools import partial
 from typing_extensions import Literal
 
 import httpx
@@ -21,6 +22,7 @@ from ...._response import to_streamed_response_wrapper, async_to_streamed_respon
 from ...._constants import DEFAULT_TIMEOUT
 from ...._streaming import Stream, AsyncStream
 from ...._base_client import make_request_options
+from ....lib.streaming import PromptCachingBetaMessageStreamManager, AsyncPromptCachingBetaMessageStreamManager
 from ....types.model_param import ModelParam
 from ....types.beta.prompt_caching import message_create_params
 from ....types.beta.prompt_caching.prompt_caching_beta_message import PromptCachingBetaMessage
@@ -885,6 +887,65 @@ class Messages(SyncAPIResource):
             stream_cls=Stream[RawPromptCachingBetaMessageStreamEvent],
         )
 
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[PromptCachingBetaMessageParam],
+        model: ModelParam,
+        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> PromptCachingBetaMessageStreamManager:
+        """Create a Message stream"""
+        if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+            timeout = 600
+
+        extra_headers = {
+            "anthropic-beta": "prompt-caching-2024-07-31",
+            "X-Stainless-Stream-Helper": "beta.prompt_caching.messages",
+            **(extra_headers or {}),
+        }
+        request = partial(
+            self._post,
+            "/v1/messages?beta=prompt_caching",
+            body=maybe_transform(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "metadata": metadata,
+                    "stop_sequences": stop_sequences,
+                    "stream": True,
+                    "system": system,
+                    "temperature": temperature,
+                    "tool_choice": tool_choice,
+                    "tools": tools,
+                    "top_k": top_k,
+                    "top_p": top_p,
+                },
+                message_create_params.MessageCreateParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=PromptCachingBetaMessage,
+            stream=True,
+            stream_cls=Stream[RawPromptCachingBetaMessageStreamEvent],
+        )
+        return PromptCachingBetaMessageStreamManager(request)
+
 
 class AsyncMessages(AsyncAPIResource):
     @cached_property
@@ -1736,6 +1797,64 @@ class AsyncMessages(AsyncAPIResource):
             stream=stream or False,
             stream_cls=AsyncStream[RawPromptCachingBetaMessageStreamEvent],
         )
+
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[PromptCachingBetaMessageParam],
+        model: ModelParam,
+        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> AsyncPromptCachingBetaMessageStreamManager:
+        """Create a Message stream"""
+        if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+            timeout = 600
+
+        extra_headers = {
+            "anthropic-beta": "prompt-caching-2024-07-31",
+            "X-Stainless-Stream-Helper": "beta.prompt_caching.messages",
+            **(extra_headers or {}),
+        }
+        request = self._post(
+            "/v1/messages?beta=prompt_caching",
+            body=maybe_transform(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "metadata": metadata,
+                    "stop_sequences": stop_sequences,
+                    "stream": True,
+                    "system": system,
+                    "temperature": temperature,
+                    "tool_choice": tool_choice,
+                    "tools": tools,
+                    "top_k": top_k,
+                    "top_p": top_p,
+                },
+                message_create_params.MessageCreateParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=PromptCachingBetaMessage,
+            stream=True,
+            stream_cls=AsyncStream[RawPromptCachingBetaMessageStreamEvent],
+        )
+        return AsyncPromptCachingBetaMessageStreamManager(request)
 
 
 class MessagesWithRawResponse:
