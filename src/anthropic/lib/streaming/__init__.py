@@ -11,3 +11,9 @@ from ._messages import (
     MessageStreamManager as MessageStreamManager,
     AsyncMessageStreamManager as AsyncMessageStreamManager,
 )
+from ._prompt_caching_beta_messages import (
+    PromptCachingBetaMessageStream as PromptCachingBetaMessageStream,
+    AsyncPromptCachingBetaMessageStream as AsyncPromptCachingBetaMessageStream,
+    PromptCachingBetaMessageStreamManager as PromptCachingBetaMessageStreamManager,
+    AsyncPromptCachingBetaMessageStreamManager as AsyncPromptCachingBetaMessageStreamManager,
+)
