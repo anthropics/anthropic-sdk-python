@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.34.0 (2024-08-14)
+
+Full Changelog: [v0.33.1...v0.34.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.33.1...v0.34.0)
+
+### Features
+
+* **api:** add prompt caching beta ([3978411](https://github.com/anthropics/anthropic-sdk-python/commit/397841125164a2420d5abf8f45d47f2467e36cd9))
+* **client:** add streaming helpers for prompt caching ([98a0a7b](https://github.com/anthropics/anthropic-sdk-python/commit/98a0a7b9c679539c98d212b12c0a9a950fd6371d))
+
+
+### Chores
+
+* **examples:** minor formatting changes ([#633](https://github.com/anthropics/anthropic-sdk-python/issues/633)) ([20487ea](https://github.com/anthropics/anthropic-sdk-python/commit/20487ea0080969511e7c41f199387b87a84f6ab4))
+
 ## 0.33.1 (2024-08-12)
 
 Full Changelog: [v0.33.0...v0.33.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.33.0...v0.33.1)
