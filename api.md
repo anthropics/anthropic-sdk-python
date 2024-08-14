@@ -68,3 +68,4 @@ from anthropic.types.beta.prompt_caching import (
 Methods:
 
 - <code title="post /v1/messages?beta=prompt_caching">client.beta.prompt_caching.messages.<a href="./src/anthropic/resources/beta/prompt_caching/messages.py">create</a>(\*\*<a href="src/anthropic/types/beta/prompt_caching/message_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/prompt_caching/prompt_caching_beta_message.py">PromptCachingBetaMessage</a></code>
+- <code title="post /v1/messages?beta=prompt_caching">client.beta.prompt_caching.messages.<a href="./src/anthropic/resources/beta/prompt_caching/messages.py">stream</a>(\*\*<a href="src/anthropic/types/beta/prompt_caching/message_create_params.py">params</a>) -> <a href="./src/anthropic/lib/streaming/_prompt_caching_beta_messages.py">PromptCachingBetaMessageStreamManager</a></code>
