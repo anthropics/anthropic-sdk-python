@@ -59,9 +59,6 @@
       "hidden": true
     }
   ],
-  "reviewers": [
-    "@anthropics/sdk"
-  ],
   "release-type": "python",
   "extra-files": [
     "src/anthropic/_version.py"
