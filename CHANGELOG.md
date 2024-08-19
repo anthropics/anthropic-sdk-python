@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.34.1 (2024-08-19)
+
+Full Changelog: [v0.34.0...v0.34.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.34.0...v0.34.1)
+
+### Chores
+
+* **ci:** add CODEOWNERS file ([#639](https://github.com/anthropics/anthropic-sdk-python/issues/639)) ([33001cc](https://github.com/anthropics/anthropic-sdk-python/commit/33001ccf80f6ec2ac43b74f5f41034ec6a12552b))
+* **client:** fix parsing union responses when non-json is returned ([#643](https://github.com/anthropics/anthropic-sdk-python/issues/643)) ([45be91d](https://github.com/anthropics/anthropic-sdk-python/commit/45be91dbcc2789a71a048a34f1f23977b9829818))
+* **docs/api:** update prompt caching helpers ([6a55aee](https://github.com/anthropics/anthropic-sdk-python/commit/6a55aeeaca83ade0adc18eae0f8682558769d5ff))
+* **internal:** use different 32bit detection method ([#640](https://github.com/anthropics/anthropic-sdk-python/issues/640)) ([d6b2b63](https://github.com/anthropics/anthropic-sdk-python/commit/d6b2b630613f7c5f01fc3cd005a055989e7d8e71))
+
 ## 0.34.0 (2024-08-14)
 
 Full Changelog: [v0.33.1...v0.34.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.33.1...v0.34.0)
