@@ -3,41 +3,51 @@
 import pprint
 import asyncio
 import itertools
+from typing import Dict, List, Tuple, Union
+from collections.abc import AsyncGenerator
 
 from anthropic import AsyncAnthropic
+from anthropic.types import TextBlock
 
 
-async def make_batch(sequence, batch_size):
+async def make_batch(sequence: List[str], batch_size: int) -> AsyncGenerator[Tuple[str, ...], None]:
     iterator = iter(sequence)
-    while batch := tuple(itertools.islice(iterator, batch_size)):
+    while True:
+        batch = tuple(itertools.islice(iterator, batch_size))
+        if not batch:
+            break
         yield batch
 
 
-async def process_prompt(client, prompt):
+async def process_prompt(client: AsyncAnthropic, prompt: str) -> Union[Dict[str, str], None]:
     try:
         response = await client.messages.create(
-            model="claude-3-opus-20240229",
+            model="claude-3-haiku-20240307",
             max_tokens=512,
             messages=[{"role": "user", "content": prompt}],
         )
-        return {"input": prompt, "repsonse": response.content[0].text}
+        if response.content:
+            content = response.content[0]
+            if isinstance(content, TextBlock):
+                return {"input": prompt, "response": content.text}
+        return None
     except Exception as e:
         print(f"Error processing prompt {prompt}: {e}")
         return None
 
 
-async def process_batch(client, batch):
+async def process_batch(client: AsyncAnthropic, batch: Tuple[str, ...]) -> List[Union[Dict[str, str], None]]:
     tasks = [process_prompt(client, prompt) for prompt in batch]
     return await asyncio.gather(*tasks)
 
 
-async def main(prompts, batch_size=5, delay_between_batches=60):
+async def main(prompts: List[str], batch_size: int = 5, delay_between_batches: int = 60) -> List[Dict[str, str]]:
     client = AsyncAnthropic()
 
-    results = []
+    results: List[Dict[str, str]] = []
     async for batch in make_batch(prompts, batch_size):
         batch_results = await process_batch(client, batch)
-        results.extend(batch_results)
+        results.extend(filter(None, batch_results))
         await asyncio.sleep(delay_between_batches)
 
     return results
