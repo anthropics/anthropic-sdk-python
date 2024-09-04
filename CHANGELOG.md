@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.34.2 (2024-09-04)
+
+Full Changelog: [v0.34.1...v0.34.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.34.1...v0.34.2)
+
+### Chores
+
+* **api:** deprecate claude-1 model ([eab07dc](https://github.com/anthropics/anthropic-sdk-python/commit/eab07dc1984ea20918bb0d902108a1ce4646a1e0))
+* **ci:** also run pydantic v1 tests ([#644](https://github.com/anthropics/anthropic-sdk-python/issues/644)) ([c61fe89](https://github.com/anthropics/anthropic-sdk-python/commit/c61fe899e79f21691c7a19d40f1bc397b3f3f82d))
+
 ## 0.34.1 (2024-08-19)
 
 Full Changelog: [v0.34.0...v0.34.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.34.0...v0.34.1)
