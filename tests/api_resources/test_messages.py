@@ -10,6 +10,7 @@ import pytest
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
 from anthropic.types import Message
+from anthropic.resources.messages import DEPRECATED_MODELS
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -283,6 +284,16 @@ class TestMessages:
 
         assert cast(Any, response.is_closed) is True
 
+    @parametrize
+    def test_deprecated_model_warning(self, client: Anthropic) -> None:
+        for deprecated_model in DEPRECATED_MODELS:
+            with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
+                client.messages.create(
+                    max_tokens=1024,
+                    messages=[{"role": "user", "content": "Hello"}],
+                    model=deprecated_model,
+                )
+
 
 class TestAsyncMessages:
     parametrize = pytest.mark.parametrize("async_client", [False, True], indirect=True, ids=["loose", "strict"])
@@ -552,3 +563,13 @@ class TestAsyncMessages:
             await stream.close()
 
         assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_deprecated_model_warning(self, async_client: AsyncAnthropic) -> None:
+        for deprecated_model in DEPRECATED_MODELS:
+            with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
+                await async_client.messages.create(
+                    max_tokens=1024,
+                    messages=[{"role": "user", "content": "Hello"}],
+                    model=deprecated_model,
+                )

@@ -12,6 +12,7 @@ from respx import MockRouter
 from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
 from anthropic.lib.streaming import MessageStreamEvent
 from anthropic.types.message import Message
+from anthropic.resources.messages import DEPRECATED_MODELS
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -128,6 +129,20 @@ class TestSyncMessages:
         # response should be closed even if the body isn't read
         assert stream.response.is_closed
 
+    @pytest.mark.respx(base_url=base_url)
+    def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
+        for deprecated_model in DEPRECATED_MODELS:
+            respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
+
+            with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
+                with sync_client.messages.stream(
+                    max_tokens=1024,
+                    messages=[{"role": "user", "content": "Hello"}],
+                    model=deprecated_model,
+                ) as stream:
+                    # Consume the stream to ensure the warning is triggered
+                    stream.until_done()
+
 
 class TestAsyncMessages:
     @pytest.mark.asyncio
@@ -169,6 +184,23 @@ class TestAsyncMessages:
 
         # response should be closed even if the body isn't read
         assert stream.response.is_closed
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
+        for deprecated_model in DEPRECATED_MODELS:
+            respx_mock.post("/v1/messages").mock(
+                return_value=httpx.Response(200, content=to_async_iter(basic_response()))
+            )
+
+            with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
+                async with async_client.messages.stream(
+                    max_tokens=1024,
+                    messages=[{"role": "user", "content": "Hello"}],
+                    model=deprecated_model,
+                ) as stream:
+                    # Consume the stream to ensure the warning is triggered
+                    await stream.get_final_message()
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
