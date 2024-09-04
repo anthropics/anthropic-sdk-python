@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import List, Union, Iterable, overload
 from functools import partial
 from typing_extensions import Literal
@@ -32,6 +33,15 @@ from ..types.text_block_param import TextBlockParam
 from ..types.raw_message_stream_event import RawMessageStreamEvent
 
 __all__ = ["Messages", "AsyncMessages"]
+
+
+DEPRECATED_MODELS = {
+    "claude-1.3": "November 6th, 2024",
+    "claude-1.3-100k": "November 6th, 2024",
+    "claude-instant-1.1": "November 6th, 2024",
+    "claude-instant-1.1-100k": "November 6th, 2024",
+    "claude-instant-1.2": "November 6th, 2024",
+}
 
 
 class Messages(SyncAPIResource):
@@ -857,6 +867,14 @@ class Messages(SyncAPIResource):
     ) -> Message | Stream[RawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
+
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
         return self._post(
             "/v1/messages",
             body=maybe_transform(
@@ -906,6 +924,13 @@ class Messages(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> MessageStreamManager:
         """Create a Message stream"""
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
         extra_headers = {
             "X-Stainless-Stream-Helper": "messages",
             **(extra_headers or {}),
@@ -1763,6 +1788,14 @@ class AsyncMessages(AsyncAPIResource):
     ) -> Message | AsyncStream[RawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
+
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
         return await self._post(
             "/v1/messages",
             body=await async_maybe_transform(
@@ -1812,6 +1845,13 @@ class AsyncMessages(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> AsyncMessageStreamManager:
         """Create a Message stream"""
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
         extra_headers = {
             "X-Stainless-Stream-Helper": "messages",
             **(extra_headers or {}),
