@@ -201,28 +201,14 @@ message = client.messages.create(
 print(message)
 ```
 
-or if you want to use a profile and region
+The bedrock client supports the following arguments for authentication
 
 ```py
-import os
-from anthropic import AnthropicBedrock
-
-PROFILE_NAME = os.getenv("PROFILE_NAME")
-REGION_NAME = os.getenv("REGION_NAME")
-
-client = AnthropicBedrock(aws_profile=PROFILE_NAME, aws_region=REGION_NAME)
-
-message = client.messages.create(
-    max_tokens=1024,
-    messages=[
-        {
-            "role": "user",
-            "content": "Hello!",
-        }
-    ],
-    model="anthropic.claude-3-sonnet-20240229-v1:0",
+AnthropicBedrock(
+  aws_profile='...',
+  aws_region='us-east'
+  ... etc
 )
-print(message)
 ```
 
 For a more fully fledged example see [`examples/bedrock.py`](https://github.com/anthropics/anthropic-sdk-python/blob/main/examples/bedrock.py).
