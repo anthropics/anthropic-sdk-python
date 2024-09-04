@@ -207,7 +207,9 @@ The bedrock client supports the following arguments for authentication
 AnthropicBedrock(
   aws_profile='...',
   aws_region='us-east'
-  ... etc
+  aws_secret_key='...',
+  aws_access_key='...',
+  aws_session_token='...',
 )
 ```
 
