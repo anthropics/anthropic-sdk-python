@@ -201,6 +201,18 @@ message = client.messages.create(
 print(message)
 ```
 
+The bedrock client supports the following arguments for authentication
+
+```py
+AnthropicBedrock(
+  aws_profile='...',
+  aws_region='us-east'
+  aws_secret_key='...',
+  aws_access_key='...',
+  aws_session_token='...',
+)
+```
+
 For a more fully fledged example see [`examples/bedrock.py`](https://github.com/anthropics/anthropic-sdk-python/blob/main/examples/bedrock.py).
 
 ## Google Vertex
