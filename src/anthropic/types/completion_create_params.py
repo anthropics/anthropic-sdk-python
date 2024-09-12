@@ -105,7 +105,7 @@ class Metadata(TypedDict, total=False):
     """
 
 
-class CompletionCreateParamsNonStreaming(CompletionCreateParamsBase):
+class CompletionCreateParamsNonStreaming(CompletionCreateParamsBase, total=False):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
