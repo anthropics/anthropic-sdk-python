@@ -290,7 +290,7 @@ class ToolChoiceToolChoiceTool(TypedDict, total=False):
 ToolChoice: TypeAlias = Union[ToolChoiceToolChoiceAuto, ToolChoiceToolChoiceAny, ToolChoiceToolChoiceTool]
 
 
-class MessageCreateParamsNonStreaming(MessageCreateParamsBase):
+class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
