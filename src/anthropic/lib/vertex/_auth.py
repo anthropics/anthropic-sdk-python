@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from .._extras import google_auth
 
@@ -21,6 +21,7 @@ def load_auth(*, project_id: str | None) -> tuple[Credentials, str]:
     credentials, loaded_project_id = google_auth.default(
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
+    credentials = cast(Any, credentials)
     credentials.refresh(Request())
 
     if not project_id:
