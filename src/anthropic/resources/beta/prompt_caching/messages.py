@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from typing import List, Union, Iterable, overload
-from typing_extensions import Literal
+from typing import List, Union, Iterable
+from typing_extensions import Literal, overload
 
 import httpx
 
