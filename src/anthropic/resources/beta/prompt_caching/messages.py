@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import List, Union, Iterable, overload
+from typing import List, Union, Iterable
 from functools import partial
-from typing_extensions import Literal
+from typing_extensions import Literal, overload
 
 import httpx
 
