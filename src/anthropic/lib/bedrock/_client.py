@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any, Union, Mapping, TypeVar
 from typing_extensions import Self, override
+import boto3
 
 import httpx
 
@@ -116,9 +117,8 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
 
         self.aws_access_key = aws_access_key
 
-        if aws_region is None:
-            aws_region = os.environ.get("AWS_REGION") or "us-east-1"
-        self.aws_region = aws_region
+        self.aws_region = aws_region or os.environ.get("AWS_REGION") or self.get_region_from_boto3() or "us-east-1"
+
 
         self.aws_session_token = aws_session_token
 
@@ -166,6 +166,12 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             data=data,
         )
         request.headers.update(headers)
+
+    def get_region_from_boto3(
+        self
+    ) -> str | None:
+        session = boto3.Session()
+        return session.region_name
 
     def copy(
         self,
