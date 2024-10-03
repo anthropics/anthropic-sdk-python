@@ -53,7 +53,10 @@ class TestMessages:
                 }
             ],
             temperature=1,
-            tool_choice={"type": "auto"},
+            tool_choice={
+                "type": "auto",
+                "disable_parallel_tool_use": True,
+            },
             tools=[
                 {
                     "input_schema": {
@@ -186,7 +189,10 @@ class TestMessages:
                 }
             ],
             temperature=1,
-            tool_choice={"type": "auto"},
+            tool_choice={
+                "type": "auto",
+                "disable_parallel_tool_use": True,
+            },
             tools=[
                 {
                     "input_schema": {
@@ -333,7 +339,10 @@ class TestAsyncMessages:
                 }
             ],
             temperature=1,
-            tool_choice={"type": "auto"},
+            tool_choice={
+                "type": "auto",
+                "disable_parallel_tool_use": True,
+            },
             tools=[
                 {
                     "input_schema": {
@@ -466,7 +475,10 @@ class TestAsyncMessages:
                 }
             ],
             temperature=1,
-            tool_choice={"type": "auto"},
+            tool_choice={
+                "type": "auto",
+                "disable_parallel_tool_use": True,
+            },
             tools=[
                 {
                     "input_schema": {
