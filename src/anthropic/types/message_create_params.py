@@ -275,9 +275,23 @@ class Metadata(TypedDict, total=False):
 class ToolChoiceToolChoiceAuto(TypedDict, total=False):
     type: Required[Literal["auto"]]
 
+    disable_parallel_tool_use: bool
+    """Whether to disable parallel tool use.
+
+    Defaults to `false`. If set to `true`, the model will output at most one tool
+    use.
+    """
+
 
 class ToolChoiceToolChoiceAny(TypedDict, total=False):
     type: Required[Literal["any"]]
+
+    disable_parallel_tool_use: bool
+    """Whether to disable parallel tool use.
+
+    Defaults to `false`. If set to `true`, the model will output exactly one tool
+    use.
+    """
 
 
 class ToolChoiceToolChoiceTool(TypedDict, total=False):
@@ -285,6 +299,13 @@ class ToolChoiceToolChoiceTool(TypedDict, total=False):
     """The name of the tool to use."""
 
     type: Required[Literal["tool"]]
+
+    disable_parallel_tool_use: bool
+    """Whether to disable parallel tool use.
+
+    Defaults to `false`. If set to `true`, the model will output exactly one tool
+    use.
+    """
 
 
 ToolChoice: TypeAlias = Union[ToolChoiceToolChoiceAuto, ToolChoiceToolChoiceAny, ToolChoiceToolChoiceTool]
