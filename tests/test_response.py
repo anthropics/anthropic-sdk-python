@@ -190,6 +190,56 @@ async def test_async_response_parse_annotated_type(async_client: AsyncAnthropic)
     assert obj.bar == 2
 
 
+@pytest.mark.parametrize(
+    "content, expected",
+    [
+        ("false", False),
+        ("true", True),
+        ("False", False),
+        ("True", True),
+        ("TrUe", True),
+        ("FalSe", False),
+    ],
+)
+def test_response_parse_bool(client: Anthropic, content: str, expected: bool) -> None:
+    response = APIResponse(
+        raw=httpx.Response(200, content=content),
+        client=client,
+        stream=False,
+        stream_cls=None,
+        cast_to=str,
+        options=FinalRequestOptions.construct(method="get", url="/foo"),
+    )
+
+    result = response.parse(to=bool)
+    assert result is expected
+
+
+@pytest.mark.parametrize(
+    "content, expected",
+    [
+        ("false", False),
+        ("true", True),
+        ("False", False),
+        ("True", True),
+        ("TrUe", True),
+        ("FalSe", False),
+    ],
+)
+async def test_async_response_parse_bool(client: AsyncAnthropic, content: str, expected: bool) -> None:
+    response = AsyncAPIResponse(
+        raw=httpx.Response(200, content=content),
+        client=client,
+        stream=False,
+        stream_cls=None,
+        cast_to=str,
+        options=FinalRequestOptions.construct(method="get", url="/foo"),
+    )
+
+    result = await response.parse(to=bool)
+    assert result is expected
+
+
 class OtherModel(BaseModel):
     a: str
 
