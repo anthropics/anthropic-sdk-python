@@ -3,23 +3,15 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable, Optional
-from typing_extensions import Literal, Required, TypeAlias, TypedDict
+from typing_extensions import Literal, Required, TypedDict
 
 from ...model_param import ModelParam
+from ...tool_choice_param import ToolChoiceParam
 from .prompt_caching_beta_tool_param import PromptCachingBetaToolParam
 from .prompt_caching_beta_message_param import PromptCachingBetaMessageParam
 from .prompt_caching_beta_text_block_param import PromptCachingBetaTextBlockParam
 
-__all__ = [
-    "MessageCreateParamsBase",
-    "Metadata",
-    "ToolChoice",
-    "ToolChoiceToolChoiceAuto",
-    "ToolChoiceToolChoiceAny",
-    "ToolChoiceToolChoiceTool",
-    "MessageCreateParamsNonStreaming",
-    "MessageCreateParamsStreaming",
-]
+__all__ = ["MessageCreateParamsBase", "Metadata", "MessageCreateParamsNonStreaming", "MessageCreateParamsStreaming"]
 
 
 class MessageCreateParamsBase(TypedDict, total=False):
@@ -162,7 +154,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     deterministic.
     """
 
-    tool_choice: ToolChoice
+    tool_choice: ToolChoiceParam
     """How the model should use the provided tools.
 
     The model can use a specific tool, any available tool, or decide by itself.
@@ -270,45 +262,6 @@ class Metadata(TypedDict, total=False):
     this id to help detect abuse. Do not include any identifying information such as
     name, email address, or phone number.
     """
-
-
-class ToolChoiceToolChoiceAuto(TypedDict, total=False):
-    type: Required[Literal["auto"]]
-
-    disable_parallel_tool_use: bool
-    """Whether to disable parallel tool use.
-
-    Defaults to `false`. If set to `true`, the model will output at most one tool
-    use.
-    """
-
-
-class ToolChoiceToolChoiceAny(TypedDict, total=False):
-    type: Required[Literal["any"]]
-
-    disable_parallel_tool_use: bool
-    """Whether to disable parallel tool use.
-
-    Defaults to `false`. If set to `true`, the model will output exactly one tool
-    use.
-    """
-
-
-class ToolChoiceToolChoiceTool(TypedDict, total=False):
-    name: Required[str]
-    """The name of the tool to use."""
-
-    type: Required[Literal["tool"]]
-
-    disable_parallel_tool_use: bool
-    """Whether to disable parallel tool use.
-
-    Defaults to `false`. If set to `true`, the model will output exactly one tool
-    use.
-    """
-
-
-ToolChoice: TypeAlias = Union[ToolChoiceToolChoiceAuto, ToolChoiceToolChoiceAny, ToolChoiceToolChoiceTool]
 
 
 class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
