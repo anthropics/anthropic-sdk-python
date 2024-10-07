@@ -24,6 +24,7 @@ from ...._streaming import Stream, AsyncStream
 from ...._base_client import make_request_options
 from ....lib.streaming import PromptCachingBetaMessageStreamManager, AsyncPromptCachingBetaMessageStreamManager
 from ....types.model_param import ModelParam
+from ....types.tool_choice_param import ToolChoiceParam
 from ....types.beta.prompt_caching import message_create_params
 from ....types.beta.prompt_caching.prompt_caching_beta_message import PromptCachingBetaMessage
 from ....types.beta.prompt_caching.prompt_caching_beta_tool_param import PromptCachingBetaToolParam
@@ -68,7 +69,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -331,7 +332,7 @@ class Messages(SyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -594,7 +595,7 @@ class Messages(SyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -857,7 +858,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -990,7 +991,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -1253,7 +1254,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -1516,7 +1517,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -1779,7 +1780,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
