@@ -27,6 +27,7 @@ from ..types.tool_param import ToolParam
 from ..types.model_param import ModelParam
 from ..types.message_param import MessageParam
 from ..types.text_block_param import TextBlockParam
+from ..types.tool_choice_param import ToolChoiceParam
 from ..types.raw_message_stream_event import RawMessageStreamEvent
 
 __all__ = ["Messages", "AsyncMessages"]
@@ -64,7 +65,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -327,7 +328,7 @@ class Messages(SyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -590,7 +591,7 @@ class Messages(SyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -853,7 +854,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -926,7 +927,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -1189,7 +1190,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -1452,7 +1453,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -1715,7 +1716,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
+        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
