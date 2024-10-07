@@ -6,6 +6,10 @@ from typing import List, Union, Iterable, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from ...model_param import ModelParam
+from ...tool_choice_param import ToolChoiceParam
+from ...tool_choice_any_param import ToolChoiceAnyParam
+from ...tool_choice_auto_param import ToolChoiceAutoParam
+from ...tool_choice_tool_param import ToolChoiceToolParam
 from .prompt_caching_beta_tool_param import PromptCachingBetaToolParam
 from .prompt_caching_beta_message_param import PromptCachingBetaMessageParam
 from .prompt_caching_beta_text_block_param import PromptCachingBetaTextBlockParam
@@ -162,7 +166,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     deterministic.
     """
 
-    tool_choice: ToolChoice
+    tool_choice: ToolChoiceParam
     """How the model should use the provided tools.
 
     The model can use a specific tool, any available tool, or decide by itself.
@@ -272,43 +276,17 @@ class Metadata(TypedDict, total=False):
     """
 
 
-class ToolChoiceToolChoiceAuto(TypedDict, total=False):
-    type: Required[Literal["auto"]]
+ToolChoice: TypeAlias = ToolChoiceParam
+"""This is deprecated, `ToolChoiceParam` should be used instead"""
 
-    disable_parallel_tool_use: bool
-    """Whether to disable parallel tool use.
+ToolChoiceToolChoiceAuto: TypeAlias = ToolChoiceAutoParam
+"""This is deprecated, `ToolChoiceAutoParam` should be used instead"""
 
-    Defaults to `false`. If set to `true`, the model will output at most one tool
-    use.
-    """
+ToolChoiceToolChoiceAny: TypeAlias = ToolChoiceAnyParam
+"""This is deprecated, `ToolChoiceAnyParam` should be used instead"""
 
-
-class ToolChoiceToolChoiceAny(TypedDict, total=False):
-    type: Required[Literal["any"]]
-
-    disable_parallel_tool_use: bool
-    """Whether to disable parallel tool use.
-
-    Defaults to `false`. If set to `true`, the model will output exactly one tool
-    use.
-    """
-
-
-class ToolChoiceToolChoiceTool(TypedDict, total=False):
-    name: Required[str]
-    """The name of the tool to use."""
-
-    type: Required[Literal["tool"]]
-
-    disable_parallel_tool_use: bool
-    """Whether to disable parallel tool use.
-
-    Defaults to `false`. If set to `true`, the model will output exactly one tool
-    use.
-    """
-
-
-ToolChoice: TypeAlias = Union[ToolChoiceToolChoiceAuto, ToolChoiceToolChoiceAny, ToolChoiceToolChoiceTool]
+ToolChoiceToolChoiceTool: TypeAlias = ToolChoiceToolParam
+"""This is deprecated, `ToolChoiceToolParam` should be used instead"""
 
 
 class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):

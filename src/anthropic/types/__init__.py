@@ -16,6 +16,7 @@ from .tool_use_block import ToolUseBlock as ToolUseBlock
 from .input_json_delta import InputJSONDelta as InputJSONDelta
 from .text_block_param import TextBlockParam as TextBlockParam
 from .image_block_param import ImageBlockParam as ImageBlockParam
+from .tool_choice_param import ToolChoiceParam as ToolChoiceParam
 from .message_stop_event import MessageStopEvent as MessageStopEvent
 from .message_delta_event import MessageDeltaEvent as MessageDeltaEvent
 from .message_delta_usage import MessageDeltaUsage as MessageDeltaUsage
@@ -23,7 +24,10 @@ from .message_start_event import MessageStartEvent as MessageStartEvent
 from .message_stream_event import MessageStreamEvent as MessageStreamEvent
 from .tool_use_block_param import ToolUseBlockParam as ToolUseBlockParam
 from .message_create_params import MessageCreateParams as MessageCreateParams
+from .tool_choice_any_param import ToolChoiceAnyParam as ToolChoiceAnyParam
 from .raw_message_stop_event import RawMessageStopEvent as RawMessageStopEvent
+from .tool_choice_auto_param import ToolChoiceAutoParam as ToolChoiceAutoParam
+from .tool_choice_tool_param import ToolChoiceToolParam as ToolChoiceToolParam
 from .raw_message_delta_event import RawMessageDeltaEvent as RawMessageDeltaEvent
 from .raw_message_start_event import RawMessageStartEvent as RawMessageStartEvent
 from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockParam
