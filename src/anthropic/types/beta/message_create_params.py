@@ -3,30 +3,18 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable
-from typing_extensions import Literal, Required, Annotated, TypeAlias, TypedDict
+from typing_extensions import Literal, Required, Annotated, TypedDict
 
-from ...._utils import PropertyInfo
-from ...model_param import ModelParam
-from ...metadata_param import MetadataParam
-from ...tool_choice_param import ToolChoiceParam
-from ...anthropic_beta_param import AnthropicBetaParam
-from ...tool_choice_any_param import ToolChoiceAnyParam
-from ...tool_choice_auto_param import ToolChoiceAutoParam
-from ...tool_choice_tool_param import ToolChoiceToolParam
-from .prompt_caching_beta_tool_param import PromptCachingBetaToolParam
-from .prompt_caching_beta_message_param import PromptCachingBetaMessageParam
-from .prompt_caching_beta_text_block_param import PromptCachingBetaTextBlockParam
+from ..._utils import PropertyInfo
+from ..model_param import ModelParam
+from .beta_tool_param import BetaToolParam
+from .beta_message_param import BetaMessageParam
+from .beta_metadata_param import BetaMetadataParam
+from ..anthropic_beta_param import AnthropicBetaParam
+from .beta_text_block_param import BetaTextBlockParam
+from .beta_tool_choice_param import BetaToolChoiceParam
 
-__all__ = [
-    "MessageCreateParamsBase",
-    "Metadata",
-    "ToolChoice",
-    "ToolChoiceToolChoiceAuto",
-    "ToolChoiceToolChoiceAny",
-    "ToolChoiceToolChoiceTool",
-    "MessageCreateParamsNonStreaming",
-    "MessageCreateParamsStreaming",
-]
+__all__ = ["MessageCreateParamsBase", "MessageCreateParamsNonStreaming", "MessageCreateParamsStreaming"]
 
 
 class MessageCreateParamsBase(TypedDict, total=False):
@@ -40,7 +28,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     [models](https://docs.anthropic.com/en/docs/models-overview) for details.
     """
 
-    messages: Required[Iterable[PromptCachingBetaMessageParam]]
+    messages: Required[Iterable[BetaMessageParam]]
     """Input messages.
 
     Our models are trained to operate on alternating `user` and `assistant`
@@ -135,7 +123,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     details and options.
     """
 
-    metadata: MetadataParam
+    metadata: BetaMetadataParam
     """An object describing metadata about the request."""
 
     stop_sequences: List[str]
@@ -150,7 +138,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     and the response `stop_sequence` value will contain the matched stop sequence.
     """
 
-    system: Union[str, Iterable[PromptCachingBetaTextBlockParam]]
+    system: Union[str, Iterable[BetaTextBlockParam]]
     """System prompt.
 
     A system prompt is a way of providing context and instructions to Claude, such
@@ -169,13 +157,13 @@ class MessageCreateParamsBase(TypedDict, total=False):
     deterministic.
     """
 
-    tool_choice: ToolChoiceParam
+    tool_choice: BetaToolChoiceParam
     """How the model should use the provided tools.
 
     The model can use a specific tool, any available tool, or decide by itself.
     """
 
-    tools: Iterable[PromptCachingBetaToolParam]
+    tools: Iterable[BetaToolParam]
     """Definitions of tools that the model may use.
 
     If you include `tools` in your API request, the model may return `tool_use`
@@ -270,22 +258,6 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
-
-
-Metadata: TypeAlias = MetadataParam
-"""This is deprecated, `MetadataParam` should be used instead"""
-
-ToolChoice: TypeAlias = ToolChoiceParam
-"""This is deprecated, `ToolChoiceParam` should be used instead"""
-
-ToolChoiceToolChoiceAuto: TypeAlias = ToolChoiceAutoParam
-"""This is deprecated, `ToolChoiceAutoParam` should be used instead"""
-
-ToolChoiceToolChoiceAny: TypeAlias = ToolChoiceAnyParam
-"""This is deprecated, `ToolChoiceAnyParam` should be used instead"""
-
-ToolChoiceToolChoiceTool: TypeAlias = ToolChoiceToolParam
-"""This is deprecated, `ToolChoiceToolParam` should be used instead"""
 
 
 class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
