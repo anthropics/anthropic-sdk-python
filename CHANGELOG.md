@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.36.0 (2024-10-08)
+
+Full Changelog: [v0.35.0...v0.36.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.35.0...v0.36.0)
+
+### Features
+
+* **api:** add message batches api ([cd1ffcb](https://github.com/anthropics/anthropic-sdk-python/commit/cd1ffcb5e506c62e82e6f1365718949840724b9a))
+
+
+### Bug Fixes
+
+* **client:** avoid OverflowError with very large retry counts ([#676](https://github.com/anthropics/anthropic-sdk-python/issues/676)) ([93d6eeb](https://github.com/anthropics/anthropic-sdk-python/commit/93d6eeb80e63424b8a97f949d5354052b6b16cf4))
+
+
+### Chores
+
+* add repr to PageInfo class ([#678](https://github.com/anthropics/anthropic-sdk-python/issues/678)) ([53e87e8](https://github.com/anthropics/anthropic-sdk-python/commit/53e87e8abed82fe90fb2d877f69a2cc695662e86))
+
+
+### Refactors
+
+* **types:** improve metadata type names ([#683](https://github.com/anthropics/anthropic-sdk-python/issues/683)) ([59f2088](https://github.com/anthropics/anthropic-sdk-python/commit/59f208855039bb7b31266ae5e12d7454ecd69f3b))
+* **types:** improve metadata types ([#682](https://github.com/anthropics/anthropic-sdk-python/issues/682)) ([e037d1c](https://github.com/anthropics/anthropic-sdk-python/commit/e037d1c310a6487e4f94a751232399e75f10b46d))
+* **types:** improve tool type names ([#679](https://github.com/anthropics/anthropic-sdk-python/issues/679)) ([f6f3afe](https://github.com/anthropics/anthropic-sdk-python/commit/f6f3afe2e26ba004a24f7c3bdd36c7b4c1ae4697))
+* **types:** improve tool type names ([#680](https://github.com/anthropics/anthropic-sdk-python/issues/680)) ([fe2e417](https://github.com/anthropics/anthropic-sdk-python/commit/fe2e4178dbdea42e84fd925e9e259fef6134c3d3))
+
 ## 0.35.0 (2024-10-04)
 
 Full Changelog: [v0.34.2...v0.35.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.34.2...v0.35.0)
