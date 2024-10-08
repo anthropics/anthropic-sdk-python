@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from typing import List, Union, Optional
+from typing import List, Union
 from typing_extensions import Literal, Required, TypedDict
 
 from .model_param import ModelParam
+from .metadata_param import MetadataParam
 
 __all__ = [
     "CompletionRequestStreamingMetadata",
@@ -13,7 +14,6 @@ __all__ = [
     "CompletionRequestNonStreaming",
     "CompletionRequestStreaming",
     "CompletionCreateParamsBase",
-    "Metadata",
     "CompletionCreateParamsNonStreaming",
     "CompletionCreateParamsStreaming",
 ]
@@ -50,7 +50,7 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     details.
     """
 
-    metadata: Metadata
+    metadata: MetadataParam
     """An object describing metadata about the request."""
 
     stop_sequences: List[str]
@@ -95,16 +95,6 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     """
 
 
-class Metadata(TypedDict, total=False):
-    user_id: Optional[str]
-    """An external identifier for the user who is associated with the request.
-
-    This should be a uuid, hash value, or other opaque identifier. Anthropic may use
-    this id to help detect abuse. Do not include any identifying information such as
-    name, email address, or phone number.
-    """
-
-
 class CompletionCreateParamsNonStreaming(CompletionCreateParamsBase, total=False):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
@@ -121,11 +111,11 @@ class CompletionCreateParamsStreaming(CompletionCreateParamsBase):
     """
 
 
-CompletionRequestStreamingMetadata = Metadata
-"""This is deprecated, `Metadata` should be used instead"""
+CompletionRequestStreamingMetadata = MetadataParam
+"""This is deprecated, `MetadataParam` should be used instead"""
 
-CompletionRequestNonStreamingMetadata = Metadata
-"""This is deprecated, `Metadata` should be used instead"""
+CompletionRequestNonStreamingMetadata = MetadataParam
+"""This is deprecated, `MetadataParam` should be used instead"""
 
 CompletionRequestNonStreaming = CompletionCreateParamsNonStreaming
 """This is deprecated, `CompletionCreateParamsNonStreaming` should be used instead"""
