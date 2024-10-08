@@ -3,12 +3,19 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable
-from functools import partial
 from typing_extensions import Literal, overload
 
 import httpx
 
 from .... import _legacy_response
+from .batches import (
+    Batches,
+    AsyncBatches,
+    BatchesWithRawResponse,
+    AsyncBatchesWithRawResponse,
+    BatchesWithStreamingResponse,
+    AsyncBatchesWithStreamingResponse,
+)
 from ...._types import NOT_GIVEN, Body, Query, Headers, NotGiven
 from ...._utils import (
     is_given,
@@ -22,25 +29,26 @@ from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
 from ...._constants import DEFAULT_TIMEOUT
 from ...._streaming import Stream, AsyncStream
+from ....types.beta import message_create_params
 from ...._base_client import make_request_options
-from ....lib.streaming import PromptCachingBetaMessageStreamManager, AsyncPromptCachingBetaMessageStreamManager
 from ....types.model_param import ModelParam
-from ....types.metadata_param import MetadataParam
-from ....types.tool_choice_param import ToolChoiceParam
-from ....types.beta.prompt_caching import message_create_params
+from ....types.beta.beta_message import BetaMessage
 from ....types.anthropic_beta_param import AnthropicBetaParam
-from ....types.beta.prompt_caching.prompt_caching_beta_message import PromptCachingBetaMessage
-from ....types.beta.prompt_caching.prompt_caching_beta_tool_param import PromptCachingBetaToolParam
-from ....types.beta.prompt_caching.prompt_caching_beta_message_param import PromptCachingBetaMessageParam
-from ....types.beta.prompt_caching.prompt_caching_beta_text_block_param import PromptCachingBetaTextBlockParam
-from ....types.beta.prompt_caching.raw_prompt_caching_beta_message_stream_event import (
-    RawPromptCachingBetaMessageStreamEvent,
-)
+from ....types.beta.beta_tool_param import BetaToolParam
+from ....types.beta.beta_message_param import BetaMessageParam
+from ....types.beta.beta_metadata_param import BetaMetadataParam
+from ....types.beta.beta_text_block_param import BetaTextBlockParam
+from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
+from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
 
 __all__ = ["Messages", "AsyncMessages"]
 
 
 class Messages(SyncAPIResource):
+    @cached_property
+    def batches(self) -> Batches:
+        return Batches(self._client)
+
     @cached_property
     def with_raw_response(self) -> MessagesWithRawResponse:
         """
@@ -65,15 +73,15 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[PromptCachingBetaMessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -83,7 +91,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> PromptCachingBetaMessage:
+    ) -> BetaMessage:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -329,15 +337,15 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[PromptCachingBetaMessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -347,7 +355,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Stream[RawPromptCachingBetaMessageStreamEvent]:
+    ) -> Stream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -593,15 +601,15 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[PromptCachingBetaMessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -611,7 +619,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> PromptCachingBetaMessage | Stream[RawPromptCachingBetaMessageStreamEvent]:
+    ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -857,15 +865,15 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[PromptCachingBetaMessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -875,16 +883,15 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> PromptCachingBetaMessage | Stream[RawPromptCachingBetaMessageStreamEvent]:
+    ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
-        extra_headers = {"anthropic-beta": "prompt-caching-2024-07-31", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/messages?beta=prompt_caching",
+            "/v1/messages?beta=true",
             body=maybe_transform(
                 {
                     "max_tokens": max_tokens,
@@ -905,72 +912,17 @@ class Messages(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=PromptCachingBetaMessage,
+            cast_to=BetaMessage,
             stream=stream or False,
-            stream_cls=Stream[RawPromptCachingBetaMessageStreamEvent],
+            stream_cls=Stream[BetaRawMessageStreamEvent],
         )
-
-    def stream(
-        self,
-        *,
-        max_tokens: int,
-        messages: Iterable[PromptCachingBetaMessageParam],
-        model: ModelParam,
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> PromptCachingBetaMessageStreamManager:
-        """Create a Message stream"""
-        if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
-            timeout = 600
-
-        extra_headers = {
-            "anthropic-beta": "prompt-caching-2024-07-31",
-            "X-Stainless-Stream-Helper": "beta.prompt_caching.messages",
-            **(extra_headers or {}),
-        }
-        request = partial(
-            self._post,
-            "/v1/messages?beta=prompt_caching",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "metadata": metadata,
-                    "stop_sequences": stop_sequences,
-                    "stream": True,
-                    "system": system,
-                    "temperature": temperature,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                    "top_k": top_k,
-                    "top_p": top_p,
-                },
-                message_create_params.MessageCreateParams,
-            ),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=PromptCachingBetaMessage,
-            stream=True,
-            stream_cls=Stream[RawPromptCachingBetaMessageStreamEvent],
-        )
-        return PromptCachingBetaMessageStreamManager(request)
 
 
 class AsyncMessages(AsyncAPIResource):
+    @cached_property
+    def batches(self) -> AsyncBatches:
+        return AsyncBatches(self._client)
+
     @cached_property
     def with_raw_response(self) -> AsyncMessagesWithRawResponse:
         """
@@ -995,15 +947,15 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[PromptCachingBetaMessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -1013,7 +965,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> PromptCachingBetaMessage:
+    ) -> BetaMessage:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -1259,15 +1211,15 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[PromptCachingBetaMessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -1277,7 +1229,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncStream[RawPromptCachingBetaMessageStreamEvent]:
+    ) -> AsyncStream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -1523,15 +1475,15 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[PromptCachingBetaMessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -1541,7 +1493,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> PromptCachingBetaMessage | AsyncStream[RawPromptCachingBetaMessageStreamEvent]:
+    ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -1787,15 +1739,15 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[PromptCachingBetaMessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -1805,16 +1757,15 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> PromptCachingBetaMessage | AsyncStream[RawPromptCachingBetaMessageStreamEvent]:
+    ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
-        extra_headers = {"anthropic-beta": "prompt-caching-2024-07-31", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/messages?beta=prompt_caching",
+            "/v1/messages?beta=true",
             body=await async_maybe_transform(
                 {
                     "max_tokens": max_tokens,
@@ -1835,68 +1786,10 @@ class AsyncMessages(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=PromptCachingBetaMessage,
+            cast_to=BetaMessage,
             stream=stream or False,
-            stream_cls=AsyncStream[RawPromptCachingBetaMessageStreamEvent],
+            stream_cls=AsyncStream[BetaRawMessageStreamEvent],
         )
-
-    def stream(
-        self,
-        *,
-        max_tokens: int,
-        messages: Iterable[PromptCachingBetaMessageParam],
-        model: ModelParam,
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: message_create_params.ToolChoice | NotGiven = NOT_GIVEN,
-        tools: Iterable[PromptCachingBetaToolParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncPromptCachingBetaMessageStreamManager:
-        """Create a Message stream"""
-        if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
-            timeout = 600
-
-        extra_headers = {
-            "anthropic-beta": "prompt-caching-2024-07-31",
-            "X-Stainless-Stream-Helper": "beta.prompt_caching.messages",
-            **(extra_headers or {}),
-        }
-        request = self._post(
-            "/v1/messages?beta=prompt_caching",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "metadata": metadata,
-                    "stop_sequences": stop_sequences,
-                    "stream": True,
-                    "system": system,
-                    "temperature": temperature,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                    "top_k": top_k,
-                    "top_p": top_p,
-                },
-                message_create_params.MessageCreateParams,
-            ),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=PromptCachingBetaMessage,
-            stream=True,
-            stream_cls=AsyncStream[RawPromptCachingBetaMessageStreamEvent],
-        )
-        return AsyncPromptCachingBetaMessageStreamManager(request)
 
 
 class MessagesWithRawResponse:
@@ -1907,6 +1800,10 @@ class MessagesWithRawResponse:
             messages.create,
         )
 
+    @cached_property
+    def batches(self) -> BatchesWithRawResponse:
+        return BatchesWithRawResponse(self._messages.batches)
+
 
 class AsyncMessagesWithRawResponse:
     def __init__(self, messages: AsyncMessages) -> None:
@@ -1915,6 +1812,10 @@ class AsyncMessagesWithRawResponse:
         self.create = _legacy_response.async_to_raw_response_wrapper(
             messages.create,
         )
+
+    @cached_property
+    def batches(self) -> AsyncBatchesWithRawResponse:
+        return AsyncBatchesWithRawResponse(self._messages.batches)
 
 
 class MessagesWithStreamingResponse:
@@ -1925,6 +1826,10 @@ class MessagesWithStreamingResponse:
             messages.create,
         )
 
+    @cached_property
+    def batches(self) -> BatchesWithStreamingResponse:
+        return BatchesWithStreamingResponse(self._messages.batches)
+
 
 class AsyncMessagesWithStreamingResponse:
     def __init__(self, messages: AsyncMessages) -> None:
@@ -1933,3 +1838,7 @@ class AsyncMessagesWithStreamingResponse:
         self.create = async_to_streamed_response_wrapper(
             messages.create,
         )
+
+    @cached_property
+    def batches(self) -> AsyncBatchesWithStreamingResponse:
+        return AsyncBatchesWithStreamingResponse(self._messages.batches)

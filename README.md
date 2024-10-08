@@ -173,6 +173,50 @@ message.usage
 # Usage(input_tokens=25, output_tokens=13)
 ```
 
+## Message Batches
+
+This SDK provides beta support for the [Message Batches API](https://docs.anthropic.com/en/docs/build-with-claude/message-batches) under the `client.beta.messages.batches` namespace.
+
+
+### Creating a batch
+
+Message Batches take the exact same request params as the standard Messages API:
+
+```python
+await client.beta.messages.batches.create(
+    requests=[
+        {
+            "custom_id": "my-first-request",
+            "params": {
+                "model": "claude-3-5-sonnet-20240620",
+                "max_tokens": 1024,
+                "messages": [{"role": "user", "content": "Hello, world"}],
+            },
+        },
+        {
+            "custom_id": "my-second-request",
+            "params": {
+                "model": "claude-3-5-sonnet-20240620",
+                "max_tokens": 1024,
+                "messages": [{"role": "user", "content": "Hi again, friend"}],
+            },
+        },
+    ]
+)
+```
+
+
+### Getting results from a batch
+
+Once a Message Batch has been processed, indicated by `.processing_status === 'ended'`, you can access the results with `.batches.results()`
+
+```python
+result_stream = await client.beta.messages.batches.results(batch_id)
+async for entry in result_stream:
+    if entry.result.type == "succeeded":
+        print(entry.result.message.content)
+```
+
 ## Tool use
 
 This SDK provides support for tool use, aka function calling. More details can be found in [the documentation](https://docs.anthropic.com/claude/docs/tool-use).
@@ -249,6 +293,77 @@ Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typ
 - Converting to a dictionary, `model.to_dict()`
 
 Typed requests and responses provide autocomplete and documentation within your editor. If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `basic`.
+
+## Pagination
+
+List methods in the Anthropic API are paginated.
+
+This library provides auto-paginating iterators with each list response, so you do not have to request successive pages manually:
+
+```python
+from anthropic import Anthropic
+
+client = Anthropic()
+
+all_batches = []
+# Automatically fetches more pages as needed.
+for batch in client.beta.messages.batches.list(
+    limit=20,
+):
+    # Do something with batch here
+    all_batches.append(batch)
+print(all_batches)
+```
+
+Or, asynchronously:
+
+```python
+import asyncio
+from anthropic import AsyncAnthropic
+
+client = AsyncAnthropic()
+
+
+async def main() -> None:
+    all_batches = []
+    # Iterate through items across all pages, issuing requests as needed.
+    async for batch in client.beta.messages.batches.list(
+        limit=20,
+    ):
+        all_batches.append(batch)
+    print(all_batches)
+
+
+asyncio.run(main())
+```
+
+Alternatively, you can use the `.has_next_page()`, `.next_page_info()`, or `.get_next_page()` methods for more granular control working with pages:
+
+```python
+first_page = await client.beta.messages.batches.list(
+    limit=20,
+)
+if first_page.has_next_page():
+    print(f"will fetch next page using these details: {first_page.next_page_info()}")
+    next_page = await first_page.get_next_page()
+    print(f"number of items we just fetched: {len(next_page.data)}")
+
+# Remove `await` for non-async usage.
+```
+
+Or just work directly with the returned data:
+
+```python
+first_page = await client.beta.messages.batches.list(
+    limit=20,
+)
+
+print(f"next page cursor: {first_page.last_id}")  # => "next page cursor: ..."
+for batch in first_page.data:
+    print(batch.id)
+
+# Remove `await` for non-async usage.
+```
 
 ## Handling errors
 
