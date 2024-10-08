@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.37.0 (2024-10-08)
+
+Full Changelog: [v0.36.0...v0.37.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.36.0...v0.37.0)
+
+### Features
+
+* **api:** add message batches api ([#685](https://github.com/anthropics/anthropic-sdk-python/issues/685)) ([80984a6](https://github.com/anthropics/anthropic-sdk-python/commit/80984a6b4dcc95d02d667cadaed0fd7f875905de))
+
 ## 0.36.0 (2024-10-08)
 
 Full Changelog: [v0.35.0...v0.36.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.35.0...v0.36.0)
