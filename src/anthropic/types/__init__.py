@@ -12,6 +12,7 @@ from .tool_param import ToolParam as ToolParam
 from .model_param import ModelParam as ModelParam
 from .content_block import ContentBlock as ContentBlock
 from .message_param import MessageParam as MessageParam
+from .metadata_param import MetadataParam as MetadataParam
 from .tool_use_block import ToolUseBlock as ToolUseBlock
 from .input_json_delta import InputJSONDelta as InputJSONDelta
 from .text_block_param import TextBlockParam as TextBlockParam

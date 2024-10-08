@@ -17,6 +17,7 @@ from anthropic.types import (
     MessageStartEvent,
     MessageStopEvent,
     MessageStreamEvent,
+    Metadata,
     Model,
     RawContentBlockDeltaEvent,
     RawContentBlockStartEvent,

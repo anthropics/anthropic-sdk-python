@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from typing import List, Union, Iterable, Optional
+from typing import List, Union, Iterable
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .tool_param import ToolParam
 from .model_param import ModelParam
 from .message_param import MessageParam
+from .metadata_param import MetadataParam
 from .text_block_param import TextBlockParam
 from .tool_choice_param import ToolChoiceParam
 from .tool_choice_any_param import ToolChoiceAnyParam
@@ -132,7 +133,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     details and options.
     """
 
-    metadata: Metadata
+    metadata: MetadataParam
     """An object describing metadata about the request."""
 
     stop_sequences: List[str]
@@ -266,15 +267,8 @@ class MessageCreateParamsBase(TypedDict, total=False):
     """
 
 
-class Metadata(TypedDict, total=False):
-    user_id: Optional[str]
-    """An external identifier for the user who is associated with the request.
-
-    This should be a uuid, hash value, or other opaque identifier. Anthropic may use
-    this id to help detect abuse. Do not include any identifying information such as
-    name, email address, or phone number.
-    """
-
+Metadata: TypeAlias = MetadataParam
+"""This is deprecated, `MetadataParam` should be used instead"""
 
 ToolChoice: TypeAlias = ToolChoiceParam
 """This is deprecated, `ToolChoiceParam` should be used instead"""
