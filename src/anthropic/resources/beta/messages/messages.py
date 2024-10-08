@@ -7,34 +7,48 @@ from typing_extensions import Literal, overload
 
 import httpx
 
-from .. import _legacy_response
-from ..types import message_create_params
-from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven
-from .._utils import (
+from .... import _legacy_response
+from .batches import (
+    Batches,
+    AsyncBatches,
+    BatchesWithRawResponse,
+    AsyncBatchesWithRawResponse,
+    BatchesWithStreamingResponse,
+    AsyncBatchesWithStreamingResponse,
+)
+from ...._types import NOT_GIVEN, Body, Query, Headers, NotGiven
+from ...._utils import (
     is_given,
     required_args,
     maybe_transform,
+    strip_not_given,
     async_maybe_transform,
 )
-from .._compat import cached_property
-from .._resource import SyncAPIResource, AsyncAPIResource
-from .._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
-from .._constants import DEFAULT_TIMEOUT
-from .._streaming import Stream, AsyncStream
-from .._base_client import make_request_options
-from ..types.message import Message
-from ..types.tool_param import ToolParam
-from ..types.model_param import ModelParam
-from ..types.message_param import MessageParam
-from ..types.metadata_param import MetadataParam
-from ..types.text_block_param import TextBlockParam
-from ..types.tool_choice_param import ToolChoiceParam
-from ..types.raw_message_stream_event import RawMessageStreamEvent
+from ...._compat import cached_property
+from ...._resource import SyncAPIResource, AsyncAPIResource
+from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ...._constants import DEFAULT_TIMEOUT
+from ...._streaming import Stream, AsyncStream
+from ....types.beta import message_create_params
+from ...._base_client import make_request_options
+from ....types.model_param import ModelParam
+from ....types.beta.beta_message import BetaMessage
+from ....types.anthropic_beta_param import AnthropicBetaParam
+from ....types.beta.beta_tool_param import BetaToolParam
+from ....types.beta.beta_message_param import BetaMessageParam
+from ....types.beta.beta_metadata_param import BetaMetadataParam
+from ....types.beta.beta_text_block_param import BetaTextBlockParam
+from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
+from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
 
 __all__ = ["Messages", "AsyncMessages"]
 
 
 class Messages(SyncAPIResource):
+    @cached_property
+    def batches(self) -> Batches:
+        return Batches(self._client)
+
     @cached_property
     def with_raw_response(self) -> MessagesWithRawResponse:
         """
@@ -59,24 +73,25 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message:
+    ) -> BetaMessage:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -305,6 +320,8 @@ class Messages(SyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          betas: Optional header to specify the beta version(s) you want to use.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -320,24 +337,25 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Stream[RawMessageStreamEvent]:
+    ) -> Stream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -565,6 +583,8 @@ class Messages(SyncAPIResource):
 
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
+
+          betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
 
@@ -581,24 +601,25 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message | Stream[RawMessageStreamEvent]:
+    ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -826,6 +847,8 @@ class Messages(SyncAPIResource):
 
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
+
+          betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
 
@@ -842,28 +865,33 @@ class Messages(SyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message | Stream[RawMessageStreamEvent]:
+    ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **(extra_headers or {}),
+        }
         return self._post(
-            "/v1/messages",
+            "/v1/messages?beta=true",
             body=maybe_transform(
                 {
                     "max_tokens": max_tokens,
@@ -884,13 +912,17 @@ class Messages(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=Message,
+            cast_to=BetaMessage,
             stream=stream or False,
-            stream_cls=Stream[RawMessageStreamEvent],
+            stream_cls=Stream[BetaRawMessageStreamEvent],
         )
 
 
 class AsyncMessages(AsyncAPIResource):
+    @cached_property
+    def batches(self) -> AsyncBatches:
+        return AsyncBatches(self._client)
+
     @cached_property
     def with_raw_response(self) -> AsyncMessagesWithRawResponse:
         """
@@ -915,24 +947,25 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message:
+    ) -> BetaMessage:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -1161,6 +1194,8 @@ class AsyncMessages(AsyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          betas: Optional header to specify the beta version(s) you want to use.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -1176,24 +1211,25 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncStream[RawMessageStreamEvent]:
+    ) -> AsyncStream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -1421,6 +1457,8 @@ class AsyncMessages(AsyncAPIResource):
 
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
+
+          betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
 
@@ -1437,24 +1475,25 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message | AsyncStream[RawMessageStreamEvent]:
+    ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
         model will generate the next message in the conversation.
@@ -1682,6 +1721,8 @@ class AsyncMessages(AsyncAPIResource):
 
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
+
+          betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
 
@@ -1698,28 +1739,33 @@ class AsyncMessages(AsyncAPIResource):
         self,
         *,
         max_tokens: int,
-        messages: Iterable[MessageParam],
+        messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolParam] | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> Message | AsyncStream[RawMessageStreamEvent]:
+    ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **(extra_headers or {}),
+        }
         return await self._post(
-            "/v1/messages",
+            "/v1/messages?beta=true",
             body=await async_maybe_transform(
                 {
                     "max_tokens": max_tokens,
@@ -1740,9 +1786,9 @@ class AsyncMessages(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=Message,
+            cast_to=BetaMessage,
             stream=stream or False,
-            stream_cls=AsyncStream[RawMessageStreamEvent],
+            stream_cls=AsyncStream[BetaRawMessageStreamEvent],
         )
 
 
@@ -1754,6 +1800,10 @@ class MessagesWithRawResponse:
             messages.create,
         )
 
+    @cached_property
+    def batches(self) -> BatchesWithRawResponse:
+        return BatchesWithRawResponse(self._messages.batches)
+
 
 class AsyncMessagesWithRawResponse:
     def __init__(self, messages: AsyncMessages) -> None:
@@ -1762,6 +1812,10 @@ class AsyncMessagesWithRawResponse:
         self.create = _legacy_response.async_to_raw_response_wrapper(
             messages.create,
         )
+
+    @cached_property
+    def batches(self) -> AsyncBatchesWithRawResponse:
+        return AsyncBatchesWithRawResponse(self._messages.batches)
 
 
 class MessagesWithStreamingResponse:
@@ -1772,6 +1826,10 @@ class MessagesWithStreamingResponse:
             messages.create,
         )
 
+    @cached_property
+    def batches(self) -> BatchesWithStreamingResponse:
+        return BatchesWithStreamingResponse(self._messages.batches)
+
 
 class AsyncMessagesWithStreamingResponse:
     def __init__(self, messages: AsyncMessages) -> None:
@@ -1780,3 +1838,7 @@ class AsyncMessagesWithStreamingResponse:
         self.create = async_to_streamed_response_wrapper(
             messages.create,
         )
+
+    @cached_property
+    def batches(self) -> AsyncBatchesWithStreamingResponse:
+        return AsyncBatchesWithStreamingResponse(self._messages.batches)

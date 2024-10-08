@@ -137,6 +137,77 @@ Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typ
 
 Typed requests and responses provide autocomplete and documentation within your editor. If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `basic`.
 
+## Pagination
+
+List methods in the Anthropic API are paginated.
+
+This library provides auto-paginating iterators with each list response, so you do not have to request successive pages manually:
+
+```python
+from anthropic import Anthropic
+
+client = Anthropic()
+
+all_batches = []
+# Automatically fetches more pages as needed.
+for batch in client.beta.messages.batches.list(
+    limit=20,
+):
+    # Do something with batch here
+    all_batches.append(batch)
+print(all_batches)
+```
+
+Or, asynchronously:
+
+```python
+import asyncio
+from anthropic import AsyncAnthropic
+
+client = AsyncAnthropic()
+
+
+async def main() -> None:
+    all_batches = []
+    # Iterate through items across all pages, issuing requests as needed.
+    async for batch in client.beta.messages.batches.list(
+        limit=20,
+    ):
+        all_batches.append(batch)
+    print(all_batches)
+
+
+asyncio.run(main())
+```
+
+Alternatively, you can use the `.has_next_page()`, `.next_page_info()`, or `.get_next_page()` methods for more granular control working with pages:
+
+```python
+first_page = await client.beta.messages.batches.list(
+    limit=20,
+)
+if first_page.has_next_page():
+    print(f"will fetch next page using these details: {first_page.next_page_info()}")
+    next_page = await first_page.get_next_page()
+    print(f"number of items we just fetched: {len(next_page.data)}")
+
+# Remove `await` for non-async usage.
+```
+
+Or just work directly with the returned data:
+
+```python
+first_page = await client.beta.messages.batches.list(
+    limit=20,
+)
+
+print(f"next page cursor: {first_page.last_id}")  # => "next page cursor: ..."
+for batch in first_page.data:
+    print(batch.id)
+
+# Remove `await` for non-async usage.
+```
+
 ## Handling errors
 
 When the library is unable to connect to the API (for example, due to network connection problems or a timeout), a subclass of `anthropic.APIConnectionError` is raised.

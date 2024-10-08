@@ -9,7 +9,7 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
-from anthropic.types.beta.prompt_caching import PromptCachingBetaMessage
+from anthropic.types.beta import BetaMessage
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -19,7 +19,7 @@ class TestMessages:
 
     @parametrize
     def test_method_create_overload_1(self, client: Anthropic) -> None:
-        message = client.beta.prompt_caching.messages.create(
+        message = client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -29,11 +29,11 @@ class TestMessages:
             ],
             model="claude-3-5-sonnet-20240620",
         )
-        assert_matches_type(PromptCachingBetaMessage, message, path=["response"])
+        assert_matches_type(BetaMessage, message, path=["response"])
 
     @parametrize
     def test_method_create_with_all_params_overload_1(self, client: Anthropic) -> None:
-        message = client.beta.prompt_caching.messages.create(
+        message = client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -117,11 +117,11 @@ class TestMessages:
             top_p=0.7,
             betas=["string", "string", "string"],
         )
-        assert_matches_type(PromptCachingBetaMessage, message, path=["response"])
+        assert_matches_type(BetaMessage, message, path=["response"])
 
     @parametrize
     def test_raw_response_create_overload_1(self, client: Anthropic) -> None:
-        response = client.beta.prompt_caching.messages.with_raw_response.create(
+        response = client.beta.messages.with_raw_response.create(
             max_tokens=1024,
             messages=[
                 {
@@ -135,11 +135,11 @@ class TestMessages:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         message = response.parse()
-        assert_matches_type(PromptCachingBetaMessage, message, path=["response"])
+        assert_matches_type(BetaMessage, message, path=["response"])
 
     @parametrize
     def test_streaming_response_create_overload_1(self, client: Anthropic) -> None:
-        with client.beta.prompt_caching.messages.with_streaming_response.create(
+        with client.beta.messages.with_streaming_response.create(
             max_tokens=1024,
             messages=[
                 {
@@ -153,13 +153,13 @@ class TestMessages:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             message = response.parse()
-            assert_matches_type(PromptCachingBetaMessage, message, path=["response"])
+            assert_matches_type(BetaMessage, message, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
     @parametrize
     def test_method_create_overload_2(self, client: Anthropic) -> None:
-        message_stream = client.beta.prompt_caching.messages.create(
+        message_stream = client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -174,7 +174,7 @@ class TestMessages:
 
     @parametrize
     def test_method_create_with_all_params_overload_2(self, client: Anthropic) -> None:
-        message_stream = client.beta.prompt_caching.messages.create(
+        message_stream = client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -262,7 +262,7 @@ class TestMessages:
 
     @parametrize
     def test_raw_response_create_overload_2(self, client: Anthropic) -> None:
-        response = client.beta.prompt_caching.messages.with_raw_response.create(
+        response = client.beta.messages.with_raw_response.create(
             max_tokens=1024,
             messages=[
                 {
@@ -280,7 +280,7 @@ class TestMessages:
 
     @parametrize
     def test_streaming_response_create_overload_2(self, client: Anthropic) -> None:
-        with client.beta.prompt_caching.messages.with_streaming_response.create(
+        with client.beta.messages.with_streaming_response.create(
             max_tokens=1024,
             messages=[
                 {
@@ -305,7 +305,7 @@ class TestAsyncMessages:
 
     @parametrize
     async def test_method_create_overload_1(self, async_client: AsyncAnthropic) -> None:
-        message = await async_client.beta.prompt_caching.messages.create(
+        message = await async_client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -315,11 +315,11 @@ class TestAsyncMessages:
             ],
             model="claude-3-5-sonnet-20240620",
         )
-        assert_matches_type(PromptCachingBetaMessage, message, path=["response"])
+        assert_matches_type(BetaMessage, message, path=["response"])
 
     @parametrize
     async def test_method_create_with_all_params_overload_1(self, async_client: AsyncAnthropic) -> None:
-        message = await async_client.beta.prompt_caching.messages.create(
+        message = await async_client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -403,11 +403,11 @@ class TestAsyncMessages:
             top_p=0.7,
             betas=["string", "string", "string"],
         )
-        assert_matches_type(PromptCachingBetaMessage, message, path=["response"])
+        assert_matches_type(BetaMessage, message, path=["response"])
 
     @parametrize
     async def test_raw_response_create_overload_1(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.prompt_caching.messages.with_raw_response.create(
+        response = await async_client.beta.messages.with_raw_response.create(
             max_tokens=1024,
             messages=[
                 {
@@ -421,11 +421,11 @@ class TestAsyncMessages:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         message = response.parse()
-        assert_matches_type(PromptCachingBetaMessage, message, path=["response"])
+        assert_matches_type(BetaMessage, message, path=["response"])
 
     @parametrize
     async def test_streaming_response_create_overload_1(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.prompt_caching.messages.with_streaming_response.create(
+        async with async_client.beta.messages.with_streaming_response.create(
             max_tokens=1024,
             messages=[
                 {
@@ -439,13 +439,13 @@ class TestAsyncMessages:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             message = await response.parse()
-            assert_matches_type(PromptCachingBetaMessage, message, path=["response"])
+            assert_matches_type(BetaMessage, message, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
     @parametrize
     async def test_method_create_overload_2(self, async_client: AsyncAnthropic) -> None:
-        message_stream = await async_client.beta.prompt_caching.messages.create(
+        message_stream = await async_client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -460,7 +460,7 @@ class TestAsyncMessages:
 
     @parametrize
     async def test_method_create_with_all_params_overload_2(self, async_client: AsyncAnthropic) -> None:
-        message_stream = await async_client.beta.prompt_caching.messages.create(
+        message_stream = await async_client.beta.messages.create(
             max_tokens=1024,
             messages=[
                 {
@@ -548,7 +548,7 @@ class TestAsyncMessages:
 
     @parametrize
     async def test_raw_response_create_overload_2(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.prompt_caching.messages.with_raw_response.create(
+        response = await async_client.beta.messages.with_raw_response.create(
             max_tokens=1024,
             messages=[
                 {
@@ -566,7 +566,7 @@ class TestAsyncMessages:
 
     @parametrize
     async def test_streaming_response_create_overload_2(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.prompt_caching.messages.with_streaming_response.create(
+        async with async_client.beta.messages.with_streaming_response.create(
             max_tokens=1024,
             messages=[
                 {
