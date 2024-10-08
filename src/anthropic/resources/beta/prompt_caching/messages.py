@@ -24,6 +24,7 @@ from ...._streaming import Stream, AsyncStream
 from ...._base_client import make_request_options
 from ....lib.streaming import PromptCachingBetaMessageStreamManager, AsyncPromptCachingBetaMessageStreamManager
 from ....types.model_param import ModelParam
+from ....types.metadata_param import MetadataParam
 from ....types.tool_choice_param import ToolChoiceParam
 from ....types.beta.prompt_caching import message_create_params
 from ....types.beta.prompt_caching.prompt_caching_beta_message import PromptCachingBetaMessage
@@ -64,7 +65,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -328,7 +329,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -591,7 +592,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         stream: bool,
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -853,7 +854,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -986,7 +987,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -1250,7 +1251,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -1513,7 +1514,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
         stream: bool,
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -1775,7 +1776,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[PromptCachingBetaMessageParam],
         model: ModelParam,
-        metadata: message_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[PromptCachingBetaTextBlockParam]] | NotGiven = NOT_GIVEN,

@@ -24,6 +24,7 @@ from .._streaming import Stream, AsyncStream
 from .._base_client import make_request_options
 from ..types.completion import Completion
 from ..types.model_param import ModelParam
+from ..types.metadata_param import MetadataParam
 
 __all__ = ["Completions", "AsyncCompletions"]
 
@@ -55,7 +56,7 @@ class Completions(SyncAPIResource):
         max_tokens_to_sample: int,
         model: ModelParam,
         prompt: str,
-        metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -160,7 +161,7 @@ class Completions(SyncAPIResource):
         model: ModelParam,
         prompt: str,
         stream: Literal[True],
-        metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -264,7 +265,7 @@ class Completions(SyncAPIResource):
         model: ModelParam,
         prompt: str,
         stream: bool,
-        metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -367,7 +368,7 @@ class Completions(SyncAPIResource):
         max_tokens_to_sample: int,
         model: ModelParam,
         prompt: str,
-        metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -434,7 +435,7 @@ class AsyncCompletions(AsyncAPIResource):
         max_tokens_to_sample: int,
         model: ModelParam,
         prompt: str,
-        metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -539,7 +540,7 @@ class AsyncCompletions(AsyncAPIResource):
         model: ModelParam,
         prompt: str,
         stream: Literal[True],
-        metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -643,7 +644,7 @@ class AsyncCompletions(AsyncAPIResource):
         model: ModelParam,
         prompt: str,
         stream: bool,
-        metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -746,7 +747,7 @@ class AsyncCompletions(AsyncAPIResource):
         max_tokens_to_sample: int,
         model: ModelParam,
         prompt: str,
-        metadata: completion_create_params.Metadata | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
