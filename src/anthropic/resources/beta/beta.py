@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+from .messages import (
+    Messages,
+    AsyncMessages,
+    MessagesWithRawResponse,
+    AsyncMessagesWithRawResponse,
+    MessagesWithStreamingResponse,
+    AsyncMessagesWithStreamingResponse,
+)
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from .prompt_caching import (
@@ -12,12 +20,17 @@ from .prompt_caching import (
     PromptCachingWithStreamingResponse,
     AsyncPromptCachingWithStreamingResponse,
 )
+from .messages.messages import Messages, AsyncMessages
 from .prompt_caching.prompt_caching import PromptCaching, AsyncPromptCaching
 
 __all__ = ["Beta", "AsyncBeta"]
 
 
 class Beta(SyncAPIResource):
+    @cached_property
+    def messages(self) -> Messages:
+        return Messages(self._client)
+
     @cached_property
     def prompt_caching(self) -> PromptCaching:
         return PromptCaching(self._client)
@@ -43,6 +56,10 @@ class Beta(SyncAPIResource):
 
 
 class AsyncBeta(AsyncAPIResource):
+    @cached_property
+    def messages(self) -> AsyncMessages:
+        return AsyncMessages(self._client)
+
     @cached_property
     def prompt_caching(self) -> AsyncPromptCaching:
         return AsyncPromptCaching(self._client)
@@ -72,6 +89,10 @@ class BetaWithRawResponse:
         self._beta = beta
 
     @cached_property
+    def messages(self) -> MessagesWithRawResponse:
+        return MessagesWithRawResponse(self._beta.messages)
+
+    @cached_property
     def prompt_caching(self) -> PromptCachingWithRawResponse:
         return PromptCachingWithRawResponse(self._beta.prompt_caching)
 
@@ -79,6 +100,10 @@ class BetaWithRawResponse:
 class AsyncBetaWithRawResponse:
     def __init__(self, beta: AsyncBeta) -> None:
         self._beta = beta
+
+    @cached_property
+    def messages(self) -> AsyncMessagesWithRawResponse:
+        return AsyncMessagesWithRawResponse(self._beta.messages)
 
     @cached_property
     def prompt_caching(self) -> AsyncPromptCachingWithRawResponse:
@@ -90,6 +115,10 @@ class BetaWithStreamingResponse:
         self._beta = beta
 
     @cached_property
+    def messages(self) -> MessagesWithStreamingResponse:
+        return MessagesWithStreamingResponse(self._beta.messages)
+
+    @cached_property
     def prompt_caching(self) -> PromptCachingWithStreamingResponse:
         return PromptCachingWithStreamingResponse(self._beta.prompt_caching)
 
@@ -97,6 +126,10 @@ class BetaWithStreamingResponse:
 class AsyncBetaWithStreamingResponse:
     def __init__(self, beta: AsyncBeta) -> None:
         self._beta = beta
+
+    @cached_property
+    def messages(self) -> AsyncMessagesWithStreamingResponse:
+        return AsyncMessagesWithStreamingResponse(self._beta.messages)
 
     @cached_property
     def prompt_caching(self) -> AsyncPromptCachingWithStreamingResponse:

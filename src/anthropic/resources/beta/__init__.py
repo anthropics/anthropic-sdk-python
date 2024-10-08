@@ -8,6 +8,14 @@ from .beta import (
     BetaWithStreamingResponse,
     AsyncBetaWithStreamingResponse,
 )
+from .messages import (
+    Messages,
+    AsyncMessages,
+    MessagesWithRawResponse,
+    AsyncMessagesWithRawResponse,
+    MessagesWithStreamingResponse,
+    AsyncMessagesWithStreamingResponse,
+)
 from .prompt_caching import (
     PromptCaching,
     AsyncPromptCaching,
@@ -18,6 +26,12 @@ from .prompt_caching import (
 )
 
 __all__ = [
+    "Messages",
+    "AsyncMessages",
+    "MessagesWithRawResponse",
+    "AsyncMessagesWithRawResponse",
+    "MessagesWithStreamingResponse",
+    "AsyncMessagesWithStreamingResponse",
     "PromptCaching",
     "AsyncPromptCaching",
     "PromptCachingWithRawResponse",

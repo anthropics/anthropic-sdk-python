@@ -47,6 +47,89 @@ Methods:
 
 # Beta
 
+Types:
+
+```python
+from anthropic.types import (
+    AnthropicBeta,
+    BetaAPIError,
+    BetaAuthenticationError,
+    BetaError,
+    BetaErrorResponse,
+    BetaInvalidRequestError,
+    BetaNotFoundError,
+    BetaOverloadedError,
+    BetaPermissionError,
+    BetaRateLimitError,
+)
+```
+
+## Messages
+
+Types:
+
+```python
+from anthropic.types.beta import (
+    BetaCacheControlEphemeral,
+    BetaContentBlock,
+    BetaContentBlockParam,
+    BetaImageBlockParam,
+    BetaInputJSONDelta,
+    BetaMessage,
+    BetaMessageDeltaUsage,
+    BetaMessageParam,
+    BetaMetadata,
+    BetaRawContentBlockDeltaEvent,
+    BetaRawContentBlockStartEvent,
+    BetaRawContentBlockStopEvent,
+    BetaRawMessageDeltaEvent,
+    BetaRawMessageStartEvent,
+    BetaRawMessageStopEvent,
+    BetaRawMessageStreamEvent,
+    BetaTextBlock,
+    BetaTextBlockParam,
+    BetaTextDelta,
+    BetaTool,
+    BetaToolChoice,
+    BetaToolChoiceAny,
+    BetaToolChoiceAuto,
+    BetaToolChoiceTool,
+    BetaToolResultBlockParam,
+    BetaToolUseBlock,
+    BetaToolUseBlockParam,
+    BetaUsage,
+)
+```
+
+Methods:
+
+- <code title="post /v1/messages?beta=true">client.beta.messages.<a href="./src/anthropic/resources/beta/messages/messages.py">create</a>(\*\*<a href="src/anthropic/types/beta/message_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_message.py">BetaMessage</a></code>
+
+### Batches
+
+Types:
+
+```python
+from anthropic.types.beta.messages import (
+    BetaMessageBatch,
+    BetaMessageBatchCanceledResult,
+    BetaMessageBatchErroredResult,
+    BetaMessageBatchExpiredResult,
+    BetaMessageBatchIndividualResponse,
+    BetaMessageBatchRequestCounts,
+    BetaMessageBatchResult,
+    BetaMessageBatchSucceededResult,
+)
+```
+
+Methods:
+
+- <code title="post /v1/messages/batches?beta=true">client.beta.messages.batches.<a href="./src/anthropic/resources/beta/messages/batches.py">create</a>(\*\*<a href="src/anthropic/types/beta/messages/batch_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/messages/beta_message_batch.py">BetaMessageBatch</a></code>
+- <code title="get /v1/messages/batches/{message_batch_id}?beta=true">client.beta.messages.batches.<a href="./src/anthropic/resources/beta/messages/batches.py">retrieve</a>(message_batch_id) -> <a href="./src/anthropic/types/beta/messages/beta_message_batch.py">BetaMessageBatch</a></code>
+- <code title="get /v1/messages/batches?beta=true">client.beta.messages.batches.<a href="./src/anthropic/resources/beta/messages/batches.py">list</a>(\*\*<a href="src/anthropic/types/beta/messages/batch_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/messages/beta_message_batch.py">SyncPage[BetaMessageBatch]</a></code>
+- <code title="post /v1/messages/batches/{message_batch_id}/cancel?beta=true">client.beta.messages.batches.<a href="./src/anthropic/resources/beta/messages/batches.py">cancel</a>(message_batch_id) -> <a href="./src/anthropic/types/beta/messages/beta_message_batch.py">BetaMessageBatch</a></code>
+- <code title="get /v1/messages/batches/{message_batch_id}/results?beta=true">client.beta.messages.batches.<a href="./src/anthropic/resources/beta/messages/batches.py">results</a>(message_batch_id) -> BinaryAPIResponse</code>
+
 ## PromptCaching
 
 ### Messages
