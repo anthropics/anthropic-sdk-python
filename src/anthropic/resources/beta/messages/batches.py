@@ -81,11 +81,11 @@ class Batches(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
             "/v1/messages/batches?beta=true",
             body=maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
@@ -128,11 +128,11 @@ class Batches(SyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get(
             f"/v1/messages/batches/{message_batch_id}?beta=true",
             options=make_request_options(
@@ -179,11 +179,11 @@ class Batches(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/messages/batches?beta=true",
             page=SyncPage[BetaMessageBatch],
@@ -236,11 +236,11 @@ class Batches(SyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
             f"/v1/messages/batches/{message_batch_id}/cancel?beta=true",
             options=make_request_options(
@@ -290,12 +290,12 @@ class Batches(SyncAPIResource):
                 f"No `results_url` for the given batch; Has it finished processing? {batch.processing_status}"
             )
 
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get(
             batch.results_url,
             options=make_request_options(
@@ -358,11 +358,11 @@ class AsyncBatches(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
             "/v1/messages/batches?beta=true",
             body=await async_maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
@@ -405,11 +405,11 @@ class AsyncBatches(AsyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._get(
             f"/v1/messages/batches/{message_batch_id}?beta=true",
             options=make_request_options(
@@ -456,11 +456,11 @@ class AsyncBatches(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/messages/batches?beta=true",
             page=AsyncPage[BetaMessageBatch],
@@ -513,11 +513,11 @@ class AsyncBatches(AsyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
             f"/v1/messages/batches/{message_batch_id}/cancel?beta=true",
             options=make_request_options(
@@ -567,12 +567,12 @@ class AsyncBatches(AsyncAPIResource):
                 f"No `results_url` for the given batch; Has it finished processing? {batch.processing_status}"
             )
 
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._get(
             batch.results_url,
             options=make_request_options(
