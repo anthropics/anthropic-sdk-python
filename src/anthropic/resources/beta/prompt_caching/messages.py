@@ -876,11 +876,11 @@ class Messages(SyncAPIResource):
     ) -> PromptCachingBetaMessage | Stream[RawPromptCachingBetaMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
-        extra_headers = {"anthropic-beta": "prompt-caching-2024-07-31", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "prompt-caching-2024-07-31", **(extra_headers or {})}
         return self._post(
             "/v1/messages?beta=prompt_caching",
             body=maybe_transform(
@@ -1747,11 +1747,11 @@ class AsyncMessages(AsyncAPIResource):
     ) -> PromptCachingBetaMessage | AsyncStream[RawPromptCachingBetaMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
-        extra_headers = {"anthropic-beta": "prompt-caching-2024-07-31", **(extra_headers or {})}
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "prompt-caching-2024-07-31", **(extra_headers or {})}
         return await self._post(
             "/v1/messages?beta=prompt_caching",
             body=await async_maybe_transform(
