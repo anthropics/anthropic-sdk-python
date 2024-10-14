@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Iterable
+from itertools import chain
 
 import httpx
 
@@ -90,7 +91,13 @@ class Batches(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
@@ -137,7 +144,13 @@ class Batches(SyncAPIResource):
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
@@ -188,7 +201,13 @@ class Batches(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
@@ -245,7 +264,13 @@ class Batches(SyncAPIResource):
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
@@ -293,7 +318,13 @@ class Batches(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
@@ -359,7 +390,13 @@ class AsyncBatches(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
@@ -406,7 +443,13 @@ class AsyncBatches(AsyncAPIResource):
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
@@ -457,7 +500,13 @@ class AsyncBatches(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
@@ -514,7 +563,13 @@ class AsyncBatches(AsyncAPIResource):
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
@@ -562,7 +617,13 @@ class AsyncBatches(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
