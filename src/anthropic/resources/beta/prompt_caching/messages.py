@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import List, Union, Iterable
 from functools import partial
+from itertools import chain
 from typing_extensions import Literal, overload
 
 import httpx
@@ -879,7 +880,13 @@ class Messages(SyncAPIResource):
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["prompt-caching-2024-07-31"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "prompt-caching-2024-07-31", **(extra_headers or {})}
@@ -1809,7 +1816,13 @@ class AsyncMessages(AsyncAPIResource):
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["prompt-caching-2024-07-31"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "prompt-caching-2024-07-31", **(extra_headers or {})}
