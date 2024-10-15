@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.36.1 (2024-10-15)
+
+Full Changelog: [v0.36.0...v0.36.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.36.0...v0.36.1)
+
+### Bug Fixes
+
+* allow header params to override default headers ([#690](https://github.com/anthropics/anthropic-sdk-python/issues/690)) ([56f195f](https://github.com/anthropics/anthropic-sdk-python/commit/56f195ff1a67f2ba6e546ad897cbb0fe39f36a3b))
+* **beta:** merge betas param with the default value ([#695](https://github.com/anthropics/anthropic-sdk-python/issues/695)) ([f52eac9](https://github.com/anthropics/anthropic-sdk-python/commit/f52eac9357c0c496f1307def2628376d8a36e5ba))
+
+
+### Chores
+
+* **internal:** update spec URL ([#694](https://github.com/anthropics/anthropic-sdk-python/issues/694)) ([1b437cc](https://github.com/anthropics/anthropic-sdk-python/commit/1b437cc40f2e02e59df06744cc1458ee0cae202a))
+
 ## 0.36.0 (2024-10-08)
 
 Full Changelog: [v0.35.0...v0.36.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.35.0...v0.36.0)
