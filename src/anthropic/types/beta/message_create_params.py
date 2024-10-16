@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable
-from typing_extensions import Literal, Required, Annotated, TypedDict
+from typing_extensions import Literal, Required, TypedDict
 
-from ..._utils import PropertyInfo
 from ..model_param import ModelParam
 from .beta_tool_param import BetaToolParam
 from .beta_message_param import BetaMessageParam
 from .beta_metadata_param import BetaMetadataParam
-from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 
@@ -255,9 +253,6 @@ class MessageCreateParamsBase(TypedDict, total=False):
     Recommended for advanced use cases only. You usually only need to use
     `temperature`.
     """
-
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
-    """Optional header to specify the beta version(s) you want to use."""
 
 
 class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
