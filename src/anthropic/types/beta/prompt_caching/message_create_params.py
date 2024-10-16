@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable
-from typing_extensions import Literal, Required, Annotated, TypeAlias, TypedDict
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
-from ...._utils import PropertyInfo
 from ...model_param import ModelParam
 from ...metadata_param import MetadataParam
 from ...tool_choice_param import ToolChoiceParam
-from ...anthropic_beta_param import AnthropicBetaParam
 from ...tool_choice_any_param import ToolChoiceAnyParam
 from ...tool_choice_auto_param import ToolChoiceAutoParam
 from ...tool_choice_tool_param import ToolChoiceToolParam
@@ -267,9 +265,6 @@ class MessageCreateParamsBase(TypedDict, total=False):
     Recommended for advanced use cases only. You usually only need to use
     `temperature`.
     """
-
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
-    """Optional header to specify the beta version(s) you want to use."""
 
 
 Metadata: TypeAlias = MetadataParam
