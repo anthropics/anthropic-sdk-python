@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.36.2 (2024-10-17)
+
+Full Changelog: [v0.36.1...v0.36.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.36.1...v0.36.2)
+
+### Bug Fixes
+
+* **types:** remove misleading betas TypedDict property for the Batch API ([#697](https://github.com/anthropics/anthropic-sdk-python/issues/697)) ([e1b9e31](https://github.com/anthropics/anthropic-sdk-python/commit/e1b9e311644103466904fdce78469380d971ccad))
+
+
+### Chores
+
+* **internal:** update test syntax ([#699](https://github.com/anthropics/anthropic-sdk-python/issues/699)) ([a836157](https://github.com/anthropics/anthropic-sdk-python/commit/a836157d1c0cefc452f5f27fe90eea3b4ff687d2))
+
 ## 0.36.1 (2024-10-15)
 
 Full Changelog: [v0.36.0...v0.36.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.36.0...v0.36.1)
