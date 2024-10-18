@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.36.3 (2024-10-18)
+
+Full Changelog: [v0.36.2...v0.36.3](https://github.com/anthropics/anthropic-sdk-python/compare/v0.36.2...v0.36.3)
+
+### Chores
+
+* **api:** add title ([#703](https://github.com/anthropics/anthropic-sdk-python/issues/703)) ([a046817](https://github.com/anthropics/anthropic-sdk-python/commit/a046817e9181d35f145249eeb070cfbfd2c36901))
+* **internal:** bump ruff dependency ([#700](https://github.com/anthropics/anthropic-sdk-python/issues/700)) ([d5bf9e1](https://github.com/anthropics/anthropic-sdk-python/commit/d5bf9e1f88486552dfba1409cfc699994a1e9aab))
+
 ## 0.36.2 (2024-10-17)
 
 Full Changelog: [v0.36.1...v0.36.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.36.1...v0.36.2)
