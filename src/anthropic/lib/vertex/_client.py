@@ -8,6 +8,7 @@ import httpx
 
 from ... import _exceptions
 from ._auth import load_auth, refresh_auth
+from ._beta import Beta, AsyncBeta
 from ..._types import NOT_GIVEN, NotGiven, Transport, ProxiesTypes, AsyncTransport
 from ..._utils import is_dict, asyncify, is_given
 from ..._compat import model_copy, typed_cached_property
@@ -85,6 +86,7 @@ class BaseVertexClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
 
 class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient):
     messages: Messages
+    beta: Beta
 
     def __init__(
         self,
@@ -142,6 +144,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         self.credentials = credentials
 
         self.messages = Messages(self)
+        self.beta = Beta(self)
 
     @override
     def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
@@ -251,6 +254,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
 
 class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
     messages: AsyncMessages
+    beta: AsyncBeta
 
     def __init__(
         self,
@@ -308,6 +312,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         self.credentials = credentials
 
         self.messages = AsyncMessages(self)
+        self.beta = AsyncBeta(self)
 
     @override
     async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
