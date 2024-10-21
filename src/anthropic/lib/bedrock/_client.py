@@ -7,6 +7,7 @@ from typing_extensions import Self, override
 import httpx
 
 from ... import _exceptions
+from ._beta import Beta, AsyncBeta
 from ..._types import NOT_GIVEN, Timeout, NotGiven
 from ..._utils import is_dict, is_given
 from ..._compat import model_copy
@@ -35,6 +36,11 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
 
     if is_dict(options.json_data):
         options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
+
+        if is_given(options.headers):
+            betas = options.headers.get("anthropic-beta")
+            if betas:
+                options.json_data.setdefault("anthropic_beta", betas.split(","))
 
     if options.url in {"/v1/complete", "/v1/messages"} and options.method == "post":
         if not is_dict(options.json_data):
@@ -88,6 +94,7 @@ class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
 class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClient):
     messages: Messages
     completions: Completions
+    beta: Beta
 
     def __init__(
         self,
@@ -140,6 +147,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             _strict_response_validation=_strict_response_validation,
         )
 
+        self.beta = Beta(self)
         self.messages = Messages(self)
         self.completions = Completions(self)
 
@@ -230,6 +238,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
 class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
     messages: AsyncMessages
     completions: AsyncCompletions
+    beta: AsyncBeta
 
     def __init__(
         self,
@@ -284,6 +293,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
 
         self.messages = AsyncMessages(self)
         self.completions = AsyncCompletions(self)
+        self.beta = AsyncBeta(self)
 
     @override
     def _make_sse_decoder(self) -> AWSEventStreamDecoder:
