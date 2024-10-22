@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.37.1 (2024-10-22)
+
+Full Changelog: [v0.37.0...v0.37.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.37.0...v0.37.1)
+
+### Bug Fixes
+
+* **bedrock:** correct handling of messages beta ([#711](https://github.com/anthropics/anthropic-sdk-python/issues/711)) ([4cba32b](https://github.com/anthropics/anthropic-sdk-python/commit/4cba32b41e82377e155612e05c847baf2ca166d0))
+* **vertex:** use correct beta url ([b76db5c](https://github.com/anthropics/anthropic-sdk-python/commit/b76db5c90a9b22d4078a15ac6844a4f75dcbc857))
+
 ## 0.37.0 (2024-10-22)
 
 Full Changelog: [v0.36.2...v0.37.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.36.2...v0.37.0)
