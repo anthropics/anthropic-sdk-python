@@ -42,7 +42,7 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
             if betas:
                 options.json_data.setdefault("anthropic_beta", betas.split(","))
 
-    if options.url in {"/v1/complete", "/v1/messages"} and options.method == "post":
+    if options.url in {"/v1/complete", "/v1/messages", "/v1/messages?beta=true"} and options.method == "post":
         if not is_dict(options.json_data):
             raise RuntimeError("Expected dictionary json_data for post /completions endpoint")
 
