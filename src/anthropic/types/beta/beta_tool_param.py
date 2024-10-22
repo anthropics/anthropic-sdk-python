@@ -39,3 +39,5 @@ class BetaToolParam(TypedDict, total=False):
     perform. You can use natural language descriptions to reinforce important
     aspects of the tool input JSON schema.
     """
+
+    type: Optional[Literal["custom"]]
