@@ -34,10 +34,10 @@ from ...._base_client import make_request_options
 from ....types.model_param import ModelParam
 from ....types.beta.beta_message import BetaMessage
 from ....types.anthropic_beta_param import AnthropicBetaParam
-from ....types.beta.beta_tool_param import BetaToolParam
 from ....types.beta.beta_message_param import BetaMessageParam
 from ....types.beta.beta_metadata_param import BetaMetadataParam
 from ....types.beta.beta_text_block_param import BetaTextBlockParam
+from ....types.beta.beta_tool_union_param import BetaToolUnionParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
 
@@ -81,7 +81,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -113,11 +113,12 @@ class Messages(SyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -345,7 +346,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -377,11 +378,12 @@ class Messages(SyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -609,7 +611,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -641,11 +643,12 @@ class Messages(SyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -873,7 +876,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -955,7 +958,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -987,11 +990,12 @@ class AsyncMessages(AsyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -1219,7 +1223,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -1251,11 +1255,12 @@ class AsyncMessages(AsyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -1483,7 +1488,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -1515,11 +1520,12 @@ class AsyncMessages(AsyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -1747,7 +1753,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolParam] | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,

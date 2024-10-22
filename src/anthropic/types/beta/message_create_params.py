@@ -7,11 +7,11 @@ from typing_extensions import Literal, Required, Annotated, TypedDict
 
 from ..._utils import PropertyInfo
 from ..model_param import ModelParam
-from .beta_tool_param import BetaToolParam
 from .beta_message_param import BetaMessageParam
 from .beta_metadata_param import BetaMetadataParam
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_text_block_param import BetaTextBlockParam
+from .beta_tool_union_param import BetaToolUnionParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 
 __all__ = ["MessageCreateParamsBase", "MessageCreateParamsNonStreaming", "MessageCreateParamsStreaming"]
@@ -34,11 +34,12 @@ class MessageCreateParamsBase(TypedDict, total=False):
     Our models are trained to operate on alternating `user` and `assistant`
     conversational turns. When creating a new `Message`, you specify the prior
     conversational turns with the `messages` parameter, and the model then generates
-    the next `Message` in the conversation.
+    the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+    in your request will be combined into a single turn.
 
     Each input message must be an object with a `role` and `content`. You can
     specify a single `user`-role message, or you can include multiple `user` and
-    `assistant` messages. The first message must always use the `user` role.
+    `assistant` messages.
 
     If the final message uses the `assistant` role, the response content will
     continue immediately from the content in that message. This can be used to
@@ -163,7 +164,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     The model can use a specific tool, any available tool, or decide by itself.
     """
 
-    tools: Iterable[BetaToolParam]
+    tools: Iterable[BetaToolUnionParam]
     """Definitions of tools that the model may use.
 
     If you include `tools` in your API request, the model may return `tool_use`
