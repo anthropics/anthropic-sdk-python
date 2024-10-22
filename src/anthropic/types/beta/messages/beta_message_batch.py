@@ -17,6 +17,12 @@ class BetaMessageBatch(BaseModel):
     The format and length of IDs may change over time.
     """
 
+    archived_at: Optional[datetime] = None
+    """
+    RFC 3339 datetime string representing the time at which the Message Batch was
+    archived and its results became unavailable.
+    """
+
     cancel_initiated_at: Optional[datetime] = None
     """
     RFC 3339 datetime string representing the time at which cancellation was
@@ -45,16 +51,14 @@ class BetaMessageBatch(BaseModel):
     """
 
     processing_status: Literal["in_progress", "canceling", "ended"]
-    """Processing status of the Message Batch.
-
-    This is one of: `in_progress`, `canceling`, or `ended`.
-    """
+    """Processing status of the Message Batch."""
 
     request_counts: BetaMessageBatchRequestCounts
-    """Overview of the number of requests within the Message Batch and their statuses.
+    """Tallies requests within the Message Batch, categorized by their status.
 
     Requests start as `processing` and move to one of the other statuses only once
-    processing of entire batch ends.
+    processing of the entire batch ends. The sum of all values always matches the
+    total number of requests in the batch.
     """
 
     results_url: Optional[str] = None
