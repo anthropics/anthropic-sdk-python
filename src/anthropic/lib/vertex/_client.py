@@ -426,7 +426,7 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
     if is_dict(options.json_data):
         options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
 
-    if options.url == "/v1/messages" and options.method == "post":
+    if options.url in {"/v1/messages", "/v1/messages?beta=true"} and options.method == "post":
         if project_id is None:
             raise RuntimeError(
                 "No project_id was given and it could not be resolved from credentials. The client should be instantiated with the `project_id` argument or the `ANTHROPIC_VERTEX_PROJECT_ID` environment variable should be set."
