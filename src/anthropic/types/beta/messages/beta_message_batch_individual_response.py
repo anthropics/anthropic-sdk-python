@@ -11,7 +11,8 @@ class BetaMessageBatchIndividualResponse(BaseModel):
     custom_id: str
     """Developer-provided ID created for each request in a Message Batch.
 
-    Useful for matching results to requests.
+    Useful for matching results to requests, as results may be given out of request
+    order.
 
     Must be unique for each request within the Message Batch.
     """

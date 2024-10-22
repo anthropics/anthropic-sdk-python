@@ -63,10 +63,11 @@ class Batches(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaMessageBatch:
         """
-        Send a batch of requests to create Messages.
+        Send a batch of Message creation requests.
 
-        The Messages Batch API can be used to process multiple Messages API requests at
-        once. Once a Message Batch is created, it begins processing immediately.
+        The Message Batches API can be used to process multiple Messages API requests at
+        once. Once a Message Batch is created, it begins processing immediately. Batches
+        can take up to 24 hours to complete.
 
         Args:
           requests: List of requests for prompt completion. Each is an individual request to create
@@ -117,8 +118,8 @@ class Batches(SyncAPIResource):
         """This endpoint is idempotent and can be used to poll for Message Batch
         completion.
 
-        To access the results of a Message Batch, use the `responses_url`
-        field in the response.
+        To access the results of a Message Batch, make a request to the
+        `results_url` field in the response.
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -168,8 +169,10 @@ class Batches(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> SyncPage[BetaMessageBatch]:
-        """
-        List all Message Batches within a Workspace.
+        """List all Message Batches within a Workspace.
+
+        Most recently created batches are
+        returned first.
 
         Args:
           after_id: ID of the object to use as a cursor for pagination. When provided, returns the
@@ -237,8 +240,15 @@ class Batches(SyncAPIResource):
     ) -> BetaMessageBatch:
         """Batches may be canceled any time before processing ends.
 
-        The system may complete
-        any in-progress, non-interruptible operations before finalizing cancellation.
+        Once cancellation is
+        initiated, the batch enters a `canceling` state, at which time the system may
+        complete any in-progress, non-interruptible requests before finalizing
+        cancellation.
+
+        The number of canceled requests is specified in `request_counts`. To determine
+        which requests were canceled, check the individual results within the batch.
+        Note that cancellation may not result in any canceled requests if they were
+        non-interruptible.
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -370,10 +380,11 @@ class AsyncBatches(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaMessageBatch:
         """
-        Send a batch of requests to create Messages.
+        Send a batch of Message creation requests.
 
-        The Messages Batch API can be used to process multiple Messages API requests at
-        once. Once a Message Batch is created, it begins processing immediately.
+        The Message Batches API can be used to process multiple Messages API requests at
+        once. Once a Message Batch is created, it begins processing immediately. Batches
+        can take up to 24 hours to complete.
 
         Args:
           requests: List of requests for prompt completion. Each is an individual request to create
@@ -424,8 +435,8 @@ class AsyncBatches(AsyncAPIResource):
         """This endpoint is idempotent and can be used to poll for Message Batch
         completion.
 
-        To access the results of a Message Batch, use the `responses_url`
-        field in the response.
+        To access the results of a Message Batch, make a request to the
+        `results_url` field in the response.
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -475,8 +486,10 @@ class AsyncBatches(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> AsyncPaginator[BetaMessageBatch, AsyncPage[BetaMessageBatch]]:
-        """
-        List all Message Batches within a Workspace.
+        """List all Message Batches within a Workspace.
+
+        Most recently created batches are
+        returned first.
 
         Args:
           after_id: ID of the object to use as a cursor for pagination. When provided, returns the
@@ -544,8 +557,15 @@ class AsyncBatches(AsyncAPIResource):
     ) -> BetaMessageBatch:
         """Batches may be canceled any time before processing ends.
 
-        The system may complete
-        any in-progress, non-interruptible operations before finalizing cancellation.
+        Once cancellation is
+        initiated, the batch enters a `canceling` state, at which time the system may
+        complete any in-progress, non-interruptible requests before finalizing
+        cancellation.
+
+        The number of canceled requests is specified in `request_counts`. To determine
+        which requests were canceled, check the individual results within the batch.
+        Note that cancellation may not result in any canceled requests if they were
+        non-interruptible.
 
         Args:
           message_batch_id: ID of the Message Batch.

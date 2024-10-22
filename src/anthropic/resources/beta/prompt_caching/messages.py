@@ -106,11 +106,12 @@ class Messages(SyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -370,11 +371,12 @@ class Messages(SyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -634,11 +636,12 @@ class Messages(SyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -1042,11 +1045,12 @@ class AsyncMessages(AsyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -1306,11 +1310,12 @@ class AsyncMessages(AsyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
@@ -1570,11 +1575,12 @@ class AsyncMessages(AsyncAPIResource):
               Our models are trained to operate on alternating `user` and `assistant`
               conversational turns. When creating a new `Message`, you specify the prior
               conversational turns with the `messages` parameter, and the model then generates
-              the next `Message` in the conversation.
+              the next `Message` in the conversation. Consecutive `user` or `assistant` turns
+              in your request will be combined into a single turn.
 
               Each input message must be an object with a `role` and `content`. You can
               specify a single `user`-role message, or you can include multiple `user` and
-              `assistant` messages. The first message must always use the `user` role.
+              `assistant` messages.
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
