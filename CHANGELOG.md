@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.37.0 (2024-10-22)
+
+Full Changelog: [v0.36.2...v0.37.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.36.2...v0.37.0)
+
+### Features
+
+* **api:** add new model and `computer-use-2024-10-22` beta ([dd93d87](https://github.com/anthropics/anthropic-sdk-python/commit/dd93d872dd00a52b5bd65f84451fc9d368692cde))
+* **bedrock:** add messages beta ([2566c93](https://github.com/anthropics/anthropic-sdk-python/commit/2566c93a7d7a861136ebdfde0eb90287977d43d1))
+* **vertex:** add messages beta ([0d1f1a6](https://github.com/anthropics/anthropic-sdk-python/commit/0d1f1a663a7bd43f1f524ddaad1d6e18d6d68a61))
+
+
+### Bug Fixes
+
+* **client/async:** correctly retry in all cases ([#704](https://github.com/anthropics/anthropic-sdk-python/issues/704)) ([ee6febc](https://github.com/anthropics/anthropic-sdk-python/commit/ee6febc4b5c58db9aed835b021e476b46f68033e))
+
+
+### Chores
+
+* **api:** add title ([#703](https://github.com/anthropics/anthropic-sdk-python/issues/703)) ([a046817](https://github.com/anthropics/anthropic-sdk-python/commit/a046817e9181d35f145249eeb070cfbfd2c36901))
+* **internal:** bump ruff dependency ([#700](https://github.com/anthropics/anthropic-sdk-python/issues/700)) ([d5bf9e1](https://github.com/anthropics/anthropic-sdk-python/commit/d5bf9e1f88486552dfba1409cfc699994a1e9aab))
+* **internal:** remove unused black config ([#705](https://github.com/anthropics/anthropic-sdk-python/issues/705)) ([3259eb0](https://github.com/anthropics/anthropic-sdk-python/commit/3259eb0a740e65ec649da41667a703d0a4ec1eee))
+* **internal:** update spec ([#706](https://github.com/anthropics/anthropic-sdk-python/issues/706)) ([6ab0ce9](https://github.com/anthropics/anthropic-sdk-python/commit/6ab0ce9acf3fdfb217c3885198f88a9ece0969af))
+
 ## 0.36.2 (2024-10-17)
 
 Full Changelog: [v0.36.1...v0.36.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.36.1...v0.36.2)
