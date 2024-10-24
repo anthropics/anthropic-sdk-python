@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.37.2 (2024-10-24)
+
+Full Changelog: [v0.37.1...v0.37.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.37.1...v0.37.2)
+
+### Chores
+
+* **internal:** update spec version ([#712](https://github.com/anthropics/anthropic-sdk-python/issues/712)) ([f71b0f5](https://github.com/anthropics/anthropic-sdk-python/commit/f71b0f5e54aab20b93cd13609151aa833583145a))
+
 ## 0.37.1 (2024-10-22)
 
 Full Changelog: [v0.37.0...v0.37.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.37.0...v0.37.1)
