@@ -12,13 +12,20 @@ __all__ = ["BetaToolComputerUse20241022Param"]
 
 class BetaToolComputerUse20241022Param(TypedDict, total=False):
     display_height_px: Required[int]
+    """The height of the display in pixels."""
 
     display_width_px: Required[int]
+    """The width of the display in pixels."""
 
     name: Required[Literal["computer"]]
+    """Name of the tool.
+
+    This is how the tool will be called by the model and in tool_use blocks.
+    """
 
     type: Required[Literal["computer_20241022"]]
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
 
     display_number: Optional[int]
+    """The X11 display number (e.g. 0, 1) for the display."""

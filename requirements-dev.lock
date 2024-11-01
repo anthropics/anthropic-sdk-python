@@ -16,24 +16,22 @@ anyio==4.4.0
     # via httpx
 argcomplete==3.1.2
     # via nox
-attrs==23.1.0
-    # via pytest
-boto3==1.28.58
+boto3==1.35.49
     # via anthropic
-boto3-stubs==1.28.41
-botocore==1.31.58
+boto3-stubs==1.35.49
+botocore==1.35.49
     # via anthropic
     # via boto3
     # via s3transfer
-botocore-stubs==1.34.94
+botocore-stubs==1.35.49
     # via boto3-stubs
-cachetools==5.3.3
+cachetools==5.5.0
     # via google-auth
 certifi==2023.7.22
     # via httpcore
     # via httpx
     # via requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 colorlog==6.7.0
     # via nox
@@ -42,14 +40,15 @@ distlib==0.3.7
     # via virtualenv
 distro==1.8.0
     # via anthropic
-exceptiongroup==1.1.3
+exceptiongroup==1.2.2
     # via anyio
+    # via pytest
 filelock==3.12.4
     # via huggingface-hub
     # via virtualenv
-fsspec==2024.3.1
+fsspec==2024.10.0
     # via huggingface-hub
-google-auth==2.26.2
+google-auth==2.35.0
     # via anthropic
 h11==0.14.0
     # via httpcore
@@ -58,7 +57,7 @@ httpcore==1.0.2
 httpx==0.25.2
     # via anthropic
     # via respx
-huggingface-hub==0.16.4
+huggingface-hub==0.26.1
     # via tokenizers
 idna==3.4
     # via anyio
@@ -67,7 +66,7 @@ idna==3.4
 importlib-metadata==7.0.0
 iniconfig==2.0.0
     # via pytest
-jiter==0.4.0
+jiter==0.6.1
     # via anthropic
 jmespath==1.0.1
     # via boto3
@@ -76,7 +75,7 @@ markdown-it-py==3.0.0
     # via rich
 mdurl==0.1.2
     # via markdown-it-py
-mypy==1.11.2
+mypy==1.13.0
 mypy-extensions==1.0.0
     # via mypy
 nodeenv==1.8.0
@@ -88,40 +87,38 @@ packaging==23.2
     # via pytest
 platformdirs==3.11.0
     # via virtualenv
-pluggy==1.3.0
+pluggy==1.5.0
     # via pytest
-py==1.11.0
-    # via pytest
-pyasn1==0.6.0
+pyasn1==0.6.1
     # via pyasn1-modules
     # via rsa
-pyasn1-modules==0.4.0
+pyasn1-modules==0.4.1
     # via google-auth
-pydantic==2.7.1
+pydantic==2.9.2
     # via anthropic
-pydantic-core==2.18.2
+pydantic-core==2.23.4
     # via pydantic
 pygments==2.18.0
     # via rich
 pyright==1.1.380
-pytest==7.1.1
+pytest==8.3.3
     # via pytest-asyncio
-pytest-asyncio==0.21.1
+pytest-asyncio==0.24.0
 python-dateutil==2.8.2
     # via botocore
     # via time-machine
 pytz==2023.3.post1
     # via dirty-equals
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via huggingface-hub
-requests==2.31.0
+requests==2.32.3
     # via huggingface-hub
 respx==0.20.2
 rich==13.7.1
 rsa==4.9
     # via google-auth
 ruff==0.6.9
-s3transfer==0.7.0
+s3transfer==0.10.3
     # via boto3
 setuptools==68.2.2
     # via nodeenv
@@ -132,18 +129,18 @@ sniffio==1.3.0
     # via anyio
     # via httpx
 time-machine==2.9.0
-tokenizers==0.14.0
+tokenizers==0.20.1
     # via anthropic
-tomli==2.0.1
+tomli==2.0.2
     # via mypy
     # via pytest
-tqdm==4.66.4
+tqdm==4.66.5
     # via huggingface-hub
-types-awscrt==0.20.9
+types-awscrt==0.23.0
     # via botocore-stubs
-types-s3transfer==0.10.1
+types-s3transfer==0.10.3
     # via boto3-stubs
-typing-extensions==4.8.0
+typing-extensions==4.12.2
     # via anthropic
     # via anyio
     # via boto3-stubs
@@ -151,7 +148,7 @@ typing-extensions==4.8.0
     # via mypy
     # via pydantic
     # via pydantic-core
-urllib3==1.26.18
+urllib3==1.26.20
     # via botocore
     # via requests
 virtualenv==20.24.5

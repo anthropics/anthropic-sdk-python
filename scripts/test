@@ -57,3 +57,9 @@ rye run pytest "$@"
 
 echo "==> Running Pydantic v1 tests"
 rye run nox -s test-pydantic-v1 -- "$@"
+
+# this is a separate script instead of a pytest test as we can't rely on the
+# execution order, so a tokenizer test could be executed before this check which
+# invalidates everything
+echo "==> Verifying that \`tokenizers\` is lazily imported"
+rye run python -c 'import anthropic, sys; assert "tokenizers" not in sys.modules; print("true")'
