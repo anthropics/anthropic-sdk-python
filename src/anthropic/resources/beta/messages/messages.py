@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable
+from itertools import chain
 from typing_extensions import Literal, overload
 
 import httpx
@@ -1124,9 +1125,16 @@ class Messages(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["token-counting-2024-11-01"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "token-counting-2024-11-01", **(extra_headers or {})}
         return self._post(
             "/v1/messages/count_tokens?beta=true",
             body=maybe_transform(
@@ -2225,9 +2233,16 @@ class AsyncMessages(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["token-counting-2024-11-01"]))
+                    if is_given(betas)
+                    else NOT_GIVEN
+                }
+            ),
             **(extra_headers or {}),
         }
+        extra_headers = {"anthropic-beta": "token-counting-2024-11-01", **(extra_headers or {})}
         return await self._post(
             "/v1/messages/count_tokens?beta=true",
             body=await async_maybe_transform(
