@@ -9,7 +9,10 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
-from anthropic.types.beta import BetaMessage
+from anthropic.types.beta import (
+    BetaMessage,
+    BetaMessageTokensCount,
+)
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -27,7 +30,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -41,7 +44,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
             stream=False,
@@ -132,7 +135,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
         )
 
         assert response.is_closed is True
@@ -150,7 +153,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -170,7 +173,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             stream=True,
         )
         message_stream.response.close()
@@ -185,7 +188,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
@@ -276,7 +279,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             stream=True,
         )
 
@@ -294,7 +297,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -302,6 +305,171 @@ class TestMessages:
 
             stream = response.parse()
             stream.close()
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    def test_method_count_tokens(self, client: Anthropic) -> None:
+        message = client.beta.messages.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+            ],
+            model="string",
+        )
+        assert_matches_type(BetaMessageTokensCount, message, path=["response"])
+
+    @parametrize
+    def test_method_count_tokens_with_all_params(self, client: Anthropic) -> None:
+        message = client.beta.messages.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+            ],
+            model="string",
+            system=[
+                {
+                    "text": "Today's date is 2024-06-01.",
+                    "type": "text",
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            tool_choice={
+                "type": "auto",
+                "disable_parallel_tool_use": True,
+            },
+            tools=[
+                {
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "x",
+                    "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
+                    "type": "custom",
+                },
+                {
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "x",
+                    "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
+                    "type": "custom",
+                },
+                {
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "x",
+                    "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
+                    "type": "custom",
+                },
+            ],
+            betas=["string", "string", "string"],
+        )
+        assert_matches_type(BetaMessageTokensCount, message, path=["response"])
+
+    @parametrize
+    def test_raw_response_count_tokens(self, client: Anthropic) -> None:
+        response = client.beta.messages.with_raw_response.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+            ],
+            model="string",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        message = response.parse()
+        assert_matches_type(BetaMessageTokensCount, message, path=["response"])
+
+    @parametrize
+    def test_streaming_response_count_tokens(self, client: Anthropic) -> None:
+        with client.beta.messages.with_streaming_response.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+            ],
+            model="string",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            message = response.parse()
+            assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -319,7 +487,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -333,7 +501,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
             stream=False,
@@ -424,7 +592,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
         )
 
         assert response.is_closed is True
@@ -442,7 +610,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -462,7 +630,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             stream=True,
         )
         await message_stream.response.aclose()
@@ -477,7 +645,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string", "string", "string"],
@@ -568,7 +736,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             stream=True,
         )
 
@@ -586,7 +754,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20240620",
+            model="claude-3-5-sonnet-20241022",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -594,5 +762,170 @@ class TestAsyncMessages:
 
             stream = await response.parse()
             await stream.close()
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_method_count_tokens(self, async_client: AsyncAnthropic) -> None:
+        message = await async_client.beta.messages.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+            ],
+            model="string",
+        )
+        assert_matches_type(BetaMessageTokensCount, message, path=["response"])
+
+    @parametrize
+    async def test_method_count_tokens_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        message = await async_client.beta.messages.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+            ],
+            model="string",
+            system=[
+                {
+                    "text": "Today's date is 2024-06-01.",
+                    "type": "text",
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            tool_choice={
+                "type": "auto",
+                "disable_parallel_tool_use": True,
+            },
+            tools=[
+                {
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "x",
+                    "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
+                    "type": "custom",
+                },
+                {
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "x",
+                    "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
+                    "type": "custom",
+                },
+                {
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "x",
+                    "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
+                    "type": "custom",
+                },
+            ],
+            betas=["string", "string", "string"],
+        )
+        assert_matches_type(BetaMessageTokensCount, message, path=["response"])
+
+    @parametrize
+    async def test_raw_response_count_tokens(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.beta.messages.with_raw_response.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+            ],
+            model="string",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        message = response.parse()
+        assert_matches_type(BetaMessageTokensCount, message, path=["response"])
+
+    @parametrize
+    async def test_streaming_response_count_tokens(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.beta.messages.with_streaming_response.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+                {
+                    "content": "string",
+                    "role": "user",
+                },
+            ],
+            model="string",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            message = await response.parse()
+            assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
         assert cast(Any, response.is_closed) is True

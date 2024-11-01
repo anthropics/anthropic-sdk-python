@@ -26,6 +26,10 @@ class ToolParam(TypedDict, total=False):
     """
 
     name: Required[str]
+    """Name of the tool.
+
+    This is how the tool will be called by the model and in tool_use blocks.
+    """
 
     description: str
     """Description of what this tool does.

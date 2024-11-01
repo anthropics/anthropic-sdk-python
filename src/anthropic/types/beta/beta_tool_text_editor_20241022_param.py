@@ -12,6 +12,10 @@ __all__ = ["BetaToolTextEditor20241022Param"]
 
 class BetaToolTextEditor20241022Param(TypedDict, total=False):
     name: Required[Literal["str_replace_editor"]]
+    """Name of the tool.
+
+    This is how the tool will be called by the model and in tool_use blocks.
+    """
 
     type: Required[Literal["text_editor_20241022"]]
 
