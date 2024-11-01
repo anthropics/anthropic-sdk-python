@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.38.0 (2024-11-01)
+
+Full Changelog: [v0.37.1...v0.38.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.37.1...v0.38.0)
+
+### Features
+
+* **api:** add message token counting & PDFs support ([#721](https://github.com/anthropics/anthropic-sdk-python/issues/721)) ([e4856dd](https://github.com/anthropics/anthropic-sdk-python/commit/e4856dd6be698e797eaee2d6a669a6aaa6719e7d))
+
+
+### Bug Fixes
+
+* **count_tokens:** correctly set beta header ([e5b4b54](https://github.com/anthropics/anthropic-sdk-python/commit/e5b4b54e3ea1b4fc2d947d45df17996f66900387))
+* **types:** add missing token-counting-2024-11-01 ([1897883](https://github.com/anthropics/anthropic-sdk-python/commit/1897883d6332bd0ad10cf13ad09e30563c3e7232))
+
+
+### Chores
+
+* **internal:** bump mypy ([#720](https://github.com/anthropics/anthropic-sdk-python/issues/720)) ([fe8d19e](https://github.com/anthropics/anthropic-sdk-python/commit/fe8d19e265c57fa9e34a09e46e808322e70c721d))
+* **internal:** bump pytest to v8 & pydantic ([#716](https://github.com/anthropics/anthropic-sdk-python/issues/716)) ([00fe1f8](https://github.com/anthropics/anthropic-sdk-python/commit/00fe1f8b0c9c1312c7f1e62ce6ef9c5c56478ede))
+* **internal:** update spec version ([#712](https://github.com/anthropics/anthropic-sdk-python/issues/712)) ([f71b0f5](https://github.com/anthropics/anthropic-sdk-python/commit/f71b0f5e54aab20b93cd13609151aa833583145a))
+* **tests:** move lazy tokenizer test outside of pytest ([d8f2402](https://github.com/anthropics/anthropic-sdk-python/commit/d8f24023c7110b89528b7b37ddf9c1e6630562c4))
+
 ## 0.37.1 (2024-10-22)
 
 Full Changelog: [v0.37.0...v0.37.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.37.0...v0.37.1)
