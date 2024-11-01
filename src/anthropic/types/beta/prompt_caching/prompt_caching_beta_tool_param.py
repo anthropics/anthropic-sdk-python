@@ -28,6 +28,10 @@ class PromptCachingBetaToolParam(TypedDict, total=False):
     """
 
     name: Required[str]
+    """Name of the tool.
+
+    This is how the tool will be called by the model and in tool_use blocks.
+    """
 
     cache_control: Optional[PromptCachingBetaCacheControlEphemeralParam]
 
