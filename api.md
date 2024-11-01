@@ -71,6 +71,8 @@ Types:
 
 ```python
 from anthropic.types.beta import (
+    BetaBase64PDFBlock,
+    BetaBase64PDFSource,
     BetaCacheControlEphemeral,
     BetaContentBlock,
     BetaContentBlockParam,
@@ -79,6 +81,7 @@ from anthropic.types.beta import (
     BetaMessage,
     BetaMessageDeltaUsage,
     BetaMessageParam,
+    BetaMessageTokensCount,
     BetaMetadata,
     BetaRawContentBlockDeltaEvent,
     BetaRawContentBlockStartEvent,
@@ -109,6 +112,7 @@ from anthropic.types.beta import (
 Methods:
 
 - <code title="post /v1/messages?beta=true">client.beta.messages.<a href="./src/anthropic/resources/beta/messages/messages.py">create</a>(\*\*<a href="src/anthropic/types/beta/message_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_message.py">BetaMessage</a></code>
+- <code title="post /v1/messages/count_tokens?beta=true">client.beta.messages.<a href="./src/anthropic/resources/beta/messages/messages.py">count_tokens</a>(\*\*<a href="src/anthropic/types/beta/message_count_tokens_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_message_tokens_count.py">BetaMessageTokensCount</a></code>
 
 ### Batches
 
