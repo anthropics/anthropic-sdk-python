@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.39.0 (2024-11-04)
+
+Full Changelog: [v0.38.0...v0.39.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.38.0...v0.39.0)
+
+### ⚠ BREAKING CHANGES
+
+* **client:** remove legacy `client.count_tokens()` method ([#726](https://github.com/anthropics/anthropic-sdk-python/issues/726))
+
+### Features
+
+* **api:** add new haiku model ([#731](https://github.com/anthropics/anthropic-sdk-python/issues/731)) ([77eaaf9](https://github.com/anthropics/anthropic-sdk-python/commit/77eaaf9c76f9b267706c830a5f7c1d81df6013d9))
+* **project:** drop support for Python 3.7 ([#729](https://github.com/anthropics/anthropic-sdk-python/issues/729)) ([7f897e2](https://github.com/anthropics/anthropic-sdk-python/commit/7f897e253ae09e6a85fe64ba8004c2c3a8133e4e))
+
+
+### Bug Fixes
+
+* don't use dicts as iterables in transform ([#724](https://github.com/anthropics/anthropic-sdk-python/issues/724)) ([62bb863](https://github.com/anthropics/anthropic-sdk-python/commit/62bb8636a3d7156bc0caab5f574b1fa72445cead))
+* support json safe serialization for basemodel subclasses ([#727](https://github.com/anthropics/anthropic-sdk-python/issues/727)) ([5be855e](https://github.com/anthropics/anthropic-sdk-python/commit/5be855e20f40042f59e839c7747dd994dc88c456))
+* **types:** add missing token-counting-2024-11-01 ([#722](https://github.com/anthropics/anthropic-sdk-python/issues/722)) ([c549736](https://github.com/anthropics/anthropic-sdk-python/commit/c5497360a385f5dbaa5ab775bc19a0d7eee713bc))
+
+
+### Documentation
+
+* **readme:** mention new token counting endpoint ([#728](https://github.com/anthropics/anthropic-sdk-python/issues/728)) ([72a4636](https://github.com/anthropics/anthropic-sdk-python/commit/72a4636a7798170d69e7551ba58a0213d82d1711))
+
+
+### Refactors
+
+* **client:** remove legacy `client.count_tokens()` method ([#726](https://github.com/anthropics/anthropic-sdk-python/issues/726)) ([14e4244](https://github.com/anthropics/anthropic-sdk-python/commit/14e4244752b656cedfe7d160088e9744d07470a1))
+
 ## 0.38.0 (2024-11-01)
 
 Full Changelog: [v0.37.1...v0.38.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.37.1...v0.38.0)
