@@ -11,7 +11,7 @@ ModelParam: TypeAlias = Union[
     str,
     Literal[
         "claude-3-5-haiku-latest",
-        "claude-3-haiku-20241022",
+        "claude-3-5-haiku-20241022",
         "claude-3-5-sonnet-latest",
         "claude-3-5-sonnet-20241022",
         "claude-3-5-sonnet-20240620",
