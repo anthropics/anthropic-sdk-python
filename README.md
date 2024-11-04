@@ -165,7 +165,19 @@ Alternatively, you can use `client.messages.create(..., stream=True)` which only
 
 ## Token counting
 
-You can see the exact usage for a given request through the `usage` response property, e.g.
+To get the token count for a message without creating it you can use the `client.beta.messages.count_tokens()` method. This takes the same `messages` list as the `.create()` method.
+
+```py
+count = client.beta.messages.count_tokens(
+    model="claude-3-5-sonnet-20241022",
+    messages=[
+        {"role": "user", "content": "Hello, world"}
+    ]
+)
+count.input_tokens  # 10
+```
+
+You can also see the exact usage for a given request through the `usage` response property, e.g.
 
 ```py
 message = client.messages.create(...)
