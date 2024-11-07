@@ -6,7 +6,8 @@ Full Changelog: [v0.38.0...v0.39.0](https://github.com/anthropics/anthropic-sdk-
 
 ### ⚠ BREAKING CHANGES
 
-* **client:** remove legacy `client.count_tokens()` method ([#726](https://github.com/anthropics/anthropic-sdk-python/issues/726))
+* **client:** remove legacy `client.count_tokens()` & `client.get_tokenizer()` methods ([#726](https://github.com/anthropics/anthropic-sdk-python/issues/726))
+  * This functionality has been replaced by the `client.beta.messages.count_tokens()` API which supports newer models and all content functionality, such as images and PDFs.
 
 ### Features
 
