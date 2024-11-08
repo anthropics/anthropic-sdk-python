@@ -156,6 +156,47 @@ async def test_async_response_parse_custom_model(async_client: AsyncAnthropic) -
     assert obj.bar == 2
 
 
+def test_response_basemodel_request_id(client: Anthropic) -> None:
+    response = APIResponse(
+        raw=httpx.Response(
+            200,
+            headers={"request-id": "my-req-id"},
+            content=json.dumps({"foo": "hello!", "bar": 2}),
+        ),
+        client=client,
+        stream=False,
+        stream_cls=None,
+        cast_to=str,
+        options=FinalRequestOptions.construct(method="get", url="/foo"),
+    )
+    obj = response.parse(to=CustomModel)
+    assert obj._request_id == "my-req-id"
+    assert obj.foo == "hello!"
+    assert obj.bar == 2
+    assert obj.to_dict() == {"foo": "hello!", "bar": 2}
+
+
+@pytest.mark.asyncio
+async def test_async_response_basemodel_request_id(client: Anthropic) -> None:
+    response = AsyncAPIResponse(
+        raw=httpx.Response(
+            200,
+            headers={"request-id": "my-req-id"},
+            content=json.dumps({"foo": "hello!", "bar": 2}),
+        ),
+        client=client,
+        stream=False,
+        stream_cls=None,
+        cast_to=str,
+        options=FinalRequestOptions.construct(method="get", url="/foo"),
+    )
+    obj = await response.parse(to=CustomModel)
+    assert obj._request_id == "my-req-id"
+    assert obj.foo == "hello!"
+    assert obj.bar == 2
+    assert obj.to_dict() == {"foo": "hello!", "bar": 2}
+
+
 def test_response_parse_annotated_type(client: Anthropic) -> None:
     response = APIResponse(
         raw=httpx.Response(200, content=json.dumps({"foo": "hello!", "bar": 2})),
