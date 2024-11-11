@@ -26,8 +26,7 @@ import os
 from anthropic import Anthropic
 
 client = Anthropic(
-    # This is the default and can be omitted
-    api_key=os.environ.get("ANTHROPIC_API_KEY"),
+    api_key=os.environ.get("ANTHROPIC_API_KEY"),  # This is the default and can be omitted
 )
 
 message = client.messages.create(
@@ -58,8 +57,7 @@ import asyncio
 from anthropic import AsyncAnthropic
 
 client = AsyncAnthropic(
-    # This is the default and can be omitted
-    api_key=os.environ.get("ANTHROPIC_API_KEY"),
+    api_key=os.environ.get("ANTHROPIC_API_KEY"),  # This is the default and can be omitted
 )
 
 
