@@ -6,6 +6,7 @@ Types:
 from anthropic.types import (
     ContentBlock,
     ContentBlockDeltaEvent,
+    ContentBlockParam,
     ContentBlockStartEvent,
     ContentBlockStopEvent,
     ImageBlockParam,
