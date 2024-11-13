@@ -22,6 +22,7 @@ from .image_block_param import ImageBlockParam as ImageBlockParam
 from .tool_choice_param import ToolChoiceParam as ToolChoiceParam
 from .message_stop_event import MessageStopEvent as MessageStopEvent
 from .beta_error_response import BetaErrorResponse as BetaErrorResponse
+from .content_block_param import ContentBlockParam as ContentBlockParam
 from .message_delta_event import MessageDeltaEvent as MessageDeltaEvent
 from .message_delta_usage import MessageDeltaUsage as MessageDeltaUsage
 from .message_start_event import MessageStartEvent as MessageStartEvent
