@@ -39,33 +39,7 @@ class TestBatches:
                         ],
                         "model": "claude-3-5-sonnet-20241022",
                     },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
+                }
             ],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
@@ -86,7 +60,7 @@ class TestBatches:
                         ],
                         "model": "claude-3-5-sonnet-20241022",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
-                        "stop_sequences": ["string", "string", "string"],
+                        "stop_sequences": ["string"],
                         "stream": False,
                         "system": [
                             {
@@ -119,230 +93,14 @@ class TestBatches:
                                 "cache_control": {"type": "ephemeral"},
                                 "description": "Get the current weather in a given location",
                                 "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
+                            }
                         ],
                         "top_k": 5,
                         "top_p": 0.7,
                     },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                        "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
-                        "stop_sequences": ["string", "string", "string"],
-                        "stream": False,
-                        "system": [
-                            {
-                                "text": "Today's date is 2024-06-01.",
-                                "type": "text",
-                                "cache_control": {"type": "ephemeral"},
-                            }
-                        ],
-                        "temperature": 1,
-                        "tool_choice": {
-                            "type": "auto",
-                            "disable_parallel_tool_use": True,
-                        },
-                        "tools": [
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                        ],
-                        "top_k": 5,
-                        "top_p": 0.7,
-                    },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                        "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
-                        "stop_sequences": ["string", "string", "string"],
-                        "stream": False,
-                        "system": [
-                            {
-                                "text": "Today's date is 2024-06-01.",
-                                "type": "text",
-                                "cache_control": {"type": "ephemeral"},
-                            }
-                        ],
-                        "temperature": 1,
-                        "tool_choice": {
-                            "type": "auto",
-                            "disable_parallel_tool_use": True,
-                        },
-                        "tools": [
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                        ],
-                        "top_k": 5,
-                        "top_p": 0.7,
-                    },
-                },
+                }
             ],
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -362,33 +120,7 @@ class TestBatches:
                         ],
                         "model": "claude-3-5-sonnet-20241022",
                     },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
+                }
             ],
         )
 
@@ -413,33 +145,7 @@ class TestBatches:
                         ],
                         "model": "claude-3-5-sonnet-20241022",
                     },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
+                }
             ],
         ) as response:
             assert not response.is_closed
@@ -461,7 +167,7 @@ class TestBatches:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.retrieve(
             message_batch_id="message_batch_id",
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -507,7 +213,7 @@ class TestBatches:
             after_id="after_id",
             before_id="before_id",
             limit=1,
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         assert_matches_type(SyncPage[BetaMessageBatch], batch, path=["response"])
 
@@ -542,7 +248,7 @@ class TestBatches:
     def test_method_cancel_with_all_params(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.cancel(
             message_batch_id="message_batch_id",
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -636,33 +342,7 @@ class TestAsyncBatches:
                         ],
                         "model": "claude-3-5-sonnet-20241022",
                     },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
+                }
             ],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
@@ -683,7 +363,7 @@ class TestAsyncBatches:
                         ],
                         "model": "claude-3-5-sonnet-20241022",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
-                        "stop_sequences": ["string", "string", "string"],
+                        "stop_sequences": ["string"],
                         "stream": False,
                         "system": [
                             {
@@ -716,230 +396,14 @@ class TestAsyncBatches:
                                 "cache_control": {"type": "ephemeral"},
                                 "description": "Get the current weather in a given location",
                                 "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
+                            }
                         ],
                         "top_k": 5,
                         "top_p": 0.7,
                     },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                        "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
-                        "stop_sequences": ["string", "string", "string"],
-                        "stream": False,
-                        "system": [
-                            {
-                                "text": "Today's date is 2024-06-01.",
-                                "type": "text",
-                                "cache_control": {"type": "ephemeral"},
-                            }
-                        ],
-                        "temperature": 1,
-                        "tool_choice": {
-                            "type": "auto",
-                            "disable_parallel_tool_use": True,
-                        },
-                        "tools": [
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                        ],
-                        "top_k": 5,
-                        "top_p": 0.7,
-                    },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                        "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
-                        "stop_sequences": ["string", "string", "string"],
-                        "stream": False,
-                        "system": [
-                            {
-                                "text": "Today's date is 2024-06-01.",
-                                "type": "text",
-                                "cache_control": {"type": "ephemeral"},
-                            }
-                        ],
-                        "temperature": 1,
-                        "tool_choice": {
-                            "type": "auto",
-                            "disable_parallel_tool_use": True,
-                        },
-                        "tools": [
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                            {
-                                "input_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                                "name": "x",
-                                "cache_control": {"type": "ephemeral"},
-                                "description": "Get the current weather in a given location",
-                                "type": "custom",
-                            },
-                        ],
-                        "top_k": 5,
-                        "top_p": 0.7,
-                    },
-                },
+                }
             ],
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -959,33 +423,7 @@ class TestAsyncBatches:
                         ],
                         "model": "claude-3-5-sonnet-20241022",
                     },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
+                }
             ],
         )
 
@@ -1010,33 +448,7 @@ class TestAsyncBatches:
                         ],
                         "model": "claude-3-5-sonnet-20241022",
                     },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
-                {
-                    "custom_id": "my-custom-id-1",
-                    "params": {
-                        "max_tokens": 1024,
-                        "messages": [
-                            {
-                                "content": "Hello, world",
-                                "role": "user",
-                            }
-                        ],
-                        "model": "claude-3-5-sonnet-20241022",
-                    },
-                },
+                }
             ],
         ) as response:
             assert not response.is_closed
@@ -1058,7 +470,7 @@ class TestAsyncBatches:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.retrieve(
             message_batch_id="message_batch_id",
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -1104,7 +516,7 @@ class TestAsyncBatches:
             after_id="after_id",
             before_id="before_id",
             limit=1,
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         assert_matches_type(AsyncPage[BetaMessageBatch], batch, path=["response"])
 
@@ -1139,7 +551,7 @@ class TestAsyncBatches:
     async def test_method_cancel_with_all_params(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.cancel(
             message_batch_id="message_batch_id",
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 

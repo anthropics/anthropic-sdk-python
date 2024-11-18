@@ -43,7 +43,7 @@ class TestMessages:
             ],
             model="claude-3-5-sonnet-20241022",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
-            stop_sequences=["string", "string", "string"],
+            stop_sequences=["string"],
             stream=False,
             system=[
                 {
@@ -75,47 +75,11 @@ class TestMessages:
                     "name": "x",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
-                },
-                {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "x",
-                    "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                },
-                {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "x",
-                    "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                },
+                }
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         assert_matches_type(PromptCachingBetaMessage, message, path=["response"])
 
@@ -185,7 +149,7 @@ class TestMessages:
             model="claude-3-5-sonnet-20241022",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
-            stop_sequences=["string", "string", "string"],
+            stop_sequences=["string"],
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -216,47 +180,11 @@ class TestMessages:
                     "name": "x",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
-                },
-                {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "x",
-                    "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                },
-                {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "x",
-                    "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                },
+                }
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         message_stream.response.close()
 
@@ -329,7 +257,7 @@ class TestAsyncMessages:
             ],
             model="claude-3-5-sonnet-20241022",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
-            stop_sequences=["string", "string", "string"],
+            stop_sequences=["string"],
             stream=False,
             system=[
                 {
@@ -361,47 +289,11 @@ class TestAsyncMessages:
                     "name": "x",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
-                },
-                {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "x",
-                    "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                },
-                {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "x",
-                    "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                },
+                }
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         assert_matches_type(PromptCachingBetaMessage, message, path=["response"])
 
@@ -471,7 +363,7 @@ class TestAsyncMessages:
             model="claude-3-5-sonnet-20241022",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
-            stop_sequences=["string", "string", "string"],
+            stop_sequences=["string"],
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -502,47 +394,11 @@ class TestAsyncMessages:
                     "name": "x",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
-                },
-                {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "x",
-                    "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                },
-                {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "x",
-                    "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                },
+                }
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string", "string", "string"],
+            betas=["string"],
         )
         await message_stream.response.aclose()
 
