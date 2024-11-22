@@ -48,7 +48,7 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
             raise RuntimeError("Expected dictionary json_data for post /completions endpoint")
 
         model = options.json_data.pop("model", None)
-        model = urllib.parse.quote(model, safe="")
+        model = urllib.parse.quote(str(model), safe=":")
         stream = options.json_data.pop("stream", False)
         if stream:
             options.url = f"/model/{model}/invoke-with-response-stream"
