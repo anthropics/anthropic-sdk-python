@@ -91,3 +91,36 @@ async def test_messages_retries_async(respx_mock: MockRouter) -> None:
         calls[1].request.url
         == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke"
     )
+
+@pytest.mark.respx()
+def test_application_inference_profile(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        side_effect=[
+            httpx.Response(500, json={"error": "server error"}, headers={"retry-after-ms": "10"}),
+            httpx.Response(200, json={"foo": "bar"}),
+        ]
+    )
+
+    sync_client.messages.create(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="arn:aws:bedrock:us-east-1:123456789012:application-inference-profile/jf2sje1c0jnb",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+
+    assert len(calls) == 2
+
+    assert (
+        calls[0].request.url
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/arn%3Aaws%3Abedrock%3Aus-east-1%3A123456789012%3Aapplication-inference-profile%2Fjf2sje1c0jnb/invoke"
+    )
+    assert (
+        calls[1].request.url
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/arn%3Aaws%3Abedrock%3Aus-east-1%3A123456789012%3Aapplication-inference-profile%2Fjf2sje1c0jnb/invoke"
+    )
