@@ -92,6 +92,7 @@ async def test_messages_retries_async(respx_mock: MockRouter) -> None:
         == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke"
     )
 
+
 @pytest.mark.respx()
 def test_application_inference_profile(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
@@ -113,7 +114,6 @@ def test_application_inference_profile(respx_mock: MockRouter) -> None:
     )
 
     calls = cast("list[MockRequestCall]", respx_mock.calls)
-
     assert len(calls) == 2
 
     assert (
