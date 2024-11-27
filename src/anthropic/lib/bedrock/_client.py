@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import urllib.parse
 from typing import Any, Union, Mapping, TypeVar
 from typing_extensions import Self, override
 
@@ -47,6 +48,7 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
             raise RuntimeError("Expected dictionary json_data for post /completions endpoint")
 
         model = options.json_data.pop("model", None)
+        model = urllib.parse.quote(str(model), safe=":")
         stream = options.json_data.pop("stream", False)
         if stream:
             options.url = f"/model/{model}/invoke-with-response-stream"
