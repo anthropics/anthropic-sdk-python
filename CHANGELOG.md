@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.40.0 (2024-11-28)
+
+Full Changelog: [v0.39.0...v0.40.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.39.0...v0.40.0)
+
+### Features
+
+* **client:** add ._request_id property to object responses ([#743](https://github.com/anthropics/anthropic-sdk-python/issues/743)) ([9fb64a6](https://github.com/anthropics/anthropic-sdk-python/commit/9fb64a627821730fcf48662f6326d4c0f8c623ab))
+
+
+### Bug Fixes
+
+* **asyncify:** avoid hanging process under certain conditions ([#756](https://github.com/anthropics/anthropic-sdk-python/issues/756)) ([c71bba2](https://github.com/anthropics/anthropic-sdk-python/commit/c71bba2ad5248400c0142fca5e53c505f9e6d417))
+* **bedrock:** correct URL encoding for model params ([#759](https://github.com/anthropics/anthropic-sdk-python/issues/759)) ([be4e73a](https://github.com/anthropics/anthropic-sdk-python/commit/be4e73a6d6ced33c887cc338c7755f5fe1697e54))
+* **client:** compat with new httpx 0.28.0 release ([#765](https://github.com/anthropics/anthropic-sdk-python/issues/765)) ([de51f60](https://github.com/anthropics/anthropic-sdk-python/commit/de51f6089f7b025db5d150438caf78a615431cde))
+* don't use dicts as iterables in transform ([#750](https://github.com/anthropics/anthropic-sdk-python/issues/750)) ([1f71464](https://github.com/anthropics/anthropic-sdk-python/commit/1f71464a818066687bf6c1bcae0abb991d6ed9cd))
+* **types:** remove anthropic-instant-1.2 model ([#744](https://github.com/anthropics/anthropic-sdk-python/issues/744)) ([23637de](https://github.com/anthropics/anthropic-sdk-python/commit/23637de028c6c870f062fc0fbaefa9ae54a0e053))
+
+
+### Chores
+
+* **api:** update spec version ([#751](https://github.com/anthropics/anthropic-sdk-python/issues/751)) ([4ec986c](https://github.com/anthropics/anthropic-sdk-python/commit/4ec986ccfa601a78f9fff721710390c1fb4727cc))
+* **ci:** remove unneeded workflow ([#742](https://github.com/anthropics/anthropic-sdk-python/issues/742)) ([472b7d3](https://github.com/anthropics/anthropic-sdk-python/commit/472b7d362c4bd32e7b32c5a10ed3d40e6821f052))
+* **internal:** exclude mypy from running on tests ([#764](https://github.com/anthropics/anthropic-sdk-python/issues/764)) ([bce763a](https://github.com/anthropics/anthropic-sdk-python/commit/bce763a35f5420d0e811ff3cd4d2bf7494f11081))
+* **internal:** fix compat model_dump method when warnings are passed ([#760](https://github.com/anthropics/anthropic-sdk-python/issues/760)) ([0e09236](https://github.com/anthropics/anthropic-sdk-python/commit/0e0923612bb1ce4eb18f82966055df4fb8cd348d))
+* **internal:** minor formatting changes ([493020e](https://github.com/anthropics/anthropic-sdk-python/commit/493020eed859bd20e49f4ac7ec0b6c3293c7d3fd))
+* remove now unused `cached-property` dep ([#762](https://github.com/anthropics/anthropic-sdk-python/issues/762)) ([b9ffefe](https://github.com/anthropics/anthropic-sdk-python/commit/b9ffefec20279705a86e4ad342597886bd7064ca))
+* **tests:** adjust retry timeout values ([#736](https://github.com/anthropics/anthropic-sdk-python/issues/736)) ([27ed781](https://github.com/anthropics/anthropic-sdk-python/commit/27ed7816aa8ae32f179652ea6171dd621ef8a6b5))
+* **tests:** limit array example length ([#754](https://github.com/anthropics/anthropic-sdk-python/issues/754)) ([6cab2b9](https://github.com/anthropics/anthropic-sdk-python/commit/6cab2b9237c9679ce40e319d035fb4267bca03a7))
+
+
+### Documentation
+
+* add info log level to readme ([#761](https://github.com/anthropics/anthropic-sdk-python/issues/761)) ([5966b85](https://github.com/anthropics/anthropic-sdk-python/commit/5966b855f3e58d735d8ccfe3244f549baa3a87ed))
+* move comments in example snippets ([#749](https://github.com/anthropics/anthropic-sdk-python/issues/749)) ([f887930](https://github.com/anthropics/anthropic-sdk-python/commit/f887930773cbb2d5cb0d4d46ec6cd4f320d045ea))
+
 ## 0.39.0 (2024-11-04)
 
 Full Changelog: [v0.38.0...v0.39.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.38.0...v0.39.0)
