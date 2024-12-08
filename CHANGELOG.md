@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.40.1 (2024-12-08)
+
+Full Changelog: [v0.40.0...v0.40.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.40.0...v0.40.1)
+
+### Chores
+
+* **internal:** bump pyright ([#769](https://github.com/anthropics/anthropic-sdk-python/issues/769)) ([81f7d70](https://github.com/anthropics/anthropic-sdk-python/commit/81f7d70fa85029f86de30ac1701ec39d01dde8f9))
+* make the `Omit` type public ([#772](https://github.com/anthropics/anthropic-sdk-python/issues/772)) ([4ed0419](https://github.com/anthropics/anthropic-sdk-python/commit/4ed041961b59a7943b00a8e592ead0e962f36174))
+
 ## 0.40.0 (2024-11-28)
 
 Full Changelog: [v0.39.0...v0.40.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.39.0...v0.40.0)
