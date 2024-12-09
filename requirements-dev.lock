@@ -85,9 +85,9 @@ pyasn1==0.6.1
     # via rsa
 pyasn1-modules==0.4.1
     # via google-auth
-pydantic==2.9.2
+pydantic==2.10.3
     # via anthropic
-pydantic-core==2.23.4
+pydantic-core==2.27.1
     # via pydantic
 pygments==2.18.0
     # via rich
@@ -130,6 +130,7 @@ typing-extensions==4.12.2
     # via mypy
     # via pydantic
     # via pydantic-core
+    # via pyright
 urllib3==1.26.20
     # via botocore
 virtualenv==20.24.5
