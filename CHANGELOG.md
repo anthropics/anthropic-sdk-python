@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.41.0 (2024-12-10)
+
+Full Changelog: [v0.40.0...v0.41.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.40.0...v0.41.0)
+
+### Chores
+
+* **internal:** bump pydantic dependency ([#775](https://github.com/anthropics/anthropic-sdk-python/issues/775)) ([99b4d06](https://github.com/anthropics/anthropic-sdk-python/commit/99b4d06e73cdae3f2c97c304b8c0b64ec4758768))
+* **internal:** bump pyright ([#769](https://github.com/anthropics/anthropic-sdk-python/issues/769)) ([81f7d70](https://github.com/anthropics/anthropic-sdk-python/commit/81f7d70fa85029f86de30ac1701ec39d01dde8f9))
+* make the `Omit` type public ([#772](https://github.com/anthropics/anthropic-sdk-python/issues/772)) ([4ed0419](https://github.com/anthropics/anthropic-sdk-python/commit/4ed041961b59a7943b00a8e592ead0e962f36174))
+* remove deprecated HTTP client options ([#777](https://github.com/anthropics/anthropic-sdk-python/issues/777)) ([3933368](https://github.com/anthropics/anthropic-sdk-python/commit/3933368e8a54d1f81c9503576e461c3d75292c39))
+
+
+### Documentation
+
+* **readme:** fix http client proxies example ([#778](https://github.com/anthropics/anthropic-sdk-python/issues/778)) ([df1a549](https://github.com/anthropics/anthropic-sdk-python/commit/df1a5494d2d3be86717c344654ce54e2f97f19be))
+
 ## 0.40.0 (2024-11-28)
 
 Full Changelog: [v0.39.0...v0.40.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.39.0...v0.40.0)
