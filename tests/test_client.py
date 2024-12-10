@@ -745,7 +745,7 @@ class TestAnthropic:
                                 "content": "Hello, Claude",
                             }
                         ],
-                        model="claude-3-opus-20240229",
+                        model="claude-3-5-sonnet-latest",
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -772,7 +772,7 @@ class TestAnthropic:
                                 "content": "Hello, Claude",
                             }
                         ],
-                        model="claude-3-opus-20240229",
+                        model="claude-3-5-sonnet-latest",
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -1625,7 +1625,7 @@ class TestAsyncAnthropic:
                                 "content": "Hello, Claude",
                             }
                         ],
-                        model="claude-3-opus-20240229",
+                        model="claude-3-5-sonnet-latest",
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -1652,7 +1652,7 @@ class TestAsyncAnthropic:
                                 "content": "Hello, Claude",
                             }
                         ],
-                        model="claude-3-opus-20240229",
+                        model="claude-3-5-sonnet-latest",
                     ),
                 ),
                 cast_to=httpx.Response,
