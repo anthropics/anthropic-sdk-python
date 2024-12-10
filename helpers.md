@@ -11,7 +11,7 @@ async with client.messages.stream(
             "content": "Say hello there!",
         }
     ],
-    model="claude-3-opus-20240229",
+    model="claude-3-5-sonnet-latest",
 ) as stream:
     async for text in stream.text_stream:
         print(text, end="", flush=True)
@@ -60,7 +60,7 @@ async with client.messages.stream(
             "content": "Say hello there!",
         }
     ],
-    model="claude-3-opus-20240229",
+    model="claude-3-5-sonnet-latest",
 ) as stream:
     async for event in stream:
         if event.type == "text":
