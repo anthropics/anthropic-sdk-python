@@ -37,7 +37,7 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-opus-20240229",
+    model="claude-3-5-sonnet-latest",
 )
 print(message.content)
 ```
@@ -70,7 +70,7 @@ async def main() -> None:
                 "content": "Hello, Claude",
             }
         ],
-        model="claude-3-opus-20240229",
+        model="claude-3-5-sonnet-latest",
     )
     print(message.content)
 
@@ -97,7 +97,7 @@ stream = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-opus-20240229",
+    model="claude-3-5-sonnet-latest",
     stream=True,
 )
 for event in stream:
@@ -119,7 +119,7 @@ stream = await client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-opus-20240229",
+    model="claude-3-5-sonnet-latest",
     stream=True,
 )
 async for event in stream:
@@ -145,7 +145,7 @@ async def main() -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="claude-3-opus-20240229",
+        model="claude-3-5-sonnet-latest",
     ) as stream:
         async for text in stream.text_stream:
             print(text, end="", flush=True)
@@ -198,7 +198,7 @@ await client.beta.messages.batches.create(
         {
             "custom_id": "my-first-request",
             "params": {
-                "model": "claude-3-5-sonnet-20240620",
+                "model": "claude-3-5-sonnet-latest",
                 "max_tokens": 1024,
                 "messages": [{"role": "user", "content": "Hello, world"}],
             },
@@ -206,7 +206,7 @@ await client.beta.messages.batches.create(
         {
             "custom_id": "my-second-request",
             "params": {
-                "model": "claude-3-5-sonnet-20240620",
+                "model": "claude-3-5-sonnet-latest",
                 "max_tokens": 1024,
                 "messages": [{"role": "user", "content": "Hi again, friend"}],
             },
@@ -250,7 +250,7 @@ message = client.messages.create(
             "content": "Hello!",
         }
     ],
-    model="anthropic.claude-3-sonnet-20240229-v1:0",
+    model="anthropic.claude-3-5-sonnet-20241022-v2:0",
 )
 print(message)
 ```
@@ -281,7 +281,7 @@ from anthropic import AnthropicVertex
 client = AnthropicVertex()
 
 message = client.messages.create(
-    model="claude-3-sonnet@20240229",
+    model="claude-3-5-sonnet-v2@20241022",
     max_tokens=100,
     messages=[
         {
@@ -399,7 +399,7 @@ try:
                 "content": "Hello, Claude",
             }
         ],
-        model="claude-3-opus-20240229",
+        model="claude-3-5-sonnet-latest",
     )
 except anthropic.APIConnectionError as e:
     print("The server could not be reached")
@@ -440,7 +440,7 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-opus-20240229",
+    model="claude-3-5-sonnet-latest",
 )
 print(message._request_id)  # req_018EeWyXxfu5pfWkrYcMdjWG
 ```
@@ -475,7 +475,7 @@ client.with_options(max_retries=5).messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-opus-20240229",
+    model="claude-3-5-sonnet-latest",
 )
 ```
 
@@ -507,7 +507,7 @@ client.with_options(timeout=5.0).messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-opus-20240229",
+    model="claude-3-5-sonnet-latest",
 )
 ```
 
@@ -571,7 +571,7 @@ response = client.messages.with_raw_response.create(
         "role": "user",
         "content": "Hello, Claude",
     }],
-    model="claude-3-opus-20240229",
+    model="claude-3-5-sonnet-latest",
 )
 print(response.headers.get('X-My-Header'))
 
@@ -605,7 +605,7 @@ with client.messages.with_streaming_response.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-opus-20240229",
+    model="claude-3-5-sonnet-latest",
 ) as response:
     print(response.headers.get("X-My-Header"))
 
@@ -654,18 +654,19 @@ can also get all the extra fields on the Pydantic model as a dict with
 
 You can directly override the [httpx client](https://www.python-httpx.org/api/#client) to customize it for your use case, including:
 
-- Support for proxies
-- Custom transports
+- Support for [proxies](https://www.python-httpx.org/advanced/proxies/)
+- Custom [transports](https://www.python-httpx.org/advanced/transports/)
 - Additional [advanced](https://www.python-httpx.org/advanced/clients/) functionality
 
 ```python
+import httpx
 from anthropic import Anthropic, DefaultHttpxClient
 
 client = Anthropic(
     # Or use the `ANTHROPIC_BASE_URL` env var
     base_url="http://my.test.server.example.com:8083",
     http_client=DefaultHttpxClient(
-        proxies="http://my.test.proxy.example.com",
+        proxy="http://my.test.proxy.example.com",
         transport=httpx.HTTPTransport(local_address="0.0.0.0"),
     ),
 )
