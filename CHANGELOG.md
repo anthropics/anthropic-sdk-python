@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.41.0 (2024-12-12)
+
+Full Changelog: [v0.40.0...v0.41.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.40.0...v0.41.0)
+
+### Chores
+
+* **internal:** add support for TypeAliasType ([#786](https://github.com/anthropics/anthropic-sdk-python/issues/786)) ([287ebd2](https://github.com/anthropics/anthropic-sdk-python/commit/287ebd2287ca90408999fe6be3b6f8c0295b46ef))
+* **internal:** bump pydantic dependency ([#775](https://github.com/anthropics/anthropic-sdk-python/issues/775)) ([99b4d06](https://github.com/anthropics/anthropic-sdk-python/commit/99b4d06e73cdae3f2c97c304b8c0b64ec4758768))
+* **internal:** bump pyright ([#769](https://github.com/anthropics/anthropic-sdk-python/issues/769)) ([81f7d70](https://github.com/anthropics/anthropic-sdk-python/commit/81f7d70fa85029f86de30ac1701ec39d01dde8f9))
+* **internal:** bump pyright ([#785](https://github.com/anthropics/anthropic-sdk-python/issues/785)) ([44ab333](https://github.com/anthropics/anthropic-sdk-python/commit/44ab3339b7f3860e3a492a1784f247702bea5be0))
+* make the `Omit` type public ([#772](https://github.com/anthropics/anthropic-sdk-python/issues/772)) ([4ed0419](https://github.com/anthropics/anthropic-sdk-python/commit/4ed041961b59a7943b00a8e592ead0e962f36174))
+* remove deprecated HTTP client options ([#777](https://github.com/anthropics/anthropic-sdk-python/issues/777)) ([3933368](https://github.com/anthropics/anthropic-sdk-python/commit/3933368e8a54d1f81c9503576e461c3d75292c39))
+
+
+### Documentation
+
+* **readme:** fix http client proxies example ([#778](https://github.com/anthropics/anthropic-sdk-python/issues/778)) ([df1a549](https://github.com/anthropics/anthropic-sdk-python/commit/df1a5494d2d3be86717c344654ce54e2f97f19be))
+* use latest sonnet in example snippets ([#781](https://github.com/anthropics/anthropic-sdk-python/issues/781)) ([1ad9e4f](https://github.com/anthropics/anthropic-sdk-python/commit/1ad9e4ff559f16760de15e2352a64bb2b3103071))
+
 ## 0.40.0 (2024-11-28)
 
 Full Changelog: [v0.39.0...v0.40.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.39.0...v0.40.0)
