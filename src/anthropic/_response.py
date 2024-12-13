@@ -137,7 +137,6 @@ class BaseAPIResponse(Generic[R]):
         if cast_to and is_annotated_type(cast_to):
             cast_to = extract_type_arg(cast_to, 0)
 
-        cast_to = to if to is not None else self._cast_to
         origin = get_origin(cast_to) or cast_to
 
         if inspect.isclass(origin):
