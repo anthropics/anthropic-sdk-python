@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from .messages import (
+from ..._compat import cached_property
+from ..._resource import SyncAPIResource, AsyncAPIResource
+from .messages.messages import (
     Messages,
     AsyncMessages,
     MessagesWithRawResponse,
@@ -10,9 +12,7 @@ from .messages import (
     MessagesWithStreamingResponse,
     AsyncMessagesWithStreamingResponse,
 )
-from ..._compat import cached_property
-from ..._resource import SyncAPIResource, AsyncAPIResource
-from .prompt_caching import (
+from .prompt_caching.prompt_caching import (
     PromptCaching,
     AsyncPromptCaching,
     PromptCachingWithRawResponse,
@@ -20,8 +20,6 @@ from .prompt_caching import (
     PromptCachingWithStreamingResponse,
     AsyncPromptCachingWithStreamingResponse,
 )
-from .messages.messages import Messages, AsyncMessages
-from .prompt_caching.prompt_caching import PromptCaching, AsyncPromptCaching
 
 __all__ = ["Beta", "AsyncBeta"]
 
