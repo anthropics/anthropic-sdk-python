@@ -441,7 +441,15 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
 
         options.url = f"/projects/{project_id}/locations/{region}/publishers/anthropic/models/{model}:{specifier}"
 
+    if options.url in {"/v1/messages/count_tokens", "/v1/messages/count_tokens?beta=true"} and options.method == "post":
+        if project_id is None:
+            raise RuntimeError(
+                "No project_id was given and it could not be resolved from credentials. The client should be instantiated with the `project_id` argument or the `ANTHROPIC_VERTEX_PROJECT_ID` environment variable should be set."
+            )
+
         if is_dict(options.json_data):
-            options.json_data.pop("model", None)
+            options.json_data.pop("anthropic_version", None)
+
+        options.url = f"/projects/{project_id}/locations/{region}/publishers/anthropic/models/count-tokens:rawPredict"
 
     return options
