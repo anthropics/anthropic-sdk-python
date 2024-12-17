@@ -14,7 +14,7 @@ from ..._utils import is_dict, is_given
 from ..._compat import model_copy
 from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
-from ..._exceptions import APIStatusError
+from ..._exceptions import AnthropicError, APIStatusError
 from ..._base_client import (
     DEFAULT_MAX_RETRIES,
     BaseClient,
@@ -54,6 +54,12 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
             options.url = f"/model/{model}/invoke-with-response-stream"
         else:
             options.url = f"/model/{model}/invoke"
+
+    if options.url.startswith('/v1/messages/batches'):
+        raise AnthropicError('The Batch API is not supported in Bedrock yet')
+    
+    if options.url == '/v1/messages/count_tokens':
+        raise AnthropicError('Token counting is not supported in Bedrock yet')
 
     return options
 

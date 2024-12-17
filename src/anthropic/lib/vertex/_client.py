@@ -15,7 +15,7 @@ from ..._compat import model_copy, typed_cached_property
 from ..._models import FinalRequestOptions
 from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
-from ..._exceptions import APIStatusError
+from ..._exceptions import AnthropicError, APIStatusError
 from ..._base_client import (
     DEFAULT_MAX_RETRIES,
     DEFAULT_CONNECTION_LIMITS,
@@ -452,4 +452,7 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
 
         options.url = f"/projects/{project_id}/locations/{region}/publishers/anthropic/models/count-tokens:rawPredict"
 
+    if options.url.startswith('/v1/messages/batches'):
+        raise AnthropicError('The Batch API is not supported in the Vertex client yet')
+    
     return options
