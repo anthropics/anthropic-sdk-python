@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.42.0 (2024-12-17)
+
+Full Changelog: [v0.41.0...v0.42.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.41.0...v0.42.0)
+
+### Features
+
+* **api:** general availability updates ([#795](https://github.com/anthropics/anthropic-sdk-python/issues/795)) ([0954c48](https://github.com/anthropics/anthropic-sdk-python/commit/0954c488e64a8d80d2dfa160b0ffdd8366996d2e))
+
+
+### Bug Fixes
+
+* **vertex:** remove `anthropic_version` deletion for token counting ([f613929](https://github.com/anthropics/anthropic-sdk-python/commit/f613929150591e8927af590554e71f197fc243fc))
+
+
+### Chores
+
+* **internal:** fix some typos ([#799](https://github.com/anthropics/anthropic-sdk-python/issues/799)) ([45addb6](https://github.com/anthropics/anthropic-sdk-python/commit/45addb671fde3c7e06735fbd09fee278e0ddff18))
+
 ## 0.41.0 (2024-12-17)
 
 Full Changelog: [v0.40.0...v0.41.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.40.0...v0.41.0)
