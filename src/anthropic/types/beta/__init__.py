@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from .beta_usage import BetaUsage as BetaUsage
 from .beta_message import BetaMessage as BetaMessage
+from .beta_model_info import BetaModelInfo as BetaModelInfo
 from .beta_text_block import BetaTextBlock as BetaTextBlock
 from .beta_text_delta import BetaTextDelta as BetaTextDelta
 from .beta_tool_param import BetaToolParam as BetaToolParam
+from .model_list_params import ModelListParams as ModelListParams
 from .beta_content_block import BetaContentBlock as BetaContentBlock
 from .beta_message_param import BetaMessageParam as BetaMessageParam
 from .beta_metadata_param import BetaMetadataParam as BetaMetadataParam

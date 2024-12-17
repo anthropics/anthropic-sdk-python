@@ -5,14 +5,15 @@ from __future__ import annotations
 from typing import Optional
 from typing_extensions import Literal, Required, TypedDict
 
+from .base64_pdf_source_param import Base64PDFSourceParam
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
 
-__all__ = ["TextBlockParam"]
+__all__ = ["DocumentBlockParam"]
 
 
-class TextBlockParam(TypedDict, total=False):
-    text: Required[str]
+class DocumentBlockParam(TypedDict, total=False):
+    source: Required[Base64PDFSourceParam]
 
-    type: Required[Literal["text"]]
+    type: Required[Literal["document"]]
 
     cache_control: Optional[CacheControlEphemeralParam]

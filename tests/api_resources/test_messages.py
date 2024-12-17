@@ -9,7 +9,10 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
-from anthropic.types import Message
+from anthropic.types import (
+    Message,
+    MessageTokensCount,
+)
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -49,6 +52,7 @@ class TestMessages:
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
+                    "cache_control": {"type": "ephemeral"},
                 }
             ],
             temperature=1,
@@ -72,6 +76,7 @@ class TestMessages:
                         },
                     },
                     "name": "x",
+                    "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
                 }
             ],
@@ -151,6 +156,7 @@ class TestMessages:
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
+                    "cache_control": {"type": "ephemeral"},
                 }
             ],
             temperature=1,
@@ -174,6 +180,7 @@ class TestMessages:
                         },
                     },
                     "name": "x",
+                    "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
                 }
             ],
@@ -221,6 +228,99 @@ class TestMessages:
 
         assert cast(Any, response.is_closed) is True
 
+    @parametrize
+    def test_method_count_tokens(self, client: Anthropic) -> None:
+        message = client.messages.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                }
+            ],
+            model="string",
+        )
+        assert_matches_type(MessageTokensCount, message, path=["response"])
+
+    @parametrize
+    def test_method_count_tokens_with_all_params(self, client: Anthropic) -> None:
+        message = client.messages.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                }
+            ],
+            model="string",
+            system=[
+                {
+                    "text": "Today's date is 2024-06-01.",
+                    "type": "text",
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            tool_choice={
+                "type": "auto",
+                "disable_parallel_tool_use": True,
+            },
+            tools=[
+                {
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "x",
+                    "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
+                }
+            ],
+        )
+        assert_matches_type(MessageTokensCount, message, path=["response"])
+
+    @parametrize
+    def test_raw_response_count_tokens(self, client: Anthropic) -> None:
+        response = client.messages.with_raw_response.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                }
+            ],
+            model="string",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        message = response.parse()
+        assert_matches_type(MessageTokensCount, message, path=["response"])
+
+    @parametrize
+    def test_streaming_response_count_tokens(self, client: Anthropic) -> None:
+        with client.messages.with_streaming_response.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                }
+            ],
+            model="string",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            message = response.parse()
+            assert_matches_type(MessageTokensCount, message, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
 
 class TestAsyncMessages:
     parametrize = pytest.mark.parametrize("async_client", [False, True], indirect=True, ids=["loose", "strict"])
@@ -257,6 +357,7 @@ class TestAsyncMessages:
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
+                    "cache_control": {"type": "ephemeral"},
                 }
             ],
             temperature=1,
@@ -280,6 +381,7 @@ class TestAsyncMessages:
                         },
                     },
                     "name": "x",
+                    "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
                 }
             ],
@@ -359,6 +461,7 @@ class TestAsyncMessages:
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
+                    "cache_control": {"type": "ephemeral"},
                 }
             ],
             temperature=1,
@@ -382,6 +485,7 @@ class TestAsyncMessages:
                         },
                     },
                     "name": "x",
+                    "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
                 }
             ],
@@ -426,5 +530,98 @@ class TestAsyncMessages:
 
             stream = await response.parse()
             await stream.close()
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_method_count_tokens(self, async_client: AsyncAnthropic) -> None:
+        message = await async_client.messages.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                }
+            ],
+            model="string",
+        )
+        assert_matches_type(MessageTokensCount, message, path=["response"])
+
+    @parametrize
+    async def test_method_count_tokens_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        message = await async_client.messages.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                }
+            ],
+            model="string",
+            system=[
+                {
+                    "text": "Today's date is 2024-06-01.",
+                    "type": "text",
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            tool_choice={
+                "type": "auto",
+                "disable_parallel_tool_use": True,
+            },
+            tools=[
+                {
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "x",
+                    "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
+                }
+            ],
+        )
+        assert_matches_type(MessageTokensCount, message, path=["response"])
+
+    @parametrize
+    async def test_raw_response_count_tokens(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.messages.with_raw_response.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                }
+            ],
+            model="string",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        message = response.parse()
+        assert_matches_type(MessageTokensCount, message, path=["response"])
+
+    @parametrize
+    async def test_streaming_response_count_tokens(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.messages.with_streaming_response.count_tokens(
+            messages=[
+                {
+                    "content": "string",
+                    "role": "user",
+                }
+            ],
+            model="string",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            message = await response.parse()
+            assert_matches_type(MessageTokensCount, message, path=["response"])
 
         assert cast(Any, response.is_closed) is True
