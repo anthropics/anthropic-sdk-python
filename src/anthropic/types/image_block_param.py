@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import Union, Optional
 from typing_extensions import Literal, Required, Annotated, TypedDict
 
 from .._types import Base64FileInput
 from .._utils import PropertyInfo
 from .._models import set_pydantic_config
+from .cache_control_ephemeral_param import CacheControlEphemeralParam
 
 __all__ = ["ImageBlockParam", "Source"]
 
@@ -27,3 +28,5 @@ class ImageBlockParam(TypedDict, total=False):
     source: Required[Source]
 
     type: Required[Literal["image"]]
+
+    cache_control: Optional[CacheControlEphemeralParam]

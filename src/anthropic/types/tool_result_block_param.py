@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Union, Iterable
+from typing import Union, Iterable, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .text_block_param import TextBlockParam
 from .image_block_param import ImageBlockParam
+from .cache_control_ephemeral_param import CacheControlEphemeralParam
 
 __all__ = ["ToolResultBlockParam", "Content"]
 
@@ -17,6 +18,8 @@ class ToolResultBlockParam(TypedDict, total=False):
     tool_use_id: Required[str]
 
     type: Required[Literal["tool_result"]]
+
+    cache_control: Optional[CacheControlEphemeralParam]
 
     content: Union[str, Iterable[Content]]
 

@@ -2,22 +2,19 @@
 
 from __future__ import annotations
 
-from typing import List, Iterable
-from itertools import chain
+from typing import Iterable
 
 import httpx
 
-from .... import _legacy_response
-from ...._types import NOT_GIVEN, Body, Query, Headers, NotGiven
-from ...._utils import (
-    is_given,
+from ... import _legacy_response
+from ..._types import NOT_GIVEN, Body, Query, Headers, NotGiven
+from ..._utils import (
     maybe_transform,
-    strip_not_given,
     async_maybe_transform,
 )
-from ...._compat import cached_property
-from ...._resource import SyncAPIResource, AsyncAPIResource
-from ...._response import (
+from ..._compat import cached_property
+from ..._resource import SyncAPIResource, AsyncAPIResource
+from ..._response import (
     BinaryAPIResponse,
     AsyncBinaryAPIResponse,
     StreamedBinaryAPIResponse,
@@ -29,11 +26,10 @@ from ...._response import (
     async_to_custom_raw_response_wrapper,
     async_to_custom_streamed_response_wrapper,
 )
-from ....pagination import SyncPage, AsyncPage
-from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.messages import batch_list_params, batch_create_params
-from ....types.anthropic_beta_param import AnthropicBetaParam
-from ....types.beta.messages.beta_message_batch import BetaMessageBatch
+from ...pagination import SyncPage, AsyncPage
+from ..._base_client import AsyncPaginator, make_request_options
+from ...types.messages import batch_list_params, batch_create_params
+from ...types.messages.message_batch import MessageBatch
 
 __all__ = ["Batches", "AsyncBatches"]
 
@@ -62,14 +58,13 @@ class Batches(SyncAPIResource):
         self,
         *,
         requests: Iterable[batch_create_params.Request],
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaMessageBatch:
+    ) -> MessageBatch:
         """
         Send a batch of Message creation requests.
 
@@ -81,8 +76,6 @@ class Batches(SyncAPIResource):
           requests: List of requests for prompt completion. Each is an individual request to create
               a Message.
 
-          betas: Optional header to specify the beta version(s) you want to use.
-
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -91,38 +84,26 @@ class Batches(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else NOT_GIVEN
-                }
-            ),
-            **(extra_headers or {}),
-        }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
-            "/v1/messages/batches?beta=true",
+            "/v1/messages/batches",
             body=maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=BetaMessageBatch,
+            cast_to=MessageBatch,
         )
 
     def retrieve(
         self,
         message_batch_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaMessageBatch:
+    ) -> MessageBatch:
         """This endpoint is idempotent and can be used to poll for Message Batch
         completion.
 
@@ -131,8 +112,6 @@ class Batches(SyncAPIResource):
 
         Args:
           message_batch_id: ID of the Message Batch.
-
-          betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
 
@@ -144,23 +123,12 @@ class Batches(SyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else NOT_GIVEN
-                }
-            ),
-            **(extra_headers or {}),
-        }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get(
-            f"/v1/messages/batches/{message_batch_id}?beta=true",
+            f"/v1/messages/batches/{message_batch_id}",
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=BetaMessageBatch,
+            cast_to=MessageBatch,
         )
 
     def list(
@@ -169,14 +137,13 @@ class Batches(SyncAPIResource):
         after_id: str | NotGiven = NOT_GIVEN,
         before_id: str | NotGiven = NOT_GIVEN,
         limit: int | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> SyncPage[BetaMessageBatch]:
+    ) -> SyncPage[MessageBatch]:
         """List all Message Batches within a Workspace.
 
         Most recently created batches are
@@ -193,8 +160,6 @@ class Batches(SyncAPIResource):
 
               Defaults to `20`. Ranges from `1` to `1000`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
-
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -203,20 +168,9 @@ class Batches(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else NOT_GIVEN
-                }
-            ),
-            **(extra_headers or {}),
-        }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/messages/batches?beta=true",
-            page=SyncPage[BetaMessageBatch],
+            "/v1/messages/batches",
+            page=SyncPage[MessageBatch],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -231,21 +185,20 @@ class Batches(SyncAPIResource):
                     batch_list_params.BatchListParams,
                 ),
             ),
-            model=BetaMessageBatch,
+            model=MessageBatch,
         )
 
     def cancel(
         self,
         message_batch_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaMessageBatch:
+    ) -> MessageBatch:
         """Batches may be canceled any time before processing ends.
 
         Once cancellation is
@@ -261,8 +214,6 @@ class Batches(SyncAPIResource):
         Args:
           message_batch_id: ID of the Message Batch.
 
-          betas: Optional header to specify the beta version(s) you want to use.
-
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -273,30 +224,18 @@ class Batches(SyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else NOT_GIVEN
-                }
-            ),
-            **(extra_headers or {}),
-        }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
-            f"/v1/messages/batches/{message_batch_id}/cancel?beta=true",
+            f"/v1/messages/batches/{message_batch_id}/cancel",
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=BetaMessageBatch,
+            cast_to=MessageBatch,
         )
 
     def results(
         self,
         message_batch_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -314,8 +253,6 @@ class Batches(SyncAPIResource):
         Args:
           message_batch_id: ID of the Message Batch.
 
-          betas: Optional header to specify the beta version(s) you want to use.
-
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -327,19 +264,8 @@ class Batches(SyncAPIResource):
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else NOT_GIVEN
-                }
-            ),
-            **(extra_headers or {}),
-        }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get(
-            f"/v1/messages/batches/{message_batch_id}/results?beta=true",
+            f"/v1/messages/batches/{message_batch_id}/results",
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -371,14 +297,13 @@ class AsyncBatches(AsyncAPIResource):
         self,
         *,
         requests: Iterable[batch_create_params.Request],
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaMessageBatch:
+    ) -> MessageBatch:
         """
         Send a batch of Message creation requests.
 
@@ -390,8 +315,6 @@ class AsyncBatches(AsyncAPIResource):
           requests: List of requests for prompt completion. Each is an individual request to create
               a Message.
 
-          betas: Optional header to specify the beta version(s) you want to use.
-
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -400,38 +323,26 @@ class AsyncBatches(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else NOT_GIVEN
-                }
-            ),
-            **(extra_headers or {}),
-        }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
-            "/v1/messages/batches?beta=true",
+            "/v1/messages/batches",
             body=await async_maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=BetaMessageBatch,
+            cast_to=MessageBatch,
         )
 
     async def retrieve(
         self,
         message_batch_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaMessageBatch:
+    ) -> MessageBatch:
         """This endpoint is idempotent and can be used to poll for Message Batch
         completion.
 
@@ -440,8 +351,6 @@ class AsyncBatches(AsyncAPIResource):
 
         Args:
           message_batch_id: ID of the Message Batch.
-
-          betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
 
@@ -453,23 +362,12 @@ class AsyncBatches(AsyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else NOT_GIVEN
-                }
-            ),
-            **(extra_headers or {}),
-        }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._get(
-            f"/v1/messages/batches/{message_batch_id}?beta=true",
+            f"/v1/messages/batches/{message_batch_id}",
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=BetaMessageBatch,
+            cast_to=MessageBatch,
         )
 
     def list(
@@ -478,14 +376,13 @@ class AsyncBatches(AsyncAPIResource):
         after_id: str | NotGiven = NOT_GIVEN,
         before_id: str | NotGiven = NOT_GIVEN,
         limit: int | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncPaginator[BetaMessageBatch, AsyncPage[BetaMessageBatch]]:
+    ) -> AsyncPaginator[MessageBatch, AsyncPage[MessageBatch]]:
         """List all Message Batches within a Workspace.
 
         Most recently created batches are
@@ -502,8 +399,6 @@ class AsyncBatches(AsyncAPIResource):
 
               Defaults to `20`. Ranges from `1` to `1000`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
-
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -512,20 +407,9 @@ class AsyncBatches(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else NOT_GIVEN
-                }
-            ),
-            **(extra_headers or {}),
-        }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/messages/batches?beta=true",
-            page=AsyncPage[BetaMessageBatch],
+            "/v1/messages/batches",
+            page=AsyncPage[MessageBatch],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -540,21 +424,20 @@ class AsyncBatches(AsyncAPIResource):
                     batch_list_params.BatchListParams,
                 ),
             ),
-            model=BetaMessageBatch,
+            model=MessageBatch,
         )
 
     async def cancel(
         self,
         message_batch_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaMessageBatch:
+    ) -> MessageBatch:
         """Batches may be canceled any time before processing ends.
 
         Once cancellation is
@@ -570,8 +453,6 @@ class AsyncBatches(AsyncAPIResource):
         Args:
           message_batch_id: ID of the Message Batch.
 
-          betas: Optional header to specify the beta version(s) you want to use.
-
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -582,30 +463,18 @@ class AsyncBatches(AsyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else NOT_GIVEN
-                }
-            ),
-            **(extra_headers or {}),
-        }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
-            f"/v1/messages/batches/{message_batch_id}/cancel?beta=true",
+            f"/v1/messages/batches/{message_batch_id}/cancel",
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=BetaMessageBatch,
+            cast_to=MessageBatch,
         )
 
     async def results(
         self,
         message_batch_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -623,8 +492,6 @@ class AsyncBatches(AsyncAPIResource):
         Args:
           message_batch_id: ID of the Message Batch.
 
-          betas: Optional header to specify the beta version(s) you want to use.
-
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -636,19 +503,8 @@ class AsyncBatches(AsyncAPIResource):
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else NOT_GIVEN
-                }
-            ),
-            **(extra_headers or {}),
-        }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._get(
-            f"/v1/messages/batches/{message_batch_id}/results?beta=true",
+            f"/v1/messages/batches/{message_batch_id}/results",
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),

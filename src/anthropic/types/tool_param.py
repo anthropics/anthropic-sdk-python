@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import Dict, Union, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
+from .cache_control_ephemeral_param import CacheControlEphemeralParam
+
 __all__ = ["ToolParam", "InputSchema"]
 
 
@@ -30,6 +32,8 @@ class ToolParam(TypedDict, total=False):
 
     This is how the tool will be called by the model and in tool_use blocks.
     """
+
+    cache_control: Optional[CacheControlEphemeralParam]
 
     description: str
     """Description of what this tool does.

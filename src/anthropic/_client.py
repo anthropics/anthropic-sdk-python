@@ -25,7 +25,7 @@ from ._utils import (
     get_async_library,
 )
 from ._version import __version__
-from .resources import messages, completions
+from .resources import models, completions
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
 from ._base_client import (
@@ -34,6 +34,7 @@ from ._base_client import (
     AsyncAPIClient,
 )
 from .resources.beta import beta
+from .resources.messages import messages
 
 __all__ = [
     "Timeout",
@@ -50,6 +51,7 @@ __all__ = [
 class Anthropic(SyncAPIClient):
     completions: completions.Completions
     messages: messages.Messages
+    models: models.Models
     beta: beta.Beta
     with_raw_response: AnthropicWithRawResponse
     with_streaming_response: AnthropicWithStreamedResponse
@@ -120,6 +122,7 @@ class Anthropic(SyncAPIClient):
 
         self.completions = completions.Completions(self)
         self.messages = messages.Messages(self)
+        self.models = models.Models(self)
         self.beta = beta.Beta(self)
         self.with_raw_response = AnthropicWithRawResponse(self)
         self.with_streaming_response = AnthropicWithStreamedResponse(self)
@@ -268,6 +271,7 @@ class Anthropic(SyncAPIClient):
 class AsyncAnthropic(AsyncAPIClient):
     completions: completions.AsyncCompletions
     messages: messages.AsyncMessages
+    models: models.AsyncModels
     beta: beta.AsyncBeta
     with_raw_response: AsyncAnthropicWithRawResponse
     with_streaming_response: AsyncAnthropicWithStreamedResponse
@@ -338,6 +342,7 @@ class AsyncAnthropic(AsyncAPIClient):
 
         self.completions = completions.AsyncCompletions(self)
         self.messages = messages.AsyncMessages(self)
+        self.models = models.AsyncModels(self)
         self.beta = beta.AsyncBeta(self)
         self.with_raw_response = AsyncAnthropicWithRawResponse(self)
         self.with_streaming_response = AsyncAnthropicWithStreamedResponse(self)
@@ -487,6 +492,7 @@ class AnthropicWithRawResponse:
     def __init__(self, client: Anthropic) -> None:
         self.completions = completions.CompletionsWithRawResponse(client.completions)
         self.messages = messages.MessagesWithRawResponse(client.messages)
+        self.models = models.ModelsWithRawResponse(client.models)
         self.beta = beta.BetaWithRawResponse(client.beta)
 
 
@@ -494,6 +500,7 @@ class AsyncAnthropicWithRawResponse:
     def __init__(self, client: AsyncAnthropic) -> None:
         self.completions = completions.AsyncCompletionsWithRawResponse(client.completions)
         self.messages = messages.AsyncMessagesWithRawResponse(client.messages)
+        self.models = models.AsyncModelsWithRawResponse(client.models)
         self.beta = beta.AsyncBetaWithRawResponse(client.beta)
 
 
@@ -501,6 +508,7 @@ class AnthropicWithStreamedResponse:
     def __init__(self, client: Anthropic) -> None:
         self.completions = completions.CompletionsWithStreamingResponse(client.completions)
         self.messages = messages.MessagesWithStreamingResponse(client.messages)
+        self.models = models.ModelsWithStreamingResponse(client.models)
         self.beta = beta.BetaWithStreamingResponse(client.beta)
 
 
@@ -508,6 +516,7 @@ class AsyncAnthropicWithStreamedResponse:
     def __init__(self, client: AsyncAnthropic) -> None:
         self.completions = completions.AsyncCompletionsWithStreamingResponse(client.completions)
         self.messages = messages.AsyncMessagesWithStreamingResponse(client.messages)
+        self.models = models.AsyncModelsWithStreamingResponse(client.models)
         self.beta = beta.AsyncBetaWithStreamingResponse(client.beta)
 
 
