@@ -183,7 +183,7 @@ class Batches(SyncAPIResource):
 
           limit: Number of items to return per page.
 
-              Defaults to `20`. Ranges from `1` to `100`.
+              Defaults to `20`. Ranges from `1` to `1000`.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -500,7 +500,7 @@ class AsyncBatches(AsyncAPIResource):
 
           limit: Number of items to return per page.
 
-              Defaults to `20`. Ranges from `1` to `100`.
+              Defaults to `20`. Ranges from `1` to `1000`.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

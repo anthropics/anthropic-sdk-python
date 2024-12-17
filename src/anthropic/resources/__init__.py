@@ -8,6 +8,14 @@ from .beta import (
     BetaWithStreamingResponse,
     AsyncBetaWithStreamingResponse,
 )
+from .models import (
+    Models,
+    AsyncModels,
+    ModelsWithRawResponse,
+    AsyncModelsWithRawResponse,
+    ModelsWithStreamingResponse,
+    AsyncModelsWithStreamingResponse,
+)
 from .messages import (
     Messages,
     AsyncMessages,
@@ -38,6 +46,12 @@ __all__ = [
     "AsyncMessagesWithRawResponse",
     "MessagesWithStreamingResponse",
     "AsyncMessagesWithStreamingResponse",
+    "Models",
+    "AsyncModels",
+    "ModelsWithRawResponse",
+    "AsyncModelsWithRawResponse",
+    "ModelsWithStreamingResponse",
+    "AsyncModelsWithStreamingResponse",
     "Beta",
     "AsyncBeta",
     "BetaWithRawResponse",

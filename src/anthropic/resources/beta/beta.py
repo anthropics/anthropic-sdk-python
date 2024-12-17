@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+from .models import (
+    Models,
+    AsyncModels,
+    ModelsWithRawResponse,
+    AsyncModelsWithRawResponse,
+    ModelsWithStreamingResponse,
+    AsyncModelsWithStreamingResponse,
+)
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from .messages.messages import (
@@ -12,26 +20,18 @@ from .messages.messages import (
     MessagesWithStreamingResponse,
     AsyncMessagesWithStreamingResponse,
 )
-from .prompt_caching.prompt_caching import (
-    PromptCaching,
-    AsyncPromptCaching,
-    PromptCachingWithRawResponse,
-    AsyncPromptCachingWithRawResponse,
-    PromptCachingWithStreamingResponse,
-    AsyncPromptCachingWithStreamingResponse,
-)
 
 __all__ = ["Beta", "AsyncBeta"]
 
 
 class Beta(SyncAPIResource):
     @cached_property
-    def messages(self) -> Messages:
-        return Messages(self._client)
+    def models(self) -> Models:
+        return Models(self._client)
 
     @cached_property
-    def prompt_caching(self) -> PromptCaching:
-        return PromptCaching(self._client)
+    def messages(self) -> Messages:
+        return Messages(self._client)
 
     @cached_property
     def with_raw_response(self) -> BetaWithRawResponse:
@@ -55,12 +55,12 @@ class Beta(SyncAPIResource):
 
 class AsyncBeta(AsyncAPIResource):
     @cached_property
-    def messages(self) -> AsyncMessages:
-        return AsyncMessages(self._client)
+    def models(self) -> AsyncModels:
+        return AsyncModels(self._client)
 
     @cached_property
-    def prompt_caching(self) -> AsyncPromptCaching:
-        return AsyncPromptCaching(self._client)
+    def messages(self) -> AsyncMessages:
+        return AsyncMessages(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncBetaWithRawResponse:
@@ -87,12 +87,12 @@ class BetaWithRawResponse:
         self._beta = beta
 
     @cached_property
-    def messages(self) -> MessagesWithRawResponse:
-        return MessagesWithRawResponse(self._beta.messages)
+    def models(self) -> ModelsWithRawResponse:
+        return ModelsWithRawResponse(self._beta.models)
 
     @cached_property
-    def prompt_caching(self) -> PromptCachingWithRawResponse:
-        return PromptCachingWithRawResponse(self._beta.prompt_caching)
+    def messages(self) -> MessagesWithRawResponse:
+        return MessagesWithRawResponse(self._beta.messages)
 
 
 class AsyncBetaWithRawResponse:
@@ -100,12 +100,12 @@ class AsyncBetaWithRawResponse:
         self._beta = beta
 
     @cached_property
-    def messages(self) -> AsyncMessagesWithRawResponse:
-        return AsyncMessagesWithRawResponse(self._beta.messages)
+    def models(self) -> AsyncModelsWithRawResponse:
+        return AsyncModelsWithRawResponse(self._beta.models)
 
     @cached_property
-    def prompt_caching(self) -> AsyncPromptCachingWithRawResponse:
-        return AsyncPromptCachingWithRawResponse(self._beta.prompt_caching)
+    def messages(self) -> AsyncMessagesWithRawResponse:
+        return AsyncMessagesWithRawResponse(self._beta.messages)
 
 
 class BetaWithStreamingResponse:
@@ -113,12 +113,12 @@ class BetaWithStreamingResponse:
         self._beta = beta
 
     @cached_property
-    def messages(self) -> MessagesWithStreamingResponse:
-        return MessagesWithStreamingResponse(self._beta.messages)
+    def models(self) -> ModelsWithStreamingResponse:
+        return ModelsWithStreamingResponse(self._beta.models)
 
     @cached_property
-    def prompt_caching(self) -> PromptCachingWithStreamingResponse:
-        return PromptCachingWithStreamingResponse(self._beta.prompt_caching)
+    def messages(self) -> MessagesWithStreamingResponse:
+        return MessagesWithStreamingResponse(self._beta.messages)
 
 
 class AsyncBetaWithStreamingResponse:
@@ -126,9 +126,9 @@ class AsyncBetaWithStreamingResponse:
         self._beta = beta
 
     @cached_property
-    def messages(self) -> AsyncMessagesWithStreamingResponse:
-        return AsyncMessagesWithStreamingResponse(self._beta.messages)
+    def models(self) -> AsyncModelsWithStreamingResponse:
+        return AsyncModelsWithStreamingResponse(self._beta.models)
 
     @cached_property
-    def prompt_caching(self) -> AsyncPromptCachingWithStreamingResponse:
-        return AsyncPromptCachingWithStreamingResponse(self._beta.prompt_caching)
+    def messages(self) -> AsyncMessagesWithStreamingResponse:
+        return AsyncMessagesWithStreamingResponse(self._beta.messages)
