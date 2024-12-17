@@ -7,9 +7,12 @@ from typing_extensions import TypeAlias
 
 from .text_block_param import TextBlockParam
 from .image_block_param import ImageBlockParam
+from .document_block_param import DocumentBlockParam
 from .tool_use_block_param import ToolUseBlockParam
 from .tool_result_block_param import ToolResultBlockParam
 
 __all__ = ["ContentBlockParam"]
 
-ContentBlockParam: TypeAlias = Union[TextBlockParam, ImageBlockParam, ToolUseBlockParam, ToolResultBlockParam]
+ContentBlockParam: TypeAlias = Union[
+    TextBlockParam, ImageBlockParam, ToolUseBlockParam, ToolResultBlockParam, DocumentBlockParam
+]
