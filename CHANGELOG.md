@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.42.1 (2024-12-19)
+
+Full Changelog: [v0.42.0...v0.42.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.42.0...v0.42.1)
+
+### Chores
+
+* bump testing data uri ([#800](https://github.com/anthropics/anthropic-sdk-python/issues/800)) ([641ae8d](https://github.com/anthropics/anthropic-sdk-python/commit/641ae8d412e365e44c8965222f487e30a63d57ee))
+
 ## 0.42.0 (2024-12-17)
 
 Full Changelog: [v0.41.0...v0.42.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.41.0...v0.42.0)
