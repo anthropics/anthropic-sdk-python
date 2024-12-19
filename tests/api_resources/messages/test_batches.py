@@ -18,7 +18,7 @@ from anthropic._response import (
     AsyncStreamedBinaryAPIResponse,
 )
 from anthropic.pagination import SyncPage, AsyncPage
-from anthropic.types.messages import MessageBatch
+from anthropic.types.messages import MessageBatch, DeletedMessageBatch
 
 # pyright: reportDeprecated=false
 
@@ -172,6 +172,44 @@ class TestBatches:
             assert_matches_type(SyncPage[MessageBatch], batch, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    def test_method_delete(self, client: Anthropic) -> None:
+        batch = client.messages.batches.delete(
+            "message_batch_id",
+        )
+        assert_matches_type(DeletedMessageBatch, batch, path=["response"])
+
+    @parametrize
+    def test_raw_response_delete(self, client: Anthropic) -> None:
+        response = client.messages.batches.with_raw_response.delete(
+            "message_batch_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        batch = response.parse()
+        assert_matches_type(DeletedMessageBatch, batch, path=["response"])
+
+    @parametrize
+    def test_streaming_response_delete(self, client: Anthropic) -> None:
+        with client.messages.batches.with_streaming_response.delete(
+            "message_batch_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            batch = response.parse()
+            assert_matches_type(DeletedMessageBatch, batch, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    def test_path_params_delete(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
+            client.messages.batches.with_raw_response.delete(
+                "",
+            )
 
     @parametrize
     def test_method_cancel(self, client: Anthropic) -> None:
@@ -415,6 +453,44 @@ class TestAsyncBatches:
             assert_matches_type(AsyncPage[MessageBatch], batch, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
+        batch = await async_client.messages.batches.delete(
+            "message_batch_id",
+        )
+        assert_matches_type(DeletedMessageBatch, batch, path=["response"])
+
+    @parametrize
+    async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.messages.batches.with_raw_response.delete(
+            "message_batch_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        batch = response.parse()
+        assert_matches_type(DeletedMessageBatch, batch, path=["response"])
+
+    @parametrize
+    async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.messages.batches.with_streaming_response.delete(
+            "message_batch_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            batch = await response.parse()
+            assert_matches_type(DeletedMessageBatch, batch, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_path_params_delete(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
+            await async_client.messages.batches.with_raw_response.delete(
+                "",
+            )
 
     @parametrize
     async def test_method_cancel(self, async_client: AsyncAnthropic) -> None:

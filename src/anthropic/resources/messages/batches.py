@@ -30,6 +30,7 @@ from ...pagination import SyncPage, AsyncPage
 from ..._base_client import AsyncPaginator, make_request_options
 from ...types.messages import batch_list_params, batch_create_params
 from ...types.messages.message_batch import MessageBatch
+from ...types.messages.deleted_message_batch import DeletedMessageBatch
 
 __all__ = ["Batches", "AsyncBatches"]
 
@@ -186,6 +187,44 @@ class Batches(SyncAPIResource):
                 ),
             ),
             model=MessageBatch,
+        )
+
+    def delete(
+        self,
+        message_batch_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> DeletedMessageBatch:
+        """This endpoint is idempotent and can be used to poll for Message Batch
+        completion.
+
+        To access the results of a Message Batch, make a request to the
+        `results_url` field in the response.
+
+        Args:
+          message_batch_id: ID of the Message Batch.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not message_batch_id:
+            raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
+        return self._delete(
+            f"/v1/messages/batches/{message_batch_id}",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=DeletedMessageBatch,
         )
 
     def cancel(
@@ -427,6 +466,44 @@ class AsyncBatches(AsyncAPIResource):
             model=MessageBatch,
         )
 
+    async def delete(
+        self,
+        message_batch_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> DeletedMessageBatch:
+        """This endpoint is idempotent and can be used to poll for Message Batch
+        completion.
+
+        To access the results of a Message Batch, make a request to the
+        `results_url` field in the response.
+
+        Args:
+          message_batch_id: ID of the Message Batch.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not message_batch_id:
+            raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
+        return await self._delete(
+            f"/v1/messages/batches/{message_batch_id}",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=DeletedMessageBatch,
+        )
+
     async def cancel(
         self,
         message_batch_id: str,
@@ -525,6 +602,9 @@ class BatchesWithRawResponse:
         self.list = _legacy_response.to_raw_response_wrapper(
             batches.list,
         )
+        self.delete = _legacy_response.to_raw_response_wrapper(
+            batches.delete,
+        )
         self.cancel = _legacy_response.to_raw_response_wrapper(
             batches.cancel,
         )
@@ -546,6 +626,9 @@ class AsyncBatchesWithRawResponse:
         )
         self.list = _legacy_response.async_to_raw_response_wrapper(
             batches.list,
+        )
+        self.delete = _legacy_response.async_to_raw_response_wrapper(
+            batches.delete,
         )
         self.cancel = _legacy_response.async_to_raw_response_wrapper(
             batches.cancel,
@@ -569,6 +652,9 @@ class BatchesWithStreamingResponse:
         self.list = to_streamed_response_wrapper(
             batches.list,
         )
+        self.delete = to_streamed_response_wrapper(
+            batches.delete,
+        )
         self.cancel = to_streamed_response_wrapper(
             batches.cancel,
         )
@@ -590,6 +676,9 @@ class AsyncBatchesWithStreamingResponse:
         )
         self.list = async_to_streamed_response_wrapper(
             batches.list,
+        )
+        self.delete = async_to_streamed_response_wrapper(
+            batches.delete,
         )
         self.cancel = async_to_streamed_response_wrapper(
             batches.cancel,
