@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.43.0 (2024-12-21)
+
+Full Changelog: [v0.42.0...v0.43.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.42.0...v0.43.0)
+
+### Features
+
+* **api:** add message batch delete endpoint ([#802](https://github.com/anthropics/anthropic-sdk-python/issues/802)) ([9cf1e99](https://github.com/anthropics/anthropic-sdk-python/commit/9cf1e9920d3e0ce8496859b119f19eed8cd75e2b))
+
+
+### Chores
+
+* bump testing data uri ([#800](https://github.com/anthropics/anthropic-sdk-python/issues/800)) ([641ae8d](https://github.com/anthropics/anthropic-sdk-python/commit/641ae8d412e365e44c8965222f487e30a63d57ee))
+
 ## 0.42.0 (2024-12-17)
 
 Full Changelog: [v0.41.0...v0.42.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.41.0...v0.42.0)
