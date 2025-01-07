@@ -75,7 +75,7 @@ class TestMessages:
                             },
                         },
                     },
-                    "name": "x",
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
                 }
@@ -179,7 +179,7 @@ class TestMessages:
                             },
                         },
                     },
-                    "name": "x",
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
                 }
@@ -277,7 +277,7 @@ class TestMessages:
                             },
                         },
                     },
-                    "name": "x",
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
                 }
@@ -380,7 +380,7 @@ class TestAsyncMessages:
                             },
                         },
                     },
-                    "name": "x",
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
                 }
@@ -484,7 +484,7 @@ class TestAsyncMessages:
                             },
                         },
                     },
-                    "name": "x",
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
                 }
@@ -582,7 +582,7 @@ class TestAsyncMessages:
                             },
                         },
                     },
-                    "name": "x",
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
                 }
