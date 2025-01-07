@@ -55,11 +55,11 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
         else:
             options.url = f"/model/{model}/invoke"
 
-    if options.url.startswith('/v1/messages/batches'):
-        raise AnthropicError('The Batch API is not supported in Bedrock yet')
-    
-    if options.url == '/v1/messages/count_tokens':
-        raise AnthropicError('Token counting is not supported in Bedrock yet')
+    if options.url.startswith("/v1/messages/batches"):
+        raise AnthropicError("The Batch API is not supported in Bedrock yet")
+
+    if options.url == "/v1/messages/count_tokens":
+        raise AnthropicError("Token counting is not supported in Bedrock yet")
 
     return options
 

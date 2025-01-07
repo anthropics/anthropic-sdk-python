@@ -394,7 +394,7 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
 
         options.url = f"/projects/{project_id}/locations/{region}/publishers/anthropic/models/count-tokens:rawPredict"
 
-    if options.url.startswith('/v1/messages/batches'):
-        raise AnthropicError('The Batch API is not supported in the Vertex client yet')
-    
+    if options.url.startswith("/v1/messages/batches"):
+        raise AnthropicError("The Batch API is not supported in the Vertex client yet")
+
     return options
