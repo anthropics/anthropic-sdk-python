@@ -11,3 +11,16 @@ from ._messages import (
     MessageStreamManager as MessageStreamManager,
     AsyncMessageStreamManager as AsyncMessageStreamManager,
 )
+from ._beta_types import (
+    BetaTextEvent as BetaTextEvent,
+    BetaInputJsonEvent as BetaInputJsonEvent,
+    BetaMessageStopEvent as BetaMessageStopEvent,
+    BetaMessageStreamEvent as BetaMessageStreamEvent,
+    BetaContentBlockStopEvent as BetaContentBlockStopEvent,
+)
+from ._beta_messages import (
+    BetaMessageStream as BetaMessageStream,
+    BetaAsyncMessageStream as BetaAsyncMessageStream,
+    BetaMessageStreamManager as BetaMessageStreamManager,
+    BetaAsyncMessageStreamManager as BetaAsyncMessageStreamManager,
+)
