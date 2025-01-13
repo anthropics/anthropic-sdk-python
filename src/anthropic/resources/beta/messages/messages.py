@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable
+from functools import partial
 from itertools import chain
 from typing_extensions import Literal, overload
 
@@ -32,6 +33,7 @@ from ...._constants import DEFAULT_TIMEOUT
 from ...._streaming import Stream, AsyncStream
 from ....types.beta import message_create_params, message_count_tokens_params
 from ...._base_client import make_request_options
+from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ....types.model_param import ModelParam
 from ....types.beta.beta_message import BetaMessage
 from ....types.anthropic_beta_param import AnthropicBetaParam
@@ -921,6 +923,67 @@ class Messages(SyncAPIResource):
             stream=stream or False,
             stream_cls=Stream[BetaRawMessageStreamEvent],
         )
+
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaMessageStreamManager:
+        """Create a Message stream"""
+        if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+            timeout = 600
+
+        extra_headers = {
+            "X-Stainless-Stream-Helper": "beta.messages",
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **(extra_headers or {}),
+        }
+        make_request = partial(
+            self._post,
+            "/v1/messages?beta=true",
+            body=maybe_transform(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "metadata": metadata,
+                    "stop_sequences": stop_sequences,
+                    "system": system,
+                    "temperature": temperature,
+                    "top_k": top_k,
+                    "top_p": top_p,
+                    "tools": tools,
+                    "tool_choice": tool_choice,
+                    "stream": True,
+                },
+                message_create_params.MessageCreateParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=BetaMessage,
+            stream=True,
+            stream_cls=Stream[BetaRawMessageStreamEvent],
+        )
+        return BetaMessageStreamManager(make_request)
+    
 
     def count_tokens(
         self,
@@ -2029,6 +2092,64 @@ class AsyncMessages(AsyncAPIResource):
             stream=stream or False,
             stream_cls=AsyncStream[BetaRawMessageStreamEvent],
         )
+
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaAsyncMessageStreamManager:
+        if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+            timeout = 600
+
+        extra_headers = {
+            "X-Stainless-Stream-Helper": "beta.messages",
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **(extra_headers or {}),
+        }
+        request = self._post(
+            "/v1/messages",
+            body=maybe_transform(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "metadata": metadata,
+                    "stop_sequences": stop_sequences,
+                    "system": system,
+                    "temperature": temperature,
+                    "top_k": top_k,
+                    "top_p": top_p,
+                    "tools": tools,
+                    "tool_choice": tool_choice,
+                    "stream": True,
+                },
+                message_create_params.MessageCreateParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=BetaMessage,
+            stream=True,
+            stream_cls=AsyncStream[BetaRawMessageStreamEvent],
+        )
+        return BetaAsyncMessageStreamManager(request)
 
     async def count_tokens(
         self,
