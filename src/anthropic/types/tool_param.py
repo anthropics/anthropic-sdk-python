@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Dict, Union, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
+from .._models import set_pydantic_config
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
 
 __all__ = ["ToolParam", "InputSchema"]
@@ -15,6 +16,7 @@ class InputSchemaTyped(TypedDict, total=False):
 
     properties: Optional[object]
 
+set_pydantic_config(InputSchemaTyped, {"extra": "allow"})
 
 InputSchema: TypeAlias = Union[InputSchemaTyped, Dict[str, object]]
 
