@@ -10,13 +10,36 @@ from .cache_control_ephemeral_param import CacheControlEphemeralParam
 __all__ = ["ToolParam", "InputSchema"]
 
 
-class InputSchemaTyped(TypedDict, total=False):
-    type: Required[Literal["object"]]
+InputSchemaTyped = TypedDict(
+    'InputSchemaType',
+    {
+        '$comment': str,
+        '$defs': object,
+        '$dynamicAnchor': str,
+        '$dynamicRef': str,
+        '$id': str,
+        '$schema': str,
+        'additionalProperties': bool,
+        'default': object,
+        'deprecated': bool,
+        'examples': list[object],
+        'if': object,
+        'maxProperties': int,
+        'minProperties': int,
+        'patternProperties': object,
+        'properties': object,
+        'readOnly': bool,
+        'writeOnly': bool,
+        'then': object,
+        'title': str,
+        'description': str,
+        'type': Required[Literal["object"]],
+        'unevaluatedProperties': bool,
+    },
+    total=False,
+)
 
-    properties: Optional[object]
-
-
-InputSchema: TypeAlias = Union[InputSchemaTyped, Dict[str, object]]
+InputSchema: TypeAlias = InputSchemaTyped
 
 
 class ToolParam(TypedDict, total=False):
