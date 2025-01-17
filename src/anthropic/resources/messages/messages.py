@@ -52,6 +52,9 @@ DEPRECATED_MODELS = {
     "claude-instant-1.1": "November 6th, 2024",
     "claude-instant-1.1-100k": "November 6th, 2024",
     "claude-instant-1.2": "November 6th, 2024",
+    "claude-3-sonnet-20240229": "July 21st, 2025",
+    "claude-2.1": "July 21st, 2025",
+    "claude-2.0": "July 21st, 2025",
 }
 
 
