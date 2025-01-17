@@ -983,7 +983,6 @@ class Messages(SyncAPIResource):
             stream_cls=Stream[BetaRawMessageStreamEvent],
         )
         return BetaMessageStreamManager(make_request)
-    
 
     def count_tokens(
         self,

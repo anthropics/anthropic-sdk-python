@@ -1,5 +1,5 @@
 from typing import Union
-from typing_extensions import Literal
+from typing_extensions import Literal, Annotated
 
 from ...types import (
     Message,
@@ -12,6 +12,7 @@ from ...types import (
     RawContentBlockStopEvent,
 )
 from ..._models import BaseModel
+from ..._utils._transform import PropertyInfo
 
 
 class TextEvent(BaseModel):
@@ -53,13 +54,16 @@ class ContentBlockStopEvent(RawContentBlockStopEvent):
     content_block: ContentBlock
 
 
-MessageStreamEvent = Union[
-    TextEvent,
-    InputJsonEvent,
-    RawMessageStartEvent,
-    RawMessageDeltaEvent,
-    MessageStopEvent,
-    RawContentBlockStartEvent,
-    RawContentBlockDeltaEvent,
-    ContentBlockStopEvent,
+MessageStreamEvent = Annotated[
+    Union[
+        TextEvent,
+        InputJsonEvent,
+        RawMessageStartEvent,
+        RawMessageDeltaEvent,
+        MessageStopEvent,
+        RawContentBlockStartEvent,
+        RawContentBlockDeltaEvent,
+        ContentBlockStopEvent,
+    ],
+    PropertyInfo(discriminator="type"),
 ]

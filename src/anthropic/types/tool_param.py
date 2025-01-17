@@ -16,6 +16,7 @@ class InputSchemaTyped(TypedDict, total=False):
 
     properties: Optional[object]
 
+
 set_pydantic_config(InputSchemaTyped, {"extra": "allow"})
 
 InputSchema: TypeAlias = Union[InputSchemaTyped, Dict[str, object]]

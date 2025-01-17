@@ -1,5 +1,5 @@
 from typing import Union
-from typing_extensions import Literal
+from typing_extensions import Literal, Annotated
 
 from ..._models import BaseModel
 from ...types.beta import (
@@ -12,6 +12,7 @@ from ...types.beta import (
     BetaRawContentBlockDeltaEvent,
     BetaRawContentBlockStartEvent,
 )
+from ..._utils._transform import PropertyInfo
 
 
 class BetaTextEvent(BaseModel):
@@ -53,13 +54,16 @@ class BetaContentBlockStopEvent(BetaRawContentBlockStopEvent):
     content_block: BetaContentBlock
 
 
-BetaMessageStreamEvent = Union[
-    BetaTextEvent,
-    BetaInputJsonEvent,
-    BetaRawMessageStartEvent,
-    BetaRawMessageDeltaEvent,
-    BetaMessageStopEvent,
-    BetaRawContentBlockStartEvent,
-    BetaRawContentBlockDeltaEvent,
-    BetaContentBlockStopEvent,
+BetaMessageStreamEvent = Annotated[
+    Union[
+        BetaTextEvent,
+        BetaInputJsonEvent,
+        BetaRawMessageStartEvent,
+        BetaRawMessageDeltaEvent,
+        BetaMessageStopEvent,
+        BetaRawContentBlockStartEvent,
+        BetaRawContentBlockDeltaEvent,
+        BetaContentBlockStopEvent,
+    ],
+    PropertyInfo(discriminator="type"),
 ]
