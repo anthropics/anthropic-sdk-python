@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import List, Union, Iterable
 from functools import partial
 from itertools import chain
@@ -34,6 +35,7 @@ from ...._streaming import Stream, AsyncStream
 from ....types.beta import message_create_params, message_count_tokens_params
 from ...._base_client import make_request_options
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
+from ...messages.messages import DEPRECATED_MODELS
 from ....types.model_param import ModelParam
 from ....types.beta.beta_message import BetaMessage
 from ....types.anthropic_beta_param import AnthropicBetaParam
@@ -893,6 +895,14 @@ class Messages(SyncAPIResource):
     ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
+
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
@@ -2061,6 +2071,14 @@ class AsyncMessages(AsyncAPIResource):
     ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
+
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
