@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable, cast
 from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
 
 import httpx
+from pydantic import BaseModel
 
 from ._types import (
     TextEvent,
@@ -346,6 +347,9 @@ def accumulate_event(
     event: RawMessageStreamEvent,
     current_snapshot: Message | None,
 ) -> Message:
+    if not isinstance(event, BaseModel):  # pyright: ignore[reportUnnecessaryIsInstance]
+        raise TypeError(f'Unexpected event runtime type - {event}')
+
     if current_snapshot is None:
         if event.type == "message_start":
             return Message.construct(**cast(Any, event.message.to_dict()))
