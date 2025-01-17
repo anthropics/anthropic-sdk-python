@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.43.1 (2025-01-17)
+
+Full Changelog: [v0.43.0...v0.43.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.43.0...v0.43.1)
+
+### Bug Fixes
+
+* **docs:** correct results return type ([69ad511](https://github.com/anthropics/anthropic-sdk-python/commit/69ad5112596f6e9aaf5cd2d495cb57516f2afbd4))
+
+
+### Chores
+
+* **internal:** bump pyright dependency ([#822](https://github.com/anthropics/anthropic-sdk-python/issues/822)) ([f8ddb90](https://github.com/anthropics/anthropic-sdk-python/commit/f8ddb90112a432a750fd4123c747ca581cff54ab))
+* **internal:** fix lint ([483cc27](https://github.com/anthropics/anthropic-sdk-python/commit/483cc277b66cb5b1a767e9d91347f22bcf69dc28))
+* **streaming:** add runtime type check for better error messages ([#826](https://github.com/anthropics/anthropic-sdk-python/issues/826)) ([cf69e09](https://github.com/anthropics/anthropic-sdk-python/commit/cf69e091d230aa0befb6ace74e64357b1cf2e4cd))
+* **types:** add more discriminator metadata ([#825](https://github.com/anthropics/anthropic-sdk-python/issues/825)) ([d0de8e5](https://github.com/anthropics/anthropic-sdk-python/commit/d0de8e564038cc6f801dc663b1938ac571ab47be))
+
 ## 0.43.0 (2025-01-14)
 
 Full Changelog: [v0.42.0...v0.43.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.42.0...v0.43.0)
