@@ -40,6 +40,10 @@ class BetaMessageStream:
     def response(self) -> httpx.Response:
         return self._raw_stream.response
 
+    @property
+    def request_id(self) -> str | None:
+        return self.response.headers.get("request-id")  # type: ignore[no-any-return]
+
     def __next__(self) -> BetaMessageStreamEvent:
         return self._iterator.__next__()
 
@@ -172,6 +176,10 @@ class BetaAsyncMessageStream:
     @property
     def response(self) -> httpx.Response:
         return self._raw_stream.response
+
+    @property
+    def request_id(self) -> str | None:
+        return self.response.headers.get("request-id")  # type: ignore[no-any-return]
 
     async def __anext__(self) -> BetaMessageStreamEvent:
         return await self._iterator.__anext__()
