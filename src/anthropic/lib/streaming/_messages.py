@@ -356,7 +356,7 @@ def accumulate_event(
     current_snapshot: Message | None,
 ) -> Message:
     if not isinstance(event, BaseModel):  # pyright: ignore[reportUnnecessaryIsInstance]
-        raise TypeError(f'Unexpected event runtime type - {event}')
+        raise TypeError(f"Unexpected event runtime type - {event}")
 
     if current_snapshot is None:
         if event.type == "message_start":
