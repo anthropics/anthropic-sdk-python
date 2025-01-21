@@ -5,22 +5,17 @@ from __future__ import annotations
 import os
 from typing import Any, cast
 
-import httpx
 import pytest
-from respx import MockRouter
 
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
-from anthropic._response import (
-    BinaryAPIResponse,
-    AsyncBinaryAPIResponse,
-    StreamedBinaryAPIResponse,
-    AsyncStreamedBinaryAPIResponse,
-)
 from anthropic.pagination import SyncPage, AsyncPage
-from anthropic.types.messages import MessageBatch, DeletedMessageBatch
-
-# pyright: reportDeprecated=false
+from anthropic.types.messages import (
+    MessageBatch,
+    DeletedMessageBatch,
+    MessageBatchIndividualResponse,
+)
+from anthropic._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -249,56 +244,42 @@ class TestBatches:
                 "",
             )
 
+    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
     @parametrize
-    @pytest.mark.respx(base_url=base_url)
-    def test_method_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
-        )
+    def test_method_results(self, client: Anthropic) -> None:
         batch = client.messages.batches.results(
             "message_batch_id",
         )
-        assert batch.is_closed
-        assert batch.json() == {"foo": "bar"}
-        assert cast(Any, batch.is_closed) is True
-        assert isinstance(batch, BinaryAPIResponse)
+        assert_matches_type(JSONLDecoder[MessageBatchIndividualResponse], batch, path=["response"])
 
+    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
     @parametrize
-    @pytest.mark.respx(base_url=base_url)
-    def test_raw_response_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
-        )
-
-        batch = client.messages.batches.with_raw_response.results(
+    def test_raw_response_results(self, client: Anthropic) -> None:
+        response = client.messages.batches.with_raw_response.results(
             "message_batch_id",
         )
 
-        assert batch.is_closed is True
-        assert batch.http_request.headers.get("X-Stainless-Lang") == "python"
-        assert batch.json() == {"foo": "bar"}
-        assert isinstance(batch, BinaryAPIResponse)
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        batch = response.parse()
+        assert_matches_type(JSONLDecoder[MessageBatchIndividualResponse], batch, path=["response"])
 
+    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
     @parametrize
-    @pytest.mark.respx(base_url=base_url)
-    def test_streaming_response_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
-        )
+    def test_streaming_response_results(self, client: Anthropic) -> None:
         with client.messages.batches.with_streaming_response.results(
             "message_batch_id",
-        ) as batch:
-            assert not batch.is_closed
-            assert batch.http_request.headers.get("X-Stainless-Lang") == "python"
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            assert batch.json() == {"foo": "bar"}
-            assert cast(Any, batch.is_closed) is True
-            assert isinstance(batch, StreamedBinaryAPIResponse)
+            batch = response.parse()
+            assert_matches_type(JSONLDecoder[MessageBatchIndividualResponse], batch, path=["response"])
 
-        assert cast(Any, batch.is_closed) is True
+        assert cast(Any, response.is_closed) is True
 
+    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
     @parametrize
-    @pytest.mark.respx(base_url=base_url)
     def test_path_params_results(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             client.messages.batches.with_raw_response.results(
@@ -530,56 +511,42 @@ class TestAsyncBatches:
                 "",
             )
 
+    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
     @parametrize
-    @pytest.mark.respx(base_url=base_url)
-    async def test_method_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
-        )
+    async def test_method_results(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.messages.batches.results(
             "message_batch_id",
         )
-        assert batch.is_closed
-        assert await batch.json() == {"foo": "bar"}
-        assert cast(Any, batch.is_closed) is True
-        assert isinstance(batch, AsyncBinaryAPIResponse)
+        assert_matches_type(AsyncJSONLDecoder[MessageBatchIndividualResponse], batch, path=["response"])
 
+    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
     @parametrize
-    @pytest.mark.respx(base_url=base_url)
-    async def test_raw_response_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
-        )
-
-        batch = await async_client.messages.batches.with_raw_response.results(
+    async def test_raw_response_results(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.messages.batches.with_raw_response.results(
             "message_batch_id",
         )
 
-        assert batch.is_closed is True
-        assert batch.http_request.headers.get("X-Stainless-Lang") == "python"
-        assert await batch.json() == {"foo": "bar"}
-        assert isinstance(batch, AsyncBinaryAPIResponse)
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        batch = response.parse()
+        assert_matches_type(AsyncJSONLDecoder[MessageBatchIndividualResponse], batch, path=["response"])
 
+    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
     @parametrize
-    @pytest.mark.respx(base_url=base_url)
-    async def test_streaming_response_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
-        )
+    async def test_streaming_response_results(self, async_client: AsyncAnthropic) -> None:
         async with async_client.messages.batches.with_streaming_response.results(
             "message_batch_id",
-        ) as batch:
-            assert not batch.is_closed
-            assert batch.http_request.headers.get("X-Stainless-Lang") == "python"
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            assert await batch.json() == {"foo": "bar"}
-            assert cast(Any, batch.is_closed) is True
-            assert isinstance(batch, AsyncStreamedBinaryAPIResponse)
+            batch = await response.parse()
+            assert_matches_type(AsyncJSONLDecoder[MessageBatchIndividualResponse], batch, path=["response"])
 
-        assert cast(Any, batch.is_closed) is True
+        assert cast(Any, response.is_closed) is True
 
+    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
     @parametrize
-    @pytest.mark.respx(base_url=base_url)
     async def test_path_params_results(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             await async_client.messages.batches.with_raw_response.results(
