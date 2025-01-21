@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.44.0 (2025-01-21)
+
+Full Changelog: [v0.43.1...v0.44.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.43.1...v0.44.0)
+
+### Features
+
+* **streaming:** add request_id getter ([#831](https://github.com/anthropics/anthropic-sdk-python/issues/831)) ([fb397e0](https://github.com/anthropics/anthropic-sdk-python/commit/fb397e0851bd874a10a69a9531483fd196fc8a55))
+
+
+### Bug Fixes
+
+* **tests:** make test_get_platform less flaky ([#830](https://github.com/anthropics/anthropic-sdk-python/issues/830)) ([f2c10ca](https://github.com/anthropics/anthropic-sdk-python/commit/f2c10cae0cbff6881bba2a41c93efdcc17e8d2ab))
+
+
+### Chores
+
+* deprecate more models ([c647e25](https://github.com/anthropics/anthropic-sdk-python/commit/c647e25c3735e4276195ee8eb0011ace3e3e0d2f))
+* **internal:** avoid pytest-asyncio deprecation warning ([#832](https://github.com/anthropics/anthropic-sdk-python/issues/832)) ([2b3ceff](https://github.com/anthropics/anthropic-sdk-python/commit/2b3ceff7ef9c953e28044442821069d7de3b0154))
+* **internal:** minor style changes ([#833](https://github.com/anthropics/anthropic-sdk-python/issues/833)) ([65cfb7b](https://github.com/anthropics/anthropic-sdk-python/commit/65cfb7b13324e52e2d2987c4de3ed9e5c122a40b))
+
+
+### Documentation
+
+* **raw responses:** fix duplicate `the` ([#828](https://github.com/anthropics/anthropic-sdk-python/issues/828)) ([ff850f8](https://github.com/anthropics/anthropic-sdk-python/commit/ff850f8081a72090eaaa31e09e560acd3ce18b09))
+
 ## 0.43.1 (2025-01-17)
 
 Full Changelog: [v0.43.0...v0.43.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.43.0...v0.43.1)
