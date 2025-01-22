@@ -18,8 +18,6 @@ from anthropic.types.beta.messages import (
     BetaDeletedMessageBatch,
 )
 
-# pyright: reportDeprecated=false
-
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 
@@ -363,8 +361,8 @@ class TestBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
+    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
     @parametrize
-    @pytest.mark.respx(base_url=base_url)
     def test_path_params_results(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             client.beta.messages.batches.results(
@@ -713,8 +711,8 @@ class TestAsyncBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
+    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
     @parametrize
-    @pytest.mark.respx(base_url=base_url)
     async def test_path_params_results(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             await async_client.beta.messages.batches.results(

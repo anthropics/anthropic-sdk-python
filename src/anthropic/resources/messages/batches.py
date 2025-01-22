@@ -14,25 +14,15 @@ from ..._utils import (
 )
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import (
-    BinaryAPIResponse,
-    AsyncBinaryAPIResponse,
-    StreamedBinaryAPIResponse,
-    AsyncStreamedBinaryAPIResponse,
-    to_streamed_response_wrapper,
-    to_custom_raw_response_wrapper,
-    async_to_streamed_response_wrapper,
-    to_custom_streamed_response_wrapper,
-    async_to_custom_raw_response_wrapper,
-    async_to_custom_streamed_response_wrapper,
-)
+from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
 from ...pagination import SyncPage, AsyncPage
 from ..._exceptions import AnthropicError
 from ..._base_client import AsyncPaginator, make_request_options
-from ...types.messages import MessageBatchIndividualResponse, batch_list_params, batch_create_params
+from ...types.messages import batch_list_params, batch_create_params
 from ..._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
 from ...types.messages.message_batch import MessageBatch
 from ...types.messages.deleted_message_batch import DeletedMessageBatch
+from ...types.messages.message_batch_individual_response import MessageBatchIndividualResponse
 
 __all__ = ["Batches", "AsyncBatches"]
 
@@ -317,8 +307,8 @@ class Batches(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            stream=True,
             cast_to=JSONLDecoder[MessageBatchIndividualResponse],
+            stream=True,
         )
 
 
@@ -602,8 +592,8 @@ class AsyncBatches(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            stream=True,
             cast_to=AsyncJSONLDecoder[MessageBatchIndividualResponse],
+            stream=True,
         )
 
 
@@ -626,10 +616,6 @@ class BatchesWithRawResponse:
         self.cancel = _legacy_response.to_raw_response_wrapper(
             batches.cancel,
         )
-        self.results = to_custom_raw_response_wrapper(
-            batches.results,
-            BinaryAPIResponse,
-        )
 
 
 class AsyncBatchesWithRawResponse:
@@ -650,10 +636,6 @@ class AsyncBatchesWithRawResponse:
         )
         self.cancel = _legacy_response.async_to_raw_response_wrapper(
             batches.cancel,
-        )
-        self.results = async_to_custom_raw_response_wrapper(
-            batches.results,
-            AsyncBinaryAPIResponse,
         )
 
 
@@ -676,10 +658,6 @@ class BatchesWithStreamingResponse:
         self.cancel = to_streamed_response_wrapper(
             batches.cancel,
         )
-        self.results = to_custom_streamed_response_wrapper(
-            batches.results,
-            StreamedBinaryAPIResponse,
-        )
 
 
 class AsyncBatchesWithStreamingResponse:
@@ -700,8 +678,4 @@ class AsyncBatchesWithStreamingResponse:
         )
         self.cancel = async_to_streamed_response_wrapper(
             batches.cancel,
-        )
-        self.results = async_to_custom_streamed_response_wrapper(
-            batches.results,
-            AsyncStreamedBinaryAPIResponse,
         )

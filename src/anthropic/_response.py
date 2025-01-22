@@ -140,7 +140,7 @@ class BaseAPIResponse(Generic[R]):
         origin = get_origin(cast_to) or cast_to
 
         if inspect.isclass(origin):
-            if issubclass(origin, (JSONLDecoder)):
+            if issubclass(cast(Any, origin), JSONLDecoder):
                 return cast(
                     R,
                     cast("type[JSONLDecoder[Any]]", cast_to)(
@@ -150,7 +150,7 @@ class BaseAPIResponse(Generic[R]):
                     ),
                 )
 
-            if issubclass(origin, AsyncJSONLDecoder):
+            if issubclass(cast(Any, origin), AsyncJSONLDecoder):
                 return cast(
                     R,
                     cast("type[AsyncJSONLDecoder[Any]]", cast_to)(
