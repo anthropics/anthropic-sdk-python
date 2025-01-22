@@ -395,8 +395,8 @@ class Batches(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            stream=True,
             cast_to=JSONLDecoder[BetaMessageBatchIndividualResponse],
+            stream=True,
         )
 
 
@@ -764,8 +764,8 @@ class AsyncBatches(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            stream=True,
             cast_to=AsyncJSONLDecoder[BetaMessageBatchIndividualResponse],
+            stream=True,
         )
 
 

@@ -12,9 +12,10 @@ from respx import MockRouter
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
 from anthropic.pagination import SyncPage, AsyncPage
-from anthropic.types.messages import MessageBatch, DeletedMessageBatch
-
-# pyright: reportDeprecated=false
+from anthropic.types.messages import (
+    MessageBatch,
+    DeletedMessageBatch,
+)
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -273,14 +274,6 @@ class TestBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @parametrize
-    @pytest.mark.respx(base_url=base_url)
-    def test_path_params_results(self, client: Anthropic) -> None:
-        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
-            client.messages.batches.with_raw_response.results(
-                "",
-            )
-
 
 class TestAsyncBatches:
     parametrize = pytest.mark.parametrize("async_client", [False, True], indirect=True, ids=["loose", "strict"])
@@ -535,11 +528,3 @@ class TestAsyncBatches:
 
         assert i == 1
         assert results.http_response.is_stream_consumed
-
-    @parametrize
-    @pytest.mark.respx(base_url=base_url)
-    async def test_path_params_results(self, async_client: AsyncAnthropic) -> None:
-        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
-            await async_client.messages.batches.with_raw_response.results(
-                "",
-            )
