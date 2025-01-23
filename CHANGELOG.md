@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.45.0 (2025-01-23)
+
+Full Changelog: [v0.44.0...v0.45.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.44.0...v0.45.0)
+
+### Features
+
+* **api:** add citations ([#839](https://github.com/anthropics/anthropic-sdk-python/issues/839)) ([2ec74b6](https://github.com/anthropics/anthropic-sdk-python/commit/2ec74b6ff106c6e3d7d55e3c189e345098f8575e))
+* **client:** support results endpoint ([#835](https://github.com/anthropics/anthropic-sdk-python/issues/835)) ([5dd88bf](https://github.com/anthropics/anthropic-sdk-python/commit/5dd88bf2d20b8909736cc0bc1e81296ba6e322a9))
+
+
+### Chores
+
+* **internal:** minor formatting changes ([#838](https://github.com/anthropics/anthropic-sdk-python/issues/838)) ([31eb826](https://github.com/anthropics/anthropic-sdk-python/commit/31eb826deb96a17d3c0bb953c728f39412c12ada))
+
 ## 0.44.0 (2025-01-21)
 
 Full Changelog: [v0.43.1...v0.44.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.43.1...v0.44.0)
