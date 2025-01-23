@@ -238,11 +238,11 @@ class Batches(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaDeletedMessageBatch:
-        """This endpoint is idempotent and can be used to poll for Message Batch
-        completion.
+        """
+        Delete a Message Batch.
 
-        To access the results of a Message Batch, make a request to the
-        `results_url` field in the response.
+        Message Batches can only be deleted once they've finished processing. If you'd
+        like to delete an in-progress batch, you must first cancel it.
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -600,11 +600,11 @@ class AsyncBatches(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaDeletedMessageBatch:
-        """This endpoint is idempotent and can be used to poll for Message Batch
-        completion.
+        """
+        Delete a Message Batch.
 
-        To access the results of a Message Batch, make a request to the
-        `results_url` field in the response.
+        Message Batches can only be deleted once they've finished processing. If you'd
+        like to delete an in-progress batch, you must first cancel it.
 
         Args:
           message_batch_id: ID of the Message Batch.

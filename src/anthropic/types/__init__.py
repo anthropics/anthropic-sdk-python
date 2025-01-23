@@ -27,9 +27,11 @@ from .tool_param import ToolParam as ToolParam
 from .model_param import ModelParam as ModelParam
 from .content_block import ContentBlock as ContentBlock
 from .message_param import MessageParam as MessageParam
+from .text_citation import TextCitation as TextCitation
 from .beta_api_error import BetaAPIError as BetaAPIError
 from .metadata_param import MetadataParam as MetadataParam
 from .tool_use_block import ToolUseBlock as ToolUseBlock
+from .citations_delta import CitationsDelta as CitationsDelta
 from .input_json_delta import InputJSONDelta as InputJSONDelta
 from .text_block_param import TextBlockParam as TextBlockParam
 from .image_block_param import ImageBlockParam as ImageBlockParam
@@ -42,6 +44,7 @@ from .content_block_param import ContentBlockParam as ContentBlockParam
 from .message_delta_event import MessageDeltaEvent as MessageDeltaEvent
 from .message_delta_usage import MessageDeltaUsage as MessageDeltaUsage
 from .message_start_event import MessageStartEvent as MessageStartEvent
+from .text_citation_param import TextCitationParam as TextCitationParam
 from .anthropic_beta_param import AnthropicBetaParam as AnthropicBetaParam
 from .beta_not_found_error import BetaNotFoundError as BetaNotFoundError
 from .document_block_param import DocumentBlockParam as DocumentBlockParam
@@ -53,10 +56,14 @@ from .beta_permission_error import BetaPermissionError as BetaPermissionError
 from .beta_rate_limit_error import BetaRateLimitError as BetaRateLimitError
 from .message_create_params import MessageCreateParams as MessageCreateParams
 from .tool_choice_any_param import ToolChoiceAnyParam as ToolChoiceAnyParam
+from .citation_char_location import CitationCharLocation as CitationCharLocation
+from .citation_page_location import CitationPageLocation as CitationPageLocation
+from .citations_config_param import CitationsConfigParam as CitationsConfigParam
 from .raw_message_stop_event import RawMessageStopEvent as RawMessageStopEvent
 from .tool_choice_auto_param import ToolChoiceAutoParam as ToolChoiceAutoParam
 from .tool_choice_tool_param import ToolChoiceToolParam as ToolChoiceToolParam
 from .base64_pdf_source_param import Base64PDFSourceParam as Base64PDFSourceParam
+from .plain_text_source_param import PlainTextSourceParam as PlainTextSourceParam
 from .raw_message_delta_event import RawMessageDeltaEvent as RawMessageDeltaEvent
 from .raw_message_start_event import RawMessageStartEvent as RawMessageStartEvent
 from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockParam
@@ -68,8 +75,16 @@ from .content_block_delta_event import ContentBlockDeltaEvent as ContentBlockDel
 from .content_block_start_event import ContentBlockStartEvent as ContentBlockStartEvent
 from .beta_gateway_timeout_error import BetaGatewayTimeoutError as BetaGatewayTimeoutError
 from .beta_invalid_request_error import BetaInvalidRequestError as BetaInvalidRequestError
+from .content_block_source_param import ContentBlockSourceParam as ContentBlockSourceParam
 from .message_count_tokens_params import MessageCountTokensParams as MessageCountTokensParams
+from .citation_char_location_param import CitationCharLocationParam as CitationCharLocationParam
+from .citation_page_location_param import CitationPageLocationParam as CitationPageLocationParam
 from .raw_content_block_stop_event import RawContentBlockStopEvent as RawContentBlockStopEvent
 from .cache_control_ephemeral_param import CacheControlEphemeralParam as CacheControlEphemeralParam
 from .raw_content_block_delta_event import RawContentBlockDeltaEvent as RawContentBlockDeltaEvent
 from .raw_content_block_start_event import RawContentBlockStartEvent as RawContentBlockStartEvent
+from .citation_content_block_location import CitationContentBlockLocation as CitationContentBlockLocation
+from .content_block_source_content_param import ContentBlockSourceContentParam as ContentBlockSourceContentParam
+from .citation_content_block_location_param import (
+    CitationContentBlockLocationParam as CitationContentBlockLocationParam,
+)
