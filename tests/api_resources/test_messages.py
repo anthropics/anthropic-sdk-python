@@ -54,6 +54,16 @@ class TestMessages:
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
                     "cache_control": {"type": "ephemeral"},
+                    "citations": [
+                        {
+                            "cited_text": "cited_text",
+                            "document_index": 0,
+                            "document_title": "x",
+                            "end_char_index": 0,
+                            "start_char_index": 0,
+                            "type": "char_location",
+                        }
+                    ],
                 }
             ],
             temperature=1,
@@ -158,6 +168,16 @@ class TestMessages:
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
                     "cache_control": {"type": "ephemeral"},
+                    "citations": [
+                        {
+                            "cited_text": "cited_text",
+                            "document_index": 0,
+                            "document_title": "x",
+                            "end_char_index": 0,
+                            "start_char_index": 0,
+                            "type": "char_location",
+                        }
+                    ],
                 }
             ],
             temperature=1,
@@ -267,6 +287,16 @@ class TestMessages:
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
                     "cache_control": {"type": "ephemeral"},
+                    "citations": [
+                        {
+                            "cited_text": "cited_text",
+                            "document_index": 0,
+                            "document_title": "x",
+                            "end_char_index": 0,
+                            "start_char_index": 0,
+                            "type": "char_location",
+                        }
+                    ],
                 }
             ],
             tool_choice={
@@ -369,6 +399,16 @@ class TestAsyncMessages:
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
                     "cache_control": {"type": "ephemeral"},
+                    "citations": [
+                        {
+                            "cited_text": "cited_text",
+                            "document_index": 0,
+                            "document_title": "x",
+                            "end_char_index": 0,
+                            "start_char_index": 0,
+                            "type": "char_location",
+                        }
+                    ],
                 }
             ],
             temperature=1,
@@ -473,6 +513,16 @@ class TestAsyncMessages:
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
                     "cache_control": {"type": "ephemeral"},
+                    "citations": [
+                        {
+                            "cited_text": "cited_text",
+                            "document_index": 0,
+                            "document_title": "x",
+                            "end_char_index": 0,
+                            "start_char_index": 0,
+                            "type": "char_location",
+                        }
+                    ],
                 }
             ],
             temperature=1,
@@ -582,6 +632,16 @@ class TestAsyncMessages:
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
                     "cache_control": {"type": "ephemeral"},
+                    "citations": [
+                        {
+                            "cited_text": "cited_text",
+                            "document_index": 0,
+                            "document_title": "x",
+                            "end_char_index": 0,
+                            "start_char_index": 0,
+                            "type": "char_location",
+                        }
+                    ],
                 }
             ],
             tool_choice={
