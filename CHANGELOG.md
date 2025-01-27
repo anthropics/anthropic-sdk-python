@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.45.2 (2025-01-27)
+
+Full Changelog: [v0.45.1...v0.45.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.45.1...v0.45.2)
+
+### Bug Fixes
+
+* **streaming:** avoid invalid deser type error ([#845](https://github.com/anthropics/anthropic-sdk-python/issues/845)) ([72a2585](https://github.com/anthropics/anthropic-sdk-python/commit/72a2585680a4cc5d007bf93935424dbc4cecf2bd))
+
 ## 0.45.1 (2025-01-27)
 
 Full Changelog: [v0.45.0...v0.45.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.45.0...v0.45.1)
