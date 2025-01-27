@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from ._types import (
     TextEvent,
+    CitationEvent,
     InputJsonEvent,
     MessageStopEvent,
     MessageStreamEvent,
@@ -315,24 +316,40 @@ def build_events(
         events_to_fire.append(event)
 
         content_block = message_snapshot.content[event.index]
-        if event.delta.type == "text_delta" and content_block.type == "text":
-            events_to_fire.append(
-                build(
-                    TextEvent,
-                    type="text",
-                    text=event.delta.text,
-                    snapshot=content_block.text,
+        if event.delta.type == "text_delta":
+            if content_block.type == "text":
+                events_to_fire.append(
+                    build(
+                        TextEvent,
+                        type="text",
+                        text=event.delta.text,
+                        snapshot=content_block.text,
+                    )
                 )
-            )
-        elif event.delta.type == "input_json_delta" and content_block.type == "tool_use":
-            events_to_fire.append(
-                build(
-                    InputJsonEvent,
-                    type="input_json",
-                    partial_json=event.delta.partial_json,
-                    snapshot=content_block.input,
+        elif event.delta.type == "input_json_delta":
+            if content_block.type == "tool_use":
+                events_to_fire.append(
+                    build(
+                        InputJsonEvent,
+                        type="input_json",
+                        partial_json=event.delta.partial_json,
+                        snapshot=content_block.input,
+                    )
                 )
-            )
+        elif event.delta.type == "citations_delta":
+            if content_block.type == "text":
+                events_to_fire.append(
+                    build(
+                        CitationEvent,
+                        type="citation",
+                        citation=event.delta.citation,
+                        snapshot=content_block.citations or [],
+                    )
+                )
+        else:
+            # we only want exhaustive checking for linters, not at runtime
+            if TYPE_CHECKING:  # type: ignore[unreachable]
+                assert_never(event.delta)
     elif event.type == "content_block_stop":
         content_block = message_snapshot.content[event.index]
 
@@ -374,21 +391,33 @@ def accumulate_event(
         )
     elif event.type == "content_block_delta":
         content = current_snapshot.content[event.index]
-        if content.type == "text" and event.delta.type == "text_delta":
-            content.text += event.delta.text
-        elif content.type == "tool_use" and event.delta.type == "input_json_delta":
-            from jiter import from_json
+        if event.delta.type == "text_delta":
+            if content.type == "text":
+                content.text += event.delta.text
+        elif event.delta.type == "input_json_delta":
+            if content.type == "tool_use":
+                from jiter import from_json
 
-            # we need to keep track of the raw JSON string as well so that we can
-            # re-parse it for each delta, for now we just store it as an untyped
-            # property on the snapshot
-            json_buf = cast(bytes, getattr(content, JSON_BUF_PROPERTY, b""))
-            json_buf += bytes(event.delta.partial_json, "utf-8")
+                # we need to keep track of the raw JSON string as well so that we can
+                # re-parse it for each delta, for now we just store it as an untyped
+                # property on the snapshot
+                json_buf = cast(bytes, getattr(content, JSON_BUF_PROPERTY, b""))
+                json_buf += bytes(event.delta.partial_json, "utf-8")
 
-            if json_buf:
-                content.input = from_json(json_buf, partial_mode=True)
+                if json_buf:
+                    content.input = from_json(json_buf, partial_mode=True)
 
-            setattr(content, JSON_BUF_PROPERTY, json_buf)
+                setattr(content, JSON_BUF_PROPERTY, json_buf)
+        elif event.delta.type == "citations_delta":
+            if content.type == "text":
+                if not content.citations:
+                    content.citations = [event.delta.citation]
+                else:
+                    content.citations.append(event.delta.citation)
+        else:
+            # we only want exhaustive checking for linters, not at runtime
+            if TYPE_CHECKING:  # type: ignore[unreachable]
+                assert_never(event.delta)
     elif event.type == "message_delta":
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence

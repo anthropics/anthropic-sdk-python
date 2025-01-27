@@ -1,5 +1,5 @@
 from typing import Union
-from typing_extensions import Literal, Annotated
+from typing_extensions import List, Literal, Annotated
 
 from ...types import (
     Message,
@@ -13,6 +13,7 @@ from ...types import (
 )
 from ..._models import BaseModel
 from ..._utils._transform import PropertyInfo
+from ...types.citations_delta import Citation
 
 
 class TextEvent(BaseModel):
@@ -23,6 +24,16 @@ class TextEvent(BaseModel):
 
     snapshot: str
     """The entire accumulated text"""
+
+
+class CitationEvent(BaseModel):
+    type: Literal["citation"]
+
+    citation: Citation
+    """The new citation"""
+
+    snapshot: List[Citation]
+    """All of the accumulated citations"""
 
 
 class InputJsonEvent(BaseModel):
@@ -57,6 +68,7 @@ class ContentBlockStopEvent(RawContentBlockStopEvent):
 MessageStreamEvent = Annotated[
     Union[
         TextEvent,
+        CitationEvent,
         InputJsonEvent,
         RawMessageStartEvent,
         RawMessageDeltaEvent,
