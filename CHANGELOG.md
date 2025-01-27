@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.45.1 (2025-01-27)
+
+Full Changelog: [v0.45.0...v0.45.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.45.0...v0.45.1)
+
+### Bug Fixes
+
+* **streaming:** accumulate citations ([#844](https://github.com/anthropics/anthropic-sdk-python/issues/844)) ([e665f2f](https://github.com/anthropics/anthropic-sdk-python/commit/e665f2fefd4573fc45cd4c546a9480f15d18d1cd))
+
+
+### Chores
+
+* **docs:** updates ([#841](https://github.com/anthropics/anthropic-sdk-python/issues/841)) ([fb10a7d](https://github.com/anthropics/anthropic-sdk-python/commit/fb10a7d658044062e5023cd8495c80d3344af8df))
+
 ## 0.45.0 (2025-01-23)
 
 Full Changelog: [v0.44.0...v0.45.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.44.0...v0.45.0)
