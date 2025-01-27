@@ -816,7 +816,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-5-haiku-latest",
         )
 
         assert response.retries_taken == failures_before_success
@@ -849,7 +849,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-5-haiku-latest",
             extra_headers={"x-stainless-retry-count": Omit()},
         )
 
@@ -882,7 +882,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-5-haiku-latest",
             extra_headers={"x-stainless-retry-count": "42"},
         )
 
@@ -915,7 +915,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-5-haiku-latest",
         ) as response:
             assert response.retries_taken == failures_before_success
             assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
@@ -1697,7 +1697,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-5-haiku-latest",
         )
 
         assert response.retries_taken == failures_before_success
@@ -1731,7 +1731,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-5-haiku-latest",
             extra_headers={"x-stainless-retry-count": Omit()},
         )
 
@@ -1765,7 +1765,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-5-haiku-latest",
             extra_headers={"x-stainless-retry-count": "42"},
         )
 
@@ -1799,7 +1799,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-5-haiku-latest",
         ) as response:
             assert response.retries_taken == failures_before_success
             assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success

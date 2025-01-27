@@ -8,7 +8,6 @@ from typing_extensions import Literal, TypeAlias
 __all__ = ["ModelParam"]
 
 ModelParam: TypeAlias = Union[
-    str,
     Literal[
         "claude-3-5-haiku-latest",
         "claude-3-5-haiku-20241022",
@@ -22,4 +21,5 @@ ModelParam: TypeAlias = Union[
         "claude-2.1",
         "claude-2.0",
     ],
+    str,
 ]
