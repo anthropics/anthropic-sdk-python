@@ -37,7 +37,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-sonnet-20241022",
+                        "model": "claude-3-5-haiku-latest",
                     },
                 }
             ],
@@ -58,7 +58,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-sonnet-20241022",
+                        "model": "claude-3-5-haiku-latest",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
                         "stop_sequences": ["string"],
                         "stream": True,
@@ -128,7 +128,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-sonnet-20241022",
+                        "model": "claude-3-5-haiku-latest",
                     },
                 }
             ],
@@ -153,7 +153,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-sonnet-20241022",
+                        "model": "claude-3-5-haiku-latest",
                     },
                 }
             ],
@@ -408,7 +408,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-sonnet-20241022",
+                        "model": "claude-3-5-haiku-latest",
                     },
                 }
             ],
@@ -429,7 +429,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-sonnet-20241022",
+                        "model": "claude-3-5-haiku-latest",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
                         "stop_sequences": ["string"],
                         "stream": True,
@@ -499,7 +499,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-sonnet-20241022",
+                        "model": "claude-3-5-haiku-latest",
                     },
                 }
             ],
@@ -524,7 +524,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-sonnet-20241022",
+                        "model": "claude-3-5-haiku-latest",
                     },
                 }
             ],
