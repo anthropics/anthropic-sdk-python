@@ -6,7 +6,6 @@ from typing_extensions import Literal, TypeAlias
 __all__ = ["Model"]
 
 Model: TypeAlias = Union[
-    str,
     Literal[
         "claude-3-5-haiku-latest",
         "claude-3-5-haiku-20241022",
@@ -20,4 +19,5 @@ Model: TypeAlias = Union[
         "claude-2.1",
         "claude-2.0",
     ],
+    str,
 ]
