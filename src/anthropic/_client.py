@@ -257,11 +257,17 @@ class Anthropic(SyncAPIClient):
         if response.status_code == 409:
             return _exceptions.ConflictError(err_msg, response=response, body=body)
 
+        if response.status_code == 413:
+            return _exceptions.RequestTooLargeError(err_msg, response=response, body=body)
+
         if response.status_code == 422:
             return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
 
         if response.status_code == 429:
             return _exceptions.RateLimitError(err_msg, response=response, body=body)
+
+        if response.status_code == 529:
+            return _exceptions.OverloadedError(err_msg, response=response, body=body)
 
         if response.status_code >= 500:
             return _exceptions.InternalServerError(err_msg, response=response, body=body)
