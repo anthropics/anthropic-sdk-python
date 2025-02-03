@@ -104,7 +104,7 @@ respx==0.22.0
 rich==13.7.1
 rsa==4.9
     # via google-auth
-ruff==0.6.9
+ruff==0.9.4
 s3transfer==0.10.3
     # via boto3
 setuptools==68.2.2
