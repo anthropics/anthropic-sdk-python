@@ -24,6 +24,14 @@ class SyncPage(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
         return data
 
     @override
+    def has_next_page(self) -> bool:
+        has_more = self.has_more
+        if has_more is not None and has_more is False:
+            return False
+
+        return super().has_next_page()
+
+    @override
     def next_page_info(self) -> Optional[PageInfo]:
         if self._options.params.get("before_id"):
             first_id = self.first_id
@@ -51,6 +59,14 @@ class AsyncPage(BaseAsyncPage[_T], BasePage[_T], Generic[_T]):
         if not data:
             return []
         return data
+
+    @override
+    def has_next_page(self) -> bool:
+        has_more = self.has_more
+        if has_more is not None and has_more is False:
+            return False
+
+        return super().has_next_page()
 
     @override
     def next_page_info(self) -> Optional[PageInfo]:
