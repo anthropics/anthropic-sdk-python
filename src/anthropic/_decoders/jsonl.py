@@ -17,17 +17,28 @@ class JSONLDecoder(Generic[_T]):
     into a given type.
     """
 
-    http_response: httpx.Response | None
+    http_response: httpx.Response
     """The HTTP response this decoder was constructed from"""
 
     def __init__(
-        self, *, raw_iterator: Iterator[bytes], line_type: type[_T], http_response: httpx.Response | None
+        self,
+        *,
+        raw_iterator: Iterator[bytes],
+        line_type: type[_T],
+        http_response: httpx.Response,
     ) -> None:
         super().__init__()
         self.http_response = http_response
         self._raw_iterator = raw_iterator
         self._line_type = line_type
         self._iterator = self.__decode__()
+
+    def close(self) -> None:
+        """Close the response body stream.
+
+        This is called automatically if you consume the entire stream.
+        """
+        self.http_response.close()
 
     def __decode__(self) -> Iterator[_T]:
         buf = b""
@@ -63,16 +74,27 @@ class AsyncJSONLDecoder(Generic[_T]):
     into a given type.
     """
 
-    http_response: httpx.Response | None
+    http_response: httpx.Response
 
     def __init__(
-        self, *, raw_iterator: AsyncIterator[bytes], line_type: type[_T], http_response: httpx.Response | None
+        self,
+        *,
+        raw_iterator: AsyncIterator[bytes],
+        line_type: type[_T],
+        http_response: httpx.Response,
     ) -> None:
         super().__init__()
         self.http_response = http_response
         self._raw_iterator = raw_iterator
         self._line_type = line_type
         self._iterator = self.__decode__()
+
+    async def close(self) -> None:
+        """Close the response body stream.
+
+        This is called automatically if you consume the entire stream.
+        """
+        await self.http_response.aclose()
 
     async def __decode__(self) -> AsyncIterator[_T]:
         buf = b""
