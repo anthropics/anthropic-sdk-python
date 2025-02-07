@@ -144,7 +144,7 @@ class BaseAPIResponse(Generic[R]):
                 return cast(
                     R,
                     cast("type[JSONLDecoder[Any]]", cast_to)(
-                        raw_iterator=self.http_response.iter_bytes(chunk_size=4096),
+                        raw_iterator=self.http_response.iter_bytes(chunk_size=64),
                         line_type=extract_type_arg(cast_to, 0),
                         http_response=self.http_response,
                     ),
@@ -154,7 +154,7 @@ class BaseAPIResponse(Generic[R]):
                 return cast(
                     R,
                     cast("type[AsyncJSONLDecoder[Any]]", cast_to)(
-                        raw_iterator=self.http_response.aiter_bytes(chunk_size=4096),
+                        raw_iterator=self.http_response.aiter_bytes(chunk_size=64),
                         line_type=extract_type_arg(cast_to, 0),
                         http_response=self.http_response,
                     ),
