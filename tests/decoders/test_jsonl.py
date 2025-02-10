@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Iterator, AsyncIterator
 from typing_extensions import TypeVar
 
+import httpx
 import pytest
 
 from anthropic._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
@@ -82,6 +83,6 @@ def make_jsonl_iterator(
     line_type: type[_T],
 ) -> JSONLDecoder[_T] | AsyncJSONLDecoder[_T]:
     if sync:
-        return JSONLDecoder(line_type=line_type, raw_iterator=content, http_response=None)
+        return JSONLDecoder(line_type=line_type, raw_iterator=content, http_response=httpx.Response(200))
 
-    return AsyncJSONLDecoder(line_type=line_type, raw_iterator=to_aiter(content), http_response=None)
+    return AsyncJSONLDecoder(line_type=line_type, raw_iterator=to_aiter(content), http_response=httpx.Response(200))
