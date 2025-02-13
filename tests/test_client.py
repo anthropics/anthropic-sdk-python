@@ -23,6 +23,7 @@ from pydantic import ValidationError
 
 from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
 from anthropic._types import Omit
+from anthropic._utils import maybe_transform
 from anthropic._models import BaseModel, FinalRequestOptions
 from anthropic._constants import RAW_RESPONSE_HEADER
 from anthropic._streaming import Stream, AsyncStream
@@ -33,6 +34,7 @@ from anthropic._base_client import (
     BaseClient,
     make_request_options,
 )
+from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
 
 from .utils import update_env
 
@@ -738,15 +740,18 @@ class TestAnthropic:
                 "/v1/messages",
                 body=cast(
                     object,
-                    dict(
-                        max_tokens=1024,
-                        messages=[
-                            {
-                                "role": "user",
-                                "content": "Hello, Claude",
-                            }
-                        ],
-                        model="claude-3-5-sonnet-latest",
+                    maybe_transform(
+                        dict(
+                            max_tokens=1024,
+                            messages=[
+                                {
+                                    "role": "user",
+                                    "content": "Hello, Claude",
+                                }
+                            ],
+                            model="claude-3-5-sonnet-latest",
+                        ),
+                        MessageCreateParamsNonStreaming,
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -765,15 +770,18 @@ class TestAnthropic:
                 "/v1/messages",
                 body=cast(
                     object,
-                    dict(
-                        max_tokens=1024,
-                        messages=[
-                            {
-                                "role": "user",
-                                "content": "Hello, Claude",
-                            }
-                        ],
-                        model="claude-3-5-sonnet-latest",
+                    maybe_transform(
+                        dict(
+                            max_tokens=1024,
+                            messages=[
+                                {
+                                    "role": "user",
+                                    "content": "Hello, Claude",
+                                }
+                            ],
+                            model="claude-3-5-sonnet-latest",
+                        ),
+                        MessageCreateParamsNonStreaming,
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -1618,15 +1626,18 @@ class TestAsyncAnthropic:
                 "/v1/messages",
                 body=cast(
                     object,
-                    dict(
-                        max_tokens=1024,
-                        messages=[
-                            {
-                                "role": "user",
-                                "content": "Hello, Claude",
-                            }
-                        ],
-                        model="claude-3-5-sonnet-latest",
+                    maybe_transform(
+                        dict(
+                            max_tokens=1024,
+                            messages=[
+                                {
+                                    "role": "user",
+                                    "content": "Hello, Claude",
+                                }
+                            ],
+                            model="claude-3-5-sonnet-latest",
+                        ),
+                        MessageCreateParamsNonStreaming,
                     ),
                 ),
                 cast_to=httpx.Response,
@@ -1645,15 +1656,18 @@ class TestAsyncAnthropic:
                 "/v1/messages",
                 body=cast(
                     object,
-                    dict(
-                        max_tokens=1024,
-                        messages=[
-                            {
-                                "role": "user",
-                                "content": "Hello, Claude",
-                            }
-                        ],
-                        model="claude-3-5-sonnet-latest",
+                    maybe_transform(
+                        dict(
+                            max_tokens=1024,
+                            messages=[
+                                {
+                                    "role": "user",
+                                    "content": "Hello, Claude",
+                                }
+                            ],
+                            model="claude-3-5-sonnet-latest",
+                        ),
+                        MessageCreateParamsNonStreaming,
                     ),
                 ),
                 cast_to=httpx.Response,
