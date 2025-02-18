@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.46.0 (2025-02-18)
+
+Full Changelog: [v0.45.2...v0.46.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.45.2...v0.46.0)
+
+### Features
+
+* **client:** send `X-Stainless-Read-Timeout` header ([#858](https://github.com/anthropics/anthropic-sdk-python/issues/858)) ([0e75983](https://github.com/anthropics/anthropic-sdk-python/commit/0e759835ddfa7d72d0926cab0101601e7c1e8f22))
+* **jsonl:** add .close() method ([#862](https://github.com/anthropics/anthropic-sdk-python/issues/862)) ([137335c](https://github.com/anthropics/anthropic-sdk-python/commit/137335c649f3dc886875bb60bddeb0c8d8abb67b))
+* **pagination:** avoid fetching when has_more: false ([#860](https://github.com/anthropics/anthropic-sdk-python/issues/860)) ([0cdb81d](https://github.com/anthropics/anthropic-sdk-python/commit/0cdb81d106c48c851fff5c9532c675b414f474b4))
+
+
+### Bug Fixes
+
+* asyncify on non-asyncio runtimes ([#864](https://github.com/anthropics/anthropic-sdk-python/issues/864)) ([f92b36d](https://github.com/anthropics/anthropic-sdk-python/commit/f92b36d4a87c6b5455945ce38e3ab3db24e9a529))
+* **internal:** add back custom header naming support ([#861](https://github.com/anthropics/anthropic-sdk-python/issues/861)) ([cf851ae](https://github.com/anthropics/anthropic-sdk-python/commit/cf851ae9ee57635250beec8bedb0134aa2d79a42))
+* **jsonl:** lower chunk size ([#863](https://github.com/anthropics/anthropic-sdk-python/issues/863)) ([38fb720](https://github.com/anthropics/anthropic-sdk-python/commit/38fb72043b436afc02839ad4e2a966a5ef0b0bc1))
+
+
+### Chores
+
+* **api:** update openapi spec url ([#852](https://github.com/anthropics/anthropic-sdk-python/issues/852)) ([461d821](https://github.com/anthropics/anthropic-sdk-python/commit/461d821965c61d98bf35a8b6fab5da55a2ddddef))
+* **internal:** bummp ruff dependency ([#856](https://github.com/anthropics/anthropic-sdk-python/issues/856)) ([590c3fa](https://github.com/anthropics/anthropic-sdk-python/commit/590c3fa154e38f85c3cc6fcc518a6c68ee2bd234))
+* **internal:** change default timeout to an int ([#855](https://github.com/anthropics/anthropic-sdk-python/issues/855)) ([3152e1a](https://github.com/anthropics/anthropic-sdk-python/commit/3152e1a135a07430404f3209fbbcb924d9d2b9a2))
+* **internal:** fix tests ([fc41ba2](https://github.com/anthropics/anthropic-sdk-python/commit/fc41ba21b492e864685384e82b3eeca1ca56f4eb))
+* **internal:** fix type traversing dictionary params ([#859](https://github.com/anthropics/anthropic-sdk-python/issues/859)) ([c5b700d](https://github.com/anthropics/anthropic-sdk-python/commit/c5b700d9abea1fcebc43fe12ac514512fedff0db))
+* **internal:** reorder model constants ([#847](https://github.com/anthropics/anthropic-sdk-python/issues/847)) ([aadd531](https://github.com/anthropics/anthropic-sdk-python/commit/aadd5315868ce2eec17cc7d0e8ec4f0b6a4c3c87))
+* **internal:** update models used in tests ([aadd531](https://github.com/anthropics/anthropic-sdk-python/commit/aadd5315868ce2eec17cc7d0e8ec4f0b6a4c3c87))
+
 ## 0.45.2 (2025-01-27)
 
 Full Changelog: [v0.45.1...v0.45.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.45.1...v0.45.2)
