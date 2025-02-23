@@ -98,12 +98,28 @@ class ConflictError(APIStatusError):
     status_code: Literal[409] = 409  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
+class RequestTooLargeError(APIStatusError):
+    status_code: Literal[413] = 413  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
 class UnprocessableEntityError(APIStatusError):
     status_code: Literal[422] = 422  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
 class RateLimitError(APIStatusError):
     status_code: Literal[429] = 429  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class ServiceUnavailableError(APIStatusError):
+    status_code: Literal[503] = 503  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class OverloadedError(APIStatusError):
+    status_code: Literal[529] = 529  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class DeadlineExceededError(APIStatusError):
+    status_code: Literal[504] = 504  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
 class InternalServerError(APIStatusError):

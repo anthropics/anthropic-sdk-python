@@ -94,6 +94,9 @@ class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         if response.status_code == 429:
             return _exceptions.RateLimitError(err_msg, response=response, body=body)
 
+        if response.status_code == 503:
+            return _exceptions.ServiceUnavailableError(err_msg, response=response, body=body)
+
         if response.status_code >= 500:
             return _exceptions.InternalServerError(err_msg, response=response, body=body)
         return APIStatusError(err_msg, response=response, body=body)
