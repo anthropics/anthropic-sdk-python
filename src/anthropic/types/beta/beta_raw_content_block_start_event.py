@@ -6,11 +6,16 @@ from typing_extensions import Literal, Annotated, TypeAlias
 from ..._utils import PropertyInfo
 from ..._models import BaseModel
 from .beta_text_block import BetaTextBlock
+from .beta_thinking_block import BetaThinkingBlock
 from .beta_tool_use_block import BetaToolUseBlock
+from .beta_redacted_thinking_block import BetaRedactedThinkingBlock
 
 __all__ = ["BetaRawContentBlockStartEvent", "ContentBlock"]
 
-ContentBlock: TypeAlias = Annotated[Union[BetaTextBlock, BetaToolUseBlock], PropertyInfo(discriminator="type")]
+ContentBlock: TypeAlias = Annotated[
+    Union[BetaTextBlock, BetaToolUseBlock, BetaThinkingBlock, BetaRedactedThinkingBlock],
+    PropertyInfo(discriminator="type"),
+]
 
 
 class BetaRawContentBlockStartEvent(BaseModel):
