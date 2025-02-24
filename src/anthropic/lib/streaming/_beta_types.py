@@ -36,6 +36,23 @@ class BetaCitationEvent(BaseModel):
     """All of the accumulated citations"""
 
 
+class BetaThinkingEvent(BaseModel):
+    type: Literal["thinking"]
+
+    thinking: str
+    """The thinking delta"""
+
+    snapshot: str
+    """The accumulated thinking so far"""
+
+
+class BetaSignatureEvent(BaseModel):
+    type: Literal["signature"]
+
+    signature: str
+    """The signature of the thinking block"""
+
+
 class BetaInputJsonEvent(BaseModel):
     type: Literal["input_json"]
 
@@ -69,6 +86,8 @@ BetaMessageStreamEvent = Annotated[
     Union[
         BetaTextEvent,
         BetaCitationEvent,
+        BetaThinkingEvent,
+        BetaSignatureEvent,
         BetaInputJsonEvent,
         BetaRawMessageStartEvent,
         BetaRawMessageDeltaEvent,

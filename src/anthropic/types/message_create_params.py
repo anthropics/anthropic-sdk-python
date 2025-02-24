@@ -5,12 +5,13 @@ from __future__ import annotations
 from typing import List, Union, Iterable
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
-from .tool_param import ToolParam
 from .model_param import ModelParam
 from .message_param import MessageParam
 from .metadata_param import MetadataParam
 from .text_block_param import TextBlockParam
+from .tool_union_param import ToolUnionParam
 from .tool_choice_param import ToolChoiceParam
+from .thinking_config_param import ThinkingConfigParam
 from .tool_choice_any_param import ToolChoiceAnyParam
 from .tool_choice_auto_param import ToolChoiceAutoParam
 from .tool_choice_tool_param import ToolChoiceToolParam
@@ -168,13 +169,25 @@ class MessageCreateParamsBase(TypedDict, total=False):
     deterministic.
     """
 
+    thinking: ThinkingConfigParam
+    """Configuration for enabling Claude's extended thinking.
+
+    When enabled, responses include `thinking` content blocks showing Claude's
+    thinking process before the final answer. Requires a minimum budget of 1,024
+    tokens and counts towards your `max_tokens` limit.
+
+    See
+    [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+    for details.
+    """
+
     tool_choice: ToolChoiceParam
     """How the model should use the provided tools.
 
     The model can use a specific tool, any available tool, or decide by itself.
     """
 
-    tools: Iterable[ToolParam]
+    tools: Iterable[ToolUnionParam]
     """Definitions of tools that the model may use.
 
     If you include `tools` in your API request, the model may return `tool_use`
@@ -186,8 +199,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     - `name`: Name of the tool.
     - `description`: Optional, but strongly-recommended description of the tool.
-    - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-      shape that the model will produce in `tool_use` output content blocks.
+    - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+      tool `input` shape that the model will produce in `tool_use` output content
+      blocks.
 
     For example, if you defined `tools` as:
 

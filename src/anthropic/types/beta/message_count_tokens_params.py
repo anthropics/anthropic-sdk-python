@@ -12,9 +12,13 @@ from .beta_message_param import BetaMessageParam
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_tool_choice_param import BetaToolChoiceParam
+from .beta_thinking_config_param import BetaThinkingConfigParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
+from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param
+from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param
 from .beta_tool_computer_use_20241022_param import BetaToolComputerUse20241022Param
+from .beta_tool_computer_use_20250124_param import BetaToolComputerUse20250124Param
 
 __all__ = ["MessageCountTokensParams", "Tool"]
 
@@ -124,6 +128,18 @@ class MessageCountTokensParams(TypedDict, total=False):
     [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
     """
 
+    thinking: BetaThinkingConfigParam
+    """Configuration for enabling Claude's extended thinking.
+
+    When enabled, responses include `thinking` content blocks showing Claude's
+    thinking process before the final answer. Requires a minimum budget of 1,024
+    tokens and counts towards your `max_tokens` limit.
+
+    See
+    [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+    for details.
+    """
+
     tool_choice: BetaToolChoiceParam
     """How the model should use the provided tools.
 
@@ -142,8 +158,9 @@ class MessageCountTokensParams(TypedDict, total=False):
 
     - `name`: Name of the tool.
     - `description`: Optional, but strongly-recommended description of the tool.
-    - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-      shape that the model will produce in `tool_use` output content blocks.
+    - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+      tool `input` shape that the model will produce in `tool_use` output content
+      blocks.
 
     For example, if you defined `tools` as:
 
@@ -206,5 +223,11 @@ class MessageCountTokensParams(TypedDict, total=False):
 
 
 Tool: TypeAlias = Union[
-    BetaToolParam, BetaToolComputerUse20241022Param, BetaToolBash20241022Param, BetaToolTextEditor20241022Param
+    BetaToolComputerUse20241022Param,
+    BetaToolBash20241022Param,
+    BetaToolTextEditor20241022Param,
+    BetaToolComputerUse20250124Param,
+    BetaToolBash20250124Param,
+    BetaToolTextEditor20250124Param,
+    BetaToolParam,
 ]
