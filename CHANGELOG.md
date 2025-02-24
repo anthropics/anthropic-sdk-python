@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.47.1 (2025-02-24)
+
+Full Changelog: [v0.47.0...v0.47.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.47.0...v0.47.1)
+
+### Chores
+
+* **internal:** update spec ([#871](https://github.com/anthropics/anthropic-sdk-python/issues/871)) ([916be18](https://github.com/anthropics/anthropic-sdk-python/commit/916be1806d3a86ec5abaef7c00227cd918b92274))
+* update large max_tokens error message ([40c71df](https://github.com/anthropics/anthropic-sdk-python/commit/40c71df4b6e7760648f42a5f0995bcc93dafbd17))
+
 ## 0.47.0 (2025-02-24)
 
 Full Changelog: [v0.46.0...v0.47.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.46.0...v0.47.0)
