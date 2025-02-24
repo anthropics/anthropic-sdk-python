@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.47.0 (2025-02-24)
+
+Full Changelog: [v0.46.0...v0.47.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.46.0...v0.47.0)
+
+### Features
+
+* **api:** add claude-3.7 + support for thinking ([c5387e6](https://github.com/anthropics/anthropic-sdk-python/commit/c5387e69e799f14e44006ea4e54fdf32f2f74393))
+* **client:** add more status exceptions ([#854](https://github.com/anthropics/anthropic-sdk-python/issues/854)) ([00d9512](https://github.com/anthropics/anthropic-sdk-python/commit/00d95126aff50158c7849d651c35a88ea81ff969))
+* **client:** allow passing `NotGiven` for body ([#868](https://github.com/anthropics/anthropic-sdk-python/issues/868)) ([8ab445e](https://github.com/anthropics/anthropic-sdk-python/commit/8ab445e6a837854421f358f4977ff80c5e0635c8))
+
+
+### Bug Fixes
+
+* **client:** mark some request bodies as optional ([8ab445e](https://github.com/anthropics/anthropic-sdk-python/commit/8ab445e6a837854421f358f4977ff80c5e0635c8))
+
+
+### Chores
+
+* **internal:** fix devcontainers setup ([#870](https://github.com/anthropics/anthropic-sdk-python/issues/870)) ([1a21c6a](https://github.com/anthropics/anthropic-sdk-python/commit/1a21c6a3fb6969a07e9b8483ed116fb3af7bd3b2))
+
 ## 0.46.0 (2025-02-18)
 
 Full Changelog: [v0.45.2...v0.46.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.45.2...v0.46.0)
