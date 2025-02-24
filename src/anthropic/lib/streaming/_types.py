@@ -36,6 +36,23 @@ class CitationEvent(BaseModel):
     """All of the accumulated citations"""
 
 
+class ThinkingEvent(BaseModel):
+    type: Literal["thinking"]
+
+    thinking: str
+    """The thinking delta"""
+
+    snapshot: str
+    """The accumulated thinking so far"""
+
+
+class SignatureEvent(BaseModel):
+    type: Literal["signature"]
+
+    signature: str
+    """The signature of the thinking block"""
+
+
 class InputJsonEvent(BaseModel):
     type: Literal["input_json"]
 
@@ -69,6 +86,8 @@ MessageStreamEvent = Annotated[
     Union[
         TextEvent,
         CitationEvent,
+        ThinkingEvent,
+        SignatureEvent,
         InputJsonEvent,
         RawMessageStartEvent,
         RawMessageDeltaEvent,

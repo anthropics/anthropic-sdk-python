@@ -6,11 +6,15 @@ from typing_extensions import Literal, Annotated, TypeAlias
 from .._utils import PropertyInfo
 from .._models import BaseModel
 from .text_block import TextBlock
+from .thinking_block import ThinkingBlock
 from .tool_use_block import ToolUseBlock
+from .redacted_thinking_block import RedactedThinkingBlock
 
 __all__ = ["RawContentBlockStartEvent", "ContentBlock"]
 
-ContentBlock: TypeAlias = Annotated[Union[TextBlock, ToolUseBlock], PropertyInfo(discriminator="type")]
+ContentBlock: TypeAlias = Annotated[
+    Union[TextBlock, ToolUseBlock, ThinkingBlock, RedactedThinkingBlock], PropertyInfo(discriminator="type")
+]
 
 
 class RawContentBlockStartEvent(BaseModel):

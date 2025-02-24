@@ -32,7 +32,11 @@ from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
 from ...._constants import DEFAULT_TIMEOUT
 from ...._streaming import Stream, AsyncStream
-from ....types.beta import message_create_params, message_count_tokens_params
+from ....types.beta import (
+    BetaThinkingConfigParam,
+    message_create_params,
+    message_count_tokens_params,
+)
 from ...._base_client import make_request_options
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS
@@ -45,6 +49,7 @@ from ....types.beta.beta_text_block_param import BetaTextBlockParam
 from ....types.beta.beta_tool_union_param import BetaToolUnionParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
+from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
 from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
 
 __all__ = ["Messages", "AsyncMessages"]
@@ -86,6 +91,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -104,6 +110,8 @@ class Messages(SyncAPIResource):
 
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
+
+        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -237,6 +245,16 @@ class Messages(SyncAPIResource):
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
 
+          thinking: Configuration for enabling Claude's extended thinking.
+
+              When enabled, responses include `thinking` content blocks showing Claude's
+              thinking process before the final answer. Requires a minimum budget of 1,024
+              tokens and counts towards your `max_tokens` limit.
+
+              See
+              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              for details.
+
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, or decide by itself.
 
@@ -251,8 +269,9 @@ class Messages(SyncAPIResource):
 
               - `name`: Name of the tool.
               - `description`: Optional, but strongly-recommended description of the tool.
-              - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-                shape that the model will produce in `tool_use` output content blocks.
+              - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+                tool `input` shape that the model will produce in `tool_use` output content
+                blocks.
 
               For example, if you defined `tools` as:
 
@@ -351,6 +370,7 @@ class Messages(SyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -369,6 +389,8 @@ class Messages(SyncAPIResource):
 
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
+
+        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -502,6 +524,16 @@ class Messages(SyncAPIResource):
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
 
+          thinking: Configuration for enabling Claude's extended thinking.
+
+              When enabled, responses include `thinking` content blocks showing Claude's
+              thinking process before the final answer. Requires a minimum budget of 1,024
+              tokens and counts towards your `max_tokens` limit.
+
+              See
+              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              for details.
+
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, or decide by itself.
 
@@ -516,8 +548,9 @@ class Messages(SyncAPIResource):
 
               - `name`: Name of the tool.
               - `description`: Optional, but strongly-recommended description of the tool.
-              - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-                shape that the model will produce in `tool_use` output content blocks.
+              - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+                tool `input` shape that the model will produce in `tool_use` output content
+                blocks.
 
               For example, if you defined `tools` as:
 
@@ -616,6 +649,7 @@ class Messages(SyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -634,6 +668,8 @@ class Messages(SyncAPIResource):
 
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
+
+        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -767,6 +803,16 @@ class Messages(SyncAPIResource):
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
 
+          thinking: Configuration for enabling Claude's extended thinking.
+
+              When enabled, responses include `thinking` content blocks showing Claude's
+              thinking process before the final answer. Requires a minimum budget of 1,024
+              tokens and counts towards your `max_tokens` limit.
+
+              See
+              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              for details.
+
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, or decide by itself.
 
@@ -781,8 +827,9 @@ class Messages(SyncAPIResource):
 
               - `name`: Name of the tool.
               - `description`: Optional, but strongly-recommended description of the tool.
-              - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-                shape that the model will produce in `tool_use` output content blocks.
+              - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+                tool `input` shape that the model will produce in `tool_use` output content
+                blocks.
 
               For example, if you defined `tools` as:
 
@@ -881,6 +928,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -893,8 +941,8 @@ class Messages(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
-        if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
-            timeout = 600
+        if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+            timeout = self._client._calculate_nonstreaming_timeout(max_tokens)
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -919,6 +967,7 @@ class Messages(SyncAPIResource):
                     "stream": stream,
                     "system": system,
                     "temperature": temperature,
+                    "thinking": thinking,
                     "tool_choice": tool_choice,
                     "tools": tools,
                     "top_k": top_k,
@@ -957,9 +1006,6 @@ class Messages(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaMessageStreamManager:
         """Create a Message stream"""
-        if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
-            timeout = 600
-
         extra_headers = {
             "X-Stainless-Stream-Helper": "beta.messages",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
@@ -1000,6 +1046,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[message_count_tokens_params.Tool] | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -1015,6 +1062,9 @@ class Messages(SyncAPIResource):
 
         The Token Count API can be used to count the number of tokens in a Message,
         including tools, images, and documents, without creating it.
+
+        Learn more about token counting in our
+        [user guide](/en/docs/build-with-claude/token-counting)
 
         Args:
           messages: Input messages.
@@ -1114,6 +1164,16 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
 
+          thinking: Configuration for enabling Claude's extended thinking.
+
+              When enabled, responses include `thinking` content blocks showing Claude's
+              thinking process before the final answer. Requires a minimum budget of 1,024
+              tokens and counts towards your `max_tokens` limit.
+
+              See
+              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              for details.
+
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, or decide by itself.
 
@@ -1128,8 +1188,9 @@ class Messages(SyncAPIResource):
 
               - `name`: Name of the tool.
               - `description`: Optional, but strongly-recommended description of the tool.
-              - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-                shape that the model will produce in `tool_use` output content blocks.
+              - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+                tool `input` shape that the model will produce in `tool_use` output content
+                blocks.
 
               For example, if you defined `tools` as:
 
@@ -1214,6 +1275,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "system": system,
+                    "thinking": thinking,
                     "tool_choice": tool_choice,
                     "tools": tools,
                 },
@@ -1262,6 +1324,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -1280,6 +1343,8 @@ class AsyncMessages(AsyncAPIResource):
 
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
+
+        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1413,6 +1478,16 @@ class AsyncMessages(AsyncAPIResource):
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
 
+          thinking: Configuration for enabling Claude's extended thinking.
+
+              When enabled, responses include `thinking` content blocks showing Claude's
+              thinking process before the final answer. Requires a minimum budget of 1,024
+              tokens and counts towards your `max_tokens` limit.
+
+              See
+              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              for details.
+
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, or decide by itself.
 
@@ -1427,8 +1502,9 @@ class AsyncMessages(AsyncAPIResource):
 
               - `name`: Name of the tool.
               - `description`: Optional, but strongly-recommended description of the tool.
-              - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-                shape that the model will produce in `tool_use` output content blocks.
+              - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+                tool `input` shape that the model will produce in `tool_use` output content
+                blocks.
 
               For example, if you defined `tools` as:
 
@@ -1527,6 +1603,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -1545,6 +1622,8 @@ class AsyncMessages(AsyncAPIResource):
 
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
+
+        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1678,6 +1757,16 @@ class AsyncMessages(AsyncAPIResource):
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
 
+          thinking: Configuration for enabling Claude's extended thinking.
+
+              When enabled, responses include `thinking` content blocks showing Claude's
+              thinking process before the final answer. Requires a minimum budget of 1,024
+              tokens and counts towards your `max_tokens` limit.
+
+              See
+              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              for details.
+
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, or decide by itself.
 
@@ -1692,8 +1781,9 @@ class AsyncMessages(AsyncAPIResource):
 
               - `name`: Name of the tool.
               - `description`: Optional, but strongly-recommended description of the tool.
-              - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-                shape that the model will produce in `tool_use` output content blocks.
+              - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+                tool `input` shape that the model will produce in `tool_use` output content
+                blocks.
 
               For example, if you defined `tools` as:
 
@@ -1792,6 +1882,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -1810,6 +1901,8 @@ class AsyncMessages(AsyncAPIResource):
 
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
+
+        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1943,6 +2036,16 @@ class AsyncMessages(AsyncAPIResource):
               Note that even with `temperature` of `0.0`, the results will not be fully
               deterministic.
 
+          thinking: Configuration for enabling Claude's extended thinking.
+
+              When enabled, responses include `thinking` content blocks showing Claude's
+              thinking process before the final answer. Requires a minimum budget of 1,024
+              tokens and counts towards your `max_tokens` limit.
+
+              See
+              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              for details.
+
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, or decide by itself.
 
@@ -1957,8 +2060,9 @@ class AsyncMessages(AsyncAPIResource):
 
               - `name`: Name of the tool.
               - `description`: Optional, but strongly-recommended description of the tool.
-              - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-                shape that the model will produce in `tool_use` output content blocks.
+              - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+                tool `input` shape that the model will produce in `tool_use` output content
+                blocks.
 
               For example, if you defined `tools` as:
 
@@ -2057,6 +2161,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -2069,8 +2174,8 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
-        if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
-            timeout = 600
+        if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+            timeout = self._client._calculate_nonstreaming_timeout(max_tokens)
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -2095,6 +2200,7 @@ class AsyncMessages(AsyncAPIResource):
                     "stream": stream,
                     "system": system,
                     "temperature": temperature,
+                    "thinking": thinking,
                     "tool_choice": tool_choice,
                     "tools": tools,
                     "top_k": top_k,
@@ -2132,9 +2238,6 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaAsyncMessageStreamManager:
-        if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
-            timeout = 600
-
         extra_headers = {
             "X-Stainless-Stream-Helper": "beta.messages",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
@@ -2174,6 +2277,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
         tools: Iterable[message_count_tokens_params.Tool] | NotGiven = NOT_GIVEN,
         betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
@@ -2189,6 +2293,9 @@ class AsyncMessages(AsyncAPIResource):
 
         The Token Count API can be used to count the number of tokens in a Message,
         including tools, images, and documents, without creating it.
+
+        Learn more about token counting in our
+        [user guide](/en/docs/build-with-claude/token-counting)
 
         Args:
           messages: Input messages.
@@ -2288,6 +2395,16 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
 
+          thinking: Configuration for enabling Claude's extended thinking.
+
+              When enabled, responses include `thinking` content blocks showing Claude's
+              thinking process before the final answer. Requires a minimum budget of 1,024
+              tokens and counts towards your `max_tokens` limit.
+
+              See
+              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              for details.
+
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, or decide by itself.
 
@@ -2302,8 +2419,9 @@ class AsyncMessages(AsyncAPIResource):
 
               - `name`: Name of the tool.
               - `description`: Optional, but strongly-recommended description of the tool.
-              - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-                shape that the model will produce in `tool_use` output content blocks.
+              - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+                tool `input` shape that the model will produce in `tool_use` output content
+                blocks.
 
               For example, if you defined `tools` as:
 
@@ -2388,6 +2506,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "system": system,
+                    "thinking": thinking,
                     "tool_choice": tool_choice,
                     "tools": tools,
                 },

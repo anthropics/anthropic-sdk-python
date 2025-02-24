@@ -30,7 +30,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -44,7 +44,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string"],
             stream=False,
@@ -66,29 +66,22 @@ class TestMessages:
                 }
             ],
             temperature=1,
+            thinking={
+                "budget_tokens": 1024,
+                "type": "enabled",
+            },
             tool_choice={
                 "type": "auto",
                 "disable_parallel_tool_use": True,
             },
             tools=[
                 {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "name",
+                    "display_height_px": 1,
+                    "display_width_px": 1,
+                    "name": "computer",
+                    "type": "computer_20241022",
                     "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                    "type": "custom",
+                    "display_number": 0,
                 }
             ],
             top_k=5,
@@ -107,7 +100,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         )
 
         assert response.is_closed is True
@@ -125,7 +118,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -145,7 +138,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             stream=True,
         )
         message_stream.response.close()
@@ -160,7 +153,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string"],
@@ -182,29 +175,22 @@ class TestMessages:
                 }
             ],
             temperature=1,
+            thinking={
+                "budget_tokens": 1024,
+                "type": "enabled",
+            },
             tool_choice={
                 "type": "auto",
                 "disable_parallel_tool_use": True,
             },
             tools=[
                 {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "name",
+                    "display_height_px": 1,
+                    "display_width_px": 1,
+                    "name": "computer",
+                    "type": "computer_20241022",
                     "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                    "type": "custom",
+                    "display_number": 0,
                 }
             ],
             top_k=5,
@@ -223,7 +209,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             stream=True,
         )
 
@@ -241,7 +227,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -261,7 +247,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -274,7 +260,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -292,29 +278,22 @@ class TestMessages:
                     ],
                 }
             ],
+            thinking={
+                "budget_tokens": 1024,
+                "type": "enabled",
+            },
             tool_choice={
                 "type": "auto",
                 "disable_parallel_tool_use": True,
             },
             tools=[
                 {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "name",
+                    "display_height_px": 1,
+                    "display_width_px": 1,
+                    "name": "computer",
+                    "type": "computer_20241022",
                     "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                    "type": "custom",
+                    "display_number": 0,
                 }
             ],
             betas=["string"],
@@ -330,7 +309,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         )
 
         assert response.is_closed is True
@@ -347,7 +326,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -371,7 +350,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -385,7 +364,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string"],
             stream=False,
@@ -407,29 +386,22 @@ class TestAsyncMessages:
                 }
             ],
             temperature=1,
+            thinking={
+                "budget_tokens": 1024,
+                "type": "enabled",
+            },
             tool_choice={
                 "type": "auto",
                 "disable_parallel_tool_use": True,
             },
             tools=[
                 {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "name",
+                    "display_height_px": 1,
+                    "display_width_px": 1,
+                    "name": "computer",
+                    "type": "computer_20241022",
                     "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                    "type": "custom",
+                    "display_number": 0,
                 }
             ],
             top_k=5,
@@ -448,7 +420,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         )
 
         assert response.is_closed is True
@@ -466,7 +438,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -486,7 +458,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             stream=True,
         )
         await message_stream.response.aclose()
@@ -501,7 +473,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string"],
@@ -523,29 +495,22 @@ class TestAsyncMessages:
                 }
             ],
             temperature=1,
+            thinking={
+                "budget_tokens": 1024,
+                "type": "enabled",
+            },
             tool_choice={
                 "type": "auto",
                 "disable_parallel_tool_use": True,
             },
             tools=[
                 {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "name",
+                    "display_height_px": 1,
+                    "display_width_px": 1,
+                    "name": "computer",
+                    "type": "computer_20241022",
                     "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                    "type": "custom",
+                    "display_number": 0,
                 }
             ],
             top_k=5,
@@ -564,7 +529,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             stream=True,
         )
 
@@ -582,7 +547,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -602,7 +567,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -615,7 +580,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -633,29 +598,22 @@ class TestAsyncMessages:
                     ],
                 }
             ],
+            thinking={
+                "budget_tokens": 1024,
+                "type": "enabled",
+            },
             tool_choice={
                 "type": "auto",
                 "disable_parallel_tool_use": True,
             },
             tools=[
                 {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
-                        },
-                    },
-                    "name": "name",
+                    "display_height_px": 1,
+                    "display_width_px": 1,
+                    "name": "computer",
+                    "type": "computer_20241022",
                     "cache_control": {"type": "ephemeral"},
-                    "description": "Get the current weather in a given location",
-                    "type": "custom",
+                    "display_number": 0,
                 }
             ],
             betas=["string"],
@@ -671,7 +629,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         )
 
         assert response.is_closed is True
@@ -688,7 +646,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-5-haiku-latest",
+            model="claude-3-7-sonnet-latest",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

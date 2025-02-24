@@ -5,6 +5,7 @@ import json
 import time
 import uuid
 import email
+import socket
 import asyncio
 import inspect
 import logging
@@ -409,7 +410,15 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
     def _build_headers(self, options: FinalRequestOptions, *, retries_taken: int = 0) -> httpx.Headers:
         custom_headers = options.headers or {}
-        headers_dict = _merge_mappings(self.default_headers, custom_headers)
+        headers_dict = _merge_mappings(
+            {
+                "x-stainless-timeout": str(options.timeout.read)
+                if isinstance(options.timeout, Timeout)
+                else str(options.timeout),
+                **self.default_headers,
+            },
+            custom_headers,
+        )
         self._validate_headers(headers_dict, custom_headers)
 
         # headers are case-insensitive while dictionaries are not.
@@ -656,6 +665,21 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         # https://github.com/python/cpython/issues/88476
         return platform_headers(self._version, platform=self._platform)
 
+    def _calculate_nonstreaming_timeout(self, max_tokens: int) -> Timeout:
+        maximum_time = 60 * 60
+        default_time = 60 * 10
+
+        expected_time = maximum_time * max_tokens / 128_000
+        if expected_time > default_time:
+            raise ValueError(
+                "Streaming is strongly recommended for operations that may take longer than 10 minutes. "
+                + "See https://github.com/anthropics/anthropic-sdk-python#streaming-responses for more details",
+            )
+        return Timeout(
+            default_time,
+            connect=5.0,
+        )
+
     def _parse_retry_after_header(self, response_headers: Optional[httpx.Headers] = None) -> float | None:
         """Returns a float of the number of seconds (not milliseconds) to wait after retrying, or None if unspecified.
 
@@ -758,6 +782,23 @@ class _DefaultHttpxClient(httpx.Client):
         kwargs.setdefault("timeout", DEFAULT_TIMEOUT)
         kwargs.setdefault("limits", DEFAULT_CONNECTION_LIMITS)
         kwargs.setdefault("follow_redirects", True)
+
+        if "transport" not in kwargs:
+            socket_options = [
+                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, True),
+                (socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 60),
+                (socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5),
+            ]
+            TCP_KEEPIDLE = getattr(socket, "TCP_KEEPIDLE", None)
+            if TCP_KEEPIDLE is not None:
+                socket_options.append((socket.IPPROTO_TCP, TCP_KEEPIDLE, 60))
+
+            kwargs["transport"] = httpx.HTTPTransport(
+                # note: limits is always set above
+                limits=kwargs["limits"],
+                socket_options=socket_options,
+            )
+
         super().__init__(**kwargs)
 
 
@@ -1343,6 +1384,23 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
         kwargs.setdefault("timeout", DEFAULT_TIMEOUT)
         kwargs.setdefault("limits", DEFAULT_CONNECTION_LIMITS)
         kwargs.setdefault("follow_redirects", True)
+
+        if "transport" not in kwargs:
+            socket_options = [
+                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, True),
+                (socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 60),
+                (socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5),
+            ]
+            TCP_KEEPIDLE = getattr(socket, "TCP_KEEPIDLE", None)
+            if TCP_KEEPIDLE is not None:
+                socket_options.append((socket.IPPROTO_TCP, TCP_KEEPIDLE, 60))
+
+            kwargs["transport"] = httpx.AsyncHTTPTransport(
+                # note: limits is always set above
+                limits=kwargs["limits"],
+                socket_options=socket_options,
+            )
+
         super().__init__(**kwargs)
 
 
@@ -1403,6 +1461,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
 
         if transport is not None:
             kwargs["transport"] = transport
+
             warnings.warn(
                 "The `transport` argument is deprecated. The `http_client` argument should be passed instead",
                 category=DeprecationWarning,

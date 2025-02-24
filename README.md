@@ -515,6 +515,25 @@ On timeout, an `APITimeoutError` is thrown.
 
 Note that requests that time out are [retried twice by default](#retries).
 
+### Long Requests
+
+> [!IMPORTANT]
+> We highly encourage you use the streaming [Messages API](#streaming-responses) for longer running requests.
+
+We do not recommend setting a large `max_tokens` values without using streaming.
+Some networks may drop idle connections after a certain period of time, which
+can cause the request to fail or [timeout](#timeouts) without receiving a response from Anthropic.
+
+This SDK will also throw a `ValueError` if a non-streaming request is expected to be above roughly 10 minutes long.
+Passing `stream=True` or [overriding](#timeouts) the `timeout` option at the client or request level disables this error.
+
+An expected request latency longer than the [timeout](#timeouts) for a non-streaming request
+will result in the client terminating the connection and retrying without receiving a response.
+
+We set a [TCP socket keep-alive](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html) option in order
+to reduce the impact of idle connection timeouts on some networks.
+This can be [overriden](#Configuring-the-HTTP-client) by passing a `http_client` option to the client.
+
 ## Default Headers
 
 We automatically send the `anthropic-version` header set to `2023-06-01`.

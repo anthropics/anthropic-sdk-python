@@ -70,6 +70,9 @@ class Batches(SyncAPIResource):
         once. Once a Message Batch is created, it begins processing immediately. Batches
         can take up to 24 hours to complete.
 
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
+
         Args:
           requests: List of requests for prompt completion. Each is an individual request to create
               a Message.
@@ -121,6 +124,9 @@ class Batches(SyncAPIResource):
 
         To access the results of a Message Batch, make a request to the
         `results_url` field in the response.
+
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -174,6 +180,9 @@ class Batches(SyncAPIResource):
 
         Most recently created batches are
         returned first.
+
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
 
         Args:
           after_id: ID of the object to use as a cursor for pagination. When provided, returns the
@@ -245,6 +254,9 @@ class Batches(SyncAPIResource):
         Message Batches can only be deleted once they've finished processing. If you'd
         like to delete an in-progress batch, you must first cancel it.
 
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
+
         Args:
           message_batch_id: ID of the Message Batch.
 
@@ -303,6 +315,9 @@ class Batches(SyncAPIResource):
         Note that cancellation may not result in any canceled requests if they were
         non-interruptible.
 
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
+
         Args:
           message_batch_id: ID of the Message Batch.
 
@@ -355,6 +370,9 @@ class Batches(SyncAPIResource):
         Each line in the file is a JSON object containing the result of a single request
         in the Message Batch. Results are not guaranteed to be in the same order as
         requests. Use the `custom_id` field to match results to requests.
+
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -439,6 +457,9 @@ class AsyncBatches(AsyncAPIResource):
         once. Once a Message Batch is created, it begins processing immediately. Batches
         can take up to 24 hours to complete.
 
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
+
         Args:
           requests: List of requests for prompt completion. Each is an individual request to create
               a Message.
@@ -490,6 +511,9 @@ class AsyncBatches(AsyncAPIResource):
 
         To access the results of a Message Batch, make a request to the
         `results_url` field in the response.
+
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -543,6 +567,9 @@ class AsyncBatches(AsyncAPIResource):
 
         Most recently created batches are
         returned first.
+
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
 
         Args:
           after_id: ID of the object to use as a cursor for pagination. When provided, returns the
@@ -614,6 +641,9 @@ class AsyncBatches(AsyncAPIResource):
         Message Batches can only be deleted once they've finished processing. If you'd
         like to delete an in-progress batch, you must first cancel it.
 
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
+
         Args:
           message_batch_id: ID of the Message Batch.
 
@@ -672,6 +702,9 @@ class AsyncBatches(AsyncAPIResource):
         Note that cancellation may not result in any canceled requests if they were
         non-interruptible.
 
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
+
         Args:
           message_batch_id: ID of the Message Batch.
 
@@ -724,6 +757,9 @@ class AsyncBatches(AsyncAPIResource):
         Each line in the file is a JSON object containing the result of a single request
         in the Message Batch. Results are not guaranteed to be in the same order as
         requests. Use the `custom_id` field to match results to requests.
+
+        Learn more about the Message Batches API in our
+        [user guide](/en/docs/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.

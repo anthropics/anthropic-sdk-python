@@ -30,10 +30,14 @@ from .message_param import MessageParam as MessageParam
 from .text_citation import TextCitation as TextCitation
 from .beta_api_error import BetaAPIError as BetaAPIError
 from .metadata_param import MetadataParam as MetadataParam
+from .thinking_block import ThinkingBlock as ThinkingBlock
+from .thinking_delta import ThinkingDelta as ThinkingDelta
 from .tool_use_block import ToolUseBlock as ToolUseBlock
 from .citations_delta import CitationsDelta as CitationsDelta
+from .signature_delta import SignatureDelta as SignatureDelta
 from .input_json_delta import InputJSONDelta as InputJSONDelta
 from .text_block_param import TextBlockParam as TextBlockParam
+from .tool_union_param import ToolUnionParam as ToolUnionParam
 from .image_block_param import ImageBlockParam as ImageBlockParam
 from .model_list_params import ModelListParams as ModelListParams
 from .tool_choice_param import ToolChoiceParam as ToolChoiceParam
@@ -50,11 +54,13 @@ from .beta_not_found_error import BetaNotFoundError as BetaNotFoundError
 from .document_block_param import DocumentBlockParam as DocumentBlockParam
 from .message_stream_event import MessageStreamEvent as MessageStreamEvent
 from .message_tokens_count import MessageTokensCount as MessageTokensCount
+from .thinking_block_param import ThinkingBlockParam as ThinkingBlockParam
 from .tool_use_block_param import ToolUseBlockParam as ToolUseBlockParam
 from .beta_overloaded_error import BetaOverloadedError as BetaOverloadedError
 from .beta_permission_error import BetaPermissionError as BetaPermissionError
 from .beta_rate_limit_error import BetaRateLimitError as BetaRateLimitError
 from .message_create_params import MessageCreateParams as MessageCreateParams
+from .thinking_config_param import ThinkingConfigParam as ThinkingConfigParam
 from .tool_choice_any_param import ToolChoiceAnyParam as ToolChoiceAnyParam
 from .citation_char_location import CitationCharLocation as CitationCharLocation
 from .citation_page_location import CitationPageLocation as CitationPageLocation
@@ -66,10 +72,12 @@ from .base64_pdf_source_param import Base64PDFSourceParam as Base64PDFSourcePara
 from .plain_text_source_param import PlainTextSourceParam as PlainTextSourceParam
 from .raw_message_delta_event import RawMessageDeltaEvent as RawMessageDeltaEvent
 from .raw_message_start_event import RawMessageStartEvent as RawMessageStartEvent
+from .redacted_thinking_block import RedactedThinkingBlock as RedactedThinkingBlock
 from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockParam
 from .completion_create_params import CompletionCreateParams as CompletionCreateParams
 from .content_block_stop_event import ContentBlockStopEvent as ContentBlockStopEvent
 from .raw_message_stream_event import RawMessageStreamEvent as RawMessageStreamEvent
+from .tool_bash_20250124_param import ToolBash20250124Param as ToolBash20250124Param
 from .beta_authentication_error import BetaAuthenticationError as BetaAuthenticationError
 from .content_block_delta_event import ContentBlockDeltaEvent as ContentBlockDeltaEvent
 from .content_block_start_event import ContentBlockStartEvent as ContentBlockStartEvent
@@ -83,7 +91,12 @@ from .raw_content_block_stop_event import RawContentBlockStopEvent as RawContent
 from .cache_control_ephemeral_param import CacheControlEphemeralParam as CacheControlEphemeralParam
 from .raw_content_block_delta_event import RawContentBlockDeltaEvent as RawContentBlockDeltaEvent
 from .raw_content_block_start_event import RawContentBlockStartEvent as RawContentBlockStartEvent
+from .redacted_thinking_block_param import RedactedThinkingBlockParam as RedactedThinkingBlockParam
+from .thinking_config_enabled_param import ThinkingConfigEnabledParam as ThinkingConfigEnabledParam
+from .thinking_config_disabled_param import ThinkingConfigDisabledParam as ThinkingConfigDisabledParam
 from .citation_content_block_location import CitationContentBlockLocation as CitationContentBlockLocation
+from .message_count_tokens_tool_param import MessageCountTokensToolParam as MessageCountTokensToolParam
+from .tool_text_editor_20250124_param import ToolTextEditor20250124Param as ToolTextEditor20250124Param
 from .content_block_source_content_param import ContentBlockSourceContentParam as ContentBlockSourceContentParam
 from .citation_content_block_location_param import (
     CitationContentBlockLocationParam as CitationContentBlockLocationParam,

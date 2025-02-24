@@ -10,7 +10,9 @@ from pydantic import BaseModel
 from ._types import (
     TextEvent,
     CitationEvent,
+    ThinkingEvent,
     InputJsonEvent,
+    SignatureEvent,
     MessageStopEvent,
     MessageStreamEvent,
     ContentBlockStopEvent,
@@ -346,6 +348,26 @@ def build_events(
                         snapshot=content_block.citations or [],
                     )
                 )
+        elif event.delta.type == "thinking_delta":
+            if content_block.type == "thinking":
+                events_to_fire.append(
+                    build(
+                        ThinkingEvent,
+                        type="thinking",
+                        thinking=event.delta.thinking,
+                        snapshot=content_block.thinking,
+                    )
+                )
+        elif event.delta.type == "signature_delta":
+            if content_block.type == "thinking":
+                events_to_fire.append(
+                    build(
+                        SignatureEvent,
+                        type="signature",
+                        signature=content_block.signature,
+                    )
+                )
+            pass
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
@@ -422,6 +444,12 @@ def accumulate_event(
                     content.citations = [event.delta.citation]
                 else:
                     content.citations.append(event.delta.citation)
+        elif event.delta.type == "thinking_delta":
+            if content.type == "thinking":
+                content.thinking += event.delta.thinking
+        elif event.delta.type == "signature_delta":
+            if content.type == "thinking":
+                content.signature = event.delta.signature
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
