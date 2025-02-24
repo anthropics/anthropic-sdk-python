@@ -37,7 +37,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-haiku-latest",
+                        "model": "claude-3-7-sonnet-latest",
                     },
                 }
             ],
@@ -58,7 +58,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-haiku-latest",
+                        "model": "claude-3-7-sonnet-latest",
                     },
                 }
             ],
@@ -83,7 +83,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-haiku-latest",
+                        "model": "claude-3-7-sonnet-latest",
                     },
                 }
             ],
@@ -304,7 +304,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-haiku-latest",
+                        "model": "claude-3-7-sonnet-latest",
                     },
                 }
             ],
@@ -325,7 +325,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-haiku-latest",
+                        "model": "claude-3-7-sonnet-latest",
                     },
                 }
             ],
@@ -350,7 +350,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-5-haiku-latest",
+                        "model": "claude-3-7-sonnet-latest",
                     },
                 }
             ],

@@ -13,6 +13,7 @@ from ...anthropic_beta_param import AnthropicBetaParam
 from ..beta_text_block_param import BetaTextBlockParam
 from ..beta_tool_union_param import BetaToolUnionParam
 from ..beta_tool_choice_param import BetaToolChoiceParam
+from ..beta_thinking_config_param import BetaThinkingConfigParam
 
 __all__ = ["BatchCreateParams", "Request", "RequestParams"]
 
@@ -176,6 +177,18 @@ class RequestParams(TypedDict, total=False):
     deterministic.
     """
 
+    thinking: BetaThinkingConfigParam
+    """Configuration for enabling Claude's extended thinking.
+
+    When enabled, responses include `thinking` content blocks showing Claude's
+    thinking process before the final answer. Requires a minimum budget of 1,024
+    tokens and counts towards your `max_tokens` limit.
+
+    See
+    [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+    for details.
+    """
+
     tool_choice: BetaToolChoiceParam
     """How the model should use the provided tools.
 
@@ -194,8 +207,9 @@ class RequestParams(TypedDict, total=False):
 
     - `name`: Name of the tool.
     - `description`: Optional, but strongly-recommended description of the tool.
-    - `input_schema`: [JSON schema](https://json-schema.org/) for the tool `input`
-      shape that the model will produce in `tool_use` output content blocks.
+    - `input_schema`: [JSON schema](https://json-schema.org/draft/2020-12) for the
+      tool `input` shape that the model will produce in `tool_use` output content
+      blocks.
 
     For example, if you defined `tools` as:
 
