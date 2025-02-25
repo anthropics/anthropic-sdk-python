@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.47.2 (2025-02-25)
+
+Full Changelog: [v0.47.1...v0.47.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.47.1...v0.47.2)
+
+### Bug Fixes
+
+* **beta:** add thinking to beta.messages.stream ([69e3db1](https://github.com/anthropics/anthropic-sdk-python/commit/69e3db1de0c584c06ac450cc181144abc1602f13))
+
+
+### Chores
+
+* **internal:** properly set __pydantic_private__ ([#879](https://github.com/anthropics/anthropic-sdk-python/issues/879)) ([3537a3b](https://github.com/anthropics/anthropic-sdk-python/commit/3537a3bb229412bcd89e79bfda45e89727187244))
+
 ## 0.47.1 (2025-02-24)
 
 Full Changelog: [v0.47.0...v0.47.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.47.0...v0.47.1)
