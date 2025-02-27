@@ -11,4 +11,4 @@ from .tool_text_editor_20250124_param import ToolTextEditor20250124Param
 
 __all__ = ["MessageCountTokensToolParam"]
 
-MessageCountTokensToolParam: TypeAlias = Union[ToolBash20250124Param, ToolTextEditor20250124Param, ToolParam]
+MessageCountTokensToolParam: TypeAlias = Union[ToolParam, ToolBash20250124Param, ToolTextEditor20250124Param]

@@ -56,6 +56,7 @@ from .message_stream_event import MessageStreamEvent as MessageStreamEvent
 from .message_tokens_count import MessageTokensCount as MessageTokensCount
 from .thinking_block_param import ThinkingBlockParam as ThinkingBlockParam
 from .tool_use_block_param import ToolUseBlockParam as ToolUseBlockParam
+from .url_pdf_source_param import URLPDFSourceParam as URLPDFSourceParam
 from .beta_overloaded_error import BetaOverloadedError as BetaOverloadedError
 from .beta_permission_error import BetaPermissionError as BetaPermissionError
 from .beta_rate_limit_error import BetaRateLimitError as BetaRateLimitError
@@ -68,6 +69,7 @@ from .citations_config_param import CitationsConfigParam as CitationsConfigParam
 from .raw_message_stop_event import RawMessageStopEvent as RawMessageStopEvent
 from .tool_choice_auto_param import ToolChoiceAutoParam as ToolChoiceAutoParam
 from .tool_choice_tool_param import ToolChoiceToolParam as ToolChoiceToolParam
+from .url_image_source_param import URLImageSourceParam as URLImageSourceParam
 from .base64_pdf_source_param import Base64PDFSourceParam as Base64PDFSourceParam
 from .plain_text_source_param import PlainTextSourceParam as PlainTextSourceParam
 from .raw_message_delta_event import RawMessageDeltaEvent as RawMessageDeltaEvent
@@ -78,6 +80,7 @@ from .completion_create_params import CompletionCreateParams as CompletionCreate
 from .content_block_stop_event import ContentBlockStopEvent as ContentBlockStopEvent
 from .raw_message_stream_event import RawMessageStreamEvent as RawMessageStreamEvent
 from .tool_bash_20250124_param import ToolBash20250124Param as ToolBash20250124Param
+from .base64_image_source_param import Base64ImageSourceParam as Base64ImageSourceParam
 from .beta_authentication_error import BetaAuthenticationError as BetaAuthenticationError
 from .content_block_delta_event import ContentBlockDeltaEvent as ContentBlockDeltaEvent
 from .content_block_start_event import ContentBlockStartEvent as ContentBlockStartEvent
