@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Union, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
+from .beta_url_pdf_source_param import BetaURLPDFSourceParam
 from .beta_citations_config_param import BetaCitationsConfigParam
 from .beta_base64_pdf_source_param import BetaBase64PDFSourceParam
 from .beta_plain_text_source_param import BetaPlainTextSourceParam
@@ -13,7 +14,9 @@ from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
 __all__ = ["BetaBase64PDFBlockParam", "Source"]
 
-Source: TypeAlias = Union[BetaBase64PDFSourceParam, BetaPlainTextSourceParam, BetaContentBlockSourceParam]
+Source: TypeAlias = Union[
+    BetaBase64PDFSourceParam, BetaPlainTextSourceParam, BetaContentBlockSourceParam, BetaURLPDFSourceParam
+]
 
 
 class BetaBase64PDFBlockParam(TypedDict, total=False):

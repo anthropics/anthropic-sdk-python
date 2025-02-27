@@ -22,6 +22,7 @@ Types:
 
 ```python
 from anthropic.types import (
+    Base64ImageSource,
     Base64PDFSource,
     CacheControlEphemeral,
     CitationCharLocation,
@@ -86,6 +87,8 @@ from anthropic.types import (
     ToolUnion,
     ToolUseBlock,
     ToolUseBlockParam,
+    URLImageSource,
+    URLPDFSource,
     Usage,
 )
 ```
@@ -176,6 +179,7 @@ Types:
 
 ```python
 from anthropic.types.beta import (
+    BetaBase64ImageSource,
     BetaBase64PDFBlock,
     BetaBase64PDFSource,
     BetaCacheControlEphemeral,
@@ -235,6 +239,8 @@ from anthropic.types.beta import (
     BetaToolUnion,
     BetaToolUseBlock,
     BetaToolUseBlockParam,
+    BetaURLImageSource,
+    BetaURLPDFSource,
     BetaUsage,
 )
 ```
