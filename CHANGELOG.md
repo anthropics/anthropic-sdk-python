@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.48.0 (2025-02-27)
+
+Full Changelog: [v0.47.2...v0.48.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.47.2...v0.48.0)
+
+### Features
+
+* **api:** add URL source blocks for images and PDFs ([#884](https://github.com/anthropics/anthropic-sdk-python/issues/884)) ([e6b3a70](https://github.com/anthropics/anthropic-sdk-python/commit/e6b3a70ffbd830a8bdd87c0938897eebc6d5ee33))
+
+
+### Documentation
+
+* add thinking examples ([f463248](https://github.com/anthropics/anthropic-sdk-python/commit/f46324863dabe4efc4adec7361be5d6888fe4dd5))
+
 ## 0.47.2 (2025-02-25)
 
 Full Changelog: [v0.47.1...v0.47.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.47.1...v0.47.2)
