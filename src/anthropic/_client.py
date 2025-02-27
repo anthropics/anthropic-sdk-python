@@ -88,7 +88,7 @@ class Anthropic(SyncAPIClient):
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new synchronous anthropic client instance.
+        """Construct a new synchronous Anthropic client instance.
 
         This automatically infers the following arguments from their corresponding environment variables if they are not provided:
         - `api_key` from `ANTHROPIC_API_KEY`
@@ -314,7 +314,7 @@ class AsyncAnthropic(AsyncAPIClient):
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new async anthropic client instance.
+        """Construct a new async AsyncAnthropic client instance.
 
         This automatically infers the following arguments from their corresponding environment variables if they are not provided:
         - `api_key` from `ANTHROPIC_API_KEY`
