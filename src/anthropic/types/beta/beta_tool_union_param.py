@@ -16,11 +16,11 @@ from .beta_tool_computer_use_20250124_param import BetaToolComputerUse20250124Pa
 __all__ = ["BetaToolUnionParam"]
 
 BetaToolUnionParam: TypeAlias = Union[
+    BetaToolParam,
     BetaToolComputerUse20241022Param,
     BetaToolBash20241022Param,
     BetaToolTextEditor20241022Param,
     BetaToolComputerUse20250124Param,
     BetaToolBash20250124Param,
     BetaToolTextEditor20250124Param,
-    BetaToolParam,
 ]

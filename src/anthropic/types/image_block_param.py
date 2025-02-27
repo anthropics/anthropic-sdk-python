@@ -3,25 +3,15 @@
 from __future__ import annotations
 
 from typing import Union, Optional
-from typing_extensions import Literal, Required, Annotated, TypedDict
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
-from .._types import Base64FileInput
-from .._utils import PropertyInfo
-from .._models import set_pydantic_config
+from .url_image_source_param import URLImageSourceParam
+from .base64_image_source_param import Base64ImageSourceParam
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
 
 __all__ = ["ImageBlockParam", "Source"]
 
-
-class Source(TypedDict, total=False):
-    data: Required[Annotated[Union[str, Base64FileInput], PropertyInfo(format="base64")]]
-
-    media_type: Required[Literal["image/jpeg", "image/png", "image/gif", "image/webp"]]
-
-    type: Required[Literal["base64"]]
-
-
-set_pydantic_config(Source, {"arbitrary_types_allowed": True})
+Source: TypeAlias = Union[Base64ImageSourceParam, URLImageSourceParam]
 
 
 class ImageBlockParam(TypedDict, total=False):
