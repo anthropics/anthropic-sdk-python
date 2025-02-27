@@ -77,9 +77,22 @@ class TestMessages:
             },
             tools=[
                 {
-                    "name": "bash",
-                    "type": "bash_20250124",
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
                 }
             ],
             top_k=5,
@@ -182,9 +195,22 @@ class TestMessages:
             },
             tools=[
                 {
-                    "name": "bash",
-                    "type": "bash_20250124",
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
                 }
             ],
             top_k=5,
@@ -291,9 +317,22 @@ class TestMessages:
             },
             tools=[
                 {
-                    "name": "bash",
-                    "type": "bash_20250124",
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
                 }
             ],
         )
@@ -395,9 +434,22 @@ class TestAsyncMessages:
             },
             tools=[
                 {
-                    "name": "bash",
-                    "type": "bash_20250124",
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
                 }
             ],
             top_k=5,
@@ -500,9 +552,22 @@ class TestAsyncMessages:
             },
             tools=[
                 {
-                    "name": "bash",
-                    "type": "bash_20250124",
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
                 }
             ],
             top_k=5,
@@ -609,9 +674,22 @@ class TestAsyncMessages:
             },
             tools=[
                 {
-                    "name": "bash",
-                    "type": "bash_20250124",
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "description": "The city and state, e.g. San Francisco, CA",
+                                "type": "string",
+                            },
+                            "unit": {
+                                "description": "Unit for the output - one of (celsius, fahrenheit)",
+                                "type": "string",
+                            },
+                        },
+                    },
+                    "name": "name",
                     "cache_control": {"type": "ephemeral"},
+                    "description": "Get the current weather in a given location",
                 }
             ],
         )
