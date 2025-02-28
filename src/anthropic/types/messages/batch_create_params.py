@@ -187,7 +187,8 @@ class RequestParams(TypedDict, total=False):
     tool_choice: ToolChoiceParam
     """How the model should use the provided tools.
 
-    The model can use a specific tool, any available tool, or decide by itself.
+    The model can use a specific tool, any available tool, decide by itself, or not
+    use tools at all.
     """
 
     tools: Iterable[ToolUnionParam]

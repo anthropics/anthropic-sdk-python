@@ -68,6 +68,7 @@ from .citation_page_location import CitationPageLocation as CitationPageLocation
 from .citations_config_param import CitationsConfigParam as CitationsConfigParam
 from .raw_message_stop_event import RawMessageStopEvent as RawMessageStopEvent
 from .tool_choice_auto_param import ToolChoiceAutoParam as ToolChoiceAutoParam
+from .tool_choice_none_param import ToolChoiceNoneParam as ToolChoiceNoneParam
 from .tool_choice_tool_param import ToolChoiceToolParam as ToolChoiceToolParam
 from .url_image_source_param import URLImageSourceParam as URLImageSourceParam
 from .base64_pdf_source_param import Base64PDFSourceParam as Base64PDFSourceParam
