@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.49.0 (2025-02-28)
+
+Full Changelog: [v0.48.0...v0.49.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.48.0...v0.49.0)
+
+### Features
+
+* **api:** add support for disabling tool calls ([#888](https://github.com/anthropics/anthropic-sdk-python/issues/888)) ([bfde3d2](https://github.com/anthropics/anthropic-sdk-python/commit/bfde3d2978f78ee43db351a78fe1b078eb073394))
+
+
+### Chores
+
+* **docs:** update client docstring ([#887](https://github.com/anthropics/anthropic-sdk-python/issues/887)) ([4d3ec5e](https://github.com/anthropics/anthropic-sdk-python/commit/4d3ec5ec5b9c9aabb7cc7f27345809c347c56d89))
+
+
+### Documentation
+
+* update URLs from stainlessapi.com to stainless.com ([#885](https://github.com/anthropics/anthropic-sdk-python/issues/885)) ([312364b](https://github.com/anthropics/anthropic-sdk-python/commit/312364b9b5025ba16f0081e6e53b478c3a4fb089))
+
 ## 0.48.0 (2025-02-27)
 
 Full Changelog: [v0.47.2...v0.48.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.47.2...v0.48.0)
