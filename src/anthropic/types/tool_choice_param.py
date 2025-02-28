@@ -7,8 +7,9 @@ from typing_extensions import TypeAlias
 
 from .tool_choice_any_param import ToolChoiceAnyParam
 from .tool_choice_auto_param import ToolChoiceAutoParam
+from .tool_choice_none_param import ToolChoiceNoneParam
 from .tool_choice_tool_param import ToolChoiceToolParam
 
 __all__ = ["ToolChoiceParam"]
 
-ToolChoiceParam: TypeAlias = Union[ToolChoiceAutoParam, ToolChoiceAnyParam, ToolChoiceToolParam]
+ToolChoiceParam: TypeAlias = Union[ToolChoiceAutoParam, ToolChoiceAnyParam, ToolChoiceToolParam, ToolChoiceNoneParam]
