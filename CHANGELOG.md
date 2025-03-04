@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.49.1 (2025-03-04)
+
+Full Changelog: [v0.49.0...v0.49.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.49.0...v0.49.1)
+
+### Chores
+
+* **internal:** remove unused http client options forwarding ([#890](https://github.com/anthropics/anthropic-sdk-python/issues/890)) ([e0428bf](https://github.com/anthropics/anthropic-sdk-python/commit/e0428bfdffb6adb2e21c6ca365a26816eb699006))
+
 ## 0.49.0 (2025-02-28)
 
 Full Changelog: [v0.48.0...v0.49.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.48.0...v0.49.0)
