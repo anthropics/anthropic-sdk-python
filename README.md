@@ -375,6 +375,24 @@ for batch in first_page.data:
 # Remove `await` for non-async usage.
 ```
 
+## Nested params
+
+Nested parameters are dictionaries, typed using `TypedDict`, for example:
+
+```python
+from anthropic import Anthropic
+
+client = Anthropic()
+
+completion = client.completions.create(
+    max_tokens_to_sample=256,
+    model="claude-3-7-sonnet-latest",
+    prompt="\n\nHuman: Hello, world!\n\nAssistant:",
+    metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+)
+print(completion.metadata)
+```
+
 ## Handling errors
 
 When the library is unable to connect to the API (for example, due to network connection problems or a timeout), a subclass of `anthropic.APIConnectionError` is raised.
