@@ -43,7 +43,6 @@ Homepage = "https://github.com/anthropics/anthropic-sdk-python"
 Repository = "https://github.com/anthropics/anthropic-sdk-python"
 
 
-
 [tool.rye]
 managed = true
 # version pins are in requirements-dev.lock
@@ -157,7 +156,6 @@ reportImplicitOverride = true
 
 reportImportCycles = false
 reportPrivateUsage = false
-
 
 [tool.ruff]
 line-length = 120
