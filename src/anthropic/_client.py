@@ -59,6 +59,7 @@ class Anthropic(SyncAPIClient):
     # client options
     api_key: str | None
     auth_token: str | None
+    offline_mode: bool
 
     # constants
     HUMAN_PROMPT = _constants.HUMAN_PROMPT
@@ -87,6 +88,9 @@ class Anthropic(SyncAPIClient):
         # outlining your use-case to help us decide if it should be
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
+        # Enable offline mode, which prevents any actual API calls from being made.
+        # This is useful for testing and development.
+        offline_mode: bool = False,
     ) -> None:
         """Construct a new synchronous Anthropic client instance.
 
@@ -106,6 +110,15 @@ class Anthropic(SyncAPIClient):
             base_url = os.environ.get("ANTHROPIC_BASE_URL")
         if base_url is None:
             base_url = f"https://api.anthropic.com"
+            
+        self.offline_mode = offline_mode
+        if offline_mode:
+            # Import here to avoid circular imports
+            from .lib.mock._offline import patch_client_for_offline_mode
+            
+            if base_url == "https://api.anthropic.com":
+                # In offline mode, redirect to a mock server if no custom base_url was provided
+                base_url = "http://127.0.0.1:4010"
 
         super().__init__(
             version=__version__,
@@ -126,6 +139,11 @@ class Anthropic(SyncAPIClient):
         self.beta = beta.Beta(self)
         self.with_raw_response = AnthropicWithRawResponse(self)
         self.with_streaming_response = AnthropicWithStreamedResponse(self)
+
+        # If offline mode is enabled, patch this client to use mock responses
+        if offline_mode:
+            from .lib.mock._offline import patch_client_for_offline_mode
+            patch_client_for_offline_mode(self)
 
     @property
     @override
@@ -194,6 +212,7 @@ class Anthropic(SyncAPIClient):
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        offline_mode: bool | None = None,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -227,6 +246,7 @@ class Anthropic(SyncAPIClient):
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            offline_mode=offline_mode if offline_mode is not None else self.offline_mode,
             **_extra_kwargs,
         )
 
@@ -285,6 +305,7 @@ class AsyncAnthropic(AsyncAPIClient):
     # client options
     api_key: str | None
     auth_token: str | None
+    offline_mode: bool
 
     # constants
     HUMAN_PROMPT = _constants.HUMAN_PROMPT
@@ -313,6 +334,9 @@ class AsyncAnthropic(AsyncAPIClient):
         # outlining your use-case to help us decide if it should be
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
+        # Enable offline mode, which prevents any actual API calls from being made.
+        # This is useful for testing and development.
+        offline_mode: bool = False,
     ) -> None:
         """Construct a new async AsyncAnthropic client instance.
 
@@ -332,6 +356,15 @@ class AsyncAnthropic(AsyncAPIClient):
             base_url = os.environ.get("ANTHROPIC_BASE_URL")
         if base_url is None:
             base_url = f"https://api.anthropic.com"
+            
+        self.offline_mode = offline_mode
+        if offline_mode:
+            # Import here to avoid circular imports
+            from .lib.mock._offline import patch_client_for_offline_mode
+            
+            if base_url == "https://api.anthropic.com":
+                # In offline mode, redirect to a mock server if no custom base_url was provided
+                base_url = "http://127.0.0.1:4010"
 
         super().__init__(
             version=__version__,
@@ -352,6 +385,11 @@ class AsyncAnthropic(AsyncAPIClient):
         self.beta = beta.AsyncBeta(self)
         self.with_raw_response = AsyncAnthropicWithRawResponse(self)
         self.with_streaming_response = AsyncAnthropicWithStreamedResponse(self)
+
+        # If offline mode is enabled, patch this client to use mock responses
+        if offline_mode:
+            from .lib.mock._offline import patch_client_for_offline_mode
+            patch_client_for_offline_mode(self)
 
     @property
     @override
@@ -420,6 +458,7 @@ class AsyncAnthropic(AsyncAPIClient):
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        offline_mode: bool | None = None,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -453,6 +492,7 @@ class AsyncAnthropic(AsyncAPIClient):
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            offline_mode=offline_mode if offline_mode is not None else self.offline_mode,
             **_extra_kwargs,
         )
 
