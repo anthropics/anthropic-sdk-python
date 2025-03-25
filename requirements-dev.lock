@@ -31,6 +31,9 @@ cachetools==5.5.0
 certifi==2023.7.22
     # via httpcore
     # via httpx
+    # via requests
+charset-normalizer==3.4.1
+    # via requests
 colorlog==6.7.0
     # via nox
 dirty-equals==0.6.0
@@ -55,6 +58,7 @@ httpx==0.28.1
 idna==3.4
     # via anyio
     # via httpx
+    # via requests
 importlib-metadata==7.0.0
 iniconfig==2.0.0
     # via pytest
@@ -101,6 +105,8 @@ python-dateutil==2.8.2
     # via time-machine
 pytz==2023.3.post1
     # via dirty-equals
+requests==2.32.3
+    # via google-auth
 respx==0.22.0
 rich==13.7.1
 rsa==4.9
@@ -133,6 +139,7 @@ typing-extensions==4.12.2
     # via pyright
 urllib3==1.26.20
     # via botocore
+    # via requests
 virtualenv==20.24.5
     # via nox
 zipp==3.17.0
