@@ -26,6 +26,9 @@ cachetools==5.5.0
 certifi==2023.7.22
     # via httpcore
     # via httpx
+    # via requests
+charset-normalizer==3.4.1
+    # via requests
 distro==1.8.0
     # via anthropic
 exceptiongroup==1.2.2
@@ -41,6 +44,7 @@ httpx==0.28.1
 idna==3.4
     # via anyio
     # via httpx
+    # via requests
 jiter==0.6.1
     # via anthropic
 jmespath==1.0.1
@@ -57,6 +61,8 @@ pydantic-core==2.27.1
     # via pydantic
 python-dateutil==2.9.0.post0
     # via botocore
+requests==2.32.3
+    # via google-auth
 rsa==4.9
     # via google-auth
 s3transfer==0.10.3
@@ -73,3 +79,4 @@ typing-extensions==4.12.2
     # via pydantic-core
 urllib3==1.26.20
     # via botocore
+    # via requests
