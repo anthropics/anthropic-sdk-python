@@ -16,7 +16,10 @@ if TYPE_CHECKING:
 
 
 def load_auth(*, project_id: str | None) -> tuple[Credentials, str]:
-    from google.auth.transport.requests import Request  # type: ignore[import-untyped]
+    try:
+        from google.auth.transport.requests import Request  # type: ignore[import-untyped]
+    except ModuleNotFoundError as err:
+        raise RuntimeError(f'Could not import google.auth, you need to install the SDK with `pip install anthropic[vertex]`') from err
 
     credentials, loaded_project_id = google_auth.default(
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
