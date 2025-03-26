@@ -6,6 +6,7 @@ from typing_extensions import Literal
 from .model import Model
 from .usage import Usage
 from .._models import BaseModel
+from .stop_reason import StopReason
 from .content_block import ContentBlock, ContentBlock as ContentBlock
 
 __all__ = ["Message"]
@@ -66,7 +67,7 @@ class Message(BaseModel):
     This will always be `"assistant"`.
     """
 
-    stop_reason: Optional[Literal["end_turn", "max_tokens", "stop_sequence", "tool_use"]] = None
+    stop_reason: Optional[StopReason] = None
     """The reason that we stopped.
 
     This may be one the following values:

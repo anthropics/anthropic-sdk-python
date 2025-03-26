@@ -8,6 +8,7 @@ from .beta_model_info import BetaModelInfo as BetaModelInfo
 from .beta_text_block import BetaTextBlock as BetaTextBlock
 from .beta_text_delta import BetaTextDelta as BetaTextDelta
 from .beta_tool_param import BetaToolParam as BetaToolParam
+from .beta_stop_reason import BetaStopReason as BetaStopReason
 from .model_list_params import ModelListParams as ModelListParams
 from .beta_content_block import BetaContentBlock as BetaContentBlock
 from .beta_message_param import BetaMessageParam as BetaMessageParam
