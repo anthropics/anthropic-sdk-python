@@ -4,13 +4,14 @@ from typing import Optional
 from typing_extensions import Literal
 
 from ..._models import BaseModel
+from .beta_stop_reason import BetaStopReason
 from .beta_message_delta_usage import BetaMessageDeltaUsage
 
 __all__ = ["BetaRawMessageDeltaEvent", "Delta"]
 
 
 class Delta(BaseModel):
-    stop_reason: Optional[Literal["end_turn", "max_tokens", "stop_sequence", "tool_use"]] = None
+    stop_reason: Optional[BetaStopReason] = None
 
     stop_sequence: Optional[str] = None
 
