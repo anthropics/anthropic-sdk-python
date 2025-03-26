@@ -6,6 +6,7 @@ from typing_extensions import Literal
 from ..model import Model
 from ..._models import BaseModel
 from .beta_usage import BetaUsage
+from .beta_stop_reason import BetaStopReason
 from .beta_content_block import BetaContentBlock, BetaContentBlock as BetaContentBlock
 
 __all__ = ["BetaMessage"]
@@ -66,7 +67,7 @@ class BetaMessage(BaseModel):
     This will always be `"assistant"`.
     """
 
-    stop_reason: Optional[Literal["end_turn", "max_tokens", "stop_sequence", "tool_use"]] = None
+    stop_reason: Optional[BetaStopReason] = None
     """The reason that we stopped.
 
     This may be one the following values:
