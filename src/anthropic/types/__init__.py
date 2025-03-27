@@ -25,7 +25,6 @@ from .text_block import TextBlock as TextBlock
 from .text_delta import TextDelta as TextDelta
 from .tool_param import ToolParam as ToolParam
 from .model_param import ModelParam as ModelParam
-from .stop_reason import StopReason as StopReason
 from .content_block import ContentBlock as ContentBlock
 from .message_param import MessageParam as MessageParam
 from .text_citation import TextCitation as TextCitation
