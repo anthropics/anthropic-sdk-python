@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import logging
 import urllib.parse
 from typing import Any, Union, Mapping, TypeVar
 from typing_extensions import Self, override
@@ -25,6 +26,8 @@ from ..._base_client import (
 from ._stream_decoder import AWSEventStreamDecoder
 from ...resources.messages import Messages, AsyncMessages
 from ...resources.completions import Completions, AsyncCompletions
+
+log: logging.Logger = logging.getLogger(__name__)
 
 DEFAULT_VERSION = "bedrock-2023-05-31"
 
@@ -62,6 +65,29 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
         raise AnthropicError("Token counting is not supported in Bedrock yet")
 
     return options
+
+
+def _infer_region() -> str:
+    """
+    Infer the AWS region from the environment variables or
+    from the boto3 session if available.
+    """
+    aws_region = os.environ.get("AWS_REGION")
+    if aws_region is None:
+        try:
+            import boto3
+
+            session = boto3.Session()
+            if session.region_name:
+                aws_region = session.region_name
+        except ImportError:
+            pass
+
+    if aws_region is None:
+        log.warning("No AWS region specified, defaulting to us-east-1")
+        aws_region = "us-east-1"  # fall back to legacy behavior
+
+    return aws_region
 
 
 class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
@@ -135,9 +161,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
 
         self.aws_access_key = aws_access_key
 
-        if aws_region is None:
-            aws_region = os.environ.get("AWS_REGION") or "us-east-1"
-        self.aws_region = aws_region
+        self.aws_region = _infer_region() if aws_region is None else aws_region
         self.aws_profile = aws_profile
 
         self.aws_session_token = aws_session_token
@@ -279,9 +303,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
 
         self.aws_access_key = aws_access_key
 
-        if aws_region is None:
-            aws_region = os.environ.get("AWS_REGION") or "us-east-1"
-        self.aws_region = aws_region
+        self.aws_region = _infer_region() if aws_region is None else aws_region
         self.aws_profile = aws_profile
 
         self.aws_session_token = aws_session_token
