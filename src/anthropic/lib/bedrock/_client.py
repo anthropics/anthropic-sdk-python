@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import os
+import typing
 import logging
 import urllib.parse
-from typing import Any, Union, Mapping, TypeVar
+from typing import Any, Union, Mapping, TypeVar, cast
 from typing_extensions import Self, override
 
 import httpx
@@ -146,19 +147,18 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             aws_session_token=aws_session_token,
         )
 
-        aws_region = session.region_name if session else None
+        # types are wrong here from the library. This can in fact return `None` and
+        # we need to handle that case.
+        aws_region = cast(typing.Optional[str], session.region_name)
         if aws_region is None:
             log.warning("No AWS region specified, defaulting to us-east-1")
             aws_region = "us-east-1"  # fall back to legacy behavior
         self.aws_region = aws_region
 
         self.aws_profile = session.profile_name
-
-        credentials = session.get_credentials()
-        if credentials is not None:
-            self.aws_secret_key = credentials.secret_key
-            self.aws_access_key = credentials.access_key
-            self.aws_session_token = credentials.token
+        self.aws_secret_key = aws_secret_key
+        self.aws_access_key = aws_access_key
+        self.aws_session_token = aws_session_token
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
@@ -303,19 +303,18 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             aws_session_token=aws_session_token,
         )
 
-        aws_region = session.region_name if session else None
+        # types are wrong here from the library. This can in fact return `None` and
+        # we need to handle that case.
+        aws_region = cast(typing.Optional[str], session.region_name)
         if aws_region is None:
             log.warning("No AWS region specified, defaulting to us-east-1")
             aws_region = "us-east-1"  # fall back to legacy behavior
         self.aws_region = aws_region
 
         self.aws_profile = session.profile_name
-
-        credentials = session.get_credentials()
-        if credentials is not None:
-            self.aws_secret_key = credentials.secret_key
-            self.aws_access_key = credentials.access_key
-            self.aws_session_token = credentials.token
+        self.aws_secret_key = aws_secret_key
+        self.aws_access_key = aws_access_key
+        self.aws_session_token = aws_session_token
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
