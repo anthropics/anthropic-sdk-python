@@ -8,6 +8,8 @@ from typing_extensions import Self, override
 
 import httpx
 
+from anthropic.lib.bedrock._auth import _get_session
+
 from ... import _exceptions
 from ._beta import Beta, AsyncBeta
 from ..._types import NOT_GIVEN, Timeout, NotGiven
@@ -65,29 +67,6 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
         raise AnthropicError("Token counting is not supported in Bedrock yet")
 
     return options
-
-
-def _infer_region() -> str:
-    """
-    Infer the AWS region from the environment variables or
-    from the boto3 session if available.
-    """
-    aws_region = os.environ.get("AWS_REGION")
-    if aws_region is None:
-        try:
-            import boto3
-
-            session = boto3.Session()
-            if session.region_name:
-                aws_region = session.region_name
-        except ImportError:
-            pass
-
-    if aws_region is None:
-        log.warning("No AWS region specified, defaulting to us-east-1")
-        aws_region = "us-east-1"  # fall back to legacy behavior
-
-    return aws_region
 
 
 class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
@@ -157,14 +136,29 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        self.aws_secret_key = aws_secret_key
+        if aws_region is None:
+            aws_region = os.environ.get("AWS_REGION")
+        session = _get_session(
+            aws_access_key=aws_access_key,
+            aws_secret_key=aws_secret_key,
+            region=aws_region,
+            profile=aws_profile,
+            aws_session_token=aws_session_token,
+        )
 
-        self.aws_access_key = aws_access_key
+        aws_region = session.region_name if session else None
+        if aws_region is None:
+            log.warning("No AWS region specified, defaulting to us-east-1")
+            aws_region = "us-east-1"  # fall back to legacy behavior
+        self.aws_region = aws_region
 
-        self.aws_region = _infer_region() if aws_region is None else aws_region
-        self.aws_profile = aws_profile
+        self.aws_profile = session.profile_name
 
-        self.aws_session_token = aws_session_token
+        credentials = session.get_credentials()
+        if credentials is not None:
+            self.aws_secret_key = credentials.secret_key
+            self.aws_access_key = credentials.access_key
+            self.aws_session_token = credentials.token
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
@@ -299,14 +293,29 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        self.aws_secret_key = aws_secret_key
+        if aws_region is None:
+            aws_region = os.environ.get("AWS_REGION")
+        session = _get_session(
+            aws_access_key=aws_access_key,
+            aws_secret_key=aws_secret_key,
+            region=aws_region,
+            profile=aws_profile,
+            aws_session_token=aws_session_token,
+        )
 
-        self.aws_access_key = aws_access_key
+        aws_region = session.region_name if session else None
+        if aws_region is None:
+            log.warning("No AWS region specified, defaulting to us-east-1")
+            aws_region = "us-east-1"  # fall back to legacy behavior
+        self.aws_region = aws_region
 
-        self.aws_region = _infer_region() if aws_region is None else aws_region
-        self.aws_profile = aws_profile
+        self.aws_profile = session.profile_name
 
-        self.aws_session_token = aws_session_token
+        credentials = session.get_credentials()
+        if credentials is not None:
+            self.aws_secret_key = credentials.secret_key
+            self.aws_access_key = credentials.access_key
+            self.aws_session_token = credentials.token
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
