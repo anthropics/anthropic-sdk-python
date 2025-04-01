@@ -9,7 +9,7 @@ from typing_extensions import Self, override
 
 import httpx
 
-from anthropic.lib.bedrock._auth import _get_session
+from ...lib.bedrock._auth import _get_session
 
 from ... import _exceptions
 from ._beta import Beta, AsyncBeta
