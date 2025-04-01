@@ -74,6 +74,7 @@ from .tool_choice_tool_param import ToolChoiceToolParam as ToolChoiceToolParam
 from .url_image_source_param import URLImageSourceParam as URLImageSourceParam
 from .base64_pdf_source_param import Base64PDFSourceParam as Base64PDFSourceParam
 from .plain_text_source_param import PlainTextSourceParam as PlainTextSourceParam
+from .raw_content_block_delta import RawContentBlockDelta as RawContentBlockDelta
 from .raw_message_delta_event import RawMessageDeltaEvent as RawMessageDeltaEvent
 from .raw_message_start_event import RawMessageStartEvent as RawMessageStartEvent
 from .redacted_thinking_block import RedactedThinkingBlock as RedactedThinkingBlock
