@@ -9,8 +9,6 @@ from typing_extensions import Self, override
 
 import httpx
 
-from ...lib.bedrock._auth import _get_session
-
 from ... import _exceptions
 from ._beta import Beta, AsyncBeta
 from ..._types import NOT_GIVEN, Timeout, NotGiven
@@ -27,6 +25,7 @@ from ..._base_client import (
     FinalRequestOptions,
 )
 from ._stream_decoder import AWSEventStreamDecoder
+from ...lib.bedrock._auth import _get_session
 from ...resources.messages import Messages, AsyncMessages
 from ...resources.completions import Completions, AsyncCompletions
 
