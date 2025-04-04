@@ -384,13 +384,18 @@ from anthropic import Anthropic
 
 client = Anthropic()
 
-completion = client.completions.create(
-    max_tokens_to_sample=256,
+message = client.messages.create(
+    max_tokens=1024,
+    messages=[
+        {
+            "content": "Hello, world",
+            "role": "user",
+        }
+    ],
     model="claude-3-7-sonnet-latest",
-    prompt="\n\nHuman: Hello, world!\n\nAssistant:",
     metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
 )
-print(completion.metadata)
+print(message.metadata)
 ```
 
 ## Handling errors
