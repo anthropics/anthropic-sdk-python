@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import os
+import typing
+import logging
 import urllib.parse
-from typing import Any, Union, Mapping, TypeVar
+from typing import Any, Union, Mapping, TypeVar, cast
 from typing_extensions import Self, override
 
 import httpx
@@ -23,8 +25,11 @@ from ..._base_client import (
     FinalRequestOptions,
 )
 from ._stream_decoder import AWSEventStreamDecoder
+from ...lib.bedrock._auth import _get_session
 from ...resources.messages import Messages, AsyncMessages
 from ...resources.completions import Completions, AsyncCompletions
+
+log: logging.Logger = logging.getLogger(__name__)
 
 DEFAULT_VERSION = "bedrock-2023-05-31"
 
@@ -131,15 +136,27 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        self.aws_secret_key = aws_secret_key
-
-        self.aws_access_key = aws_access_key
-
         if aws_region is None:
-            aws_region = os.environ.get("AWS_REGION") or "us-east-1"
-        self.aws_region = aws_region
-        self.aws_profile = aws_profile
+            aws_region = os.environ.get("AWS_REGION")
+        session = _get_session(
+            aws_access_key=aws_access_key,
+            aws_secret_key=aws_secret_key,
+            region=aws_region,
+            profile=aws_profile,
+            aws_session_token=aws_session_token,
+        )
 
+        # types are wrong here from the library. This can in fact return `None` and
+        # we need to handle that case.
+        aws_region = cast(typing.Optional[str], session.region_name)
+        if aws_region is None:
+            log.warning("No AWS region specified, defaulting to us-east-1")
+            aws_region = "us-east-1"  # fall back to legacy behavior
+        self.aws_region = aws_region
+
+        self.aws_profile = session.profile_name
+        self.aws_secret_key = aws_secret_key
+        self.aws_access_key = aws_access_key
         self.aws_session_token = aws_session_token
 
         if base_url is None:
@@ -275,15 +292,27 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        self.aws_secret_key = aws_secret_key
-
-        self.aws_access_key = aws_access_key
-
         if aws_region is None:
-            aws_region = os.environ.get("AWS_REGION") or "us-east-1"
-        self.aws_region = aws_region
-        self.aws_profile = aws_profile
+            aws_region = os.environ.get("AWS_REGION")
+        session = _get_session(
+            aws_access_key=aws_access_key,
+            aws_secret_key=aws_secret_key,
+            region=aws_region,
+            profile=aws_profile,
+            aws_session_token=aws_session_token,
+        )
 
+        # types are wrong here from the library. This can in fact return `None` and
+        # we need to handle that case.
+        aws_region = cast(typing.Optional[str], session.region_name)
+        if aws_region is None:
+            log.warning("No AWS region specified, defaulting to us-east-1")
+            aws_region = "us-east-1"  # fall back to legacy behavior
+        self.aws_region = aws_region
+
+        self.aws_profile = session.profile_name
+        self.aws_secret_key = aws_secret_key
+        self.aws_access_key = aws_access_key
         self.aws_session_token = aws_session_token
 
         if base_url is None:
