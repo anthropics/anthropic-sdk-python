@@ -135,11 +135,7 @@ class Anthropic(SyncAPIClient):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        if self._api_key_auth:
-            return self._api_key_auth
-        if self._bearer_auth:
-            return self._bearer_auth
-        return {}
+        return {**self._api_key_auth, **self._bearer_auth}
 
     @property
     def _api_key_auth(self) -> dict[str, str]:
@@ -361,11 +357,7 @@ class AsyncAnthropic(AsyncAPIClient):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        if self._api_key_auth:
-            return self._api_key_auth
-        if self._bearer_auth:
-            return self._bearer_auth
-        return {}
+        return {**self._api_key_auth, **self._bearer_auth}
 
     @property
     def _api_key_auth(self) -> dict[str, str]:
