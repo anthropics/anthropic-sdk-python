@@ -38,7 +38,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-latest",
+                        "model": "claude-3-7-sonnet-20250219",
                     },
                 }
             ],
@@ -59,7 +59,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-latest",
+                        "model": "claude-3-7-sonnet-20250219",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
                         "stop_sequences": ["string"],
                         "stream": False,
@@ -133,7 +133,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-latest",
+                        "model": "claude-3-7-sonnet-20250219",
                     },
                 }
             ],
@@ -158,7 +158,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-latest",
+                        "model": "claude-3-7-sonnet-20250219",
                     },
                 }
             ],
@@ -401,7 +401,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-latest",
+                        "model": "claude-3-7-sonnet-20250219",
                     },
                 }
             ],
@@ -422,7 +422,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-latest",
+                        "model": "claude-3-7-sonnet-20250219",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
                         "stop_sequences": ["string"],
                         "stream": False,
@@ -496,7 +496,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-latest",
+                        "model": "claude-3-7-sonnet-20250219",
                     },
                 }
             ],
@@ -521,7 +521,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-latest",
+                        "model": "claude-3-7-sonnet-20250219",
                     },
                 }
             ],
