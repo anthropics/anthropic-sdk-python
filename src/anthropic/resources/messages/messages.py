@@ -968,7 +968,9 @@ class Messages(SyncAPIResource):
                     "top_k": top_k,
                     "top_p": top_p,
                 },
-                message_create_params.MessageCreateParams,
+                message_create_params.MessageCreateParamsStreaming
+                if stream
+                else message_create_params.MessageCreateParamsNonStreaming,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -2180,7 +2182,9 @@ class AsyncMessages(AsyncAPIResource):
                     "top_k": top_k,
                     "top_p": top_p,
                 },
-                message_create_params.MessageCreateParams,
+                message_create_params.MessageCreateParamsStreaming
+                if stream
+                else message_create_params.MessageCreateParamsNonStreaming,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
