@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.50.0 (2025-04-15)
+
+Full Changelog: [v0.49.0...v0.50.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.49.0...v0.50.0)
+
+### Features
+
+* **api:** extract ContentBlockDelta events into their own schemas ([#920](https://github.com/anthropics/anthropic-sdk-python/issues/920)) ([ae773d6](https://github.com/anthropics/anthropic-sdk-python/commit/ae773d673a7d3cbb28eebce0df9c526f1e855435))
+* **api:** manual updates ([a74746e](https://github.com/anthropics/anthropic-sdk-python/commit/a74746e0df0b3c9b85a42e95a80c1db763379e1b))
+
+
+### Bug Fixes
+
+* **ci:** ensure pip is always available ([#907](https://github.com/anthropics/anthropic-sdk-python/issues/907)) ([3632687](https://github.com/anthropics/anthropic-sdk-python/commit/36326871c1304fbb1dad56e3e5bc71659bbf0df1))
+* **ci:** remove publishing patch ([#908](https://github.com/anthropics/anthropic-sdk-python/issues/908)) ([cae0323](https://github.com/anthropics/anthropic-sdk-python/commit/cae032381bd73e86174b5fde2efaf046e96f5e6a))
+* **client:** deduplicate stop reason type ([#913](https://github.com/anthropics/anthropic-sdk-python/issues/913)) ([3ab0194](https://github.com/anthropics/anthropic-sdk-python/commit/3ab0194550aa9893cc948c3d658a965817d64ccd))
+* **project:** bump httpx minimum version to 0.25.0 ([b554138](https://github.com/anthropics/anthropic-sdk-python/commit/b554138c2f5d73dd915092972411f7ab787cfe42)), closes [#902](https://github.com/anthropics/anthropic-sdk-python/issues/902)
+* **types:** handle more discriminated union shapes ([#906](https://github.com/anthropics/anthropic-sdk-python/issues/906)) ([2fc179a](https://github.com/anthropics/anthropic-sdk-python/commit/2fc179a4d29b720263e84c90f37d078ffab860ad))
+* **vertex:** explicitly include requests extra ([2b1221b](https://github.com/anthropics/anthropic-sdk-python/commit/2b1221b76bfcc0dfaa14d94e7f6a3ddc303f3715))
+
+
+### Chores
+
+* add hash of OpenAPI spec/config inputs to .stats.yml ([#912](https://github.com/anthropics/anthropic-sdk-python/issues/912)) ([ddf7835](https://github.com/anthropics/anthropic-sdk-python/commit/ddf78352c9e589f6102f9373cc01bee9333d15d8))
+* **internal:** add back release workflow ([ce18972](https://github.com/anthropics/anthropic-sdk-python/commit/ce189722eefedc794111899d54048bddaa82d17d))
+* **internal:** bump rye to 0.44.0 ([#905](https://github.com/anthropics/anthropic-sdk-python/issues/905)) ([e1a1b14](https://github.com/anthropics/anthropic-sdk-python/commit/e1a1b142c8f385d288cf5395917e6380add556ea))
+* **internal:** import ordering changes ([#895](https://github.com/anthropics/anthropic-sdk-python/issues/895)) ([b8da2f7](https://github.com/anthropics/anthropic-sdk-python/commit/b8da2f748f478fc83c5f13f1d0dcd2eaf85922e0))
+* **internal:** remove CI condition ([#916](https://github.com/anthropics/anthropic-sdk-python/issues/916)) ([043b56b](https://github.com/anthropics/anthropic-sdk-python/commit/043b56b9772d49965cdeec649f2b6c7bdf0249a5))
+* **internal:** remove extra empty newlines ([#904](https://github.com/anthropics/anthropic-sdk-python/issues/904)) ([cfe8f6e](https://github.com/anthropics/anthropic-sdk-python/commit/cfe8f6e4e1a5be51a2bd7ced23258b4159564ae7))
+* **internal:** remove trailing character ([#924](https://github.com/anthropics/anthropic-sdk-python/issues/924)) ([dc8e781](https://github.com/anthropics/anthropic-sdk-python/commit/dc8e7816a9e8cae3f4f8ccf4b9723f9093b3f05e))
+* **internal:** remove unused http client options forwarding ([#890](https://github.com/anthropics/anthropic-sdk-python/issues/890)) ([e0428bf](https://github.com/anthropics/anthropic-sdk-python/commit/e0428bfdffb6adb2e21c6ca365a26816eb699006))
+* **internal:** update config ([#914](https://github.com/anthropics/anthropic-sdk-python/issues/914)) ([a697234](https://github.com/anthropics/anthropic-sdk-python/commit/a697234637b84b2a488309bdb851db2efe17190c))
+* **vertex:** improve error message when missing extra ([15dc4cb](https://github.com/anthropics/anthropic-sdk-python/commit/15dc4cb5297304420fd1d7be8e87697bf60d8b2d))
+
+
+### Documentation
+
+* revise readme docs about nested params ([#900](https://github.com/anthropics/anthropic-sdk-python/issues/900)) ([0f80ab0](https://github.com/anthropics/anthropic-sdk-python/commit/0f80ab0ffcd5c2d854f01364b1cfe2517e04b40b))
+
 ## 0.49.0 (2025-02-28)
 
 Full Changelog: [v0.48.0...v0.49.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.48.0...v0.49.0)
