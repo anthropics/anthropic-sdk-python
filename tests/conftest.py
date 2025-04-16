@@ -10,7 +10,7 @@ from pytest_asyncio import is_async_test
 from anthropic import Anthropic, AsyncAnthropic
 
 if TYPE_CHECKING:
-    from _pytest.fixtures import FixtureRequest
+    from _pytest.fixtures import FixtureRequest  # pyright: ignore[reportPrivateImportUsage]
 
 pytest.register_assert_rewrite("tests.utils")
 
