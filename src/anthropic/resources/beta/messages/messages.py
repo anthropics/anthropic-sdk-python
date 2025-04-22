@@ -17,13 +17,7 @@ from .batches import (
     AsyncBatchesWithStreamingResponse,
 )
 from ...._types import NOT_GIVEN, Body, Query, Headers, NotGiven
-from ...._utils import (
-    is_given,
-    required_args,
-    maybe_transform,
-    strip_not_given,
-    async_maybe_transform,
-)
+from ...._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
