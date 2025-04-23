@@ -1,6 +1,5 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-
 from ...._models import BaseModel
 from .beta_message_batch_result import BetaMessageBatchResult
 
