@@ -18,7 +18,9 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    List,
     Type,
+    Tuple,
     Union,
     Generic,
     Mapping,
@@ -30,8 +32,6 @@ from typing import (
     AsyncIterator,
     cast,
     overload,
-    List,
-    Tuple
 )
 from typing_extensions import Literal, override, get_origin
 
@@ -792,12 +792,10 @@ class _DefaultHttpxClient(httpx.Client):
         kwargs.setdefault("follow_redirects", True)
 
         if "transport" not in kwargs:
-            socket_options:List[Tuple[int, int, Union[int, bool]]] = [
-                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, True)
-            ]
+            socket_options: List[Tuple[int, int, Union[int, bool]]] = [(socket.SOL_SOCKET, socket.SO_KEEPALIVE, True)]
 
             TCP_KEEPINTVL = getattr(socket, "TCP_KEEPINTVL", None)
-            
+
             if TCP_KEEPINTVL is not None:
                 socket_options.append((socket.IPPROTO_TCP, TCP_KEEPINTVL, 60))
             elif sys.platform == "darwin":
@@ -1405,12 +1403,10 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
         kwargs.setdefault("follow_redirects", True)
 
         if "transport" not in kwargs:
-            socket_options:List[Tuple[int, int, Union[int, bool]]] = [
-                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, True)
-            ]
+            socket_options: List[Tuple[int, int, Union[int, bool]]] = [(socket.SOL_SOCKET, socket.SO_KEEPALIVE, True)]
 
             TCP_KEEPINTVL = getattr(socket, "TCP_KEEPINTVL", None)
-            
+
             if TCP_KEEPINTVL is not None:
                 socket_options.append((socket.IPPROTO_TCP, TCP_KEEPINTVL, 60))
             elif sys.platform == "darwin":
