@@ -30,6 +30,8 @@ from typing import (
     AsyncIterator,
     cast,
     overload,
+    List,
+    Tuple
 )
 from typing_extensions import Literal, override, get_origin
 
@@ -790,7 +792,7 @@ class _DefaultHttpxClient(httpx.Client):
         kwargs.setdefault("follow_redirects", True)
 
         if "transport" not in kwargs:
-            socket_options = [
+            socket_options:List[Tuple[int, int, Union[int, bool]]] = [
                 (socket.SOL_SOCKET, socket.SO_KEEPALIVE, True)
             ]
 
@@ -1403,7 +1405,7 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
         kwargs.setdefault("follow_redirects", True)
 
         if "transport" not in kwargs:
-            socket_options = [
+            socket_options:List[Tuple[int, int, Union[int, bool]]] = [
                 (socket.SOL_SOCKET, socket.SO_KEEPALIVE, True)
             ]
 
