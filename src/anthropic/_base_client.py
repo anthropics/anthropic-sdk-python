@@ -1404,10 +1404,21 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
 
         if "transport" not in kwargs:
             socket_options = [
-                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, True),
-                (socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 60),
-                (socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5),
+                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, True)
             ]
+
+            TCP_KEEPINTVL = getattr(socket, "TCP_KEEPINTVL", None)
+            
+            if TCP_KEEPINTVL is not None:
+                socket_options.append((socket.IPPROTO_TCP, TCP_KEEPINTVL, 60))
+            elif sys.platform == "darwin":
+                TCP_KEEPALIVE = getattr(socket, "TCP_KEEPALIVE", 0x10)
+                socket_options.append((socket.IPPROTO_TCP, TCP_KEEPALIVE, 60))
+
+            TCP_KEEPCNT = getattr(socket, "TCP_KEEPCNT", None)
+            if TCP_KEEPCNT is not None:
+                socket_options.append((socket.IPPROTO_TCP, TCP_KEEPCNT, 5))
+
             TCP_KEEPIDLE = getattr(socket, "TCP_KEEPIDLE", None)
             if TCP_KEEPIDLE is not None:
                 socket_options.append((socket.IPPROTO_TCP, TCP_KEEPIDLE, 60))
