@@ -459,4 +459,14 @@ def accumulate_event(
         current_snapshot.stop_sequence = event.delta.stop_sequence
         current_snapshot.usage.output_tokens = event.usage.output_tokens
 
+        # Update other usage fields if they exist in the event
+        if event.usage.input_tokens is not None:
+            current_snapshot.usage.input_tokens = event.usage.input_tokens
+        if event.usage.cache_creation_input_tokens is not None:
+            current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
+        if event.usage.cache_read_input_tokens is not None:
+            current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
+        if event.usage.server_tool_use is not None:
+            current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+
     return current_snapshot
