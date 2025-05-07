@@ -20,12 +20,13 @@ class BetaToolComputerUse20241022Param(TypedDict, total=False):
     name: Required[Literal["computer"]]
     """Name of the tool.
 
-    This is how the tool will be called by the model and in tool_use blocks.
+    This is how the tool will be called by the model and in `tool_use` blocks.
     """
 
     type: Required[Literal["computer_20241022"]]
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
+    """Create a cache control breakpoint at this content block."""
 
     display_number: Optional[int]
     """The X11 display number (e.g. 0, 1) for the display."""

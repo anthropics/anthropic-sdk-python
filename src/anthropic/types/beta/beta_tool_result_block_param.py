@@ -20,6 +20,7 @@ class BetaToolResultBlockParam(TypedDict, total=False):
     type: Required[Literal["tool_result"]]
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
+    """Create a cache control breakpoint at this content block."""
 
     content: Union[str, Iterable[Content]]
 

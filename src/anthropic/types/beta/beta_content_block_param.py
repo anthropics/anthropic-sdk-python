@@ -11,7 +11,9 @@ from .beta_thinking_block_param import BetaThinkingBlockParam
 from .beta_tool_use_block_param import BetaToolUseBlockParam
 from .beta_base64_pdf_block_param import BetaBase64PDFBlockParam
 from .beta_tool_result_block_param import BetaToolResultBlockParam
+from .beta_server_tool_use_block_param import BetaServerToolUseBlockParam
 from .beta_redacted_thinking_block_param import BetaRedactedThinkingBlockParam
+from .beta_web_search_tool_result_block_param import BetaWebSearchToolResultBlockParam
 
 __all__ = ["BetaContentBlockParam"]
 
@@ -19,6 +21,8 @@ BetaContentBlockParam: TypeAlias = Union[
     BetaTextBlockParam,
     BetaImageBlockParam,
     BetaToolUseBlockParam,
+    BetaServerToolUseBlockParam,
+    BetaWebSearchToolResultBlockParam,
     BetaToolResultBlockParam,
     BetaBase64PDFBlockParam,
     BetaThinkingBlockParam,

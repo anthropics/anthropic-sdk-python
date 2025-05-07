@@ -25,6 +25,7 @@ class BetaBase64PDFBlockParam(TypedDict, total=False):
     type: Required[Literal["document"]]
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
+    """Create a cache control breakpoint at this content block."""
 
     citations: BetaCitationsConfigParam
 

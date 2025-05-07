@@ -20,3 +20,4 @@ class ImageBlockParam(TypedDict, total=False):
     type: Required[Literal["image"]]
 
     cache_control: Optional[CacheControlEphemeralParam]
+    """Create a cache control breakpoint at this content block."""

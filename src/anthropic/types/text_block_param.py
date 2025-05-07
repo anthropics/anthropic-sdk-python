@@ -17,5 +17,6 @@ class TextBlockParam(TypedDict, total=False):
     type: Required[Literal["text"]]
 
     cache_control: Optional[CacheControlEphemeralParam]
+    """Create a cache control breakpoint at this content block."""
 
     citations: Optional[Iterable[TextCitationParam]]

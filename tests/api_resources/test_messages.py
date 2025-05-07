@@ -92,6 +92,7 @@ class TestMessages:
                     "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
+                    "type": "custom",
                 }
             ],
             top_k=5,
@@ -210,6 +211,7 @@ class TestMessages:
                     "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
+                    "type": "custom",
                 }
             ],
             top_k=5,
@@ -322,6 +324,7 @@ class TestMessages:
                     "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
+                    "type": "custom",
                 }
             ],
         )
@@ -439,6 +442,7 @@ class TestAsyncMessages:
                     "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
+                    "type": "custom",
                 }
             ],
             top_k=5,
@@ -557,6 +561,7 @@ class TestAsyncMessages:
                     "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
+                    "type": "custom",
                 }
             ],
             top_k=5,
@@ -669,6 +674,7 @@ class TestAsyncMessages:
                     "name": "name",
                     "cache_control": {"type": "ephemeral"},
                     "description": "Get the current weather in a given location",
+                    "type": "custom",
                 }
             ],
         )
