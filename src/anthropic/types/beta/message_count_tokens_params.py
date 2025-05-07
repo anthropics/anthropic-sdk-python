@@ -15,6 +15,7 @@ from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
+from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param
 from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param
 from .beta_tool_computer_use_20241022_param import BetaToolComputerUse20241022Param
@@ -111,6 +112,8 @@ class MessageCountTokensParams(TypedDict, total=False):
     [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
     the top-level `system` parameter — there is no `"system"` role for input
     messages in the Messages API.
+
+    There is a limit of 100000 messages in a single request.
     """
 
     model: Required[ModelParam]
@@ -231,4 +234,5 @@ Tool: TypeAlias = Union[
     BetaToolComputerUse20250124Param,
     BetaToolBash20250124Param,
     BetaToolTextEditor20250124Param,
+    BetaWebSearchTool20250305Param,
 ]

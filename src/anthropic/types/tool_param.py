@@ -33,10 +33,11 @@ class ToolParam(TypedDict, total=False):
     name: Required[str]
     """Name of the tool.
 
-    This is how the tool will be called by the model and in tool_use blocks.
+    This is how the tool will be called by the model and in `tool_use` blocks.
     """
 
     cache_control: Optional[CacheControlEphemeralParam]
+    """Create a cache control breakpoint at this content block."""
 
     description: str
     """Description of what this tool does.
@@ -46,3 +47,5 @@ class ToolParam(TypedDict, total=False):
     perform. You can use natural language descriptions to reinforce important
     aspects of the tool input JSON schema.
     """
+
+    type: Optional[Literal["custom"]]

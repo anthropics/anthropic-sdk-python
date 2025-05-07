@@ -7,8 +7,11 @@ from typing_extensions import TypeAlias
 
 from .tool_param import ToolParam
 from .tool_bash_20250124_param import ToolBash20250124Param
+from .web_search_tool_20250305_param import WebSearchTool20250305Param
 from .tool_text_editor_20250124_param import ToolTextEditor20250124Param
 
 __all__ = ["MessageCountTokensToolParam"]
 
-MessageCountTokensToolParam: TypeAlias = Union[ToolParam, ToolBash20250124Param, ToolTextEditor20250124Param]
+MessageCountTokensToolParam: TypeAlias = Union[
+    ToolParam, ToolBash20250124Param, ToolTextEditor20250124Param, WebSearchTool20250305Param
+]

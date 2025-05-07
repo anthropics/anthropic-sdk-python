@@ -21,14 +21,22 @@ class TestModels:
     @parametrize
     def test_method_retrieve(self, client: Anthropic) -> None:
         model = client.models.retrieve(
-            "model_id",
+            model_id="model_id",
+        )
+        assert_matches_type(ModelInfo, model, path=["response"])
+
+    @parametrize
+    def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
+        model = client.models.retrieve(
+            model_id="model_id",
+            betas=["string"],
         )
         assert_matches_type(ModelInfo, model, path=["response"])
 
     @parametrize
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.models.with_raw_response.retrieve(
-            "model_id",
+            model_id="model_id",
         )
 
         assert response.is_closed is True
@@ -39,7 +47,7 @@ class TestModels:
     @parametrize
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.models.with_streaming_response.retrieve(
-            "model_id",
+            model_id="model_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -53,7 +61,7 @@ class TestModels:
     def test_path_params_retrieve(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `model_id` but received ''"):
             client.models.with_raw_response.retrieve(
-                "",
+                model_id="",
             )
 
     @parametrize
@@ -67,6 +75,7 @@ class TestModels:
             after_id="after_id",
             before_id="before_id",
             limit=1,
+            betas=["string"],
         )
         assert_matches_type(SyncPage[ModelInfo], model, path=["response"])
 
@@ -97,14 +106,22 @@ class TestAsyncModels:
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         model = await async_client.models.retrieve(
-            "model_id",
+            model_id="model_id",
+        )
+        assert_matches_type(ModelInfo, model, path=["response"])
+
+    @parametrize
+    async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        model = await async_client.models.retrieve(
+            model_id="model_id",
+            betas=["string"],
         )
         assert_matches_type(ModelInfo, model, path=["response"])
 
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.models.with_raw_response.retrieve(
-            "model_id",
+            model_id="model_id",
         )
 
         assert response.is_closed is True
@@ -115,7 +132,7 @@ class TestAsyncModels:
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.models.with_streaming_response.retrieve(
-            "model_id",
+            model_id="model_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -129,7 +146,7 @@ class TestAsyncModels:
     async def test_path_params_retrieve(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `model_id` but received ''"):
             await async_client.models.with_raw_response.retrieve(
-                "",
+                model_id="",
             )
 
     @parametrize
@@ -143,6 +160,7 @@ class TestAsyncModels:
             after_id="after_id",
             before_id="before_id",
             limit=1,
+            betas=["string"],
         )
         assert_matches_type(AsyncPage[ModelInfo], model, path=["response"])
 
