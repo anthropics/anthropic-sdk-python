@@ -41,6 +41,7 @@ from .text_block_param import TextBlockParam as TextBlockParam
 from .tool_union_param import ToolUnionParam as ToolUnionParam
 from .image_block_param import ImageBlockParam as ImageBlockParam
 from .model_list_params import ModelListParams as ModelListParams
+from .server_tool_usage import ServerToolUsage as ServerToolUsage
 from .tool_choice_param import ToolChoiceParam as ToolChoiceParam
 from .beta_billing_error import BetaBillingError as BetaBillingError
 from .message_stop_event import MessageStopEvent as MessageStopEvent
@@ -62,6 +63,7 @@ from .beta_overloaded_error import BetaOverloadedError as BetaOverloadedError
 from .beta_permission_error import BetaPermissionError as BetaPermissionError
 from .beta_rate_limit_error import BetaRateLimitError as BetaRateLimitError
 from .message_create_params import MessageCreateParams as MessageCreateParams
+from .server_tool_use_block import ServerToolUseBlock as ServerToolUseBlock
 from .thinking_config_param import ThinkingConfigParam as ThinkingConfigParam
 from .tool_choice_any_param import ToolChoiceAnyParam as ToolChoiceAnyParam
 from .citation_char_location import CitationCharLocation as CitationCharLocation
@@ -79,6 +81,7 @@ from .raw_message_delta_event import RawMessageDeltaEvent as RawMessageDeltaEven
 from .raw_message_start_event import RawMessageStartEvent as RawMessageStartEvent
 from .redacted_thinking_block import RedactedThinkingBlock as RedactedThinkingBlock
 from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockParam
+from .web_search_result_block import WebSearchResultBlock as WebSearchResultBlock
 from .completion_create_params import CompletionCreateParams as CompletionCreateParams
 from .content_block_stop_event import ContentBlockStopEvent as ContentBlockStopEvent
 from .raw_message_stream_event import RawMessageStreamEvent as RawMessageStreamEvent
@@ -91,19 +94,34 @@ from .beta_gateway_timeout_error import BetaGatewayTimeoutError as BetaGatewayTi
 from .beta_invalid_request_error import BetaInvalidRequestError as BetaInvalidRequestError
 from .content_block_source_param import ContentBlockSourceParam as ContentBlockSourceParam
 from .message_count_tokens_params import MessageCountTokensParams as MessageCountTokensParams
+from .server_tool_use_block_param import ServerToolUseBlockParam as ServerToolUseBlockParam
 from .citation_char_location_param import CitationCharLocationParam as CitationCharLocationParam
 from .citation_page_location_param import CitationPageLocationParam as CitationPageLocationParam
 from .raw_content_block_stop_event import RawContentBlockStopEvent as RawContentBlockStopEvent
+from .web_search_tool_result_block import WebSearchToolResultBlock as WebSearchToolResultBlock
+from .web_search_tool_result_error import WebSearchToolResultError as WebSearchToolResultError
 from .cache_control_ephemeral_param import CacheControlEphemeralParam as CacheControlEphemeralParam
 from .raw_content_block_delta_event import RawContentBlockDeltaEvent as RawContentBlockDeltaEvent
 from .raw_content_block_start_event import RawContentBlockStartEvent as RawContentBlockStartEvent
 from .redacted_thinking_block_param import RedactedThinkingBlockParam as RedactedThinkingBlockParam
 from .thinking_config_enabled_param import ThinkingConfigEnabledParam as ThinkingConfigEnabledParam
+from .web_search_result_block_param import WebSearchResultBlockParam as WebSearchResultBlockParam
 from .thinking_config_disabled_param import ThinkingConfigDisabledParam as ThinkingConfigDisabledParam
+from .web_search_tool_20250305_param import WebSearchTool20250305Param as WebSearchTool20250305Param
 from .citation_content_block_location import CitationContentBlockLocation as CitationContentBlockLocation
 from .message_count_tokens_tool_param import MessageCountTokensToolParam as MessageCountTokensToolParam
 from .tool_text_editor_20250124_param import ToolTextEditor20250124Param as ToolTextEditor20250124Param
 from .content_block_source_content_param import ContentBlockSourceContentParam as ContentBlockSourceContentParam
+from .web_search_tool_result_block_param import WebSearchToolResultBlockParam as WebSearchToolResultBlockParam
+from .web_search_tool_request_error_param import WebSearchToolRequestErrorParam as WebSearchToolRequestErrorParam
+from .citations_web_search_result_location import CitationsWebSearchResultLocation as CitationsWebSearchResultLocation
+from .web_search_tool_result_block_content import WebSearchToolResultBlockContent as WebSearchToolResultBlockContent
 from .citation_content_block_location_param import (
     CitationContentBlockLocationParam as CitationContentBlockLocationParam,
+)
+from .citation_web_search_result_location_param import (
+    CitationWebSearchResultLocationParam as CitationWebSearchResultLocationParam,
+)
+from .web_search_tool_result_block_param_content_param import (
+    WebSearchToolResultBlockParamContentParam as WebSearchToolResultBlockParamContentParam,
 )

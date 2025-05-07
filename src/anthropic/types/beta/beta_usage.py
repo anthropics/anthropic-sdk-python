@@ -3,6 +3,7 @@
 from typing import Optional
 
 from ..._models import BaseModel
+from .beta_server_tool_usage import BetaServerToolUsage
 
 __all__ = ["BetaUsage"]
 
@@ -19,3 +20,6 @@ class BetaUsage(BaseModel):
 
     output_tokens: int
     """The number of output tokens which were used."""
+
+    server_tool_use: Optional[BetaServerToolUsage] = None
+    """The number of server tool requests."""

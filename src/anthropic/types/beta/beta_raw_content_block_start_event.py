@@ -8,12 +8,21 @@ from ..._models import BaseModel
 from .beta_text_block import BetaTextBlock
 from .beta_thinking_block import BetaThinkingBlock
 from .beta_tool_use_block import BetaToolUseBlock
+from .beta_server_tool_use_block import BetaServerToolUseBlock
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock
+from .beta_web_search_tool_result_block import BetaWebSearchToolResultBlock
 
 __all__ = ["BetaRawContentBlockStartEvent", "ContentBlock"]
 
 ContentBlock: TypeAlias = Annotated[
-    Union[BetaTextBlock, BetaToolUseBlock, BetaThinkingBlock, BetaRedactedThinkingBlock],
+    Union[
+        BetaTextBlock,
+        BetaToolUseBlock,
+        BetaServerToolUseBlock,
+        BetaWebSearchToolResultBlock,
+        BetaThinkingBlock,
+        BetaRedactedThinkingBlock,
+    ],
     PropertyInfo(discriminator="type"),
 ]
 

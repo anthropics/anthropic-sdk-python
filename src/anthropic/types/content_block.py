@@ -7,10 +7,13 @@ from .._utils import PropertyInfo
 from .text_block import TextBlock
 from .thinking_block import ThinkingBlock
 from .tool_use_block import ToolUseBlock
+from .server_tool_use_block import ServerToolUseBlock
 from .redacted_thinking_block import RedactedThinkingBlock
+from .web_search_tool_result_block import WebSearchToolResultBlock
 
 __all__ = ["ContentBlock"]
 
 ContentBlock: TypeAlias = Annotated[
-    Union[TextBlock, ToolUseBlock, ThinkingBlock, RedactedThinkingBlock], PropertyInfo(discriminator="type")
+    Union[TextBlock, ToolUseBlock, ServerToolUseBlock, WebSearchToolResultBlock, ThinkingBlock, RedactedThinkingBlock],
+    PropertyInfo(discriminator="type"),
 ]

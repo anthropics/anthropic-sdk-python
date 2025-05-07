@@ -14,9 +14,10 @@ class BetaToolBash20241022Param(TypedDict, total=False):
     name: Required[Literal["bash"]]
     """Name of the tool.
 
-    This is how the tool will be called by the model and in tool_use blocks.
+    This is how the tool will be called by the model and in `tool_use` blocks.
     """
 
     type: Required[Literal["bash_20241022"]]
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
+    """Create a cache control breakpoint at this content block."""

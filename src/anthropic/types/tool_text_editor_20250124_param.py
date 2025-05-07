@@ -14,9 +14,10 @@ class ToolTextEditor20250124Param(TypedDict, total=False):
     name: Required[Literal["str_replace_editor"]]
     """Name of the tool.
 
-    This is how the tool will be called by the model and in tool_use blocks.
+    This is how the tool will be called by the model and in `tool_use` blocks.
     """
 
     type: Required[Literal["text_editor_20250124"]]
 
     cache_control: Optional[CacheControlEphemeralParam]
+    """Create a cache control breakpoint at this content block."""

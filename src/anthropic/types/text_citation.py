@@ -7,9 +7,11 @@ from .._utils import PropertyInfo
 from .citation_char_location import CitationCharLocation
 from .citation_page_location import CitationPageLocation
 from .citation_content_block_location import CitationContentBlockLocation
+from .citations_web_search_result_location import CitationsWebSearchResultLocation
 
 __all__ = ["TextCitation"]
 
 TextCitation: TypeAlias = Annotated[
-    Union[CitationCharLocation, CitationPageLocation, CitationContentBlockLocation], PropertyInfo(discriminator="type")
+    Union[CitationCharLocation, CitationPageLocation, CitationContentBlockLocation, CitationsWebSearchResultLocation],
+    PropertyInfo(discriminator="type"),
 ]

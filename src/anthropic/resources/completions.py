@@ -10,7 +10,7 @@ import httpx
 from .. import _legacy_response
 from ..types import completion_create_params
 from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven
-from .._utils import is_given, required_args, maybe_transform, async_maybe_transform
+from .._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
@@ -20,6 +20,7 @@ from .._base_client import make_request_options
 from ..types.completion import Completion
 from ..types.model_param import ModelParam
 from ..types.metadata_param import MetadataParam
+from ..types.anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["Completions", "AsyncCompletions"]
 
@@ -57,6 +58,7 @@ class Completions(SyncAPIResource):
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -138,6 +140,8 @@ class Completions(SyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          betas: Optional header to specify the beta version(s) you want to use.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -161,6 +165,7 @@ class Completions(SyncAPIResource):
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -242,6 +247,8 @@ class Completions(SyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          betas: Optional header to specify the beta version(s) you want to use.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -265,6 +272,7 @@ class Completions(SyncAPIResource):
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -346,6 +354,8 @@ class Completions(SyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          betas: Optional header to specify the beta version(s) you want to use.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -369,6 +379,7 @@ class Completions(SyncAPIResource):
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -378,6 +389,10 @@ class Completions(SyncAPIResource):
     ) -> Completion | Stream[Completion]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **(extra_headers or {}),
+        }
         return self._post(
             "/v1/complete",
             body=maybe_transform(
@@ -438,6 +453,7 @@ class AsyncCompletions(AsyncAPIResource):
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -519,6 +535,8 @@ class AsyncCompletions(AsyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          betas: Optional header to specify the beta version(s) you want to use.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -542,6 +560,7 @@ class AsyncCompletions(AsyncAPIResource):
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -623,6 +642,8 @@ class AsyncCompletions(AsyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          betas: Optional header to specify the beta version(s) you want to use.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -646,6 +667,7 @@ class AsyncCompletions(AsyncAPIResource):
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -727,6 +749,8 @@ class AsyncCompletions(AsyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          betas: Optional header to specify the beta version(s) you want to use.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -750,6 +774,7 @@ class AsyncCompletions(AsyncAPIResource):
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -759,6 +784,10 @@ class AsyncCompletions(AsyncAPIResource):
     ) -> Completion | AsyncStream[Completion]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **(extra_headers or {}),
+        }
         return await self._post(
             "/v1/complete",
             body=await async_maybe_transform(

@@ -203,6 +203,8 @@ class Messages(SyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
+              There is a limit of 100000 messages in a single request.
+
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
@@ -482,6 +484,8 @@ class Messages(SyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
+              There is a limit of 100000 messages in a single request.
+
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
@@ -760,6 +764,8 @@ class Messages(SyncAPIResource):
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
+
+              There is a limit of 100000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
@@ -1152,6 +1158,8 @@ class Messages(SyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
+              There is a limit of 100000 messages in a single request.
+
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
@@ -1440,6 +1448,8 @@ class AsyncMessages(AsyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
+              There is a limit of 100000 messages in a single request.
+
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
@@ -1719,6 +1729,8 @@ class AsyncMessages(AsyncAPIResource):
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
 
+              There is a limit of 100000 messages in a single request.
+
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
@@ -1997,6 +2009,8 @@ class AsyncMessages(AsyncAPIResource):
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
+
+              There is a limit of 100000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
@@ -2386,6 +2400,8 @@ class AsyncMessages(AsyncAPIResource):
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
               the top-level `system` parameter — there is no `"system"` role for input
               messages in the Messages API.
+
+              There is a limit of 100000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional

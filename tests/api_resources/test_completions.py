@@ -38,6 +38,7 @@ class TestCompletions:
             temperature=1,
             top_k=5,
             top_p=0.7,
+            betas=["string"],
         )
         assert_matches_type(Completion, completion, path=["response"])
 
@@ -91,6 +92,7 @@ class TestCompletions:
             temperature=1,
             top_k=5,
             top_p=0.7,
+            betas=["string"],
         )
         completion_stream.response.close()
 
@@ -148,6 +150,7 @@ class TestAsyncCompletions:
             temperature=1,
             top_k=5,
             top_p=0.7,
+            betas=["string"],
         )
         assert_matches_type(Completion, completion, path=["response"])
 
@@ -201,6 +204,7 @@ class TestAsyncCompletions:
             temperature=1,
             top_k=5,
             top_p=0.7,
+            betas=["string"],
         )
         await completion_stream.response.aclose()
 
