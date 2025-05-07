@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.51.0 (2025-05-07)
+
+Full Changelog: [v0.50.0...v0.51.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.50.0...v0.51.0)
+
+### Features
+
+* **api:** adds web search capabilities to the Claude API ([bec0cf9](https://github.com/anthropics/anthropic-sdk-python/commit/bec0cf93c2d7cb47c921236a14c8569e0e22793e))
+
+
+### Bug Fixes
+
+* **pydantic v1:** more robust ModelField.annotation check ([c50f406](https://github.com/anthropics/anthropic-sdk-python/commit/c50f406767d8e7737a2754d6e1488d8a19216ac0))
+* **sockets:** handle non-portable socket flags ([#935](https://github.com/anthropics/anthropic-sdk-python/issues/935)) ([205c8dd](https://github.com/anthropics/anthropic-sdk-python/commit/205c8dda371caa3b393d3cfb4d323714b1fab336))
+
+
+### Chores
+
+* broadly detect json family of content-type headers ([66bbb3a](https://github.com/anthropics/anthropic-sdk-python/commit/66bbb3a6689a4e2dd4915a7a2940dec53e2b8eb9))
+* **ci:** only use depot for staging repos ([c867a11](https://github.com/anthropics/anthropic-sdk-python/commit/c867a11af37416c0d513aa177f77e1bcd0d70949))
+* **ci:** run on more branches and use depot runners ([95f5f17](https://github.com/anthropics/anthropic-sdk-python/commit/95f5f17be0ab05ed4e258ccc488d8cf55ffb8f29))
+* **internal:** add back missing custom modifications for Web Search ([f43ba69](https://github.com/anthropics/anthropic-sdk-python/commit/f43ba69d5337e5d99f7ca9bd2e773cc57bae5d1c))
+* **internal:** minor formatting changes ([8afef08](https://github.com/anthropics/anthropic-sdk-python/commit/8afef086af194df1e4b0d6d25b7fbe4d74bd6850))
+* use lazy imports for resources ([704be81](https://github.com/anthropics/anthropic-sdk-python/commit/704be817f436d92d96915cf02608b6827e06945f))
+
 ## 0.50.0 (2025-04-22)
 
 Full Changelog: [v0.49.0...v0.50.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.49.0...v0.50.0)
