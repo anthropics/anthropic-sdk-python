@@ -38,6 +38,7 @@ from ._exceptions import (
     InternalServerError,
     PermissionDeniedError,
     UnprocessableEntityError,
+    FailedDependencyError,
     APIResponseValidationError,
 )
 from ._base_client import DefaultHttpxClient, DefaultAsyncHttpxClient
@@ -65,6 +66,7 @@ __all__ = [
     "NotFoundError",
     "ConflictError",
     "UnprocessableEntityError",
+    "FailedDependencyError",
     "RateLimitError",
     "InternalServerError",
     "Timeout",
