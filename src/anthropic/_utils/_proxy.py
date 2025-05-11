@@ -49,6 +49,7 @@ class LazyProxy(Generic[T], ABC):
         try:
             proxied = self.__get_proxied__()
         except Exception:
+            # If __get_proxied__() fails, return the type of the proxy itself
             return type(self)
         if issubclass(type(proxied), LazyProxy):
             return type(proxied)
