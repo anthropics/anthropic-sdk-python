@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.51.1 (2025-05-11)
+
+Full Changelog: [v0.51.0...v0.51.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.51.0...v0.51.1)
+
+### Bug Fixes
+
+* **package:** support direct resource imports ([6d73bab](https://github.com/anthropics/anthropic-sdk-python/commit/6d73bab63cc666f0de65ec67f7e2b55a3de1b8cf))
+
+
+### Chores
+
+* **internal:** avoid errors for isinstance checks on proxies ([ef4be3f](https://github.com/anthropics/anthropic-sdk-python/commit/ef4be3f6ae02632d1d67ef6d4ac9d3bacef5e934))
+
 ## 0.51.0 (2025-05-07)
 
 Full Changelog: [v0.50.0...v0.51.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.50.0...v0.51.0)
