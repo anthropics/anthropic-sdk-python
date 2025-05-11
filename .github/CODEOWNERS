@@ -1,4 +1,28 @@
-# This file is used to automatically assign reviewers to PRs
+# This file is used to automatically assign reviewers to PRs.
+# For more information see:
+# https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+
+# Assign ownership to the @anthropics/sdk team for all files by default.
+* @anthropics/sdk 
+
+# Example: Assign specific ownership for folders or files (if applicable).
+# /docs/ @anthropics/docs-team
+# *.py @anthropics/python-team
+
+# Fallback owner for unassigned files (if needed):
+# / @anthropics/repo-maintainers# This file is used to automatically assign reviewers to PRs.
+# For more information see:
+# https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+
+# Assign ownership to the @anthropics/sdk team for all files by default.
+* @anthropics/sdk 
+
+# Example: Assign specific ownership for folders or files (if applicable).
+# /docs/ @anthropics/docs-team
+# *.py @anthropics/python-team
+
+# Fallback owner for unassigned files (if needed):
+# / @anthropics/repo-maintainers This file is used to automatically assign reviewers to PRs
 # For more information see: https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
 
 * @anthropics/sdk
