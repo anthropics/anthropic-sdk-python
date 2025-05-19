@@ -685,6 +685,10 @@ print(response.headers.get("x-foo"))
 If you want to explicitly send an extra param, you can do so with the `extra_query`, `extra_body`, and `extra_headers` request
 options.
 
+> [!WARNING]
+>
+> The `extra_` parameters of the same name overrides the documented parameters. For security reasons, ensure these methods are only used with trusted input data.
+
 #### Undocumented response properties
 
 To access undocumented response properties, you can access the extra fields like `response.unknown_prop`. You
