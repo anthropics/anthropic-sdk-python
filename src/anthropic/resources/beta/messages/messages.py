@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import List, Union, Iterable
+from typing import List, Union, Iterable, Optional
 from functools import partial
 from itertools import chain
 from typing_extensions import Literal, overload
@@ -24,7 +24,7 @@ from ...._utils import is_given, required_args, maybe_transform, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
-from ...._constants import DEFAULT_TIMEOUT
+from ...._constants import DEFAULT_TIMEOUT, MODEL_NONSTREAMING_TOKENS
 from ...._streaming import Stream, AsyncStream
 from ....types.beta import (
     BetaThinkingConfigParam,
@@ -45,6 +45,7 @@ from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
 from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
+from ....types.beta.beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
 
 __all__ = ["Messages", "AsyncMessages"]
 
@@ -80,7 +81,10 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -209,7 +213,17 @@ class Messages(SyncAPIResource):
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
+          container: Container identifier for reuse across requests.
+
+          mcp_servers: MCP servers to be utilized in this request
+
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -362,7 +376,10 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -495,7 +512,17 @@ class Messages(SyncAPIResource):
               See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
               details.
 
+          container: Container identifier for reuse across requests.
+
+          mcp_servers: MCP servers to be utilized in this request
+
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -643,7 +670,10 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -776,7 +806,17 @@ class Messages(SyncAPIResource):
               See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
               details.
 
+          container: Container identifier for reuse across requests.
+
+          mcp_servers: MCP servers to be utilized in this request
+
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -923,7 +963,10 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -942,7 +985,9 @@ class Messages(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
-            timeout = self._client._calculate_nonstreaming_timeout(max_tokens)
+            timeout = self._client._calculate_nonstreaming_timeout(
+                max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
+            )
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -962,7 +1007,10 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "container": container,
+                    "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -991,7 +1039,10 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -1023,6 +1074,9 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "container": container,
+                    "mcp_servers": mcp_servers,
+                    "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "system": system,
                     "temperature": temperature,
@@ -1049,6 +1103,7 @@ class Messages(SyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
@@ -1163,6 +1218,8 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          mcp_servers: MCP servers to be utilized in this request
 
           system: System prompt.
 
@@ -1280,6 +1337,7 @@ class Messages(SyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "mcp_servers": mcp_servers,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
@@ -1325,7 +1383,10 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -1454,7 +1515,17 @@ class AsyncMessages(AsyncAPIResource):
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
+          container: Container identifier for reuse across requests.
+
+          mcp_servers: MCP servers to be utilized in this request
+
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1607,7 +1678,10 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -1740,7 +1814,17 @@ class AsyncMessages(AsyncAPIResource):
               See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
               details.
 
+          container: Container identifier for reuse across requests.
+
+          mcp_servers: MCP servers to be utilized in this request
+
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1888,7 +1972,10 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -2021,7 +2108,17 @@ class AsyncMessages(AsyncAPIResource):
               See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
               details.
 
+          container: Container identifier for reuse across requests.
+
+          mcp_servers: MCP servers to be utilized in this request
+
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2168,7 +2265,10 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -2187,7 +2287,9 @@ class AsyncMessages(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
-            timeout = self._client._calculate_nonstreaming_timeout(max_tokens)
+            timeout = self._client._calculate_nonstreaming_timeout(
+                max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
+            )
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -2207,7 +2309,10 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "container": container,
+                    "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -2237,6 +2342,9 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -2266,6 +2374,9 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "container": container,
+                    "mcp_servers": mcp_servers,
+                    "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "system": system,
                     "temperature": temperature,
@@ -2292,6 +2403,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
         thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
         tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
@@ -2406,6 +2518,8 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          mcp_servers: MCP servers to be utilized in this request
 
           system: System prompt.
 
@@ -2523,6 +2637,7 @@ class AsyncMessages(AsyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "mcp_servers": mcp_servers,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,

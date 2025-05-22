@@ -329,7 +329,7 @@ def build_events(
                     )
                 )
         elif event.delta.type == "input_json_delta":
-            if content_block.type == "tool_use":
+            if content_block.type == "tool_use" or content_block.type == "mcp_tool_use":
                 events_to_fire.append(
                     build(
                         BetaInputJsonEvent,
@@ -425,7 +425,7 @@ def accumulate_event(
             if content.type == "text":
                 content.text += event.delta.text
         elif event.delta.type == "input_json_delta":
-            if content.type == "tool_use":
+            if content.type == "tool_use" or content.type == "mcp_tool_use":
                 from jiter import from_json
 
                 # we need to keep track of the raw JSON string as well so that we can
@@ -455,6 +455,7 @@ def accumulate_event(
             if TYPE_CHECKING:  # type: ignore[unreachable]
                 assert_never(event.delta)
     elif event.type == "message_delta":
+        current_snapshot.container = event.delta.container
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
         current_snapshot.usage.output_tokens = event.usage.output_tokens
