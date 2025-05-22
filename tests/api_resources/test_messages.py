@@ -46,6 +46,7 @@ class TestMessages:
             ],
             model="claude-3-7-sonnet-20250219",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             stream=False,
             system=[
@@ -166,6 +167,7 @@ class TestMessages:
             model="claude-3-7-sonnet-20250219",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             system=[
                 {
@@ -396,6 +398,7 @@ class TestAsyncMessages:
             ],
             model="claude-3-7-sonnet-20250219",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             stream=False,
             system=[
@@ -516,6 +519,7 @@ class TestAsyncMessages:
             model="claude-3-7-sonnet-20250219",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             system=[
                 {

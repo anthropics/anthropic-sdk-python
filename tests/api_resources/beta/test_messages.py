@@ -45,14 +45,31 @@ class TestMessages:
                 }
             ],
             model="claude-3-7-sonnet-20250219",
+            container="container",
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             stream=False,
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -90,7 +107,10 @@ class TestMessages:
                         },
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -166,13 +186,30 @@ class TestMessages:
             ],
             model="claude-3-7-sonnet-20250219",
             stream=True,
+            container="container",
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -210,7 +247,10 @@ class TestMessages:
                         },
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -283,11 +323,26 @@ class TestMessages:
                 }
             ],
             model="claude-3-7-sonnet-latest",
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -324,7 +379,10 @@ class TestMessages:
                         },
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -398,14 +456,31 @@ class TestAsyncMessages:
                 }
             ],
             model="claude-3-7-sonnet-20250219",
+            container="container",
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             stream=False,
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -443,7 +518,10 @@ class TestAsyncMessages:
                         },
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -519,13 +597,30 @@ class TestAsyncMessages:
             ],
             model="claude-3-7-sonnet-20250219",
             stream=True,
+            container="container",
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -563,7 +658,10 @@ class TestAsyncMessages:
                         },
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -636,11 +734,26 @@ class TestAsyncMessages:
                 }
             ],
             model="claude-3-7-sonnet-latest",
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -677,7 +790,10 @@ class TestAsyncMessages:
                         },
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }

@@ -1,6 +1,7 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 from typing import Optional
+from typing_extensions import Literal
 
 from .._models import BaseModel
 from .server_tool_usage import ServerToolUsage
@@ -23,3 +24,6 @@ class Usage(BaseModel):
 
     server_tool_use: Optional[ServerToolUsage] = None
     """The number of server tool requests."""
+
+    service_tier: Optional[Literal["standard", "priority", "batch"]] = None
+    """If the request used the priority, standard, or batch tier."""

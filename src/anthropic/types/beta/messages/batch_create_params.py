@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from typing import List, Union, Iterable
-from typing_extensions import Required, Annotated, TypedDict
+from typing import List, Union, Iterable, Optional
+from typing_extensions import Literal, Required, Annotated, TypedDict
 
 from ...._utils import PropertyInfo
 from ...model_param import ModelParam
@@ -14,6 +14,7 @@ from ..beta_text_block_param import BetaTextBlockParam
 from ..beta_tool_union_param import BetaToolUnionParam
 from ..beta_tool_choice_param import BetaToolChoiceParam
 from ..beta_thinking_config_param import BetaThinkingConfigParam
+from ..beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
 
 __all__ = ["BatchCreateParams", "Request", "RequestParams"]
 
@@ -138,8 +139,23 @@ class RequestParams(TypedDict, total=False):
     details and options.
     """
 
+    container: Optional[str]
+    """Container identifier for reuse across requests."""
+
+    mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam]
+    """MCP servers to be utilized in this request"""
+
     metadata: BetaMetadataParam
     """An object describing metadata about the request."""
+
+    service_tier: Literal["auto", "standard_only"]
+    """
+    Determines whether to use priority capacity (if available) or standard capacity
+    for this request.
+
+    Anthropic offers different levels of service for your API requests. See
+    [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
+    """
 
     stop_sequences: List[str]
     """Custom text sequences that will cause the model to stop generating.

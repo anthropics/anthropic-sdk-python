@@ -6,6 +6,7 @@ from typing_extensions import Literal
 from ..model import Model
 from ..._models import BaseModel
 from .beta_usage import BetaUsage
+from .beta_container import BetaContainer
 from .beta_stop_reason import BetaStopReason
 from .beta_content_block import BetaContentBlock, BetaContentBlock as BetaContentBlock
 
@@ -17,6 +18,12 @@ class BetaMessage(BaseModel):
     """Unique object identifier.
 
     The format and length of IDs may change over time.
+    """
+
+    container: Optional[BetaContainer] = None
+    """
+    Information about the container used in the request (for the code execution
+    tool)
     """
 
     content: List[BetaContentBlock]

@@ -18,5 +18,11 @@ AnthropicBetaParam: TypeAlias = Union[
         "token-counting-2024-11-01",
         "token-efficient-tools-2025-02-19",
         "output-128k-2025-02-19",
+        "files-api-2025-04-14",
+        "mcp-client-2025-04-04",
+        "dev-full-thinking-2025-05-14",
+        "interleaved-thinking-2025-05-14",
+        "code-execution-2025-05-22",
+        "extended-cache-ttl-2025-04-11",
     ],
 ]

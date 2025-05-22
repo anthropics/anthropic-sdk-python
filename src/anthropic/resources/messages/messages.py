@@ -76,6 +76,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -204,6 +205,12 @@ class Messages(SyncAPIResource):
               details and options.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -355,6 +362,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -487,6 +495,12 @@ class Messages(SyncAPIResource):
               details.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -633,6 +647,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: bool,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -765,6 +780,12 @@ class Messages(SyncAPIResource):
               details.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -910,6 +931,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -936,6 +958,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -1226,6 +1249,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -1354,6 +1378,12 @@ class AsyncMessages(AsyncAPIResource):
               details and options.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1505,6 +1535,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -1637,6 +1668,12 @@ class AsyncMessages(AsyncAPIResource):
               details.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1783,6 +1820,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: bool,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
@@ -1915,6 +1953,12 @@ class AsyncMessages(AsyncAPIResource):
               details.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2060,6 +2104,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
         stop_sequences: List[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
@@ -2086,6 +2131,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,

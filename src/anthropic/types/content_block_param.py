@@ -18,11 +18,11 @@ from .web_search_tool_result_block_param import WebSearchToolResultBlockParam
 __all__ = ["ContentBlockParam"]
 
 ContentBlockParam: TypeAlias = Union[
+    ServerToolUseBlockParam,
+    WebSearchToolResultBlockParam,
     TextBlockParam,
     ImageBlockParam,
     ToolUseBlockParam,
-    ServerToolUseBlockParam,
-    WebSearchToolResultBlockParam,
     ToolResultBlockParam,
     DocumentBlockParam,
     ThinkingBlockParam,
