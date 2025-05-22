@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.52.0 (2025-05-22)
+
+Full Changelog: [v0.51.0...v0.52.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.51.0...v0.52.0)
+
+### Features
+
+* **api:** add claude 4 models, files API, code execution tool, MCP connector and more ([9c48bc6](https://github.com/anthropics/anthropic-sdk-python/commit/9c48bc6211e2b36cab4c25b67a3dfa4e679aa046))
+
+
+### Bug Fixes
+
+* **package:** support direct resource imports ([6d73bab](https://github.com/anthropics/anthropic-sdk-python/commit/6d73bab63cc666f0de65ec67f7e2b55a3de1b8cf))
+
+
+### Chores
+
+* **ci:** fix installation instructions ([ca374e5](https://github.com/anthropics/anthropic-sdk-python/commit/ca374e587c283d46afedfa0e571bc4126f252644))
+* **ci:** upload sdks to package manager ([fde0c44](https://github.com/anthropics/anthropic-sdk-python/commit/fde0c44a2e4cc3afe34b644f47e3cca986d210c6))
+* **internal:** avoid errors for isinstance checks on proxies ([ef4be3f](https://github.com/anthropics/anthropic-sdk-python/commit/ef4be3f6ae02632d1d67ef6d4ac9d3bacef5e934))
+* **internal:** codegen related update ([40359d9](https://github.com/anthropics/anthropic-sdk-python/commit/40359d9db8c5c5868a74de85b84c5e9ccbed5ae4))
+
+
+### Documentation
+
+* add security warning for overriding parameters ([#1008](https://github.com/anthropics/anthropic-sdk-python/issues/1008)) ([9f52239](https://github.com/anthropics/anthropic-sdk-python/commit/9f52239dda32f26c1fdd999723a124d1bc87dc18))
+
 ## 0.51.0 (2025-05-07)
 
 Full Changelog: [v0.50.0...v0.51.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.50.0...v0.51.0)
