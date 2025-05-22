@@ -8,6 +8,14 @@ from .beta import (
     BetaWithStreamingResponse,
     AsyncBetaWithStreamingResponse,
 )
+from .files import (
+    Files,
+    AsyncFiles,
+    FilesWithRawResponse,
+    AsyncFilesWithRawResponse,
+    FilesWithStreamingResponse,
+    AsyncFilesWithStreamingResponse,
+)
 from .models import (
     Models,
     AsyncModels,
@@ -38,6 +46,12 @@ __all__ = [
     "AsyncMessagesWithRawResponse",
     "MessagesWithStreamingResponse",
     "AsyncMessagesWithStreamingResponse",
+    "Files",
+    "AsyncFiles",
+    "FilesWithRawResponse",
+    "AsyncFilesWithRawResponse",
+    "FilesWithStreamingResponse",
+    "AsyncFilesWithStreamingResponse",
     "Beta",
     "AsyncBeta",
     "BetaWithRawResponse",

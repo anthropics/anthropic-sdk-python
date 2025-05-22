@@ -1,3 +1,5 @@
+#!/usr/bin/env -S rye run python
+
 import asyncio
 
 from anthropic import AsyncAnthropic

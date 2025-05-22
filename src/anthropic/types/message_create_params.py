@@ -140,6 +140,15 @@ class MessageCreateParamsBase(TypedDict, total=False):
     metadata: MetadataParam
     """An object describing metadata about the request."""
 
+    service_tier: Literal["auto", "standard_only"]
+    """
+    Determines whether to use priority capacity (if available) or standard capacity
+    for this request.
+
+    Anthropic offers different levels of service for your API requests. See
+    [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
+    """
+
     stop_sequences: List[str]
     """Custom text sequences that will cause the model to stop generating.
 
