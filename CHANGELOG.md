@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.52.1 (2025-05-28)
+
+Full Changelog: [v0.52.0...v0.52.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.52.0...v0.52.1)
+
+### Bug Fixes
+
+* **example:** logo.png was broken ([#1021](https://github.com/anthropics/anthropic-sdk-python/issues/1021)) ([1ee8314](https://github.com/anthropics/anthropic-sdk-python/commit/1ee83149809e0193612b62f9b443a0acac5d3d37))
+
+
+### Chores
+
+* **examples:** show how to pass an authorization token to an MCP server ([18be7f3](https://github.com/anthropics/anthropic-sdk-python/commit/18be7f3194ed1171c3ab937b37c2eb9dbf93a6c5))
+* **internal:** fix release workflows ([be9af1f](https://github.com/anthropics/anthropic-sdk-python/commit/be9af1f6fd5c0b4befa61fc7ec01ec52cec9ecd5))
+
 ## 0.52.0 (2025-05-22)
 
 Full Changelog: [v0.51.0...v0.52.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.51.0...v0.52.0)
