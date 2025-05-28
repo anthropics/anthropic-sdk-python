@@ -296,7 +296,7 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             types_with_input.add(block_type)
 
     # Get the types included in TRACKS_TOOL_INPUT
-    tracked_types = set(get_args(TRACKS_TOOL_INPUT))
+    tracked_types = TRACKS_TOOL_INPUT
 
     # Make sure all types with input are tracked
     for block_type in types_with_input:
