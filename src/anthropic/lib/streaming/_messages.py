@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Type, Union, Callable, cast
-from typing_extensions import Self, Iterator, Awaitable, TypeAlias, AsyncIterator, assert_never
+from typing import TYPE_CHECKING, Any, Type, Callable, cast
+from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
 
 import httpx
 from pydantic import BaseModel

@@ -14,7 +14,7 @@ from anthropic._compat import PYDANTIC_V2
 from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_types import BetaMessageStreamEvent
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
-from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaAsyncMessageStream, BetaMessageStream
+from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -361,6 +361,7 @@ class TestAsyncMessages:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_tool_use_response([event async for event in stream], await stream.get_final_message())
+
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
 def test_stream_method_definition_in_sync(sync: bool) -> None:
