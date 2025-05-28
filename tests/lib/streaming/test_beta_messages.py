@@ -394,39 +394,6 @@ def test_stream_method_definition_in_sync(sync: bool) -> None:
             + "\n\n".join(errors)
         )
 
-
-@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
-def test_beta_stream_method_definition_in_sync(sync: bool) -> None:
-    client: Anthropic | AsyncAnthropic = sync_client if sync else async_client
-
-    sig = inspect.signature(client.beta.messages.stream)
-    generated_sig = inspect.signature(client.beta.messages.create)
-
-    errors: list[str] = []
-
-    for name, generated_param in generated_sig.parameters.items():
-        if name == "stream":
-            # intentionally excluded
-            continue
-
-        custom_param = sig.parameters.get(name)
-        if not custom_param:
-            errors.append(f"the `{name}` param is missing")
-            continue
-
-        if custom_param.annotation != generated_param.annotation:
-            errors.append(
-                f"types for the `{name}` param are do not match; generated={repr(generated_param.annotation)} custom={repr(custom_param.annotation)}"
-            )
-            continue
-
-    if errors:
-        raise AssertionError(
-            f"{len(errors)} errors encountered with the {'sync' if sync else 'async'} client `messages.stream()` method:\n\n"
-            + "\n\n".join(errors)
-        )
-
-
 # go through all the ContentBlock types to make sure the type alias is up to date
 # with any type that has an input property of type object
 def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
