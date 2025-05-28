@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Type, Callable, cast
-from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
+from typing import TYPE_CHECKING, Any, Type, Union, Callable, cast
+from typing_extensions import Self, Iterator, Awaitable, TypeAlias, AsyncIterator, assert_never
 
 import httpx
 from pydantic import BaseModel
+
+from anthropic.types.beta.beta_tool_use_block import BetaToolUseBlock
+from anthropic.types.beta.beta_mcp_tool_use_block import BetaMCPToolUseBlock
+from anthropic.types.beta.beta_server_tool_use_block import BetaServerToolUseBlock
 
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
@@ -388,6 +392,12 @@ def build_events(
 
 JSON_BUF_PROPERTY = "__json_buf"
 
+TRACKS_TOOL_INPUT: TypeAlias = Union[
+    BetaToolUseBlock,
+    BetaServerToolUseBlock,
+    BetaMCPToolUseBlock,
+]
+
 
 def accumulate_event(
     *,
@@ -425,7 +435,7 @@ def accumulate_event(
             if content.type == "text":
                 content.text += event.delta.text
         elif event.delta.type == "input_json_delta":
-            if content.type == "tool_use" or content.type == "mcp_tool_use":
+            if isinstance(content, TRACKS_TOOL_INPUT):
                 from jiter import from_json
 
                 # we need to keep track of the raw JSON string as well so that we can
