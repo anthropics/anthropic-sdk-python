@@ -391,10 +391,10 @@ def build_events(
 
 JSON_BUF_PROPERTY = "__json_buf"
 
-TRACKS_TOOL_INPUT: TypeAlias = Union[
+TRACKS_TOOL_INPUT = (
     ToolUseBlock,
     ServerToolUseBlock,
-]
+)
 
 
 def accumulate_event(
