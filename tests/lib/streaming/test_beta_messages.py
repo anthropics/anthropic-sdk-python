@@ -14,7 +14,7 @@ from anthropic._compat import PYDANTIC_V2
 from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_types import BetaMessageStreamEvent
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
-from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT
+from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaAsyncMessageStream, BetaMessageStream
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -54,9 +54,61 @@ event: message_stop
 data: {"type":"message_stop"}
 """
 
+streaming_with_tool_use_example = """
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_019Q1hrJbZG26Fb9BQhrkHEr","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":377,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":1,"service_tier":"standard"}}     }
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}            }
+
+event: ping
+data: {"type": "ping"}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"I"}    }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'ll check the current weather in Paris for you."}           }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0             }
+
+event: content_block_start
+data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_01NRLabsLyVHZPKxbKvkfSMn","name":"get_weather","input":{}}             }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}   }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\\"locati"}               }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"on\\": \\"P"}              }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"ar"}    }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"is\\"}"}               }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":1           }
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":65}   }
+
+event: message_stop
+data: {"type":"message_stop"       }
+"""
+
 
 def basic_response() -> Iterator[bytes]:
     for line in stream_example.splitlines():
+        yield line.encode() + b"\n"
+
+
+def streaming_with_tool_use_example_response() -> Iterator[bytes]:
+    for line in streaming_with_tool_use_example.splitlines():
         yield line.encode() + b"\n"
 
 
@@ -92,6 +144,62 @@ def assert_basic_response(events: list[BetaMessageStreamEvent], message: BetaMes
     ]
 
 
+def assert_tool_use_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
+    print(message)
+    assert message.id == "msg_019Q1hrJbZG26Fb9BQhrkHEr"
+    assert message.model == "claude-sonnet-4-20250514"
+    assert message.role == "assistant"
+    assert message.stop_reason == "tool_use"
+    assert message.stop_sequence is None
+    assert message.type == "message"
+    assert len(message.content) == 2
+
+    print(message.content)
+    content = message.content[0]
+    assert content.type == "text"
+    assert content.text == "I'll check the current weather in Paris for you."
+
+    tool_use = message.content[1]
+    assert tool_use.type == "tool_use"
+    assert tool_use.id == "toolu_01NRLabsLyVHZPKxbKvkfSMn"
+    assert tool_use.name == "get_weather"
+    assert tool_use.input == {
+        "location": "Paris",
+    }
+
+    assert message.usage.input_tokens == 377
+    assert message.usage.output_tokens == 65
+    assert message.usage.cache_creation_input_tokens == 0
+    assert message.usage.cache_read_input_tokens == 0
+    assert message.usage.service_tier == "standard"
+    assert message.usage.server_tool_use == None
+
+    print(f"Events: {[e.type for e in events]}")
+
+    assert [e.type for e in events] == [
+        "message_start",
+        "content_block_start",
+        "content_block_delta",
+        "text",
+        "content_block_delta",
+        "text",
+        "content_block_stop",
+        "content_block_start",
+        "content_block_delta",
+        "input_json",
+        "content_block_delta",
+        "input_json",
+        "content_block_delta",
+        "input_json",
+        "content_block_delta",
+        "input_json",
+        "content_block_delta",
+        "input_json",
+        "content_block_stop",
+        "message_delta",
+    ]
+
+
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
@@ -114,6 +222,26 @@ class TestSyncMessages:
                 assert isinstance(cast(Any, stream), Stream)
 
             assert_basic_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_tool_use(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=streaming_with_tool_use_example_response())
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-sonnet-4-20250514",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaMessageStream)
+
+            assert_tool_use_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
@@ -213,6 +341,26 @@ class TestAsyncMessages:
                     # Consume the stream to ensure the warning is triggered
                     await stream.get_final_message()
 
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_tool_use(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(streaming_with_tool_use_example_response()))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-sonnet-4-20250514",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
+
+            assert_tool_use_response([event async for event in stream], await stream.get_final_message())
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
 def test_stream_method_definition_in_sync(sync: bool) -> None:
