@@ -9,7 +9,7 @@ import httpx
 import pytest
 from respx import MockRouter
 
-from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
+from anthropic import Anthropic, AsyncAnthropic
 from anthropic._compat import PYDANTIC_V2
 from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_types import BetaMessageStreamEvent
@@ -203,9 +203,6 @@ def assert_tool_use_response(events: list[BetaMessageStreamEvent], message: Beta
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
-        # skip for now... this isn't in `stream`?
-        pytest.skip("Deprecated model warnings are not currently implemented for streaming...")
-
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
 
         with sync_client.beta.messages.stream(
@@ -218,8 +215,7 @@ class TestSyncMessages:
             ],
             model="claude-3-opus-20240229",
         ) as stream:
-            with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), Stream)
+            assert isinstance(cast(Any, stream), BetaMessageStream)
 
             assert_basic_response([event for event in stream], stream.get_final_message())
 
@@ -264,8 +260,6 @@ class TestSyncMessages:
 
     @pytest.mark.respx(base_url=base_url)
     def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
-        # skip for now... this isn't in `stream`?
-        pytest.skip("Deprecated model warnings are not currently implemented for streaming...")
         for deprecated_model in DEPRECATED_MODELS:
             respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
 
@@ -283,8 +277,6 @@ class TestAsyncMessages:
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
     async def test_basic_response(self, respx_mock: MockRouter) -> None:
-        # skip for now... this isn't in `stream`?
-        pytest.skip("Deprecated model warnings are not currently implemented for streaming...")
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=to_async_iter(basic_response())))
 
         async with async_client.beta.messages.stream(
@@ -295,10 +287,9 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-3-opus-20240229",
+            model="claude-opus-4-0",
         ) as stream:
-            with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), AsyncStream)
+            assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_basic_response([event async for event in stream], await stream.get_final_message())
 
@@ -325,8 +316,6 @@ class TestAsyncMessages:
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
     async def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
-        # skip for now... this isn't in `stream`?
-        pytest.skip("Deprecated model warnings are not currently implemented for streaming...")
         for deprecated_model in DEPRECATED_MODELS:
             respx_mock.post("/v1/messages").mock(
                 return_value=httpx.Response(200, content=to_async_iter(basic_response()))
@@ -393,6 +382,7 @@ def test_stream_method_definition_in_sync(sync: bool) -> None:
             f"{len(errors)} errors encountered with the {'sync' if sync else 'async'} client `messages.stream()` method:\n\n"
             + "\n\n".join(errors)
         )
+
 
 # go through all the ContentBlock types to make sure the type alias is up to date
 # with any type that has an input property of type object

@@ -1059,6 +1059,13 @@ class Messages(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaMessageStreamManager:
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
         """Create a Message stream"""
         extra_headers = {
             "X-Stainless-Stream-Helper": "beta.messages",
@@ -2361,6 +2368,13 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaAsyncMessageStreamManager:
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
         extra_headers = {
             "X-Stainless-Stream-Helper": "beta.messages",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),

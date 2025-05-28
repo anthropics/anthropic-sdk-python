@@ -12,9 +12,9 @@ from respx import MockRouter
 from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
 from anthropic._compat import PYDANTIC_V2
 from anthropic.lib.streaming import MessageStreamEvent
-from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
 from anthropic.types.message import Message
 from anthropic.resources.messages import DEPRECATED_MODELS
+from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -144,6 +144,7 @@ def assert_basic_response(events: list[MessageStreamEvent], message: Message) ->
         "message_delta",
     ]
 
+
 def assert_tool_use_response(events: list[MessageStreamEvent], message: Message) -> None:
     assert message.id == "msg_019Q1hrJbZG26Fb9BQhrkHEr"
     assert message.model == "claude-sonnet-4-20250514"
@@ -196,6 +197,7 @@ def assert_tool_use_response(events: list[MessageStreamEvent], message: Message)
         "content_block_stop",
         "message_delta",
     ]
+
 
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
@@ -351,6 +353,7 @@ class TestAsyncMessages:
                 assert isinstance(cast(Any, stream), AsyncStream)
 
             assert_tool_use_response([event async for event in stream], await stream.get_final_message())
+
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
 def test_stream_method_definition_in_sync(sync: bool) -> None:
