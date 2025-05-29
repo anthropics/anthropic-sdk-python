@@ -9,12 +9,12 @@ import httpx
 import pytest
 from respx import MockRouter
 
-from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
+from anthropic import Anthropic, AsyncAnthropic
 from anthropic._compat import PYDANTIC_V2
-from anthropic.lib.streaming import MessageStreamEvent
-from anthropic.types.message import Message
-from anthropic.resources.messages import DEPRECATED_MODELS
-from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
+from anthropic.types.beta.beta_message import BetaMessage
+from anthropic.lib.streaming._beta_types import BetaMessageStreamEvent
+from anthropic.resources.messages.messages import DEPRECATED_MODELS
+from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -53,7 +53,6 @@ data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":
 event: message_stop
 data: {"type":"message_stop"}
 """
-
 
 streaming_with_tool_use_example = """
 event: message_start
@@ -118,7 +117,7 @@ async def to_async_iter(iter: Iterator[_T]) -> AsyncIterator[_T]:
         yield event
 
 
-def assert_basic_response(events: list[MessageStreamEvent], message: Message) -> None:
+def assert_basic_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
     assert message.id == "msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK"
     assert message.model == "claude-3-opus-20240229"
     assert message.role == "assistant"
@@ -145,7 +144,8 @@ def assert_basic_response(events: list[MessageStreamEvent], message: Message) ->
     ]
 
 
-def assert_tool_use_response(events: list[MessageStreamEvent], message: Message) -> None:
+def assert_tool_use_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
+    print(message)
     assert message.id == "msg_019Q1hrJbZG26Fb9BQhrkHEr"
     assert message.model == "claude-sonnet-4-20250514"
     assert message.role == "assistant"
@@ -154,6 +154,7 @@ def assert_tool_use_response(events: list[MessageStreamEvent], message: Message)
     assert message.type == "message"
     assert len(message.content) == 2
 
+    print(message.content)
     content = message.content[0]
     assert content.type == "text"
     assert content.text == "I'll check the current weather in Paris for you."
@@ -204,7 +205,7 @@ class TestSyncMessages:
     def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
 
-        with sync_client.messages.stream(
+        with sync_client.beta.messages.stream(
             max_tokens=1024,
             messages=[
                 {
@@ -214,16 +215,35 @@ class TestSyncMessages:
             ],
             model="claude-3-opus-20240229",
         ) as stream:
-            with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), Stream)
+            assert isinstance(cast(Any, stream), BetaMessageStream)
 
             assert_basic_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_tool_use(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=streaming_with_tool_use_example_response())
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-sonnet-4-20250514",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaMessageStream)
+
+            assert_tool_use_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
 
-        with sync_client.messages.stream(
+        with sync_client.beta.messages.stream(
             max_tokens=1024,
             messages=[
                 {
@@ -244,34 +264,13 @@ class TestSyncMessages:
             respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
 
             with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
-                with sync_client.messages.stream(
+                with sync_client.beta.messages.stream(
                     max_tokens=1024,
                     messages=[{"role": "user", "content": "Hello"}],
                     model=deprecated_model,
                 ) as stream:
                     # Consume the stream to ensure the warning is triggered
                     stream.until_done()
-
-    @pytest.mark.respx(base_url=base_url)
-    def test_tool_use(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=streaming_with_tool_use_example_response())
-        )
-
-        with sync_client.messages.stream(
-            max_tokens=1024,
-            messages=[
-                {
-                    "role": "user",
-                    "content": "Say hello there!",
-                }
-            ],
-            model="claude-sonnet-4-20250514",
-        ) as stream:
-            with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), Stream)
-
-            assert_tool_use_response([event for event in stream], stream.get_final_message())
 
 
 class TestAsyncMessages:
@@ -280,7 +279,7 @@ class TestAsyncMessages:
     async def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=to_async_iter(basic_response())))
 
-        async with async_client.messages.stream(
+        async with async_client.beta.messages.stream(
             max_tokens=1024,
             messages=[
                 {
@@ -288,10 +287,9 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-3-opus-20240229",
+            model="claude-opus-4-0",
         ) as stream:
-            with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), AsyncStream)
+            assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_basic_response([event async for event in stream], await stream.get_final_message())
 
@@ -300,7 +298,7 @@ class TestAsyncMessages:
     async def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=to_async_iter(basic_response())))
 
-        async with async_client.messages.stream(
+        async with async_client.beta.messages.stream(
             max_tokens=1024,
             messages=[
                 {
@@ -324,7 +322,7 @@ class TestAsyncMessages:
             )
 
             with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
-                async with async_client.messages.stream(
+                async with async_client.beta.messages.stream(
                     max_tokens=1024,
                     messages=[{"role": "user", "content": "Hello"}],
                     model=deprecated_model,
@@ -339,7 +337,7 @@ class TestAsyncMessages:
             return_value=httpx.Response(200, content=to_async_iter(streaming_with_tool_use_example_response()))
         )
 
-        async with async_client.messages.stream(
+        async with async_client.beta.messages.stream(
             max_tokens=1024,
             messages=[
                 {
@@ -349,8 +347,7 @@ class TestAsyncMessages:
             ],
             model="claude-sonnet-4-20250514",
         ) as stream:
-            with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), AsyncStream)
+            assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_tool_use_response([event async for event in stream], await stream.get_final_message())
 
@@ -359,8 +356,8 @@ class TestAsyncMessages:
 def test_stream_method_definition_in_sync(sync: bool) -> None:
     client: Anthropic | AsyncAnthropic = sync_client if sync else async_client
 
-    sig = inspect.signature(client.messages.stream)
-    generated_sig = inspect.signature(client.messages.create)
+    sig = inspect.signature(client.beta.messages.stream)
+    generated_sig = inspect.signature(client.beta.messages.create)
 
     errors: list[str] = []
 
@@ -389,18 +386,20 @@ def test_stream_method_definition_in_sync(sync: bool) -> None:
 
 # go through all the ContentBlock types to make sure the type alias is up to date
 # with any type that has an input property of type object
-@pytest.mark.skipif(not PYDANTIC_V2, reason='only applicable in pydantic v2')
 def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
+    # only run this on Pydantic v2
+    if not PYDANTIC_V2:
+        pytest.skip("This test is only applicable for Pydantic v2")
     from typing import get_args
 
     from pydantic import BaseModel
 
-    from anthropic.types.content_block import ContentBlock
+    from anthropic.types.beta.beta_content_block import BetaContentBlock
 
     # Get the content block union type
-    content_block_union = get_args(ContentBlock)[0]
+    content_block_union = get_args(BetaContentBlock)[0]
 
-    # Get all types from ContentBlock union
+    # Get all types from BetaContentBlock union
     content_block_types = get_args(content_block_union)
 
     # Types that should have an input property
