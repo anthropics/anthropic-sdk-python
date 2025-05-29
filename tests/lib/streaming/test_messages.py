@@ -389,10 +389,8 @@ def test_stream_method_definition_in_sync(sync: bool) -> None:
 
 # go through all the ContentBlock types to make sure the type alias is up to date
 # with any type that has an input property of type object
+@pytest.mark.skipif(not PYDANTIC_V2, reason='only applicable in pydantic v2')
 def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
-    # only run this on Pydantic v2
-    if not PYDANTIC_V2:
-        pytest.skip("This test is only applicable for Pydantic v2")
     from typing import get_args
 
     from pydantic import BaseModel
