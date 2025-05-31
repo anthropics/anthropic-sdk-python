@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.52.2 (2025-05-31)
+
+Full Changelog: [v0.52.1...v0.52.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.52.1...v0.52.2)
+
+### Bug Fixes
+
+* **client:** fix issue with server_tool_use input tracking and improve tests ([3fe3fa2](https://github.com/anthropics/anthropic-sdk-python/commit/3fe3fa278bbd44fd01c889807154c37259bf617d))
+
 ## 0.52.1 (2025-05-28)
 
 Full Changelog: [v0.52.0...v0.52.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.52.0...v0.52.1)
