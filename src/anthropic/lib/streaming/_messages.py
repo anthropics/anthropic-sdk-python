@@ -7,6 +7,9 @@ from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_n
 import httpx
 from pydantic import BaseModel
 
+from anthropic.types.tool_use_block import ToolUseBlock
+from anthropic.types.server_tool_use_block import ServerToolUseBlock
+
 from ._types import (
     TextEvent,
     CitationEvent,
@@ -388,6 +391,11 @@ def build_events(
 
 JSON_BUF_PROPERTY = "__json_buf"
 
+TRACKS_TOOL_INPUT = (
+    ToolUseBlock,
+    ServerToolUseBlock,
+)
+
 
 def accumulate_event(
     *,
@@ -425,7 +433,7 @@ def accumulate_event(
             if content.type == "text":
                 content.text += event.delta.text
         elif event.delta.type == "input_json_delta":
-            if content.type == "tool_use":
+            if isinstance(content, TRACKS_TOOL_INPUT):
                 from jiter import from_json
 
                 # we need to keep track of the raw JSON string as well so that we can
