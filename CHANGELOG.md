@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.52.2 (2025-06-02)
+
+Full Changelog: [v0.52.1...v0.52.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.52.1...v0.52.2)
+
+### Bug Fixes
+
+* **client:** fix issue with server_tool_use input tracking and improve tests ([3fe3fa2](https://github.com/anthropics/anthropic-sdk-python/commit/3fe3fa278bbd44fd01c889807154c37259bf617d))
+* **docs:** remove reference to rye shell ([2b3d677](https://github.com/anthropics/anthropic-sdk-python/commit/2b3d677a8df49e1c9a26a594436f1ace8af7d3af))
+
+
+### Chores
+
+* **docs:** remove unnecessary param examples ([6b129f4](https://github.com/anthropics/anthropic-sdk-python/commit/6b129f4fd00ca296b53368966349bcce0ee0e3a0))
+
+
+### Refactors
+
+* **pkg:** switch from rye to uv ([f553908](https://github.com/anthropics/anthropic-sdk-python/commit/f55390804154b73d9a639fb25b93f21106bcf569))
+
 ## 0.52.1 (2025-05-28)
 
 Full Changelog: [v0.52.0...v0.52.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.52.0...v0.52.1)
