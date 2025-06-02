@@ -22,14 +22,11 @@ jobs:
           repo: ${{ github.event.repository.full_name }}
           stainless-api-key: ${{ secrets.STAINLESS_API_KEY }}
 
-      - name: Install Rye
+      - name: Install uv
         if: ${{ steps.release.outputs.releases_created }}
-        run: |
-          curl -sSf https://rye.astral.sh/get | bash
-          echo "$HOME/.rye/shims" >> $GITHUB_PATH
-        env:
-          RYE_VERSION: '0.44.0'
-          RYE_INSTALL_OPTION: '--yes'
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: '0.5.23'
 
       - name: Publish to PyPI
         if: ${{ steps.release.outputs.releases_created }}
