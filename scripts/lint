@@ -4,8 +4,14 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-echo "==> Running lints"
-rye run lint
+echo "==> Running ruff"
+uv run ruff check .
+
+echo "==> Running pyright"
+uv run pyright
+
+echo "==> Running mypy"
+uv run mypy .
 
 echo "==> Making sure it imports"
-rye run python -c 'import anthropic'
+uv run python -c 'import anthropic'

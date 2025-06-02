@@ -55,7 +55,8 @@ fi
 export DEFER_PYDANTIC_BUILD=false
 
 echo "==> Running tests"
-rye run pytest "$@"
+uv run pytest "$@"
 
 echo "==> Running Pydantic v1 tests"
-rye run nox -s test-pydantic-v1 -- "$@"
+uv pip install 'pydantic<2'
+uv run --no-sync pytest "$@"
