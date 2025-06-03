@@ -105,6 +105,7 @@ class TestMessages:
                                 "type": "string",
                             },
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
                     "cache_control": {
@@ -245,6 +246,7 @@ class TestMessages:
                                 "type": "string",
                             },
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
                     "cache_control": {
@@ -377,6 +379,7 @@ class TestMessages:
                                 "type": "string",
                             },
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
                     "cache_control": {
@@ -516,6 +519,7 @@ class TestAsyncMessages:
                                 "type": "string",
                             },
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
                     "cache_control": {
@@ -656,6 +660,7 @@ class TestAsyncMessages:
                                 "type": "string",
                             },
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
                     "cache_control": {
@@ -788,6 +793,7 @@ class TestAsyncMessages:
                                 "type": "string",
                             },
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
                     "cache_control": {
