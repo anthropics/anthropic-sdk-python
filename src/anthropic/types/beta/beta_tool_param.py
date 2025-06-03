@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, Union, Optional
+from typing import Dict, List, Union, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
@@ -14,6 +14,8 @@ class InputSchemaTyped(TypedDict, total=False):
     type: Required[Literal["object"]]
 
     properties: Optional[object]
+
+    required: Optional[List[str]]
 
 
 InputSchema: TypeAlias = Union[InputSchemaTyped, Dict[str, object]]
