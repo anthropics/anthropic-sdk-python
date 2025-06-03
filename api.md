@@ -85,7 +85,6 @@ from anthropic.types import (
     ToolChoiceTool,
     ToolResultBlockParam,
     ToolTextEditor20250124,
-    ToolTextEditor20250429,
     ToolUnion,
     ToolUseBlock,
     ToolUseBlockParam,
