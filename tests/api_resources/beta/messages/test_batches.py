@@ -119,6 +119,7 @@ class TestBatches:
                                             "type": "string",
                                         },
                                     },
+                                    "required": ["location"],
                                 },
                                 "name": "name",
                                 "cache_control": {
@@ -513,6 +514,7 @@ class TestAsyncBatches:
                                             "type": "string",
                                         },
                                     },
+                                    "required": ["location"],
                                 },
                                 "name": "name",
                                 "cache_control": {
