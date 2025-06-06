@@ -197,7 +197,6 @@ Types:
 ```python
 from anthropic.types.beta import (
     BetaBase64ImageSource,
-    BetaBase64PDFBlock,
     BetaBase64PDFSource,
     BetaCacheControlEphemeral,
     BetaCacheCreation,
@@ -253,6 +252,7 @@ from anthropic.types.beta import (
     BetaRawMessageStreamEvent,
     BetaRedactedThinkingBlock,
     BetaRedactedThinkingBlockParam,
+    BetaRequestDocumentBlock,
     BetaRequestMCPServerToolConfiguration,
     BetaRequestMCPServerURLDefinition,
     BetaRequestMCPToolResultBlockParam,
@@ -302,6 +302,7 @@ from anthropic.types.beta import (
     BetaWebSearchToolResultBlockParamContent,
     BetaWebSearchToolResultError,
     BetaWebSearchToolResultErrorCode,
+    BetaBase64PDFBlock,
 )
 ```
 
