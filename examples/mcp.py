@@ -10,7 +10,7 @@ response = anthropic.beta.messages.create(
     messages=[
         {
             "role": "user",
-            "content": 'Calculate 1+2',
+            "content": "Calculate 1+2",
         },
     ],
     mcp_servers=[
@@ -21,7 +21,7 @@ response = anthropic.beta.messages.create(
             "name": "example",
             "tool_configuration": {  # Optional, by default all tools are enabled
                 "enabled": True,
-                "allowed_tools": ['echo', 'add'],  # Optional
+                "allowed_tools": ["echo", "add"],  # Optional
             },
         }
     ],

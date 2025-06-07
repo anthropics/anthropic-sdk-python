@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, Union, Optional
+from typing import Dict, List, Union, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .._models import set_pydantic_config
@@ -15,6 +15,8 @@ class InputSchemaTyped(TypedDict, total=False):
     type: Required[Literal["object"]]
 
     properties: Optional[object]
+
+    required: Optional[List[str]]
 
 
 set_pydantic_config(InputSchemaTyped, {"extra": "allow"})

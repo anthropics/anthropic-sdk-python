@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import inspect
 from typing import Any, Set, TypeVar, cast
-from typing_extensions import Iterator, AsyncIterator
 
 import httpx
 import pytest
@@ -16,6 +15,8 @@ from anthropic.lib.streaming._beta_types import BetaMessageStreamEvent
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
 from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
 
+from .helpers import get_response, to_async_iter
+
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
 
@@ -23,98 +24,6 @@ sync_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_val
 async_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 
 _T = TypeVar("_T")
-
-# copied from the real API
-stream_example = """
-event: message_start
-data: {"type":"message_start","message":{"id":"msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK","type":"message","role":"assistant","content":[],"model":"claude-3-opus-20240229","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":11,"output_tokens":1}}}
-
-event: content_block_start
-data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
-
-event: ping
-data: {"type": "ping"}
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" there"}}
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"!"}}
-
-event: content_block_stop
-data: {"type":"content_block_stop","index":0}
-
-event: message_delta
-data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":6}}
-
-event: message_stop
-data: {"type":"message_stop"}
-"""
-
-streaming_with_tool_use_example = """
-event: message_start
-data: {"type":"message_start","message":{"id":"msg_019Q1hrJbZG26Fb9BQhrkHEr","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":377,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":1,"service_tier":"standard"}}     }
-
-event: content_block_start
-data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}            }
-
-event: ping
-data: {"type": "ping"}
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"I"}    }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'ll check the current weather in Paris for you."}           }
-
-event: content_block_stop
-data: {"type":"content_block_stop","index":0             }
-
-event: content_block_start
-data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_01NRLabsLyVHZPKxbKvkfSMn","name":"get_weather","input":{}}             }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}   }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\\"locati"}               }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"on\\": \\"P"}              }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"ar"}    }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"is\\"}"}               }
-
-event: content_block_stop
-data: {"type":"content_block_stop","index":1           }
-
-event: message_delta
-data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":65}   }
-
-event: message_stop
-data: {"type":"message_stop"       }
-"""
-
-
-def basic_response() -> Iterator[bytes]:
-    for line in stream_example.splitlines():
-        yield line.encode() + b"\n"
-
-
-def streaming_with_tool_use_example_response() -> Iterator[bytes]:
-    for line in streaming_with_tool_use_example.splitlines():
-        yield line.encode() + b"\n"
-
-
-async def to_async_iter(iter: Iterator[_T]) -> AsyncIterator[_T]:
-    for event in iter:
-        yield event
 
 
 def assert_basic_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
@@ -145,7 +54,6 @@ def assert_basic_response(events: list[BetaMessageStreamEvent], message: BetaMes
 
 
 def assert_tool_use_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
-    print(message)
     assert message.id == "msg_019Q1hrJbZG26Fb9BQhrkHEr"
     assert message.model == "claude-sonnet-4-20250514"
     assert message.role == "assistant"
@@ -154,7 +62,6 @@ def assert_tool_use_response(events: list[BetaMessageStreamEvent], message: Beta
     assert message.type == "message"
     assert len(message.content) == 2
 
-    print(message.content)
     content = message.content[0]
     assert content.type == "text"
     assert content.text == "I'll check the current weather in Paris for you."
@@ -173,8 +80,6 @@ def assert_tool_use_response(events: list[BetaMessageStreamEvent], message: Beta
     assert message.usage.cache_read_input_tokens == 0
     assert message.usage.service_tier == "standard"
     assert message.usage.server_tool_use == None
-
-    print(f"Events: {[e.type for e in events]}")
 
     assert [e.type for e in events] == [
         "message_start",
@@ -203,7 +108,9 @@ def assert_tool_use_response(events: list[BetaMessageStreamEvent], message: Beta
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+        )
 
         with sync_client.beta.messages.stream(
             max_tokens=1024,
@@ -222,7 +129,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=streaming_with_tool_use_example_response())
+            return_value=httpx.Response(200, content=get_response("tool_use_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -241,7 +148,9 @@ class TestSyncMessages:
 
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+        )
 
         with sync_client.beta.messages.stream(
             max_tokens=1024,
@@ -261,7 +170,9 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
         for deprecated_model in DEPRECATED_MODELS:
-            respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=basic_response()))
+            respx_mock.post("/v1/messages").mock(
+                return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+            )
 
             with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
                 with sync_client.beta.messages.stream(
@@ -277,7 +188,9 @@ class TestAsyncMessages:
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
     async def test_basic_response(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=to_async_iter(basic_response())))
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+        )
 
         async with async_client.beta.messages.stream(
             max_tokens=1024,
@@ -296,7 +209,9 @@ class TestAsyncMessages:
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
     async def test_context_manager(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, content=to_async_iter(basic_response())))
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+        )
 
         async with async_client.beta.messages.stream(
             max_tokens=1024,
@@ -318,7 +233,7 @@ class TestAsyncMessages:
     async def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
         for deprecated_model in DEPRECATED_MODELS:
             respx_mock.post("/v1/messages").mock(
-                return_value=httpx.Response(200, content=to_async_iter(basic_response()))
+                return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
             )
 
             with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
@@ -334,7 +249,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(streaming_with_tool_use_example_response()))
+            return_value=httpx.Response(200, content=to_async_iter(get_response("tool_use_response.txt")))
         )
 
         async with async_client.beta.messages.stream(
