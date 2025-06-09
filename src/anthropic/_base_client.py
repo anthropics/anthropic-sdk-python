@@ -830,16 +830,15 @@ class _DefaultHttpxClient(httpx.Client):
 
             proxy_map = {key: None if url is None else Proxy(url=url) for key, url in get_environment_proxies().items()}
 
-            args = {}
-
-            args = {
+            transport_kwargs = {
                 arg: kwargs[arg] for arg in ("verify", "cert", "trust_env", "http1", "http2", "limits") if arg in kwargs
             }
 
             proxy_mounts = {
-                key: None if proxy is None else HTTPTransport(proxy=proxy, **args) for key, proxy in proxy_map.items()
+                key: None if proxy is None else HTTPTransport(proxy=proxy, **transport_kwargs)
+                for key, proxy in proxy_map.items()
             }
-            default_transport = HTTPTransport(**args)
+            default_transport = HTTPTransport(**transport_kwargs)
 
             # Prioritize the mounts set by the user over the environment variables.
             kwargs["mounts"] = proxy_mounts | kwargs.get("mounts", {})
@@ -1381,16 +1380,15 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
 
             proxy_map = {key: None if url is None else Proxy(url=url) for key, url in get_environment_proxies().items()}
 
-            args = {}
-
-            args = {
+            transport_kwargs = {
                 arg: kwargs[arg] for arg in ("verify", "cert", "trust_env", "http1", "http2", "limits") if arg in kwargs
             }
 
             proxy_mounts = {
-                key: None if proxy is None else HTTPTransport(proxy=proxy, **args) for key, proxy in proxy_map.items()
+                key: None if proxy is None else HTTPTransport(proxy=proxy, **transport_kwargs)
+                for key, proxy in proxy_map.items()
             }
-            default_transport = HTTPTransport(**args)
+            default_transport = HTTPTransport(**transport_kwargs)
 
             # Prioritize the mounts set by the user over the environment variables.
             kwargs["mounts"] = proxy_mounts | kwargs.get("mounts", {})
