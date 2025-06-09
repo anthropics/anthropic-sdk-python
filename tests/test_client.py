@@ -928,6 +928,15 @@ class TestAnthropic:
             assert response.retries_taken == failures_before_success
             assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
+    def test_proxy_environment_variables(self, monkeypatch: Any):
+        monkeypatch.setenv("HTTPS_PROXY", "https://example.org")
+        client = Anthropic()
+
+        mounts = tuple(client._client._mounts.items())
+        assert len(mounts) == 1
+        assert mounts[0][1] == "https://example.org"
+        assert mounts[0][0].pattern == "https://"
+
 
 class TestAsyncAnthropic:
     client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
@@ -1862,3 +1871,12 @@ class TestAsyncAnthropic:
                     raise AssertionError("calling get_platform using asyncify resulted in a hung process")
 
                 time.sleep(0.1)
+
+    def test_proxy_environment_variables(self, monkeypatch: Any):
+        monkeypatch.setenv("HTTPS_PROXY", "https://example.org")
+        client = Anthropic()
+
+        mounts = tuple(client._client._mounts.items())
+        assert len(mounts) == 1
+        assert mounts[0][1] == "https://example.org"
+        assert mounts[0][0].pattern == "https://"
