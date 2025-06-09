@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.53.0 (2025-06-09)
+
+Full Changelog: [v0.52.2...v0.53.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.52.2...v0.53.0)
+
+### Features
+
+* **client:** add follow_redirects request option ([e5238c0](https://github.com/anthropics/anthropic-sdk-python/commit/e5238c0d77aaab054b58e0ec046fe7a981eecadf))
+* **client:** add support for new text_editor_20250429 tool ([b3b3f5b](https://github.com/anthropics/anthropic-sdk-python/commit/b3b3f5b27b9eb3d6f2d4d242fd473aec84fb99a4))
+
+
+### Bug Fixes
+
+* **client:** deprecate BetaBase64PDFBlock in favor of BetaRequestDocumentBlock ([5ac58e9](https://github.com/anthropics/anthropic-sdk-python/commit/5ac58e97d7b8502db477cf15169ac18c2c0916c9))
+* **internal:** fix typing remapping ([6c415da](https://github.com/anthropics/anthropic-sdk-python/commit/6c415da0b2713505b0deaa586f92b2a549b5d3ca))
+
+
+### Chores
+
+* **internal:** codegen related update ([94812ec](https://github.com/anthropics/anthropic-sdk-python/commit/94812ec4c75c93268c5dec21d2659dd3b0725c32))
+* **internal:** version bump ([41ce701](https://github.com/anthropics/anthropic-sdk-python/commit/41ce701f67858e5bfb0f68b8f30f114d9c8e5712))
+* **tests:** improve testing by extracting fixtures ([68c62cc](https://github.com/anthropics/anthropic-sdk-python/commit/68c62cc7b97e27985eff22d65b9ba1854eea7a53))
+
 ## 0.52.2 (2025-06-02)
 
 Full Changelog: [v0.52.1...v0.52.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.52.1...v0.52.2)
