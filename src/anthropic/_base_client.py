@@ -38,10 +38,8 @@ import anyio
 import httpx
 import distro
 import pydantic
-from httpx import URL, Proxy, HTTPTransport
+from httpx import URL, Proxy, HTTPTransport, AsyncHTTPTransport
 from pydantic import PrivateAttr
-
-from anthropic._utils._httpx import get_environment_proxies
 
 from . import _exceptions
 from ._qs import Querystring
@@ -88,6 +86,7 @@ from ._exceptions import (
     APIConnectionError,
     APIResponseValidationError,
 )
+from ._utils._httpx import get_environment_proxies
 from ._legacy_response import LegacyAPIResponse
 
 log: logging.Logger = logging.getLogger(__name__)
@@ -1027,6 +1026,9 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
             if self.custom_auth is not None:
                 kwargs["auth"] = self.custom_auth
 
+            if options.follow_redirects is not None:
+                kwargs["follow_redirects"] = options.follow_redirects
+
             log.debug("Sending HTTP Request: %s %s", request.method, request.url)
 
             response = None
@@ -1385,10 +1387,10 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
             }
 
             proxy_mounts = {
-                key: None if proxy is None else HTTPTransport(proxy=proxy, **transport_kwargs)
+                key: None if proxy is None else AsyncHTTPTransport(proxy=proxy, **transport_kwargs)
                 for key, proxy in proxy_map.items()
             }
-            default_transport = HTTPTransport(**transport_kwargs)
+            default_transport = AsyncHTTPTransport(**transport_kwargs)
 
             # Prioritize the mounts set by the user over the environment variables.
             kwargs["mounts"] = proxy_mounts | kwargs.get("mounts", {})
@@ -1579,6 +1581,9 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
             kwargs: HttpxSendArgs = {}
             if self.custom_auth is not None:
                 kwargs["auth"] = self.custom_auth
+
+            if options.follow_redirects is not None:
+                kwargs["follow_redirects"] = options.follow_redirects
 
             log.debug("Sending HTTP Request: %s %s", request.method, request.url)
 

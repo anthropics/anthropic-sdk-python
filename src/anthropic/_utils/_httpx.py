@@ -1,3 +1,11 @@
+"""
+This file includes code adapted from HTTPX's utility module
+(https://github.com/encode/httpx/blob/336204f0121a9aefdebac5cacd81f912bafe8057/httpx/_utils.py).
+We implement custom proxy handling to support configurations like `socket_options`,
+which are not currently configurable through the HTTPX client.
+For more context, see: https://github.com/encode/httpx/discussions/3514
+"""
+
 from __future__ import annotations
 
 import ipaddress
