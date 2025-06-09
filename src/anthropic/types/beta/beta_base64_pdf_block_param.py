@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from .beta_request_document_block import BetaRequestDocumentBlock
+from .beta_request_document_block_param import BetaRequestDocumentBlockParam
 
-BetaBase64PDFBlockParam = BetaRequestDocumentBlock
+BetaBase64PDFBlockParam = BetaRequestDocumentBlockParam
