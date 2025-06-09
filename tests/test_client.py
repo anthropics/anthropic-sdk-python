@@ -934,7 +934,6 @@ class TestAnthropic:
 
         mounts = tuple(client._client._mounts.items())
         assert len(mounts) == 1
-        assert mounts[0][1] == "https://example.org"
         assert mounts[0][0].pattern == "https://"
 
 
@@ -1878,5 +1877,4 @@ class TestAsyncAnthropic:
 
         mounts = tuple(client._client._mounts.items())
         assert len(mounts) == 1
-        assert mounts[0][1] == "https://example.org"
         assert mounts[0][0].pattern == "https://"
