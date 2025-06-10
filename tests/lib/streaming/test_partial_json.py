@@ -128,6 +128,6 @@ class TestPartialJson:
             )
             raise AssertionError("Expected ValueError for invalid JSON, but no error was raised.")
         except ValueError as e:
-            assert str(e).startswith("Failed to parse input JSON: expected value at line 1 column 38.")
+            assert str(e).startswith("Unable to parse tool parameter JSON from model. Please retry your request or adjust your prompt.")
         except Exception as e:
             raise AssertionError(f"Unexpected error type: {type(e).__name__} with message: {str(e)}") from e
