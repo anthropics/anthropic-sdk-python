@@ -840,7 +840,8 @@ class _DefaultHttpxClient(httpx.Client):
             default_transport = HTTPTransport(**transport_kwargs)
 
             # Prioritize the mounts set by the user over the environment variables.
-            kwargs["mounts"] = proxy_mounts | kwargs.get("mounts", {})
+            proxy_mounts.update(kwargs.get("mounts", {}).items())
+            kwargs["mounts"] = proxy_mounts
 
             # Sets the default transport so that HTTPX won't automatically configure proxies.
             kwargs["transport"] = kwargs.get("transport", default_transport)
@@ -1393,7 +1394,8 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
             default_transport = AsyncHTTPTransport(**transport_kwargs)
 
             # Prioritize the mounts set by the user over the environment variables.
-            kwargs["mounts"] = proxy_mounts | kwargs.get("mounts", {})
+            proxy_mounts.update(kwargs.get("mounts", {}).items())
+            kwargs["mounts"] = proxy_mounts
 
             # Sets the default transport so that HTTPX won't automatically configure proxies.
             kwargs["transport"] = kwargs.get("transport", default_transport)
