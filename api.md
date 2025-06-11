@@ -298,13 +298,13 @@ from anthropic.types import (
     WebSearchToolResultBlockParam,
     WebSearchToolResultBlockParamContent,
     WebSearchToolResultError,
-    MessageStreamEvent,
-    MessageStartEvent,
-    MessageDeltaEvent,
-    MessageStopEvent,
-    ContentBlockStartEvent,
     ContentBlockDeltaEvent,
+    ContentBlockStartEvent,
     ContentBlockStopEvent,
+    MessageDeltaEvent,
+    MessageStartEvent,
+    MessageStopEvent,
+    MessageStreamEvent,
 )
 ```
 
