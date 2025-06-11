@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import os
+import json
 import inspect
-from typing import Any, Set, TypeVar, cast
+from typing import Any, Set, Dict, TypeVar, cast
+from unittest import TestCase
 
 import httpx
 import pytest
@@ -25,84 +27,162 @@ async_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_respon
 
 _T = TypeVar("_T")
 
+# Expected message fixtures
+EXPECTED_BASIC_MESSAGE = {
+    "id": "msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK",
+    "model": "claude-3-opus-20240229",
+    "role": "assistant",
+    "stop_reason": "end_turn",
+    "type": "message",
+    "content": [{"type": "text", "text": "Hello there!"}],
+    "usage": {"input_tokens": 11, "output_tokens": 6},
+}
+
+EXPECTED_BASIC_EVENT_TYPES = [
+    "message_start",
+    "content_block_start",
+    "content_block_delta",
+    "text",
+    "content_block_delta",
+    "text",
+    "content_block_delta",
+    "text",
+    "content_block_stop",
+    "message_delta",
+]
+
+EXPECTED_TOOL_USE_MESSAGE = {
+    "id": "msg_019Q1hrJbZG26Fb9BQhrkHEr",
+    "model": "claude-sonnet-4-20250514",
+    "role": "assistant",
+    "stop_reason": "tool_use",
+    "type": "message",
+    "content": [
+        {"type": "text", "text": "I'll check the current weather in Paris for you."},
+        {
+            "type": "tool_use",
+            "id": "toolu_01NRLabsLyVHZPKxbKvkfSMn",
+            "name": "get_weather",
+            "input": {"location": "Paris"},
+        },
+    ],
+    "usage": {
+        "input_tokens": 377,
+        "output_tokens": 65,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "service_tier": "standard",
+    },
+}
+
+EXPECTED_TOOL_USE_EVENT_TYPES = [
+    "message_start",
+    "content_block_start",
+    "content_block_delta",
+    "text",
+    "content_block_delta",
+    "text",
+    "content_block_stop",
+    "content_block_start",
+    "content_block_delta",
+    "input_json",
+    "content_block_delta",
+    "input_json",
+    "content_block_delta",
+    "input_json",
+    "content_block_delta",
+    "input_json",
+    "content_block_delta",
+    "input_json",
+    "content_block_stop",
+    "message_delta",
+]
+
+EXPECTED_INCOMPLETE_MESSAGE = {
+    "id": "msg_01UdjYBBipA9omjYhicnevgq",
+    "model": "claude-3-7-sonnet-20250219",
+    "role": "assistant",
+    "stop_reason": "max_tokens",
+    "type": "message",
+    "content": [
+        {
+            "type": "text",
+            "text": "I'll create a comprehensive tax guide for someone with multiple W2s and save it in a file called taxes.txt. Let me do that for you now.",
+        },
+        {
+            "type": "tool_use",
+            "id": "toolu_01EKqbqmZrGRXy18eN7m9kvY",
+            "name": "make_file",
+            "input": {
+                "filename": "taxes.txt",
+                "lines_of_text": [
+                    "# COMPREHENSIVE TAX GUIDE FOR INDIVIDUALS WITH MULTIPLE W-2s",
+                    "",
+                    "## INTRODUCTION",
+                    "",
+                ],
+            },
+        },
+    ],
+    "usage": {
+        "input_tokens": 450,
+        "output_tokens": 124,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "service_tier": "standard",
+    },
+}
+
+EXPECTED_INCOMPLETE_EVENT_TYPES = [
+    "message_start",
+    "content_block_start",
+    "content_block_delta",
+    "text",
+    "content_block_delta",
+    "text",
+    "content_block_delta",
+    "text",
+    "content_block_delta",
+    "text",
+    "content_block_delta",
+    "text",
+    "content_block_stop",
+    "content_block_start",
+    "content_block_delta",
+    "input_json",
+    "content_block_delta",
+    "input_json",
+    "content_block_delta",
+    "input_json",
+    "content_block_delta",
+    "input_json",
+    "message_delta",
+]
+
+
+def assert_message_matches(message: BetaMessage, expected: Dict[str, Any]) -> None:
+    actual_message_json = message.model_dump_json(
+        indent=2, exclude_none=True, exclude={"content": {"__all__": {"__json_buf"}}}
+    )
+
+    test_case = TestCase()
+    test_case.maxDiff = None
+    test_case.assertEqual(expected, json.loads(actual_message_json))
+
 
 def assert_basic_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
-    assert message.id == "msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK"
-    assert message.model == "claude-3-opus-20240229"
-    assert message.role == "assistant"
-    assert message.stop_reason == "end_turn"
-    assert message.stop_sequence is None
-    assert message.type == "message"
-    assert len(message.content) == 1
-
-    content = message.content[0]
-    assert content.type == "text"
-    assert content.text == "Hello there!"
-
-    assert [e.type for e in events] == [
-        "message_start",
-        "content_block_start",
-        "content_block_delta",
-        "text",
-        "content_block_delta",
-        "text",
-        "content_block_delta",
-        "text",
-        "content_block_stop",
-        "message_delta",
-    ]
+    assert_message_matches(message, EXPECTED_BASIC_MESSAGE)
+    assert [e.type for e in events] == EXPECTED_BASIC_EVENT_TYPES
 
 
 def assert_tool_use_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
-    assert message.id == "msg_019Q1hrJbZG26Fb9BQhrkHEr"
-    assert message.model == "claude-sonnet-4-20250514"
-    assert message.role == "assistant"
-    assert message.stop_reason == "tool_use"
-    assert message.stop_sequence is None
-    assert message.type == "message"
-    assert len(message.content) == 2
+    assert_message_matches(message, EXPECTED_TOOL_USE_MESSAGE)
+    assert [e.type for e in events] == EXPECTED_TOOL_USE_EVENT_TYPES
 
-    content = message.content[0]
-    assert content.type == "text"
-    assert content.text == "I'll check the current weather in Paris for you."
 
-    tool_use = message.content[1]
-    assert tool_use.type == "tool_use"
-    assert tool_use.id == "toolu_01NRLabsLyVHZPKxbKvkfSMn"
-    assert tool_use.name == "get_weather"
-    assert tool_use.input == {
-        "location": "Paris",
-    }
-
-    assert message.usage.input_tokens == 377
-    assert message.usage.output_tokens == 65
-    assert message.usage.cache_creation_input_tokens == 0
-    assert message.usage.cache_read_input_tokens == 0
-    assert message.usage.service_tier == "standard"
-    assert message.usage.server_tool_use == None
-
-    assert [e.type for e in events] == [
-        "message_start",
-        "content_block_start",
-        "content_block_delta",
-        "text",
-        "content_block_delta",
-        "text",
-        "content_block_stop",
-        "content_block_start",
-        "content_block_delta",
-        "input_json",
-        "content_block_delta",
-        "input_json",
-        "content_block_delta",
-        "input_json",
-        "content_block_delta",
-        "input_json",
-        "content_block_delta",
-        "input_json",
-        "content_block_stop",
-        "message_delta",
-    ]
+def assert_incomplete_partial_input_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
+    assert_message_matches(message, EXPECTED_INCOMPLETE_MESSAGE)
+    assert [e.type for e in events] == EXPECTED_INCOMPLETE_EVENT_TYPES
 
 
 class TestSyncMessages:
@@ -265,6 +345,31 @@ class TestAsyncMessages:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_tool_use_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_incomplete_response(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(
+                200, content=to_async_iter(get_response("incomplete_partial_json_response.txt"))
+            )
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-sonnet-4-20250514",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
+
+            assert_incomplete_partial_input_response(
+                [event async for event in stream], await stream.get_final_message()
+            )
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])

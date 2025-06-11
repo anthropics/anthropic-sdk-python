@@ -120,6 +120,7 @@ class BetaMessageStream:
             self.__final_message_snapshot = accumulate_event(
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
+                request_headers=self.response.request.headers,
             )
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
@@ -257,6 +258,7 @@ class BetaAsyncMessageStream:
             self.__final_message_snapshot = accumulate_event(
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
+                request_headers=self.response.request.headers,
             )
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
@@ -403,6 +405,7 @@ def accumulate_event(
     *,
     event: BetaRawMessageStreamEvent,
     current_snapshot: BetaMessage | None,
+    request_headers: httpx.Headers,
 ) -> BetaMessage:
     if not isinstance(cast(Any, event), BaseModel):
         event = cast(  # pyright: ignore[reportUnnecessaryCast]
@@ -445,7 +448,17 @@ def accumulate_event(
                 json_buf += bytes(event.delta.partial_json, "utf-8")
 
                 if json_buf:
-                    content.input = from_json(json_buf, partial_mode=True)
+                    try:
+                        anthropic_beta = request_headers.get("anthropic-beta", "") if request_headers else ""
+
+                        if "fine-grained-tool-streaming-2025-05-14" in anthropic_beta:
+                            content.input = from_json(json_buf, partial_mode="trailing-strings")
+                        else:
+                            content.input = from_json(json_buf, partial_mode=True)
+                    except ValueError as e:
+                        raise ValueError(
+                            f"Unable to parse tool parameter JSON from model. Please retry your request or adjust your prompt. Error: {e}. JSON: {json_buf.decode('utf-8')}"
+                        ) from e
 
                 setattr(content, JSON_BUF_PROPERTY, json_buf)
         elif event.delta.type == "citations_delta":

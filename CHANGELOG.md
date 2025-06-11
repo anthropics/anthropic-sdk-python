@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.54.0 (2025-06-10)
+
+Full Changelog: [v0.53.0...v0.54.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.53.0...v0.54.0)
+
+### Features
+
+* **client:** add support for fine-grained-tool-streaming-2025-05-14 ([07ec081](https://github.com/anthropics/anthropic-sdk-python/commit/07ec08119dbc328934fea5ec6eacd00c8dbda089))
+
+
+### Bug Fixes
+
+* **httpx:** resolve conflict between default transport and proxy settings ([#969](https://github.com/anthropics/anthropic-sdk-python/issues/969)) ([a6efded](https://github.com/anthropics/anthropic-sdk-python/commit/a6efdedcfef881ae3466bb77d92d0338c8338e20))
+* **tests:** update test ([99c2433](https://github.com/anthropics/anthropic-sdk-python/commit/99c243363e94f5f3f627cb8b80e3f238503c89f5))
+
+
+### Chores
+
+* **internal:** version bump ([45029f4](https://github.com/anthropics/anthropic-sdk-python/commit/45029f41c96f62f26ead99a5989c9ad974fc21b9))
+
+
+### Documentation
+
+* **contributing:** fix uv script for bootstrapping ([d2bde52](https://github.com/anthropics/anthropic-sdk-python/commit/d2bde52286ee8fa65995e73c579a8962087c1da4))
+
 ## 0.53.0 (2025-06-09)
 
 Full Changelog: [v0.52.2...v0.53.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.52.2...v0.53.0)

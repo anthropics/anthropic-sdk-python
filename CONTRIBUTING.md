@@ -11,7 +11,7 @@ $ ./scripts/bootstrap
 Or [install uv manually](https://docs.astral.sh/uv/getting-started/installation/) and run:
 
 ```sh
-$ uv sync
+$ uv sync --all-extras
 ```
 
 You can then run scripts using `uv run python script.py` or by manually activating the virtual environment:

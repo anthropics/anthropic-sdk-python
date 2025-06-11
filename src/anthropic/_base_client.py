@@ -38,7 +38,7 @@ import anyio
 import httpx
 import distro
 import pydantic
-from httpx import URL
+from httpx import URL, Proxy, HTTPTransport, AsyncHTTPTransport
 from pydantic import PrivateAttr
 
 from . import _exceptions
@@ -86,6 +86,7 @@ from ._exceptions import (
     APIConnectionError,
     APIResponseValidationError,
 )
+from ._utils._httpx import get_environment_proxies
 from ._legacy_response import LegacyAPIResponse
 
 log: logging.Logger = logging.getLogger(__name__)
@@ -826,11 +827,24 @@ class _DefaultHttpxClient(httpx.Client):
             if TCP_KEEPIDLE is not None:
                 socket_options.append((socket.IPPROTO_TCP, TCP_KEEPIDLE, 60))
 
-            kwargs["transport"] = httpx.HTTPTransport(
-                # note: limits is always set above
-                limits=kwargs["limits"],
-                socket_options=socket_options,
-            )
+            proxy_map = {key: None if url is None else Proxy(url=url) for key, url in get_environment_proxies().items()}
+
+            transport_kwargs = {
+                arg: kwargs[arg] for arg in ("verify", "cert", "trust_env", "http1", "http2", "limits") if arg in kwargs
+            }
+
+            proxy_mounts = {
+                key: None if proxy is None else HTTPTransport(proxy=proxy, **transport_kwargs)
+                for key, proxy in proxy_map.items()
+            }
+            default_transport = HTTPTransport(**transport_kwargs)
+
+            # Prioritize the mounts set by the user over the environment variables.
+            proxy_mounts.update(kwargs.get("mounts", {}))
+            kwargs["mounts"] = proxy_mounts
+
+            # Sets the default transport so that HTTPX won't automatically configure proxies.
+            kwargs["transport"] = kwargs.get("transport", default_transport)
 
         super().__init__(**kwargs)
 
@@ -1367,11 +1381,24 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
             if TCP_KEEPIDLE is not None:
                 socket_options.append((socket.IPPROTO_TCP, TCP_KEEPIDLE, 60))
 
-            kwargs["transport"] = httpx.AsyncHTTPTransport(
-                # note: limits is always set above
-                limits=kwargs["limits"],
-                socket_options=socket_options,
-            )
+            proxy_map = {key: None if url is None else Proxy(url=url) for key, url in get_environment_proxies().items()}
+
+            transport_kwargs = {
+                arg: kwargs[arg] for arg in ("verify", "cert", "trust_env", "http1", "http2", "limits") if arg in kwargs
+            }
+
+            proxy_mounts = {
+                key: None if proxy is None else AsyncHTTPTransport(proxy=proxy, **transport_kwargs)
+                for key, proxy in proxy_map.items()
+            }
+            default_transport = AsyncHTTPTransport(**transport_kwargs)
+
+            # Prioritize the mounts set by the user over the environment variables.
+            proxy_mounts.update(kwargs.get("mounts", {}))
+            kwargs["mounts"] = proxy_mounts
+
+            # Sets the default transport so that HTTPX won't automatically configure proxies.
+            kwargs["transport"] = kwargs.get("transport", default_transport)
 
         super().__init__(**kwargs)
 
