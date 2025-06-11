@@ -13,8 +13,6 @@ DEFAULT_CONNECTION_LIMITS = httpx.Limits(max_connections=1000, max_keepalive_con
 INITIAL_RETRY_DELAY = 0.5
 MAX_RETRY_DELAY = 8.0
 
-HUMAN_PROMPT = "\n\nHuman:"
-
 AI_PROMPT = "\n\nAssistant:"
 
 MODEL_NONSTREAMING_TOKENS = {
@@ -24,3 +22,4 @@ MODEL_NONSTREAMING_TOKENS = {
     "anthropic.claude-opus-4-20250514-v1:0": 8_192,
     "claude-opus-4@20250514": 8_192,
 }
+HUMAN_PROMPT = "\n\nHuman:"
