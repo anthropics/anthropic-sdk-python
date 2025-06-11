@@ -34,12 +34,6 @@ from .completions import (
 )
 
 __all__ = [
-    "Beta",
-    "AsyncBeta",
-    "BetaWithRawResponse",
-    "AsyncBetaWithRawResponse",
-    "BetaWithStreamingResponse",
-    "AsyncBetaWithStreamingResponse",
     "Completions",
     "AsyncCompletions",
     "CompletionsWithRawResponse",
@@ -58,4 +52,10 @@ __all__ = [
     "AsyncModelsWithRawResponse",
     "ModelsWithStreamingResponse",
     "AsyncModelsWithStreamingResponse",
+    "Beta",
+    "AsyncBeta",
+    "BetaWithRawResponse",
+    "AsyncBetaWithRawResponse",
+    "BetaWithStreamingResponse",
+    "AsyncBetaWithStreamingResponse",
 ]

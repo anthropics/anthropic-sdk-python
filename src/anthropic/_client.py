@@ -56,8 +56,8 @@ class Anthropic(SyncAPIClient):
     auth_token: str | None
 
     # constants
-    AI_PROMPT = _constants.AI_PROMPT
     HUMAN_PROMPT = _constants.HUMAN_PROMPT
+    AI_PROMPT = _constants.AI_PROMPT
 
     def __init__(
         self,
@@ -116,12 +116,6 @@ class Anthropic(SyncAPIClient):
         self._default_stream_cls = Stream
 
     @cached_property
-    def beta(self) -> Beta:
-        from .resources.beta import Beta
-
-        return Beta(self)
-
-    @cached_property
     def completions(self) -> Completions:
         from .resources.completions import Completions
 
@@ -138,6 +132,12 @@ class Anthropic(SyncAPIClient):
         from .resources.models import Models
 
         return Models(self)
+
+    @cached_property
+    def beta(self) -> Beta:
+        from .resources.beta import Beta
+
+        return Beta(self)
 
     @cached_property
     def with_raw_response(self) -> AnthropicWithRawResponse:
@@ -290,8 +290,8 @@ class AsyncAnthropic(AsyncAPIClient):
     auth_token: str | None
 
     # constants
-    AI_PROMPT = _constants.AI_PROMPT
     HUMAN_PROMPT = _constants.HUMAN_PROMPT
+    AI_PROMPT = _constants.AI_PROMPT
 
     def __init__(
         self,
@@ -350,12 +350,6 @@ class AsyncAnthropic(AsyncAPIClient):
         self._default_stream_cls = AsyncStream
 
     @cached_property
-    def beta(self) -> AsyncBeta:
-        from .resources.beta import AsyncBeta
-
-        return AsyncBeta(self)
-
-    @cached_property
     def completions(self) -> AsyncCompletions:
         from .resources.completions import AsyncCompletions
 
@@ -372,6 +366,12 @@ class AsyncAnthropic(AsyncAPIClient):
         from .resources.models import AsyncModels
 
         return AsyncModels(self)
+
+    @cached_property
+    def beta(self) -> AsyncBeta:
+        from .resources.beta import AsyncBeta
+
+        return AsyncBeta(self)
 
     @cached_property
     def with_raw_response(self) -> AsyncAnthropicWithRawResponse:
@@ -525,12 +525,6 @@ class AnthropicWithRawResponse:
         self._client = client
 
     @cached_property
-    def beta(self) -> beta.BetaWithRawResponse:
-        from .resources.beta import BetaWithRawResponse
-
-        return BetaWithRawResponse(self._client.beta)
-
-    @cached_property
     def completions(self) -> completions.CompletionsWithRawResponse:
         from .resources.completions import CompletionsWithRawResponse
 
@@ -548,18 +542,18 @@ class AnthropicWithRawResponse:
 
         return ModelsWithRawResponse(self._client.models)
 
+    @cached_property
+    def beta(self) -> beta.BetaWithRawResponse:
+        from .resources.beta import BetaWithRawResponse
+
+        return BetaWithRawResponse(self._client.beta)
+
 
 class AsyncAnthropicWithRawResponse:
     _client: AsyncAnthropic
 
     def __init__(self, client: AsyncAnthropic) -> None:
         self._client = client
-
-    @cached_property
-    def beta(self) -> beta.AsyncBetaWithRawResponse:
-        from .resources.beta import AsyncBetaWithRawResponse
-
-        return AsyncBetaWithRawResponse(self._client.beta)
 
     @cached_property
     def completions(self) -> completions.AsyncCompletionsWithRawResponse:
@@ -579,18 +573,18 @@ class AsyncAnthropicWithRawResponse:
 
         return AsyncModelsWithRawResponse(self._client.models)
 
+    @cached_property
+    def beta(self) -> beta.AsyncBetaWithRawResponse:
+        from .resources.beta import AsyncBetaWithRawResponse
+
+        return AsyncBetaWithRawResponse(self._client.beta)
+
 
 class AnthropicWithStreamedResponse:
     _client: Anthropic
 
     def __init__(self, client: Anthropic) -> None:
         self._client = client
-
-    @cached_property
-    def beta(self) -> beta.BetaWithStreamingResponse:
-        from .resources.beta import BetaWithStreamingResponse
-
-        return BetaWithStreamingResponse(self._client.beta)
 
     @cached_property
     def completions(self) -> completions.CompletionsWithStreamingResponse:
@@ -610,18 +604,18 @@ class AnthropicWithStreamedResponse:
 
         return ModelsWithStreamingResponse(self._client.models)
 
+    @cached_property
+    def beta(self) -> beta.BetaWithStreamingResponse:
+        from .resources.beta import BetaWithStreamingResponse
+
+        return BetaWithStreamingResponse(self._client.beta)
+
 
 class AsyncAnthropicWithStreamedResponse:
     _client: AsyncAnthropic
 
     def __init__(self, client: AsyncAnthropic) -> None:
         self._client = client
-
-    @cached_property
-    def beta(self) -> beta.AsyncBetaWithStreamingResponse:
-        from .resources.beta import AsyncBetaWithStreamingResponse
-
-        return AsyncBetaWithStreamingResponse(self._client.beta)
 
     @cached_property
     def completions(self) -> completions.AsyncCompletionsWithStreamingResponse:
@@ -640,6 +634,12 @@ class AsyncAnthropicWithStreamedResponse:
         from .resources.models import AsyncModelsWithStreamingResponse
 
         return AsyncModelsWithStreamingResponse(self._client.models)
+
+    @cached_property
+    def beta(self) -> beta.AsyncBetaWithStreamingResponse:
+        from .resources.beta import AsyncBetaWithStreamingResponse
+
+        return AsyncBetaWithStreamingResponse(self._client.beta)
 
 
 Client = Anthropic

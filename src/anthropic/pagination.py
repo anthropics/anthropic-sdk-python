@@ -12,8 +12,8 @@ _T = TypeVar("_T")
 
 class SyncPage(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
     data: List[_T]
-    first_id: Optional[str] = None
     has_more: Optional[bool] = None
+    first_id: Optional[str] = None
     last_id: Optional[str] = None
 
     @override
@@ -49,8 +49,8 @@ class SyncPage(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
 
 class AsyncPage(BaseAsyncPage[_T], BasePage[_T], Generic[_T]):
     data: List[_T]
-    first_id: Optional[str] = None
     has_more: Optional[bool] = None
+    first_id: Optional[str] = None
     last_id: Optional[str] = None
 
     @override

@@ -33,8 +33,8 @@ message = client.messages.create(
     max_tokens=1024,
     messages=[
         {
-            "content": "Hello, Claude",
             "role": "user",
+            "content": "Hello, Claude",
         }
     ],
     model="claude-3-5-sonnet-latest",
@@ -66,8 +66,8 @@ async def main() -> None:
         max_tokens=1024,
         messages=[
             {
-                "content": "Hello, Claude",
                 "role": "user",
+                "content": "Hello, Claude",
             }
         ],
         model="claude-3-5-sonnet-latest",
@@ -93,8 +93,8 @@ stream = client.messages.create(
     max_tokens=1024,
     messages=[
         {
-            "content": "Hello, Claude",
             "role": "user",
+            "content": "Hello, Claude",
         }
     ],
     model="claude-3-5-sonnet-latest",
@@ -115,8 +115,8 @@ stream = await client.messages.create(
     max_tokens=1024,
     messages=[
         {
-            "content": "Hello, Claude",
             "role": "user",
+            "content": "Hello, Claude",
         }
     ],
     model="claude-3-5-sonnet-latest",
@@ -266,8 +266,8 @@ try:
         max_tokens=1024,
         messages=[
             {
-                "content": "Hello, Claude",
                 "role": "user",
+                "content": "Hello, Claude",
             }
         ],
         model="claude-3-5-sonnet-latest",
@@ -318,8 +318,8 @@ client.with_options(max_retries=5).messages.create(
     max_tokens=1024,
     messages=[
         {
-            "content": "Hello, Claude",
             "role": "user",
+            "content": "Hello, Claude",
         }
     ],
     model="claude-3-5-sonnet-latest",
@@ -350,8 +350,8 @@ client.with_options(timeout=5.0).messages.create(
     max_tokens=1024,
     messages=[
         {
-            "content": "Hello, Claude",
             "role": "user",
+            "content": "Hello, Claude",
         }
     ],
     model="claude-3-5-sonnet-latest",
@@ -415,8 +415,8 @@ client = Anthropic()
 response = client.messages.with_raw_response.create(
     max_tokens=1024,
     messages=[{
-        "content": "Hello, Claude",
         "role": "user",
+        "content": "Hello, Claude",
     }],
     model="claude-3-5-sonnet-latest",
 )
@@ -448,8 +448,8 @@ with client.messages.with_streaming_response.create(
     max_tokens=1024,
     messages=[
         {
-            "content": "Hello, Claude",
             "role": "user",
+            "content": "Hello, Claude",
         }
     ],
     model="claude-3-5-sonnet-latest",
