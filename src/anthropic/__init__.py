@@ -84,8 +84,8 @@ __all__ = [
     "DEFAULT_CONNECTION_LIMITS",
     "DefaultHttpxClient",
     "DefaultAsyncHttpxClient",
-    "AI_PROMPT",
     "HUMAN_PROMPT",
+    "AI_PROMPT",
 ]
 
 if not _t.TYPE_CHECKING:
