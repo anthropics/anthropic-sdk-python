@@ -34,16 +34,16 @@ __all__ = ["Beta", "AsyncBeta"]
 
 class Beta(SyncAPIResource):
     @cached_property
-    def models(self) -> Models:
-        return Models(self._client)
+    def files(self) -> Files:
+        return Files(self._client)
 
     @cached_property
     def messages(self) -> Messages:
         return Messages(self._client)
 
     @cached_property
-    def files(self) -> Files:
-        return Files(self._client)
+    def models(self) -> Models:
+        return Models(self._client)
 
     @cached_property
     def with_raw_response(self) -> BetaWithRawResponse:
@@ -67,16 +67,16 @@ class Beta(SyncAPIResource):
 
 class AsyncBeta(AsyncAPIResource):
     @cached_property
-    def models(self) -> AsyncModels:
-        return AsyncModels(self._client)
+    def files(self) -> AsyncFiles:
+        return AsyncFiles(self._client)
 
     @cached_property
     def messages(self) -> AsyncMessages:
         return AsyncMessages(self._client)
 
     @cached_property
-    def files(self) -> AsyncFiles:
-        return AsyncFiles(self._client)
+    def models(self) -> AsyncModels:
+        return AsyncModels(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncBetaWithRawResponse:
@@ -103,16 +103,16 @@ class BetaWithRawResponse:
         self._beta = beta
 
     @cached_property
-    def models(self) -> ModelsWithRawResponse:
-        return ModelsWithRawResponse(self._beta.models)
+    def files(self) -> FilesWithRawResponse:
+        return FilesWithRawResponse(self._beta.files)
 
     @cached_property
     def messages(self) -> MessagesWithRawResponse:
         return MessagesWithRawResponse(self._beta.messages)
 
     @cached_property
-    def files(self) -> FilesWithRawResponse:
-        return FilesWithRawResponse(self._beta.files)
+    def models(self) -> ModelsWithRawResponse:
+        return ModelsWithRawResponse(self._beta.models)
 
 
 class AsyncBetaWithRawResponse:
@@ -120,16 +120,16 @@ class AsyncBetaWithRawResponse:
         self._beta = beta
 
     @cached_property
-    def models(self) -> AsyncModelsWithRawResponse:
-        return AsyncModelsWithRawResponse(self._beta.models)
+    def files(self) -> AsyncFilesWithRawResponse:
+        return AsyncFilesWithRawResponse(self._beta.files)
 
     @cached_property
     def messages(self) -> AsyncMessagesWithRawResponse:
         return AsyncMessagesWithRawResponse(self._beta.messages)
 
     @cached_property
-    def files(self) -> AsyncFilesWithRawResponse:
-        return AsyncFilesWithRawResponse(self._beta.files)
+    def models(self) -> AsyncModelsWithRawResponse:
+        return AsyncModelsWithRawResponse(self._beta.models)
 
 
 class BetaWithStreamingResponse:
@@ -137,16 +137,16 @@ class BetaWithStreamingResponse:
         self._beta = beta
 
     @cached_property
-    def models(self) -> ModelsWithStreamingResponse:
-        return ModelsWithStreamingResponse(self._beta.models)
+    def files(self) -> FilesWithStreamingResponse:
+        return FilesWithStreamingResponse(self._beta.files)
 
     @cached_property
     def messages(self) -> MessagesWithStreamingResponse:
         return MessagesWithStreamingResponse(self._beta.messages)
 
     @cached_property
-    def files(self) -> FilesWithStreamingResponse:
-        return FilesWithStreamingResponse(self._beta.files)
+    def models(self) -> ModelsWithStreamingResponse:
+        return ModelsWithStreamingResponse(self._beta.models)
 
 
 class AsyncBetaWithStreamingResponse:
@@ -154,13 +154,13 @@ class AsyncBetaWithStreamingResponse:
         self._beta = beta
 
     @cached_property
-    def models(self) -> AsyncModelsWithStreamingResponse:
-        return AsyncModelsWithStreamingResponse(self._beta.models)
+    def files(self) -> AsyncFilesWithStreamingResponse:
+        return AsyncFilesWithStreamingResponse(self._beta.files)
 
     @cached_property
     def messages(self) -> AsyncMessagesWithStreamingResponse:
         return AsyncMessagesWithStreamingResponse(self._beta.messages)
 
     @cached_property
-    def files(self) -> AsyncFilesWithStreamingResponse:
-        return AsyncFilesWithStreamingResponse(self._beta.files)
+    def models(self) -> AsyncModelsWithStreamingResponse:
+        return AsyncModelsWithStreamingResponse(self._beta.models)
