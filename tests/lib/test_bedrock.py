@@ -55,7 +55,6 @@ def mock_aws_config(
 ) -> t.Iterable[None]:
     with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
         for profile in profiles:
-            print(profile_to_ini(profile))
             temp_file.write(profile_to_ini(profile))
         temp_file.flush()
         monkeypatch.setenv("AWS_CONFIG_FILE", str(temp_file.name))
