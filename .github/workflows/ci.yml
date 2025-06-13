@@ -7,6 +7,8 @@ on:
       - 'integrated/**'
       - 'stl-preview-head/**'
       - 'stl-preview-base/**'
+  pull_request:
+    branches: ["main", "next"]
 
 jobs:
   lint:
