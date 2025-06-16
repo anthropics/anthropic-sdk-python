@@ -33,6 +33,7 @@ from anthropic._base_client import (
     HTTPX_DEFAULT_TIMEOUT,
     BaseClient,
     DefaultHttpxClient,
+    DefaultAsyncHttpxClient,
     make_request_options,
 )
 from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
@@ -929,14 +930,15 @@ class TestAnthropic:
             assert response.retries_taken == failures_before_success
             assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
-    def test_proxy_environment_variables(self, monkeypatch: Any):
+    def test_proxy_environment_variables(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # Test that the proxy environment variables are set correctly
         monkeypatch.setenv("HTTPS_PROXY", "https://example.org")
-        client = Anthropic()
 
-        mounts = tuple(client._client._mounts.items())
+        client = DefaultHttpxClient()
+
+        mounts = tuple(client._mounts.items())
         assert len(mounts) == 1
         assert mounts[0][0].pattern == "https://"
-        assert isinstance(mounts[0][1], httpx.HTTPTransport)
 
     @pytest.mark.filterwarnings("ignore:.*deprecated.*:DeprecationWarning")
     def test_default_client_creation(self) -> None:
@@ -1912,18 +1914,20 @@ class TestAsyncAnthropic:
 
                 time.sleep(0.1)
 
-    def test_proxy_environment_variables(self, monkeypatch: Any):
+    async def test_proxy_environment_variables(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # Test that the proxy environment variables are set correctly
         monkeypatch.setenv("HTTPS_PROXY", "https://example.org")
-        client = Anthropic()
 
-        mounts = tuple(client._client._mounts.items())
+        client = DefaultAsyncHttpxClient()
+
+        mounts = tuple(client._mounts.items())
         assert len(mounts) == 1
         assert mounts[0][0].pattern == "https://"
 
     @pytest.mark.filterwarnings("ignore:.*deprecated.*:DeprecationWarning")
-    def test_default_client_creation(self) -> None:
+    async def test_default_client_creation(self) -> None:
         # Ensure that the client can be initialized without any exceptions
-        DefaultHttpxClient(
+        DefaultAsyncHttpxClient(
             verify=True,
             cert=None,
             trust_env=True,
