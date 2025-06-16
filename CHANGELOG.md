@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.55.0 (2025-06-16)
+
+Full Changelog: [v0.54.0...v0.55.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.54.0...v0.55.0)
+
+### Features
+
+* **api:** api update ([4b2134e](https://github.com/anthropics/anthropic-sdk-python/commit/4b2134e5ec3fecab7c56f483b8db87b403a08e05))
+* **api:** api update ([2093bff](https://github.com/anthropics/anthropic-sdk-python/commit/2093bfff2a6c25573eaa2a4667f1e1d0e2d89e24))
+* **api:** manual updates ([c80fda8](https://github.com/anthropics/anthropic-sdk-python/commit/c80fda8cbd157fbbd23895d034cc7bb7a7614569))
+
+
+### Bug Fixes
+
+* **client:** correctly parse binary response | stream ([d93817d](https://github.com/anthropics/anthropic-sdk-python/commit/d93817d9d761bd5e16b35f3c2973122a9c122240))
+* **internal:** revert unintentional changes ([bb3beab](https://github.com/anthropics/anthropic-sdk-python/commit/bb3beab10668be177d6bb573607ef6951a238b24))
+
+
+### Chores
+
+* **internal:** version bump ([7241eaa](https://github.com/anthropics/anthropic-sdk-python/commit/7241eaa25b6f40bb55f61e766a996a3a18a53a02))
+* **tests:** run tests in parallel ([4b24a79](https://github.com/anthropics/anthropic-sdk-python/commit/4b24a791b76c2176de1f35118901da533a10b991))
+
 ## 0.54.0 (2025-06-10)
 
 Full Changelog: [v0.53.0...v0.54.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.53.0...v0.54.0)
