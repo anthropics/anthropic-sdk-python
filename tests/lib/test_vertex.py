@@ -119,6 +119,82 @@ class TestAnthropicVertex:
         ):
             client.copy(set_default_headers={}, default_headers={"X-Foo": "Bar"})
 
+    def test_global_region_base_url(self) -> None:
+        """Test that global region uses the correct base URL."""
+        client = AsyncAnthropicVertex(region="global", project_id="test-project", access_token="fake-token")
+        assert str(client.base_url).rstrip("/") == "https://aiplatform.googleapis.com/v1"
+
+    def test_regional_base_url(self) -> None:
+        """Test that regional endpoints use the correct base URL format."""
+        test_regions = ["us-central1", "europe-west1", "asia-southeast1"]
+
+        for region in test_regions:
+            client = AsyncAnthropicVertex(region=region, project_id="test-project", access_token="fake-token")
+            expected_url = f"https://{region}-aiplatform.googleapis.com/v1"
+            assert str(client.base_url).rstrip("/") == expected_url
+
+    def test_env_var_base_url_override(self) -> None:
+        """Test that ANTHROPIC_VERTEX_BASE_URL environment variable overrides default behavior."""
+        test_url = "https://custom-endpoint.googleapis.com/v1"
+
+        # Set environment variable
+        original_value = os.environ.get("ANTHROPIC_VERTEX_BASE_URL")
+        os.environ["ANTHROPIC_VERTEX_BASE_URL"] = test_url
+
+        try:
+            # Test with global region
+            client = AsyncAnthropicVertex(region="global", project_id="test-project", access_token="fake-token")
+            assert str(client.base_url).rstrip("/") == test_url
+
+            # Test with regional URL
+            client2 = AsyncAnthropicVertex(region="us-central1", project_id="test-project", access_token="fake-token")
+            assert str(client2.base_url).rstrip("/") == test_url
+
+        finally:
+            # Clean up
+            if original_value is None:
+                os.environ.pop("ANTHROPIC_VERTEX_BASE_URL", None)
+            else:
+                os.environ["ANTHROPIC_VERTEX_BASE_URL"] = original_value
+
+    def test_global_region_base_url(self) -> None:
+        """Test that global region uses the correct base URL."""
+        client = AnthropicVertex(region="global", project_id="test-project", access_token="fake-token")
+        assert str(client.base_url).rstrip("/") == "https://aiplatform.googleapis.com/v1"
+
+    def test_regional_base_url(self) -> None:
+        """Test that regional endpoints use the correct base URL format."""
+        test_regions = ["us-central1", "europe-west1", "asia-southeast1"]
+
+        for region in test_regions:
+            client = AnthropicVertex(region=region, project_id="test-project", access_token="fake-token")
+            expected_url = f"https://{region}-aiplatform.googleapis.com/v1"
+            assert str(client.base_url).rstrip("/") == expected_url
+
+    def test_env_var_base_url_override(self) -> None:
+        """Test that ANTHROPIC_VERTEX_BASE_URL environment variable overrides default behavior."""
+        test_url = "https://custom-endpoint.googleapis.com/v1"
+
+        # Set environment variable
+        original_value = os.environ.get("ANTHROPIC_VERTEX_BASE_URL")
+        os.environ["ANTHROPIC_VERTEX_BASE_URL"] = test_url
+
+        try:
+            # Test with global region
+            client = AnthropicVertex(region="global", project_id="test-project", access_token="fake-token")
+            assert str(client.base_url).rstrip("/") == test_url
+
+            # Test with regional URL
+            client2 = AnthropicVertex(region="us-central1", project_id="test-project", access_token="fake-token")
+            assert str(client2.base_url).rstrip("/") == test_url
+
+        finally:
+            # Clean up
+            if original_value is None:
+                os.environ.pop("ANTHROPIC_VERTEX_BASE_URL", None)
+            else:
+                os.environ["ANTHROPIC_VERTEX_BASE_URL"] = original_value
+
 
 class TestAsyncAnthropicVertex:
     client = AsyncAnthropicVertex(region="region", project_id="project", access_token="my-access-token")
@@ -222,3 +298,41 @@ class TestAsyncAnthropicVertex:
             match="`default_headers` and `set_default_headers` arguments are mutually exclusive",
         ):
             client.copy(set_default_headers={}, default_headers={"X-Foo": "Bar"})
+
+    def test_global_region_base_url(self) -> None:
+        """Test that global region uses the correct base URL."""
+        client = AsyncAnthropicVertex(region="global", project_id="test-project", access_token="fake-token")
+        assert str(client.base_url).rstrip("/") == "https://aiplatform.googleapis.com/v1"
+
+    def test_regional_base_url(self) -> None:
+        """Test that regional endpoints use the correct base URL format."""
+        test_regions = ["us-central1", "europe-west1", "asia-southeast1"]
+
+        for region in test_regions:
+            client = AsyncAnthropicVertex(region=region, project_id="test-project", access_token="fake-token")
+            expected_url = f"https://{region}-aiplatform.googleapis.com/v1"
+            assert str(client.base_url).rstrip("/") == expected_url
+
+    def test_env_var_base_url_override(self) -> None:
+        """Test that ANTHROPIC_VERTEX_BASE_URL environment variable overrides default behavior."""
+        test_url = "https://custom-endpoint.googleapis.com/v1"
+
+        # Set environment variable
+        original_value = os.environ.get("ANTHROPIC_VERTEX_BASE_URL")
+        os.environ["ANTHROPIC_VERTEX_BASE_URL"] = test_url
+
+        try:
+            # Test with global region
+            client = AsyncAnthropicVertex(region="global", project_id="test-project", access_token="fake-token")
+            assert str(client.base_url).rstrip("/") == test_url
+
+            # Test with regional URL
+            client2 = AsyncAnthropicVertex(region="us-central1", project_id="test-project", access_token="fake-token")
+            assert str(client2.base_url).rstrip("/") == test_url
+
+        finally:
+            # Clean up
+            if original_value is None:
+                os.environ.pop("ANTHROPIC_VERTEX_BASE_URL", None)
+            else:
+                os.environ["ANTHROPIC_VERTEX_BASE_URL"] = original_value
