@@ -101,7 +101,9 @@ class BetaMessageStream:
                 text_blocks.append(block.text)
 
         if not text_blocks:
-            raise RuntimeError("Expected to have received at least 1 text block")
+            raise RuntimeError(
+                f".get_final_text() can only be called when the API returns a `text` content block.\nThe API returned {','.join([b.type for b in message.content])} content block type(s) that you can access by calling get_final_message().content"
+            )
 
         return "".join(text_blocks)
 
@@ -239,7 +241,10 @@ class BetaAsyncMessageStream:
                 text_blocks.append(block.text)
 
         if not text_blocks:
-            raise RuntimeError("Expected to have received at least 1 text block")
+            raise RuntimeError(
+                f".get_final_text() can only be called when the API returns a `text` content block.\nThe API returned {','.join([b.type for b in message.content])} content block type(s) that you can access by calling get_final_message().content"
+            )
+
 
         return "".join(text_blocks)
 
