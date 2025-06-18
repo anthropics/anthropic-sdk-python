@@ -312,7 +312,7 @@ class AsyncAnthropic(AsyncAPIClient):
         # Configure a custom httpx client.
         # We provide a `DefaultAsyncHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx documentation](https://www.python-httpx.org/api/#asyncclient) for more details.
-        http_client: httpx.AsyncClient | None = None,
+        http_async_client: httpx.AsyncClient | None = None,
         # Enable or disable schema validation for data returned by the API.
         # When enabled an error APIResponseValidationError is raised
         # if the API responds with invalid data for the expected schema.
@@ -347,7 +347,7 @@ class AsyncAnthropic(AsyncAPIClient):
             base_url=base_url,
             max_retries=max_retries,
             timeout=timeout,
-            http_client=http_client,
+            http_async_client=http_async_client,
             custom_headers=default_headers,
             custom_query=default_query,
             _strict_response_validation=_strict_response_validation,
@@ -444,7 +444,7 @@ class AsyncAnthropic(AsyncAPIClient):
         auth_token: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
-        http_client: httpx.AsyncClient | None = None,
+        http_async_client: httpx.AsyncClient | None = None,
         max_retries: int | NotGiven = NOT_GIVEN,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
@@ -473,13 +473,13 @@ class AsyncAnthropic(AsyncAPIClient):
         elif set_default_query is not None:
             params = set_default_query
 
-        http_client = http_client or self._client
+        http_async_client = http_async_client or self._client
         return self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
-            http_client=http_client,
+            http_async_client=http_async_client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,

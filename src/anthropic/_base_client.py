@@ -1439,7 +1439,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
         _strict_response_validation: bool,
         max_retries: int = DEFAULT_MAX_RETRIES,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
-        http_client: httpx.AsyncClient | None = None,
+        http_async_client: httpx.AsyncClient | None = None,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
     ) -> None:
@@ -1451,14 +1451,14 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
             # where they've explicitly set the timeout to match the default timeout
             # as this check is structural, meaning that we'll think they didn't
             # pass in a timeout and will ignore it
-            if http_client and http_client.timeout != HTTPX_DEFAULT_TIMEOUT:
-                timeout = http_client.timeout
+            if http_async_client and http_async_client.timeout != HTTPX_DEFAULT_TIMEOUT:
+                timeout = http_async_client.timeout
             else:
                 timeout = DEFAULT_TIMEOUT
 
-        if http_client is not None and not isinstance(http_client, httpx.AsyncClient):  # pyright: ignore[reportUnnecessaryIsInstance]
+        if http_async_client is not None and not isinstance(http_async_client, httpx.AsyncClient):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise TypeError(
-                f"Invalid `http_client` argument; Expected an instance of `httpx.AsyncClient` but got {type(http_client)}"
+                f"Invalid `http_async_client` argument; Expected an instance of `httpx.AsyncClient` but got {type(http_async_client)}"
             )
 
         super().__init__(
@@ -1471,7 +1471,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
             custom_headers=custom_headers,
             _strict_response_validation=_strict_response_validation,
         )
-        self._client = http_client or AsyncHttpxClientWrapper(
+        self._client = http_async_client or AsyncHttpxClientWrapper(
             base_url=base_url,
             # cast to a valid type because mypy doesn't understand our type narrowing
             timeout=cast(Timeout, timeout),

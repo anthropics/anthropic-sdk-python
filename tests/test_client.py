@@ -1199,7 +1199,7 @@ class TestAsyncAnthropic:
         # custom timeout given to the httpx client should be used
         async with httpx.AsyncClient(timeout=None) as http_client:
             client = AsyncAnthropic(
-                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
+                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_async_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -1209,7 +1209,7 @@ class TestAsyncAnthropic:
         # no timeout given to the httpx client should not use the httpx default
         async with httpx.AsyncClient() as http_client:
             client = AsyncAnthropic(
-                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
+                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_async_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -1219,7 +1219,7 @@ class TestAsyncAnthropic:
         # explicitly passing the default timeout currently results in it being ignored
         async with httpx.AsyncClient(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
             client = AsyncAnthropic(
-                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
+                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_async_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -1227,13 +1227,13 @@ class TestAsyncAnthropic:
             assert timeout == DEFAULT_TIMEOUT  # our default
 
     def test_invalid_http_client(self) -> None:
-        with pytest.raises(TypeError, match="Invalid `http_client` arg"):
+        with pytest.raises(TypeError, match="Invalid `http_async_client` arg"):
             with httpx.Client() as http_client:
                 AsyncAnthropic(
                     base_url=base_url,
                     api_key=api_key,
                     _strict_response_validation=True,
-                    http_client=cast(Any, http_client),
+                    http_async_client=cast(Any, http_client),
                 )
 
     def test_default_headers_option(self) -> None:
@@ -1500,7 +1500,7 @@ class TestAsyncAnthropic:
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
-                http_client=httpx.AsyncClient(),
+                http_async_client=httpx.AsyncClient(),
             ),
         ],
         ids=["standard", "custom http client"],
@@ -1525,7 +1525,7 @@ class TestAsyncAnthropic:
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
-                http_client=httpx.AsyncClient(),
+                http_async_client=httpx.AsyncClient(),
             ),
         ],
         ids=["standard", "custom http client"],
@@ -1550,7 +1550,7 @@ class TestAsyncAnthropic:
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
-                http_client=httpx.AsyncClient(),
+                http_async_client=httpx.AsyncClient(),
             ),
         ],
         ids=["standard", "custom http client"],
