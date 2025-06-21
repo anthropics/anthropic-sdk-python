@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "0.54.0"
+version = "0.55.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "MIT"
@@ -35,13 +35,13 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+aiohttp = ["aiohttp", "httpx_aiohttp>=0.1.6"]
 vertex = ["google-auth[requests] >=2, <3"]
 bedrock = ["boto3 >= 1.28.57", "botocore >= 1.31.57"]
 
 [project.urls]
 Homepage = "https://github.com/anthropics/anthropic-sdk-python"
 Repository = "https://github.com/anthropics/anthropic-sdk-python"
-
 
 [tool.uv]
 managed = true
@@ -60,6 +60,7 @@ dev-dependencies = [
     "boto3-stubs >= 1",
     "rich>=13.7.1",
     "nest_asyncio==1.6.0",
+    "pytest-xdist>=3.6.1",
 ]
 
 [build-system]
@@ -102,7 +103,7 @@ replacement = '[\1](https://github.com/anthropics/anthropic-sdk-python/tree/main
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--tb=short"
+addopts = "--tb=short -n auto"
 xfail_strict = true
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"

@@ -23,9 +23,7 @@ from pydantic import ValidationError
 
 from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
 from anthropic._types import Omit
-from anthropic._utils import maybe_transform
 from anthropic._models import BaseModel, FinalRequestOptions
-from anthropic._constants import RAW_RESPONSE_HEADER
 from anthropic._streaming import Stream, AsyncStream
 from anthropic._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
 from anthropic._base_client import (
@@ -33,9 +31,9 @@ from anthropic._base_client import (
     HTTPX_DEFAULT_TIMEOUT,
     BaseClient,
     DefaultHttpxClient,
+    DefaultAsyncHttpxClient,
     make_request_options,
 )
-from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
 
 from .utils import update_env
 
@@ -733,62 +731,39 @@ class TestAnthropic:
 
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
+    def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, client: Anthropic) -> None:
         respx_mock.post("/v1/messages").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
-            self.client.post(
-                "/v1/messages",
-                body=cast(
-                    object,
-                    maybe_transform(
-                        dict(
-                            max_tokens=1024,
-                            messages=[
-                                {
-                                    "role": "user",
-                                    "content": "Hello, Claude",
-                                }
-                            ],
-                            model="claude-3-5-sonnet-latest",
-                        ),
-                        MessageCreateParamsNonStreaming,
-                    ),
-                ),
-                cast_to=httpx.Response,
-                options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
-            )
+            client.messages.with_streaming_response.create(
+                max_tokens=1024,
+                messages=[
+                    {
+                        "content": "Hello, world",
+                        "role": "user",
+                    }
+                ],
+                model="claude-3-7-sonnet-20250219",
+            ).__enter__()
 
         assert _get_open_connections(self.client) == 0
 
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
+    def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, client: Anthropic) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
-            self.client.post(
-                "/v1/messages",
-                body=cast(
-                    object,
-                    maybe_transform(
-                        dict(
-                            max_tokens=1024,
-                            messages=[
-                                {
-                                    "role": "user",
-                                    "content": "Hello, Claude",
-                                }
-                            ],
-                            model="claude-3-5-sonnet-latest",
-                        ),
-                        MessageCreateParamsNonStreaming,
-                    ),
-                ),
-                cast_to=httpx.Response,
-                options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
-            )
-
+            client.messages.with_streaming_response.create(
+                max_tokens=1024,
+                messages=[
+                    {
+                        "content": "Hello, world",
+                        "role": "user",
+                    }
+                ],
+                model="claude-3-7-sonnet-20250219",
+            ).__enter__()
         assert _get_open_connections(self.client) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
@@ -929,14 +904,15 @@ class TestAnthropic:
             assert response.retries_taken == failures_before_success
             assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
-    def test_proxy_environment_variables(self, monkeypatch: Any):
+    def test_proxy_environment_variables(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # Test that the proxy environment variables are set correctly
         monkeypatch.setenv("HTTPS_PROXY", "https://example.org")
-        client = Anthropic()
 
-        mounts = tuple(client._client._mounts.items())
+        client = DefaultHttpxClient()
+
+        mounts = tuple(client._mounts.items())
         assert len(mounts) == 1
         assert mounts[0][0].pattern == "https://"
-        assert isinstance(mounts[0][1], httpx.HTTPTransport)
 
     @pytest.mark.filterwarnings("ignore:.*deprecated.*:DeprecationWarning")
     def test_default_client_creation(self) -> None:
@@ -1667,62 +1643,43 @@ class TestAsyncAnthropic:
 
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    async def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
+    async def test_retrying_timeout_errors_doesnt_leak(
+        self, respx_mock: MockRouter, async_client: AsyncAnthropic
+    ) -> None:
         respx_mock.post("/v1/messages").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
-            await self.client.post(
-                "/v1/messages",
-                body=cast(
-                    object,
-                    maybe_transform(
-                        dict(
-                            max_tokens=1024,
-                            messages=[
-                                {
-                                    "role": "user",
-                                    "content": "Hello, Claude",
-                                }
-                            ],
-                            model="claude-3-5-sonnet-latest",
-                        ),
-                        MessageCreateParamsNonStreaming,
-                    ),
-                ),
-                cast_to=httpx.Response,
-                options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
-            )
+            await async_client.messages.with_streaming_response.create(
+                max_tokens=1024,
+                messages=[
+                    {
+                        "content": "Hello, world",
+                        "role": "user",
+                    }
+                ],
+                model="claude-3-7-sonnet-20250219",
+            ).__aenter__()
 
         assert _get_open_connections(self.client) == 0
 
     @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    async def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
+    async def test_retrying_status_errors_doesnt_leak(
+        self, respx_mock: MockRouter, async_client: AsyncAnthropic
+    ) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
-            await self.client.post(
-                "/v1/messages",
-                body=cast(
-                    object,
-                    maybe_transform(
-                        dict(
-                            max_tokens=1024,
-                            messages=[
-                                {
-                                    "role": "user",
-                                    "content": "Hello, Claude",
-                                }
-                            ],
-                            model="claude-3-5-sonnet-latest",
-                        ),
-                        MessageCreateParamsNonStreaming,
-                    ),
-                ),
-                cast_to=httpx.Response,
-                options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
-            )
-
+            await async_client.messages.with_streaming_response.create(
+                max_tokens=1024,
+                messages=[
+                    {
+                        "content": "Hello, world",
+                        "role": "user",
+                    }
+                ],
+                model="claude-3-7-sonnet-20250219",
+            ).__aenter__()
         assert _get_open_connections(self.client) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
@@ -1912,18 +1869,20 @@ class TestAsyncAnthropic:
 
                 time.sleep(0.1)
 
-    def test_proxy_environment_variables(self, monkeypatch: Any):
+    async def test_proxy_environment_variables(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # Test that the proxy environment variables are set correctly
         monkeypatch.setenv("HTTPS_PROXY", "https://example.org")
-        client = Anthropic()
 
-        mounts = tuple(client._client._mounts.items())
+        client = DefaultAsyncHttpxClient()
+
+        mounts = tuple(client._mounts.items())
         assert len(mounts) == 1
         assert mounts[0][0].pattern == "https://"
 
     @pytest.mark.filterwarnings("ignore:.*deprecated.*:DeprecationWarning")
-    def test_default_client_creation(self) -> None:
+    async def test_default_client_creation(self) -> None:
         # Ensure that the client can be initialized without any exceptions
-        DefaultHttpxClient(
+        DefaultAsyncHttpxClient(
             verify=True,
             cert=None,
             trust_env=True,
