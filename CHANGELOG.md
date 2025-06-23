@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.55.0 (2025-06-23)
+
+Full Changelog: [v0.54.0...v0.55.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.54.0...v0.55.0)
+
+### Features
+
+* **api:** api update ([4b2134e](https://github.com/anthropics/anthropic-sdk-python/commit/4b2134e5ec3fecab7c56f483b8db87b403a08e05))
+* **api:** api update ([2093bff](https://github.com/anthropics/anthropic-sdk-python/commit/2093bfff2a6c25573eaa2a4667f1e1d0e2d89e24))
+* **api:** manual updates ([c80fda8](https://github.com/anthropics/anthropic-sdk-python/commit/c80fda8cbd157fbbd23895d034cc7bb7a7614569))
+* **client:** add support for aiohttp ([3b03295](https://github.com/anthropics/anthropic-sdk-python/commit/3b03295f15a02ba629d1bdc77e330c2e6043b83e))
+
+
+### Bug Fixes
+
+* **client:** correctly parse binary response | stream ([d93817d](https://github.com/anthropics/anthropic-sdk-python/commit/d93817d9d761bd5e16b35f3c2973122a9c122240))
+* **internal:** revert unintentional changes ([bb3beab](https://github.com/anthropics/anthropic-sdk-python/commit/bb3beab10668be177d6bb573607ef6951a238b24))
+* **tests:** fix: tests which call HTTP endpoints directly with the example parameters ([ee69d74](https://github.com/anthropics/anthropic-sdk-python/commit/ee69d74cc40f749280a29afb12420c117d08ef34))
+* **tests:** suppress warnings in tests when running on the latest Python versions ([#982](https://github.com/anthropics/anthropic-sdk-python/issues/982)) ([740da21](https://github.com/anthropics/anthropic-sdk-python/commit/740da21b563c6ffe7618edf1dcd658bb894b2edf))
+
+
+### Chores
+
+* **ci:** enable for pull requests ([08f2dd2](https://github.com/anthropics/anthropic-sdk-python/commit/08f2dd2bd28958c08a3c82fcf00a0fc7d4e2807c))
+* **internal:** update conftest.py ([1174a62](https://github.com/anthropics/anthropic-sdk-python/commit/1174a6214624ff8cd64edb121d4ff09e9af6b717))
+* **internal:** version bump ([7241eaa](https://github.com/anthropics/anthropic-sdk-python/commit/7241eaa25b6f40bb55f61e766a996a3a18a53a02))
+* **readme:** update badges ([00661c2](https://github.com/anthropics/anthropic-sdk-python/commit/00661c275e120314f76bbd480c0267383e992638))
+* **tests:** add tests for httpx client instantiation & proxies ([b831d88](https://github.com/anthropics/anthropic-sdk-python/commit/b831d8833010c629143041b4b385929ca9c2198d))
+* **tests:** run tests in parallel ([4b24a79](https://github.com/anthropics/anthropic-sdk-python/commit/4b24a791b76c2176de1f35118901da533a10b991))
+
+
+### Documentation
+
+* **client:** fix httpx.Timeout documentation reference ([b0138b1](https://github.com/anthropics/anthropic-sdk-python/commit/b0138b1b2af3c73e568659c7e717fc955eb976b0))
+
 ## 0.54.0 (2025-06-10)
 
 Full Changelog: [v0.53.0...v0.54.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.53.0...v0.54.0)
