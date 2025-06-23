@@ -59,6 +59,7 @@ def test_messages_retries(respx_mock: MockRouter) -> None:
     )
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 @pytest.mark.asyncio()
 async def test_messages_retries_async(respx_mock: MockRouter) -> None:
