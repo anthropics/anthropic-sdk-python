@@ -1,0 +1,31 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - main
+      - next
+
+jobs:
+  detect_breaking_changes:
+    runs-on: 'ubuntu-latest'
+    name: detect-breaking-changes
+    if: github.repository == 'anthropics/anthropic-sdk-python'
+    steps:
+      - name: Calculate fetch-depth
+        run: |
+          echo "FETCH_DEPTH=$(expr ${{ github.event.pull_request.commits }} + 1)" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v4
+        with:
+          # Ensure we can check out the pull request base in the script below.
+          fetch-depth: ${{ env.FETCH_DEPTH }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: '0.5.23'
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Detect breaking changes
+        run: ./scripts/detect-breaking-changes ${{ github.event.pull_request.base.sha }}
