@@ -33,14 +33,13 @@ jobs:
         run: ./scripts/lint
 
   upload:
-    if: github.repository == 'stainless-sdks/anthropic-python'
+    if: github.repository == 'stainless-sdks/anthropic-python' && (github.event_name == 'push' || github.event.pull_request.head.repo.fork)
     timeout-minutes: 10
     name: upload
     permissions:
       contents: read
       id-token: write
     runs-on: depot-ubuntu-24.04
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@v4
 
