@@ -11,7 +11,7 @@ anyio==4.8.0 ; python_full_version >= '3.9'
     # via
     #   anthropic
     #   httpx
-boto3-stubs==1.38.35
+boto3-stubs==1.38.42
 botocore-stubs==1.38.30
     # via boto3-stubs
 certifi==2024.12.14

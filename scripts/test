@@ -54,9 +54,24 @@ fi
 
 export DEFER_PYDANTIC_BUILD=false
 
-echo "==> Running tests"
-uv run pytest "$@"
+function run_tests() {
+    echo "==> Running tests with Pydantic v2"
+    uv run --all-extras --all-groups pytest "$@"
 
-echo "==> Running Pydantic v1 tests"
-uv pip install 'pydantic<2'
-uv run --no-sync pytest "$@"
+    echo "==> Running tests with Pydantic v1"
+    uv pip install 'pydantic<2'
+    uv run --all-extras --all-groups pytest "$@"
+}
+
+# If UV_PYTHON is already set in the environment, just run the command once
+if [[ -n "$UV_PYTHON" ]]; then
+  run_tests "$@"
+else
+  # If UV_PYTHON is not set, run the command for min and max versions
+
+  echo "==> Running tests for Python 3.8"
+  UV_PYTHON=3.8 run_tests "$@"
+
+  echo "==> Running tests for Python 3.12"
+  UV_PYTHON=3.12 run_tests "$@"
+fi

@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 10
     name: lint
     runs-on: ${{ github.repository == 'stainless-sdks/anthropic-python' && 'depot-ubuntu-24.04' || 'ubuntu-latest' }}
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@v4
 
@@ -32,7 +33,7 @@ jobs:
         run: ./scripts/lint
 
   upload:
-    if: github.repository == 'stainless-sdks/anthropic-python'
+    if: github.repository == 'stainless-sdks/anthropic-python' && (github.event_name == 'push' || github.event.pull_request.head.repo.fork)
     timeout-minutes: 10
     name: upload
     permissions:
@@ -59,6 +60,7 @@ jobs:
     timeout-minutes: 10
     name: test
     runs-on: ${{ github.repository == 'stainless-sdks/anthropic-python' && 'depot-ubuntu-24.04' || 'ubuntu-latest' }}
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@v4
 
