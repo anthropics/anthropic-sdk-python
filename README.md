@@ -1,6 +1,6 @@
 # Anthropic Python API library
 
-[![PyPI version](https://img.shields.io/pypi/v/anthropic.svg)](https://pypi.org/project/anthropic/)
+[![PyPI version](<https://img.shields.io/pypi/v/anthropic.svg?label=pypi%20(stable)>)](https://pypi.org/project/anthropic/)
 
 The Anthropic Python library provides convenient access to the Anthropic REST API from any Python 3.8+
 application. It includes type definitions for all request params and response fields,
@@ -79,6 +79,47 @@ asyncio.run(main())
 ```
 
 Functionality between the synchronous and asynchronous clients is otherwise identical.
+
+### With aiohttp
+
+By default, the async client uses `httpx` for HTTP requests. However, for improved concurrency performance you may also use `aiohttp` as the HTTP backend.
+
+You can enable this by installing `aiohttp`:
+
+```sh
+# install from PyPI
+pip install anthropic[aiohttp]
+```
+
+Then you can enable it by instantiating the client with `http_client=DefaultAioHttpClient()`:
+
+```python
+import os
+import asyncio
+from anthropic import DefaultAioHttpClient
+from anthropic import AsyncAnthropic
+
+
+async def main() -> None:
+    async with AsyncAnthropic(
+        api_key=os.environ.get("ANTHROPIC_API_KEY"),  # This is the default and can be omitted
+        http_client=DefaultAioHttpClient(),
+    ) as client:
+        message = await client.messages.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Hello, Claude",
+                }
+            ],
+            model="claude-3-5-sonnet-latest",
+        )
+        print(message.content)
+
+
+asyncio.run(main())
+```
 
 ## Streaming responses
 
@@ -522,7 +563,7 @@ client.with_options(max_retries=5).messages.create(
 ### Timeouts
 
 By default requests time out after 10 minutes. You can configure this with a `timeout` option,
-which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/#fine-tuning-the-configuration) object:
+which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/timeouts/#fine-tuning-the-configuration) object:
 
 ```python
 from anthropic import Anthropic
