@@ -28,7 +28,7 @@ _T = TypeVar("_T")
 
 def assert_basic_response(events: list[MessageStreamEvent], message: Message) -> None:
     assert message.id == "msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK"
-    assert message.model == "claude-3-opus-20240229"
+    assert message.model == "claude-3-opus-latest"
     assert message.role == "assistant"
     assert message.stop_reason == "end_turn"
     assert message.stop_sequence is None
@@ -120,7 +120,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-3-opus-20240229",
+            model="claude-3-opus-latest",
         ) as stream:
             with pytest.warns(DeprecationWarning):
                 assert isinstance(cast(Any, stream), Stream)
@@ -141,7 +141,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-3-opus-20240229",
+            model="claude-3-opus-latest",
         ) as stream:
             assert not stream.response.is_closed
 
@@ -202,7 +202,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-3-opus-20240229",
+            model="claude-3-opus-latest",
         ) as stream:
             with pytest.warns(DeprecationWarning):
                 assert isinstance(cast(Any, stream), AsyncStream)
@@ -224,7 +224,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-3-opus-20240229",
+            model="claude-3-opus-latest",
         ) as stream:
             assert not stream.response.is_closed
 

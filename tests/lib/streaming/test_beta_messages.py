@@ -30,7 +30,7 @@ _T = TypeVar("_T")
 # Expected message fixtures
 EXPECTED_BASIC_MESSAGE = {
     "id": "msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK",
-    "model": "claude-3-opus-20240229",
+    "model": "claude-3-opus-latest",
     "role": "assistant",
     "stop_reason": "end_turn",
     "type": "message",
@@ -200,7 +200,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-3-opus-20240229",
+            model="claude-3-opus-latest",
         ) as stream:
             assert isinstance(cast(Any, stream), BetaMessageStream)
 
@@ -240,7 +240,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-3-opus-20240229",
+            model="claude-3-opus-latest",
         ) as stream:
             assert not stream.response.is_closed
 
@@ -301,7 +301,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-3-opus-20240229",
+            model="claude-3-opus-latest",
         ) as stream:
             assert not stream.response.is_closed
 
