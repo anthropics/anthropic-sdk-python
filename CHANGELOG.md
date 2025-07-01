@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.56.0 (2025-07-01)
+
+Full Changelog: [v0.55.0...v0.56.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.55.0...v0.56.0)
+
+### Features
+
+* **bedrock:** automatically infer AWS Region ([#974](https://github.com/anthropics/anthropic-sdk-python/issues/974)) ([f648e09](https://github.com/anthropics/anthropic-sdk-python/commit/f648e09c43ea227a7a388cbdd21e8ddb762963e4))
+* **vertex:** support global region endpoint ([1fd1adf](https://github.com/anthropics/anthropic-sdk-python/commit/1fd1adf736e4e5a3e16819c052903dfe4a436132))
+
+
+### Bug Fixes
+
+* **ci:** correct conditional ([18e625a](https://github.com/anthropics/anthropic-sdk-python/commit/18e625a1a6de15ff7729149c19b8c22191ed8622))
+* **ci:** release-doctor — report correct token name ([c91f50d](https://github.com/anthropics/anthropic-sdk-python/commit/c91f50dbd7057ea465b9d71795488cdae8c1a13a))
+* **tests:** avoid deprecation warnings ([71b432f](https://github.com/anthropics/anthropic-sdk-python/commit/71b432f2d22d72f6763d7042677cb43122302ded))
+
+
+### Chores
+
+* **ci:** only run for pushes and fork pull requests ([447b793](https://github.com/anthropics/anthropic-sdk-python/commit/447b793baf8ba4df63a8fcfcd870a85dd2d07f07))
+* **internal:** add breaking change detection ([e6d0eca](https://github.com/anthropics/anthropic-sdk-python/commit/e6d0eca3fc5c918b56e42fbe46fcf9bedd26ca4d))
+* **internal:** codegen related update ([f88517b](https://github.com/anthropics/anthropic-sdk-python/commit/f88517bfb56969674b82193b788d2043806e5a39))
+* **internal:** codegen related update ([a385cb9](https://github.com/anthropics/anthropic-sdk-python/commit/a385cb9270f8214907ce1f4923e16537ac10cdab))
+* **internal:** codegen related update ([9d4b537](https://github.com/anthropics/anthropic-sdk-python/commit/9d4b537be3e248f2ce0d98721f9bbbdc32b75575))
+* **internal:** codegen related update ([6a3a6fe](https://github.com/anthropics/anthropic-sdk-python/commit/6a3a6fe3743ee448a83f294d394c5bf9b214176f))
+* **internal:** codegen related update ([28704a6](https://github.com/anthropics/anthropic-sdk-python/commit/28704a63eb20f6ed78f13b424190cac14aca8a0f))
+* **tests:** run tests with min and max supported Python versions by default ([0ad8534](https://github.com/anthropics/anthropic-sdk-python/commit/0ad85343fbe4d2934aa826fde36c7927f7b57803))
+* **tests:** skip some failing tests on the latest python versions ([f63a2d2](https://github.com/anthropics/anthropic-sdk-python/commit/f63a2d29d5c56175078eaf5c67a142aec0937174))
+
 ## 0.55.0 (2025-06-23)
 
 Full Changelog: [v0.54.0...v0.55.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.54.0...v0.55.0)
