@@ -32,16 +32,27 @@ jobs:
       - name: Run lints
         run: ./scripts/lint
 
-  upload:
+  build:
     if: github.repository == 'stainless-sdks/anthropic-python' && (github.event_name == 'push' || github.event.pull_request.head.repo.fork)
     timeout-minutes: 10
-    name: upload
+    name: build
     permissions:
       contents: read
       id-token: write
     runs-on: depot-ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: '0.5.23'
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run build
+        run: uv build
 
       - name: Get GitHub OIDC Token
         id: github-oidc
