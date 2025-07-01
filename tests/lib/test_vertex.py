@@ -124,7 +124,7 @@ class TestAnthropicVertex:
         client = AnthropicVertex(region="global", project_id="test-project", access_token="fake-token")
         assert str(client.base_url).rstrip("/") == "https://aiplatform.googleapis.com/v1"
 
-    @pytest.mark.parametrize('region', ["us-central1", "europe-west1", "asia-southeast1"])
+    @pytest.mark.parametrize("region", ["us-central1", "europe-west1", "asia-southeast1"])
     def test_regional_base_url(self, region: str) -> None:
         """Test that regional endpoints use the correct base URL format."""
         client = AnthropicVertex(region=region, project_id="test-project", access_token="fake-token")
@@ -138,7 +138,7 @@ class TestAnthropicVertex:
         monkeypatch.setenv("ANTHROPIC_VERTEX_BASE_URL", test_url)
 
         client = AnthropicVertex(
-            region="global", # we expect this to get ignored since the user is providing a base_url
+            region="global",  # we expect this to get ignored since the user is providing a base_url
             project_id="test-project",
             access_token="fake-token",
             base_url="https://test.googleapis.com/v1",
@@ -270,7 +270,7 @@ class TestAsyncAnthropicVertex:
         monkeypatch.setenv("ANTHROPIC_VERTEX_BASE_URL", test_url)
 
         client = AsyncAnthropicVertex(
-            region="global", # we expect this to get ignored since the user is providing a base_url
+            region="global",  # we expect this to get ignored since the user is providing a base_url
             project_id="test-project",
             access_token="fake-token",
             base_url="https://test.googleapis.com/v1",
