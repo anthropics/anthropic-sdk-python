@@ -25,15 +25,15 @@ class MessageParam(TypedDict, total=False):
             str,
             Iterable[
                 Union[
-                    ServerToolUseBlockParam,
-                    WebSearchToolResultBlockParam,
                     TextBlockParam,
                     ImageBlockParam,
-                    ToolUseBlockParam,
-                    ToolResultBlockParam,
                     DocumentBlockParam,
                     ThinkingBlockParam,
                     RedactedThinkingBlockParam,
+                    ToolUseBlockParam,
+                    ToolResultBlockParam,
+                    ServerToolUseBlockParam,
+                    WebSearchToolResultBlockParam,
                     ContentBlock,
                 ]
             ],

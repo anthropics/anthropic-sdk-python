@@ -15,7 +15,7 @@ from .web_search_tool_result_block import WebSearchToolResultBlock
 __all__ = ["RawContentBlockStartEvent", "ContentBlock"]
 
 ContentBlock: TypeAlias = Annotated[
-    Union[TextBlock, ToolUseBlock, ServerToolUseBlock, WebSearchToolResultBlock, ThinkingBlock, RedactedThinkingBlock],
+    Union[TextBlock, ThinkingBlock, RedactedThinkingBlock, ToolUseBlock, ServerToolUseBlock, WebSearchToolResultBlock],
     PropertyInfo(discriminator="type"),
 ]
 
