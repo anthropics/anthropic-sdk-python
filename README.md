@@ -208,7 +208,7 @@ To get the token count for a message without creating it you can use the `client
 
 ```py
 count = client.messages.count_tokens(
-    model="claude-3-5-sonnet-20241022",
+    model="claude-sonnet-4-20250514",
     messages=[
         {"role": "user", "content": "Hello, world"}
     ]
@@ -289,7 +289,7 @@ message = client.messages.create(
             "content": "Hello!",
         }
     ],
-    model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    model="anthropic.claude-sonnet-4-20250514-v2:0",
 )
 print(message)
 ```
@@ -320,7 +320,7 @@ from anthropic import AnthropicVertex
 client = AnthropicVertex()
 
 message = client.messages.create(
-    model="claude-3-5-sonnet-v2@20241022",
+    model="claude-sonnet-4-20250514-v2@20241022",
     max_tokens=100,
     messages=[
         {
@@ -431,7 +431,7 @@ message = client.messages.create(
             "role": "user",
         }
     ],
-    model="claude-3-7-sonnet-20250219",
+    model="claude-sonnet-4-20250514",
     metadata={},
 )
 print(message.metadata)
