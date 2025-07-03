@@ -25,6 +25,6 @@ response = client.messages.create(
             ],
         },
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-20250514",
 )
 print(response.model_dump_json(indent=2))

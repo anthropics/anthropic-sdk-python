@@ -21,7 +21,7 @@ tools: list[ToolParam] = [
 ]
 
 message = client.messages.create(
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-20250514",
     max_tokens=1024,
     messages=[user_message],
     tools=tools,
@@ -32,7 +32,7 @@ assert message.stop_reason == "tool_use"
 
 tool = next(c for c in message.content if c.type == "tool_use")
 response = client.messages.create(
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-20250514",
     max_tokens=1024,
     messages=[
         user_message,
