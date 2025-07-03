@@ -91,7 +91,7 @@ from .beta_web_search_result_block_param import BetaWebSearchResultBlockParam as
 from .beta_thinking_config_disabled_param import BetaThinkingConfigDisabledParam as BetaThinkingConfigDisabledParam
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param as BetaWebSearchTool20250305Param
 from .beta_citation_content_block_location import BetaCitationContentBlockLocation as BetaCitationContentBlockLocation
-from .beta_search_result_location_citation import BetaSearchResultLocationCitation as BetaSearchResultLocationCitation
+from .beta_citation_search_result_location import BetaCitationSearchResultLocation as BetaCitationSearchResultLocation
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param as BetaToolTextEditor20241022Param
 from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param as BetaToolTextEditor20250124Param
 from .beta_tool_text_editor_20250429_param import BetaToolTextEditor20250429Param as BetaToolTextEditor20250429Param
@@ -130,11 +130,11 @@ from .beta_web_search_tool_result_block_content import (
 from .beta_citation_content_block_location_param import (
     BetaCitationContentBlockLocationParam as BetaCitationContentBlockLocationParam,
 )
+from .beta_citation_search_result_location_param import (
+    BetaCitationSearchResultLocationParam as BetaCitationSearchResultLocationParam,
+)
 from .beta_code_execution_tool_result_error_code import (
     BetaCodeExecutionToolResultErrorCode as BetaCodeExecutionToolResultErrorCode,
-)
-from .beta_search_result_location_citation_param import (
-    BetaSearchResultLocationCitationParam as BetaSearchResultLocationCitationParam,
 )
 from .beta_code_execution_tool_result_block_param import (
     BetaCodeExecutionToolResultBlockParam as BetaCodeExecutionToolResultBlockParam,
