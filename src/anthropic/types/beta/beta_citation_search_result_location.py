@@ -5,10 +5,10 @@ from typing_extensions import Literal
 
 from ..._models import BaseModel
 
-__all__ = ["BetaSearchResultLocationCitation"]
+__all__ = ["BetaCitationSearchResultLocation"]
 
 
-class BetaSearchResultLocationCitation(BaseModel):
+class BetaCitationSearchResultLocation(BaseModel):
     cited_text: str
 
     end_block_index: int

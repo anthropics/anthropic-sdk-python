@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import Optional
 from typing_extensions import Literal, Required, TypedDict
 
-__all__ = ["BetaSearchResultLocationCitationParam"]
+__all__ = ["BetaCitationSearchResultLocationParam"]
 
 
-class BetaSearchResultLocationCitationParam(TypedDict, total=False):
+class BetaCitationSearchResultLocationParam(TypedDict, total=False):
     cited_text: Required[str]
 
     end_block_index: Required[int]
