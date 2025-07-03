@@ -186,7 +186,7 @@ async def main() -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="claude-3-5-sonnet-latest",
+        model="claude-sonnet-4-20250514",
     ) as stream:
         async for text in stream.text_stream:
             print(text, end="", flush=True)
@@ -204,10 +204,10 @@ Alternatively, you can use `client.messages.create(..., stream=True)` which only
 
 ## Token counting
 
-To get the token count for a message without creating it you can use the `client.beta.messages.count_tokens()` method. This takes the same `messages` list as the `.create()` method.
+To get the token count for a message without creating it you can use the `client.messages.count_tokens()` method. This takes the same `messages` list as the `.create()` method.
 
 ```py
-count = client.beta.messages.count_tokens(
+count = client.messages.count_tokens(
     model="claude-3-5-sonnet-20241022",
     messages=[
         {"role": "user", "content": "Hello, world"}
@@ -226,20 +226,19 @@ message.usage
 
 ## Message Batches
 
-This SDK provides beta support for the [Message Batches API](https://docs.anthropic.com/en/docs/build-with-claude/message-batches) under the `client.beta.messages.batches` namespace.
-
+This SDK provides beta support for the [Message Batches API](https://docs.anthropic.com/en/docs/build-with-claude/message-batches) under the `client.messages.batches` namespace.
 
 ### Creating a batch
 
 Message Batches take the exact same request params as the standard Messages API:
 
 ```python
-await client.beta.messages.batches.create(
+await client.messages.batches.create(
     requests=[
         {
             "custom_id": "my-first-request",
             "params": {
-                "model": "claude-3-5-sonnet-latest",
+                "model": "claude-sonnet-4-20250514",
                 "max_tokens": 1024,
                 "messages": [{"role": "user", "content": "Hello, world"}],
             },
@@ -247,7 +246,7 @@ await client.beta.messages.batches.create(
         {
             "custom_id": "my-second-request",
             "params": {
-                "model": "claude-3-5-sonnet-latest",
+                "model": "claude-sonnet-4-20250514",
                 "max_tokens": 1024,
                 "messages": [{"role": "user", "content": "Hi again, friend"}],
             },
@@ -256,13 +255,12 @@ await client.beta.messages.batches.create(
 )
 ```
 
-
 ### Getting results from a batch
 
 Once a Message Batch has been processed, indicated by `.processing_status === 'ended'`, you can access the results with `.batches.results()`
 
 ```python
-result_stream = await client.beta.messages.batches.results(batch_id)
+result_stream = await client.messages.batches.results(batch_id)
 async for entry in result_stream:
     if entry.result.type == "succeeded":
         print(entry.result.message.content)
@@ -358,7 +356,7 @@ client = Anthropic()
 
 all_batches = []
 # Automatically fetches more pages as needed.
-for batch in client.beta.messages.batches.list(
+for batch in client.messages.batches.list(
     limit=20,
 ):
     # Do something with batch here
@@ -378,7 +376,7 @@ client = AsyncAnthropic()
 async def main() -> None:
     all_batches = []
     # Iterate through items across all pages, issuing requests as needed.
-    async for batch in client.beta.messages.batches.list(
+    async for batch in client.messages.batches.list(
         limit=20,
     ):
         all_batches.append(batch)
@@ -391,7 +389,7 @@ asyncio.run(main())
 Alternatively, you can use the `.has_next_page()`, `.next_page_info()`, or `.get_next_page()` methods for more granular control working with pages:
 
 ```python
-first_page = await client.beta.messages.batches.list(
+first_page = await client.messages.batches.list(
     limit=20,
 )
 if first_page.has_next_page():
@@ -405,7 +403,7 @@ if first_page.has_next_page():
 Or just work directly with the returned data:
 
 ```python
-first_page = await client.beta.messages.batches.list(
+first_page = await client.messages.batches.list(
     limit=20,
 )
 
@@ -521,14 +519,14 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-20250514",
 )
 print(message._request_id)  # req_018EeWyXxfu5pfWkrYcMdjWG
 ```
 
 Note that unlike other properties that use an `_` prefix, the `_request_id` property
-*is* public. Unless documented otherwise, *all* other `_` prefix properties,
-methods and modules are *private*.
+_is_ public. Unless documented otherwise, _all_ other `_` prefix properties,
+methods and modules are _private_.
 
 ### Retries
 
