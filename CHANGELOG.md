@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.57.1 (2025-07-03)
+
+Full Changelog: [v0.57.0...v0.57.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.57.0...v0.57.1)
+
+### Chores
+
+* **api:** update BetaCitationSearchResultLocation ([e0735b4](https://github.com/anthropics/anthropic-sdk-python/commit/e0735b45216fc97866492bf2fff50ea7bc9768ef))
+* **internal:** version bump ([d368831](https://github.com/anthropics/anthropic-sdk-python/commit/d3688311d7b175986cff8e87ccc6e4d3159e43f4))
+
 ## 0.57.0 (2025-07-03)
 
 Full Changelog: [v0.56.0...v0.57.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.56.0...v0.57.0)
