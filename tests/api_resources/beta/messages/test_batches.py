@@ -37,7 +37,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-20250514",
                     },
                 }
             ],
@@ -58,7 +58,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-20250514",
                         "container": "container",
                         "mcp_servers": [
                             {
@@ -153,7 +153,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-20250514",
                     },
                 }
             ],
@@ -178,7 +178,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-20250514",
                     },
                 }
             ],
@@ -434,7 +434,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-20250514",
                     },
                 }
             ],
@@ -455,7 +455,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-20250514",
                         "container": "container",
                         "mcp_servers": [
                             {
@@ -550,7 +550,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-20250514",
                     },
                 }
             ],
@@ -575,7 +575,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-20250514",
                     },
                 }
             ],
