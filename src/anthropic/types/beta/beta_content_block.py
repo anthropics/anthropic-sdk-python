@@ -20,6 +20,8 @@ __all__ = ["BetaContentBlock"]
 BetaContentBlock: TypeAlias = Annotated[
     Union[
         BetaTextBlock,
+        BetaThinkingBlock,
+        BetaRedactedThinkingBlock,
         BetaToolUseBlock,
         BetaServerToolUseBlock,
         BetaWebSearchToolResultBlock,
@@ -27,8 +29,6 @@ BetaContentBlock: TypeAlias = Annotated[
         BetaMCPToolUseBlock,
         BetaMCPToolResultBlock,
         BetaContainerUploadBlock,
-        BetaThinkingBlock,
-        BetaRedactedThinkingBlock,
     ],
     PropertyInfo(discriminator="type"),
 ]

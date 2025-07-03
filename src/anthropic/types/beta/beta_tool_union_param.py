@@ -20,13 +20,13 @@ __all__ = ["BetaToolUnionParam"]
 
 BetaToolUnionParam: TypeAlias = Union[
     BetaToolParam,
-    BetaToolComputerUse20241022Param,
     BetaToolBash20241022Param,
-    BetaToolTextEditor20241022Param,
-    BetaToolComputerUse20250124Param,
     BetaToolBash20250124Param,
+    BetaCodeExecutionTool20250522Param,
+    BetaToolComputerUse20241022Param,
+    BetaToolComputerUse20250124Param,
+    BetaToolTextEditor20241022Param,
     BetaToolTextEditor20250124Param,
     BetaToolTextEditor20250429Param,
     BetaWebSearchTool20250305Param,
-    BetaCodeExecutionTool20250522Param,
 ]
