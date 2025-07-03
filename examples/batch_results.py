@@ -14,6 +14,6 @@ except IndexError as exc:
 
 s = time.monotonic()
 
-result_stream = client.beta.messages.batches.results(batch_id)
+result_stream = client.messages.batches.results(batch_id)
 for result in result_stream:
     rich.print(result)
