@@ -8,7 +8,7 @@ client = AsyncAnthropic()
 async def main() -> None:
     async with client.messages.stream(
         max_tokens=1024,
-        model="claude-3-5-sonnet-latest",
+        model="claude-sonnet-4-20250514",
         tools=[
             {
                 "name": "get_weather",
