@@ -320,7 +320,7 @@ from anthropic import AnthropicVertex
 client = AnthropicVertex()
 
 message = client.messages.create(
-    model="claude-sonnet-4-20250514-v2@20241022",
+    model="claude-sonnet-4@20250514",
     max_tokens=100,
     messages=[
         {
