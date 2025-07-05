@@ -289,7 +289,7 @@ message = client.messages.create(
             "content": "Hello!",
         }
     ],
-    model="anthropic.claude-sonnet-4-20250514-v2:0",
+    model="anthropic.claude-sonnet-4-20250514-v1:0",
 )
 print(message)
 ```

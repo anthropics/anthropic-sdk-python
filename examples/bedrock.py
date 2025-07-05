@@ -19,7 +19,7 @@ message = client.messages.create(
             "content": "Hello!",
         }
     ],
-    model="anthropic.claude-3-sonnet-20240229-v1:0",
+    model="anthropic.claude-sonnet-4-20250514-v1:0",
 )
 print(message.model_dump_json(indent=2))
 
@@ -33,7 +33,7 @@ with client.messages.stream(
             "content": "Say hello there!",
         }
     ],
-    model="anthropic.claude-3-sonnet-20240229-v1:0",
+    model="anthropic.claude-sonnet-4-20250514-v1:0",
 ) as stream:
     for text in stream.text_stream:
         print(text, end="", flush=True)

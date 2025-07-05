@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.57.2 (2025-07-05)
+
+Full Changelog: [v0.57.1...v0.57.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.57.1...v0.57.2)
+
+### Chores
+
+* **internal:** version bump ([5f0f5ad](https://github.com/anthropics/anthropic-sdk-python/commit/5f0f5adba5392facf8331451c449513ae005a054))
+
+
+### Documentation
+
+* model in examples ([89b6925](https://github.com/anthropics/anthropic-sdk-python/commit/89b69256dcbd107970d0763afc62f2cbf08e3d5a))
+* model in examples ([1eccecb](https://github.com/anthropics/anthropic-sdk-python/commit/1eccecbec9e0c0cde748695e0cb1bc61ac8ffca5))
+
 ## 0.57.1 (2025-07-03)
 
 Full Changelog: [v0.57.0...v0.57.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.57.0...v0.57.1)
