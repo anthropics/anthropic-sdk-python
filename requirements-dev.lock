@@ -11,8 +11,10 @@ anyio==4.8.0 ; python_full_version >= '3.9'
     # via
     #   anthropic
     #   httpx
-boto3-stubs==1.38.42
-botocore-stubs==1.38.30
+boto3-stubs==1.39.4
+botocore-stubs==1.38.30 ; python_full_version < '3.9'
+    # via boto3-stubs
+botocore-stubs==1.38.46 ; python_full_version >= '3.9'
     # via boto3-stubs
 certifi==2024.12.14
     # via
@@ -96,7 +98,7 @@ tomli==2.2.1 ; python_full_version < '3.11'
     # via
     #   mypy
     #   pytest
-types-awscrt==0.27.2
+types-awscrt==0.27.4
     # via botocore-stubs
 types-s3transfer==0.13.0
     # via boto3-stubs
