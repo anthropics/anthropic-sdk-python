@@ -1,6 +1,7 @@
 # Anthropic Python API library
 
-[![PyPI version](<https://img.shields.io/pypi/v/anthropic.svg?label=pypi%20(stable)>)](https://pypi.org/project/anthropic/)
+<!-- prettier-ignore -->
+[![PyPI version](https://img.shields.io/pypi/v/anthropic.svg?label=pypi%20(stable))](https://pypi.org/project/anthropic/)
 
 The Anthropic Python library provides convenient access to the Anthropic REST API from any Python 3.8+
 application. It includes type definitions for all request params and response fields,
@@ -289,7 +290,7 @@ message = client.messages.create(
             "content": "Hello!",
         }
     ],
-    model="anthropic.claude-sonnet-4-20250514-v2:0",
+    model="anthropic.claude-sonnet-4-20250514-v1:0",
 )
 print(message)
 ```
