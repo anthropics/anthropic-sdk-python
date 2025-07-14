@@ -95,7 +95,6 @@ pip install anthropic[aiohttp]
 Then you can enable it by instantiating the client with `http_client=DefaultAioHttpClient()`:
 
 ```python
-import os
 import asyncio
 from anthropic import DefaultAioHttpClient
 from anthropic import AsyncAnthropic
@@ -103,7 +102,7 @@ from anthropic import AsyncAnthropic
 
 async def main() -> None:
     async with AsyncAnthropic(
-        api_key=os.environ.get("ANTHROPIC_API_KEY"),  # This is the default and can be omitted
+        api_key="my-anthropic-api-key",
         http_client=DefaultAioHttpClient(),
     ) as client:
         message = await client.messages.create(
