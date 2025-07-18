@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.58.2 (2025-07-18)
+
+Full Changelog: [v0.58.1...v0.58.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.58.1...v0.58.2)
+
+### Chores
+
+* **internal:** version bump ([cd5d1ad](https://github.com/anthropics/anthropic-sdk-python/commit/cd5d1adc34e488f1c9e3a6d2a46f69e5c168e3f6))
+
 ## 0.58.1 (2025-07-18)
 
 Full Changelog: [v0.58.0...v0.58.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.58.0...v0.58.1)
