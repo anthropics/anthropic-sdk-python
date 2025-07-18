@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.58.0 (2025-07-18)
+
+Full Changelog: [v0.57.1...v0.58.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.57.1...v0.58.0)
+
+### Features
+
+* clean up environment call outs ([4f64e9c](https://github.com/anthropics/anthropic-sdk-python/commit/4f64e9c1bdb142bbcff2072baa709afdea348889))
+
+
+### Bug Fixes
+
+* **client:** don't send Content-Type header on GET requests ([727268f](https://github.com/anthropics/anthropic-sdk-python/commit/727268f2bd4cb42aa1472e1f0c6a92fd6a5cb122))
+* **parsing:** correctly handle nested discriminated unions ([44dd47e](https://github.com/anthropics/anthropic-sdk-python/commit/44dd47e15ed91af912eac4791421e11504c3094b))
+
+
+### Chores
+
+* **internal:** bump pinned h11 dep ([9a947e1](https://github.com/anthropics/anthropic-sdk-python/commit/9a947e1061021529937395758acb4d77b685a68b))
+* **internal:** codegen related update ([33f2b34](https://github.com/anthropics/anthropic-sdk-python/commit/33f2b3468a971ca2ce6eb8b823b26d45092303f7))
+* **internal:** version bump ([5f0f5ad](https://github.com/anthropics/anthropic-sdk-python/commit/5f0f5adba5392facf8331451c449513ae005a054))
+* **package:** mark python 3.13 as supported ([703d557](https://github.com/anthropics/anthropic-sdk-python/commit/703d55747456a3825ba8c79cd492d6e64276dc15))
+* **readme:** fix version rendering on pypi ([dd956a6](https://github.com/anthropics/anthropic-sdk-python/commit/dd956a616a45191398aac9061eaaa5f3b7cbf2f6))
+
+
+### Documentation
+
+* model in examples ([89b6925](https://github.com/anthropics/anthropic-sdk-python/commit/89b69256dcbd107970d0763afc62f2cbf08e3d5a))
+* model in examples ([1eccecb](https://github.com/anthropics/anthropic-sdk-python/commit/1eccecbec9e0c0cde748695e0cb1bc61ac8ffca5))
+
 ## 0.57.1 (2025-07-03)
 
 Full Changelog: [v0.57.0...v0.57.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.57.0...v0.57.1)
