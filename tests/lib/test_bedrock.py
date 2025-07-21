@@ -79,7 +79,7 @@ def test_messages_retries(respx_mock: MockRouter) -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="anthropic.claude-3-sonnet-20240229-v1:0",
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
     )
 
     calls = cast("list[MockRequestCall]", respx_mock.calls)
@@ -88,11 +88,11 @@ def test_messages_retries(respx_mock: MockRouter) -> None:
 
     assert (
         calls[0].request.url
-        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke"
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke"
     )
     assert (
         calls[1].request.url
-        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke"
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke"
     )
 
 
@@ -115,7 +115,7 @@ async def test_messages_retries_async(respx_mock: MockRouter) -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="anthropic.claude-3-sonnet-20240229-v1:0",
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
     )
 
     calls = cast("list[MockRequestCall]", respx_mock.calls)
@@ -124,11 +124,11 @@ async def test_messages_retries_async(respx_mock: MockRouter) -> None:
 
     assert (
         calls[0].request.url
-        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke"
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke"
     )
     assert (
         calls[1].request.url
-        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke"
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke"
     )
 
 
