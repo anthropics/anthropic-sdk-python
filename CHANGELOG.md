@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.59.0 (2025-07-23)
+
+Full Changelog: [v0.58.2...v0.59.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.58.2...v0.59.0)
+
+### Features
+
+* **api:** removed older deprecated models ([38998fd](https://github.com/anthropics/anthropic-sdk-python/commit/38998fdab79b62349481c9c49579a825a5a33761))
+
+
+### Bug Fixes
+
+* **parsing:** ignore empty metadata ([7099f32](https://github.com/anthropics/anthropic-sdk-python/commit/7099f32a401b1f2a08b358562e325571a5fce8f6))
+* **parsing:** parse extra field types ([dbea8a4](https://github.com/anthropics/anthropic-sdk-python/commit/dbea8a40469c30533e30dc1762bfba83159f090d))
+
+
+### Chores
+
+* **internal:** version bump ([5defffa](https://github.com/anthropics/anthropic-sdk-python/commit/5defffa3ab4b0299759f2a45ffa3f7a49e8c2ba5))
+
 ## 0.58.2 (2025-07-18)
 
 Full Changelog: [v0.58.1...v0.58.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.58.1...v0.58.2)
