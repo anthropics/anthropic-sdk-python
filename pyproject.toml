@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "0.58.2"
+version = "0.59.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "MIT"
