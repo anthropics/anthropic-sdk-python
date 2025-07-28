@@ -13,6 +13,8 @@ __all__ = ["Messages", "AsyncMessages"]
 
 class Messages(SyncAPIResource):
     create = FirstPartyMessagesAPI.create
+    stream = FirstPartyMessagesAPI.stream
+    count_tokens = FirstPartyMessagesAPI.count_tokens
 
     @cached_property
     def with_raw_response(self) -> MessagesWithRawResponse:
@@ -36,6 +38,8 @@ class Messages(SyncAPIResource):
 
 class AsyncMessages(AsyncAPIResource):
     create = FirstPartyAsyncMessagesAPI.create
+    stream = FirstPartyAsyncMessagesAPI.stream
+    count_tokens = FirstPartyAsyncMessagesAPI.count_tokens
 
     @cached_property
     def with_raw_response(self) -> AsyncMessagesWithRawResponse:
