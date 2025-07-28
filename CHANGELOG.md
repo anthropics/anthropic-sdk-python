@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.60.0 (2025-07-28)
+
+Full Changelog: [v0.59.0...v0.60.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.59.0...v0.60.0)
+
+### Features
+
+* update streaming error message to say 'required' not 'recommended' ([57120c8](https://github.com/anthropics/anthropic-sdk-python/commit/57120c8e0579ca3d3218ce043cc46c82345a925e))
+* update streaming error message to say 'required' not 'recommended' ([3b47368](https://github.com/anthropics/anthropic-sdk-python/commit/3b47368ca00a51bc4876066af502b0a21a6b6a60))
+
+
+### Bug Fixes
+
+* **vertex:** add missing beta methods ([#1004](https://github.com/anthropics/anthropic-sdk-python/issues/1004)) ([f8e9cb4](https://github.com/anthropics/anthropic-sdk-python/commit/f8e9cb40b1832eaa7f319d8b051b258a7320cbd4))
+
+
+### Chores
+
+* **project:** add settings file for vscode ([1c4a9b1](https://github.com/anthropics/anthropic-sdk-python/commit/1c4a9b17e39e76c7260b44b6b666dbf2450a6d19))
+
 ## 0.59.0 (2025-07-23)
 
 Full Changelog: [v0.58.2...v0.59.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.58.2...v0.59.0)
