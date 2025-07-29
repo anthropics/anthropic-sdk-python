@@ -10,6 +10,7 @@ from .tool_bash_20250124_param import ToolBash20250124Param
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
 from .web_search_tool_20250305_param import WebSearchTool20250305Param
 from .tool_text_editor_20250124_param import ToolTextEditor20250124Param
+from .tool_text_editor_20250728_param import ToolTextEditor20250728Param
 
 __all__ = ["ToolUnionParam", "TextEditor20250429"]
 
@@ -28,5 +29,10 @@ class TextEditor20250429(TypedDict, total=False):
 
 
 ToolUnionParam: TypeAlias = Union[
-    ToolParam, ToolBash20250124Param, ToolTextEditor20250124Param, TextEditor20250429, WebSearchTool20250305Param
+    ToolParam,
+    ToolBash20250124Param,
+    ToolTextEditor20250124Param,
+    TextEditor20250429,
+    ToolTextEditor20250728Param,
+    WebSearchTool20250305Param,
 ]
