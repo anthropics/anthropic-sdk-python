@@ -17,6 +17,8 @@ class BetaCitationContentBlockLocation(BaseModel):
 
     end_block_index: int
 
+    file_id: Optional[str] = None
+
     start_block_index: int
 
     type: Literal["content_block_location"]

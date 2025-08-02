@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.61.0 (2025-08-02)
+
+Full Changelog: [v0.60.0...v0.61.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.60.0...v0.61.0)
+
+### Features
+
+* **api:** adds support for text_editor_20250728 tool ([9ad8fe5](https://github.com/anthropics/anthropic-sdk-python/commit/9ad8fe53d6878715e5d423aedba6cc23109e47ea))
+* **client:** support file upload requests ([a9bd98a](https://github.com/anthropics/anthropic-sdk-python/commit/a9bd98ab54438528cb8110cf1f4efaa2b20df959))
+
+
+### Chores
+
+* **client:** add TextEditor_20250429 tool ([ec207c5](https://github.com/anthropics/anthropic-sdk-python/commit/ec207c52d6c15ef7232a3f997aaa6d95fcbef9f3))
+* **internal:** codegen related update ([4498057](https://github.com/anthropics/anthropic-sdk-python/commit/44980570bd92204177f069b5653f08dbda3ea018))
+
 ## 0.60.0 (2025-07-28)
 
 Full Changelog: [v0.59.0...v0.60.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.59.0...v0.60.0)
