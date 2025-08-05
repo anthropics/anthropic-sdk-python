@@ -22,6 +22,7 @@ ModelParam: TypeAlias = Union[
         "claude-opus-4-0",
         "claude-opus-4-20250514",
         "claude-4-opus-20250514",
+        "claude-opus-4-1-20250805",
         "claude-3-opus-latest",
         "claude-3-opus-20240229",
         "claude-3-haiku-20240307",
