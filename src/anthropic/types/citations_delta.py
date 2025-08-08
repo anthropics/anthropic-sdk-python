@@ -8,12 +8,19 @@ from .._models import BaseModel
 from .citation_char_location import CitationCharLocation
 from .citation_page_location import CitationPageLocation
 from .citation_content_block_location import CitationContentBlockLocation
+from .citations_search_result_location import CitationsSearchResultLocation
 from .citations_web_search_result_location import CitationsWebSearchResultLocation
 
 __all__ = ["CitationsDelta", "Citation"]
 
 Citation: TypeAlias = Annotated[
-    Union[CitationCharLocation, CitationPageLocation, CitationContentBlockLocation, CitationsWebSearchResultLocation],
+    Union[
+        CitationCharLocation,
+        CitationPageLocation,
+        CitationContentBlockLocation,
+        CitationsWebSearchResultLocation,
+        CitationsSearchResultLocation,
+    ],
     PropertyInfo(discriminator="type"),
 ]
 
