@@ -19,6 +19,19 @@ if TYPE_CHECKING:
 
 _T = TypeVar("_T")
 
+# Centralized event type definitions for O(1) lookup performance
+# frozenset prevents accidental modification and is slightly faster than set
+MESSAGE_EVENTS = frozenset(
+    {
+        "message_start",
+        "message_delta",
+        "message_stop",
+        "content_block_start",
+        "content_block_delta",
+        "content_block_stop",
+    }
+)
+
 
 class _SyncStreamMeta(abc.ABCMeta):
     @override
@@ -80,15 +93,8 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
         for sse in iterator:
             if sse.event == "completion":
                 yield process_data(data=sse.json(), cast_to=cast_to, response=response)
-
-            if (
-                sse.event == "message_start"
-                or sse.event == "message_delta"
-                or sse.event == "message_stop"
-                or sse.event == "content_block_start"
-                or sse.event == "content_block_delta"
-                or sse.event == "content_block_stop"
-            ):
+            # Single, fast membership test instead of multiple string comparisons
+            if sse.event in MESSAGE_EVENTS:
                 data = sse.json()
                 if is_dict(data) and "type" not in data:
                     data["type"] = sse.event
@@ -101,6 +107,7 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
             if sse.event == "error":
                 body = sse.data
 
+                # Extract meaningful error messages and use specific exception handling
                 try:
                     body = sse.json()
                     err_msg = f"{body}"
@@ -113,9 +120,10 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
                     response=self.response,
                 )
 
-        # Ensure the entire stream is consumed
-        for _sse in iterator:
-            ...
+        # Explicitly closes decoder resources if available
+        # Immediately releases connection instead of consuming remaining stream
+        if hasattr(self._decoder, "close"):
+            self._decoder.close()  # Properly closes decoder resources without unnecessary iteration
 
     def __enter__(self) -> Self:
         return self
@@ -198,15 +206,8 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
         async for sse in iterator:
             if sse.event == "completion":
                 yield process_data(data=sse.json(), cast_to=cast_to, response=response)
-
-            if (
-                sse.event == "message_start"
-                or sse.event == "message_delta"
-                or sse.event == "message_stop"
-                or sse.event == "content_block_start"
-                or sse.event == "content_block_delta"
-                or sse.event == "content_block_stop"
-            ):
+            # same O(1) lookup for consistency between sync/async versions
+            if sse.event in MESSAGE_EVENTS:
                 data = sse.json()
                 if is_dict(data) and "type" not in data:
                     data["type"] = sse.event
@@ -231,9 +232,9 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
                     response=self.response,
                 )
 
-        # Ensure the entire stream is consumed
-        async for _sse in iterator:
-            ...
+        # Immediately releases connection instead of consuming remaining stream
+        if hasattr(self._decoder, "close"):
+            self._decoder.close()  # Properly closes decoder resources without unnecessary iteration
 
     async def __aenter__(self) -> Self:
         return self
