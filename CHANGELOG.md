@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.62.0 (2025-08-08)
+
+Full Changelog: [v0.61.0...v0.62.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.61.0...v0.62.0)
+
+### Features
+
+* **api:** search result content blocks ([1ae15cd](https://github.com/anthropics/anthropic-sdk-python/commit/1ae15cd58da2c58dfb85276860ec407401c04cc6))
+
 ## 0.61.0 (2025-08-05)
 
 Full Changelog: [v0.60.0...v0.61.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.60.0...v0.61.0)
