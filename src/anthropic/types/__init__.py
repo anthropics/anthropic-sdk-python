@@ -90,6 +90,7 @@ from .base64_image_source_param import Base64ImageSourceParam as Base64ImageSour
 from .beta_authentication_error import BetaAuthenticationError as BetaAuthenticationError
 from .content_block_delta_event import ContentBlockDeltaEvent as ContentBlockDeltaEvent
 from .content_block_start_event import ContentBlockStartEvent as ContentBlockStartEvent
+from .search_result_block_param import SearchResultBlockParam as SearchResultBlockParam
 from .beta_gateway_timeout_error import BetaGatewayTimeoutError as BetaGatewayTimeoutError
 from .beta_invalid_request_error import BetaInvalidRequestError as BetaInvalidRequestError
 from .content_block_source_param import ContentBlockSourceParam as ContentBlockSourceParam
@@ -113,6 +114,7 @@ from .message_count_tokens_tool_param import MessageCountTokensToolParam as Mess
 from .tool_text_editor_20250124_param import ToolTextEditor20250124Param as ToolTextEditor20250124Param
 from .tool_text_editor_20250429_param import ToolTextEditor20250429Param as ToolTextEditor20250429Param
 from .tool_text_editor_20250728_param import ToolTextEditor20250728Param as ToolTextEditor20250728Param
+from .citations_search_result_location import CitationsSearchResultLocation as CitationsSearchResultLocation
 from .content_block_source_content_param import ContentBlockSourceContentParam as ContentBlockSourceContentParam
 from .web_search_tool_result_block_param import WebSearchToolResultBlockParam as WebSearchToolResultBlockParam
 from .web_search_tool_request_error_param import WebSearchToolRequestErrorParam as WebSearchToolRequestErrorParam
@@ -120,6 +122,9 @@ from .citations_web_search_result_location import CitationsWebSearchResultLocati
 from .web_search_tool_result_block_content import WebSearchToolResultBlockContent as WebSearchToolResultBlockContent
 from .citation_content_block_location_param import (
     CitationContentBlockLocationParam as CitationContentBlockLocationParam,
+)
+from .citation_search_result_location_param import (
+    CitationSearchResultLocationParam as CitationSearchResultLocationParam,
 )
 from .citation_web_search_result_location_param import (
     CitationWebSearchResultLocationParam as CitationWebSearchResultLocationParam,
