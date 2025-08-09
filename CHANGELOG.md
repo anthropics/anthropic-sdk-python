@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.62.1 (2025-08-09)
+
+Full Changelog: [v0.62.0...v0.62.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.62.0...v0.62.1)
+
+### Chores
+
+* **internal:** detect breaking changes when removing endpoints ([5c62d7b](https://github.com/anthropics/anthropic-sdk-python/commit/5c62d7bdaf8a180dcb6bc30c17a6bdf13d976ab2))
+* **internal:** update comment in script ([9e9d69c](https://github.com/anthropics/anthropic-sdk-python/commit/9e9d69cdd98a838adac734a0748e1f52ccd4faa4))
+* update @stainless-api/prism-cli to v5.15.0 ([55cb0a1](https://github.com/anthropics/anthropic-sdk-python/commit/55cb0a1d1f42f6bcae74c6d1946f927534e30276))
+
 ## 0.62.0 (2025-08-08)
 
 Full Changelog: [v0.61.0...v0.62.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.61.0...v0.62.0)
