@@ -24,5 +24,6 @@ AnthropicBetaParam: TypeAlias = Union[
         "interleaved-thinking-2025-05-14",
         "code-execution-2025-05-22",
         "extended-cache-ttl-2025-04-11",
+        "context-1m-2025-08-07",
     ],
 ]
