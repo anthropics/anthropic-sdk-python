@@ -57,6 +57,8 @@ DEPRECATED_MODELS = {
     "claude-3-opus-20240229": "January 5th, 2026",
     "claude-2.1": "July 21st, 2025",
     "claude-2.0": "July 21st, 2025",
+    "claude-3-5-sonnet-20241022": "October 22, 2025",
+    "claude-3-5-sonnet-20240620": "October 22, 2025",
 }
 
 
