@@ -30,6 +30,7 @@ from .content_block import ContentBlock as ContentBlock
 from .message_param import MessageParam as MessageParam
 from .text_citation import TextCitation as TextCitation
 from .beta_api_error import BetaAPIError as BetaAPIError
+from .cache_creation import CacheCreation as CacheCreation
 from .metadata_param import MetadataParam as MetadataParam
 from .thinking_block import ThinkingBlock as ThinkingBlock
 from .thinking_delta import ThinkingDelta as ThinkingDelta
