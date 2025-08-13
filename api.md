@@ -25,6 +25,7 @@ from anthropic.types import (
     Base64ImageSource,
     Base64PDFSource,
     CacheControlEphemeral,
+    CacheCreation,
     CitationCharLocation,
     CitationCharLocationParam,
     CitationContentBlockLocation,

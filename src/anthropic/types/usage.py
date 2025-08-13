@@ -4,12 +4,16 @@ from typing import Optional
 from typing_extensions import Literal
 
 from .._models import BaseModel
+from .cache_creation import CacheCreation
 from .server_tool_usage import ServerToolUsage
 
 __all__ = ["Usage"]
 
 
 class Usage(BaseModel):
+    cache_creation: Optional[CacheCreation] = None
+    """Breakdown of cached tokens by TTL"""
+
     cache_creation_input_tokens: Optional[int] = None
     """The number of input tokens used to create the cache entry."""
 
