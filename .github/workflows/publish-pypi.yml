@@ -15,7 +15,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
-          version: '0.5.23'
+          version: '0.8.11'
 
       - name: Publish to PyPI
         run: |
