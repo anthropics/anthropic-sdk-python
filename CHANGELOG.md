@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.64.1 (2025-08-16)
+
+Full Changelog: [v0.64.0...v0.64.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.64.0...v0.64.1)
+
+### Chores
+
+* **internal:** bump uv version ([aab5bc6](https://github.com/anthropics/anthropic-sdk-python/commit/aab5bc667e5aa1144dc45650cd4c6a63f1be6051))
+
 ## 0.64.0 (2025-08-13)
 
 Full Changelog: [v0.63.0...v0.64.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.63.0...v0.64.0)
