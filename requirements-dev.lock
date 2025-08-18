@@ -61,9 +61,15 @@ pydantic==2.10.3
 pydantic-core==2.27.1
     # via pydantic
 pygments==2.19.1
-    # via rich
+    # via
+    #   pytest
+    #   rich
 pyright==1.1.399
-pytest==8.3.3
+pytest==8.3.5 ; python_full_version < '3.9'
+    # via
+    #   pytest-asyncio
+    #   pytest-xdist
+pytest==8.4.1 ; python_full_version >= '3.9'
     # via
     #   pytest-asyncio
     #   pytest-xdist
