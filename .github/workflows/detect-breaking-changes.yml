@@ -26,6 +26,9 @@ jobs:
           version: '0.8.11'
       - name: Install dependencies
         run: uv sync --all-extras
+      - name: Detect removed symbols
+        run: |
+          uv run python scripts/detect-breaking-changes.py "${{ github.event.pull_request.base.sha }}"
 
       - name: Detect breaking changes
         run: |
