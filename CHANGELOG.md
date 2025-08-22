@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.64.1 (2025-08-22)
+
+Full Changelog: [v0.64.0...v0.64.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.64.0...v0.64.1)
+
+### Chores
+
+* **internal:** bump uv version ([aab5bc6](https://github.com/anthropics/anthropic-sdk-python/commit/aab5bc667e5aa1144dc45650cd4c6a63f1be6051))
+* **internal:** improve breaking change detection ([6c8afa9](https://github.com/anthropics/anthropic-sdk-python/commit/6c8afa9c9fb667d824d0630de22c1662e85d7bd3))
+* **internal:** refactor pydantic v1 test setup ([cb5444b](https://github.com/anthropics/anthropic-sdk-python/commit/cb5444be33dd798748fc5d0709ce1d47d5d4c012))
+* update github action ([1e6a135](https://github.com/anthropics/anthropic-sdk-python/commit/1e6a1353d045b26cea766fc6bcf7331159522fa5))
+
 ## 0.64.0 (2025-08-13)
 
 Full Changelog: [v0.63.0...v0.64.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.63.0...v0.64.0)
