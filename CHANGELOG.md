@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.65.0 (2025-09-02)
+
+Full Changelog: [v0.64.0...v0.65.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.64.0...v0.65.0)
+
+### Features
+
+* **client:** adds support for code-execution-2025-08-26 tool ([fe92af0](https://github.com/anthropics/anthropic-sdk-python/commit/fe92af02a2fa2d1bc626bb238ee54886bc701829))
+* **types:** replace List[str] with SequenceNotStr in params ([f542b54](https://github.com/anthropics/anthropic-sdk-python/commit/f542b541ba1e70b65704e9b96a87733cb1d9d77f))
+
+
+### Bug Fixes
+
+* avoid newer type syntax ([c6d1cf5](https://github.com/anthropics/anthropic-sdk-python/commit/c6d1cf5895f15d5fc526af9a34a6b53a514bf28e))
+* **client:** remove unused import ([712c6d8](https://github.com/anthropics/anthropic-sdk-python/commit/712c6d8b1c47eb663d2fc06b97b8c0630d4579cf))
+
+
+### Chores
+
+* **client:** sync SequenceNotStr over to custom stream methods ([dd16483](https://github.com/anthropics/anthropic-sdk-python/commit/dd16483da5900a9c02519617d52d951f429d4685))
+* **internal:** add Sequence related utils ([d523f29](https://github.com/anthropics/anthropic-sdk-python/commit/d523f295541c23de43d3b51512327265d243ac35))
+* **internal:** bump uv version ([aab5bc6](https://github.com/anthropics/anthropic-sdk-python/commit/aab5bc667e5aa1144dc45650cd4c6a63f1be6051))
+* **internal:** change ci workflow machines ([5383431](https://github.com/anthropics/anthropic-sdk-python/commit/5383431a31c7368c45f7cc42b358798a2f2c8a7f))
+* **internal:** codegen related update ([eb8b19f](https://github.com/anthropics/anthropic-sdk-python/commit/eb8b19f5d7e6e4af3cfbf4cc6f02a9e5ce50f1b8))
+* **internal:** improve breaking change detection ([6c8afa9](https://github.com/anthropics/anthropic-sdk-python/commit/6c8afa9c9fb667d824d0630de22c1662e85d7bd3))
+* **internal:** refactor pydantic v1 test setup ([cb5444b](https://github.com/anthropics/anthropic-sdk-python/commit/cb5444be33dd798748fc5d0709ce1d47d5d4c012))
+* **internal:** run tests in an isolated environment ([9adb089](https://github.com/anthropics/anthropic-sdk-python/commit/9adb089e2fb0d67b23b389128e2375a134564ef5))
+* **internal:** update pyright exclude list ([85961ef](https://github.com/anthropics/anthropic-sdk-python/commit/85961ef1d4cec5243c2e74160df65aef3090a59a))
+* update github action ([1e6a135](https://github.com/anthropics/anthropic-sdk-python/commit/1e6a1353d045b26cea766fc6bcf7331159522fa5))
+
 ## 0.64.0 (2025-08-13)
 
 Full Changelog: [v0.63.0...v0.64.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.63.0...v0.64.0)
