@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import List, Union, Iterable, Optional
+from typing import Union, Iterable, Optional
 from functools import partial
 from typing_extensions import Literal, overload
 
