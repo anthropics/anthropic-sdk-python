@@ -7,17 +7,17 @@ from typing_extensions import Literal, Required, TypedDict
 
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
-__all__ = ["BetaServerToolUseBlockParam"]
+__all__ = ["BetaCodeExecutionTool20250825Param"]
 
 
-class BetaServerToolUseBlockParam(TypedDict, total=False):
-    id: Required[str]
+class BetaCodeExecutionTool20250825Param(TypedDict, total=False):
+    name: Required[Literal["code_execution"]]
+    """Name of the tool.
 
-    input: Required[object]
+    This is how the tool will be called by the model and in `tool_use` blocks.
+    """
 
-    name: Required[Literal["web_search", "code_execution", "bash_code_execution", "text_editor_code_execution"]]
-
-    type: Required[Literal["server_tool_use"]]
+    type: Required[Literal["code_execution_20250825"]]
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
