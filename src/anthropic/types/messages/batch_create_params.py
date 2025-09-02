@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import List, Union, Iterable
+from typing import Union, Iterable
 from typing_extensions import Literal, Required, TypedDict
 
+from ..._types import SequenceNotStr
 from ..model_param import ModelParam
 from ..message_param import MessageParam
 from ..metadata_param import MetadataParam
@@ -145,7 +146,7 @@ class RequestParams(TypedDict, total=False):
     [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
     """
 
-    stop_sequences: List[str]
+    stop_sequences: SequenceNotStr[str]
     """Custom text sequences that will cause the model to stop generating.
 
     Our models will normally stop when they have naturally completed their turn,
