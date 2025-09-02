@@ -96,6 +96,8 @@ from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Para
 from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param as BetaToolTextEditor20250124Param
 from .beta_tool_text_editor_20250429_param import BetaToolTextEditor20250429Param as BetaToolTextEditor20250429Param
 from .beta_tool_text_editor_20250728_param import BetaToolTextEditor20250728Param as BetaToolTextEditor20250728Param
+from .beta_bash_code_execution_output_block import BetaBashCodeExecutionOutputBlock as BetaBashCodeExecutionOutputBlock
+from .beta_bash_code_execution_result_block import BetaBashCodeExecutionResultBlock as BetaBashCodeExecutionResultBlock
 from .beta_code_execution_tool_result_block import BetaCodeExecutionToolResultBlock as BetaCodeExecutionToolResultBlock
 from .beta_code_execution_tool_result_error import BetaCodeExecutionToolResultError as BetaCodeExecutionToolResultError
 from .beta_tool_computer_use_20241022_param import BetaToolComputerUse20241022Param as BetaToolComputerUse20241022Param
@@ -109,6 +111,9 @@ from .beta_code_execution_result_block_param import (
 from .beta_web_search_tool_result_error_code import BetaWebSearchToolResultErrorCode as BetaWebSearchToolResultErrorCode
 from .beta_code_execution_tool_20250522_param import (
     BetaCodeExecutionTool20250522Param as BetaCodeExecutionTool20250522Param,
+)
+from .beta_code_execution_tool_20250825_param import (
+    BetaCodeExecutionTool20250825Param as BetaCodeExecutionTool20250825Param,
 )
 from .beta_content_block_source_content_param import (
     BetaContentBlockSourceContentParam as BetaContentBlockSourceContentParam,
@@ -128,6 +133,12 @@ from .beta_citations_web_search_result_location import (
 from .beta_web_search_tool_result_block_content import (
     BetaWebSearchToolResultBlockContent as BetaWebSearchToolResultBlockContent,
 )
+from .beta_bash_code_execution_tool_result_block import (
+    BetaBashCodeExecutionToolResultBlock as BetaBashCodeExecutionToolResultBlock,
+)
+from .beta_bash_code_execution_tool_result_error import (
+    BetaBashCodeExecutionToolResultError as BetaBashCodeExecutionToolResultError,
+)
 from .beta_citation_content_block_location_param import (
     BetaCitationContentBlockLocationParam as BetaCitationContentBlockLocationParam,
 )
@@ -136,6 +147,12 @@ from .beta_citation_search_result_location_param import (
 )
 from .beta_code_execution_tool_result_error_code import (
     BetaCodeExecutionToolResultErrorCode as BetaCodeExecutionToolResultErrorCode,
+)
+from .beta_bash_code_execution_output_block_param import (
+    BetaBashCodeExecutionOutputBlockParam as BetaBashCodeExecutionOutputBlockParam,
+)
+from .beta_bash_code_execution_result_block_param import (
+    BetaBashCodeExecutionResultBlockParam as BetaBashCodeExecutionResultBlockParam,
 )
 from .beta_code_execution_tool_result_block_param import (
     BetaCodeExecutionToolResultBlockParam as BetaCodeExecutionToolResultBlockParam,
@@ -152,12 +169,48 @@ from .beta_code_execution_tool_result_block_content import (
 from .beta_citation_web_search_result_location_param import (
     BetaCitationWebSearchResultLocationParam as BetaCitationWebSearchResultLocationParam,
 )
+from .beta_bash_code_execution_tool_result_block_param import (
+    BetaBashCodeExecutionToolResultBlockParam as BetaBashCodeExecutionToolResultBlockParam,
+)
+from .beta_bash_code_execution_tool_result_error_param import (
+    BetaBashCodeExecutionToolResultErrorParam as BetaBashCodeExecutionToolResultErrorParam,
+)
 from .beta_request_mcp_server_tool_configuration_param import (
     BetaRequestMCPServerToolConfigurationParam as BetaRequestMCPServerToolConfigurationParam,
+)
+from .beta_text_editor_code_execution_tool_result_block import (
+    BetaTextEditorCodeExecutionToolResultBlock as BetaTextEditorCodeExecutionToolResultBlock,
+)
+from .beta_text_editor_code_execution_tool_result_error import (
+    BetaTextEditorCodeExecutionToolResultError as BetaTextEditorCodeExecutionToolResultError,
+)
+from .beta_text_editor_code_execution_view_result_block import (
+    BetaTextEditorCodeExecutionViewResultBlock as BetaTextEditorCodeExecutionViewResultBlock,
+)
+from .beta_text_editor_code_execution_create_result_block import (
+    BetaTextEditorCodeExecutionCreateResultBlock as BetaTextEditorCodeExecutionCreateResultBlock,
 )
 from .beta_web_search_tool_result_block_param_content_param import (
     BetaWebSearchToolResultBlockParamContentParam as BetaWebSearchToolResultBlockParamContentParam,
 )
+from .beta_text_editor_code_execution_tool_result_block_param import (
+    BetaTextEditorCodeExecutionToolResultBlockParam as BetaTextEditorCodeExecutionToolResultBlockParam,
+)
+from .beta_text_editor_code_execution_tool_result_error_param import (
+    BetaTextEditorCodeExecutionToolResultErrorParam as BetaTextEditorCodeExecutionToolResultErrorParam,
+)
+from .beta_text_editor_code_execution_view_result_block_param import (
+    BetaTextEditorCodeExecutionViewResultBlockParam as BetaTextEditorCodeExecutionViewResultBlockParam,
+)
+from .beta_text_editor_code_execution_str_replace_result_block import (
+    BetaTextEditorCodeExecutionStrReplaceResultBlock as BetaTextEditorCodeExecutionStrReplaceResultBlock,
+)
 from .beta_code_execution_tool_result_block_param_content_param import (
     BetaCodeExecutionToolResultBlockParamContentParam as BetaCodeExecutionToolResultBlockParamContentParam,
+)
+from .beta_text_editor_code_execution_create_result_block_param import (
+    BetaTextEditorCodeExecutionCreateResultBlockParam as BetaTextEditorCodeExecutionCreateResultBlockParam,
+)
+from .beta_text_editor_code_execution_str_replace_result_block_param import (
+    BetaTextEditorCodeExecutionStrReplaceResultBlockParam as BetaTextEditorCodeExecutionStrReplaceResultBlockParam,
 )

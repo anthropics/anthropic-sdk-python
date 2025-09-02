@@ -18,6 +18,7 @@ class BatchCreateParams(TypedDict, total=False):
     """
 
 
+
 class Request(TypedDict, total=False):
     custom_id: Required[str]
     """Developer-provided ID created for each request in a Message Batch.

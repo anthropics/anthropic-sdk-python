@@ -245,7 +245,6 @@ class BetaAsyncMessageStream:
                 f".get_final_text() can only be called when the API returns a `text` content block.\nThe API returned {','.join([b.type for b in message.content])} content block type(s) that you can access by calling get_final_message().content"
             )
 
-
         return "".join(text_blocks)
 
     async def until_done(self) -> None:

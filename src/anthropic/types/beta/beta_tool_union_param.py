@@ -16,6 +16,7 @@ from .beta_tool_text_editor_20250728_param import BetaToolTextEditor20250728Para
 from .beta_tool_computer_use_20241022_param import BetaToolComputerUse20241022Param
 from .beta_tool_computer_use_20250124_param import BetaToolComputerUse20250124Param
 from .beta_code_execution_tool_20250522_param import BetaCodeExecutionTool20250522Param
+from .beta_code_execution_tool_20250825_param import BetaCodeExecutionTool20250825Param
 
 __all__ = ["BetaToolUnionParam"]
 
@@ -24,6 +25,7 @@ BetaToolUnionParam: TypeAlias = Union[
     BetaToolBash20241022Param,
     BetaToolBash20250124Param,
     BetaCodeExecutionTool20250522Param,
+    BetaCodeExecutionTool20250825Param,
     BetaToolComputerUse20241022Param,
     BetaToolComputerUse20250124Param,
     BetaToolTextEditor20241022Param,

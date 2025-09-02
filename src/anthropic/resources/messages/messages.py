@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Union, Iterable, Optional
+from typing import List, Union, Iterable, Optional
 from functools import partial
 from typing_extensions import Literal, overload
 
@@ -186,30 +186,7 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
 
               Note that if you want to include a
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
@@ -477,30 +454,7 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
 
               Note that if you want to include a
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
@@ -768,30 +722,7 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
 
               Note that if you want to include a
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
@@ -1178,30 +1109,7 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
 
               Note that if you want to include a
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
@@ -1461,30 +1369,7 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
 
               Note that if you want to include a
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
@@ -1752,30 +1637,7 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
 
               Note that if you want to include a
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
@@ -2043,30 +1905,7 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
 
               Note that if you want to include a
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
@@ -2452,30 +2291,7 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
 
               Note that if you want to include a
               [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use

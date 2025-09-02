@@ -23,6 +23,7 @@ from .beta_tool_text_editor_20250728_param import BetaToolTextEditor20250728Para
 from .beta_tool_computer_use_20241022_param import BetaToolComputerUse20241022Param
 from .beta_tool_computer_use_20250124_param import BetaToolComputerUse20250124Param
 from .beta_code_execution_tool_20250522_param import BetaCodeExecutionTool20250522Param
+from .beta_code_execution_tool_20250825_param import BetaCodeExecutionTool20250825Param
 from .beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
 
 __all__ = ["MessageCountTokensParams", "Tool"]
@@ -87,30 +88,7 @@ class MessageCountTokensParams(TypedDict, total=False):
     { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
     ```
 
-    Starting with Claude 3 models, you can also send image content blocks:
-
-    ```json
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "image",
-          "source": {
-            "type": "base64",
-            "media_type": "image/jpeg",
-            "data": "/9j/4AAQSkZJRg..."
-          }
-        },
-        { "type": "text", "text": "What is in this image?" }
-      ]
-    }
-    ```
-
-    We currently support the `base64` source type for images, and the `image/jpeg`,
-    `image/png`, `image/gif`, and `image/webp` media types.
-
-    See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-    more input examples.
+    See [input examples](https://docs.anthropic.com/en/api/messages-examples).
 
     Note that if you want to include a
     [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
@@ -244,6 +222,7 @@ Tool: TypeAlias = Union[
     BetaToolBash20241022Param,
     BetaToolBash20250124Param,
     BetaCodeExecutionTool20250522Param,
+    BetaCodeExecutionTool20250825Param,
     BetaToolComputerUse20241022Param,
     BetaToolComputerUse20250124Param,
     BetaToolTextEditor20241022Param,
