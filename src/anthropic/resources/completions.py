@@ -9,7 +9,7 @@ import httpx
 
 from .. import _legacy_response
 from ..types import completion_create_params
-from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven
+from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven, SequenceNotStr
 from .._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
@@ -53,7 +53,7 @@ class Completions(SyncAPIResource):
         model: ModelParam,
         prompt: str,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -161,7 +161,7 @@ class Completions(SyncAPIResource):
         prompt: str,
         stream: Literal[True],
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -268,7 +268,7 @@ class Completions(SyncAPIResource):
         prompt: str,
         stream: bool,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -374,7 +374,7 @@ class Completions(SyncAPIResource):
         model: ModelParam,
         prompt: str,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -448,7 +448,7 @@ class AsyncCompletions(AsyncAPIResource):
         model: ModelParam,
         prompt: str,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
@@ -556,7 +556,7 @@ class AsyncCompletions(AsyncAPIResource):
         prompt: str,
         stream: Literal[True],
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -663,7 +663,7 @@ class AsyncCompletions(AsyncAPIResource):
         prompt: str,
         stream: bool,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,
         top_p: float | NotGiven = NOT_GIVEN,
@@ -769,7 +769,7 @@ class AsyncCompletions(AsyncAPIResource):
         model: ModelParam,
         prompt: str,
         metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
         stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
         temperature: float | NotGiven = NOT_GIVEN,
         top_k: int | NotGiven = NOT_GIVEN,

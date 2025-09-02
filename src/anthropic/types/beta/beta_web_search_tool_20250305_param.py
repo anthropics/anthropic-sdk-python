@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 from typing_extensions import Literal, Required, TypedDict
 
+from ..._types import SequenceNotStr
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
 __all__ = ["BetaWebSearchTool20250305Param", "UserLocation"]
@@ -39,13 +40,13 @@ class BetaWebSearchTool20250305Param(TypedDict, total=False):
 
     type: Required[Literal["web_search_20250305"]]
 
-    allowed_domains: Optional[List[str]]
+    allowed_domains: Optional[SequenceNotStr[str]]
     """If provided, only these domains will be included in results.
 
     Cannot be used alongside `blocked_domains`.
     """
 
-    blocked_domains: Optional[List[str]]
+    blocked_domains: Optional[SequenceNotStr[str]]
     """If provided, these domains will never appear in results.
 
     Cannot be used alongside `allowed_domains`.
