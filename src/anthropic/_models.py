@@ -726,7 +726,7 @@ def add_request_id(obj: BaseModel, request_id: str | None) -> None:
     # in Pydantic v1, using setattr like we do above causes the attribute
     # to be included when serializing the model which we don't want in this
     # case so we need to explicitly exclude it
-    if not PYDANTIC_V2:
+    if PYDANTIC_V1:
         try:
             exclude_fields = obj.__exclude_fields__  # type: ignore
         except AttributeError:
