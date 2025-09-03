@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.66.0 (2025-09-03)
+
+Full Changelog: [v0.65.0...v0.66.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.65.0...v0.66.0)
+
+### Features
+
+* **api:** adds support for Documents in tool results ([5309dad](https://github.com/anthropics/anthropic-sdk-python/commit/5309dad584bb31284516e0d44681f1b46d1a663d))
+
 ## 0.65.0 (2025-09-02)
 
 Full Changelog: [v0.64.0...v0.65.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.64.0...v0.65.0)
