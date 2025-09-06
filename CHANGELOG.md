@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.67.0 (2025-09-06)
+
+Full Changelog: [v0.66.0...v0.67.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.66.0...v0.67.0)
+
+### Features
+
+* improve future compat with pydantic v3 ([39f28c5](https://github.com/anthropics/anthropic-sdk-python/commit/39f28c51d328bc7bf5f86f252ea63e8325815c72))
+
+
+### Bug Fixes
+
+* more updates for future pydantic v3 compat ([7967d15](https://github.com/anthropics/anthropic-sdk-python/commit/7967d1501297e188f451fa39a33b38317dfcb883))
+
+
+### Chores
+
+* **internal:** move mypy configurations to `pyproject.toml` file ([c5347b6](https://github.com/anthropics/anthropic-sdk-python/commit/c5347b6affba397276c13e763f5eb820d11f912f))
+
 ## 0.66.0 (2025-09-03)
 
 Full Changelog: [v0.65.0...v0.66.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.65.0...v0.66.0)

@@ -9,7 +9,7 @@ import pytest
 from respx import MockRouter
 
 from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
-from anthropic._compat import PYDANTIC_V2
+from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.streaming import MessageStreamEvent
 from anthropic.types.message import Message
 from anthropic.resources.messages import DEPRECATED_MODELS
@@ -305,7 +305,7 @@ def test_stream_method_definition_in_sync(sync: bool) -> None:
 
 # go through all the ContentBlock types to make sure the type alias is up to date
 # with any type that has an input property of type object
-@pytest.mark.skipif(not PYDANTIC_V2, reason="only applicable in pydantic v2")
+@pytest.mark.skipif(PYDANTIC_V1, reason="only applicable in pydantic v2")
 def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
     from typing import get_args
 

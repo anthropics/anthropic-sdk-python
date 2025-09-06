@@ -11,7 +11,7 @@ import pytest
 from respx import MockRouter
 
 from anthropic import Anthropic, AsyncAnthropic
-from anthropic._compat import PYDANTIC_V2
+from anthropic._compat import PYDANTIC_V1
 from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_types import BetaMessageStreamEvent
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
@@ -408,7 +408,7 @@ def test_stream_method_definition_in_sync(sync: bool) -> None:
 # with any type that has an input property of type object
 def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
     # only run this on Pydantic v2
-    if not PYDANTIC_V2:
+    if PYDANTIC_V1:
         pytest.skip("This test is only applicable for Pydantic v2")
     from typing import get_args
 
