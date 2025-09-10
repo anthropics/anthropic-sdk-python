@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.67.0 (2025-09-10)
+
+Full Changelog: [v0.66.0...v0.67.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.66.0...v0.67.0)
+
+### Features
+
+* **api:** adds support for web_fetch_20250910 tool ([f85b6a1](https://github.com/anthropics/anthropic-sdk-python/commit/f85b6a172b4b6d3b42119d75f0fefbbf7dcd2351))
+* improve future compat with pydantic v3 ([39f28c5](https://github.com/anthropics/anthropic-sdk-python/commit/39f28c51d328bc7bf5f86f252ea63e8325815c72))
+
+
+### Bug Fixes
+
+* more updates for future pydantic v3 compat ([7967d15](https://github.com/anthropics/anthropic-sdk-python/commit/7967d1501297e188f451fa39a33b38317dfcb883))
+* **types/beta:** add response content block type to params ([#1030](https://github.com/anthropics/anthropic-sdk-python/issues/1030)) ([9febe38](https://github.com/anthropics/anthropic-sdk-python/commit/9febe38a309d290f2c2a8d96eb458972652b98cd))
+
+
+### Chores
+
+* **internal:** move mypy configurations to `pyproject.toml` file ([c5347b6](https://github.com/anthropics/anthropic-sdk-python/commit/c5347b6affba397276c13e763f5eb820d11f912f))
+* update SDK settings ([36e6870](https://github.com/anthropics/anthropic-sdk-python/commit/36e687098acc8c66613712c89667edea73ce799f))
+
 ## 0.66.0 (2025-09-03)
 
 Full Changelog: [v0.65.0...v0.66.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.65.0...v0.66.0)
