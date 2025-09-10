@@ -15,7 +15,9 @@ class BetaServerToolUseBlockParam(TypedDict, total=False):
 
     input: Required[object]
 
-    name: Required[Literal["web_search", "code_execution", "bash_code_execution", "text_editor_code_execution"]]
+    name: Required[
+        Literal["web_search", "web_fetch", "code_execution", "bash_code_execution", "text_editor_code_execution"]
+    ]
 
     type: Required[Literal["server_tool_use"]]
 

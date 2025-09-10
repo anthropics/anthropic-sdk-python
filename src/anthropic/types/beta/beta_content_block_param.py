@@ -16,6 +16,7 @@ from .beta_server_tool_use_block_param import BetaServerToolUseBlockParam
 from .beta_container_upload_block_param import BetaContainerUploadBlockParam
 from .beta_request_document_block_param import BetaRequestDocumentBlockParam
 from .beta_redacted_thinking_block_param import BetaRedactedThinkingBlockParam
+from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam
 from .beta_web_search_tool_result_block_param import BetaWebSearchToolResultBlockParam
 from .beta_request_mcp_tool_result_block_param import BetaRequestMCPToolResultBlockParam
 from .beta_code_execution_tool_result_block_param import BetaCodeExecutionToolResultBlockParam
@@ -35,6 +36,7 @@ BetaContentBlockParam: TypeAlias = Union[
     BetaToolResultBlockParam,
     BetaServerToolUseBlockParam,
     BetaWebSearchToolResultBlockParam,
+    BetaWebFetchToolResultBlockParam,
     BetaCodeExecutionToolResultBlockParam,
     BetaBashCodeExecutionToolResultBlockParam,
     BetaTextEditorCodeExecutionToolResultBlockParam,

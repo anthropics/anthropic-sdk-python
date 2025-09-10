@@ -15,6 +15,7 @@ from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
+from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param
 from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param
@@ -230,4 +231,5 @@ Tool: TypeAlias = Union[
     BetaToolTextEditor20250429Param,
     BetaToolTextEditor20250728Param,
     BetaWebSearchTool20250305Param,
+    BetaWebFetchTool20250910Param,
 ]

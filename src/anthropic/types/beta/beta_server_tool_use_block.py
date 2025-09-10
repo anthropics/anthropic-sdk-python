@@ -12,6 +12,6 @@ class BetaServerToolUseBlock(BaseModel):
 
     input: object
 
-    name: Literal["web_search", "code_execution", "bash_code_execution", "text_editor_code_execution"]
+    name: Literal["web_search", "web_fetch", "code_execution", "bash_code_execution", "text_editor_code_execution"]
 
     type: Literal["server_tool_use"]
