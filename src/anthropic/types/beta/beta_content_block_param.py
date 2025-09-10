@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Union
 from typing_extensions import TypeAlias
 
+from .beta_content_block import BetaContentBlock
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_image_block_param import BetaImageBlockParam
 from .beta_thinking_block_param import BetaThinkingBlockParam
@@ -41,4 +42,5 @@ BetaContentBlockParam: TypeAlias = Union[
     BetaMCPToolUseBlockParam,
     BetaRequestMCPToolResultBlockParam,
     BetaContainerUploadBlockParam,
+    BetaContentBlock,
 ]
