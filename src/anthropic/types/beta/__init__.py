@@ -19,17 +19,22 @@ from .beta_message_param import BetaMessageParam as BetaMessageParam
 from .beta_text_citation import BetaTextCitation as BetaTextCitation
 from .file_upload_params import FileUploadParams as FileUploadParams
 from .beta_cache_creation import BetaCacheCreation as BetaCacheCreation
+from .beta_document_block import BetaDocumentBlock as BetaDocumentBlock
 from .beta_metadata_param import BetaMetadataParam as BetaMetadataParam
 from .beta_thinking_block import BetaThinkingBlock as BetaThinkingBlock
 from .beta_thinking_delta import BetaThinkingDelta as BetaThinkingDelta
 from .beta_tool_use_block import BetaToolUseBlock as BetaToolUseBlock
+from .beta_citation_config import BetaCitationConfig as BetaCitationConfig
 from .beta_citations_delta import BetaCitationsDelta as BetaCitationsDelta
 from .beta_signature_delta import BetaSignatureDelta as BetaSignatureDelta
+from .beta_web_fetch_block import BetaWebFetchBlock as BetaWebFetchBlock
 from .beta_input_json_delta import BetaInputJSONDelta as BetaInputJSONDelta
 from .beta_text_block_param import BetaTextBlockParam as BetaTextBlockParam
 from .beta_tool_union_param import BetaToolUnionParam as BetaToolUnionParam
 from .message_create_params import MessageCreateParams as MessageCreateParams
+from .beta_base64_pdf_source import BetaBase64PDFSource as BetaBase64PDFSource
 from .beta_image_block_param import BetaImageBlockParam as BetaImageBlockParam
+from .beta_plain_text_source import BetaPlainTextSource as BetaPlainTextSource
 from .beta_server_tool_usage import BetaServerToolUsage as BetaServerToolUsage
 from .beta_tool_choice_param import BetaToolChoiceParam as BetaToolChoiceParam
 from .beta_mcp_tool_use_block import BetaMCPToolUseBlock as BetaMCPToolUseBlock
@@ -44,6 +49,7 @@ from .beta_mcp_tool_result_block import BetaMCPToolResultBlock as BetaMCPToolRes
 from .beta_server_tool_use_block import BetaServerToolUseBlock as BetaServerToolUseBlock
 from .beta_thinking_config_param import BetaThinkingConfigParam as BetaThinkingConfigParam
 from .beta_tool_choice_any_param import BetaToolChoiceAnyParam as BetaToolChoiceAnyParam
+from .beta_web_fetch_block_param import BetaWebFetchBlockParam as BetaWebFetchBlockParam
 from .beta_base64_pdf_block_param import BetaBase64PDFBlockParam as BetaBase64PDFBlockParam
 from .beta_citation_char_location import BetaCitationCharLocation as BetaCitationCharLocation
 from .beta_citation_page_location import BetaCitationPageLocation as BetaCitationPageLocation
@@ -75,6 +81,7 @@ from .beta_file_document_source_param import BetaFileDocumentSourceParam as Beta
 from .beta_code_execution_output_block import BetaCodeExecutionOutputBlock as BetaCodeExecutionOutputBlock
 from .beta_code_execution_result_block import BetaCodeExecutionResultBlock as BetaCodeExecutionResultBlock
 from .beta_server_tool_use_block_param import BetaServerToolUseBlockParam as BetaServerToolUseBlockParam
+from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock as BetaWebFetchToolResultBlock
 from .beta_citation_char_location_param import BetaCitationCharLocationParam as BetaCitationCharLocationParam
 from .beta_citation_page_location_param import BetaCitationPageLocationParam as BetaCitationPageLocationParam
 from .beta_container_upload_block_param import BetaContainerUploadBlockParam as BetaContainerUploadBlockParam
@@ -87,6 +94,7 @@ from .beta_raw_content_block_delta_event import BetaRawContentBlockDeltaEvent as
 from .beta_raw_content_block_start_event import BetaRawContentBlockStartEvent as BetaRawContentBlockStartEvent
 from .beta_redacted_thinking_block_param import BetaRedactedThinkingBlockParam as BetaRedactedThinkingBlockParam
 from .beta_thinking_config_enabled_param import BetaThinkingConfigEnabledParam as BetaThinkingConfigEnabledParam
+from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param as BetaWebFetchTool20250910Param
 from .beta_web_search_result_block_param import BetaWebSearchResultBlockParam as BetaWebSearchResultBlockParam
 from .beta_thinking_config_disabled_param import BetaThinkingConfigDisabledParam as BetaThinkingConfigDisabledParam
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param as BetaWebSearchTool20250305Param
@@ -102,12 +110,15 @@ from .beta_code_execution_tool_result_block import BetaCodeExecutionToolResultBl
 from .beta_code_execution_tool_result_error import BetaCodeExecutionToolResultError as BetaCodeExecutionToolResultError
 from .beta_tool_computer_use_20241022_param import BetaToolComputerUse20241022Param as BetaToolComputerUse20241022Param
 from .beta_tool_computer_use_20250124_param import BetaToolComputerUse20250124Param as BetaToolComputerUse20250124Param
+from .beta_web_fetch_tool_result_error_code import BetaWebFetchToolResultErrorCode as BetaWebFetchToolResultErrorCode
 from .beta_code_execution_output_block_param import (
     BetaCodeExecutionOutputBlockParam as BetaCodeExecutionOutputBlockParam,
 )
 from .beta_code_execution_result_block_param import (
     BetaCodeExecutionResultBlockParam as BetaCodeExecutionResultBlockParam,
 )
+from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam as BetaWebFetchToolResultBlockParam
+from .beta_web_fetch_tool_result_error_block import BetaWebFetchToolResultErrorBlock as BetaWebFetchToolResultErrorBlock
 from .beta_web_search_tool_result_error_code import BetaWebSearchToolResultErrorCode as BetaWebSearchToolResultErrorCode
 from .beta_code_execution_tool_20250522_param import (
     BetaCodeExecutionTool20250522Param as BetaCodeExecutionTool20250522Param,
@@ -162,6 +173,9 @@ from .beta_code_execution_tool_result_error_param import (
 )
 from .beta_request_mcp_server_url_definition_param import (
     BetaRequestMCPServerURLDefinitionParam as BetaRequestMCPServerURLDefinitionParam,
+)
+from .beta_web_fetch_tool_result_error_block_param import (
+    BetaWebFetchToolResultErrorBlockParam as BetaWebFetchToolResultErrorBlockParam,
 )
 from .beta_code_execution_tool_result_block_content import (
     BetaCodeExecutionToolResultBlockContent as BetaCodeExecutionToolResultBlockContent,

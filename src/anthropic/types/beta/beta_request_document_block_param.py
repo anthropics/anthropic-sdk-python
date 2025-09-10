@@ -32,7 +32,7 @@ class BetaRequestDocumentBlockParam(TypedDict, total=False):
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
 
-    citations: BetaCitationsConfigParam
+    citations: Optional[BetaCitationsConfigParam]
 
     context: Optional[str]
 
