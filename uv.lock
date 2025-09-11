@@ -2,8 +2,7 @@ version = 1
 revision = 3
 requires-python = ">=3.8"
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
     "python_full_version < '3.9'",
 ]
 conflicts = [[
@@ -28,8 +27,7 @@ name = "aiohappyeyeballs"
 version = "2.6.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/26/30/f84a107a9c4331c14b2b586036f40965c128aa4fee4dda5d3d51cb14ad54/aiohappyeyeballs-2.6.1.tar.gz", hash = "sha256:c3f9d0113123803ccadfdf3f0faa505bc78e6a72d1cc4806cbd719826e943558", size = 22760, upload-time = "2025-03-12T01:42:48.764Z" }
 wheels = [
@@ -151,8 +149,7 @@ name = "aiohttp"
 version = "3.12.13"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 dependencies = [
     { name = "aiohappyeyeballs", version = "2.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -273,8 +270,7 @@ name = "aiosignal"
 version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 dependencies = [
     { name = "frozenlist", version = "1.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -323,11 +319,10 @@ aiohttp = [
 dev = [
     { name = "dirty-equals" },
     { name = "griffe", version = "1.4.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
-    { name = "griffe", version = "1.14.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+    { name = "griffe", version = "1.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "importlib-metadata", version = "8.5.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "importlib-metadata", version = "8.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "mypy" },
-    { name = "nest-asyncio" },
     { name = "pyright" },
     { name = "pytest", version = "8.3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "pytest", version = "8.4.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -366,7 +361,6 @@ dev = [
     { name = "griffe", specifier = ">=1" },
     { name = "importlib-metadata", specifier = ">=6.7.0" },
     { name = "mypy" },
-    { name = "nest-asyncio", specifier = "==1.6.0" },
     { name = "pyright", specifier = "==1.1.399" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -402,8 +396,7 @@ name = "anyio"
 version = "4.8.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 dependencies = [
     { name = "exceptiongroup", marker = "(python_full_version >= '3.9' and python_full_version < '3.11') or (python_full_version < '3.9' and extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2') or (python_full_version >= '3.11' and extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -611,8 +604,7 @@ name = "frozenlist"
 version = "1.7.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/79/b1/b64018016eeb087db503b038296fd782586432b9c077fc5c7839e9cb6ef6/frozenlist-1.7.0.tar.gz", hash = "sha256:2e310d81923c2437ea8670467121cc3e9b0f76d3043cc1d2331d56c7fb7a3a8f", size = 45078, upload-time = "2025-06-09T23:02:35.538Z" }
 wheels = [
@@ -739,18 +731,17 @@ wheels = [
 
 [[package]]
 name = "griffe"
-version = "1.14.0"
+version = "1.13.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 dependencies = [
     { name = "colorama", marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ec/d7/6c09dd7ce4c7837e4cdb11dce980cb45ae3cd87677298dc3b781b6bce7d3/griffe-1.14.0.tar.gz", hash = "sha256:9d2a15c1eca966d68e00517de5d69dd1bc5c9f2335ef6c1775362ba5b8651a13", size = 424684, upload-time = "2025-09-05T15:02:29.167Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/b5/23b91f22b7b3a7f8f62223f6664946271c0f5cb4179605a3e6bbae863920/griffe-1.13.0.tar.gz", hash = "sha256:246ea436a5e78f7fbf5f24ca8a727bb4d2a4b442a2959052eea3d0bfe9a076e0", size = 412759, upload-time = "2025-08-26T13:27:11.422Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2a/b1/9ff6578d789a89812ff21e4e0f80ffae20a65d5dd84e7a17873fe3b365be/griffe-1.14.0-py3-none-any.whl", hash = "sha256:0e9d52832cccf0f7188cfe585ba962d2674b241c01916d780925df34873bceb0", size = 144439, upload-time = "2025-09-05T15:02:27.511Z" },
+    { url = "https://files.pythonhosted.org/packages/aa/8c/b7cfdd8dfe48f6b09f7353323732e1a290c388bd14f216947928dc85f904/griffe-1.13.0-py3-none-any.whl", hash = "sha256:470fde5b735625ac0a36296cd194617f039e9e83e301fcbd493e2b58382d0559", size = 139365, upload-time = "2025-08-26T13:27:09.882Z" },
 ]
 
 [[package]]
@@ -834,8 +825,7 @@ name = "importlib-metadata"
 version = "8.6.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 dependencies = [
     { name = "zipp", version = "3.21.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -985,8 +975,7 @@ name = "multidict"
 version = "6.6.3"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 dependencies = [
     { name = "typing-extensions", marker = "(python_full_version >= '3.9' and python_full_version < '3.11') or (python_full_version < '3.9' and extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2') or (python_full_version >= '3.11' and extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -1164,15 +1153,6 @@ wheels = [
 ]
 
 [[package]]
-name = "nest-asyncio"
-version = "1.6.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/83/f8/51569ac65d696c8ecbee95938f89d4abf00f47d58d48f6fbabfe8f0baefe/nest_asyncio-1.6.0.tar.gz", hash = "sha256:6f172d5449aca15afd6c646851f4e31e02c598d553a667e38cafa997cfec55fe", size = 7418, upload-time = "2024-01-21T14:25:19.227Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a0/c4/c2971a3ba4c6103a3d10c4b0f24f461ddc027f0f09763220cf35ca1401b3/nest_asyncio-1.6.0-py3-none-any.whl", hash = "sha256:87af6efd6b5e897c81050477ef65c62e2b2f35d51703cae01aff2905b1852e1c", size = 5195, upload-time = "2024-01-21T14:25:17.223Z" },
-]
-
-[[package]]
 name = "nodeenv"
 version = "1.9.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1312,8 +1292,7 @@ name = "propcache"
 version = "0.3.2"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a6/16/43264e4a779dd8588c21a70f0709665ee8f611211bdd2c87d952cfa7c776/propcache-0.3.2.tar.gz", hash = "sha256:20d7d62e4e7ef05f221e0db2856b979540686342e7dd9973b815599c7057e168", size = 44139, upload-time = "2025-06-09T22:56:06.081Z" }
 wheels = [
@@ -1421,8 +1400,7 @@ name = "pydantic"
 version = "1.10.22"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
     "python_full_version < '3.9'",
 ]
 dependencies = [
@@ -1480,8 +1458,7 @@ name = "pydantic"
 version = "2.10.3"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
     "python_full_version < '3.9'",
 ]
 dependencies = [
@@ -1651,8 +1628,7 @@ name = "pytest"
 version = "8.4.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 dependencies = [
     { name = "colorama", marker = "(python_full_version >= '3.9' and sys_platform == 'win32') or (python_full_version < '3.9' and extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2') or (sys_platform != 'win32' and extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -1702,8 +1678,7 @@ name = "pytest-xdist"
 version = "3.7.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 dependencies = [
     { name = "execnet", marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -1889,8 +1864,7 @@ name = "time-machine"
 version = "2.16.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 dependencies = [
     { name = "python-dateutil", marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -2129,8 +2103,7 @@ name = "yarl"
 version = "1.20.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 dependencies = [
     { name = "idna", marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -2261,8 +2234,7 @@ name = "zipp"
 version = "3.21.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.10'",
-    "python_full_version == '3.9.*'",
+    "python_full_version >= '3.9'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/3f/50/bad581df71744867e9468ebd0bcd6505de3b275e06f202c2cb016e3ff56f/zipp-3.21.0.tar.gz", hash = "sha256:2c9958f6430a2040341a52eb608ed6dd93ef4392e02ffe219417c1b28b5dd1f4", size = 24545, upload-time = "2024-11-10T15:05:20.202Z" }
 wheels = [

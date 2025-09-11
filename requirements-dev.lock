@@ -31,7 +31,7 @@ exceptiongroup==1.2.2 ; python_full_version < '3.11'
 execnet==2.1.1
     # via pytest-xdist
 griffe==1.4.0 ; python_full_version < '3.9'
-griffe==1.14.0 ; python_full_version >= '3.9'
+griffe==1.13.0 ; python_full_version >= '3.9'
 h11==0.16.0
     # via httpcore
 httpcore==1.0.9
@@ -55,7 +55,6 @@ mdurl==0.1.2
 mypy==1.14.1
 mypy-extensions==1.0.0
     # via mypy
-nest-asyncio==1.6.0
 nodeenv==1.9.1
     # via pyright
 packaging==24.2
