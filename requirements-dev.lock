@@ -13,10 +13,10 @@ anyio==4.8.0 ; python_full_version >= '3.9'
     #   httpx
 astunparse==1.6.3 ; python_full_version < '3.9'
     # via griffe
-boto3-stubs==1.40.12
+boto3-stubs==1.40.31
 botocore-stubs==1.38.30 ; python_full_version < '3.9'
     # via boto3-stubs
-botocore-stubs==1.38.46 ; python_full_version >= '3.9'
+botocore-stubs==1.40.31 ; python_full_version >= '3.9'
     # via boto3-stubs
 certifi==2024.12.14
     # via
@@ -55,7 +55,7 @@ iniconfig==2.0.0
     # via pytest
 jiter==0.9.1 ; python_full_version < '3.9'
     # via anthropic
-jiter==0.10.0 ; python_full_version >= '3.9'
+jiter==0.11.0 ; python_full_version >= '3.9'
     # via anthropic
 markdown-it-py==3.0.0
     # via rich
@@ -70,9 +70,13 @@ packaging==24.2
     # via pytest
 pluggy==1.5.0
     # via pytest
-pydantic==2.10.3
+pydantic==2.10.6 ; python_full_version < '3.9'
     # via anthropic
-pydantic-core==2.27.1
+pydantic==2.11.9 ; python_full_version >= '3.9'
+    # via anthropic
+pydantic-core==2.27.2 ; python_full_version < '3.9'
+    # via pydantic
+pydantic-core==2.33.2 ; python_full_version >= '3.9'
     # via pydantic
 pygments==2.19.1
     # via
@@ -113,7 +117,7 @@ tomli==2.2.1 ; python_full_version < '3.11'
     #   pytest
 types-awscrt==0.27.6
     # via botocore-stubs
-types-s3transfer==0.13.0
+types-s3transfer==0.13.1
     # via boto3-stubs
 typing-extensions==4.12.2
     # via
@@ -126,6 +130,9 @@ typing-extensions==4.12.2
     #   pydantic-core
     #   pyright
     #   rich
+    #   typing-inspection
+typing-inspection==0.4.1 ; python_full_version >= '3.9'
+    # via pydantic
 wheel==0.45.1 ; python_full_version < '3.9'
     # via astunparse
 zipp==3.20.2 ; python_full_version < '3.9'
