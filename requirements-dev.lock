@@ -61,9 +61,13 @@ packaging==24.2
     # via pytest
 pluggy==1.5.0
     # via pytest
-pydantic==2.10.3
+pydantic==2.10.6 ; python_full_version < '3.9'
     # via anthropic
-pydantic-core==2.27.1
+pydantic==2.11.9 ; python_full_version >= '3.9'
+    # via anthropic
+pydantic-core==2.27.2 ; python_full_version < '3.9'
+    # via pydantic
+pydantic-core==2.33.2 ; python_full_version >= '3.9'
     # via pydantic
 pygments==2.19.1
     # via
@@ -112,6 +116,9 @@ typing-extensions==4.12.2
     #   pydantic-core
     #   pyright
     #   rich
+    #   typing-inspection
+typing-inspection==0.4.1 ; python_full_version >= '3.9'
+    # via pydantic
 wheel==0.45.1 ; python_full_version < '3.9'
     # via astunparse
 zipp==3.20.2 ; python_full_version < '3.9'
