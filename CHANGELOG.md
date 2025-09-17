@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.68.0 (2025-09-17)
+
+Full Changelog: [v0.67.0...v0.68.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.67.0...v0.68.0)
+
+### Features
+
+* add tool running helpers ([d9c9ce6](https://github.com/anthropics/anthropic-sdk-python/commit/d9c9ce63de5b5888dff0d9ba2d79724520152420))
+
+
+### Chores
+
+* **internal:** fix tests ([9858c79](https://github.com/anthropics/anthropic-sdk-python/commit/9858c791309a1af2fbc2cb4d042812de83d1a635))
+* **internal:** update pydantic dependency ([f59c2f1](https://github.com/anthropics/anthropic-sdk-python/commit/f59c2f196a09c80f6b46cac19e9d0ace18200da8))
+* **tests:** simplify `get_platform` test ([7596748](https://github.com/anthropics/anthropic-sdk-python/commit/7596748699ff3113b6cb6c1511cf4a33d0453233))
+
 ## 0.67.0 (2025-09-10)
 
 Full Changelog: [v0.66.0...v0.67.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.66.0...v0.67.0)
