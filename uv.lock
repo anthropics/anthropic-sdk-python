@@ -305,6 +305,7 @@ dependencies = [
     { name = "anyio", version = "4.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "anyio", version = "4.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "distro" },
+    { name = "docstring-parser" },
     { name = "httpx" },
     { name = "jiter", version = "0.9.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "jiter", version = "0.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -339,6 +340,7 @@ dev = [
     { name = "griffe", version = "1.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "importlib-metadata", version = "8.5.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "importlib-metadata", version = "8.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+    { name = "inline-snapshot" },
     { name = "mypy" },
     { name = "pyright" },
     { name = "pytest", version = "8.3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -367,6 +369,7 @@ requires-dist = [
     { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.28.57" },
     { name = "botocore", marker = "extra == 'bedrock'", specifier = ">=1.31.57" },
     { name = "distro", specifier = ">=1.7.0,<2" },
+    { name = "docstring-parser", specifier = ">=0.15,<1" },
     { name = "google-auth", extras = ["requests"], marker = "extra == 'vertex'", specifier = ">=2,<3" },
     { name = "httpx", specifier = ">=0.25.0,<1" },
     { name = "httpx-aiohttp", marker = "extra == 'aiohttp'", specifier = ">=0.1.8" },
@@ -383,6 +386,7 @@ dev = [
     { name = "dirty-equals", specifier = ">=0.6.0" },
     { name = "griffe", specifier = ">=1" },
     { name = "importlib-metadata", specifier = ">=6.7.0" },
+    { name = "inline-snapshot", specifier = ">=0.28.0" },
     { name = "mypy" },
     { name = "pyright", specifier = "==1.1.399" },
     { name = "pytest" },
@@ -431,6 +435,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a3/73/199a98fc2dae33535d6b8e8e6ec01f8c1d76c9adb096c6b7d64823038cde/anyio-4.8.0.tar.gz", hash = "sha256:1d9fe889df5212298c0c0723fa20479d1b94883a2df44bd3897aa91083316f7a", size = 181126, upload-time = "2025-01-05T13:13:11.095Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/46/eb/e7f063ad1fec6b3178a3cd82d1a3c4de82cccf283fc42746168188e1cdd5/anyio-4.8.0-py3-none-any.whl", hash = "sha256:b5011f270ab5eb0abf13385f851315585cc37ef330dd88e27ec3d34d651fd47a", size = 96041, upload-time = "2025-01-05T13:13:07.985Z" },
+]
+
+[[package]]
+name = "asttokens"
+version = "3.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4a/e7/82da0a03e7ba5141f05cce0d302e6eed121ae055e0456ca228bf693984bc/asttokens-3.0.0.tar.gz", hash = "sha256:0dcd8baa8d62b0c1d118b399b2ddba3c4aff271d0d7a9e0d4c1681c79035bbc7", size = 61978, upload-time = "2024-11-30T04:30:14.439Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/25/8a/c46dcc25341b5bce5472c718902eb3d38600a903b14fa6aeecef3f21a46f/asttokens-3.0.0-py3-none-any.whl", hash = "sha256:e3078351a059199dd5138cb1c706e6430c05eff2ff136af5eb4790f9d28932e2", size = 26918, upload-time = "2024-11-30T04:30:10.946Z" },
 ]
 
 [[package]]
@@ -716,6 +729,15 @@ wheels = [
 ]
 
 [[package]]
+name = "docstring-parser"
+version = "0.17.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b2/9d/c3b43da9515bd270df0f80548d9944e389870713cc1fe2b8fb35fe2bcefd/docstring_parser-0.17.0.tar.gz", hash = "sha256:583de4a309722b3315439bb31d64ba3eebada841f2e2cee23b99df001434c912", size = 27442, upload-time = "2025-07-21T07:35:01.868Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/55/e2/2537ebcff11c1ee1ff17d8d0b6f4db75873e3b0fb32c2d4a2ee31ecb310a/docstring_parser-0.17.0-py3-none-any.whl", hash = "sha256:cf2569abd23dce8099b300f9b4fa8191e9582dda731fd533daf54c4551658708", size = 36896, upload-time = "2025-07-21T07:35:00.684Z" },
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.2.2"
 source = { registry = "https://pypi.org/simple" }
@@ -731,6 +753,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/bb/ff/b4c0dc78fbe20c3e59c0c7334de0c27eb4001a2b2017999af398bf730817/execnet-2.1.1.tar.gz", hash = "sha256:5189b52c6121c24feae288166ab41b32549c7e2348652736540b9e6e7d4e72e3", size = 166524, upload-time = "2024-04-08T09:04:19.245Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/43/09/2aea36ff60d16dd8879bdb2f5b3ee0ba8d08cbbdcdfe870e695ce3784385/execnet-2.1.1-py3-none-any.whl", hash = "sha256:26dee51f1b80cebd6d0ca8e74dd8745419761d3bef34163928cbebbdc4749fdc", size = 40612, upload-time = "2024-04-08T09:04:17.414Z" },
+]
+
+[[package]]
+name = "executing"
+version = "2.2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/cc/28/c14e053b6762b1044f34a13aab6859bbf40456d37d23aa286ac24cfd9a5d/executing-2.2.1.tar.gz", hash = "sha256:3632cc370565f6648cc328b32435bd120a1e4ebb20c77e3fdde9a13cd1e533c4", size = 1129488, upload-time = "2025-09-01T09:48:10.866Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c1/ea/53f2148663b321f21b5a606bd5f191517cf40b7072c0497d3c92c4a13b1e/executing-2.2.1-py2.py3-none-any.whl", hash = "sha256:760643d3452b4d777d295bb167ccc74c64a81df23fb5e08eff250c425a4b2017", size = 28317, upload-time = "2025-09-01T09:48:08.5Z" },
 ]
 
 [[package]]
@@ -1101,6 +1132,23 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d7/4b/cbd8e699e64a6f16ca3a8220661b5f83792b3017d0f79807cb8708d33913/iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3", size = 4646, upload-time = "2023-01-07T11:08:11.254Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ef/a6/62565a6e1cf69e10f5727360368e451d4b7f58beeac6173dc9db836a5b46/iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374", size = 5892, upload-time = "2023-01-07T11:08:09.864Z" },
+]
+
+[[package]]
+name = "inline-snapshot"
+version = "0.29.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asttokens" },
+    { name = "executing" },
+    { name = "pytest", version = "8.3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+    { name = "pytest", version = "8.4.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+    { name = "rich" },
+    { name = "tomli", marker = "python_full_version < '3.11' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1c/4d/8e3b89f00df7925942acb091809ca32395373dc579517abacec5e242e8bd/inline_snapshot-0.29.0.tar.gz", hash = "sha256:8bac016fc8ff4638a6cdebca96d7042fecde471f0574d360de11f552ba77d6b5", size = 349586, upload-time = "2025-09-15T07:03:05.455Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2d/eb/5ab8628a3289fab7ab28ccd59ef6d3ef4b28706c3065388df9f975ed29b6/inline_snapshot-0.29.0-py3-none-any.whl", hash = "sha256:aaea04480f1b5ec741b9025da45c00cb166d8791f01bed0f5ea7eabd1f9784cd", size = 70235, upload-time = "2025-09-15T07:03:03.616Z" },
 ]
 
 [[package]]

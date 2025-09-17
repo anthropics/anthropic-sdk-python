@@ -87,11 +87,14 @@ __all__ = [
     "DefaultAioHttpClient",
     "HUMAN_PROMPT",
     "AI_PROMPT",
+    "beta_tool",
+    "beta_async_tool",
 ]
 
 if not _t.TYPE_CHECKING:
     from ._utils._resources_proxy import resources as resources
 
+from .lib.tools import beta_tool, beta_async_tool
 from .lib.vertex import *
 from .lib.bedrock import *
 from .lib.streaming import *

@@ -167,6 +167,55 @@ async for event in stream:
     print(event.type)
 ```
 
+### Tool helpers
+
+This library provides helper functions for defining and running tools as pure python functions, for example:
+
+```py
+import json
+import rich
+from typing_extensions import Literal
+from anthropic import Anthropic, beta_tool
+
+client = Anthropic()
+
+
+@beta_tool
+def get_weather(location: str) -> str:
+    """Lookup the weather for a given city in either celsius or fahrenheit
+
+    Args:
+        location: The city and state, e.g. San Francisco, CA
+    Returns:
+        A dictionary containing the location, temperature, and weather condition.
+    """
+    # Here you would typically make an API call to a weather service
+    # For demonstration, we return a mock response
+    return json.dumps(
+        {
+            "location": location,
+            "temperature": "68°F",
+            "condition": "Sunny",
+        }
+    )
+
+
+runner = client.beta.messages.tool_runner(
+    max_tokens=1024,
+    model="claude-sonnet-4-20250514",
+    tools=[get_weather],
+    messages=[
+        {"role": "user", "content": "What is the weather in SF?"},
+    ],
+)
+for message in runner:
+    rich.print(message)
+```
+
+On every iteration, an API request will be made, if Claude wants to call one of the given tools then it will be automatically called, and the result will be returned directly to the model in the next iteration.
+
+For more information see the [full docs](tools.md).
+
 ### Streaming Helpers
 
 This library provides several conveniences for streaming messages, for example:
