@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import List, Union, Iterable, Optional
+from typing import TYPE_CHECKING, Any, List, Union, Iterable, Optional, cast
 from functools import partial
 from itertools import chain
 from typing_extensions import Literal, overload
@@ -24,6 +24,14 @@ from ...._utils import is_given, required_args, maybe_transform, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ....lib.tools import (
+    BetaToolRunner,
+    BetaFunctionTool,
+    BetaAsyncToolRunner,
+    BetaAsyncFunctionTool,
+    BetaStreamingToolRunner,
+    BetaAsyncStreamingToolRunner,
+)
 from ...._constants import DEFAULT_TIMEOUT, MODEL_NONSTREAMING_TOKENS
 from ...._streaming import Stream, AsyncStream
 from ....types.beta import (
@@ -46,6 +54,9 @@ from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
 from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
 from ....types.beta.beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
+
+if TYPE_CHECKING:
+    from ...._client import Anthropic, AsyncAnthropic
 
 __all__ = ["Messages", "AsyncMessages"]
 
@@ -980,6 +991,185 @@ class Messages(SyncAPIResource):
             cast_to=BetaMessage,
             stream=stream or False,
             stream_cls=Stream[BetaRawMessageStreamEvent],
+        )
+
+    @overload
+    def tool_runner(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        tools: Iterable[BetaFunctionTool[Any]],
+        max_iterations: int | NotGiven = NOT_GIVEN,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
+        stream: Literal[False] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaToolRunner: ...
+
+    @overload
+    def tool_runner(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        tools: Iterable[BetaFunctionTool[Any]],
+        stream: Literal[True],
+        max_iterations: int | NotGiven = NOT_GIVEN,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaStreamingToolRunner: ...
+
+    @overload
+    def tool_runner(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        tools: Iterable[BetaFunctionTool[Any]],
+        stream: bool,
+        max_iterations: int | NotGiven = NOT_GIVEN,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaStreamingToolRunner | BetaToolRunner: ...
+
+    def tool_runner(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        tools: Iterable[BetaFunctionTool[Any]],
+        max_iterations: int | NotGiven = NOT_GIVEN,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
+        stream: bool | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaToolRunner | BetaStreamingToolRunner:
+        """Create a Message stream"""
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+        extra_headers = {
+            "X-Stainless-Helper": "beta.messages.tool_runner",
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **(extra_headers or {}),
+        }
+
+        params = cast(
+            message_create_params.MessageCreateParamsNonStreaming,
+            {
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "container": container,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "service_tier": service_tier,
+                "stop_sequences": stop_sequences,
+                "system": system,
+                "temperature": temperature,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": [tool.to_dict() for tool in tools],
+                "top_k": top_k,
+                "top_p": top_p,
+            },
+        )
+
+        if stream:
+            return BetaStreamingToolRunner(
+                tools=tools,
+                params=params,
+                options={
+                    "extra_headers": extra_headers,
+                    "extra_query": extra_query,
+                    "extra_body": extra_body,
+                    "timeout": timeout,
+                },
+                client=cast("Anthropic", self._client),
+                max_iterations=max_iterations if is_given(max_iterations) else None,
+            )
+        return BetaToolRunner(
+            tools=tools,
+            params=params,
+            options={
+                "extra_headers": extra_headers,
+                "extra_query": extra_query,
+                "extra_body": extra_body,
+                "timeout": timeout,
+            },
+            client=cast("Anthropic", self._client),
+            max_iterations=max_iterations if is_given(max_iterations) else None,
         )
 
     def stream(
@@ -2221,6 +2411,185 @@ class AsyncMessages(AsyncAPIResource):
             cast_to=BetaMessage,
             stream=stream or False,
             stream_cls=AsyncStream[BetaRawMessageStreamEvent],
+        )
+
+    @overload
+    def tool_runner(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        tools: Iterable[BetaAsyncFunctionTool[Any]],
+        max_iterations: int | NotGiven = NOT_GIVEN,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
+        stream: Literal[False] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaAsyncToolRunner: ...
+
+    @overload
+    def tool_runner(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        tools: Iterable[BetaAsyncFunctionTool[Any]],
+        stream: Literal[True],
+        max_iterations: int | NotGiven = NOT_GIVEN,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaAsyncStreamingToolRunner: ...
+
+    @overload
+    def tool_runner(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        tools: Iterable[BetaAsyncFunctionTool[Any]],
+        stream: bool,
+        max_iterations: int | NotGiven = NOT_GIVEN,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaAsyncStreamingToolRunner | BetaAsyncToolRunner: ...
+
+    def tool_runner(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        tools: Iterable[BetaAsyncFunctionTool[Any]],
+        max_iterations: int | NotGiven = NOT_GIVEN,
+        container: Optional[str] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
+        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
+        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
+        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
+        stream: Literal[True] | Literal[False] | NotGiven = False,
+        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        top_k: int | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
+        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaAsyncToolRunner | BetaAsyncStreamingToolRunner:
+        """Create a Message stream"""
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+        extra_headers = {
+            "X-Stainless-Helper": "beta.messages.tool_runner",
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **(extra_headers or {}),
+        }
+
+        params = cast(
+            message_create_params.MessageCreateParamsBase,
+            {
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "container": container,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "service_tier": service_tier,
+                "stop_sequences": stop_sequences,
+                "system": system,
+                "temperature": temperature,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": [tool.to_dict() for tool in tools],
+                "top_k": top_k,
+                "top_p": top_p,
+            },
+        )
+
+        if stream:
+            return BetaAsyncStreamingToolRunner(
+                tools=tools,
+                params=params,
+                options={
+                    "extra_headers": extra_headers,
+                    "extra_query": extra_query,
+                    "extra_body": extra_body,
+                    "timeout": timeout,
+                },
+                client=cast("AsyncAnthropic", self._client),
+                max_iterations=max_iterations if is_given(max_iterations) else None,
+            )
+        return BetaAsyncToolRunner(
+            tools=tools,
+            params=params,
+            options={
+                "extra_headers": extra_headers,
+                "extra_query": extra_query,
+                "extra_body": extra_body,
+                "timeout": timeout,
+            },
+            client=cast("AsyncAnthropic", self._client),
+            max_iterations=max_iterations if is_given(max_iterations) else None,
         )
 
     def stream(

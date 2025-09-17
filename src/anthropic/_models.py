@@ -786,6 +786,9 @@ elif not TYPE_CHECKING:  # TODO: condition is weird
     def _create_pydantic_model(type_: _T) -> Type[RootModel[_T]]:
         return RootModel[type_]  # type: ignore
 
+    def TypeAdapter(*_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError("attempted to use TypeAdapter in pydantic v1")
+
 
 class FinalRequestOptionsInput(TypedDict, total=False):
     method: Required[str]

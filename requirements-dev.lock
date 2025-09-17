@@ -11,6 +11,8 @@ anyio==4.8.0 ; python_full_version >= '3.9'
     # via
     #   anthropic
     #   httpx
+asttokens==3.0.0
+    # via inline-snapshot
 astunparse==1.6.3 ; python_full_version < '3.9'
     # via griffe
 boto3-stubs==1.40.31
@@ -29,12 +31,16 @@ colorama==0.4.6
 dirty-equals==0.9.0
 distro==1.9.0
     # via anthropic
+docstring-parser==0.17.0
+    # via anthropic
 exceptiongroup==1.2.2 ; python_full_version < '3.11'
     # via
     #   anyio
     #   pytest
 execnet==2.1.1
     # via pytest-xdist
+executing==2.2.1
+    # via inline-snapshot
 griffe==1.4.0 ; python_full_version < '3.9'
 griffe==1.13.0 ; python_full_version >= '3.9'
 h11==0.16.0
@@ -53,6 +59,7 @@ importlib-metadata==8.5.0 ; python_full_version < '3.9'
 importlib-metadata==8.6.1 ; python_full_version >= '3.9'
 iniconfig==2.0.0
     # via pytest
+inline-snapshot==0.29.0
 jiter==0.9.1 ; python_full_version < '3.9'
     # via anthropic
 jiter==0.11.0 ; python_full_version >= '3.9'
@@ -85,10 +92,12 @@ pygments==2.19.1
 pyright==1.1.399
 pytest==8.3.5 ; python_full_version < '3.9'
     # via
+    #   inline-snapshot
     #   pytest-asyncio
     #   pytest-xdist
 pytest==8.4.1 ; python_full_version >= '3.9'
     # via
+    #   inline-snapshot
     #   pytest-asyncio
     #   pytest-xdist
 pytest-asyncio==0.24.0
@@ -100,6 +109,7 @@ pytz==2024.2 ; python_full_version < '3.9'
     # via dirty-equals
 respx==0.22.0
 rich==13.9.4
+    # via inline-snapshot
 ruff==0.9.4
 six==1.17.0
     # via
@@ -113,6 +123,7 @@ time-machine==2.15.0 ; python_full_version < '3.9'
 time-machine==2.16.0 ; python_full_version >= '3.9'
 tomli==2.2.1 ; python_full_version < '3.11'
     # via
+    #   inline-snapshot
     #   mypy
     #   pytest
 types-awscrt==0.27.6
