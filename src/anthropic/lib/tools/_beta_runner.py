@@ -147,7 +147,6 @@ class BaseSyncToolRunner(BaseToolRunner[BetaFunctionTool[Any]], Generic[RunnerIt
         self._cached_tool_call_response = response
         return response
 
-
     def _generate_tool_call_response(self) -> BetaMessageParam | None:
         content = self._get_last_assistant_message_content()
         if not content:

@@ -23,7 +23,7 @@ from .batches import (
     BatchesWithStreamingResponse,
     AsyncBatchesWithStreamingResponse,
 )
-from ..._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
+from ..._types import NOT_GIVEN, Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ..._utils import is_given, required_args, maybe_transform, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
@@ -964,17 +964,17 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        container: Optional[str] | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        container: Optional[str] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2147,17 +2147,17 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        container: Optional[str] | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        container: Optional[str] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
