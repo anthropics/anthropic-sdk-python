@@ -8,7 +8,7 @@ from itertools import chain
 import httpx
 
 from ... import _legacy_response
-from ..._types import NOT_GIVEN, Body, Query, Headers, NotGiven, FileTypes
+from ..._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
 from ..._utils import is_given, extract_files, maybe_transform, strip_not_given, deepcopy_minimal, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
@@ -57,16 +57,16 @@ class Files(SyncAPIResource):
     def list(
         self,
         *,
-        after_id: str | NotGiven = NOT_GIVEN,
-        before_id: str | NotGiven = NOT_GIVEN,
-        limit: int | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        after_id: str | Omit = omit,
+        before_id: str | Omit = omit,
+        limit: int | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> SyncPage[FileMetadata]:
         """List Files
 
@@ -98,7 +98,7 @@ class Files(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else NOT_GIVEN
+                    else omit
                 }
             ),
             **(extra_headers or {}),
@@ -128,13 +128,13 @@ class Files(SyncAPIResource):
         self,
         file_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> DeletedFile:
         """
         Delete File
@@ -159,7 +159,7 @@ class Files(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else NOT_GIVEN
+                    else omit
                 }
             ),
             **(extra_headers or {}),
@@ -177,13 +177,13 @@ class Files(SyncAPIResource):
         self,
         file_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BinaryAPIResponse:
         """
         Download File
@@ -209,7 +209,7 @@ class Files(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else NOT_GIVEN
+                    else omit
                 }
             ),
             **(extra_headers or {}),
@@ -227,13 +227,13 @@ class Files(SyncAPIResource):
         self,
         file_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> FileMetadata:
         """
         Get File Metadata
@@ -258,7 +258,7 @@ class Files(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else NOT_GIVEN
+                    else omit
                 }
             ),
             **(extra_headers or {}),
@@ -276,13 +276,13 @@ class Files(SyncAPIResource):
         self,
         *,
         file: FileTypes,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> FileMetadata:
         """
         Upload File
@@ -305,7 +305,7 @@ class Files(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else NOT_GIVEN
+                    else omit
                 }
             ),
             **(extra_headers or {}),
@@ -351,16 +351,16 @@ class AsyncFiles(AsyncAPIResource):
     def list(
         self,
         *,
-        after_id: str | NotGiven = NOT_GIVEN,
-        before_id: str | NotGiven = NOT_GIVEN,
-        limit: int | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        after_id: str | Omit = omit,
+        before_id: str | Omit = omit,
+        limit: int | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[FileMetadata, AsyncPage[FileMetadata]]:
         """List Files
 
@@ -392,7 +392,7 @@ class AsyncFiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else NOT_GIVEN
+                    else omit
                 }
             ),
             **(extra_headers or {}),
@@ -422,13 +422,13 @@ class AsyncFiles(AsyncAPIResource):
         self,
         file_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> DeletedFile:
         """
         Delete File
@@ -453,7 +453,7 @@ class AsyncFiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else NOT_GIVEN
+                    else omit
                 }
             ),
             **(extra_headers or {}),
@@ -471,13 +471,13 @@ class AsyncFiles(AsyncAPIResource):
         self,
         file_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncBinaryAPIResponse:
         """
         Download File
@@ -503,7 +503,7 @@ class AsyncFiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else NOT_GIVEN
+                    else omit
                 }
             ),
             **(extra_headers or {}),
@@ -521,13 +521,13 @@ class AsyncFiles(AsyncAPIResource):
         self,
         file_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> FileMetadata:
         """
         Get File Metadata
@@ -552,7 +552,7 @@ class AsyncFiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else NOT_GIVEN
+                    else omit
                 }
             ),
             **(extra_headers or {}),
@@ -570,13 +570,13 @@ class AsyncFiles(AsyncAPIResource):
         self,
         *,
         file: FileTypes,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> FileMetadata:
         """
         Upload File
@@ -599,7 +599,7 @@ class AsyncFiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else NOT_GIVEN
+                    else omit
                 }
             ),
             **(extra_headers or {}),

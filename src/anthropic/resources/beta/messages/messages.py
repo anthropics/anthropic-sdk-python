@@ -16,7 +16,7 @@ from .batches import (
     BatchesWithStreamingResponse,
     AsyncBatchesWithStreamingResponse,
 )
-from ...._types import NOT_GIVEN, Body, Query, Headers, NotGiven, SequenceNotStr
+from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ...._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
@@ -76,26 +76,26 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        container: Optional[str] | NotGiven = NOT_GIVEN,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
-        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        container: Optional[str] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessage:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -354,25 +354,25 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
-        container: Optional[str] | NotGiven = NOT_GIVEN,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
-        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        container: Optional[str] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Stream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -631,25 +631,25 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
-        container: Optional[str] | NotGiven = NOT_GIVEN,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
-        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        container: Optional[str] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -907,31 +907,31 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        container: Optional[str] | NotGiven = NOT_GIVEN,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
-        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        container: Optional[str] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else omit}),
             **(extra_headers or {}),
         }
         return self._post(
@@ -972,18 +972,18 @@ class Messages(SyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[message_count_tokens_params.Tool] | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[message_count_tokens_params.Tool] | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessageTokensCount:
         """
         Count the number of tokens in a Message.
@@ -1173,7 +1173,7 @@ class Messages(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else omit}),
             **(extra_headers or {}),
         }
         return self._post(
@@ -1228,26 +1228,26 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        container: Optional[str] | NotGiven = NOT_GIVEN,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
-        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        container: Optional[str] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessage:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -1506,25 +1506,25 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
-        container: Optional[str] | NotGiven = NOT_GIVEN,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
-        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        container: Optional[str] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncStream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -1783,25 +1783,25 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
-        container: Optional[str] | NotGiven = NOT_GIVEN,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
-        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        container: Optional[str] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -2059,31 +2059,31 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        container: Optional[str] | NotGiven = NOT_GIVEN,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
-        metadata: BetaMetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[BetaToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        container: Optional[str] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else omit}),
             **(extra_headers or {}),
         }
         return await self._post(
@@ -2124,18 +2124,18 @@ class AsyncMessages(AsyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[BetaTextBlockParam]] | NotGiven = NOT_GIVEN,
-        thinking: BetaThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: BetaToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[message_count_tokens_params.Tool] | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[message_count_tokens_params.Tool] | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessageTokensCount:
         """
         Count the number of tokens in a Message.
@@ -2325,7 +2325,7 @@ class AsyncMessages(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else omit}),
             **(extra_headers or {}),
         }
         return await self._post(

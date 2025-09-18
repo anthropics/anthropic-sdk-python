@@ -21,7 +21,7 @@ from .batches import (
     BatchesWithStreamingResponse,
     AsyncBatchesWithStreamingResponse,
 )
-from ..._types import NOT_GIVEN, Body, Query, Headers, NotGiven, SequenceNotStr
+from ..._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ..._utils import is_given, required_args, maybe_transform, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
@@ -75,23 +75,23 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -344,22 +344,22 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Stream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -612,22 +612,22 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message | Stream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -879,23 +879,23 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message | Stream[RawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
@@ -935,16 +935,16 @@ class Messages(SyncAPIResource):
         *,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[MessageCountTokensToolParam] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[MessageCountTokensToolParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> MessageTokensCount:
         """
         Count the number of tokens in a Message.
@@ -1180,23 +1180,23 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -1449,22 +1449,22 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncStream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -1717,22 +1717,22 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message | AsyncStream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -1984,23 +1984,23 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        service_tier: Literal["auto", "standard_only"] | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message | AsyncStream[RawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
@@ -2040,16 +2040,16 @@ class AsyncMessages(AsyncAPIResource):
         *,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[MessageCountTokensToolParam] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[MessageCountTokensToolParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> MessageTokensCount:
         """
         Count the number of tokens in a Message.
