@@ -9,7 +9,7 @@ import httpx
 
 from .. import _legacy_response
 from ..types import completion_create_params
-from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven, SequenceNotStr
+from .._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from .._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
@@ -52,19 +52,19 @@ class Completions(SyncAPIResource):
         max_tokens_to_sample: int,
         model: ModelParam,
         prompt: str,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Completion:
         """[Legacy] Create a Text Completion.
 
@@ -160,18 +160,18 @@ class Completions(SyncAPIResource):
         model: ModelParam,
         prompt: str,
         stream: Literal[True],
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Stream[Completion]:
         """[Legacy] Create a Text Completion.
 
@@ -267,18 +267,18 @@ class Completions(SyncAPIResource):
         model: ModelParam,
         prompt: str,
         stream: bool,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Completion | Stream[Completion]:
         """[Legacy] Create a Text Completion.
 
@@ -373,24 +373,24 @@ class Completions(SyncAPIResource):
         max_tokens_to_sample: int,
         model: ModelParam,
         prompt: str,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Completion | Stream[Completion]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else omit}),
             **(extra_headers or {}),
         }
         return self._post(
@@ -447,19 +447,19 @@ class AsyncCompletions(AsyncAPIResource):
         max_tokens_to_sample: int,
         model: ModelParam,
         prompt: str,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Completion:
         """[Legacy] Create a Text Completion.
 
@@ -555,18 +555,18 @@ class AsyncCompletions(AsyncAPIResource):
         model: ModelParam,
         prompt: str,
         stream: Literal[True],
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncStream[Completion]:
         """[Legacy] Create a Text Completion.
 
@@ -662,18 +662,18 @@ class AsyncCompletions(AsyncAPIResource):
         model: ModelParam,
         prompt: str,
         stream: bool,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Completion | AsyncStream[Completion]:
         """[Legacy] Create a Text Completion.
 
@@ -768,24 +768,24 @@ class AsyncCompletions(AsyncAPIResource):
         max_tokens_to_sample: int,
         model: ModelParam,
         prompt: str,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: SequenceNotStr[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Completion | AsyncStream[Completion]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else omit}),
             **(extra_headers or {}),
         }
         return await self._post(
