@@ -48,8 +48,16 @@ Repository = "https://github.com/anthropics/anthropic-sdk-python"
 [tool.uv]
 managed = true
 required-version = ">=0.5.0"
+conflicts = [
+    [
+      { group = "pydantic-v1" },
+      { group = "pydantic-v2" },
+    ],
+]
+
+[dependency-groups]
 # version pins are in uv.lock
-dev-dependencies = [
+dev = [
     "pyright==1.1.399",
     "mypy",
     "respx",
@@ -65,14 +73,6 @@ dev-dependencies = [
     "inline-snapshot>=0.28.0",
     "griffe>=1",
 ]
-conflicts = [
-    [
-      { group = "pydantic-v1" },
-      { group = "pydantic-v2" },
-    ],
-]
-
-[dependency-groups]
 pydantic-v1 = [
     "pydantic>=1.9.0,<2",
 ]
