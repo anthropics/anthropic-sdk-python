@@ -44,8 +44,16 @@ aiohttp = ["aiohttp", "httpx_aiohttp>=0.1.8"]
 [tool.uv]
 managed = true
 required-version = ">=0.5.0"
+conflicts = [
+    [
+      { group = "pydantic-v1" },
+      { group = "pydantic-v2" },
+    ],
+]
+
+[dependency-groups]
 # version pins are in uv.lock
-dev-dependencies = [
+dev = [
     "pyright==1.1.399",
     "mypy",
     "respx",
@@ -59,14 +67,6 @@ dev-dependencies = [
     "pytest-xdist>=3.6.1",
     "griffe>=1",
 ]
-conflicts = [
-    [
-      { group = "pydantic-v1" },
-      { group = "pydantic-v2" },
-    ],
-]
-
-[dependency-groups]
 pydantic-v1 = [
     "pydantic>=1.9.0,<2",
 ]
