@@ -108,7 +108,7 @@ class BetaMessageStream:
         return "".join(text_blocks)
 
     def until_done(self) -> None:
-        """Blocks until the stream has been consumed"""
+        """Blocks until the stream has been consumed."""
         consume_sync_iterator(self)
 
     # properties
@@ -248,7 +248,7 @@ class BetaAsyncMessageStream:
         return "".join(text_blocks)
 
     async def until_done(self) -> None:
-        """Waits until the stream has been consumed"""
+        """Waits until the stream has been consumed."""
         await consume_async_iterator(self)
 
     # properties
