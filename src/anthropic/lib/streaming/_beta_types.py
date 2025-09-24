@@ -20,51 +20,50 @@ class BetaTextEvent(BaseModel):
     type: Literal["text"]
 
     text: str
-    """The text delta"""
+    """The text delta."""
 
     snapshot: str
-    """The entire accumulated text"""
+    """The entire accumulated text."""
 
 
 class BetaCitationEvent(BaseModel):
     type: Literal["citation"]
 
     citation: Citation
-    """The new citation"""
+    """The new citation."""
 
     snapshot: List[Citation]
-    """All of the accumulated citations"""
+    """All of the accumulated citations."""
 
 
 class BetaThinkingEvent(BaseModel):
     type: Literal["thinking"]
 
     thinking: str
-    """The thinking delta"""
+    """The thinking delta."""
 
     snapshot: str
-    """The accumulated thinking so far"""
+    """The accumulated thinking so far."""
 
 
 class BetaSignatureEvent(BaseModel):
     type: Literal["signature"]
 
     signature: str
-    """The signature of the thinking block"""
+    """The signature of the thinking block."""
 
 
 class BetaInputJsonEvent(BaseModel):
     type: Literal["input_json"]
 
     partial_json: str
-    """A partial JSON string delta
+    """A partial JSON string delta.
 
     e.g. `'"San Francisco,'`
     """
 
     snapshot: object
     """The currently accumulated parsed object.
-
 
     e.g. `{'location': 'San Francisco, CA'}`
     """
