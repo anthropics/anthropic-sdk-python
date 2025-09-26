@@ -1120,7 +1120,7 @@ class Messages(SyncAPIResource):
             )
 
         extra_headers = {
-            "X-Stainless-Helper": "beta.messages.tool_runner",
+            "X-Stainless-Helper": "BetaToolRunner",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
@@ -2540,7 +2540,7 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         extra_headers = {
-            "X-Stainless-Helper": "beta.messages.tool_runner",
+            "X-Stainless-Helper": "BetaToolRunner",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
