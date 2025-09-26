@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.68.1 (2025-09-26)
+
+Full Changelog: [v0.68.0...v0.68.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.68.0...v0.68.1)
+
+### Chores
+
+* **deps:** move deprecated `dev-dependencies` in `pyproject.toml` to dev group ([df16b88](https://github.com/anthropics/anthropic-sdk-python/commit/df16b88ade25f91c0b2c88d4ae256c861e4db170))
+* do not install brew dependencies in ./scripts/bootstrap by default ([a457673](https://github.com/anthropics/anthropic-sdk-python/commit/a45767347f27258290c572ee5dc3e44c4f314f4b))
+* rename tool runner helper header ([a9ed3f9](https://github.com/anthropics/anthropic-sdk-python/commit/a9ed3f9c80dc1acbf7f487fc6cc3586f690ccd2d))
+* **types:** change optional parameter type from NotGiven to Omit ([9f0a11f](https://github.com/anthropics/anthropic-sdk-python/commit/9f0a11fa6168e5d59f8a5820de5dbe7d5c2137bd))
+* update more NotGiven usage sites ([72ab661](https://github.com/anthropics/anthropic-sdk-python/commit/72ab661827ead771923d229bd142f3b9c1a234e8))
+
 ## 0.68.0 (2025-09-17)
 
 Full Changelog: [v0.67.0...v0.68.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.67.0...v0.68.0)
