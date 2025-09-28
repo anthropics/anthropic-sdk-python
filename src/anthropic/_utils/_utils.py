@@ -295,7 +295,7 @@ def strip_not_given(obj: None) -> None: ...
 
 
 @overload
-def strip_not_given(obj: Mapping[_K, _V | NotGiven]) -> dict[_K, _V]: ...
+def strip_not_given(obj: Mapping[_K, _V | NotGiven | Omit]) -> dict[_K, _V]: ...
 
 
 @overload
@@ -310,7 +310,7 @@ def strip_not_given(obj: object | None) -> object:
     if not is_mapping(obj):
         return obj
 
-    return {key: value for key, value in obj.items() if not isinstance(value, NotGiven)}
+    return {key: value for key, value in obj.items() if not isinstance(value, (NotGiven, Omit))}
 
 
 def coerce_integer(val: str) -> int:
