@@ -44,6 +44,7 @@ from .beta_text_citation_param import BetaTextCitationParam as BetaTextCitationP
 from .beta_message_tokens_count import BetaMessageTokensCount as BetaMessageTokensCount
 from .beta_thinking_block_param import BetaThinkingBlockParam as BetaThinkingBlockParam
 from .beta_tool_use_block_param import BetaToolUseBlockParam as BetaToolUseBlockParam
+from .beta_tool_uses_keep_param import BetaToolUsesKeepParam as BetaToolUsesKeepParam
 from .beta_url_pdf_source_param import BetaURLPDFSourceParam as BetaURLPDFSourceParam
 from .beta_mcp_tool_result_block import BetaMCPToolResultBlock as BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock as BetaServerToolUseBlock
@@ -69,6 +70,7 @@ from .beta_raw_message_delta_event import BetaRawMessageDeltaEvent as BetaRawMes
 from .beta_raw_message_start_event import BetaRawMessageStartEvent as BetaRawMessageStartEvent
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock as BetaRedactedThinkingBlock
 from .beta_tool_result_block_param import BetaToolResultBlockParam as BetaToolResultBlockParam
+from .beta_tool_uses_trigger_param import BetaToolUsesTriggerParam as BetaToolUsesTriggerParam
 from .beta_web_search_result_block import BetaWebSearchResultBlock as BetaWebSearchResultBlock
 from .beta_mcp_tool_use_block_param import BetaMCPToolUseBlockParam as BetaMCPToolUseBlockParam
 from .beta_raw_message_stream_event import BetaRawMessageStreamEvent as BetaRawMessageStreamEvent
@@ -78,13 +80,17 @@ from .beta_base64_image_source_param import BetaBase64ImageSourceParam as BetaBa
 from .beta_search_result_block_param import BetaSearchResultBlockParam as BetaSearchResultBlockParam
 from .beta_content_block_source_param import BetaContentBlockSourceParam as BetaContentBlockSourceParam
 from .beta_file_document_source_param import BetaFileDocumentSourceParam as BetaFileDocumentSourceParam
+from .beta_input_tokens_trigger_param import BetaInputTokensTriggerParam as BetaInputTokensTriggerParam
+from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param as BetaMemoryTool20250818Param
 from .beta_code_execution_output_block import BetaCodeExecutionOutputBlock as BetaCodeExecutionOutputBlock
 from .beta_code_execution_result_block import BetaCodeExecutionResultBlock as BetaCodeExecutionResultBlock
+from .beta_context_management_response import BetaContextManagementResponse as BetaContextManagementResponse
 from .beta_server_tool_use_block_param import BetaServerToolUseBlockParam as BetaServerToolUseBlockParam
 from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock as BetaWebFetchToolResultBlock
 from .beta_citation_char_location_param import BetaCitationCharLocationParam as BetaCitationCharLocationParam
 from .beta_citation_page_location_param import BetaCitationPageLocationParam as BetaCitationPageLocationParam
 from .beta_container_upload_block_param import BetaContainerUploadBlockParam as BetaContainerUploadBlockParam
+from .beta_memory_tool_20250818_command import BetaMemoryTool20250818Command as BetaMemoryTool20250818Command
 from .beta_raw_content_block_stop_event import BetaRawContentBlockStopEvent as BetaRawContentBlockStopEvent
 from .beta_request_document_block_param import BetaRequestDocumentBlockParam as BetaRequestDocumentBlockParam
 from .beta_web_search_tool_result_block import BetaWebSearchToolResultBlock as BetaWebSearchToolResultBlock
@@ -100,6 +106,7 @@ from .beta_thinking_config_disabled_param import BetaThinkingConfigDisabledParam
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param as BetaWebSearchTool20250305Param
 from .beta_citation_content_block_location import BetaCitationContentBlockLocation as BetaCitationContentBlockLocation
 from .beta_citation_search_result_location import BetaCitationSearchResultLocation as BetaCitationSearchResultLocation
+from .beta_context_management_config_param import BetaContextManagementConfigParam as BetaContextManagementConfigParam
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param as BetaToolTextEditor20241022Param
 from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param as BetaToolTextEditor20250124Param
 from .beta_tool_text_editor_20250429_param import BetaToolTextEditor20250429Param as BetaToolTextEditor20250429Param
@@ -117,6 +124,10 @@ from .beta_code_execution_output_block_param import (
 from .beta_code_execution_result_block_param import (
     BetaCodeExecutionResultBlockParam as BetaCodeExecutionResultBlockParam,
 )
+from .beta_input_tokens_clear_at_least_param import BetaInputTokensClearAtLeastParam as BetaInputTokensClearAtLeastParam
+from .beta_memory_tool_20250818_view_command import (
+    BetaMemoryTool20250818ViewCommand as BetaMemoryTool20250818ViewCommand,
+)
 from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam as BetaWebFetchToolResultBlockParam
 from .beta_web_fetch_tool_result_error_block import BetaWebFetchToolResultErrorBlock as BetaWebFetchToolResultErrorBlock
 from .beta_web_search_tool_result_error_code import BetaWebSearchToolResultErrorCode as BetaWebSearchToolResultErrorCode
@@ -131,6 +142,21 @@ from .beta_content_block_source_content_param import (
 )
 from .beta_web_search_tool_result_block_param import (
     BetaWebSearchToolResultBlockParam as BetaWebSearchToolResultBlockParam,
+)
+from .beta_clear_tool_uses_20250919_edit_param import (
+    BetaClearToolUses20250919EditParam as BetaClearToolUses20250919EditParam,
+)
+from .beta_memory_tool_20250818_create_command import (
+    BetaMemoryTool20250818CreateCommand as BetaMemoryTool20250818CreateCommand,
+)
+from .beta_memory_tool_20250818_delete_command import (
+    BetaMemoryTool20250818DeleteCommand as BetaMemoryTool20250818DeleteCommand,
+)
+from .beta_memory_tool_20250818_insert_command import (
+    BetaMemoryTool20250818InsertCommand as BetaMemoryTool20250818InsertCommand,
+)
+from .beta_memory_tool_20250818_rename_command import (
+    BetaMemoryTool20250818RenameCommand as BetaMemoryTool20250818RenameCommand,
 )
 from .beta_request_mcp_tool_result_block_param import (
     BetaRequestMCPToolResultBlockParam as BetaRequestMCPToolResultBlockParam,
@@ -165,6 +191,9 @@ from .beta_bash_code_execution_output_block_param import (
 from .beta_bash_code_execution_result_block_param import (
     BetaBashCodeExecutionResultBlockParam as BetaBashCodeExecutionResultBlockParam,
 )
+from .beta_clear_tool_uses_20250919_edit_response import (
+    BetaClearToolUses20250919EditResponse as BetaClearToolUses20250919EditResponse,
+)
 from .beta_code_execution_tool_result_block_param import (
     BetaCodeExecutionToolResultBlockParam as BetaCodeExecutionToolResultBlockParam,
 )
@@ -179,6 +208,12 @@ from .beta_web_fetch_tool_result_error_block_param import (
 )
 from .beta_code_execution_tool_result_block_content import (
     BetaCodeExecutionToolResultBlockContent as BetaCodeExecutionToolResultBlockContent,
+)
+from .beta_count_tokens_context_management_response import (
+    BetaCountTokensContextManagementResponse as BetaCountTokensContextManagementResponse,
+)
+from .beta_memory_tool_20250818_str_replace_command import (
+    BetaMemoryTool20250818StrReplaceCommand as BetaMemoryTool20250818StrReplaceCommand,
 )
 from .beta_citation_web_search_result_location_param import (
     BetaCitationWebSearchResultLocationParam as BetaCitationWebSearchResultLocationParam,

@@ -8,6 +8,7 @@ from typing_extensions import TypeAlias
 from .beta_tool_param import BetaToolParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
+from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
 from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param
@@ -28,6 +29,7 @@ BetaToolUnionParam: TypeAlias = Union[
     BetaCodeExecutionTool20250522Param,
     BetaCodeExecutionTool20250825Param,
     BetaToolComputerUse20241022Param,
+    BetaMemoryTool20250818Param,
     BetaToolComputerUse20250124Param,
     BetaToolTextEditor20241022Param,
     BetaToolTextEditor20250124Param,
