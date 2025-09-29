@@ -98,7 +98,7 @@ class Files(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -159,7 +159,7 @@ class Files(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -209,7 +209,7 @@ class Files(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -258,7 +258,7 @@ class Files(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -305,7 +305,7 @@ class Files(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -392,7 +392,7 @@ class AsyncFiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -453,7 +453,7 @@ class AsyncFiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -503,7 +503,7 @@ class AsyncFiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -552,7 +552,7 @@ class AsyncFiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -599,7 +599,7 @@ class AsyncFiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["files-api-2025-04-14"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
