@@ -25,7 +25,7 @@ _T = TypeVar("_T")
 #
 # you can update them with
 #
-# `ANTHROPIC_LIVE=1 pytest --inline-snapshot=fix -p no:xdist -o addopts=""`
+# `ANTHROPIC_LIVE=1 ./scripts/test --inline-snapshot=fix -n0`
 
 snapshots = {
     "basic": {
