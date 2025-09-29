@@ -15,6 +15,7 @@ from .beta_text_block_param import BetaTextBlockParam
 from .beta_tool_union_param import BetaToolUnionParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
+from .beta_context_management_config_param import BetaContextManagementConfigParam
 from .beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
 
 __all__ = ["MessageCreateParamsBase", "MessageCreateParamsNonStreaming", "MessageCreateParamsStreaming"]
@@ -108,6 +109,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     container: Optional[str]
     """Container identifier for reuse across requests."""
+
+    context_management: Optional[BetaContextManagementConfigParam]
+    """Configuration for context management operations."""
 
     mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam]
     """MCP servers to be utilized in this request"""

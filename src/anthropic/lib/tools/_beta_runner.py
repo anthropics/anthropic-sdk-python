@@ -22,7 +22,14 @@ import httpx
 from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ...types.beta import BetaMessage, BetaContentBlock, BetaMessageParam
-from ._beta_functions import BetaFunctionTool, BetaAsyncFunctionTool
+from ._beta_functions import (
+    BetaFunctionTool,
+    BetaRunnableTool,
+    BetaAsyncFunctionTool,
+    BetaAsyncRunnableTool,
+    BetaBuiltinFunctionTool,
+    BetaAsyncBuiltinFunctionTool,
+)
 from ..streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 from ...types.beta.message_create_params import MessageCreateParamsBase
 from ...types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
@@ -31,7 +38,12 @@ if TYPE_CHECKING:
     from ..._client import Anthropic, AsyncAnthropic
 
 
-AnyFunctionToolT = TypeVar("AnyFunctionToolT", bound=Union[BetaFunctionTool[Any], BetaAsyncFunctionTool[Any]])
+AnyFunctionToolT = TypeVar(
+    "AnyFunctionToolT",
+    bound=Union[
+        BetaFunctionTool[Any], BetaAsyncFunctionTool[Any], BetaBuiltinFunctionTool, BetaAsyncBuiltinFunctionTool
+    ],
+)
 RunnerItemT = TypeVar("RunnerItemT")
 
 log = logging.getLogger(__name__)
@@ -97,13 +109,13 @@ class BaseToolRunner(Generic[AnyFunctionToolT]):
         return False
 
 
-class BaseSyncToolRunner(BaseToolRunner[BetaFunctionTool[Any]], Generic[RunnerItemT], ABC):
+class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool], Generic[RunnerItemT], ABC):
     def __init__(
         self,
         *,
         params: MessageCreateParamsBase,
         options: RequestOptions,
-        tools: Iterable[BetaFunctionTool[Any]],
+        tools: Iterable[BetaRunnableTool],
         client: Anthropic,
         max_iterations: int | None = None,
     ) -> None:
@@ -250,13 +262,13 @@ class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream]):
                 message = stream.get_final_message()
 
 
-class BaseAsyncToolRunner(BaseToolRunner[BetaAsyncFunctionTool[Any]], Generic[RunnerItemT], ABC):
+class BaseAsyncToolRunner(BaseToolRunner[BetaAsyncRunnableTool], Generic[RunnerItemT], ABC):
     def __init__(
         self,
         *,
         params: MessageCreateParamsBase,
         options: RequestOptions,
-        tools: Iterable[BetaAsyncFunctionTool[Any]],
+        tools: Iterable[BetaAsyncRunnableTool],
         client: AsyncAnthropic,
         max_iterations: int | None = None,
     ) -> None:

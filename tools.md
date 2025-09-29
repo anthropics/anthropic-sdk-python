@@ -54,7 +54,7 @@ message = client.beta.messages.create(
     tools=[get_weather.to_dict()],
     # ...
     max_tokens=1024,
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
     messages=[{"role": "user", "content": "What is 2 + 2?"}],
 )
 ```
@@ -68,7 +68,7 @@ We provide a `client.beta.messages.tool_runner()` method that can automatically 
 ```py
 runner = client.beta.messages.tool_runner(
     max_tokens=1024,
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-5-20250929",
     tools=[sum],
     messages=[{"role": "user", "content": "What is 9 + 10?"}],
 )

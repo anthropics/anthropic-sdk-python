@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Any, List, Union, Iterable, Optional, cast
+from typing import TYPE_CHECKING, List, Union, Iterable, Optional, cast
 from functools import partial
 from itertools import chain
 from typing_extensions import Literal, overload
@@ -26,9 +26,7 @@ from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
 from ....lib.tools import (
     BetaToolRunner,
-    BetaFunctionTool,
     BetaAsyncToolRunner,
-    BetaAsyncFunctionTool,
     BetaStreamingToolRunner,
     BetaAsyncStreamingToolRunner,
 )
@@ -44,6 +42,7 @@ from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamMa
 from ...messages.messages import DEPRECATED_MODELS
 from ....types.model_param import ModelParam
 from ....types.beta.beta_message import BetaMessage
+from ....lib.tools._beta_functions import BetaRunnableTool, BetaAsyncRunnableTool
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_message_param import BetaMessageParam
 from ....types.beta.beta_metadata_param import BetaMetadataParam
@@ -53,6 +52,7 @@ from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
 from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
+from ....types.beta.beta_context_management_config_param import BetaContextManagementConfigParam
 from ....types.beta.beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
 
 if TYPE_CHECKING:
@@ -93,6 +93,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -202,6 +203,8 @@ class Messages(SyncAPIResource):
               details and options.
 
           container: Container identifier for reuse across requests.
+
+          context_management: Configuration for context management operations.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -371,6 +374,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -485,6 +489,8 @@ class Messages(SyncAPIResource):
 
           container: Container identifier for reuse across requests.
 
+          context_management: Configuration for context management operations.
+
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
@@ -648,6 +654,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: bool,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -761,6 +768,8 @@ class Messages(SyncAPIResource):
               details.
 
           container: Container identifier for reuse across requests.
+
+          context_management: Configuration for context management operations.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -924,6 +933,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -968,6 +978,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "container": container,
+                    "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
                     "service_tier": service_tier,
@@ -1000,9 +1011,10 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaFunctionTool[Any]],
+        tools: Iterable[BetaRunnableTool],
         max_iterations: int | Omit = omit,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1030,10 +1042,11 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaFunctionTool[Any]],
+        tools: Iterable[BetaRunnableTool],
         stream: Literal[True],
         max_iterations: int | Omit = omit,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1060,10 +1073,11 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaFunctionTool[Any]],
+        tools: Iterable[BetaRunnableTool],
         stream: bool,
         max_iterations: int | Omit = omit,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1089,9 +1103,10 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaFunctionTool[Any]],
+        tools: Iterable[BetaRunnableTool],
         max_iterations: int | Omit = omit,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1132,6 +1147,7 @@ class Messages(SyncAPIResource):
                 "messages": messages,
                 "model": model,
                 "container": container,
+                "context_management": context_management,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
                 "service_tier": service_tier,
@@ -1179,6 +1195,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1221,6 +1238,7 @@ class Messages(SyncAPIResource):
                     "model": model,
                     "metadata": metadata,
                     "container": container,
+                    "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
@@ -1249,6 +1267,7 @@ class Messages(SyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
@@ -1341,6 +1360,8 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          context_management: Configuration for context management operations.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -1466,6 +1487,7 @@ class Messages(SyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "system": system,
                     "thinking": thinking,
@@ -1513,6 +1535,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1622,6 +1645,8 @@ class AsyncMessages(AsyncAPIResource):
               details and options.
 
           container: Container identifier for reuse across requests.
+
+          context_management: Configuration for context management operations.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -1791,6 +1816,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1905,6 +1931,8 @@ class AsyncMessages(AsyncAPIResource):
 
           container: Container identifier for reuse across requests.
 
+          context_management: Configuration for context management operations.
+
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
@@ -2068,6 +2096,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: bool,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -2181,6 +2210,8 @@ class AsyncMessages(AsyncAPIResource):
               details.
 
           container: Container identifier for reuse across requests.
+
+          context_management: Configuration for context management operations.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -2344,6 +2375,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -2388,6 +2420,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "container": container,
+                    "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
                     "service_tier": service_tier,
@@ -2420,9 +2453,10 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncFunctionTool[Any]],
+        tools: Iterable[BetaAsyncRunnableTool],
         max_iterations: int | Omit = omit,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -2450,10 +2484,11 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncFunctionTool[Any]],
+        tools: Iterable[BetaAsyncRunnableTool],
         stream: Literal[True],
         max_iterations: int | Omit = omit,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -2480,10 +2515,11 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncFunctionTool[Any]],
+        tools: Iterable[BetaAsyncRunnableTool],
         stream: bool,
         max_iterations: int | Omit = omit,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -2509,9 +2545,10 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncFunctionTool[Any]],
+        tools: Iterable[BetaAsyncRunnableTool],
         max_iterations: int | Omit = omit,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -2552,6 +2589,7 @@ class AsyncMessages(AsyncAPIResource):
                 "messages": messages,
                 "model": model,
                 "container": container,
+                "context_management": context_management,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
                 "service_tier": service_tier,
@@ -2600,6 +2638,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         metadata: BetaMetadataParam | Omit = omit,
         container: Optional[str] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2639,6 +2678,7 @@ class AsyncMessages(AsyncAPIResource):
                     "model": model,
                     "metadata": metadata,
                     "container": container,
+                    "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
@@ -2667,6 +2707,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
@@ -2759,6 +2800,8 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          context_management: Configuration for context management operations.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -2884,6 +2927,7 @@ class AsyncMessages(AsyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "system": system,
                     "thinking": thinking,

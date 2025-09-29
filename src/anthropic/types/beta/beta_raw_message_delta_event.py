@@ -7,6 +7,7 @@ from ..._models import BaseModel
 from .beta_container import BetaContainer
 from .beta_stop_reason import BetaStopReason
 from .beta_message_delta_usage import BetaMessageDeltaUsage
+from .beta_context_management_response import BetaContextManagementResponse
 
 __all__ = ["BetaRawMessageDeltaEvent", "Delta"]
 
@@ -24,6 +25,9 @@ class Delta(BaseModel):
 
 
 class BetaRawMessageDeltaEvent(BaseModel):
+    context_management: Optional[BetaContextManagementResponse] = None
+    """Information about context management operations applied during the request."""
+
     delta: Delta
 
     type: Literal["message_delta"]
