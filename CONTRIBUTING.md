@@ -114,7 +114,7 @@ ANTHROPIC_LIVE=1 ./scripts/test --inline-snapshot=fix
 ```
 
 > [!NOTE]
-> Sometimes it makes sense to update only the inline snapshots (--inline-snapshot=fix) without refreshing the HTTP snapshots (ANTHROPIC_LIVE=1).
+> Sometimes it makes sense to update only the inline snapshots `(--inline-snapshot=fix)` without refreshing the HTTP snapshots `(ANTHROPIC_LIVE=1)`.
 > This is useful when the endpoint hasn’t changed, but your code handles the response differently and the assertions need updating.
 
 ## Linting and formatting
