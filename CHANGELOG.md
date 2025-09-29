@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.69.0 (2025-09-29)
+
+Full Changelog: [v0.68.2...v0.69.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.68.2...v0.69.0)
+
+### Features
+
+* **api:** adds support for Claude Sonnet 4.5 and context management features ([f93eb12](https://github.com/anthropics/anthropic-sdk-python/commit/f93eb12dbfeaa68fb24590391ec72243836eb47a))
+
 ## 0.68.2 (2025-09-29)
 
 Full Changelog: [v0.68.1...v0.68.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.68.1...v0.68.2)
