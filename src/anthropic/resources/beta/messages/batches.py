@@ -87,7 +87,7 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -143,7 +143,7 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -205,7 +205,7 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -272,7 +272,7 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -333,7 +333,7 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -397,7 +397,7 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -474,7 +474,7 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -530,7 +530,7 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -592,7 +592,7 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -659,7 +659,7 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -720,7 +720,7 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -784,7 +784,7 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),

@@ -957,7 +957,7 @@ class Messages(SyncAPIResource):
             )
 
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else omit}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
         }
         return self._post(
@@ -1454,7 +1454,7 @@ class Messages(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["token-counting-2024-11-01"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
@@ -2377,7 +2377,7 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else omit}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
         }
         return await self._post(
@@ -2872,7 +2872,7 @@ class AsyncMessages(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["token-counting-2024-11-01"]))
                     if is_given(betas)
-                    else omit
+                    else not_given
                 }
             ),
             **(extra_headers or {}),
