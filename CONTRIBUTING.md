@@ -104,7 +104,8 @@ Some tests use [inline-snapshot](https://15r10nk.github.io/inline-snapshot/lates
 ./scripts/test --inline-snapshot=fix -n0
 ```
 
-> [!NOTE] > `inline-snapshot` is incompatible with [pytest-xdist](https://github.com/pytest-dev/pytest-xdist), so you need to disable parallel execution `(-n0)` when using the `--inline-snapshot` option.
+> [!NOTE]
+> `inline-snapshot` is incompatible with [pytest-xdist](https://github.com/pytest-dev/pytest-xdist), so you need to disable parallel execution `(-n0)` when using the `--inline-snapshot` option.
 
 In addition, some tests capture snapshots of the HTTP requests they make.
 To refresh these snapshots, run the tests with the `ANTHROPIC_LIVE=1` environment variable enabled.
