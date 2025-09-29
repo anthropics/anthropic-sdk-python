@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.68.2 (2025-09-29)
+
+Full Changelog: [v0.68.1...v0.68.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.68.1...v0.68.2)
+
+### Bug Fixes
+
+* do not set headers with default to omit ([95b14ab](https://github.com/anthropics/anthropic-sdk-python/commit/95b14ab8fa8b63b95cb82cad1347915c163818d2))
+
 ## 0.68.1 (2025-09-26)
 
 Full Changelog: [v0.68.0...v0.68.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.68.0...v0.68.1)
