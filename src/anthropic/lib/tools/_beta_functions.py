@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from abc import ABC, abstractmethod
 from typing import Any, Union, Generic, TypeVar, Callable, Iterable, Coroutine, cast, overload
 from inspect import iscoroutinefunction
 from typing_extensions import TypeAlias, override
@@ -13,6 +14,7 @@ from ... import _compat
 from ..._utils import is_dict
 from ..._compat import cached_property
 from ..._models import TypeAdapter
+from ...types.beta import BetaToolUnionParam
 from ..._utils._utils import CallableT
 from ...types.tool_param import ToolParam, InputSchema
 from ...types.beta.beta_tool_result_block_param import Content as BetaContent
@@ -26,6 +28,30 @@ FunctionT = TypeVar("FunctionT", bound=Function)
 
 AsyncFunction = Callable[..., Coroutine[Any, Any, BetaFunctionToolResultType]]
 AsyncFunctionT = TypeVar("AsyncFunctionT", bound=AsyncFunction)
+
+
+class BetaBuiltinFunctionTool(ABC):
+    @abstractmethod
+    def to_dict(self) -> BetaToolUnionParam: ...
+
+    @abstractmethod
+    def call(self, input: object) -> BetaFunctionToolResultType: ...
+
+    @property
+    def name(self) -> str:
+        return self.to_dict()["name"]
+
+
+class BetaAsyncBuiltinFunctionTool(ABC):
+    @abstractmethod
+    def to_dict(self) -> BetaToolUnionParam: ...
+
+    @abstractmethod
+    async def call(self, input: object) -> BetaFunctionToolResultType: ...
+
+    @property
+    def name(self) -> str:
+        return self.to_dict()["name"]
 
 
 class BaseFunctionTool(Generic[CallableT]):
@@ -287,3 +313,7 @@ def beta_async_tool(
         )
 
     return decorator
+
+
+BetaRunnableTool = Union[BetaFunctionTool[Any], BetaBuiltinFunctionTool]
+BetaAsyncRunnableTool = Union[BetaAsyncFunctionTool[Any], BetaAsyncBuiltinFunctionTool]

@@ -486,6 +486,7 @@ def accumulate_event(
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
         current_snapshot.usage.output_tokens = event.usage.output_tokens
+        current_snapshot.context_management = event.context_management
 
         # Update other usage fields if they exist in the event
         if event.usage.input_tokens is not None:

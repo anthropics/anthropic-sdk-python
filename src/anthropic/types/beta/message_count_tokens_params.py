@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Union, Iterable
+from typing import List, Union, Iterable, Optional
 from typing_extensions import Required, Annotated, TypeAlias, TypedDict
 
 from ..._utils import PropertyInfo
@@ -15,8 +15,10 @@ from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
+from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
 from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
+from .beta_context_management_config_param import BetaContextManagementConfigParam
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param
 from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param
 from .beta_tool_text_editor_20250429_param import BetaToolTextEditor20250429Param
@@ -105,6 +107,9 @@ class MessageCountTokensParams(TypedDict, total=False):
     [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
+
+    context_management: Optional[BetaContextManagementConfigParam]
+    """Configuration for context management operations."""
 
     mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam]
     """MCP servers to be utilized in this request"""
@@ -225,6 +230,7 @@ Tool: TypeAlias = Union[
     BetaCodeExecutionTool20250522Param,
     BetaCodeExecutionTool20250825Param,
     BetaToolComputerUse20241022Param,
+    BetaMemoryTool20250818Param,
     BetaToolComputerUse20250124Param,
     BetaToolTextEditor20241022Param,
     BetaToolTextEditor20250124Param,

@@ -38,7 +38,7 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
 )
 print(message.content)
 ```
@@ -71,7 +71,7 @@ async def main() -> None:
                 "content": "Hello, Claude",
             }
         ],
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-5-20250929",
     )
     print(message.content)
 
@@ -113,7 +113,7 @@ async def main() -> None:
                     "content": "Hello, Claude",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
         )
         print(message.content)
 
@@ -138,7 +138,7 @@ stream = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
     stream=True,
 )
 for event in stream:
@@ -160,7 +160,7 @@ stream = await client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
     stream=True,
 )
 async for event in stream:
@@ -202,7 +202,7 @@ def get_weather(location: str) -> str:
 
 runner = client.beta.messages.tool_runner(
     max_tokens=1024,
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
     tools=[get_weather],
     messages=[
         {"role": "user", "content": "What is the weather in SF?"},
@@ -235,7 +235,7 @@ async def main() -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-5-20250929",
     ) as stream:
         async for text in stream.text_stream:
             print(text, end="", flush=True)
@@ -257,7 +257,7 @@ To get the token count for a message without creating it you can use the `client
 
 ```py
 count = client.messages.count_tokens(
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
     messages=[
         {"role": "user", "content": "Hello, world"}
     ]
@@ -287,7 +287,7 @@ await client.messages.batches.create(
         {
             "custom_id": "my-first-request",
             "params": {
-                "model": "claude-sonnet-4-20250514",
+                "model": "claude-sonnet-4-5-20250929",
                 "max_tokens": 1024,
                 "messages": [{"role": "user", "content": "Hello, world"}],
             },
@@ -295,7 +295,7 @@ await client.messages.batches.create(
         {
             "custom_id": "my-second-request",
             "params": {
-                "model": "claude-sonnet-4-20250514",
+                "model": "claude-sonnet-4-5-20250929",
                 "max_tokens": 1024,
                 "messages": [{"role": "user", "content": "Hi again, friend"}],
             },
@@ -338,7 +338,7 @@ message = client.messages.create(
             "content": "Hello!",
         }
     ],
-    model="anthropic.claude-sonnet-4-20250514-v1:0",
+    model="anthropic.claude-sonnet-4-5-20250929-v1:0",
 )
 print(message)
 ```
@@ -480,7 +480,7 @@ message = client.messages.create(
             "role": "user",
         }
     ],
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
     metadata={},
 )
 print(message.metadata)
@@ -527,7 +527,7 @@ try:
                 "content": "Hello, Claude",
             }
         ],
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-5-20250929",
     )
 except anthropic.APIConnectionError as e:
     print("The server could not be reached")
@@ -568,7 +568,7 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
 )
 print(message._request_id)  # req_018EeWyXxfu5pfWkrYcMdjWG
 ```
@@ -603,7 +603,7 @@ client.with_options(max_retries=5).messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
 )
 ```
 
@@ -635,7 +635,7 @@ client.with_options(timeout=5.0).messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
 )
 ```
 
@@ -718,7 +718,7 @@ response = client.messages.with_raw_response.create(
         "role": "user",
         "content": "Hello, Claude",
     }],
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
 )
 print(response.headers.get('X-My-Header'))
 
@@ -752,7 +752,7 @@ with client.messages.with_streaming_response.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
 ) as response:
     print(response.headers.get("X-My-Header"))
 

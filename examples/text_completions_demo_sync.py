@@ -8,7 +8,7 @@ def main() -> None:
     client = Anthropic()
 
     res = client.completions.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-5-20250929",
         prompt=f"{anthropic.HUMAN_PROMPT} how does a court case get to the Supreme Court? {anthropic.AI_PROMPT}",
         max_tokens_to_sample=1000,
     )

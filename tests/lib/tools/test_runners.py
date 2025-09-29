@@ -31,12 +31,11 @@ snapshots = {
     "basic": {
         "responses": snapshot(
             [
-                '{"id": "msg_011VcyTSZL4mKtyjRLHBuqA5", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "I\'ll help you check the weather in San Francisco. I\'ll use the get_weather function, and I\'ll show you the temperature in both Celsius and Fahrenheit for completeness."}, {"type": "tool_use", "id": "toolu_013nheddwxiFJt4C4Q8eGUXJ", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "c"}}, {"type": "tool_use", "id": "toolu_01Vg4JstpLEp3JiQadw9aTU1", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "f"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 473, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 169, "service_tier": "standard"}}',
-                '{"id": "msg_0151Rxp5cbUKiA6TJbEoG1U1", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "The weather in San Francisco is currently sunny with a temperature of 20\\u00b0C (68\\u00b0F)."}], "stop_reason": "end_turn", "stop_sequence": null, "usage": {"input_tokens": 760, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 25, "service_tier": "standard"}}',
+                '{"id": "msg_01Lf1uRSXq1sB9df6EigSkXA", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "I\'ll help you check the weather in San Francisco. I\'ll use the get_weather function, and I\'ll show you the temperature in both Celsius and Fahrenheit for completeness."}, {"type": "tool_use", "id": "toolu_013bzsyqF4LyvJj6CF5gYCEn", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "c"}}, {"type": "tool_use", "id": "toolu_01Ugb5BSmDUth8vbdkUsNYrs", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "f"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 473, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 169, "service_tier": "standard"}}',
+                '{"id": "msg_01SUujjdE6BMF3CYWCTR4vHF", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "The weather in San Francisco is currently sunny with a temperature of 20\\u00b0C (68\\u00b0F)."}], "stop_reason": "end_turn", "stop_sequence": null, "usage": {"input_tokens": 760, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 25, "service_tier": "standard"}}',
             ]
         ),
-        "result": snapshot(
-            """\
+        "result": snapshot("""\
 BetaMessage(
     container=None,
     content=[
@@ -46,7 +45,8 @@ BetaMessage(
             type='text'
         )
     ],
-    id='msg_0151Rxp5cbUKiA6TJbEoG1U1',
+    context_management=None,
+    id='msg_01SUujjdE6BMF3CYWCTR4vHF',
     model='claude-3-5-sonnet-20241022',
     role='assistant',
     stop_reason='end_turn',
@@ -62,14 +62,13 @@ BetaMessage(
         service_tier='standard'
     )
 )
-"""
-        ),
+"""),
     },
     "custom": {
         "responses": snapshot(
             [
-                '{"id": "msg_01Xabmr29SxRofCJKx6dShd1", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "I\'ll help you check the weather in San Francisco. Since you want it in Celsius, I\'ll use \'c\' for the units."}, {"type": "tool_use", "id": "toolu_01TndJ8oicsz1CBQvnKa6XYM", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "c"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 476, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 104, "service_tier": "standard"}}',
-                '{"id": "msg_01JyRBYxoqpZHJh5tanTRPqU", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "The weather in San Francisco is currently 20\\u00b0C and it\'s Sunny."}], "stop_reason": "end_turn", "stop_sequence": null, "usage": {"input_tokens": 619, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 21, "service_tier": "standard"}}',
+                '{"id": "msg_01QebvpjSMHnjRVYDQpthDCM", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "I\'ll help you check the weather in San Francisco using the get_weather function. Since you want it in Celsius, I\'ll use \'c\' for the units."}, {"type": "tool_use", "id": "toolu_01W8QFaZz5X8w6UezBfvJaHG", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "c"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 476, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 110, "service_tier": "standard"}}',
+                '{"id": "msg_01GQD2QBjkCMtD8rEfbF7J7y", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "The weather in San Francisco is currently 20\\u00b0C and it\'s sunny."}], "stop_reason": "end_turn", "stop_sequence": null, "usage": {"input_tokens": 625, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 20, "service_tier": "standard"}}',
             ]
         ),
         "result": snapshot("""\
@@ -78,11 +77,12 @@ BetaMessage(
     content=[
         BetaTextBlock(
             citations=None,
-            text="The weather in San Francisco is currently 20°C and it's Sunny.",
+            text="The weather in San Francisco is currently 20°C and it's sunny.",
             type='text'
         )
     ],
-    id='msg_01JyRBYxoqpZHJh5tanTRPqU',
+    context_management=None,
+    id='msg_01GQD2QBjkCMtD8rEfbF7J7y',
     model='claude-3-5-sonnet-20241022',
     role='assistant',
     stop_reason='end_turn',
@@ -92,8 +92,8 @@ BetaMessage(
         cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0),
         cache_creation_input_tokens=0,
         cache_read_input_tokens=0,
-        input_tokens=619,
-        output_tokens=21,
+        input_tokens=625,
+        output_tokens=20,
         server_tool_use=None,
         service_tier='standard'
     )
@@ -107,6 +107,7 @@ BetaMessage(
     content=[
         BetaTextBlock(citations=None, text='The weather in San Francisco is currently 68°F and sunny.', type='text')
     ],
+    context_management=None,
     id='msg_01FtWrpBLsm99NpQCoFrhuf9',
     model='claude-3-5-sonnet-20241022',
     role='assistant',
@@ -128,16 +129,16 @@ BetaMessage(
     "tool_call": {
         "responses": snapshot(
             [
-                '{"id": "msg_01N73bKQGcVyRtRFmYKS3nF7", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "I\'ll help you check the weather in San Francisco using Celsius units."}, {"type": "tool_use", "id": "toolu_01KBWEMjDHXQMrtG3Mb4ifsr", "name": "get_weather", "input": {"location": "SF", "units": "c"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 414, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 86, "service_tier": "standard"}}',
-                '{"id": "msg_01LYmChWYohv9p2EbNojAQUD", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "The weather in San Francisco is currently 20\\u00b0C and it\'s sunny."}], "stop_reason": "end_turn", "stop_sequence": null, "usage": {"input_tokens": 536, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 20, "service_tier": "standard"}}',
+                '{"id": "msg_01CcxTJKA7URvATmjs9yemNw", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "I\'ll help you check the weather in San Francisco using Celsius units."}, {"type": "tool_use", "id": "toolu_01X4rAg6afq9WTkdXDwNdo9g", "name": "get_weather", "input": {"location": "SF", "units": "c"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 414, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 86, "service_tier": "standard"}}',
+                '{"id": "msg_01Hswpqi8rjN9k6Erfof4NML", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "The weather in San Francisco is currently 20\\u00b0C and it\'s sunny."}], "stop_reason": "end_turn", "stop_sequence": null, "usage": {"input_tokens": 536, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 20, "service_tier": "standard"}}',
             ]
         ),
     },
     "tool_call_error": {
         "responses": snapshot(
             [
-                '{"id": "msg_014RTukBtZkatJqx6AQNJmz5", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "I\'ll help you check the weather in San Francisco. Since the temperature unit wasn\'t specified, I\'ll show it in both Celsius and Fahrenheit."}, {"type": "tool_use", "id": "toolu_01Eqm7dFsQRKLFSSecctffe1", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "c"}}, {"type": "tool_use", "id": "toolu_01E7AD7aA4uR7cRk3kWs4oxa", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "f"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 473, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 162, "service_tier": "standard"}}',
-                '{"id": "msg_011W15YiUj9QAvCEQ1gDYCKB", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "The weather in San Francisco, CA is currently sunny with a temperature of 68\\u00b0F (the Celsius reading encountered an error, but you can see the Fahrenheit temperature)."}], "stop_reason": "end_turn", "stop_sequence": null, "usage": {"input_tokens": 735, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 41, "service_tier": "standard"}}',
+                '{"id": "msg_01UCU1h4ayreA2Ridzbpk5ut", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "I\'ll help you check the weather in San Francisco. Since the location format should include the state, I\'ll use \\"San Francisco, CA\\". I\'ll provide the temperature in both Celsius and Fahrenheit for completeness."}, {"type": "tool_use", "id": "toolu_01ECouLXJaT6yocMNDstufPc", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "c"}}, {"type": "tool_use", "id": "toolu_01FHQTcVXvPoLL3bzxsAUtJJ", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "f"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 473, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 176, "service_tier": "standard"}}',
+                '{"id": "msg_01PYwhqAdduuZYymTokQ4JQU", "type": "message", "role": "assistant", "model": "claude-3-5-sonnet-20241022", "content": [{"type": "text", "text": "The weather in San Francisco, CA is currently sunny with a temperature of 68\\u00b0F."}], "stop_reason": "end_turn", "stop_sequence": null, "usage": {"input_tokens": 749, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 23, "service_tier": "standard"}}',
             ]
         )
     },
@@ -241,13 +242,13 @@ class TestSyncRunTools:
         'content': [
             {
                 'type': 'tool_result',
-                'tool_use_id': 'toolu_01Eqm7dFsQRKLFSSecctffe1',
+                'tool_use_id': 'toolu_01ECouLXJaT6yocMNDstufPc',
                 'content': "RuntimeError('Unexpected error, try again')",
                 'is_error': True
             },
             {
                 'type': 'tool_result',
-                'tool_use_id': 'toolu_01E7AD7aA4uR7cRk3kWs4oxa',
+                'tool_use_id': 'toolu_01FHQTcVXvPoLL3bzxsAUtJJ',
                 'content': '{"location": "San Francisco, CA", "temperature": "68\\\\u00b0F", "condition": "Sunny"}'
             }
         ]
@@ -423,7 +424,7 @@ class TestSyncRunTools:
 
         answers = make_snapshot_request(
             get_weather_answers,
-            content_snapshot=snapshot(external("uuid:d105e140-a30c-4d6b-91df-257247da3623.json")),
+            content_snapshot=snapshot(external("uuid:ef758469-6fa6-454c-b2e6-19d0b450a8c5.json")),
             path="/v1/messages",
             mock_client=client,
             respx_mock=respx_mock,
@@ -436,8 +437,8 @@ class TestSyncRunTools:
         'content': [
             {
                 'type': 'tool_result',
-                'tool_use_id': 'toolu_01PeNQ4nbMcyDpCGiuKSfkMM',
-                'content': '{"location": "San Francisco, CA", "temperature": "20\\\\u00b0C", "condition": "Sunny"}'
+                'tool_use_id': 'toolu_01GiQJzt5d2ThB4fSUsRCSML',
+                'content': '{"location": "San Francisco, CA", "temperature": "68\\\\u00b0F", "condition": "Sunny"}'
             }
         ]
     },
@@ -446,8 +447,8 @@ class TestSyncRunTools:
         'content': [
             {
                 'type': 'tool_result',
-                'tool_use_id': 'toolu_01WcZvizPr9EybXFMyGXRxYA',
-                'content': '{"location": "New York, NY", "temperature": "20\\\\u00b0C", "condition": "Sunny"}'
+                'tool_use_id': 'toolu_015yzRQ92SwYGz5Veoq7A3P7',
+                'content': '{"location": "New York, NY", "temperature": "68\\\\u00b0F", "condition": "Sunny"}'
             }
         ]
     }
