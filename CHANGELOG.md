@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.69.1 (2025-10-04)
+
+Full Changelog: [v0.69.0...v0.69.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.69.0...v0.69.1)
+
+### Chores
+
+* **client:** add context-management-2025-06-27 beta header ([36dd334](https://github.com/anthropics/anthropic-sdk-python/commit/36dd3346b1460f003270888693fbc82dba16dc62))
+* **client:** add model-context-window-exceeded-2025-08-26 beta header ([2cbdb0f](https://github.com/anthropics/anthropic-sdk-python/commit/2cbdb0ff6342550def540ce6081af78823f9e60b))
+
 ## 0.69.0 (2025-09-29)
 
 Full Changelog: [v0.68.2...v0.69.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.68.2...v0.69.0)
