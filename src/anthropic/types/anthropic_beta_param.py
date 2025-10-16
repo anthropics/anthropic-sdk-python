@@ -27,5 +27,6 @@ AnthropicBetaParam: TypeAlias = Union[
         "context-1m-2025-08-07",
         "context-management-2025-06-27",
         "model-context-window-exceeded-2025-08-26",
+        "skills-2025-10-02",
     ],
 ]

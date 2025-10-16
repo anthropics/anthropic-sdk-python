@@ -264,7 +264,7 @@ message = client.messages.create(
             "role": "user",
         }
     ],
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-5-20250929",
     metadata={},
 )
 print(message.metadata)

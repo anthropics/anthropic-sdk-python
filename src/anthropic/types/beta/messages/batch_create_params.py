@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable, Optional
-from typing_extensions import Literal, Required, Annotated, TypedDict
+from typing_extensions import Literal, Required, Annotated, TypeAlias, TypedDict
 
 from ...._types import SequenceNotStr
 from ...._utils import PropertyInfo
@@ -11,6 +11,7 @@ from ...model_param import ModelParam
 from ..beta_message_param import BetaMessageParam
 from ..beta_metadata_param import BetaMetadataParam
 from ...anthropic_beta_param import AnthropicBetaParam
+from ..beta_container_params import BetaContainerParams
 from ..beta_text_block_param import BetaTextBlockParam
 from ..beta_tool_union_param import BetaToolUnionParam
 from ..beta_tool_choice_param import BetaToolChoiceParam
@@ -18,7 +19,7 @@ from ..beta_thinking_config_param import BetaThinkingConfigParam
 from ..beta_context_management_config_param import BetaContextManagementConfigParam
 from ..beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
 
-__all__ = ["BatchCreateParams", "Request", "RequestParams"]
+__all__ = ["BatchCreateParams", "Request", "RequestParams", "RequestParamsContainer"]
 
 
 class BatchCreateParams(TypedDict, total=False):
@@ -32,6 +33,9 @@ class BatchCreateParams(TypedDict, total=False):
     """Optional header to specify the beta version(s) you want to use."""
 
 
+RequestParamsContainer: TypeAlias = Union[BetaContainerParams, str]
+
+
 class RequestParams(TypedDict, total=False):
     max_tokens: Required[int]
     """The maximum number of tokens to generate before stopping.
@@ -40,7 +44,7 @@ class RequestParams(TypedDict, total=False):
     only specifies the absolute maximum number of tokens to generate.
 
     Different models have different maximum values for this parameter. See
-    [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+    [models](https://docs.claude.com/en/docs/models-overview) for details.
     """
 
     messages: Required[Iterable[BetaMessageParam]]
@@ -101,12 +105,12 @@ class RequestParams(TypedDict, total=False):
     { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
     ```
 
-    See [input examples](https://docs.anthropic.com/en/api/messages-examples).
+    See [input examples](https://docs.claude.com/en/api/messages-examples).
 
     Note that if you want to include a
-    [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-    the top-level `system` parameter — there is no `"system"` role for input
-    messages in the Messages API.
+    [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+    top-level `system` parameter — there is no `"system"` role for input messages in
+    the Messages API.
 
     There is a limit of 100,000 messages in a single request.
     """
@@ -118,11 +122,15 @@ class RequestParams(TypedDict, total=False):
     details and options.
     """
 
-    container: Optional[str]
+    container: Optional[RequestParamsContainer]
     """Container identifier for reuse across requests."""
 
     context_management: Optional[BetaContextManagementConfigParam]
-    """Configuration for context management operations."""
+    """Context management configuration.
+
+    This allows you to control how Claude manages context across multiple requests,
+    such as whether to clear function results or not.
+    """
 
     mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam]
     """MCP servers to be utilized in this request"""
@@ -136,7 +144,7 @@ class RequestParams(TypedDict, total=False):
     for this request.
 
     Anthropic offers different levels of service for your API requests. See
-    [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
+    [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
     """
 
     stop_sequences: SequenceNotStr[str]
@@ -154,8 +162,7 @@ class RequestParams(TypedDict, total=False):
     stream: bool
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-    details.
+    See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
     """
 
     system: Union[str, Iterable[BetaTextBlockParam]]
@@ -163,7 +170,7 @@ class RequestParams(TypedDict, total=False):
 
     A system prompt is a way of providing context and instructions to Claude, such
     as specifying a particular goal or role. See our
-    [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+    [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
     """
 
     temperature: float
@@ -185,7 +192,7 @@ class RequestParams(TypedDict, total=False):
     tokens and counts towards your `max_tokens` limit.
 
     See
-    [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+    [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
     for details.
     """
 
@@ -206,9 +213,9 @@ class RequestParams(TypedDict, total=False):
 
     There are two types of tools: **client tools** and **server tools**. The
     behavior described below applies to client tools. For
-    [server tools](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+    [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
     see their individual documentation as each has its own behavior (e.g., the
-    [web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+    [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
     Each tool definition includes:
 
@@ -271,7 +278,7 @@ class RequestParams(TypedDict, total=False):
     functions, or more generally whenever you want the model to produce a particular
     JSON structure of output.
 
-    See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+    See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
     """
 
     top_k: int

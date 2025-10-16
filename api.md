@@ -242,6 +242,7 @@ from anthropic.types.beta import (
     BetaCodeExecutionToolResultErrorCode,
     BetaCodeExecutionToolResultErrorParam,
     BetaContainer,
+    BetaContainerParams,
     BetaContainerUploadBlock,
     BetaContainerUploadBlockParam,
     BetaContentBlock,
@@ -294,6 +295,8 @@ from anthropic.types.beta import (
     BetaServerToolUseBlock,
     BetaServerToolUseBlockParam,
     BetaSignatureDelta,
+    BetaSkill,
+    BetaSkillParams,
     BetaStopReason,
     BetaTextBlock,
     BetaTextBlockParam,
@@ -408,3 +411,43 @@ Methods:
 - <code title="get /v1/files/{file_id}/content?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">download</a>(file_id) -> BinaryAPIResponse</code>
 - <code title="get /v1/files/{file_id}?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">retrieve_metadata</a>(file_id) -> <a href="./src/anthropic/types/beta/file_metadata.py">FileMetadata</a></code>
 - <code title="post /v1/files?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">upload</a>(\*\*<a href="src/anthropic/types/beta/file_upload_params.py">params</a>) -> <a href="./src/anthropic/types/beta/file_metadata.py">FileMetadata</a></code>
+
+## Skills
+
+Types:
+
+```python
+from anthropic.types.beta import (
+    SkillCreateResponse,
+    SkillRetrieveResponse,
+    SkillListResponse,
+    SkillDeleteResponse,
+)
+```
+
+Methods:
+
+- <code title="post /v1/skills?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">create</a>(\*\*<a href="src/anthropic/types/beta/skill_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skill_create_response.py">SkillCreateResponse</a></code>
+- <code title="get /v1/skills/{skill_id}?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">retrieve</a>(skill_id) -> <a href="./src/anthropic/types/beta/skill_retrieve_response.py">SkillRetrieveResponse</a></code>
+- <code title="get /v1/skills?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">list</a>(\*\*<a href="src/anthropic/types/beta/skill_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skill_list_response.py">SyncPageCursor[SkillListResponse]</a></code>
+- <code title="delete /v1/skills/{skill_id}?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">delete</a>(skill_id) -> <a href="./src/anthropic/types/beta/skill_delete_response.py">SkillDeleteResponse</a></code>
+
+### Versions
+
+Types:
+
+```python
+from anthropic.types.beta.skills import (
+    VersionCreateResponse,
+    VersionRetrieveResponse,
+    VersionListResponse,
+    VersionDeleteResponse,
+)
+```
+
+Methods:
+
+- <code title="post /v1/skills/{skill_id}/versions?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">create</a>(skill_id, \*\*<a href="src/anthropic/types/beta/skills/version_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skills/version_create_response.py">VersionCreateResponse</a></code>
+- <code title="get /v1/skills/{skill_id}/versions/{version}?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">retrieve</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/beta/skills/version_retrieve_response.py">VersionRetrieveResponse</a></code>
+- <code title="get /v1/skills/{skill_id}/versions?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">list</a>(skill_id, \*\*<a href="src/anthropic/types/beta/skills/version_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skills/version_list_response.py">SyncPageCursor[VersionListResponse]</a></code>
+- <code title="delete /v1/skills/{skill_id}/versions/{version}?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">delete</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/beta/skills/version_delete_response.py">VersionDeleteResponse</a></code>
