@@ -92,7 +92,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -130,7 +130,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -189,12 +189,12 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -204,7 +204,10 @@ class Messages(SyncAPIResource):
 
           container: Container identifier for reuse across requests.
 
-          context_management: Configuration for context management operations.
+          context_management: Context management configuration.
+
+              This allows you to control how Claude manages context across multiple requests,
+              such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -214,7 +217,7 @@ class Messages(SyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -228,14 +231,13 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           system: System prompt.
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -253,7 +255,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -268,9 +270,9 @@ class Messages(SyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -333,7 +335,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -373,7 +375,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -410,7 +412,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -469,12 +471,12 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -484,12 +486,14 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           container: Container identifier for reuse across requests.
 
-          context_management: Configuration for context management operations.
+          context_management: Context management configuration.
+
+              This allows you to control how Claude manages context across multiple requests,
+              such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -499,7 +503,7 @@ class Messages(SyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -515,7 +519,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -533,7 +537,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -548,9 +552,9 @@ class Messages(SyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -613,7 +617,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -653,7 +657,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -690,7 +694,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -749,12 +753,12 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -764,12 +768,14 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           container: Container identifier for reuse across requests.
 
-          context_management: Configuration for context management operations.
+          context_management: Context management configuration.
+
+              This allows you to control how Claude manages context across multiple requests,
+              such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -779,7 +785,7 @@ class Messages(SyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -795,7 +801,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -813,7 +819,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -828,9 +834,9 @@ class Messages(SyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -893,7 +899,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -932,7 +938,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1013,7 +1019,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         tools: Iterable[BetaRunnableTool],
         max_iterations: int | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1045,7 +1051,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaRunnableTool],
         stream: Literal[True],
         max_iterations: int | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1076,7 +1082,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaRunnableTool],
         stream: bool,
         max_iterations: int | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1105,7 +1111,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         tools: Iterable[BetaRunnableTool],
         max_iterations: int | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1194,7 +1200,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1348,12 +1354,12 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -1361,7 +1367,10 @@ class Messages(SyncAPIResource):
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          context_management: Configuration for context management operations.
+          context_management: Context management configuration.
+
+              This allows you to control how Claude manages context across multiple requests,
+              such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -1369,7 +1378,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           thinking: Configuration for enabling Claude's extended thinking.
 
@@ -1378,7 +1387,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -1393,9 +1402,9 @@ class Messages(SyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -1458,7 +1467,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -1534,7 +1543,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1572,7 +1581,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -1631,12 +1640,12 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -1646,7 +1655,10 @@ class AsyncMessages(AsyncAPIResource):
 
           container: Container identifier for reuse across requests.
 
-          context_management: Configuration for context management operations.
+          context_management: Context management configuration.
+
+              This allows you to control how Claude manages context across multiple requests,
+              such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -1656,7 +1668,7 @@ class AsyncMessages(AsyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1670,14 +1682,13 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           system: System prompt.
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -1695,7 +1706,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -1710,9 +1721,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -1775,7 +1786,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -1815,7 +1826,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1852,7 +1863,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -1911,12 +1922,12 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -1926,12 +1937,14 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           container: Container identifier for reuse across requests.
 
-          context_management: Configuration for context management operations.
+          context_management: Context management configuration.
+
+              This allows you to control how Claude manages context across multiple requests,
+              such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -1941,7 +1954,7 @@ class AsyncMessages(AsyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1957,7 +1970,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -1975,7 +1988,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -1990,9 +2003,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -2055,7 +2068,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -2095,7 +2108,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2132,7 +2145,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -2191,12 +2204,12 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -2206,12 +2219,14 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           container: Container identifier for reuse across requests.
 
-          context_management: Configuration for context management operations.
+          context_management: Context management configuration.
+
+              This allows you to control how Claude manages context across multiple requests,
+              such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -2221,7 +2236,7 @@ class AsyncMessages(AsyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.anthropic.com/en/api/service-tiers) for details.
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2237,7 +2252,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -2255,7 +2270,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -2270,9 +2285,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -2335,7 +2350,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -2374,7 +2389,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2455,7 +2470,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool],
         max_iterations: int | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2487,7 +2502,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaAsyncRunnableTool],
         stream: Literal[True],
         max_iterations: int | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2518,7 +2533,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaAsyncRunnableTool],
         stream: bool,
         max_iterations: int | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2547,7 +2562,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool],
         max_iterations: int | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2637,7 +2652,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         metadata: BetaMetadataParam | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -2788,12 +2803,12 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.anthropic.com/en/api/messages-examples).
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -2801,7 +2816,10 @@ class AsyncMessages(AsyncAPIResource):
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          context_management: Configuration for context management operations.
+          context_management: Context management configuration.
+
+              This allows you to control how Claude manages context across multiple requests,
+              such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -2809,7 +2827,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           thinking: Configuration for enabling Claude's extended thinking.
 
@@ -2818,7 +2836,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -2833,9 +2851,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -2898,7 +2916,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

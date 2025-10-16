@@ -48,10 +48,9 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     "\n\nHuman: {userQuestion}\n\nAssistant:"
     ```
 
-    See [prompt validation](https://docs.anthropic.com/en/api/prompt-validation) and
-    our guide to
-    [prompt design](https://docs.anthropic.com/en/docs/intro-to-prompting) for more
-    details.
+    See [prompt validation](https://docs.claude.com/en/api/prompt-validation) and
+    our guide to [prompt design](https://docs.claude.com/en/docs/intro-to-prompting)
+    for more details.
     """
 
     metadata: MetadataParam
@@ -110,7 +109,7 @@ class CompletionCreateParamsNonStreaming(CompletionCreateParamsBase, total=False
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.anthropic.com/en/api/streaming) for details.
+    See [streaming](https://docs.claude.com/en/api/streaming) for details.
     """
 
 
@@ -118,7 +117,7 @@ class CompletionCreateParamsStreaming(CompletionCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.anthropic.com/en/api/streaming) for details.
+    See [streaming](https://docs.claude.com/en/api/streaming) for details.
     """
 
 

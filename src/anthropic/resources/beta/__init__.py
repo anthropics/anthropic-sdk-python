@@ -24,6 +24,14 @@ from .models import (
     ModelsWithStreamingResponse,
     AsyncModelsWithStreamingResponse,
 )
+from .skills import (
+    Skills,
+    AsyncSkills,
+    SkillsWithRawResponse,
+    AsyncSkillsWithRawResponse,
+    SkillsWithStreamingResponse,
+    AsyncSkillsWithStreamingResponse,
+)
 from .messages import (
     Messages,
     AsyncMessages,
@@ -52,6 +60,12 @@ __all__ = [
     "AsyncFilesWithRawResponse",
     "FilesWithStreamingResponse",
     "AsyncFilesWithStreamingResponse",
+    "Skills",
+    "AsyncSkills",
+    "SkillsWithRawResponse",
+    "AsyncSkillsWithRawResponse",
+    "SkillsWithStreamingResponse",
+    "AsyncSkillsWithStreamingResponse",
     "Beta",
     "AsyncBeta",
     "BetaWithRawResponse",

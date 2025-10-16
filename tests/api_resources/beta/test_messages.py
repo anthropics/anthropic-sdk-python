@@ -31,7 +31,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -46,8 +46,17 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
-            container="container",
+            model="claude-sonnet-4-5-20250929",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "x",
+                        "type": "anthropic",
+                        "version": "x",
+                    }
+                ],
+            },
             context_management={
                 "edits": [
                     {
@@ -156,7 +165,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
         )
 
         assert response.is_closed is True
@@ -175,7 +184,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -196,7 +205,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         )
         message_stream.response.close()
@@ -212,9 +221,18 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
-            container="container",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "x",
+                        "type": "anthropic",
+                        "version": "x",
+                    }
+                ],
+            },
             context_management={
                 "edits": [
                     {
@@ -322,7 +340,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         )
 
@@ -341,7 +359,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -522,7 +540,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -537,8 +555,17 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
-            container="container",
+            model="claude-sonnet-4-5-20250929",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "x",
+                        "type": "anthropic",
+                        "version": "x",
+                    }
+                ],
+            },
             context_management={
                 "edits": [
                     {
@@ -647,7 +674,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
         )
 
         assert response.is_closed is True
@@ -666,7 +693,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -687,7 +714,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         )
         await message_stream.response.aclose()
@@ -703,9 +730,18 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
-            container="container",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "x",
+                        "type": "anthropic",
+                        "version": "x",
+                    }
+                ],
+            },
             context_management={
                 "edits": [
                     {
@@ -813,7 +849,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         )
 
@@ -832,7 +868,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         ) as response:
             assert not response.is_closed

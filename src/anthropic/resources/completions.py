@@ -71,10 +71,10 @@ class Completions(SyncAPIResource):
         The Text Completions API is a legacy API.
 
         We recommend using the
-        [Messages API](https://docs.anthropic.com/en/api/messages) going forward.
+        [Messages API](https://docs.claude.com/en/api/messages) going forward.
 
         Future models and features will not be compatible with Text Completions. See our
-        [migration guide](https://docs.anthropic.com/en/api/migrating-from-text-completions-to-messages)
+        [migration guide](https://docs.claude.com/en/api/migrating-from-text-completions-to-messages)
         for guidance in migrating from Text Completions to Messages.
 
         Args:
@@ -96,10 +96,9 @@ class Completions(SyncAPIResource):
               "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See [prompt validation](https://docs.anthropic.com/en/api/prompt-validation) and
-              our guide to
-              [prompt design](https://docs.anthropic.com/en/docs/intro-to-prompting) for more
-              details.
+              See [prompt validation](https://docs.claude.com/en/api/prompt-validation) and
+              our guide to [prompt design](https://docs.claude.com/en/docs/intro-to-prompting)
+              for more details.
 
           metadata: An object describing metadata about the request.
 
@@ -111,7 +110,7 @@ class Completions(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/streaming) for details.
+              See [streaming](https://docs.claude.com/en/api/streaming) for details.
 
           temperature: Amount of randomness injected into the response.
 
@@ -178,10 +177,10 @@ class Completions(SyncAPIResource):
         The Text Completions API is a legacy API.
 
         We recommend using the
-        [Messages API](https://docs.anthropic.com/en/api/messages) going forward.
+        [Messages API](https://docs.claude.com/en/api/messages) going forward.
 
         Future models and features will not be compatible with Text Completions. See our
-        [migration guide](https://docs.anthropic.com/en/api/migrating-from-text-completions-to-messages)
+        [migration guide](https://docs.claude.com/en/api/migrating-from-text-completions-to-messages)
         for guidance in migrating from Text Completions to Messages.
 
         Args:
@@ -203,14 +202,13 @@ class Completions(SyncAPIResource):
               "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See [prompt validation](https://docs.anthropic.com/en/api/prompt-validation) and
-              our guide to
-              [prompt design](https://docs.anthropic.com/en/docs/intro-to-prompting) for more
-              details.
+              See [prompt validation](https://docs.claude.com/en/api/prompt-validation) and
+              our guide to [prompt design](https://docs.claude.com/en/docs/intro-to-prompting)
+              for more details.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/streaming) for details.
+              See [streaming](https://docs.claude.com/en/api/streaming) for details.
 
           metadata: An object describing metadata about the request.
 
@@ -285,10 +283,10 @@ class Completions(SyncAPIResource):
         The Text Completions API is a legacy API.
 
         We recommend using the
-        [Messages API](https://docs.anthropic.com/en/api/messages) going forward.
+        [Messages API](https://docs.claude.com/en/api/messages) going forward.
 
         Future models and features will not be compatible with Text Completions. See our
-        [migration guide](https://docs.anthropic.com/en/api/migrating-from-text-completions-to-messages)
+        [migration guide](https://docs.claude.com/en/api/migrating-from-text-completions-to-messages)
         for guidance in migrating from Text Completions to Messages.
 
         Args:
@@ -310,14 +308,13 @@ class Completions(SyncAPIResource):
               "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See [prompt validation](https://docs.anthropic.com/en/api/prompt-validation) and
-              our guide to
-              [prompt design](https://docs.anthropic.com/en/docs/intro-to-prompting) for more
-              details.
+              See [prompt validation](https://docs.claude.com/en/api/prompt-validation) and
+              our guide to [prompt design](https://docs.claude.com/en/docs/intro-to-prompting)
+              for more details.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/streaming) for details.
+              See [streaming](https://docs.claude.com/en/api/streaming) for details.
 
           metadata: An object describing metadata about the request.
 
@@ -466,10 +463,10 @@ class AsyncCompletions(AsyncAPIResource):
         The Text Completions API is a legacy API.
 
         We recommend using the
-        [Messages API](https://docs.anthropic.com/en/api/messages) going forward.
+        [Messages API](https://docs.claude.com/en/api/messages) going forward.
 
         Future models and features will not be compatible with Text Completions. See our
-        [migration guide](https://docs.anthropic.com/en/api/migrating-from-text-completions-to-messages)
+        [migration guide](https://docs.claude.com/en/api/migrating-from-text-completions-to-messages)
         for guidance in migrating from Text Completions to Messages.
 
         Args:
@@ -491,10 +488,9 @@ class AsyncCompletions(AsyncAPIResource):
               "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See [prompt validation](https://docs.anthropic.com/en/api/prompt-validation) and
-              our guide to
-              [prompt design](https://docs.anthropic.com/en/docs/intro-to-prompting) for more
-              details.
+              See [prompt validation](https://docs.claude.com/en/api/prompt-validation) and
+              our guide to [prompt design](https://docs.claude.com/en/docs/intro-to-prompting)
+              for more details.
 
           metadata: An object describing metadata about the request.
 
@@ -506,7 +502,7 @@ class AsyncCompletions(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/streaming) for details.
+              See [streaming](https://docs.claude.com/en/api/streaming) for details.
 
           temperature: Amount of randomness injected into the response.
 
@@ -573,10 +569,10 @@ class AsyncCompletions(AsyncAPIResource):
         The Text Completions API is a legacy API.
 
         We recommend using the
-        [Messages API](https://docs.anthropic.com/en/api/messages) going forward.
+        [Messages API](https://docs.claude.com/en/api/messages) going forward.
 
         Future models and features will not be compatible with Text Completions. See our
-        [migration guide](https://docs.anthropic.com/en/api/migrating-from-text-completions-to-messages)
+        [migration guide](https://docs.claude.com/en/api/migrating-from-text-completions-to-messages)
         for guidance in migrating from Text Completions to Messages.
 
         Args:
@@ -598,14 +594,13 @@ class AsyncCompletions(AsyncAPIResource):
               "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See [prompt validation](https://docs.anthropic.com/en/api/prompt-validation) and
-              our guide to
-              [prompt design](https://docs.anthropic.com/en/docs/intro-to-prompting) for more
-              details.
+              See [prompt validation](https://docs.claude.com/en/api/prompt-validation) and
+              our guide to [prompt design](https://docs.claude.com/en/docs/intro-to-prompting)
+              for more details.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/streaming) for details.
+              See [streaming](https://docs.claude.com/en/api/streaming) for details.
 
           metadata: An object describing metadata about the request.
 
@@ -680,10 +675,10 @@ class AsyncCompletions(AsyncAPIResource):
         The Text Completions API is a legacy API.
 
         We recommend using the
-        [Messages API](https://docs.anthropic.com/en/api/messages) going forward.
+        [Messages API](https://docs.claude.com/en/api/messages) going forward.
 
         Future models and features will not be compatible with Text Completions. See our
-        [migration guide](https://docs.anthropic.com/en/api/migrating-from-text-completions-to-messages)
+        [migration guide](https://docs.claude.com/en/api/migrating-from-text-completions-to-messages)
         for guidance in migrating from Text Completions to Messages.
 
         Args:
@@ -705,14 +700,13 @@ class AsyncCompletions(AsyncAPIResource):
               "\n\nHuman: {userQuestion}\n\nAssistant:"
               ```
 
-              See [prompt validation](https://docs.anthropic.com/en/api/prompt-validation) and
-              our guide to
-              [prompt design](https://docs.anthropic.com/en/docs/intro-to-prompting) for more
-              details.
+              See [prompt validation](https://docs.claude.com/en/api/prompt-validation) and
+              our guide to [prompt design](https://docs.claude.com/en/docs/intro-to-prompting)
+              for more details.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/streaming) for details.
+              See [streaming](https://docs.claude.com/en/api/streaming) for details.
 
           metadata: An object describing metadata about the request.
 
