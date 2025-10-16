@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .beta_skill import BetaSkill as BetaSkill
 from .beta_usage import BetaUsage as BetaUsage
 from .beta_message import BetaMessage as BetaMessage
 from .deleted_file import DeletedFile as DeletedFile
@@ -13,7 +14,9 @@ from .beta_text_delta import BetaTextDelta as BetaTextDelta
 from .beta_tool_param import BetaToolParam as BetaToolParam
 from .beta_stop_reason import BetaStopReason as BetaStopReason
 from .file_list_params import FileListParams as FileListParams
+from .beta_skill_params import BetaSkillParams as BetaSkillParams
 from .model_list_params import ModelListParams as ModelListParams
+from .skill_list_params import SkillListParams as SkillListParams
 from .beta_content_block import BetaContentBlock as BetaContentBlock
 from .beta_message_param import BetaMessageParam as BetaMessageParam
 from .beta_text_citation import BetaTextCitation as BetaTextCitation
@@ -24,20 +27,26 @@ from .beta_metadata_param import BetaMetadataParam as BetaMetadataParam
 from .beta_thinking_block import BetaThinkingBlock as BetaThinkingBlock
 from .beta_thinking_delta import BetaThinkingDelta as BetaThinkingDelta
 from .beta_tool_use_block import BetaToolUseBlock as BetaToolUseBlock
+from .skill_create_params import SkillCreateParams as SkillCreateParams
+from .skill_list_response import SkillListResponse as SkillListResponse
 from .beta_citation_config import BetaCitationConfig as BetaCitationConfig
 from .beta_citations_delta import BetaCitationsDelta as BetaCitationsDelta
 from .beta_signature_delta import BetaSignatureDelta as BetaSignatureDelta
 from .beta_web_fetch_block import BetaWebFetchBlock as BetaWebFetchBlock
+from .beta_container_params import BetaContainerParams as BetaContainerParams
 from .beta_input_json_delta import BetaInputJSONDelta as BetaInputJSONDelta
 from .beta_text_block_param import BetaTextBlockParam as BetaTextBlockParam
 from .beta_tool_union_param import BetaToolUnionParam as BetaToolUnionParam
 from .message_create_params import MessageCreateParams as MessageCreateParams
+from .skill_create_response import SkillCreateResponse as SkillCreateResponse
+from .skill_delete_response import SkillDeleteResponse as SkillDeleteResponse
 from .beta_base64_pdf_source import BetaBase64PDFSource as BetaBase64PDFSource
 from .beta_image_block_param import BetaImageBlockParam as BetaImageBlockParam
 from .beta_plain_text_source import BetaPlainTextSource as BetaPlainTextSource
 from .beta_server_tool_usage import BetaServerToolUsage as BetaServerToolUsage
 from .beta_tool_choice_param import BetaToolChoiceParam as BetaToolChoiceParam
 from .beta_mcp_tool_use_block import BetaMCPToolUseBlock as BetaMCPToolUseBlock
+from .skill_retrieve_response import SkillRetrieveResponse as SkillRetrieveResponse
 from .beta_content_block_param import BetaContentBlockParam as BetaContentBlockParam
 from .beta_message_delta_usage import BetaMessageDeltaUsage as BetaMessageDeltaUsage
 from .beta_text_citation_param import BetaTextCitationParam as BetaTextCitationParam

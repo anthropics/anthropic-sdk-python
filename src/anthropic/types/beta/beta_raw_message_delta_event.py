@@ -26,7 +26,7 @@ class Delta(BaseModel):
 
 class BetaRawMessageDeltaEvent(BaseModel):
     context_management: Optional[BetaContextManagementResponse] = None
-    """Information about context management operations applied during the request."""
+    """Information about context management strategies applied during the request"""
 
     delta: Delta
 

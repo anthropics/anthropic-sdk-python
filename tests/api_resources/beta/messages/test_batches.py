@@ -39,7 +39,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-20250514",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -61,8 +61,17 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-20250514",
-                        "container": "container",
+                        "model": "claude-sonnet-4-5-20250929",
+                        "container": {
+                            "id": "id",
+                            "skills": [
+                                {
+                                    "skill_id": "x",
+                                    "type": "anthropic",
+                                    "version": "x",
+                                }
+                            ],
+                        },
                         "context_management": {
                             "edits": [
                                 {
@@ -178,7 +187,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-20250514",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -204,7 +213,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-20250514",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -450,7 +459,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-20250514",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -472,8 +481,17 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-20250514",
-                        "container": "container",
+                        "model": "claude-sonnet-4-5-20250929",
+                        "container": {
+                            "id": "id",
+                            "skills": [
+                                {
+                                    "skill_id": "x",
+                                    "type": "anthropic",
+                                    "version": "x",
+                                }
+                            ],
+                        },
                         "context_management": {
                             "edits": [
                                 {
@@ -589,7 +607,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-20250514",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -615,7 +633,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-20250514",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
