@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.71.0 (2025-10-16)
+
+Full Changelog: [v0.70.0...v0.71.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.70.0...v0.71.0)
+
+### Features
+
+* **api:** adding support for agent skills ([51a606f](https://github.com/anthropics/anthropic-sdk-python/commit/51a606f497fd278c96af00936aa98d94bdfc9ae4))
+
 ## 0.70.0 (2025-10-15)
 
 Full Changelog: [v0.69.0...v0.70.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.69.0...v0.70.0)
