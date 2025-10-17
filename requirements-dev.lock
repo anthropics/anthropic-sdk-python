@@ -15,10 +15,10 @@ asttokens==3.0.0
     # via inline-snapshot
 astunparse==1.6.3 ; python_full_version < '3.9'
     # via griffe
-boto3-stubs==1.40.31
+boto3-stubs==1.40.54
 botocore-stubs==1.38.30 ; python_full_version < '3.9'
     # via boto3-stubs
-botocore-stubs==1.40.31 ; python_full_version >= '3.9'
+botocore-stubs==1.40.54 ; python_full_version >= '3.9'
     # via boto3-stubs
 certifi==2024.12.14
     # via
@@ -59,7 +59,7 @@ importlib-metadata==8.5.0 ; python_full_version < '3.9'
 importlib-metadata==8.6.1 ; python_full_version >= '3.9'
 iniconfig==2.0.0
     # via pytest
-inline-snapshot==0.29.0
+inline-snapshot==0.30.0
 jiter==0.9.1 ; python_full_version < '3.9'
     # via anthropic
 jiter==0.11.0 ; python_full_version >= '3.9'
@@ -126,9 +126,9 @@ tomli==2.2.1 ; python_full_version < '3.11'
     #   inline-snapshot
     #   mypy
     #   pytest
-types-awscrt==0.27.6
+types-awscrt==0.28.1
     # via botocore-stubs
-types-s3transfer==0.13.1
+types-s3transfer==0.14.0
     # via boto3-stubs
 typing-extensions==4.12.2
     # via
