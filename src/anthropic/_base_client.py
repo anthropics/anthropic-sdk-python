@@ -843,6 +843,8 @@ class _DefaultHttpxClient(httpx.Client):
                 arg: kwargs[arg] for arg in ("verify", "cert", "trust_env", "http1", "http2", "limits") if arg in kwargs
             }
 
+            transport_kwargs["socket_options"] = socket_options
+
             proxy_mounts = {
                 key: None if proxy is None else HTTPTransport(proxy=proxy, **transport_kwargs)
                 for key, proxy in proxy_map.items()
@@ -854,7 +856,7 @@ class _DefaultHttpxClient(httpx.Client):
             kwargs["mounts"] = proxy_mounts
 
             # Sets the default transport so that HTTPX won't automatically configure proxies.
-            kwargs["transport"] = kwargs.get("transport", default_transport)
+            kwargs["transport"] = default_transport
 
         super().__init__(**kwargs)
 
@@ -1404,6 +1406,8 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
                 arg: kwargs[arg] for arg in ("verify", "cert", "trust_env", "http1", "http2", "limits") if arg in kwargs
             }
 
+            transport_kwargs["socket_options"] = socket_options
+
             proxy_mounts = {
                 key: None if proxy is None else AsyncHTTPTransport(proxy=proxy, **transport_kwargs)
                 for key, proxy in proxy_map.items()
@@ -1415,7 +1419,7 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
             kwargs["mounts"] = proxy_mounts
 
             # Sets the default transport so that HTTPX won't automatically configure proxies.
-            kwargs["transport"] = kwargs.get("transport", default_transport)
+            kwargs["transport"] = default_transport
 
         super().__init__(**kwargs)
 
