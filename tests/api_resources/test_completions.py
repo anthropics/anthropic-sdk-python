@@ -21,7 +21,7 @@ class TestCompletions:
     def test_method_create_overload_1(self, client: Anthropic) -> None:
         completion = client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
         )
         assert_matches_type(Completion, completion, path=["response"])
@@ -30,7 +30,7 @@ class TestCompletions:
     def test_method_create_with_all_params_overload_1(self, client: Anthropic) -> None:
         completion = client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string"],
@@ -46,7 +46,7 @@ class TestCompletions:
     def test_raw_response_create_overload_1(self, client: Anthropic) -> None:
         response = client.completions.with_raw_response.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
         )
 
@@ -59,7 +59,7 @@ class TestCompletions:
     def test_streaming_response_create_overload_1(self, client: Anthropic) -> None:
         with client.completions.with_streaming_response.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
         ) as response:
             assert not response.is_closed
@@ -74,7 +74,7 @@ class TestCompletions:
     def test_method_create_overload_2(self, client: Anthropic) -> None:
         completion_stream = client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         )
@@ -84,7 +84,7 @@ class TestCompletions:
     def test_method_create_with_all_params_overload_2(self, client: Anthropic) -> None:
         completion_stream = client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
@@ -100,7 +100,7 @@ class TestCompletions:
     def test_raw_response_create_overload_2(self, client: Anthropic) -> None:
         response = client.completions.with_raw_response.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         )
@@ -113,7 +113,7 @@ class TestCompletions:
     def test_streaming_response_create_overload_2(self, client: Anthropic) -> None:
         with client.completions.with_streaming_response.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         ) as response:
@@ -135,7 +135,7 @@ class TestAsyncCompletions:
     async def test_method_create_overload_1(self, async_client: AsyncAnthropic) -> None:
         completion = await async_client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
         )
         assert_matches_type(Completion, completion, path=["response"])
@@ -144,7 +144,7 @@ class TestAsyncCompletions:
     async def test_method_create_with_all_params_overload_1(self, async_client: AsyncAnthropic) -> None:
         completion = await async_client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             stop_sequences=["string"],
@@ -160,7 +160,7 @@ class TestAsyncCompletions:
     async def test_raw_response_create_overload_1(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.completions.with_raw_response.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
         )
 
@@ -173,7 +173,7 @@ class TestAsyncCompletions:
     async def test_streaming_response_create_overload_1(self, async_client: AsyncAnthropic) -> None:
         async with async_client.completions.with_streaming_response.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
         ) as response:
             assert not response.is_closed
@@ -188,7 +188,7 @@ class TestAsyncCompletions:
     async def test_method_create_overload_2(self, async_client: AsyncAnthropic) -> None:
         completion_stream = await async_client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         )
@@ -198,7 +198,7 @@ class TestAsyncCompletions:
     async def test_method_create_with_all_params_overload_2(self, async_client: AsyncAnthropic) -> None:
         completion_stream = await async_client.completions.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
@@ -214,7 +214,7 @@ class TestAsyncCompletions:
     async def test_raw_response_create_overload_2(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.completions.with_raw_response.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         )
@@ -227,7 +227,7 @@ class TestAsyncCompletions:
     async def test_streaming_response_create_overload_2(self, async_client: AsyncAnthropic) -> None:
         async with async_client.completions.with_streaming_response.create(
             max_tokens_to_sample=256,
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
             prompt="\n\nHuman: Hello, world!\n\nAssistant:",
             stream=True,
         ) as response:
