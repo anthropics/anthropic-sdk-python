@@ -45,10 +45,9 @@ class NewImplementationSimulator:
         return event_type in MESSAGE_EVENTS
 
     @staticmethod
-    def new_stream_cleanup(decoder):
-        """Simulate new efficient cleanup by closing decoder resources"""
-        if hasattr(decoder, "close"):
-            decoder.close()
+    def new_stream_cleanup(response):
+        """Simulate new efficient cleanup by closing response directly"""
+        response.close()
         return 0  # No events consumed
 
 
@@ -466,20 +465,19 @@ class TestOldVsNewComparison:
         print(f"   Rate: {old_consumed / old_cleanup_time:.0f} events/sec")
 
         # Simulate NEW cleanup approach (just call close)
-        print(f"\n⚡ Testing NEW approach (direct decoder close)...")
-        mock_decoder = Mock()
-        mock_decoder.close = Mock()
+        print(f"\n⚡ Testing NEW approach (direct response close)...")
+        mock_response = Mock()
+        mock_response.close = Mock()
 
         new_start = time.perf_counter()
         # Simulate the actual new cleanup logic
-        if hasattr(mock_decoder, "close"):
-            mock_decoder.close()
+        mock_response.close()
         new_consumed = 0  # No events consumed
         new_cleanup_time = time.perf_counter() - new_start
 
         print(f"   Time taken: {new_cleanup_time:.6f}s")
         print(f"   Events consumed: {new_consumed}")
-        print(f"   Method called: decoder.close()")
+        print(f"   Method called: response.close()")
 
         # Print comparison results
         print(f"\n📊 Stream Cleanup Efficiency Comparison:")
@@ -505,8 +503,8 @@ class TestOldVsNewComparison:
             assert old_consumed == num_events, "Old approach should consume all remaining events"
             print(f"   ✅ Old approach consumes all {num_events:,} events - PASSED")
 
-            mock_decoder.close.assert_called_once()
-            print(f"   ✅ Decoder.close() was called - PASSED")
+            mock_response.close.assert_called_once()
+            print(f"   ✅ Response.close() was called - PASSED")
 
             print(f"   🏆 STREAM CLEANUP TEST PASSED")
             print(f"   📋 Summary: NEW approach eliminates {old_consumed:,} unnecessary operations")
@@ -729,8 +727,8 @@ class TestRegressionPrevention:
             if isinstance(event, dict):
                 assert "type" in event
 
-        # Verify cleanup
-        mock_decoder.close.assert_called_once()
+        # Verify cleanup - response.close() should be called (not decoder.close())
+        mock_response.close.assert_called_once()
 
         print(f"\n🔒 Regression Test Results:")
         print(f"   Total events: {len(events)}")
