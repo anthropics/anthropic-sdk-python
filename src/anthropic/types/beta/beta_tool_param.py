@@ -14,7 +14,7 @@ __all__ = ["BetaToolParam", "InputSchema"]
 class InputSchemaTyped(TypedDict, total=False):
     type: Required[Literal["object"]]
 
-    properties: Optional[object]
+    properties: Optional[Dict[str, object]]
 
     required: Optional[SequenceNotStr[str]]
 
