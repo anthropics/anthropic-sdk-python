@@ -52,6 +52,7 @@ from .beta_message_delta_usage import BetaMessageDeltaUsage as BetaMessageDeltaU
 from .beta_text_citation_param import BetaTextCitationParam as BetaTextCitationParam
 from .beta_message_tokens_count import BetaMessageTokensCount as BetaMessageTokensCount
 from .beta_thinking_block_param import BetaThinkingBlockParam as BetaThinkingBlockParam
+from .beta_thinking_turns_param import BetaThinkingTurnsParam as BetaThinkingTurnsParam
 from .beta_tool_use_block_param import BetaToolUseBlockParam as BetaToolUseBlockParam
 from .beta_tool_uses_keep_param import BetaToolUsesKeepParam as BetaToolUsesKeepParam
 from .beta_url_pdf_source_param import BetaURLPDFSourceParam as BetaURLPDFSourceParam
@@ -81,6 +82,7 @@ from .beta_redacted_thinking_block import BetaRedactedThinkingBlock as BetaRedac
 from .beta_tool_result_block_param import BetaToolResultBlockParam as BetaToolResultBlockParam
 from .beta_tool_uses_trigger_param import BetaToolUsesTriggerParam as BetaToolUsesTriggerParam
 from .beta_web_search_result_block import BetaWebSearchResultBlock as BetaWebSearchResultBlock
+from .beta_all_thinking_turns_param import BetaAllThinkingTurnsParam as BetaAllThinkingTurnsParam
 from .beta_mcp_tool_use_block_param import BetaMCPToolUseBlockParam as BetaMCPToolUseBlockParam
 from .beta_raw_message_stream_event import BetaRawMessageStreamEvent as BetaRawMessageStreamEvent
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param as BetaToolBash20241022Param
@@ -140,6 +142,9 @@ from .beta_memory_tool_20250818_view_command import (
 from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam as BetaWebFetchToolResultBlockParam
 from .beta_web_fetch_tool_result_error_block import BetaWebFetchToolResultErrorBlock as BetaWebFetchToolResultErrorBlock
 from .beta_web_search_tool_result_error_code import BetaWebSearchToolResultErrorCode as BetaWebSearchToolResultErrorCode
+from .beta_clear_thinking_20251015_edit_param import (
+    BetaClearThinking20251015EditParam as BetaClearThinking20251015EditParam,
+)
 from .beta_code_execution_tool_20250522_param import (
     BetaCodeExecutionTool20250522Param as BetaCodeExecutionTool20250522Param,
 )
@@ -190,6 +195,9 @@ from .beta_citation_content_block_location_param import (
 )
 from .beta_citation_search_result_location_param import (
     BetaCitationSearchResultLocationParam as BetaCitationSearchResultLocationParam,
+)
+from .beta_clear_thinking_20251015_edit_response import (
+    BetaClearThinking20251015EditResponse as BetaClearThinking20251015EditResponse,
 )
 from .beta_code_execution_tool_result_error_code import (
     BetaCodeExecutionToolResultErrorCode as BetaCodeExecutionToolResultErrorCode,

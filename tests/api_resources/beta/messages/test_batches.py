@@ -142,14 +142,8 @@ class TestBatches:
                                 "input_schema": {
                                     "type": "object",
                                     "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
+                                        "location": "bar",
+                                        "unit": "bar",
                                     },
                                     "required": ["location"],
                                 },
@@ -573,14 +567,8 @@ class TestAsyncBatches:
                                 "input_schema": {
                                     "type": "object",
                                     "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
+                                        "location": "bar",
+                                        "unit": "bar",
                                     },
                                     "required": ["location"],
                                 },

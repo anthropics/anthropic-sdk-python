@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Dict, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
@@ -13,7 +13,7 @@ __all__ = ["ServerToolUseBlockParam"]
 class ServerToolUseBlockParam(TypedDict, total=False):
     id: Required[str]
 
-    input: Required[object]
+    input: Required[Dict[str, object]]
 
     name: Required[Literal["web_search"]]
 

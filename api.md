@@ -201,6 +201,7 @@ Types:
 
 ```python
 from anthropic.types.beta import (
+    BetaAllThinkingTurns,
     BetaBase64ImageSource,
     BetaBase64PDFSource,
     BetaBashCodeExecutionOutputBlock,
@@ -226,6 +227,8 @@ from anthropic.types.beta import (
     BetaCitationsConfigParam,
     BetaCitationsDelta,
     BetaCitationsWebSearchResultLocation,
+    BetaClearThinking20251015Edit,
+    BetaClearThinking20251015EditResponse,
     BetaClearToolUses20250919Edit,
     BetaClearToolUses20250919EditResponse,
     BetaCodeExecutionOutputBlock,
@@ -319,6 +322,7 @@ from anthropic.types.beta import (
     BetaThinkingConfigEnabled,
     BetaThinkingConfigParam,
     BetaThinkingDelta,
+    BetaThinkingTurns,
     BetaTool,
     BetaToolBash20241022,
     BetaToolBash20250124,

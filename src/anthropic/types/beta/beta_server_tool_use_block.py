@@ -1,5 +1,6 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+from typing import Dict
 from typing_extensions import Literal
 
 from ..._models import BaseModel
@@ -10,7 +11,7 @@ __all__ = ["BetaServerToolUseBlock"]
 class BetaServerToolUseBlock(BaseModel):
     id: str
 
-    input: object
+    input: Dict[str, object]
 
     name: Literal["web_search", "web_fetch", "code_execution", "bash_code_execution", "text_editor_code_execution"]
 
