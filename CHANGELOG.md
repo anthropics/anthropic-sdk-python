@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.72.0 (2025-10-28)
+
+Full Changelog: [v0.71.1...v0.72.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.71.1...v0.72.0)
+
+### Features
+
+* **api:** add ability to clear thinking in context management ([27c8f17](https://github.com/anthropics/anthropic-sdk-python/commit/27c8f17c573c73c4db2146731ef1ab712140b0a2))
+
 ## 0.71.1 (2025-10-28)
 
 Full Changelog: [v0.71.0...v0.71.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.71.0...v0.71.1)
