@@ -295,7 +295,7 @@ wheels = [
 
 [[package]]
 name = "anthropic"
-version = "0.71.1"
+version = "0.72.0"
 source = { editable = "." }
 dependencies = [
     { name = "anyio", version = "4.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
