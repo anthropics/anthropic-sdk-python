@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.71.1 (2025-10-28)
+
+Full Changelog: [v0.71.0...v0.71.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.71.0...v0.71.1)
+
+### Bug Fixes
+
+* **client:** resolve non-functional default socket options ([4606137](https://github.com/anthropics/anthropic-sdk-python/commit/4606137fcca27ab2d03669999b624c11394b090a))
+
+
+### Chores
+
+* **api:** mark older sonnet models as deprecated ([7906595](https://github.com/anthropics/anthropic-sdk-python/commit/7906595fe2f214cf0449d073145629ea8d3da437))
+* bump `httpx-aiohttp` version to 0.1.9 ([5d27492](https://github.com/anthropics/anthropic-sdk-python/commit/5d2749222bb75201279c1877690c75687f3f8abc))
+
 ## 0.71.0 (2025-10-16)
 
 Full Changelog: [v0.70.0...v0.71.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.70.0...v0.71.0)
