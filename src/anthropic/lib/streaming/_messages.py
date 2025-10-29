@@ -7,6 +7,9 @@ from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_n
 import httpx
 from pydantic import BaseModel
 
+from anthropic.types.tool_use_block import ToolUseBlock
+from anthropic.types.server_tool_use_block import ServerToolUseBlock
+
 from ._types import (
     TextEvent,
     CitationEvent,
@@ -97,7 +100,9 @@ class MessageStream:
                 text_blocks.append(block.text)
 
         if not text_blocks:
-            raise RuntimeError("Expected to have received at least 1 text block")
+            raise RuntimeError(
+                f".get_final_text() can only be called when the API returns a `text` content block.\nThe API returned {','.join([b.type for b in message.content])} content block type(s) that you can access by calling get_final_message().content"
+            )
 
         return "".join(text_blocks)
 
@@ -234,7 +239,9 @@ class AsyncMessageStream:
                 text_blocks.append(block.text)
 
         if not text_blocks:
-            raise RuntimeError("Expected to have received at least 1 text block")
+            raise RuntimeError(
+                f".get_final_text() can only be called when the API returns a `text` content block.\nThe API returned {','.join([b.type for b in message.content])} content block type(s) that you can access by calling get_final_message().content"
+            )
 
         return "".join(text_blocks)
 
@@ -388,6 +395,11 @@ def build_events(
 
 JSON_BUF_PROPERTY = "__json_buf"
 
+TRACKS_TOOL_INPUT = (
+    ToolUseBlock,
+    ServerToolUseBlock,
+)
+
 
 def accumulate_event(
     *,
@@ -425,7 +437,7 @@ def accumulate_event(
             if content.type == "text":
                 content.text += event.delta.text
         elif event.delta.type == "input_json_delta":
-            if content.type == "tool_use":
+            if isinstance(content, TRACKS_TOOL_INPUT):
                 from jiter import from_json
 
                 # we need to keep track of the raw JSON string as well so that we can

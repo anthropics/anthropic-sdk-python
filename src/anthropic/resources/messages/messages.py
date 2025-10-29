@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import List, Union, Iterable
+from typing import Union, Iterable, Optional
 from functools import partial
 from typing_extensions import Literal, overload
 
@@ -23,12 +23,12 @@ from .batches import (
     BatchesWithStreamingResponse,
     AsyncBatchesWithStreamingResponse,
 )
-from ..._types import NOT_GIVEN, Body, Query, Headers, NotGiven
+from ..._types import NOT_GIVEN, Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ..._utils import is_given, required_args, maybe_transform, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
-from ..._constants import DEFAULT_TIMEOUT
+from ..._constants import DEFAULT_TIMEOUT, MODEL_NONSTREAMING_TOKENS
 from ..._streaming import Stream, AsyncStream
 from ..._base_client import make_request_options
 from ...lib.streaming import MessageStreamManager, AsyncMessageStreamManager
@@ -54,8 +54,11 @@ DEPRECATED_MODELS = {
     "claude-instant-1.1-100k": "November 6th, 2024",
     "claude-instant-1.2": "November 6th, 2024",
     "claude-3-sonnet-20240229": "July 21st, 2025",
+    "claude-3-opus-20240229": "January 5th, 2026",
     "claude-2.1": "July 21st, 2025",
     "claude-2.0": "July 21st, 2025",
+    "claude-3-7-sonnet-latest": "February 19th, 2026",
+    "claude-3-7-sonnet-20250219": "February 19th, 2026",
 }
 
 
@@ -90,22 +93,23 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -123,7 +127,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -182,43 +186,26 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
-              There is a limit of 100000 messages in a single request.
+              There is a limit of 100,000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -232,14 +219,13 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           system: System prompt.
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -257,7 +243,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -269,6 +255,12 @@ class Messages(SyncAPIResource):
               content blocks that represent the model's use of those tools. You can then run
               those tools using the tool input generated by the model and then optionally
               return results back to the model using `tool_result` content blocks.
+
+              There are two types of tools: **client tools** and **server tools**. The
+              behavior described below applies to client tools. For
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              see their individual documentation as each has its own behavior (e.g., the
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -331,7 +323,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -369,21 +361,22 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Stream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -401,7 +394,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -460,37 +453,14 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
-              There is a limit of 100000 messages in a single request.
+              There is a limit of 100,000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
@@ -498,10 +468,15 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -517,7 +492,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -535,7 +510,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -547,6 +522,12 @@ class Messages(SyncAPIResource):
               content blocks that represent the model's use of those tools. You can then run
               those tools using the tool input generated by the model and then optionally
               return results back to the model using `tool_result` content blocks.
+
+              There are two types of tools: **client tools** and **server tools**. The
+              behavior described below applies to client tools. For
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              see their individual documentation as each has its own behavior (e.g., the
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -609,7 +590,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -647,21 +628,22 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message | Stream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -679,7 +661,7 @@ class Messages(SyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -738,37 +720,14 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
-              There is a limit of 100000 messages in a single request.
+              There is a limit of 100,000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
@@ -776,10 +735,15 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -795,7 +759,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -813,7 +777,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -825,6 +789,12 @@ class Messages(SyncAPIResource):
               content blocks that represent the model's use of those tools. You can then run
               those tools using the tool input generated by the model and then optionally
               return results back to the model using `tool_result` content blocks.
+
+              There are two types of tools: **client tools** and **server tools**. The
+              behavior described below applies to client tools. For
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              see their individual documentation as each has its own behavior (e.g., the
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -887,7 +857,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -924,25 +894,28 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message | Stream[RawMessageStreamEvent]:
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
-            timeout = self._client._calculate_nonstreaming_timeout(max_tokens)
+            timeout = self._client._calculate_nonstreaming_timeout(
+                max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
+            )
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -959,6 +932,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -987,15 +961,17 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        container: Optional[str] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1024,6 +1000,8 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "container": container,
+                    "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "system": system,
                     "temperature": temperature,
@@ -1050,16 +1028,16 @@ class Messages(SyncAPIResource):
         *,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[MessageCountTokensToolParam] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[MessageCountTokensToolParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> MessageTokensCount:
         """
         Count the number of tokens in a Message.
@@ -1128,37 +1106,14 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
-              There is a limit of 100000 messages in a single request.
+              There is a limit of 100,000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
@@ -1168,7 +1123,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           thinking: Configuration for enabling Claude's extended thinking.
 
@@ -1177,7 +1132,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -1189,6 +1144,12 @@ class Messages(SyncAPIResource):
               content blocks that represent the model's use of those tools. You can then run
               those tools using the tool input generated by the model and then optionally
               return results back to the model using `tool_result` content blocks.
+
+              There are two types of tools: **client tools** and **server tools**. The
+              behavior described below applies to client tools. For
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              see their individual documentation as each has its own behavior (e.g., the
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -1251,7 +1212,7 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           extra_headers: Send extra headers
 
@@ -1312,22 +1273,23 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -1345,7 +1307,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -1404,43 +1366,26 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
-              There is a limit of 100000 messages in a single request.
+              There is a limit of 100,000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1454,14 +1399,13 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           system: System prompt.
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -1479,7 +1423,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -1491,6 +1435,12 @@ class AsyncMessages(AsyncAPIResource):
               content blocks that represent the model's use of those tools. You can then run
               those tools using the tool input generated by the model and then optionally
               return results back to the model using `tool_result` content blocks.
+
+              There are two types of tools: **client tools** and **server tools**. The
+              behavior described below applies to client tools. For
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              see their individual documentation as each has its own behavior (e.g., the
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -1553,7 +1503,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -1591,21 +1541,22 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncStream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -1623,7 +1574,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -1682,37 +1633,14 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
-              There is a limit of 100000 messages in a single request.
+              There is a limit of 100,000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
@@ -1720,10 +1648,15 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1739,7 +1672,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -1757,7 +1690,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -1769,6 +1702,12 @@ class AsyncMessages(AsyncAPIResource):
               content blocks that represent the model's use of those tools. You can then run
               those tools using the tool input generated by the model and then optionally
               return results back to the model using `tool_result` content blocks.
+
+              There are two types of tools: **client tools** and **server tools**. The
+              behavior described below applies to client tools. For
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              see their individual documentation as each has its own behavior (e.g., the
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -1831,7 +1770,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -1869,21 +1808,22 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message | AsyncStream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -1901,7 +1841,7 @@ class AsyncMessages(AsyncAPIResource):
               only specifies the absolute maximum number of tokens to generate.
 
               Different models have different maximum values for this parameter. See
-              [models](https://docs.anthropic.com/en/docs/models-overview) for details.
+              [models](https://docs.claude.com/en/docs/models-overview) for details.
 
           messages: Input messages.
 
@@ -1960,37 +1900,14 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
-              There is a limit of 100000 messages in a single request.
+              There is a limit of 100,000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
@@ -1998,10 +1915,15 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.anthropic.com/en/api/messages-streaming) for
-              details.
+              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           metadata: An object describing metadata about the request.
+
+          service_tier: Determines whether to use priority capacity (if available) or standard capacity
+              for this request.
+
+              Anthropic offers different levels of service for your API requests. See
+              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2017,7 +1939,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           temperature: Amount of randomness injected into the response.
 
@@ -2035,7 +1957,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -2047,6 +1969,12 @@ class AsyncMessages(AsyncAPIResource):
               content blocks that represent the model's use of those tools. You can then run
               those tools using the tool input generated by the model and then optionally
               return results back to the model using `tool_result` content blocks.
+
+              There are two types of tools: **client tools** and **server tools**. The
+              behavior described below applies to client tools. For
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              see their individual documentation as each has its own behavior (e.g., the
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -2109,7 +2037,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
@@ -2146,25 +2074,28 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        stream: Literal[False] | Literal[True] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Message | AsyncStream[RawMessageStreamEvent]:
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
-            timeout = self._client._calculate_nonstreaming_timeout(max_tokens)
+            timeout = self._client._calculate_nonstreaming_timeout(
+                max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
+            )
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -2181,6 +2112,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -2209,15 +2141,17 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        metadata: MetadataParam | NotGiven = NOT_GIVEN,
-        stop_sequences: List[str] | NotGiven = NOT_GIVEN,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        temperature: float | NotGiven = NOT_GIVEN,
-        top_k: int | NotGiven = NOT_GIVEN,
-        top_p: float | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[ToolUnionParam] | NotGiven = NOT_GIVEN,
+        metadata: MetadataParam | Omit = omit,
+        container: Optional[str] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2245,6 +2179,8 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "container": container,
+                    "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "system": system,
                     "temperature": temperature,
@@ -2271,16 +2207,16 @@ class AsyncMessages(AsyncAPIResource):
         *,
         messages: Iterable[MessageParam],
         model: ModelParam,
-        system: Union[str, Iterable[TextBlockParam]] | NotGiven = NOT_GIVEN,
-        thinking: ThinkingConfigParam | NotGiven = NOT_GIVEN,
-        tool_choice: ToolChoiceParam | NotGiven = NOT_GIVEN,
-        tools: Iterable[MessageCountTokensToolParam] | NotGiven = NOT_GIVEN,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[MessageCountTokensToolParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> MessageTokensCount:
         """
         Count the number of tokens in a Message.
@@ -2349,37 +2285,14 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              Starting with Claude 3 models, you can also send image content blocks:
-
-              ```json
-              {
-                "role": "user",
-                "content": [
-                  {
-                    "type": "image",
-                    "source": {
-                      "type": "base64",
-                      "media_type": "image/jpeg",
-                      "data": "/9j/4AAQSkZJRg..."
-                    }
-                  },
-                  { "type": "text", "text": "What is in this image?" }
-                ]
-              }
-              ```
-
-              We currently support the `base64` source type for images, and the `image/jpeg`,
-              `image/png`, `image/gif`, and `image/webp` media types.
-
-              See [examples](https://docs.anthropic.com/en/api/messages-examples#vision) for
-              more input examples.
+              See [input examples](https://docs.claude.com/en/api/messages-examples).
 
               Note that if you want to include a
-              [system prompt](https://docs.anthropic.com/en/docs/system-prompts), you can use
-              the top-level `system` parameter — there is no `"system"` role for input
-              messages in the Messages API.
+              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
+              top-level `system` parameter — there is no `"system"` role for input messages in
+              the Messages API.
 
-              There is a limit of 100000 messages in a single request.
+              There is a limit of 100,000 messages in a single request.
 
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
@@ -2389,7 +2302,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.anthropic.com/en/docs/system-prompts).
+              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
 
           thinking: Configuration for enabling Claude's extended thinking.
 
@@ -2398,7 +2311,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -2410,6 +2323,12 @@ class AsyncMessages(AsyncAPIResource):
               content blocks that represent the model's use of those tools. You can then run
               those tools using the tool input generated by the model and then optionally
               return results back to the model using `tool_result` content blocks.
+
+              There are two types of tools: **client tools** and **server tools**. The
+              behavior described below applies to client tools. For
+              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              see their individual documentation as each has its own behavior (e.g., the
+              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -2472,7 +2391,7 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.anthropic.com/en/docs/tool-use) for more details.
+              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
           extra_headers: Send extra headers
 

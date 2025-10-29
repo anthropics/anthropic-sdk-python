@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+from .files import (
+    Files,
+    AsyncFiles,
+    FilesWithRawResponse,
+    AsyncFilesWithRawResponse,
+    FilesWithStreamingResponse,
+    AsyncFilesWithStreamingResponse,
+)
 from .models import (
     Models,
     AsyncModels,
@@ -12,6 +20,14 @@ from .models import (
 )
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
+from .skills.skills import (
+    Skills,
+    AsyncSkills,
+    SkillsWithRawResponse,
+    AsyncSkillsWithRawResponse,
+    SkillsWithStreamingResponse,
+    AsyncSkillsWithStreamingResponse,
+)
 from .messages.messages import (
     Messages,
     AsyncMessages,
@@ -32,6 +48,14 @@ class Beta(SyncAPIResource):
     @cached_property
     def messages(self) -> Messages:
         return Messages(self._client)
+
+    @cached_property
+    def files(self) -> Files:
+        return Files(self._client)
+
+    @cached_property
+    def skills(self) -> Skills:
+        return Skills(self._client)
 
     @cached_property
     def with_raw_response(self) -> BetaWithRawResponse:
@@ -61,6 +85,14 @@ class AsyncBeta(AsyncAPIResource):
     @cached_property
     def messages(self) -> AsyncMessages:
         return AsyncMessages(self._client)
+
+    @cached_property
+    def files(self) -> AsyncFiles:
+        return AsyncFiles(self._client)
+
+    @cached_property
+    def skills(self) -> AsyncSkills:
+        return AsyncSkills(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncBetaWithRawResponse:
@@ -94,6 +126,14 @@ class BetaWithRawResponse:
     def messages(self) -> MessagesWithRawResponse:
         return MessagesWithRawResponse(self._beta.messages)
 
+    @cached_property
+    def files(self) -> FilesWithRawResponse:
+        return FilesWithRawResponse(self._beta.files)
+
+    @cached_property
+    def skills(self) -> SkillsWithRawResponse:
+        return SkillsWithRawResponse(self._beta.skills)
+
 
 class AsyncBetaWithRawResponse:
     def __init__(self, beta: AsyncBeta) -> None:
@@ -106,6 +146,14 @@ class AsyncBetaWithRawResponse:
     @cached_property
     def messages(self) -> AsyncMessagesWithRawResponse:
         return AsyncMessagesWithRawResponse(self._beta.messages)
+
+    @cached_property
+    def files(self) -> AsyncFilesWithRawResponse:
+        return AsyncFilesWithRawResponse(self._beta.files)
+
+    @cached_property
+    def skills(self) -> AsyncSkillsWithRawResponse:
+        return AsyncSkillsWithRawResponse(self._beta.skills)
 
 
 class BetaWithStreamingResponse:
@@ -120,6 +168,14 @@ class BetaWithStreamingResponse:
     def messages(self) -> MessagesWithStreamingResponse:
         return MessagesWithStreamingResponse(self._beta.messages)
 
+    @cached_property
+    def files(self) -> FilesWithStreamingResponse:
+        return FilesWithStreamingResponse(self._beta.files)
+
+    @cached_property
+    def skills(self) -> SkillsWithStreamingResponse:
+        return SkillsWithStreamingResponse(self._beta.skills)
+
 
 class AsyncBetaWithStreamingResponse:
     def __init__(self, beta: AsyncBeta) -> None:
@@ -132,3 +188,11 @@ class AsyncBetaWithStreamingResponse:
     @cached_property
     def messages(self) -> AsyncMessagesWithStreamingResponse:
         return AsyncMessagesWithStreamingResponse(self._beta.messages)
+
+    @cached_property
+    def files(self) -> AsyncFilesWithStreamingResponse:
+        return AsyncFilesWithStreamingResponse(self._beta.files)
+
+    @cached_property
+    def skills(self) -> AsyncSkillsWithStreamingResponse:
+        return AsyncSkillsWithStreamingResponse(self._beta.skills)

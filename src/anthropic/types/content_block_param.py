@@ -11,6 +11,7 @@ from .document_block_param import DocumentBlockParam
 from .thinking_block_param import ThinkingBlockParam
 from .tool_use_block_param import ToolUseBlockParam
 from .tool_result_block_param import ToolResultBlockParam
+from .search_result_block_param import SearchResultBlockParam
 from .server_tool_use_block_param import ServerToolUseBlockParam
 from .redacted_thinking_block_param import RedactedThinkingBlockParam
 from .web_search_tool_result_block_param import WebSearchToolResultBlockParam
@@ -20,11 +21,12 @@ __all__ = ["ContentBlockParam"]
 ContentBlockParam: TypeAlias = Union[
     TextBlockParam,
     ImageBlockParam,
-    ToolUseBlockParam,
-    ServerToolUseBlockParam,
-    WebSearchToolResultBlockParam,
-    ToolResultBlockParam,
     DocumentBlockParam,
+    SearchResultBlockParam,
     ThinkingBlockParam,
     RedactedThinkingBlockParam,
+    ToolUseBlockParam,
+    ToolResultBlockParam,
+    ServerToolUseBlockParam,
+    WebSearchToolResultBlockParam,
 ]

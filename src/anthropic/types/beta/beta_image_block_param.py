@@ -6,12 +6,13 @@ from typing import Union, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .beta_url_image_source_param import BetaURLImageSourceParam
+from .beta_file_image_source_param import BetaFileImageSourceParam
 from .beta_base64_image_source_param import BetaBase64ImageSourceParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
 __all__ = ["BetaImageBlockParam", "Source"]
 
-Source: TypeAlias = Union[BetaBase64ImageSourceParam, BetaURLImageSourceParam]
+Source: TypeAlias = Union[BetaBase64ImageSourceParam, BetaURLImageSourceParam, BetaFileImageSourceParam]
 
 
 class BetaImageBlockParam(TypedDict, total=False):

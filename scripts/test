@@ -43,7 +43,7 @@ elif ! prism_is_running ; then
   echo -e "To run the server, pass in the path or url of your OpenAPI"
   echo -e "spec to the prism command:"
   echo
-  echo -e "  \$ ${YELLOW}npm exec --package=@stoplight/prism-cli@~5.3.2 -- prism mock path/to/your.openapi.yml${NC}"
+  echo -e "  \$ ${YELLOW}npm exec --package=@stainless-api/prism-cli@5.15.0 -- prism mock path/to/your.openapi.yml${NC}"
   echo
 
   exit 1
@@ -54,8 +54,23 @@ fi
 
 export DEFER_PYDANTIC_BUILD=false
 
-echo "==> Running tests"
-rye run pytest "$@"
+function run_tests() {
+    echo "==> Running tests with Pydantic v2"
+    uv run --isolated --all-extras pytest "$@"
 
-echo "==> Running Pydantic v1 tests"
-rye run nox -s test-pydantic-v1 -- "$@"
+    echo "==> Running tests with Pydantic v1"
+    uv run --isolated --all-extras --group=pydantic-v1 pytest "$@"
+}
+
+# If UV_PYTHON is already set in the environment, just run the command once
+if [[ -n "$UV_PYTHON" ]]; then
+  run_tests "$@"
+else
+  # If UV_PYTHON is not set, run the command for min and max versions
+
+  echo "==> Running tests for Python 3.8"
+  UV_PYTHON=3.8 run_tests "$@"
+
+  echo "==> Running tests for Python 3.13"
+  UV_PYTHON=3.13 run_tests "$@"
+fi

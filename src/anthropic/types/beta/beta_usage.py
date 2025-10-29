@@ -1,14 +1,19 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 from typing import Optional
+from typing_extensions import Literal
 
 from ..._models import BaseModel
+from .beta_cache_creation import BetaCacheCreation
 from .beta_server_tool_usage import BetaServerToolUsage
 
 __all__ = ["BetaUsage"]
 
 
 class BetaUsage(BaseModel):
+    cache_creation: Optional[BetaCacheCreation] = None
+    """Breakdown of cached tokens by TTL"""
+
     cache_creation_input_tokens: Optional[int] = None
     """The number of input tokens used to create the cache entry."""
 
@@ -23,3 +28,6 @@ class BetaUsage(BaseModel):
 
     server_tool_use: Optional[BetaServerToolUsage] = None
     """The number of server tool requests."""
+
+    service_tier: Optional[Literal["standard", "priority", "batch"]] = None
+    """If the request used the priority, standard, or batch tier."""

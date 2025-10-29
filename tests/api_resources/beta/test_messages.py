@@ -20,6 +20,7 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 class TestMessages:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_method_create_overload_1(self, client: Anthropic) -> None:
         message = client.beta.messages.create(
@@ -30,10 +31,11 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_method_create_with_all_params_overload_1(self, client: Anthropic) -> None:
         message = client.beta.messages.create(
@@ -44,15 +46,62 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "x",
+                        "type": "anthropic",
+                        "version": "x",
+                    }
+                ],
+            },
+            context_management={
+                "edits": [
+                    {
+                        "type": "clear_tool_uses_20250919",
+                        "clear_at_least": {
+                            "type": "input_tokens",
+                            "value": 0,
+                        },
+                        "clear_tool_inputs": True,
+                        "exclude_tools": ["string"],
+                        "keep": {
+                            "type": "tool_uses",
+                            "value": 0,
+                        },
+                        "trigger": {
+                            "type": "input_tokens",
+                            "value": 1,
+                        },
+                    }
+                ]
+            },
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             stream=False,
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -79,18 +128,16 @@ class TestMessages:
                     "input_schema": {
                         "type": "object",
                         "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
+                            "location": "bar",
+                            "unit": "bar",
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -101,6 +148,7 @@ class TestMessages:
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_raw_response_create_overload_1(self, client: Anthropic) -> None:
         response = client.beta.messages.with_raw_response.create(
@@ -111,7 +159,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
         )
 
         assert response.is_closed is True
@@ -119,6 +167,7 @@ class TestMessages:
         message = response.parse()
         assert_matches_type(BetaMessage, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_streaming_response_create_overload_1(self, client: Anthropic) -> None:
         with client.beta.messages.with_streaming_response.create(
@@ -129,7 +178,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -139,6 +188,7 @@ class TestMessages:
 
         assert cast(Any, response.is_closed) is True
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_method_create_overload_2(self, client: Anthropic) -> None:
         message_stream = client.beta.messages.create(
@@ -149,11 +199,12 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         )
         message_stream.response.close()
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_method_create_with_all_params_overload_2(self, client: Anthropic) -> None:
         message_stream = client.beta.messages.create(
@@ -164,15 +215,62 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "x",
+                        "type": "anthropic",
+                        "version": "x",
+                    }
+                ],
+            },
+            context_management={
+                "edits": [
+                    {
+                        "type": "clear_tool_uses_20250919",
+                        "clear_at_least": {
+                            "type": "input_tokens",
+                            "value": 0,
+                        },
+                        "clear_tool_inputs": True,
+                        "exclude_tools": ["string"],
+                        "keep": {
+                            "type": "tool_uses",
+                            "value": 0,
+                        },
+                        "trigger": {
+                            "type": "input_tokens",
+                            "value": 1,
+                        },
+                    }
+                ]
+            },
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -199,18 +297,16 @@ class TestMessages:
                     "input_schema": {
                         "type": "object",
                         "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
+                            "location": "bar",
+                            "unit": "bar",
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -221,6 +317,7 @@ class TestMessages:
         )
         message_stream.response.close()
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_raw_response_create_overload_2(self, client: Anthropic) -> None:
         response = client.beta.messages.with_raw_response.create(
@@ -231,7 +328,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         )
 
@@ -239,6 +336,7 @@ class TestMessages:
         stream = response.parse()
         stream.close()
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_streaming_response_create_overload_2(self, client: Anthropic) -> None:
         with client.beta.messages.with_streaming_response.create(
@@ -249,7 +347,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -260,6 +358,7 @@ class TestMessages:
 
         assert cast(Any, response.is_closed) is True
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_method_count_tokens(self, client: Anthropic) -> None:
         message = client.beta.messages.count_tokens(
@@ -269,10 +368,11 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_method_count_tokens_with_all_params(self, client: Anthropic) -> None:
         message = client.beta.messages.count_tokens(
@@ -282,12 +382,48 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
+            context_management={
+                "edits": [
+                    {
+                        "type": "clear_tool_uses_20250919",
+                        "clear_at_least": {
+                            "type": "input_tokens",
+                            "value": 0,
+                        },
+                        "clear_tool_inputs": True,
+                        "exclude_tools": ["string"],
+                        "keep": {
+                            "type": "tool_uses",
+                            "value": 0,
+                        },
+                        "trigger": {
+                            "type": "input_tokens",
+                            "value": 1,
+                        },
+                    }
+                ]
+            },
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -313,18 +449,16 @@ class TestMessages:
                     "input_schema": {
                         "type": "object",
                         "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
+                            "location": "bar",
+                            "unit": "bar",
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -333,6 +467,7 @@ class TestMessages:
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_raw_response_count_tokens(self, client: Anthropic) -> None:
         response = client.beta.messages.with_raw_response.count_tokens(
@@ -342,7 +477,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
         )
 
         assert response.is_closed is True
@@ -350,6 +485,7 @@ class TestMessages:
         message = response.parse()
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_streaming_response_count_tokens(self, client: Anthropic) -> None:
         with client.beta.messages.with_streaming_response.count_tokens(
@@ -359,7 +495,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -371,8 +507,11 @@ class TestMessages:
 
 
 class TestAsyncMessages:
-    parametrize = pytest.mark.parametrize("async_client", [False, True], indirect=True, ids=["loose", "strict"])
+    parametrize = pytest.mark.parametrize(
+        "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
+    )
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_method_create_overload_1(self, async_client: AsyncAnthropic) -> None:
         message = await async_client.beta.messages.create(
@@ -383,10 +522,11 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_method_create_with_all_params_overload_1(self, async_client: AsyncAnthropic) -> None:
         message = await async_client.beta.messages.create(
@@ -397,15 +537,62 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "x",
+                        "type": "anthropic",
+                        "version": "x",
+                    }
+                ],
+            },
+            context_management={
+                "edits": [
+                    {
+                        "type": "clear_tool_uses_20250919",
+                        "clear_at_least": {
+                            "type": "input_tokens",
+                            "value": 0,
+                        },
+                        "clear_tool_inputs": True,
+                        "exclude_tools": ["string"],
+                        "keep": {
+                            "type": "tool_uses",
+                            "value": 0,
+                        },
+                        "trigger": {
+                            "type": "input_tokens",
+                            "value": 1,
+                        },
+                    }
+                ]
+            },
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             stream=False,
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -432,18 +619,16 @@ class TestAsyncMessages:
                     "input_schema": {
                         "type": "object",
                         "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
+                            "location": "bar",
+                            "unit": "bar",
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -454,6 +639,7 @@ class TestAsyncMessages:
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_raw_response_create_overload_1(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.messages.with_raw_response.create(
@@ -464,7 +650,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
         )
 
         assert response.is_closed is True
@@ -472,6 +658,7 @@ class TestAsyncMessages:
         message = response.parse()
         assert_matches_type(BetaMessage, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_streaming_response_create_overload_1(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.messages.with_streaming_response.create(
@@ -482,7 +669,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -492,6 +679,7 @@ class TestAsyncMessages:
 
         assert cast(Any, response.is_closed) is True
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_method_create_overload_2(self, async_client: AsyncAnthropic) -> None:
         message_stream = await async_client.beta.messages.create(
@@ -502,11 +690,12 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         )
         await message_stream.response.aclose()
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_method_create_with_all_params_overload_2(self, async_client: AsyncAnthropic) -> None:
         message_stream = await async_client.beta.messages.create(
@@ -517,15 +706,62 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "x",
+                        "type": "anthropic",
+                        "version": "x",
+                    }
+                ],
+            },
+            context_management={
+                "edits": [
+                    {
+                        "type": "clear_tool_uses_20250919",
+                        "clear_at_least": {
+                            "type": "input_tokens",
+                            "value": 0,
+                        },
+                        "clear_tool_inputs": True,
+                        "exclude_tools": ["string"],
+                        "keep": {
+                            "type": "tool_uses",
+                            "value": 0,
+                        },
+                        "trigger": {
+                            "type": "input_tokens",
+                            "value": 1,
+                        },
+                    }
+                ]
+            },
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            service_tier="auto",
             stop_sequences=["string"],
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -552,18 +788,16 @@ class TestAsyncMessages:
                     "input_schema": {
                         "type": "object",
                         "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
+                            "location": "bar",
+                            "unit": "bar",
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -574,6 +808,7 @@ class TestAsyncMessages:
         )
         await message_stream.response.aclose()
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_raw_response_create_overload_2(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.messages.with_raw_response.create(
@@ -584,7 +819,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         )
 
@@ -592,6 +827,7 @@ class TestAsyncMessages:
         stream = response.parse()
         await stream.close()
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_streaming_response_create_overload_2(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.messages.with_streaming_response.create(
@@ -602,7 +838,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-20250219",
+            model="claude-sonnet-4-5-20250929",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -613,6 +849,7 @@ class TestAsyncMessages:
 
         assert cast(Any, response.is_closed) is True
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_method_count_tokens(self, async_client: AsyncAnthropic) -> None:
         message = await async_client.beta.messages.count_tokens(
@@ -622,10 +859,11 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_method_count_tokens_with_all_params(self, async_client: AsyncAnthropic) -> None:
         message = await async_client.beta.messages.count_tokens(
@@ -635,12 +873,48 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
+            context_management={
+                "edits": [
+                    {
+                        "type": "clear_tool_uses_20250919",
+                        "clear_at_least": {
+                            "type": "input_tokens",
+                            "value": 0,
+                        },
+                        "clear_tool_inputs": True,
+                        "exclude_tools": ["string"],
+                        "keep": {
+                            "type": "tool_uses",
+                            "value": 0,
+                        },
+                        "trigger": {
+                            "type": "input_tokens",
+                            "value": 1,
+                        },
+                    }
+                ]
+            },
+            mcp_servers=[
+                {
+                    "name": "name",
+                    "type": "url",
+                    "url": "url",
+                    "authorization_token": "authorization_token",
+                    "tool_configuration": {
+                        "allowed_tools": ["string"],
+                        "enabled": True,
+                    },
+                }
+            ],
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
                     "type": "text",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "citations": [
                         {
                             "cited_text": "cited_text",
@@ -666,18 +940,16 @@ class TestAsyncMessages:
                     "input_schema": {
                         "type": "object",
                         "properties": {
-                            "location": {
-                                "description": "The city and state, e.g. San Francisco, CA",
-                                "type": "string",
-                            },
-                            "unit": {
-                                "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                "type": "string",
-                            },
+                            "location": "bar",
+                            "unit": "bar",
                         },
+                        "required": ["location"],
                     },
                     "name": "name",
-                    "cache_control": {"type": "ephemeral"},
+                    "cache_control": {
+                        "type": "ephemeral",
+                        "ttl": "5m",
+                    },
                     "description": "Get the current weather in a given location",
                     "type": "custom",
                 }
@@ -686,6 +958,7 @@ class TestAsyncMessages:
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_raw_response_count_tokens(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.messages.with_raw_response.count_tokens(
@@ -695,7 +968,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
         )
 
         assert response.is_closed is True
@@ -703,6 +976,7 @@ class TestAsyncMessages:
         message = response.parse()
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_streaming_response_count_tokens(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.messages.with_streaming_response.count_tokens(
@@ -712,7 +986,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-3-7-sonnet-latest",
+            model="claude-sonnet-4-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

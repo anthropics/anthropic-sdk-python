@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Dict, Union, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
+from ..._types import SequenceNotStr
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
 __all__ = ["BetaToolParam", "InputSchema"]
@@ -13,7 +14,9 @@ __all__ = ["BetaToolParam", "InputSchema"]
 class InputSchemaTyped(TypedDict, total=False):
     type: Required[Literal["object"]]
 
-    properties: Optional[object]
+    properties: Optional[Dict[str, object]]
+
+    required: Optional[SequenceNotStr[str]]
 
 
 InputSchema: TypeAlias = Union[InputSchemaTyped, Dict[str, object]]

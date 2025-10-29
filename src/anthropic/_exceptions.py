@@ -75,7 +75,10 @@ class APIConnectionError(APIError):
 
 class APITimeoutError(APIConnectionError):
     def __init__(self, request: httpx.Request) -> None:
-        super().__init__(message="Request timed out.", request=request)
+        super().__init__(
+            message="Request timed out or interrupted. This could be due to a network timeout, dropped connection, or request cancellation. See https://docs.anthropic.com/en/api/errors#long-requests for more details.",
+            request=request,
+        )
 
 
 class BadRequestError(APIStatusError):

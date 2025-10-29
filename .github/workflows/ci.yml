@@ -7,43 +7,80 @@ on:
       - 'integrated/**'
       - 'stl-preview-head/**'
       - 'stl-preview-base/**'
+  pull_request:
+    branches-ignore:
+      - 'stl-preview-head/**'
+      - 'stl-preview-base/**'
 
 jobs:
   lint:
     timeout-minutes: 10
     name: lint
     runs-on: ${{ github.repository == 'stainless-sdks/anthropic-python' && 'depot-ubuntu-24.04' || 'ubuntu-latest' }}
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rye
-        run: |
-          curl -sSf https://rye.astral.sh/get | bash
-          echo "$HOME/.rye/shims" >> $GITHUB_PATH
-        env:
-          RYE_VERSION: '0.44.0'
-          RYE_INSTALL_OPTION: '--yes'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: '0.8.11'
 
       - name: Install dependencies
-        run: rye sync --all-features
+        run: uv sync --all-extras
 
       - name: Run lints
         run: ./scripts/lint
+
+  build:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
+    timeout-minutes: 10
+    name: build
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ${{ github.repository == 'stainless-sdks/anthropic-python' && 'depot-ubuntu-24.04' || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: '0.8.11'
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run build
+        run: uv build
+
+      - name: Get GitHub OIDC Token
+        if: github.repository == 'stainless-sdks/anthropic-python'
+        id: github-oidc
+        uses: actions/github-script@v6
+        with:
+          script: core.setOutput('github_token', await core.getIDToken());
+
+      - name: Upload tarball
+        if: github.repository == 'stainless-sdks/anthropic-python'
+        env:
+          URL: https://pkg.stainless.com/s
+          AUTH: ${{ steps.github-oidc.outputs.github_token }}
+          SHA: ${{ github.sha }}
+        run: ./scripts/utils/upload-artifact.sh
 
   test:
     timeout-minutes: 10
     name: test
     runs-on: ${{ github.repository == 'stainless-sdks/anthropic-python' && 'depot-ubuntu-24.04' || 'ubuntu-latest' }}
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rye
-        run: |
-          curl -sSf https://rye.astral.sh/get | bash
-          echo "$HOME/.rye/shims" >> $GITHUB_PATH
-        env:
-          RYE_VERSION: '0.44.0'
-          RYE_INSTALL_OPTION: '--yes'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: '0.8.11'
 
       - name: Bootstrap
         run: ./scripts/bootstrap

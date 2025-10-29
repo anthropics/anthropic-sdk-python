@@ -1,3 +1,5 @@
+#!/usr/bin/env -S rye run python
+
 import asyncio
 
 from anthropic import AsyncAnthropic
@@ -14,7 +16,7 @@ async def main() -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="claude-3-5-sonnet-latest",
+        model="claude-sonnet-4-5-20250929",
     ) as stream:
         async for event in stream:
             if event.type == "text":

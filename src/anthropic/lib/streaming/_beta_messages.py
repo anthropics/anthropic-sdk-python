@@ -7,6 +7,10 @@ from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_n
 import httpx
 from pydantic import BaseModel
 
+from anthropic.types.beta.beta_tool_use_block import BetaToolUseBlock
+from anthropic.types.beta.beta_mcp_tool_use_block import BetaMCPToolUseBlock
+from anthropic.types.beta.beta_server_tool_use_block import BetaServerToolUseBlock
+
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
 from ._beta_types import (
@@ -97,7 +101,9 @@ class BetaMessageStream:
                 text_blocks.append(block.text)
 
         if not text_blocks:
-            raise RuntimeError("Expected to have received at least 1 text block")
+            raise RuntimeError(
+                f".get_final_text() can only be called when the API returns a `text` content block.\nThe API returned {','.join([b.type for b in message.content])} content block type(s) that you can access by calling get_final_message().content"
+            )
 
         return "".join(text_blocks)
 
@@ -116,6 +122,7 @@ class BetaMessageStream:
             self.__final_message_snapshot = accumulate_event(
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
+                request_headers=self.response.request.headers,
             )
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
@@ -234,7 +241,9 @@ class BetaAsyncMessageStream:
                 text_blocks.append(block.text)
 
         if not text_blocks:
-            raise RuntimeError("Expected to have received at least 1 text block")
+            raise RuntimeError(
+                f".get_final_text() can only be called when the API returns a `text` content block.\nThe API returned {','.join([b.type for b in message.content])} content block type(s) that you can access by calling get_final_message().content"
+            )
 
         return "".join(text_blocks)
 
@@ -253,6 +262,7 @@ class BetaAsyncMessageStream:
             self.__final_message_snapshot = accumulate_event(
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
+                request_headers=self.response.request.headers,
             )
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
@@ -329,7 +339,7 @@ def build_events(
                     )
                 )
         elif event.delta.type == "input_json_delta":
-            if content_block.type == "tool_use":
+            if content_block.type == "tool_use" or content_block.type == "mcp_tool_use":
                 events_to_fire.append(
                     build(
                         BetaInputJsonEvent,
@@ -388,11 +398,18 @@ def build_events(
 
 JSON_BUF_PROPERTY = "__json_buf"
 
+TRACKS_TOOL_INPUT = (
+    BetaToolUseBlock,
+    BetaServerToolUseBlock,
+    BetaMCPToolUseBlock,
+)
+
 
 def accumulate_event(
     *,
     event: BetaRawMessageStreamEvent,
     current_snapshot: BetaMessage | None,
+    request_headers: httpx.Headers,
 ) -> BetaMessage:
     if not isinstance(cast(Any, event), BaseModel):
         event = cast(  # pyright: ignore[reportUnnecessaryCast]
@@ -425,7 +442,7 @@ def accumulate_event(
             if content.type == "text":
                 content.text += event.delta.text
         elif event.delta.type == "input_json_delta":
-            if content.type == "tool_use":
+            if isinstance(content, TRACKS_TOOL_INPUT):
                 from jiter import from_json
 
                 # we need to keep track of the raw JSON string as well so that we can
@@ -435,7 +452,17 @@ def accumulate_event(
                 json_buf += bytes(event.delta.partial_json, "utf-8")
 
                 if json_buf:
-                    content.input = from_json(json_buf, partial_mode=True)
+                    try:
+                        anthropic_beta = request_headers.get("anthropic-beta", "") if request_headers else ""
+
+                        if "fine-grained-tool-streaming-2025-05-14" in anthropic_beta:
+                            content.input = from_json(json_buf, partial_mode="trailing-strings")
+                        else:
+                            content.input = from_json(json_buf, partial_mode=True)
+                    except ValueError as e:
+                        raise ValueError(
+                            f"Unable to parse tool parameter JSON from model. Please retry your request or adjust your prompt. Error: {e}. JSON: {json_buf.decode('utf-8')}"
+                        ) from e
 
                 setattr(content, JSON_BUF_PROPERTY, json_buf)
         elif event.delta.type == "citations_delta":
@@ -455,9 +482,11 @@ def accumulate_event(
             if TYPE_CHECKING:  # type: ignore[unreachable]
                 assert_never(event.delta)
     elif event.type == "message_delta":
+        current_snapshot.container = event.delta.container
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
         current_snapshot.usage.output_tokens = event.usage.output_tokens
+        current_snapshot.context_management = event.context_management
 
         # Update other usage fields if they exist in the event
         if event.usage.input_tokens is not None:

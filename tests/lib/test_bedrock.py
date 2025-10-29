@@ -1,5 +1,7 @@
 import re
-from typing import cast
+import typing as t
+import tempfile
+from typing import TypedDict, cast
 from typing_extensions import Protocol
 
 import httpx
@@ -24,6 +26,42 @@ class MockRequestCall(Protocol):
     request: httpx.Request
 
 
+class AwsConfigProfile(TypedDict):
+    # Available regions: https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html#available-regions
+    name: t.Union[t.Literal["default"], str]
+    region: str
+
+
+def profile_to_ini(profile: AwsConfigProfile) -> str:
+    """
+    Convert an AWS config profile to an INI format string.
+    """
+
+    profile_name = profile["name"] if profile["name"] == "default" else f"profile {profile['name']}"
+    return f"[{profile_name}]\nregion = {profile['region']}\n"
+
+
+@pytest.fixture
+def profiles() -> t.List[AwsConfigProfile]:
+    return [
+        {"name": "default", "region": "us-east-2"},
+    ]
+
+
+@pytest.fixture
+def mock_aws_config(
+    profiles: t.List[AwsConfigProfile],
+    monkeypatch: t.Any,
+) -> t.Iterable[None]:
+    with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
+        for profile in profiles:
+            temp_file.write(profile_to_ini(profile))
+        temp_file.flush()
+        monkeypatch.setenv("AWS_CONFIG_FILE", str(temp_file.name))
+        yield
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 def test_messages_retries(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
@@ -41,7 +79,7 @@ def test_messages_retries(respx_mock: MockRouter) -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="anthropic.claude-3-sonnet-20240229-v1:0",
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
     )
 
     calls = cast("list[MockRequestCall]", respx_mock.calls)
@@ -50,14 +88,15 @@ def test_messages_retries(respx_mock: MockRouter) -> None:
 
     assert (
         calls[0].request.url
-        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke"
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke"
     )
     assert (
         calls[1].request.url
-        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke"
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke"
     )
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 @pytest.mark.asyncio()
 async def test_messages_retries_async(respx_mock: MockRouter) -> None:
@@ -76,7 +115,7 @@ async def test_messages_retries_async(respx_mock: MockRouter) -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="anthropic.claude-3-sonnet-20240229-v1:0",
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
     )
 
     calls = cast("list[MockRequestCall]", respx_mock.calls)
@@ -85,14 +124,15 @@ async def test_messages_retries_async(respx_mock: MockRouter) -> None:
 
     assert (
         calls[0].request.url
-        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke"
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke"
     )
     assert (
         calls[1].request.url
-        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke"
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke"
     )
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 def test_application_inference_profile(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
@@ -124,3 +164,34 @@ def test_application_inference_profile(respx_mock: MockRouter) -> None:
         calls[1].request.url
         == "https://bedrock-runtime.us-east-1.amazonaws.com/model/arn:aws:bedrock:us-east-1:123456789012:application-inference-profile%2Fjf2sje1c0jnb/invoke"
     )
+
+
+def test_region_infer_from_profile(
+    mock_aws_config: None,  # noqa: ARG001
+    profiles: t.List[AwsConfigProfile],
+) -> None:
+    client = AnthropicBedrock()
+    assert client.aws_region == profiles[0]["region"]
+
+
+@pytest.mark.parametrize(
+    "profiles, aws_profile",
+    [
+        pytest.param([{"name": "default", "region": "us-east-2"}], "default", id="default profile"),
+        pytest.param(
+            [{"name": "default", "region": "us-east-2"}, {"name": "custom", "region": "us-west-1"}],
+            "custom",
+            id="custom profile",
+        ),
+    ],
+)
+def test_region_infer_from_specified_profile(
+    mock_aws_config: None,  # noqa: ARG001
+    profiles: t.List[AwsConfigProfile],
+    aws_profile: str,
+    monkeypatch: t.Any,
+) -> None:
+    monkeypatch.setenv("AWS_PROFILE", aws_profile)
+    client = AnthropicBedrock()
+
+    assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]

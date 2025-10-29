@@ -8,20 +8,34 @@ from ..._models import BaseModel
 from .beta_text_block import BetaTextBlock
 from .beta_thinking_block import BetaThinkingBlock
 from .beta_tool_use_block import BetaToolUseBlock
+from .beta_mcp_tool_use_block import BetaMCPToolUseBlock
+from .beta_mcp_tool_result_block import BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock
+from .beta_container_upload_block import BetaContainerUploadBlock
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock
+from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock
 from .beta_web_search_tool_result_block import BetaWebSearchToolResultBlock
+from .beta_code_execution_tool_result_block import BetaCodeExecutionToolResultBlock
+from .beta_bash_code_execution_tool_result_block import BetaBashCodeExecutionToolResultBlock
+from .beta_text_editor_code_execution_tool_result_block import BetaTextEditorCodeExecutionToolResultBlock
 
 __all__ = ["BetaRawContentBlockStartEvent", "ContentBlock"]
 
 ContentBlock: TypeAlias = Annotated[
     Union[
         BetaTextBlock,
+        BetaThinkingBlock,
+        BetaRedactedThinkingBlock,
         BetaToolUseBlock,
         BetaServerToolUseBlock,
         BetaWebSearchToolResultBlock,
-        BetaThinkingBlock,
-        BetaRedactedThinkingBlock,
+        BetaWebFetchToolResultBlock,
+        BetaCodeExecutionToolResultBlock,
+        BetaBashCodeExecutionToolResultBlock,
+        BetaTextEditorCodeExecutionToolResultBlock,
+        BetaMCPToolUseBlock,
+        BetaMCPToolResultBlock,
+        BetaContainerUploadBlock,
     ],
     PropertyInfo(discriminator="type"),
 ]
@@ -29,6 +43,7 @@ ContentBlock: TypeAlias = Annotated[
 
 class BetaRawContentBlockStartEvent(BaseModel):
     content_block: ContentBlock
+    """Response model for a file uploaded to the container."""
 
     index: int
 

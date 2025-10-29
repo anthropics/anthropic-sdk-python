@@ -13,13 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rye
-        run: |
-          curl -sSf https://rye.astral.sh/get | bash
-          echo "$HOME/.rye/shims" >> $GITHUB_PATH
-        env:
-          RYE_VERSION: '0.44.0'
-          RYE_INSTALL_OPTION: '--yes'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: '0.8.11'
 
       - name: Publish to PyPI
         run: |

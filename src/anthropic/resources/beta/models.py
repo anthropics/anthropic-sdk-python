@@ -7,7 +7,7 @@ from typing import List
 import httpx
 
 from ... import _legacy_response
-from ..._types import NOT_GIVEN, Body, Query, Headers, NotGiven
+from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ..._utils import is_given, maybe_transform, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
@@ -45,13 +45,13 @@ class Models(SyncAPIResource):
         self,
         model_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaModelInfo:
         """
         Get a specific model.
@@ -75,7 +75,7 @@ class Models(SyncAPIResource):
         if not model_id:
             raise ValueError(f"Expected a non-empty value for `model_id` but received {model_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
         }
         return self._get(
@@ -89,16 +89,16 @@ class Models(SyncAPIResource):
     def list(
         self,
         *,
-        after_id: str | NotGiven = NOT_GIVEN,
-        before_id: str | NotGiven = NOT_GIVEN,
-        limit: int | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        after_id: str | Omit = omit,
+        before_id: str | Omit = omit,
+        limit: int | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> SyncPage[BetaModelInfo]:
         """
         List available models.
@@ -128,7 +128,7 @@ class Models(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
         }
         return self._get_api_list(
@@ -176,13 +176,13 @@ class AsyncModels(AsyncAPIResource):
         self,
         model_id: str,
         *,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaModelInfo:
         """
         Get a specific model.
@@ -206,7 +206,7 @@ class AsyncModels(AsyncAPIResource):
         if not model_id:
             raise ValueError(f"Expected a non-empty value for `model_id` but received {model_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
         }
         return await self._get(
@@ -220,16 +220,16 @@ class AsyncModels(AsyncAPIResource):
     def list(
         self,
         *,
-        after_id: str | NotGiven = NOT_GIVEN,
-        before_id: str | NotGiven = NOT_GIVEN,
-        limit: int | NotGiven = NOT_GIVEN,
-        betas: List[AnthropicBetaParam] | NotGiven = NOT_GIVEN,
+        after_id: str | Omit = omit,
+        before_id: str | Omit = omit,
+        limit: int | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaModelInfo, AsyncPage[BetaModelInfo]]:
         """
         List available models.
@@ -259,7 +259,7 @@ class AsyncModels(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
         }
         return self._get_api_list(

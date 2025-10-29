@@ -37,7 +37,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -58,7 +58,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -83,7 +83,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -276,7 +276,9 @@ class TestBatches:
 
 
 class TestAsyncBatches:
-    parametrize = pytest.mark.parametrize("async_client", [False, True], indirect=True, ids=["loose", "strict"])
+    parametrize = pytest.mark.parametrize(
+        "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
+    )
 
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
@@ -292,7 +294,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -313,7 +315,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -338,7 +340,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],

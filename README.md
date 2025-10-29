@@ -1,6 +1,7 @@
 # Anthropic Python API library
 
-[![PyPI version](https://img.shields.io/pypi/v/anthropic.svg)](https://pypi.org/project/anthropic/)
+<!-- prettier-ignore -->
+[![PyPI version](https://img.shields.io/pypi/v/anthropic.svg?label=pypi%20(stable))](https://pypi.org/project/anthropic/)
 
 The Anthropic Python library provides convenient access to the Anthropic REST API from any Python 3.8+
 application. It includes type definitions for all request params and response fields,
@@ -37,7 +38,7 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-5-20250929",
 )
 print(message.content)
 ```
@@ -70,7 +71,7 @@ async def main() -> None:
                 "content": "Hello, Claude",
             }
         ],
-        model="claude-3-5-sonnet-latest",
+        model="claude-sonnet-4-5-20250929",
     )
     print(message.content)
 
@@ -79,6 +80,46 @@ asyncio.run(main())
 ```
 
 Functionality between the synchronous and asynchronous clients is otherwise identical.
+
+### With aiohttp
+
+By default, the async client uses `httpx` for HTTP requests. However, for improved concurrency performance you may also use `aiohttp` as the HTTP backend.
+
+You can enable this by installing `aiohttp`:
+
+```sh
+# install from PyPI
+pip install anthropic[aiohttp]
+```
+
+Then you can enable it by instantiating the client with `http_client=DefaultAioHttpClient()`:
+
+```python
+import asyncio
+from anthropic import DefaultAioHttpClient
+from anthropic import AsyncAnthropic
+
+
+async def main() -> None:
+    async with AsyncAnthropic(
+        api_key="my-anthropic-api-key",
+        http_client=DefaultAioHttpClient(),
+    ) as client:
+        message = await client.messages.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Hello, Claude",
+                }
+            ],
+            model="claude-sonnet-4-5-20250929",
+        )
+        print(message.content)
+
+
+asyncio.run(main())
+```
 
 ## Streaming responses
 
@@ -97,7 +138,7 @@ stream = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-5-20250929",
     stream=True,
 )
 for event in stream:
@@ -119,12 +160,61 @@ stream = await client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-5-20250929",
     stream=True,
 )
 async for event in stream:
     print(event.type)
 ```
+
+### Tool helpers
+
+This library provides helper functions for defining and running tools as pure python functions, for example:
+
+```py
+import json
+import rich
+from typing_extensions import Literal
+from anthropic import Anthropic, beta_tool
+
+client = Anthropic()
+
+
+@beta_tool
+def get_weather(location: str) -> str:
+    """Lookup the weather for a given city in either celsius or fahrenheit
+
+    Args:
+        location: The city and state, e.g. San Francisco, CA
+    Returns:
+        A dictionary containing the location, temperature, and weather condition.
+    """
+    # Here you would typically make an API call to a weather service
+    # For demonstration, we return a mock response
+    return json.dumps(
+        {
+            "location": location,
+            "temperature": "68°F",
+            "condition": "Sunny",
+        }
+    )
+
+
+runner = client.beta.messages.tool_runner(
+    max_tokens=1024,
+    model="claude-sonnet-4-5-20250929",
+    tools=[get_weather],
+    messages=[
+        {"role": "user", "content": "What is the weather in SF?"},
+    ],
+)
+for message in runner:
+    rich.print(message)
+```
+
+On every iteration, an API request will be made, if Claude wants to call one of the given tools then it will be automatically called, and the result will be returned directly to the model in the next iteration.
+
+For more information see the [full docs](tools.md).
 
 ### Streaming Helpers
 
@@ -145,7 +235,7 @@ async def main() -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="claude-3-5-sonnet-latest",
+        model="claude-sonnet-4-5-20250929",
     ) as stream:
         async for text in stream.text_stream:
             print(text, end="", flush=True)
@@ -163,11 +253,11 @@ Alternatively, you can use `client.messages.create(..., stream=True)` which only
 
 ## Token counting
 
-To get the token count for a message without creating it you can use the `client.beta.messages.count_tokens()` method. This takes the same `messages` list as the `.create()` method.
+To get the token count for a message without creating it you can use the `client.messages.count_tokens()` method. This takes the same `messages` list as the `.create()` method.
 
 ```py
-count = client.beta.messages.count_tokens(
-    model="claude-3-5-sonnet-20241022",
+count = client.messages.count_tokens(
+    model="claude-sonnet-4-5-20250929",
     messages=[
         {"role": "user", "content": "Hello, world"}
     ]
@@ -185,20 +275,19 @@ message.usage
 
 ## Message Batches
 
-This SDK provides beta support for the [Message Batches API](https://docs.anthropic.com/en/docs/build-with-claude/message-batches) under the `client.beta.messages.batches` namespace.
-
+This SDK provides support for the [Message Batches API](https://docs.anthropic.com/en/docs/build-with-claude/message-batches) under the `client.messages.batches` namespace.
 
 ### Creating a batch
 
 Message Batches take the exact same request params as the standard Messages API:
 
 ```python
-await client.beta.messages.batches.create(
+await client.messages.batches.create(
     requests=[
         {
             "custom_id": "my-first-request",
             "params": {
-                "model": "claude-3-5-sonnet-latest",
+                "model": "claude-sonnet-4-5-20250929",
                 "max_tokens": 1024,
                 "messages": [{"role": "user", "content": "Hello, world"}],
             },
@@ -206,7 +295,7 @@ await client.beta.messages.batches.create(
         {
             "custom_id": "my-second-request",
             "params": {
-                "model": "claude-3-5-sonnet-latest",
+                "model": "claude-sonnet-4-5-20250929",
                 "max_tokens": 1024,
                 "messages": [{"role": "user", "content": "Hi again, friend"}],
             },
@@ -215,13 +304,12 @@ await client.beta.messages.batches.create(
 )
 ```
 
-
 ### Getting results from a batch
 
 Once a Message Batch has been processed, indicated by `.processing_status === 'ended'`, you can access the results with `.batches.results()`
 
 ```python
-result_stream = await client.beta.messages.batches.results(batch_id)
+result_stream = await client.messages.batches.results(batch_id)
 async for entry in result_stream:
     if entry.result.type == "succeeded":
         print(entry.result.message.content)
@@ -250,7 +338,7 @@ message = client.messages.create(
             "content": "Hello!",
         }
     ],
-    model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    model="anthropic.claude-sonnet-4-5-20250929-v1:0",
 )
 print(message)
 ```
@@ -281,7 +369,7 @@ from anthropic import AnthropicVertex
 client = AnthropicVertex()
 
 message = client.messages.create(
-    model="claude-3-5-sonnet-v2@20241022",
+    model="claude-sonnet-4@20250514",
     max_tokens=100,
     messages=[
         {
@@ -317,7 +405,7 @@ client = Anthropic()
 
 all_batches = []
 # Automatically fetches more pages as needed.
-for batch in client.beta.messages.batches.list(
+for batch in client.messages.batches.list(
     limit=20,
 ):
     # Do something with batch here
@@ -337,7 +425,7 @@ client = AsyncAnthropic()
 async def main() -> None:
     all_batches = []
     # Iterate through items across all pages, issuing requests as needed.
-    async for batch in client.beta.messages.batches.list(
+    async for batch in client.messages.batches.list(
         limit=20,
     ):
         all_batches.append(batch)
@@ -350,7 +438,7 @@ asyncio.run(main())
 Alternatively, you can use the `.has_next_page()`, `.next_page_info()`, or `.get_next_page()` methods for more granular control working with pages:
 
 ```python
-first_page = await client.beta.messages.batches.list(
+first_page = await client.messages.batches.list(
     limit=20,
 )
 if first_page.has_next_page():
@@ -364,7 +452,7 @@ if first_page.has_next_page():
 Or just work directly with the returned data:
 
 ```python
-first_page = await client.beta.messages.batches.list(
+first_page = await client.messages.batches.list(
     limit=20,
 )
 
@@ -392,11 +480,28 @@ message = client.messages.create(
             "role": "user",
         }
     ],
-    model="claude-3-7-sonnet-20250219",
-    metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+    model="claude-sonnet-4-5-20250929",
+    metadata={},
 )
 print(message.metadata)
 ```
+
+## File uploads
+
+Request parameters that correspond to file uploads can be passed as `bytes`, or a [`PathLike`](https://docs.python.org/3/library/os.html#os.PathLike) instance or a tuple of `(filename, contents, media type)`.
+
+```python
+from pathlib import Path
+from anthropic import Anthropic
+
+client = Anthropic()
+
+client.beta.files.upload(
+    file=Path("/path/to/file"),
+)
+```
+
+The async client uses the exact same interface. If you pass a [`PathLike`](https://docs.python.org/3/library/os.html#os.PathLike) instance, the file contents will be read asynchronously automatically.
 
 ## Handling errors
 
@@ -422,7 +527,7 @@ try:
                 "content": "Hello, Claude",
             }
         ],
-        model="claude-3-5-sonnet-latest",
+        model="claude-sonnet-4-5-20250929",
     )
 except anthropic.APIConnectionError as e:
     print("The server could not be reached")
@@ -463,14 +568,14 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-5-20250929",
 )
 print(message._request_id)  # req_018EeWyXxfu5pfWkrYcMdjWG
 ```
 
 Note that unlike other properties that use an `_` prefix, the `_request_id` property
-*is* public. Unless documented otherwise, *all* other `_` prefix properties,
-methods and modules are *private*.
+_is_ public. Unless documented otherwise, _all_ other `_` prefix properties,
+methods and modules are _private_.
 
 ### Retries
 
@@ -498,14 +603,14 @@ client.with_options(max_retries=5).messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-5-20250929",
 )
 ```
 
 ### Timeouts
 
 By default requests time out after 10 minutes. You can configure this with a `timeout` option,
-which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/#fine-tuning-the-configuration) object:
+which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/timeouts/#fine-tuning-the-configuration) object:
 
 ```python
 from anthropic import Anthropic
@@ -530,7 +635,7 @@ client.with_options(timeout=5.0).messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-5-20250929",
 )
 ```
 
@@ -613,7 +718,7 @@ response = client.messages.with_raw_response.create(
         "role": "user",
         "content": "Hello, Claude",
     }],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-5-20250929",
 )
 print(response.headers.get('X-My-Header'))
 
@@ -647,7 +752,7 @@ with client.messages.with_streaming_response.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-5-20250929",
 ) as response:
     print(response.headers.get("X-My-Header"))
 
@@ -684,6 +789,10 @@ print(response.headers.get("x-foo"))
 
 If you want to explicitly send an extra param, you can do so with the `extra_query`, `extra_body`, and `extra_headers` request
 options.
+
+> [!WARNING]
+>
+> The `extra_` parameters of the same name overrides the documented parameters. For security reasons, ensure these methods are only used with trusted input data.
 
 #### Undocumented response properties
 

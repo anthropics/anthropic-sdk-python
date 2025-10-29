@@ -1,6 +1,7 @@
 [project]
 name = "anthropic"
 version = "0.51.1"
+version = "0.72.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "MIT"
@@ -15,6 +16,7 @@ dependencies = [
     "distro>=1.7.0, <2",
     "sniffio",
     "jiter>=0.4.0, <1",
+    "docstring-parser>=0.15,<1",
 ]
 requires-python = ">= 3.8"
 classifiers = [
@@ -25,6 +27,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Operating System :: OS Independent",
   "Operating System :: POSIX",
   "Operating System :: MacOS",
@@ -35,6 +38,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+aiohttp = ["aiohttp", "httpx_aiohttp>=0.1.9"]
 vertex = ["google-auth[requests] >=2, <3"]
 bedrock = ["boto3 >= 1.28.57", "botocore >= 1.31.57"]
 
@@ -42,11 +46,19 @@ bedrock = ["boto3 >= 1.28.57", "botocore >= 1.31.57"]
 Homepage = "https://github.com/anthropics/anthropic-sdk-python"
 Repository = "https://github.com/anthropics/anthropic-sdk-python"
 
-
-[tool.rye]
+[tool.uv]
 managed = true
-# version pins are in requirements-dev.lock
-dev-dependencies = [
+required-version = ">=0.5.0"
+conflicts = [
+    [
+      { group = "pydantic-v1" },
+      { group = "pydantic-v2" },
+    ],
+]
+
+[dependency-groups]
+# version pins are in uv.lock
+dev = [
     "pyright==1.1.399",
     "mypy",
     "respx",
@@ -54,42 +66,20 @@ dev-dependencies = [
     "pytest-asyncio",
     "ruff",
     "time-machine",
-    "nox",
     "dirty-equals>=0.6.0",
     "importlib-metadata>=6.7.0",
     "boto3-stubs >= 1",
     "rich>=13.7.1",
-    "nest_asyncio==1.6.0",
+    "pytest-xdist>=3.6.1",
+    "inline-snapshot>=0.28.0",
+    "griffe>=1",
 ]
-
-[tool.rye.scripts]
-format = { chain = [
-  "format:ruff",
-  "format:docs",
-  "fix:ruff",
-  # run formatting again to fix any inconsistencies when imports are stripped
-  "format:ruff",
-]}
-"format:docs" = "python scripts/utils/ruffen-docs.py README.md api.md"
-"format:ruff" = "ruff format"
-
-"lint" = { chain = [
-  "check:ruff",
-  "typecheck",
-  "check:importable",
-]}
-"check:ruff" = "ruff check ."
-"fix:ruff" = "ruff check --fix ."
-
-"check:importable" = "python -c 'import anthropic'"
-
-typecheck = { chain = [
-  "typecheck:pyright",
-  "typecheck:mypy"
-]}
-"typecheck:pyright" = "pyright"
-"typecheck:verify-types" = "pyright --verifytypes anthropic --ignoreexternal"
-"typecheck:mypy" = "mypy ."
+pydantic-v1 = [
+    "pydantic>=1.9.0,<2",
+]
+pydantic-v2 = [
+    "pydantic>=2,<3",
+]
 
 [build-system]
 requires = ["hatchling==1.26.3", "hatch-fancy-pypi-readme"]
@@ -131,13 +121,16 @@ replacement = '[\1](https://github.com/anthropics/anthropic-sdk-python/tree/main
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--tb=short"
+addopts = "--tb=short -n auto"
 xfail_strict = true
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 filterwarnings = [
   "error"
 ]
+
+[tool.inline-snapshot]
+format-command="ruff format --stdin-filename {filename}"
 
 [tool.pyright]
 # this enables practically every flag given by pyright.
@@ -147,6 +140,7 @@ typeCheckingMode = "strict"
 pythonVersion = "3.8"
 
 exclude = [
+    ".git",
     "_dev",
     ".venv",
     ".nox",
@@ -158,10 +152,65 @@ reportOverlappingOverload = false
 reportImportCycles = false
 reportPrivateUsage = false
 
+[tool.mypy]
+pretty = true
+show_error_codes = true
+
+# Exclude _files.py because mypy isn't smart enough to apply
+# the correct type narrowing and as this is an internal module
+# it's fine to just use Pyright.
+#
+# We also exclude our `tests` as mypy doesn't always infer
+# types correctly and Pyright will still catch any type errors.
+exclude = ['src/anthropic/_files.py', '_dev/.*.py', 'tests/.*', 'examples/mcp_server_weather.py', 'examples/tools_with_mcp.py', 'examples/memory/basic.py']
+
+strict_equality = true
+implicit_reexport = true
+check_untyped_defs = true
+no_implicit_optional = true
+
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+
+# Turn these options off as it could cause conflicts
+# with the Pyright options.
+warn_unused_ignores = false
+warn_redundant_casts = false
+
+disallow_any_generics = true
+disallow_untyped_defs = true
+disallow_untyped_calls = true
+disallow_subclassing_any = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+cache_fine_grained = true
+
+# By default, mypy reports an error if you assign a value to the result
+# of a function call that doesn't return anything. We do this in our test
+# cases:
+# ```
+# result = ...
+# assert result is None
+# ```
+# Changing this codegen to make mypy happy would increase complexity
+# and would not be worth it.
+disable_error_code = "func-returns-value,overload-cannot-match"
+
+# https://github.com/python/mypy/issues/12162
+[[tool.mypy.overrides]]
+module = "black.files.*"
+ignore_errors = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "anthropic.lib.vertex._auth"
+disallow_untyped_calls = false
+
 [tool.ruff]
 line-length = 120
 output-format = "grouped"
-target-version = "py37"
+target-version = "py38"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -174,6 +223,8 @@ select = [
   "B",
   # remove unused imports
   "F401",
+  # check for missing future annotations
+  "FA102",
   # bare except statements
   "E722",
   # unused arguments
@@ -195,6 +246,8 @@ unfixable = [
   "T201",
   "T203",
 ]
+
+extend-safe-fixes = ["FA102"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "functools.lru_cache".msg = "This function does not retain type information for the wrapped function's arguments; The `lru_cache` function from `_utils` should be used instead"

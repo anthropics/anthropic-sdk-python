@@ -24,6 +24,7 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 class TestBatches:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.create(
@@ -38,13 +39,14 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.create(
@@ -59,15 +61,62 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
+                        "container": {
+                            "id": "id",
+                            "skills": [
+                                {
+                                    "skill_id": "x",
+                                    "type": "anthropic",
+                                    "version": "x",
+                                }
+                            ],
+                        },
+                        "context_management": {
+                            "edits": [
+                                {
+                                    "type": "clear_tool_uses_20250919",
+                                    "clear_at_least": {
+                                        "type": "input_tokens",
+                                        "value": 0,
+                                    },
+                                    "clear_tool_inputs": True,
+                                    "exclude_tools": ["string"],
+                                    "keep": {
+                                        "type": "tool_uses",
+                                        "value": 0,
+                                    },
+                                    "trigger": {
+                                        "type": "input_tokens",
+                                        "value": 1,
+                                    },
+                                }
+                            ]
+                        },
+                        "mcp_servers": [
+                            {
+                                "name": "name",
+                                "type": "url",
+                                "url": "url",
+                                "authorization_token": "authorization_token",
+                                "tool_configuration": {
+                                    "allowed_tools": ["string"],
+                                    "enabled": True,
+                                },
+                            }
+                        ],
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+                        "service_tier": "auto",
                         "stop_sequences": ["string"],
                         "stream": False,
                         "system": [
                             {
                                 "text": "Today's date is 2024-06-01.",
                                 "type": "text",
-                                "cache_control": {"type": "ephemeral"},
+                                "cache_control": {
+                                    "type": "ephemeral",
+                                    "ttl": "5m",
+                                },
                                 "citations": [
                                     {
                                         "cited_text": "cited_text",
@@ -94,18 +143,16 @@ class TestBatches:
                                 "input_schema": {
                                     "type": "object",
                                     "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
+                                        "location": "bar",
+                                        "unit": "bar",
                                     },
+                                    "required": ["location"],
                                 },
                                 "name": "name",
-                                "cache_control": {"type": "ephemeral"},
+                                "cache_control": {
+                                    "type": "ephemeral",
+                                    "ttl": "5m",
+                                },
                                 "description": "Get the current weather in a given location",
                                 "type": "custom",
                             }
@@ -119,6 +166,7 @@ class TestBatches:
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.messages.batches.with_raw_response.create(
@@ -133,7 +181,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -144,6 +192,7 @@ class TestBatches:
         batch = response.parse()
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.messages.batches.with_streaming_response.create(
@@ -158,7 +207,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -375,7 +424,7 @@ class TestBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
+    @pytest.mark.skip(reason="Prism doesn't support application/x-jsonl responses")
     @parametrize
     def test_path_params_results(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
@@ -385,8 +434,11 @@ class TestBatches:
 
 
 class TestAsyncBatches:
-    parametrize = pytest.mark.parametrize("async_client", [False, True], indirect=True, ids=["loose", "strict"])
+    parametrize = pytest.mark.parametrize(
+        "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
+    )
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.create(
@@ -401,13 +453,14 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.create(
@@ -422,15 +475,62 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
+                        "container": {
+                            "id": "id",
+                            "skills": [
+                                {
+                                    "skill_id": "x",
+                                    "type": "anthropic",
+                                    "version": "x",
+                                }
+                            ],
+                        },
+                        "context_management": {
+                            "edits": [
+                                {
+                                    "type": "clear_tool_uses_20250919",
+                                    "clear_at_least": {
+                                        "type": "input_tokens",
+                                        "value": 0,
+                                    },
+                                    "clear_tool_inputs": True,
+                                    "exclude_tools": ["string"],
+                                    "keep": {
+                                        "type": "tool_uses",
+                                        "value": 0,
+                                    },
+                                    "trigger": {
+                                        "type": "input_tokens",
+                                        "value": 1,
+                                    },
+                                }
+                            ]
+                        },
+                        "mcp_servers": [
+                            {
+                                "name": "name",
+                                "type": "url",
+                                "url": "url",
+                                "authorization_token": "authorization_token",
+                                "tool_configuration": {
+                                    "allowed_tools": ["string"],
+                                    "enabled": True,
+                                },
+                            }
+                        ],
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+                        "service_tier": "auto",
                         "stop_sequences": ["string"],
                         "stream": False,
                         "system": [
                             {
                                 "text": "Today's date is 2024-06-01.",
                                 "type": "text",
-                                "cache_control": {"type": "ephemeral"},
+                                "cache_control": {
+                                    "type": "ephemeral",
+                                    "ttl": "5m",
+                                },
                                 "citations": [
                                     {
                                         "cited_text": "cited_text",
@@ -457,18 +557,16 @@ class TestAsyncBatches:
                                 "input_schema": {
                                     "type": "object",
                                     "properties": {
-                                        "location": {
-                                            "description": "The city and state, e.g. San Francisco, CA",
-                                            "type": "string",
-                                        },
-                                        "unit": {
-                                            "description": "Unit for the output - one of (celsius, fahrenheit)",
-                                            "type": "string",
-                                        },
+                                        "location": "bar",
+                                        "unit": "bar",
                                     },
+                                    "required": ["location"],
                                 },
                                 "name": "name",
-                                "cache_control": {"type": "ephemeral"},
+                                "cache_control": {
+                                    "type": "ephemeral",
+                                    "ttl": "5m",
+                                },
                                 "description": "Get the current weather in a given location",
                                 "type": "custom",
                             }
@@ -482,6 +580,7 @@ class TestAsyncBatches:
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.messages.batches.with_raw_response.create(
@@ -496,7 +595,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -507,6 +606,7 @@ class TestAsyncBatches:
         batch = response.parse()
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
+    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.messages.batches.with_streaming_response.create(
@@ -521,7 +621,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-3-7-sonnet-20250219",
+                        "model": "claude-sonnet-4-5-20250929",
                     },
                 }
             ],
@@ -739,7 +839,7 @@ class TestAsyncBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @pytest.mark.skip(reason="Prism doesn't support JSONL responses yet")
+    @pytest.mark.skip(reason="Prism doesn't support application/x-jsonl responses")
     @parametrize
     async def test_path_params_results(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):

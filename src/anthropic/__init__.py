@@ -3,7 +3,7 @@
 import typing as _t
 
 from . import types
-from ._types import NOT_GIVEN, Omit, NoneType, NotGiven, Transport, ProxiesTypes
+from ._types import NOT_GIVEN, Omit, NoneType, NotGiven, Transport, ProxiesTypes, omit, not_given
 from ._utils import file_from_path
 from ._client import (
     Client,
@@ -42,7 +42,7 @@ from ._exceptions import (
     UnprocessableEntityError,
     APIResponseValidationError,
 )
-from ._base_client import DefaultHttpxClient, DefaultAsyncHttpxClient
+from ._base_client import DefaultHttpxClient, DefaultAioHttpClient, DefaultAsyncHttpxClient
 from ._utils._logs import setup_logging as _setup_logging
 
 __all__ = [
@@ -54,7 +54,9 @@ __all__ = [
     "ProxiesTypes",
     "NotGiven",
     "NOT_GIVEN",
+    "not_given",
     "Omit",
+    "omit",
     "AnthropicError",
     "APIError",
     "APIStatusError",
@@ -84,13 +86,17 @@ __all__ = [
     "DEFAULT_CONNECTION_LIMITS",
     "DefaultHttpxClient",
     "DefaultAsyncHttpxClient",
+    "DefaultAioHttpClient",
     "HUMAN_PROMPT",
     "AI_PROMPT",
+    "beta_tool",
+    "beta_async_tool",
 ]
 
 if not _t.TYPE_CHECKING:
     from ._utils._resources_proxy import resources as resources
 
+from .lib.tools import beta_tool, beta_async_tool
 from .lib.vertex import *
 from .lib.bedrock import *
 from .lib.streaming import *
