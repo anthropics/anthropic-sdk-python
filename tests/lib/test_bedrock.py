@@ -195,3 +195,257 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+class TestAnthropicBedrock:
+    client = AnthropicBedrock(
+        aws_region="us-east-1",
+        aws_access_key="example-access-key",
+        aws_secret_key="example-secret-key",
+    )
+
+    def test_copy(self) -> None:
+        copied = self.client.copy()
+        assert id(copied) != id(self.client)
+
+        copied = self.client.copy(
+            aws_region="us-west-2",
+            aws_access_key="another-access-key",
+            aws_secret_key="another-secret-key",
+        )
+        assert copied.aws_region == "us-west-2"
+        assert self.client.aws_region == "us-east-1"
+        assert copied.aws_access_key == "another-access-key"
+        assert self.client.aws_access_key == "example-access-key"
+        assert copied.aws_secret_key == "another-secret-key"
+        assert self.client.aws_secret_key == "example-secret-key"
+
+    def test_with_options(self) -> None:
+        copied = self.client.with_options(
+            aws_region="us-west-2",
+            aws_access_key="another-access-key",
+            aws_secret_key="another-secret-key",
+        )
+        assert copied.aws_region == "us-west-2"
+        assert self.client.aws_region == "us-east-1"
+        assert copied.aws_access_key == "another-access-key"
+        assert self.client.aws_access_key == "example-access-key"
+        assert copied.aws_secret_key == "another-secret-key"
+        assert self.client.aws_secret_key == "example-secret-key"
+
+    def test_copy_default_options(self) -> None:
+        # options that have a default are overridden correctly
+        copied = self.client.copy(max_retries=7)
+        assert copied.max_retries == 7
+        assert self.client.max_retries == 2
+
+        copied2 = copied.copy(max_retries=6)
+        assert copied2.max_retries == 6
+        assert copied.max_retries == 7
+
+        # timeout
+        assert isinstance(self.client.timeout, httpx.Timeout)
+        copied = self.client.copy(timeout=None)
+        assert copied.timeout is None
+        assert isinstance(self.client.timeout, httpx.Timeout)
+
+    def test_copy_default_headers(self) -> None:
+        client = AnthropicBedrock(
+            aws_region="us-east-1",
+            aws_access_key="example-access-key",
+            aws_secret_key="example-secret-key",
+            default_headers={"X-Foo": "bar"},
+        )
+        assert client.default_headers["X-Foo"] == "bar"
+
+        # does not override the already given value when not specified
+        copied = client.copy()
+        assert copied.default_headers["X-Foo"] == "bar"
+
+        # merges already given headers
+        copied = client.copy(default_headers={"X-Bar": "stainless"})
+        assert copied.default_headers["X-Foo"] == "bar"
+        assert copied.default_headers["X-Bar"] == "stainless"
+
+        # uses new values for any already given headers
+        copied = client.copy(default_headers={"X-Foo": "stainless"})
+        assert copied.default_headers["X-Foo"] == "stainless"
+
+        # set_default_headers
+
+        # completely overrides already set values
+        copied = client.copy(set_default_headers={})
+        assert copied.default_headers.get("X-Foo") is None
+
+        copied = client.copy(set_default_headers={"X-Bar": "Robert"})
+        assert copied.default_headers["X-Bar"] == "Robert"
+
+        with pytest.raises(
+            ValueError,
+            match="`default_headers` and `set_default_headers` arguments are mutually exclusive",
+        ):
+            client.copy(set_default_headers={}, default_headers={"X-Foo": "Bar"})
+
+    def test_copy_default_query(self) -> None:
+        client = AnthropicBedrock(
+            aws_region="us-east-1",
+            aws_access_key="example-access-key",
+            aws_secret_key="example-secret-key",
+            default_query={"foo": "bar"},
+        )
+        assert client.default_query["foo"] == "bar"
+
+        # does not override the already given value when not specified
+        copied = client.copy()
+        assert copied.default_query["foo"] == "bar"
+
+        # merges already given params
+        copied = client.copy(default_query={"bar": "stainless"})
+        assert copied.default_query["foo"] == "bar"
+        assert copied.default_query["bar"] == "stainless"
+
+        # uses new values for any already given params
+        copied = client.copy(default_query={"foo": "stainless"})
+        assert copied.default_query["foo"] == "stainless"
+
+        # set_default_query
+
+        # completely overrides already set values
+        copied = client.copy(set_default_query={})
+        assert copied.default_query == {}
+
+        copied = client.copy(set_default_query={"bar": "Robert"})
+        assert copied.default_query["bar"] == "Robert"
+
+        with pytest.raises(
+            ValueError,
+            match="`default_query` and `set_default_query` arguments are mutually exclusive",
+        ):
+            client.copy(set_default_query={}, default_query={"foo": "Bar"})
+
+
+class TestAsyncAnthropicBedrock:
+    client = AsyncAnthropicBedrock(
+        aws_region="us-east-1",
+        aws_access_key="example-access-key",
+        aws_secret_key="example-secret-key",
+    )
+
+    def test_copy(self) -> None:
+        copied = self.client.copy()
+        assert id(copied) != id(self.client)
+
+        copied = self.client.copy(
+            aws_region="us-west-2",
+            aws_access_key="another-access-key",
+            aws_secret_key="another-secret-key",
+        )
+        assert copied.aws_region == "us-west-2"
+        assert self.client.aws_region == "us-east-1"
+        assert copied.aws_access_key == "another-access-key"
+        assert self.client.aws_access_key == "example-access-key"
+        assert copied.aws_secret_key == "another-secret-key"
+        assert self.client.aws_secret_key == "example-secret-key"
+
+    def test_with_options(self) -> None:
+        copied = self.client.with_options(
+            aws_region="us-west-2",
+            aws_access_key="another-access-key",
+            aws_secret_key="another-secret-key",
+        )
+        assert copied.aws_region == "us-west-2"
+        assert self.client.aws_region == "us-east-1"
+        assert copied.aws_access_key == "another-access-key"
+        assert self.client.aws_access_key == "example-access-key"
+        assert copied.aws_secret_key == "another-secret-key"
+        assert self.client.aws_secret_key == "example-secret-key"
+
+    def test_copy_default_options(self) -> None:
+        # options that have a default are overridden correctly
+        copied = self.client.copy(max_retries=7)
+        assert copied.max_retries == 7
+        assert self.client.max_retries == 2
+
+        copied2 = copied.copy(max_retries=6)
+        assert copied2.max_retries == 6
+        assert copied.max_retries == 7
+
+        # timeout
+        assert isinstance(self.client.timeout, httpx.Timeout)
+        copied = self.client.copy(timeout=None)
+        assert copied.timeout is None
+        assert isinstance(self.client.timeout, httpx.Timeout)
+
+    def test_copy_default_headers(self) -> None:
+        client = AsyncAnthropicBedrock(
+            aws_region="us-east-1",
+            aws_access_key="example-access-key",
+            aws_secret_key="example-secret-key",
+            default_headers={"X-Foo": "bar"},
+        )
+        assert client.default_headers["X-Foo"] == "bar"
+
+        # does not override the already given value when not specified
+        copied = client.copy()
+        assert copied.default_headers["X-Foo"] == "bar"
+
+        # merges already given headers
+        copied = client.copy(default_headers={"X-Bar": "stainless"})
+        assert copied.default_headers["X-Foo"] == "bar"
+        assert copied.default_headers["X-Bar"] == "stainless"
+
+        # uses new values for any already given headers
+        copied = client.copy(default_headers={"X-Foo": "stainless"})
+        assert copied.default_headers["X-Foo"] == "stainless"
+
+        # set_default_headers
+
+        # completely overrides already set values
+        copied = client.copy(set_default_headers={})
+        assert copied.default_headers.get("X-Foo") is None
+
+        copied = client.copy(set_default_headers={"X-Bar": "Robert"})
+        assert copied.default_headers["X-Bar"] == "Robert"
+
+        with pytest.raises(
+            ValueError,
+            match="`default_headers` and `set_default_headers` arguments are mutually exclusive",
+        ):
+            client.copy(set_default_headers={}, default_headers={"X-Foo": "Bar"})
+
+    def test_copy_default_query(self) -> None:
+        client = AsyncAnthropicBedrock(
+            aws_region="us-east-1",
+            aws_access_key="example-access-key",
+            aws_secret_key="example-secret-key",
+            default_query={"foo": "bar"},
+        )
+        assert client.default_query["foo"] == "bar"
+
+        # does not override the already given value when not specified
+        copied = client.copy()
+        assert copied.default_query["foo"] == "bar"
+
+        # merges already given params
+        copied = client.copy(default_query={"bar": "stainless"})
+        assert copied.default_query["foo"] == "bar"
+        assert copied.default_query["bar"] == "stainless"
+
+        # uses new values for any already given params
+        copied = client.copy(default_query={"foo": "stainless"})
+        assert copied.default_query["foo"] == "stainless"
+
+        # set_default_query
+
+        # completely overrides already set values
+        copied = client.copy(set_default_query={})
+        assert copied.default_query == {}
+
+        copied = client.copy(set_default_query={"bar": "Robert"})
+        assert copied.default_query["bar"] == "Robert"
+
+        with pytest.raises(
+            ValueError,
+            match="`default_query` and `set_default_query` arguments are mutually exclusive",
+        ):
+            client.copy(set_default_query={}, default_query={"foo": "Bar"})

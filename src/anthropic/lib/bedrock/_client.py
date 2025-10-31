@@ -251,6 +251,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         elif set_default_query is not None:
             params = set_default_query
 
+        http_client = http_client or self._client
         return self.__class__(
             aws_secret_key=aws_secret_key or self.aws_secret_key,
             aws_access_key=aws_access_key or self.aws_access_key,
@@ -393,6 +394,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         elif set_default_query is not None:
             params = set_default_query
 
+        http_client = http_client or self._client
         return self.__class__(
             aws_secret_key=aws_secret_key or self.aws_secret_key,
             aws_access_key=aws_access_key or self.aws_access_key,
