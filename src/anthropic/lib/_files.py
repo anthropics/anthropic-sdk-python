@@ -22,7 +22,7 @@ def _collect_files(directory: Path, relative_to: Path, files: list[FileTypes]) -
             _collect_files(path, relative_to, files)
             continue
 
-        files.append((str(path.relative_to(relative_to)), path.read_bytes()))
+        files.append((path.relative_to(relative_to).as_posix(), path.read_bytes()))
 
 
 async def async_files_from_dir(directory: str | os.PathLike[str]) -> list[FileTypes]:
@@ -39,4 +39,4 @@ async def _async_collect_files(directory: anyio.Path, relative_to: anyio.Path, f
             await _async_collect_files(path, relative_to, files)
             continue
 
-        files.append((str(path.relative_to(relative_to)), await path.read_bytes()))
+        files.append((path.relative_to(relative_to).as_posix(), await path.read_bytes()))
