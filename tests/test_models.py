@@ -9,7 +9,7 @@ from pydantic import Field
 
 from anthropic._utils import PropertyInfo
 from anthropic._compat import PYDANTIC_V1, parse_obj, model_dump, model_json
-from anthropic._models import BaseModel, construct_type, _DISCRIMINATOR_CACHE
+from anthropic._models import _DISCRIMINATOR_CACHE, BaseModel, construct_type
 
 
 class BasicModel(BaseModel):

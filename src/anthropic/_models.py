@@ -75,6 +75,7 @@ _BaseModelT = TypeVar("_BaseModelT", bound="BaseModel")
 
 P = ParamSpec("P")
 
+
 @runtime_checkable
 class _ConfigProtocol(Protocol):
     allow_population_by_field_name: bool
@@ -585,6 +586,7 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
 
 
 _DISCRIMINATOR_CACHE: "WeakKeyDictionary[type, DiscriminatorDetails]" = WeakKeyDictionary()
+
 
 class DiscriminatorDetails:
     field_name: str
