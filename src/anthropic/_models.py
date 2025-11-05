@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import inspect
 from typing import TYPE_CHECKING, Any, Type, Union, Generic, TypeVar, Callable, Optional, cast
+from weakref import WeakKeyDictionary
 from datetime import date, datetime
 from typing_extensions import (
     List,
@@ -73,7 +74,6 @@ _T = TypeVar("_T")
 _BaseModelT = TypeVar("_BaseModelT", bound="BaseModel")
 
 P = ParamSpec("P")
-
 
 @runtime_checkable
 class _ConfigProtocol(Protocol):
@@ -584,10 +584,7 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
     return value
 
 
-@runtime_checkable
-class CachedDiscriminatorType(Protocol):
-    __discriminator__: DiscriminatorDetails
-
+_DISCRIMINATOR_CACHE: "WeakKeyDictionary[type, DiscriminatorDetails]" = WeakKeyDictionary()
 
 class DiscriminatorDetails:
     field_name: str
@@ -631,8 +628,9 @@ class DiscriminatorDetails:
 
 
 def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any, ...]) -> DiscriminatorDetails | None:
-    if isinstance(union, CachedDiscriminatorType):
-        return union.__discriminator__
+    cached_discriminator = _DISCRIMINATOR_CACHE.get(union)
+    if cached_discriminator is not None:
+        return cached_discriminator
 
     discriminator_field_name: str | None = None
 
@@ -685,7 +683,7 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
         discriminator_field=discriminator_field_name,
         discriminator_alias=discriminator_alias,
     )
-    cast(CachedDiscriminatorType, Annotated[union, details])
+    _DISCRIMINATOR_CACHE[union] = details
     return details
 
 
