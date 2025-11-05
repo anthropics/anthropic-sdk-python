@@ -685,7 +685,7 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
         discriminator_field=discriminator_field_name,
         discriminator_alias=discriminator_alias,
     )
-    cast(CachedDiscriminatorType, union).__discriminator__ = details
+    cast(CachedDiscriminatorType, Annotated[union, details])
     return details
 
 
