@@ -3,22 +3,14 @@
 -e .
 annotated-types==0.7.0
     # via pydantic
-anyio==4.5.2 ; python_full_version < '3.9'
-    # via
-    #   anthropic
-    #   httpx
-anyio==4.8.0 ; python_full_version >= '3.9'
+anyio==4.8.0
     # via
     #   anthropic
     #   httpx
 asttokens==3.0.0
     # via inline-snapshot
-astunparse==1.6.3 ; python_full_version < '3.9'
-    # via griffe
-boto3-stubs==1.40.54
-botocore-stubs==1.38.30 ; python_full_version < '3.9'
-    # via boto3-stubs
-botocore-stubs==1.40.54 ; python_full_version >= '3.9'
+boto3-stubs==1.40.69
+botocore-stubs==1.40.69
     # via boto3-stubs
 certifi==2024.12.14
     # via
@@ -41,8 +33,7 @@ execnet==2.1.1
     # via pytest-xdist
 executing==2.2.1
     # via inline-snapshot
-griffe==1.4.0 ; python_full_version < '3.9'
-griffe==1.13.0 ; python_full_version >= '3.9'
+griffe==1.13.0
 h11==0.16.0
     # via httpcore
 httpcore==1.0.9
@@ -55,14 +46,11 @@ idna==3.10
     # via
     #   anyio
     #   httpx
-importlib-metadata==8.5.0 ; python_full_version < '3.9'
-importlib-metadata==8.6.1 ; python_full_version >= '3.9'
+importlib-metadata==8.6.1
 iniconfig==2.0.0
     # via pytest
-inline-snapshot==0.30.0
-jiter==0.9.1 ; python_full_version < '3.9'
-    # via anthropic
-jiter==0.11.0 ; python_full_version >= '3.9'
+inline-snapshot==0.31.1
+jiter==0.12.0
     # via anthropic
 markdown-it-py==3.0.0
     # via rich
@@ -77,62 +65,46 @@ packaging==24.2
     # via pytest
 pluggy==1.5.0
     # via pytest
-pydantic==2.10.6 ; python_full_version < '3.9'
+pydantic==2.10.3
     # via anthropic
-pydantic==2.11.9 ; python_full_version >= '3.9'
-    # via anthropic
-pydantic-core==2.27.2 ; python_full_version < '3.9'
-    # via pydantic
-pydantic-core==2.33.2 ; python_full_version >= '3.9'
+pydantic-core==2.27.1
     # via pydantic
 pygments==2.19.1
     # via
     #   pytest
     #   rich
 pyright==1.1.399
-pytest==8.3.5 ; python_full_version < '3.9'
-    # via
-    #   inline-snapshot
-    #   pytest-asyncio
-    #   pytest-xdist
-pytest==8.4.1 ; python_full_version >= '3.9'
+pytest==8.4.1
     # via
     #   inline-snapshot
     #   pytest-asyncio
     #   pytest-xdist
 pytest-asyncio==0.24.0
-pytest-xdist==3.6.1 ; python_full_version < '3.9'
-pytest-xdist==3.7.0 ; python_full_version >= '3.9'
+pytest-xdist==3.7.0
 python-dateutil==2.9.0.post0
     # via time-machine
-pytz==2024.2 ; python_full_version < '3.9'
-    # via dirty-equals
 respx==0.22.0
 rich==13.9.4
     # via inline-snapshot
 ruff==0.9.4
 six==1.17.0
-    # via
-    #   astunparse
-    #   python-dateutil
+    # via python-dateutil
 sniffio==1.3.1
     # via
     #   anthropic
     #   anyio
-time-machine==2.15.0 ; python_full_version < '3.9'
-time-machine==2.16.0 ; python_full_version >= '3.9'
+time-machine==2.16.0
 tomli==2.2.1 ; python_full_version < '3.11'
     # via
     #   inline-snapshot
     #   mypy
     #   pytest
-types-awscrt==0.28.1
+types-awscrt==0.28.2
     # via botocore-stubs
 types-s3transfer==0.14.0
     # via boto3-stubs
 typing-extensions==4.12.2
     # via
-    #   annotated-types
     #   anthropic
     #   anyio
     #   boto3-stubs
@@ -141,12 +113,5 @@ typing-extensions==4.12.2
     #   pydantic-core
     #   pyright
     #   rich
-    #   typing-inspection
-typing-inspection==0.4.1 ; python_full_version >= '3.9'
-    # via pydantic
-wheel==0.45.1 ; python_full_version < '3.9'
-    # via astunparse
-zipp==3.20.2 ; python_full_version < '3.9'
-    # via importlib-metadata
-zipp==3.21.0 ; python_full_version >= '3.9'
+zipp==3.21.0
     # via importlib-metadata
