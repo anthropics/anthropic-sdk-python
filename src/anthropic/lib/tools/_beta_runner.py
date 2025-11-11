@@ -192,7 +192,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool], Generic[RunnerItemT],
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": repr(exc),
+                        "content": f"Error: Tool '{tool_use.name}' execution failed. Check logs for details.",
                         "is_error": True,
                     }
                 )
@@ -359,7 +359,7 @@ class BaseAsyncToolRunner(BaseToolRunner[BetaAsyncRunnableTool], Generic[RunnerI
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": repr(exc),
+                        "content": f"Error: Tool '{tool_use.name}' execution failed. Check logs for details.",
                         "is_error": True,
                     }
                 )
