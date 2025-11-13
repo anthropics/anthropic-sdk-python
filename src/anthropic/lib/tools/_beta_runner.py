@@ -15,6 +15,7 @@ from typing import (
     Coroutine,
     AsyncIterator,
 )
+from contextlib import contextmanager, asynccontextmanager
 from typing_extensions import TypedDict, override
 
 import httpx
@@ -132,8 +133,35 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool], Generic[RunnerItemT],
             yield item
 
     @abstractmethod
-    def __run__(self) -> Iterator[RunnerItemT]:
+    @contextmanager
+    def _handle_request(self) -> Iterator[RunnerItemT]:
         raise NotImplementedError()
+        yield  # type: ignore[unreachable]
+
+    def __run__(self) -> Iterator[RunnerItemT]:
+        with self._handle_request() as item:
+            yield item
+            message = self._get_last_message()
+            assert message is not None
+        self._iteration_count += 1
+
+        while not self._should_stop():
+            response = self.generate_tool_call_response()
+            if response is None:
+                log.debug("Tool call was not requested, exiting from tool runner loop.")
+                return
+
+            if not self._messages_modified:
+                self.append_messages(message, response)
+
+            self._iteration_count += 1
+            self._messages_modified = False
+            self._cached_tool_call_response = None
+
+            with self._handle_request() as item:
+                yield item
+                message = self._get_last_message()
+                assert message is not None
 
     def until_done(self) -> BetaMessage:
         """
@@ -214,52 +242,20 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool], Generic[RunnerItemT],
 
 class BetaToolRunner(BaseSyncToolRunner[BetaMessage]):
     @override
-    def __run__(self) -> Iterator[BetaMessage]:
-        self._last_message = message = self._client.beta.messages.create(**self._params, **self._options)
+    @contextmanager
+    def _handle_request(self) -> Iterator[BetaMessage]:
+        message = self._client.beta.messages.create(**self._params, **self._options)
+        self._last_message = message
         yield message
-        self._iteration_count += 1
-
-        while not self._should_stop():
-            response = self.generate_tool_call_response()
-            if response is None:
-                log.debug("Tool call was not requested, exiting from tool runner loop.")
-                return
-
-            if not self._messages_modified:
-                self.append_messages(message, response)
-
-            self._iteration_count += 1
-            self._messages_modified = False
-            self._cached_tool_call_response = None
-            self._last_message = message = self._client.beta.messages.create(**self._params, **self._options)
-            yield message
 
 
 class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream]):
     @override
-    def __run__(self) -> Iterator[BetaMessageStream]:
+    @contextmanager
+    def _handle_request(self) -> Iterator[BetaMessageStream]:
         with self._client.beta.messages.stream(**self._params, **self._options) as stream:
             self._last_message = stream.get_final_message
             yield stream
-            message = stream.get_final_message()
-        self._iteration_count += 1
-
-        while not self._should_stop():
-            response = self.generate_tool_call_response()
-            if response is None:
-                log.debug("Tool call was not requested, exiting from tool runner loop.")
-                return
-
-            if not self._messages_modified:
-                self.append_messages(message, response)
-            self._iteration_count += 1
-            self._messages_modified = False
-
-            with self._client.beta.messages.stream(**self._params, **self._options) as stream:
-                self._cached_tool_call_response = None
-                self._last_message = stream.get_final_message
-                yield stream
-                message = stream.get_final_message()
 
 
 class BaseAsyncToolRunner(BaseToolRunner[BetaAsyncRunnableTool], Generic[RunnerItemT], ABC):
@@ -285,9 +281,34 @@ class BaseAsyncToolRunner(BaseToolRunner[BetaAsyncRunnableTool], Generic[RunnerI
             yield item
 
     @abstractmethod
-    async def __run__(self) -> AsyncIterator[RunnerItemT]:
+    @asynccontextmanager
+    async def _handle_request(self) -> AsyncIterator[RunnerItemT]:
         raise NotImplementedError()
         yield  # type: ignore[unreachable]
+
+    async def __run__(self) -> AsyncIterator[RunnerItemT]:
+        async with self._handle_request() as item:
+            yield item
+            message = await self._get_last_message()
+            assert message is not None
+        self._iteration_count += 1
+
+        while not self._should_stop():
+            response = await self.generate_tool_call_response()
+            if response is None:
+                log.debug("Tool call was not requested, exiting from tool runner loop.")
+                return
+
+            if not self._messages_modified:
+                self.append_messages(message, response)
+            self._iteration_count += 1
+            self._messages_modified = False
+            self._cached_tool_call_response = None
+
+            async with self._handle_request() as item:
+                yield item
+                message = await self._get_last_message()
+                assert message is not None
 
     async def until_done(self) -> BetaMessage:
         """
@@ -369,48 +390,17 @@ class BaseAsyncToolRunner(BaseToolRunner[BetaAsyncRunnableTool], Generic[RunnerI
 
 class BetaAsyncToolRunner(BaseAsyncToolRunner[BetaMessage]):
     @override
-    async def __run__(self) -> AsyncIterator[BetaMessage]:
-        self._last_message = message = await self._client.beta.messages.create(**self._params, **self._options)
+    @asynccontextmanager
+    async def _handle_request(self) -> AsyncIterator[BetaMessage]:
+        message = await self._client.beta.messages.create(**self._params, **self._options)
+        self._last_message = message
         yield message
-        self._iteration_count += 1
-
-        while not self._should_stop():
-            response = await self.generate_tool_call_response()
-            if response is None:
-                log.debug("Tool call was not requested, exiting from tool runner loop.")
-                return
-
-            if not self._messages_modified:
-                self.append_messages(message, response)
-            self._iteration_count += 1
-            self._messages_modified = False
-            self._cached_tool_call_response = None
-            self._last_message = message = await self._client.beta.messages.create(**self._params, **self._options)
-            yield message
 
 
 class BetaAsyncStreamingToolRunner(BaseAsyncToolRunner[BetaAsyncMessageStream]):
     @override
-    async def __run__(self) -> AsyncIterator[BetaAsyncMessageStream]:
+    @asynccontextmanager
+    async def _handle_request(self) -> AsyncIterator[BetaAsyncMessageStream]:
         async with self._client.beta.messages.stream(**self._params, **self._options) as stream:
             self._last_message = stream.get_final_message
             yield stream
-            message = await stream.get_final_message()
-        self._iteration_count += 1
-
-        while not self._should_stop():
-            response = await self.generate_tool_call_response()
-            if response is None:
-                log.debug("Tool call was not requested, exiting from tool runner loop.")
-                return
-
-            if not self._messages_modified:
-                self.append_messages(message, response)
-            self._iteration_count += 1
-            self._messages_modified = False
-
-            async with self._client.beta.messages.stream(**self._params, **self._options) as stream:
-                self._last_message = stream.get_final_message
-                self._cached_tool_call_response = None
-                yield stream
-                message = await stream.get_final_message()
