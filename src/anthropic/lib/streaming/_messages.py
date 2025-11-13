@@ -401,6 +401,27 @@ TRACKS_TOOL_INPUT = (
 )
 
 
+def _deep_merge_extra_fields(existing: Any, new: Any) -> Any:
+    """Deep merge new data into existing data, mutating containers in place.
+
+    - Dicts: recursively merge keys (mutates existing dict)
+    - Lists: extend existing with new items (mutates existing list)
+    - Other: replace with new value
+    """
+    if isinstance(existing, dict) and isinstance(new, dict):
+        for key, value in new.items():
+            if key in existing:
+                existing[key] = _deep_merge_extra_fields(existing[key], value)
+            else:
+                existing[key] = value
+        return existing  # Return mutated dict
+    elif isinstance(existing, list) and isinstance(new, list):
+        existing.extend(new)
+        return existing  # Return mutated list
+    else:
+        return new
+
+
 def accumulate_event(
     *,
     event: RawMessageStreamEvent,
@@ -480,5 +501,19 @@ def accumulate_event(
             current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
         if event.usage.server_tool_use is not None:
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+
+    # Accumulate any extra fields from the event into the snapshot
+    if hasattr(event, '__pydantic_extra__') and event.__pydantic_extra__:
+        if not hasattr(current_snapshot, '__pydantic_extra__'):
+            current_snapshot.__pydantic_extra__ = {}
+
+        for key, value in event.__pydantic_extra__.items():
+            if key in current_snapshot.__pydantic_extra__:
+                current_snapshot.__pydantic_extra__[key] = _deep_merge_extra_fields(
+                    current_snapshot.__pydantic_extra__[key],
+                    value
+                )
+            else:
+                current_snapshot.__pydantic_extra__[key] = value
 
     return current_snapshot
