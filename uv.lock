@@ -146,7 +146,7 @@ wheels = [
 
 [[package]]
 name = "anthropic"
-version = "0.72.0"
+version = "0.72.1"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },
@@ -1281,9 +1281,9 @@ resolution-markers = [
     "python_full_version < '3.10'",
 ]
 dependencies = [
-    { name = "annotated-types" },
-    { name = "pydantic-core" },
-    { name = "typing-extensions" },
+    { name = "annotated-types", marker = "extra == 'group-9-anthropic-pydantic-v2' or extra != 'group-9-anthropic-pydantic-v1'" },
+    { name = "pydantic-core", marker = "extra == 'group-9-anthropic-pydantic-v2' or extra != 'group-9-anthropic-pydantic-v1'" },
+    { name = "typing-extensions", marker = "extra == 'group-9-anthropic-pydantic-v2' or extra != 'group-9-anthropic-pydantic-v1'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/45/0f/27908242621b14e649a84e62b133de45f84c255eecb350ab02979844a788/pydantic-2.10.3.tar.gz", hash = "sha256:cb5ac360ce894ceacd69c403187900a02c4b20b693a9dd1d643e1effab9eadf9", size = 786486, upload-time = "2024-12-03T15:59:02.347Z" }
 wheels = [
@@ -1295,7 +1295,7 @@ name = "pydantic-core"
 version = "2.27.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "extra == 'group-9-anthropic-pydantic-v2' or extra != 'group-9-anthropic-pydantic-v1'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a6/9f/7de1f19b6aea45aeb441838782d68352e71bfa98ee6fa048d5041991b33e/pydantic_core-2.27.1.tar.gz", hash = "sha256:62a763352879b84aa31058fc931884055fd75089cccbd9d58bb6afd01141b235", size = 412785, upload-time = "2024-11-22T00:24:49.865Z" }
 wheels = [
