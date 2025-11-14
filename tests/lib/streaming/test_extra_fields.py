@@ -6,12 +6,12 @@ accumulated during streaming, without exposing specific field names in the SDK.
 
 from __future__ import annotations
 
+import asyncio
 import os
 from typing import Any, cast
 
 import httpx
-import pytest
-from respx import MockRouter
+import respx
 
 from anthropic import Anthropic, AsyncAnthropic
 
@@ -63,56 +63,59 @@ def assert_extra_fields_accumulated(message: Any) -> None:
 
 
 class TestSyncExtraFields:
-    @pytest.mark.respx(base_url=base_url)
-    def test_extra_fields_accumulation(self, respx_mock: MockRouter) -> None:
+    def test_extra_fields_accumulation(self) -> None:
         """Test that extra fields are accumulated during streaming."""
-        respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("extra_fields_response.txt"))
-        )
+        with respx.mock(base_url=base_url) as respx_mock:
+            respx_mock.post("/v1/messages").mock(
+                return_value=httpx.Response(200, content=get_response("extra_fields_response.txt"))
+            )
 
-        with sync_client.messages.stream(
-            max_tokens=1024,
-            messages=[
-                {
-                    "role": "user",
-                    "content": "Say hello!",
-                }
-            ],
-            model="claude-3-opus-latest",
-        ) as stream:
-            # Consume the stream
-            for _ in stream:
-                pass
+            with sync_client.messages.stream(
+                max_tokens=1024,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": "Say hello!",
+                    }
+                ],
+                model="claude-3-opus-latest",
+            ) as stream:
+                # Consume the stream
+                for _ in stream:
+                    pass
 
-            message = stream.get_final_message()
-            assert_extra_fields_accumulated(message)
+                message = stream.get_final_message()
+                assert_extra_fields_accumulated(message)
 
 
 class TestAsyncExtraFields:
-    @pytest.mark.asyncio
-    @pytest.mark.respx(base_url=base_url)
-    async def test_extra_fields_accumulation(self, respx_mock: MockRouter) -> None:
+    def test_extra_fields_accumulation(self) -> None:
         """Test that extra fields are accumulated during async streaming."""
-        respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("extra_fields_response.txt")))
-        )
 
-        async with async_client.messages.stream(
-            max_tokens=1024,
-            messages=[
-                {
-                    "role": "user",
-                    "content": "Say hello!",
-                }
-            ],
-            model="claude-3-opus-latest",
-        ) as stream:
-            # Consume the stream
-            async for _ in stream:
-                pass
+        async def run_test() -> None:
+            with respx.mock(base_url=base_url) as respx_mock:
+                respx_mock.post("/v1/messages").mock(
+                    return_value=httpx.Response(200, content=to_async_iter(get_response("extra_fields_response.txt")))
+                )
 
-            message = await stream.get_final_message()
-            assert_extra_fields_accumulated(message)
+                async with async_client.messages.stream(
+                    max_tokens=1024,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": "Say hello!",
+                        }
+                    ],
+                    model="claude-3-opus-latest",
+                ) as stream:
+                    # Consume the stream
+                    async for _ in stream:
+                        pass
+
+                    message = await stream.get_final_message()
+                    assert_extra_fields_accumulated(message)
+
+        asyncio.run(run_test())
 
 
 def test_deep_merge_extra_fields_function() -> None:
