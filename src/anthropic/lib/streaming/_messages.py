@@ -401,6 +401,31 @@ TRACKS_TOOL_INPUT = (
 )
 
 
+def _deep_merge_extra_fields(existing: object, new: object) -> object:
+    """Deep merge new data into existing data, mutating containers in place.
+
+    - Dicts: recursively merge keys (mutates existing dict)
+    - Lists: extend existing with new items (mutates existing list)
+    - Other: replace with new value
+    """
+    if isinstance(existing, dict) and isinstance(new, dict):
+        existing_dict = cast("dict[str, object]", existing)
+        new_dict = cast("dict[str, object]", new)
+        for key, value in new_dict.items():
+            if key in existing_dict:
+                existing_dict[key] = _deep_merge_extra_fields(existing_dict[key], value)
+            else:
+                existing_dict[key] = value
+        return existing_dict  # Return mutated dict
+    elif isinstance(existing, list) and isinstance(new, list):
+        existing_list = cast("list[object]", existing)
+        new_list = cast("list[object]", new)
+        existing_list.extend(new_list)
+        return existing_list  # Return mutated list
+    else:
+        return new
+
+
 def accumulate_event(
     *,
     event: RawMessageStreamEvent,
@@ -480,5 +505,20 @@ def accumulate_event(
             current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
         if event.usage.server_tool_use is not None:
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+
+    # Accumulate any extra fields from the event into the snapshot
+    if hasattr(event, '__pydantic_extra__') and event.__pydantic_extra__:
+        if not hasattr(current_snapshot, '__pydantic_extra__') or current_snapshot.__pydantic_extra__ is None:
+            current_snapshot.__pydantic_extra__ = {}
+
+        snapshot_extra = current_snapshot.__pydantic_extra__
+        for key, value in event.__pydantic_extra__.items():
+            if key in snapshot_extra:
+                snapshot_extra[key] = _deep_merge_extra_fields(
+                    snapshot_extra[key],
+                    value
+                )
+            else:
+                snapshot_extra[key] = value
 
     return current_snapshot
