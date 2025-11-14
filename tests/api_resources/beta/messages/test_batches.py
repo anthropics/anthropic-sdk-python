@@ -106,6 +106,10 @@ class TestBatches:
                             }
                         ],
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+                        "output_format": {
+                            "schema": {"foo": "bar"},
+                            "type": "json_schema",
+                        },
                         "service_tier": "auto",
                         "stop_sequences": ["string"],
                         "stream": False,
@@ -154,6 +158,7 @@ class TestBatches:
                                     "ttl": "5m",
                                 },
                                 "description": "Get the current weather in a given location",
+                                "strict": True,
                                 "type": "custom",
                             }
                         ],
@@ -520,6 +525,10 @@ class TestAsyncBatches:
                             }
                         ],
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+                        "output_format": {
+                            "schema": {"foo": "bar"},
+                            "type": "json_schema",
+                        },
                         "service_tier": "auto",
                         "stop_sequences": ["string"],
                         "stream": False,
@@ -568,6 +577,7 @@ class TestAsyncBatches:
                                     "ttl": "5m",
                                 },
                                 "description": "Get the current weather in a given location",
+                                "strict": True,
                                 "type": "custom",
                             }
                         ],

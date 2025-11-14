@@ -5,9 +5,9 @@ import httpx
 
 from anthropic.types.tool_use_block import ToolUseBlock
 from anthropic.types.beta.beta_usage import BetaUsage
-from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_messages import accumulate_event
 from anthropic.types.beta.beta_tool_use_block import BetaToolUseBlock
+from anthropic.types.beta.parsed_beta_message import ParsedBetaMessage
 from anthropic.types.beta.beta_input_json_delta import BetaInputJSONDelta
 from anthropic.types.beta.beta_raw_content_block_delta_event import BetaRawContentBlockDeltaEvent
 
@@ -15,7 +15,7 @@ from anthropic.types.beta.beta_raw_content_block_delta_event import BetaRawConte
 class TestPartialJson:
     def test_trailing_strings_mode_header(self) -> None:
         """Test behavior differences with and without the beta header for JSON parsing."""
-        message = BetaMessage(
+        message = ParsedBetaMessage(
             id="msg_123",
             type="message",
             role="assistant",
@@ -101,7 +101,7 @@ class TestPartialJson:
     # test that with invalid JSON we throw the correct error
     def test_partial_json_with_invalid_json(self) -> None:
         """Test that invalid JSON raises an error."""
-        message = BetaMessage(
+        message = ParsedBetaMessage(
             id="msg_123",
             type="message",
             role="assistant",

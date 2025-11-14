@@ -6,6 +6,7 @@ import os
 from typing import Any, cast
 
 import pytest
+import pydantic
 
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
@@ -91,6 +92,10 @@ class TestMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             service_tier="auto",
             stop_sequences=["string"],
             stream=False,
@@ -139,6 +144,7 @@ class TestMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -261,6 +267,10 @@ class TestMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             service_tier="auto",
             stop_sequences=["string"],
             system=[
@@ -308,6 +318,7 @@ class TestMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -416,6 +427,10 @@ class TestMessages:
                     },
                 }
             ],
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -460,6 +475,7 @@ class TestMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -504,6 +520,23 @@ class TestMessages:
             assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    def test_pydantic_error_in_create(self, client: Anthropic) -> None:
+        class MyModel(pydantic.BaseModel):
+            name: str
+            age: int
+
+        with pytest.raises(TypeError) as exc_info:
+            client.beta.messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Test"}],
+                model="claude-sonnet-4-5-20250929",
+                output_format=MyModel,  # type: ignore
+            )
+
+        error_message = str(exc_info.value)
+        assert "parse()" in error_message
 
 
 class TestAsyncMessages:
@@ -582,6 +615,10 @@ class TestAsyncMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             service_tier="auto",
             stop_sequences=["string"],
             stream=False,
@@ -630,6 +667,7 @@ class TestAsyncMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -752,6 +790,10 @@ class TestAsyncMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             service_tier="auto",
             stop_sequences=["string"],
             system=[
@@ -799,6 +841,7 @@ class TestAsyncMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -907,6 +950,10 @@ class TestAsyncMessages:
                     },
                 }
             ],
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -951,6 +998,7 @@ class TestAsyncMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -995,3 +1043,20 @@ class TestAsyncMessages:
             assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_pydantic_error_in_create(self, async_client: AsyncAnthropic) -> None:
+        class MyModel(pydantic.BaseModel):
+            name: str
+            age: int
+
+        with pytest.raises(TypeError) as exc_info:
+            await async_client.beta.messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Test"}],
+                model="claude-sonnet-4-5-20250929",
+                output_format=MyModel,  # type: ignore
+            )
+
+        error_message = str(exc_info.value)
+        assert "parse()" in error_message

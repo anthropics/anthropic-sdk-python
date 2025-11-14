@@ -44,6 +44,7 @@ from ._exceptions import (
 )
 from ._base_client import DefaultHttpxClient, DefaultAioHttpClient, DefaultAsyncHttpxClient
 from ._utils._logs import setup_logging as _setup_logging
+from .lib._parse._transform import transform_schema
 
 __all__ = [
     "types",
@@ -91,6 +92,7 @@ __all__ = [
     "AI_PROMPT",
     "beta_tool",
     "beta_async_tool",
+    "transform_schema",
 ]
 
 if not _t.TYPE_CHECKING:

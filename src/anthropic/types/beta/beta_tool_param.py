@@ -48,4 +48,6 @@ class BetaToolParam(TypedDict, total=False):
     aspects of the tool input JSON schema.
     """
 
+    strict: bool
+
     type: Optional[Literal["custom"]]

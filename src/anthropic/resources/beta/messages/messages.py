@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import inspect
 import warnings
-from typing import TYPE_CHECKING, List, Union, Iterable, Optional, cast
+from typing import TYPE_CHECKING, List, Type, Union, Iterable, Optional, cast
 from functools import partial
 from itertools import chain
 from typing_extensions import Literal, overload
 
 import httpx
+import pydantic
 
 from .... import _legacy_response
 from .batches import (
@@ -22,6 +24,7 @@ from .batches import (
 from ...._types import NOT_GIVEN, Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ...._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
+from ...._models import TypeAdapter
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
 from ....lib.tools import (
@@ -41,16 +44,20 @@ from ...._base_client import make_request_options
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS
 from ....types.model_param import ModelParam
+from ....lib._parse._response import ResponseFormatT, parse_response
+from ....lib._parse._transform import transform_schema
 from ....types.beta.beta_message import BetaMessage
 from ....lib.tools._beta_functions import BetaRunnableTool, BetaAsyncRunnableTool
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_message_param import BetaMessageParam
 from ....types.beta.beta_metadata_param import BetaMetadataParam
+from ....types.beta.parsed_beta_message import ParsedBetaMessage
 from ....types.beta.beta_text_block_param import BetaTextBlockParam
 from ....types.beta.beta_tool_union_param import BetaToolUnionParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
+from ....types.beta.beta_json_output_format_param import BetaJSONOutputFormatParam
 from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
 from ....types.beta.beta_context_management_config_param import BetaContextManagementConfigParam
 from ....types.beta.beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
@@ -96,6 +103,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
@@ -121,7 +129,8 @@ class Messages(SyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -212,6 +221,8 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -379,6 +390,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -403,7 +415,8 @@ class Messages(SyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -498,6 +511,8 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -661,6 +676,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -685,7 +701,8 @@ class Messages(SyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -780,6 +797,8 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -942,6 +961,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
@@ -960,6 +980,8 @@ class Messages(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
+        validate_output_format(output_format)
+
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
                 max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
@@ -987,6 +1009,7 @@ class Messages(SyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "output_format": output_format,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -1010,6 +1033,122 @@ class Messages(SyncAPIResource):
             stream_cls=Stream[BetaRawMessageStreamEvent],
         )
 
+    def parse(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ParsedBetaMessage[ResponseFormatT]:
+        if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+            timeout = self._client._calculate_nonstreaming_timeout(
+                max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
+            )
+
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+        betas = [beta for beta in betas] if is_given(betas) else []
+
+        if "structured-outputs-2025-09-17" not in betas:
+            # Ensure structured outputs beta is included for parse method
+            betas.append("structured-outputs-2025-09-17")
+
+        extra_headers = {
+            "X-Stainless-Helper": "beta.messages.parse",
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **(extra_headers or {}),
+        }
+
+        transformed_output_format: Optional[message_create_params.OutputFormat] | NotGiven = NOT_GIVEN
+
+        if is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = message_create_params.OutputFormat(
+                    schema=transform_schema(schema), type="json_schema"
+                )
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydanitc.TypeAdapter`"
+                    )
+                ) from e
+
+        def parser(response: BetaMessage) -> ParsedBetaMessage[ResponseFormatT]:
+            return parse_response(
+                response=response,
+                output_format=cast(
+                    ResponseFormatT,
+                    output_format if is_given(output_format) and output_format is not None else NOT_GIVEN,
+                ),
+            )
+
+        return self._post(
+            "/v1/messages?beta=true",
+            body=maybe_transform(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "container": container,
+                    "context_management": context_management,
+                    "mcp_servers": mcp_servers,
+                    "metadata": metadata,
+                    "output_format": transformed_output_format,
+                    "service_tier": service_tier,
+                    "stop_sequences": stop_sequences,
+                    "stream": stream,
+                    "system": system,
+                    "temperature": temperature,
+                    "thinking": thinking,
+                    "tool_choice": tool_choice,
+                    "tools": tools,
+                    "top_k": top_k,
+                    "top_p": top_p,
+                },
+                message_create_params.MessageCreateParamsNonStreaming,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                post_parser=parser,
+            ),
+            cast_to=cast(Type[ParsedBetaMessage[ResponseFormatT]], BetaMessage),
+            stream=False,
+        )
+
     @overload
     def tool_runner(
         self,
@@ -1018,11 +1157,12 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaRunnableTool],
-        max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        max_iterations: int | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
@@ -1039,7 +1179,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaToolRunner: ...
+    ) -> BetaToolRunner[ResponseFormatT]: ...
 
     @overload
     def tool_runner(
@@ -1055,6 +1195,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -1070,7 +1211,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaStreamingToolRunner: ...
+    ) -> BetaStreamingToolRunner[ResponseFormatT]: ...
 
     @overload
     def tool_runner(
@@ -1086,6 +1227,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -1101,7 +1243,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaStreamingToolRunner | BetaToolRunner: ...
+    ) -> BetaStreamingToolRunner[ResponseFormatT] | BetaToolRunner[ResponseFormatT]: ...
 
     def tool_runner(
         self,
@@ -1115,6 +1257,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: bool | Omit = omit,
@@ -1131,7 +1274,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaToolRunner | BetaStreamingToolRunner:
+    ) -> BetaStreamingToolRunner[ResponseFormatT] | BetaToolRunner[ResponseFormatT]:
         """Create a Message stream"""
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -1147,7 +1290,7 @@ class Messages(SyncAPIResource):
         }
 
         params = cast(
-            message_create_params.MessageCreateParamsNonStreaming,
+            message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
             {
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -1156,6 +1299,7 @@ class Messages(SyncAPIResource):
                 "context_management": context_management,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
+                "output_format": output_format,
                 "service_tier": service_tier,
                 "stop_sequences": stop_sequences,
                 "system": system,
@@ -1169,7 +1313,7 @@ class Messages(SyncAPIResource):
         )
 
         if stream:
-            return BetaStreamingToolRunner(
+            return BetaStreamingToolRunner[ResponseFormatT](
                 tools=tools,
                 params=params,
                 options={
@@ -1181,7 +1325,7 @@ class Messages(SyncAPIResource):
                 client=cast("Anthropic", self._client),
                 max_iterations=max_iterations if is_given(max_iterations) else None,
             )
-        return BetaToolRunner(
+        return BetaToolRunner[ResponseFormatT](
             tools=tools,
             params=params,
             options={
@@ -1204,6 +1348,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -1220,7 +1365,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaMessageStreamManager:
+    ) -> BetaMessageStreamManager[ResponseFormatT]:
         if model in DEPRECATED_MODELS:
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
@@ -1234,6 +1379,25 @@ class Messages(SyncAPIResource):
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+
+        transformed_output_format: Optional[message_create_params.OutputFormat] | NotGiven = NOT_GIVEN
+
+        if is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = message_create_params.OutputFormat(
+                    schema=transform_schema(schema), type="json_schema"
+                )
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydanitc.TypeAdapter`"
+                    )
+                ) from e
+
         make_request = partial(
             self._post,
             "/v1/messages?beta=true",
@@ -1243,6 +1407,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "output_format": transformed_output_format,
                     "container": container,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
@@ -1266,7 +1431,7 @@ class Messages(SyncAPIResource):
             stream=True,
             stream_cls=Stream[BetaRawMessageStreamEvent],
         )
-        return BetaMessageStreamManager(make_request)
+        return BetaMessageStreamManager(make_request, output_format=cast(ResponseFormatT, output_format))
 
     def count_tokens(
         self,
@@ -1275,6 +1440,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
@@ -1294,7 +1460,7 @@ class Messages(SyncAPIResource):
         including tools, images, and documents, without creating it.
 
         Learn more about token counting in our
-        [user guide](/en/docs/build-with-claude/token-counting)
+        [user guide](https://docs.claude.com/en/docs/build-with-claude/token-counting)
 
         Args:
           messages: Input messages.
@@ -1373,6 +1539,8 @@ class Messages(SyncAPIResource):
               such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
+
+          output_format: A schema to specify Claude's output format in responses.
 
           system: System prompt.
 
@@ -1498,6 +1666,7 @@ class Messages(SyncAPIResource):
                     "model": model,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
+                    "output_format": output_format,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
@@ -1547,6 +1716,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
@@ -1572,7 +1742,8 @@ class AsyncMessages(AsyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1663,6 +1834,8 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -1830,6 +2003,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -1854,7 +2028,8 @@ class AsyncMessages(AsyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1949,6 +2124,8 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -2112,6 +2289,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -2136,7 +2314,8 @@ class AsyncMessages(AsyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -2231,6 +2410,8 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -2393,6 +2574,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
@@ -2411,6 +2593,8 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
+        validate_output_format(output_format)
+
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
                 max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
@@ -2438,6 +2622,7 @@ class AsyncMessages(AsyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "output_format": output_format,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -2461,6 +2646,121 @@ class AsyncMessages(AsyncAPIResource):
             stream_cls=AsyncStream[BetaRawMessageStreamEvent],
         )
 
+    async def parse(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ParsedBetaMessage[ResponseFormatT]:
+        if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+            timeout = self._client._calculate_nonstreaming_timeout(
+                max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
+            )
+
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+        betas = [beta for beta in betas] if is_given(betas) else []
+
+        if "structured-outputs-2025-09-17" not in betas:
+            # Ensure structured outputs beta is included for parse method
+            betas.append("structured-outputs-2025-09-17")
+
+        extra_headers = {
+            "X-Stainless-Helper": "beta.messages.parse",
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **(extra_headers or {}),
+        }
+
+        transformed_output_format: Optional[message_create_params.OutputFormat] | NotGiven = NOT_GIVEN
+
+        if is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = message_create_params.OutputFormat(
+                    schema=transform_schema(schema), type="json_schema"
+                )
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydanitc.TypeAdapter`"
+                    )
+                ) from e
+
+        def parser(response: BetaMessage) -> ParsedBetaMessage[ResponseFormatT]:
+            return parse_response(
+                response=response,
+                output_format=cast(
+                    ResponseFormatT,
+                    output_format if is_given(output_format) and output_format is not None else NOT_GIVEN,
+                ),
+            )
+
+        return await self._post(
+            "/v1/messages?beta=true",
+            body=maybe_transform(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "container": container,
+                    "context_management": context_management,
+                    "mcp_servers": mcp_servers,
+                    "metadata": metadata,
+                    "output_format": transformed_output_format,
+                    "service_tier": service_tier,
+                    "stop_sequences": stop_sequences,
+                    "stream": stream,
+                    "system": system,
+                    "temperature": temperature,
+                    "thinking": thinking,
+                    "tool_choice": tool_choice,
+                    "tools": tools,
+                    "top_k": top_k,
+                    "top_p": top_p,
+                },
+                message_create_params.MessageCreateParamsNonStreaming,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                post_parser=parser,
+            ),
+            cast_to=cast(Type[ParsedBetaMessage[ResponseFormatT]], BetaMessage),
+            stream=False,
+        )
+
     @overload
     def tool_runner(
         self,
@@ -2474,6 +2774,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
@@ -2490,7 +2791,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaAsyncToolRunner: ...
+    ) -> BetaAsyncToolRunner[ResponseFormatT]: ...
 
     @overload
     def tool_runner(
@@ -2506,6 +2807,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -2521,7 +2823,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaAsyncStreamingToolRunner: ...
+    ) -> BetaAsyncStreamingToolRunner[ResponseFormatT]: ...
 
     @overload
     def tool_runner(
@@ -2537,6 +2839,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -2552,7 +2855,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaAsyncStreamingToolRunner | BetaAsyncToolRunner: ...
+    ) -> BetaAsyncStreamingToolRunner[ResponseFormatT] | BetaAsyncToolRunner[ResponseFormatT]: ...
 
     def tool_runner(
         self,
@@ -2566,9 +2869,10 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
-        stream: Literal[True] | Literal[False] | Omit = False,
+        stream: Literal[True] | Literal[False] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
         top_k: int | Omit = omit,
@@ -2582,7 +2886,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaAsyncToolRunner | BetaAsyncStreamingToolRunner:
+    ) -> BetaAsyncToolRunner[ResponseFormatT] | BetaAsyncStreamingToolRunner[ResponseFormatT]:
         """Create a Message stream"""
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -2598,7 +2902,7 @@ class AsyncMessages(AsyncAPIResource):
         }
 
         params = cast(
-            message_create_params.MessageCreateParamsBase,
+            message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
             {
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -2607,6 +2911,7 @@ class AsyncMessages(AsyncAPIResource):
                 "context_management": context_management,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
+                "output_format": output_format,
                 "service_tier": service_tier,
                 "stop_sequences": stop_sequences,
                 "system": system,
@@ -2620,7 +2925,7 @@ class AsyncMessages(AsyncAPIResource):
         )
 
         if stream:
-            return BetaAsyncStreamingToolRunner(
+            return BetaAsyncStreamingToolRunner[ResponseFormatT](
                 tools=tools,
                 params=params,
                 options={
@@ -2632,7 +2937,7 @@ class AsyncMessages(AsyncAPIResource):
                 client=cast("AsyncAnthropic", self._client),
                 max_iterations=max_iterations if is_given(max_iterations) else None,
             )
-        return BetaAsyncToolRunner(
+        return BetaAsyncToolRunner[ResponseFormatT](
             tools=tools,
             params=params,
             options={
@@ -2652,6 +2957,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
@@ -2671,7 +2977,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> BetaAsyncMessageStreamManager:
+    ) -> BetaAsyncMessageStreamManager[ResponseFormatT]:
         if model in DEPRECATED_MODELS:
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
@@ -2684,6 +2990,24 @@ class AsyncMessages(AsyncAPIResource):
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
         }
+
+        transformed_output_format: Optional[message_create_params.OutputFormat] | NotGiven = NOT_GIVEN
+
+        if is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = message_create_params.OutputFormat(
+                    schema=transform_schema(schema), type="json_schema"
+                )
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydanitc.TypeAdapter`"
+                    )
+                ) from e
         request = self._post(
             "/v1/messages",
             body=maybe_transform(
@@ -2692,6 +3016,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "output_format": transformed_output_format,
                     "container": container,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
@@ -2715,7 +3040,7 @@ class AsyncMessages(AsyncAPIResource):
             stream=True,
             stream_cls=AsyncStream[BetaRawMessageStreamEvent],
         )
-        return BetaAsyncMessageStreamManager(request)
+        return BetaAsyncMessageStreamManager(request, output_format=cast(ResponseFormatT, output_format))
 
     async def count_tokens(
         self,
@@ -2724,6 +3049,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
@@ -2743,7 +3069,7 @@ class AsyncMessages(AsyncAPIResource):
         including tools, images, and documents, without creating it.
 
         Learn more about token counting in our
-        [user guide](/en/docs/build-with-claude/token-counting)
+        [user guide](https://docs.claude.com/en/docs/build-with-claude/token-counting)
 
         Args:
           messages: Input messages.
@@ -2822,6 +3148,8 @@ class AsyncMessages(AsyncAPIResource):
               such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
+
+          output_format: A schema to specify Claude's output format in responses.
 
           system: System prompt.
 
@@ -2947,6 +3275,7 @@ class AsyncMessages(AsyncAPIResource):
                     "model": model,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
+                    "output_format": output_format,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
@@ -3023,3 +3352,10 @@ class AsyncMessagesWithStreamingResponse:
     @cached_property
     def batches(self) -> AsyncBatchesWithStreamingResponse:
         return AsyncBatchesWithStreamingResponse(self._messages.batches)
+
+
+def validate_output_format(output_format: object) -> None:
+    if inspect.isclass(output_format) and issubclass(output_format, pydantic.BaseModel):
+        raise TypeError(
+            "You tried to pass a `BaseModel` class to `beta.messages.create()`; You must use `beta.messages.parse()` instead"
+        )

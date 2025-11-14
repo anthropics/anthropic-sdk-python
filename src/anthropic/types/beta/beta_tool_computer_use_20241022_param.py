@@ -30,3 +30,5 @@ class BetaToolComputerUse20241022Param(TypedDict, total=False):
 
     display_number: Optional[int]
     """The X11 display number (e.g. 0, 1) for the display."""
+
+    strict: bool
