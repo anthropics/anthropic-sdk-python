@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.73.0 (2025-11-14)
+
+Full Changelog: [v0.72.1...v0.73.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.72.1...v0.73.0)
+
+### Features
+
+* **api:** add support for structured outputs beta ([688da81](https://github.com/anthropics/anthropic-sdk-python/commit/688da8126df8a304c5f01f0dc63cda437a62c217))
+
 ## 0.72.1 (2025-11-11)
 
 Full Changelog: [v0.72.0...v0.72.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.72.0...v0.72.1)
