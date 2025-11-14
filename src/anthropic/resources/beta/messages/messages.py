@@ -39,6 +39,7 @@ from ....types.beta.beta_tool_union_param import BetaToolUnionParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
+from ....types.beta.beta_json_output_format_param import BetaJSONOutputFormatParam
 from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
 from ....types.beta.beta_context_management_config_param import BetaContextManagementConfigParam
 from ....types.beta.beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
@@ -81,6 +82,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
@@ -106,7 +108,8 @@ class Messages(SyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -197,6 +200,8 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -364,6 +369,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -388,7 +394,8 @@ class Messages(SyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -483,6 +490,8 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -646,6 +655,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -670,7 +680,8 @@ class Messages(SyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -765,6 +776,8 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -927,6 +940,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
@@ -962,6 +976,7 @@ class Messages(SyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "output_format": output_format,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -992,6 +1007,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
@@ -1011,7 +1027,7 @@ class Messages(SyncAPIResource):
         including tools, images, and documents, without creating it.
 
         Learn more about token counting in our
-        [user guide](/en/docs/build-with-claude/token-counting)
+        [user guide](https://docs.claude.com/en/docs/build-with-claude/token-counting)
 
         Args:
           messages: Input messages.
@@ -1090,6 +1106,8 @@ class Messages(SyncAPIResource):
               such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
+
+          output_format: A schema to specify Claude's output format in responses.
 
           system: System prompt.
 
@@ -1208,6 +1226,7 @@ class Messages(SyncAPIResource):
                     "model": model,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
+                    "output_format": output_format,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
@@ -1257,6 +1276,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
@@ -1282,7 +1302,8 @@ class AsyncMessages(AsyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1373,6 +1394,8 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -1540,6 +1563,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -1564,7 +1588,8 @@ class AsyncMessages(AsyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1659,6 +1684,8 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -1822,6 +1849,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -1846,7 +1874,8 @@ class AsyncMessages(AsyncAPIResource):
         The Messages API can be used for either single queries or stateless multi-turn
         conversations.
 
-        Learn more about the Messages API in our [user guide](/en/docs/initial-setup)
+        Learn more about the Messages API in our
+        [user guide](https://docs.claude.com/en/docs/initial-setup)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1941,6 +1970,8 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -2103,6 +2134,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
@@ -2138,6 +2170,7 @@ class AsyncMessages(AsyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "output_format": output_format,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -2168,6 +2201,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
@@ -2187,7 +2221,7 @@ class AsyncMessages(AsyncAPIResource):
         including tools, images, and documents, without creating it.
 
         Learn more about token counting in our
-        [user guide](/en/docs/build-with-claude/token-counting)
+        [user guide](https://docs.claude.com/en/docs/build-with-claude/token-counting)
 
         Args:
           messages: Input messages.
@@ -2266,6 +2300,8 @@ class AsyncMessages(AsyncAPIResource):
               such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
+
+          output_format: A schema to specify Claude's output format in responses.
 
           system: System prompt.
 
@@ -2384,6 +2420,7 @@ class AsyncMessages(AsyncAPIResource):
                     "model": model,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
+                    "output_format": output_format,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,

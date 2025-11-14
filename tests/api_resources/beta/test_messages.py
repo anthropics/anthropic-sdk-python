@@ -91,6 +91,10 @@ class TestMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             service_tier="auto",
             stop_sequences=["string"],
             stream=False,
@@ -139,6 +143,7 @@ class TestMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -261,6 +266,10 @@ class TestMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             service_tier="auto",
             stop_sequences=["string"],
             system=[
@@ -308,6 +317,7 @@ class TestMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -416,6 +426,10 @@ class TestMessages:
                     },
                 }
             ],
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -460,6 +474,7 @@ class TestMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -582,6 +597,10 @@ class TestAsyncMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             service_tier="auto",
             stop_sequences=["string"],
             stream=False,
@@ -630,6 +649,7 @@ class TestAsyncMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -752,6 +772,10 @@ class TestAsyncMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             service_tier="auto",
             stop_sequences=["string"],
             system=[
@@ -799,6 +823,7 @@ class TestAsyncMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],
@@ -907,6 +932,10 @@ class TestAsyncMessages:
                     },
                 }
             ],
+            output_format={
+                "schema": {"foo": "bar"},
+                "type": "json_schema",
+            },
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -951,6 +980,7 @@ class TestAsyncMessages:
                         "ttl": "5m",
                     },
                     "description": "Get the current weather in a given location",
+                    "strict": True,
                     "type": "custom",
                 }
             ],

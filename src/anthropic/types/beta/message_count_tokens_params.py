@@ -13,6 +13,7 @@ from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
+from .beta_json_output_format_param import BetaJSONOutputFormatParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
 from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
@@ -117,6 +118,9 @@ class MessageCountTokensParams(TypedDict, total=False):
 
     mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam]
     """MCP servers to be utilized in this request"""
+
+    output_format: Optional[BetaJSONOutputFormatParam]
+    """A schema to specify Claude's output format in responses."""
 
     system: Union[str, Iterable[BetaTextBlockParam]]
     """System prompt.
