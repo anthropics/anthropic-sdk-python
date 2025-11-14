@@ -6,8 +6,8 @@ accumulated during streaming, without exposing specific field names in the SDK.
 
 from __future__ import annotations
 
-import asyncio
 import os
+import asyncio
 from typing import Any, cast
 
 import httpx
