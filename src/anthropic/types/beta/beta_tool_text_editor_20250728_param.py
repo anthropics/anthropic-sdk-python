@@ -27,3 +27,5 @@ class BetaToolTextEditor20250728Param(TypedDict, total=False):
 
     If not specified, defaults to displaying the full file.
     """
+
+    strict: bool

@@ -21,3 +21,5 @@ class BetaToolTextEditor20250429Param(TypedDict, total=False):
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
+
+    strict: bool

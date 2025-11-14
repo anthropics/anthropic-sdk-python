@@ -774,7 +774,7 @@ else:
 
 
 if not PYDANTIC_V1:
-    from pydantic import TypeAdapter as _TypeAdapter
+    from pydantic import TypeAdapter as _TypeAdapter, computed_field as computed_field
 
     _CachedTypeAdapter = cast("TypeAdapter[object]", lru_cache(maxsize=None)(_TypeAdapter))
 
@@ -810,6 +810,18 @@ elif not TYPE_CHECKING:  # TODO: condition is weird
 
     def TypeAdapter(*_args: Any, **_kwargs: Any) -> Any:
         raise RuntimeError("attempted to use TypeAdapter in pydantic v1")
+
+    def computed_field(func: Any | None = None, /, **__: Any) -> Any:
+        def _exc_func(*_: Any, **__: Any) -> Any:
+            raise RuntimeError("attempted to use computed_field in pydantic v1")
+
+        def _dec(*_: Any, **__: Any) -> Any:
+            return _exc_func
+
+        if func is not None:
+            return _dec(func)
+        else:
+            return _dec
 
 
 class FinalRequestOptionsInput(TypedDict, total=False):

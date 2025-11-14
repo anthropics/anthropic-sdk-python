@@ -1,10 +1,10 @@
-from typing import Union
+from typing import TYPE_CHECKING, Any, Dict, Union, Generic, cast
 from typing_extensions import List, Literal, Annotated
 
-from ..._models import BaseModel
+import jiter
+
+from ..._models import BaseModel, GenericModel
 from ...types.beta import (
-    BetaMessage,
-    BetaContentBlock,
     BetaRawMessageStopEvent,
     BetaRawMessageDeltaEvent,
     BetaRawMessageStartEvent,
@@ -12,11 +12,13 @@ from ...types.beta import (
     BetaRawContentBlockDeltaEvent,
     BetaRawContentBlockStartEvent,
 )
+from .._parse._response import ResponseFormatT
 from ..._utils._transform import PropertyInfo
+from ...types.beta.parsed_beta_message import ParsedBetaMessage, ParsedBetaContentBlock
 from ...types.beta.beta_citations_delta import Citation
 
 
-class BetaTextEvent(BaseModel):
+class ParsedBetaTextEvent(BaseModel):
     type: Literal["text"]
 
     text: str
@@ -24,6 +26,9 @@ class BetaTextEvent(BaseModel):
 
     snapshot: str
     """The entire accumulated text"""
+
+    def parsed_snapshot(self) -> Dict[str, Any]:
+        return cast(Dict[str, Any], jiter.from_json(self.snapshot.encode("utf-8"), partial_mode="trailing-strings"))
 
 
 class BetaCitationEvent(BaseModel):
@@ -70,31 +75,34 @@ class BetaInputJsonEvent(BaseModel):
     """
 
 
-class BetaMessageStopEvent(BetaRawMessageStopEvent):
+class ParsedBetaMessageStopEvent(BetaRawMessageStopEvent, GenericModel, Generic[ResponseFormatT]):
     type: Literal["message_stop"]
 
-    message: BetaMessage
+    message: ParsedBetaMessage[ResponseFormatT]
 
 
-class BetaContentBlockStopEvent(BetaRawContentBlockStopEvent):
+class ParsedBetaContentBlockStopEvent(BetaRawContentBlockStopEvent, GenericModel, Generic[ResponseFormatT]):
     type: Literal["content_block_stop"]
 
-    content_block: BetaContentBlock
+    if TYPE_CHECKING:
+        content_block: ParsedBetaContentBlock[ResponseFormatT]
+    else:
+        content_block: ParsedBetaContentBlock
 
 
-BetaMessageStreamEvent = Annotated[
+ParsedBetaMessageStreamEvent = Annotated[
     Union[
-        BetaTextEvent,
+        ParsedBetaTextEvent,
         BetaCitationEvent,
         BetaThinkingEvent,
         BetaSignatureEvent,
         BetaInputJsonEvent,
         BetaRawMessageStartEvent,
         BetaRawMessageDeltaEvent,
-        BetaMessageStopEvent,
+        ParsedBetaMessageStopEvent[ResponseFormatT],
         BetaRawContentBlockStartEvent,
         BetaRawContentBlockDeltaEvent,
-        BetaContentBlockStopEvent,
+        ParsedBetaContentBlockStopEvent[ResponseFormatT],
     ],
     PropertyInfo(discriminator="type"),
 ]

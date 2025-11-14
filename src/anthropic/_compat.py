@@ -131,6 +131,12 @@ def model_json(model: pydantic.BaseModel, *, indent: int | None = None) -> str:
     return model.model_dump_json(indent=indent)
 
 
+def model_parse_json(model: type[_ModelT], data: str | bytes) -> _ModelT:
+    if PYDANTIC_V1:
+        return model.parse_raw(data)  # pyright: ignore[reportDeprecated]
+    return model.model_validate_json(data)
+
+
 def model_dump(
     model: pydantic.BaseModel,
     *,
