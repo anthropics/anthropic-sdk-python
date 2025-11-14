@@ -7,7 +7,7 @@ accumulated during streaming, without exposing specific field names in the SDK.
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import Any, cast
 
 import httpx
 import pytest
@@ -37,12 +37,14 @@ def assert_extra_fields_accumulated(message: Any) -> None:
     assert 'private_field' in extra, "Extra fields should be accumulated"
 
     # Verify deep merging: nested dicts should be merged, lists should be extended
-    private_field = extra['private_field']
-    assert isinstance(private_field, dict), "Extra field should be a dict"
+    private_field_value = extra['private_field']
+    assert isinstance(private_field_value, dict), "Extra field should be a dict"
+    private_field = cast(dict[str, object], private_field_value)
     assert 'nested' in private_field, "Nested structure should be present"
 
-    nested = private_field['nested']
-    assert isinstance(nested, dict), "Nested field should be a dict"
+    nested_value = private_field['nested']
+    assert isinstance(nested_value, dict), "Nested field should be a dict"
+    nested = cast(dict[str, object], nested_value)
     assert 'values' in nested, "Nested values should be present"
 
     # The 'values' list should have been extended across all streaming events:
@@ -51,8 +53,9 @@ def assert_extra_fields_accumulated(message: Any) -> None:
     # content_block_delta 2: [4, 5]
     # message_delta: [6]
     # Expected: [1, 2, 3, 4, 5, 6]
-    values = nested['values']
-    assert isinstance(values, list), "Nested values should be a list"
+    values_value = nested['values']
+    assert isinstance(values_value, list), "Nested values should be a list"
+    values = cast(list[int], values_value)
     assert values == [1, 2, 3, 4, 5, 6], "Lists should be extended, not replaced"
 
     # Last value from dict merge should be present
