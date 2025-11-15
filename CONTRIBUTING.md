@@ -83,17 +83,46 @@ Then to install:
 $ pip install ./path-to-wheel-file.whl
 ```
 
-## Running tests
+## Running Tests
 
-Most tests require you to [set up a mock server](https://github.com/stoplightio/prism) against the OpenAPI spec to run the tests.
+Most tests require a mock server to be set up against the OpenAPI specification. Follow these steps to get your test environment ready:
+
+### Setup Instructions
+
+### 1. Download the OpenAPI Specification
+
+First, locate the latest valid OpenAPI specification URL in `.stats.yml` and download it:
 
 ```sh
-# you will need npm installed
-$ npx prism mock path/to/your/openapi.yml
+# Download the openapi_spec_url from .stats.yml (use the latest valid version)
+curl -o openapi.yml [URL_FROM_STATS_YML]
 ```
 
+### 2. Copy the Specification File
+
+Move the downloaded OpenAPI specification to the main project directory:
+
 ```sh
-$ ./scripts/test
+cp openapi.yml path/to/anthropic-sdk-python/
+```
+
+### 3. Start the Mock Server
+
+Use [Prism](https://github.com/stoplightio/prism) to create a mock server from the OpenAPI specification:
+
+```sh
+# Ensure you have npm installed, then run:
+npx prism mock openapi.yml
+```
+
+The mock server will start and provide endpoints based on your OpenAPI specification.
+
+### 4. Run Tests
+
+With the mock server running, execute the test suite:
+
+```sh
+./scripts/test
 ```
 
 ## Linting and formatting
