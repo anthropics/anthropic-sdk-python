@@ -287,7 +287,7 @@ class TestSyncRunTools:
                 messages=[{"role": "user", "content": "What is the weather in SF?"}],
                 stream=True,
             ).until_done(),
-            content_snapshot=snapshot(external("hash:cd8d3d185e7a*.json")),
+            content_snapshot=external("hash:cd8d3d185e7a*.json"),
             path="/v1/messages",
             mock_client=client,
             respx_mock=respx_mock,
@@ -382,7 +382,7 @@ class TestSyncRunTools:
 
         events = make_stream_snapshot_request(
             accumulate_events,
-            content_snapshot=snapshot(external("uuid:9cb114c8-69bd-4111-841b-edee30333afd.json")),
+            content_snapshot=external("uuid:9cb114c8-69bd-4111-841b-edee30333afd.json"),
             path="/v1/messages",
             mock_client=client,
             respx_mock=respx_mock,
