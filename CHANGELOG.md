@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.74.0 (2025-11-18)
+
+Full Changelog: [v0.73.0...v0.74.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.73.0...v0.74.0)
+
+### Features
+
+* add Foundry SDK ([3ae9e45](https://github.com/anthropics/anthropic-sdk-python/commit/3ae9e45451d3ff85b25ba5f5f9f8786ea35e3cc9))
+
+
+### Bug Fixes
+
+* **examples/memory:** properly add assistant_content to messages ([#1049](https://github.com/anthropics/anthropic-sdk-python/issues/1049)) ([9c7141b](https://github.com/anthropics/anthropic-sdk-python/commit/9c7141b887bbde251b6b740405a91d1726308c32))
+* use posix paths in file collection for cross-platform compatibility ([d9c6f40](https://github.com/anthropics/anthropic-sdk-python/commit/d9c6f4006a43fe094acbf652a8dbd4234853ed70)), closes [#1051](https://github.com/anthropics/anthropic-sdk-python/issues/1051)
+
+
+### Chores
+
+* **internal:** remove unnecessary wrapper around external snapshots ([19eceac](https://github.com/anthropics/anthropic-sdk-python/commit/19eceac2406e4c71db14f9e870aaa901b4249219))
+
+
+### Documentation
+
+* explain snapshot update process ([#1040](https://github.com/anthropics/anthropic-sdk-python/issues/1040)) ([b61fd87](https://github.com/anthropics/anthropic-sdk-python/commit/b61fd87986a90105c20d4f35e34a9f69ec73645f))
+
 ## 0.73.0 (2025-11-14)
 
 Full Changelog: [v0.72.1...v0.73.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.72.1...v0.73.0)
