@@ -335,7 +335,6 @@ def conversation_loop():
             raise
 
         # Process all messages from the runner
-        assistant_content: list[BetaContentBlockParam] = []
         for message in runner:
             spinner.stop()
 
@@ -351,6 +350,7 @@ def conversation_loop():
                     print(f"\n🧹 [Context Management: {edit.type} applied]")
 
             # Process content blocks
+            assistant_content: list[BetaContentBlockParam] = []
             for content in message.content:
                 if content.type == "text":
                     print(content.text, end="", flush=True)
@@ -371,6 +371,10 @@ def conversation_loop():
                         }
                     )
 
+            # Store assistant message
+            if assistant_content:
+                messages.append({"role": "assistant", "content": assistant_content})
+
             # Generate tool response automatically
             tool_response = runner.generate_tool_call_response()
             if tool_response and tool_response["content"]:
@@ -380,10 +384,6 @@ def conversation_loop():
                 for result in tool_response["content"]:
                     if isinstance(result, dict) and result.get("type") == "tool_result":
                         print(f"[Tool result processed]")
-
-        # Store assistant message
-        if assistant_content:
-            messages.append({"role": "assistant", "content": assistant_content})
 
         print()
 
