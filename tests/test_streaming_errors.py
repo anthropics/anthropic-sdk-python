@@ -117,7 +117,7 @@ class TestStreamingErrorHandling:
 
         def stream_incomplete() -> Iterator[bytes]:
             yield b'event: message_start\n'
-            yield b'data: {"type": "message_start"}\n\n'
+            yield b'data: {"type": "message_start", "message": {"id": "msg_test", "type": "message", "role": "assistant", "content": [], "model": "claude-3-opus-20240229", "usage": {"input_tokens": 10, "output_tokens": 0}}}\n\n'
             # Incomplete - missing message_stop event
             return
 
@@ -131,13 +131,14 @@ class TestStreamingErrorHandling:
             )
         )
 
+        # Incomplete data - stream should process without complete message_stop
         with self.client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "test"}],
             model="claude-3-opus-20240229",
         ) as stream:
             events = list(stream)
-            # Should handle incomplete stream gracefully
+            # Should handle the events we did receive
             assert len(events) >= 0
 
     @pytest.mark.respx(base_url="http://127.0.0.1:4010")
@@ -146,7 +147,7 @@ class TestStreamingErrorHandling:
 
         async def async_stream_incomplete() -> AsyncIterator[bytes]:
             yield b'event: message_start\n'
-            yield b'data: {"type": "message_start"}\n\n'
+            yield b'data: {"type": "message_start", "message": {"id": "msg_test", "type": "message", "role": "assistant", "content": [], "model": "claude-3-opus-20240229", "usage": {"input_tokens": 10, "output_tokens": 0}}}\n\n'
             # Incomplete - missing message_stop event
             return
 
@@ -158,6 +159,7 @@ class TestStreamingErrorHandling:
             )
         )
 
+        # Incomplete data - stream should process without complete message_stop
         async with self.async_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "test"}],
@@ -166,7 +168,7 @@ class TestStreamingErrorHandling:
             events = []
             async for event in stream:
                 events.append(event)
-            # Should handle incomplete stream gracefully
+            # Should handle the events we did receive
             assert len(events) >= 0
 
     @pytest.mark.respx(base_url="http://127.0.0.1:4010")
@@ -227,7 +229,7 @@ class TestStreamingErrorHandling:
             from typing import Iterator
 
             yield b'event: message_start\n'
-            yield b'data: {"type": "message_start"}\n\n'
+            yield b'data: {"type": "message_start", "message": {"id": "msg_test", "type": "message", "role": "assistant", "content": [], "model": "claude-3-opus-20240229", "usage": {"input_tokens": 10, "output_tokens": 0}}}\n\n'
             raise RuntimeError("Simulated error during streaming")
 
         respx_mock.post("/v1/messages").mock(
@@ -253,7 +255,7 @@ class TestStreamingErrorHandling:
 
         async def async_stream_with_error() -> AsyncIterator[bytes]:
             yield b'event: message_start\n'
-            yield b'data: {"type": "message_start"}\n\n'
+            yield b'data: {"type": "message_start", "message": {"id": "msg_test", "type": "message", "role": "assistant", "content": [], "model": "claude-3-opus-20240229", "usage": {"input_tokens": 10, "output_tokens": 0}}}\n\n'
             raise RuntimeError("Simulated async error during streaming")
 
         respx_mock.post("/v1/messages").mock(

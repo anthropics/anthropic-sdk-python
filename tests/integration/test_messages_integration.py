@@ -288,10 +288,16 @@ class TestStreamingIntegration:
         def stream_events() -> Iterator[bytes]:
             yield b'event: message_start\n'
             yield b'data: {"type": "message_start", "message": {"id": "msg_stream", "type": "message", "role": "assistant", "content": [], "model": "claude-3-opus-20240229", "usage": {"input_tokens": 10, "output_tokens": 0}}}\n\n'
+            yield b'event: content_block_start\n'
+            yield b'data: {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}}\n\n'
             yield b'event: content_block_delta\n'
             yield b'data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "Hello"}}\n\n'
             yield b'event: content_block_delta\n'
             yield b'data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": " from stream!"}}\n\n'
+            yield b'event: content_block_stop\n'
+            yield b'data: {"type": "content_block_stop", "index": 0}\n\n'
+            yield b'event: message_delta\n'
+            yield b'data: {"type": "message_delta", "delta": {"stop_reason": "end_turn", "stop_sequence": null}, "usage": {"output_tokens": 5}}\n\n'
             yield b'event: message_stop\n'
             yield b'data: {"type": "message_stop"}\n\n'
 
