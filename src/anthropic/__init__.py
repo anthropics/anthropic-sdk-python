@@ -101,6 +101,7 @@ if not _t.TYPE_CHECKING:
 from .lib.tools import beta_tool, beta_async_tool
 from .lib.vertex import *
 from .lib.bedrock import *
+from .lib.foundry import AnthropicFoundry as AnthropicFoundry, AsyncAnthropicFoundry as AsyncAnthropicFoundry
 from .lib.streaming import *
 
 _setup_logging()
