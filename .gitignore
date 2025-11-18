@@ -14,3 +14,10 @@ dist
 .envrc
 codegen.log
 Brewfile.lock.json
+
+# Coverage reports
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
