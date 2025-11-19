@@ -302,7 +302,7 @@ Container: TypeAlias = Union[BetaContainerParams, str]
 
 
 class ParseMessageCreateParamsBase(MessageCreateParamsBase, Generic[ResponseFormatT]):
-    output_format: type[ResponseFormatT]  # type: ignore[misc]
+    output_format: ResponseFormatT  # type: ignore[misc]
 
 
 class OutputFormat(TypedDict, total=False):

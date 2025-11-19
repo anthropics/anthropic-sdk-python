@@ -1033,6 +1033,9 @@ class Messages(SyncAPIResource):
             stream_cls=Stream[BetaRawMessageStreamEvent],
         )
 
+    # This overload should be listed first to prioritize it over generic overload
+    # so calls with Omit() resolve to ParsedBetaMessage[None] not ParsedBetaMessage[Omit]
+    @overload
     def parse(
         self,
         *,
@@ -1043,7 +1046,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
-        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        output_format: None | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
@@ -1061,7 +1064,100 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> ParsedBetaMessage[ResponseFormatT]:
+    ) -> ParsedBetaMessage[None]: ...
+
+    @overload
+    def parse(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        output_format: type[ResponseFormatT],
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ParsedBetaMessage[ResponseFormatT]: ...
+
+    @overload
+    def parse(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        output_format: ResponseFormatT,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ParsedBetaMessage[ResponseFormatT]: ...
+
+    def parse(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        # TODO: Use TypeForm[ResponseFormatT] instead when PEP 747 is supported by mypy
+        output_format: None | type[ResponseFormatT] | ResponseFormatT | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ParsedBetaMessage[ResponseFormatT] | ParsedBetaMessage[None]:
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
                 max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
@@ -1338,6 +1434,9 @@ class Messages(SyncAPIResource):
             max_iterations=max_iterations if is_given(max_iterations) else None,
         )
 
+    # This overload should be listed first to prioritize it over generic overload
+    # so calls with Omit() resolve to ParsedBetaMessage[None] not ParsedBetaMessage[Omit]
+    @overload
     def stream(
         self,
         *,
@@ -1348,7 +1447,94 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
-        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        output_format: None | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaMessageStreamManager[None]: ...
+    @overload
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        output_format: type[ResponseFormatT],
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaMessageStreamManager[ResponseFormatT]: ...
+    @overload
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        output_format: ResponseFormatT,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaMessageStreamManager[ResponseFormatT]: ...
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        # TODO: Use TypeForm[ResponseFormatT] instead when PEP 747 is supported by mypy
+        output_format: None | type[ResponseFormatT] | ResponseFormatT | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -2646,6 +2832,9 @@ class AsyncMessages(AsyncAPIResource):
             stream_cls=AsyncStream[BetaRawMessageStreamEvent],
         )
 
+    # This overload should be listed first to prioritize it over generic overload
+    # so calls with Omit() resolve to ParsedBetaMessage[None] not ParsedBetaMessage[Omit]
+    @overload
     async def parse(
         self,
         *,
@@ -2656,7 +2845,98 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
-        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        output_format: None | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ParsedBetaMessage[None]: ...
+    @overload
+    async def parse(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        output_format: type[ResponseFormatT],
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ParsedBetaMessage[ResponseFormatT]: ...
+    @overload
+    async def parse(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        output_format: ResponseFormatT,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ParsedBetaMessage[ResponseFormatT]: ...
+
+    async def parse(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        metadata: BetaMetadataParam | Omit = omit,
+        # TODO: Use TypeForm[ResponseFormatT] instead when PEP 747 is supported by mypy
+        output_format: None | type[ResponseFormatT] | ResponseFormatT | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
@@ -2950,6 +3230,9 @@ class AsyncMessages(AsyncAPIResource):
             max_iterations=max_iterations if is_given(max_iterations) else None,
         )
 
+    # This overload should be listed first to prioritize it over generic overload
+    # so calls with Omit() resolve to ParsedBetaMessage[None] not ParsedBetaMessage[Omit]
+    @overload
     def stream(
         self,
         *,
@@ -2957,7 +3240,95 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         metadata: BetaMetadataParam | Omit = omit,
-        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        output_format: None | Omit = omit,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaAsyncMessageStreamManager[None]: ...
+    @overload
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        metadata: BetaMetadataParam | Omit = omit,
+        output_format: Type[ResponseFormatT],
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaAsyncMessageStreamManager[ResponseFormatT]: ...
+    @overload
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        metadata: BetaMetadataParam | Omit = omit,
+        output_format: ResponseFormatT,
+        container: Optional[message_create_params.Container] | Omit = omit,
+        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: BetaThinkingConfigParam | Omit = omit,
+        tool_choice: BetaToolChoiceParam | Omit = omit,
+        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> BetaAsyncMessageStreamManager[ResponseFormatT]: ...
+
+    def stream(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[BetaMessageParam],
+        model: ModelParam,
+        metadata: BetaMetadataParam | Omit = omit,
+        # TODO: Use TypeForm[ResponseFormatT] instead when PEP 747 is supported by mypy
+        output_format: None | type[ResponseFormatT] | ResponseFormatT | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
