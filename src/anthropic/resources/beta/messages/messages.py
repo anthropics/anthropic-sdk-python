@@ -3269,7 +3269,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         metadata: BetaMetadataParam | Omit = omit,
-        output_format: Type[ResponseFormatT],
+        output_format: type[ResponseFormatT],
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
