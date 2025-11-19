@@ -27,9 +27,8 @@ Extract the product name, price, and quantity from this customer message:
 """
 
 with client.beta.messages.stream(
-    model="claude-sonnet-4-5-20250929-structured-outputs",
+    model="claude-sonnet-4-5",
     messages=[{"role": "user", "content": prompt}],
-    betas=["structured-outputs-2025-09-17"],
     max_tokens=1024,
     output_format=Order,
 ) as stream:

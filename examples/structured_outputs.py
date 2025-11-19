@@ -28,7 +28,7 @@ Extract the product name, price, and quantity from this customer message:
 """
 
 parsed_message = client.beta.messages.parse(
-    model="claude-sonnet-4-5-20250929-structured-outputs",
+    model="claude-sonnet-4-5",
     messages=[{"role": "user", "content": prompt}],
     max_tokens=1024,
     output_format=Order,
