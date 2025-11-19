@@ -1076,9 +1076,9 @@ class Messages(SyncAPIResource):
 
         betas = [beta for beta in betas] if is_given(betas) else []
 
-        if "structured-outputs-2025-09-17" not in betas:
+        if "structured-outputs-2025-11-13" not in betas:
             # Ensure structured outputs beta is included for parse method
-            betas.append("structured-outputs-2025-09-17")
+            betas.append("structured-outputs-2025-11-13")
 
         extra_headers = {
             "X-Stainless-Helper": "beta.messages.parse",
@@ -2688,9 +2688,9 @@ class AsyncMessages(AsyncAPIResource):
             )
         betas = [beta for beta in betas] if is_given(betas) else []
 
-        if "structured-outputs-2025-09-17" not in betas:
+        if "structured-outputs-2025-11-13" not in betas:
             # Ensure structured outputs beta is included for parse method
-            betas.append("structured-outputs-2025-09-17")
+            betas.append("structured-outputs-2025-11-13")
 
         extra_headers = {
             "X-Stainless-Helper": "beta.messages.parse",
