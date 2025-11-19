@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.74.1 (2025-11-19)
+
+Full Changelog: [v0.74.0...v0.74.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.74.0...v0.74.1)
+
+### Bug Fixes
+
+* **structured outputs:** use correct beta header ([e90d347](https://github.com/anthropics/anthropic-sdk-python/commit/e90d347dfd80adc5ae2a412ebfe2eb55351ce08e))
+
+
+### Chores
+
+* **examples:** update model references ([e09461d](https://github.com/anthropics/anthropic-sdk-python/commit/e09461da36405bbb1a7ef616b9281457b2a6e20f))
+
 ## 0.74.0 (2025-11-18)
 
 Full Changelog: [v0.73.0...v0.74.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.73.0...v0.74.0)
