@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import os
 import httpx
 
 from ..._utils import lru_cache
@@ -42,6 +43,12 @@ def get_auth_headers(
     profile: str | None,
     data: str | None,
 ) -> dict[str, str]:
+    bedrock_bearer = os.getenv("AWS_BEARER_TOKEN_BEDROCK")
+    if bedrock_bearer is not None:
+        headers = headers.copy()
+        headers["Authorization"] = f"Bearer {bedrock_bearer}"
+        return dict(headers)
+
     from botocore.auth import SigV4Auth
     from botocore.awsrequest import AWSRequest
 

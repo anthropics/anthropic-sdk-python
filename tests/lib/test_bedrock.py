@@ -195,3 +195,32 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+@pytest.mark.respx()
+def test_bearer_token_env(monkeypatch: t.Any, respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx.Response(200, json={"foo": "bar"})
+    )
+
+    monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "test-bearer-token")
+
+    sync_client.messages.create(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        extra_headers={"Custom-Header": "CustomValue"},
+    )
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    auth_header = calls[0].request.headers.get("Authorization")
+    assert auth_header == "Bearer test-bearer-token"
+
+    # Verify that custom headers are preserved
+    custom_header = calls[0].request.headers.get("Custom-Header")
+    assert custom_header == "CustomValue"
