@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Dict, List, Iterable, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
@@ -19,8 +19,18 @@ class BetaToolTextEditor20250728Param(TypedDict, total=False):
 
     type: Required[Literal["text_editor_20250728"]]
 
+    allowed_callers: List[Literal["direct", "code_execution_20250825"]]
+
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
+
+    defer_loading: bool
+    """If true, tool will not be included in initial system prompt.
+
+    Only loaded when returned via tool_reference from tool search.
+    """
+
+    input_examples: Iterable[Dict[str, object]]
 
     max_characters: Optional[int]
     """Maximum number of characters to display when viewing a file.

@@ -282,7 +282,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -295,7 +295,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -355,7 +355,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         )
 
         assert response.is_closed is True
@@ -372,7 +372,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -649,7 +649,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -662,7 +662,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -722,7 +722,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         )
 
         assert response.is_closed is True
@@ -739,7 +739,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

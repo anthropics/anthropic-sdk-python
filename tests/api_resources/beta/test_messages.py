@@ -92,6 +92,7 @@ class TestMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_config={"effort": "low"},
             output_format={
                 "schema": {"foo": "bar"},
                 "type": "json_schema",
@@ -139,11 +140,14 @@ class TestMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -267,6 +271,7 @@ class TestMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_config={"effort": "low"},
             output_format={
                 "schema": {"foo": "bar"},
                 "type": "json_schema",
@@ -313,11 +318,14 @@ class TestMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -379,7 +387,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -393,7 +401,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
             context_management={
                 "edits": [
                     {
@@ -427,6 +435,7 @@ class TestMessages:
                     },
                 }
             ],
+            output_config={"effort": "low"},
             output_format={
                 "schema": {"foo": "bar"},
                 "type": "json_schema",
@@ -470,11 +479,14 @@ class TestMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -493,7 +505,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         )
 
         assert response.is_closed is True
@@ -511,7 +523,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -615,6 +627,7 @@ class TestAsyncMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_config={"effort": "low"},
             output_format={
                 "schema": {"foo": "bar"},
                 "type": "json_schema",
@@ -662,11 +675,14 @@ class TestAsyncMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -790,6 +806,7 @@ class TestAsyncMessages:
                 }
             ],
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+            output_config={"effort": "low"},
             output_format={
                 "schema": {"foo": "bar"},
                 "type": "json_schema",
@@ -836,11 +853,14 @@ class TestAsyncMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -902,7 +922,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -916,7 +936,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
             context_management={
                 "edits": [
                     {
@@ -950,6 +970,7 @@ class TestAsyncMessages:
                     },
                 }
             ],
+            output_config={"effort": "low"},
             output_format={
                 "schema": {"foo": "bar"},
                 "type": "json_schema",
@@ -993,11 +1014,14 @@ class TestAsyncMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -1016,7 +1040,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         )
 
         assert response.is_closed is True
@@ -1034,7 +1058,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-5-20251101",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

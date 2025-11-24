@@ -8,13 +8,18 @@ from typing_extensions import Literal, Required, TypeAlias, TypedDict
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_image_block_param import BetaImageBlockParam
 from .beta_search_result_block_param import BetaSearchResultBlockParam
+from .beta_tool_reference_block_param import BetaToolReferenceBlockParam
 from .beta_request_document_block_param import BetaRequestDocumentBlockParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
 __all__ = ["BetaToolResultBlockParam", "Content"]
 
 Content: TypeAlias = Union[
-    BetaTextBlockParam, BetaImageBlockParam, BetaSearchResultBlockParam, BetaRequestDocumentBlockParam
+    BetaTextBlockParam,
+    BetaImageBlockParam,
+    BetaSearchResultBlockParam,
+    BetaRequestDocumentBlockParam,
+    BetaToolReferenceBlockParam,
 ]
 
 

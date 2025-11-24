@@ -7,17 +7,23 @@ from typing_extensions import Literal, Required, TypedDict
 
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
-__all__ = ["BetaToolTextEditor20250429Param"]
+__all__ = ["BetaToolComputerUse20251124Param"]
 
 
-class BetaToolTextEditor20250429Param(TypedDict, total=False):
-    name: Required[Literal["str_replace_based_edit_tool"]]
+class BetaToolComputerUse20251124Param(TypedDict, total=False):
+    display_height_px: Required[int]
+    """The height of the display in pixels."""
+
+    display_width_px: Required[int]
+    """The width of the display in pixels."""
+
+    name: Required[Literal["computer"]]
     """Name of the tool.
 
     This is how the tool will be called by the model and in `tool_use` blocks.
     """
 
-    type: Required[Literal["text_editor_20250429"]]
+    type: Required[Literal["computer_20251124"]]
 
     allowed_callers: List[Literal["direct", "code_execution_20250825"]]
 
@@ -29,6 +35,12 @@ class BetaToolTextEditor20250429Param(TypedDict, total=False):
 
     Only loaded when returned via tool_reference from tool search.
     """
+
+    display_number: Optional[int]
+    """The X11 display number (e.g. 0, 1) for the display."""
+
+    enable_zoom: bool
+    """Whether to enable an action to take a zoomed-in screenshot of the screen."""
 
     input_examples: Iterable[Dict[str, object]]
 

@@ -6,6 +6,7 @@ from typing import Union
 from typing_extensions import TypeAlias
 
 from .beta_tool_param import BetaToolParam
+from .beta_mcp_toolset_param import BetaMCPToolsetParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
 from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
@@ -17,8 +18,11 @@ from .beta_tool_text_editor_20250429_param import BetaToolTextEditor20250429Para
 from .beta_tool_text_editor_20250728_param import BetaToolTextEditor20250728Param
 from .beta_tool_computer_use_20241022_param import BetaToolComputerUse20241022Param
 from .beta_tool_computer_use_20250124_param import BetaToolComputerUse20250124Param
+from .beta_tool_computer_use_20251124_param import BetaToolComputerUse20251124Param
 from .beta_code_execution_tool_20250522_param import BetaCodeExecutionTool20250522Param
 from .beta_code_execution_tool_20250825_param import BetaCodeExecutionTool20250825Param
+from .beta_tool_search_tool_bm25_20251119_param import BetaToolSearchToolBm25_20251119Param
+from .beta_tool_search_tool_regex_20251119_param import BetaToolSearchToolRegex20251119Param
 
 __all__ = ["BetaToolUnionParam"]
 
@@ -32,9 +36,13 @@ BetaToolUnionParam: TypeAlias = Union[
     BetaMemoryTool20250818Param,
     BetaToolComputerUse20250124Param,
     BetaToolTextEditor20241022Param,
+    BetaToolComputerUse20251124Param,
     BetaToolTextEditor20250124Param,
     BetaToolTextEditor20250429Param,
     BetaToolTextEditor20250728Param,
     BetaWebSearchTool20250305Param,
     BetaWebFetchTool20250910Param,
+    BetaToolSearchToolBm25_20251119Param,
+    BetaToolSearchToolRegex20251119Param,
+    BetaMCPToolsetParam,
 ]

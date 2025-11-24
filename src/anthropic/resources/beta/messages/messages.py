@@ -55,6 +55,7 @@ from ....types.beta.parsed_beta_message import ParsedBetaMessage
 from ....types.beta.beta_text_block_param import BetaTextBlockParam
 from ....types.beta.beta_tool_union_param import BetaToolUnionParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
+from ....types.beta.beta_output_config_param import BetaOutputConfigParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
 from ....types.beta.beta_json_output_format_param import BetaJSONOutputFormatParam
@@ -103,6 +104,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -221,6 +223,9 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -390,6 +395,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -511,6 +517,9 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -676,6 +685,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -797,6 +807,9 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -961,6 +974,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -1009,6 +1023,7 @@ class Messages(SyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "output_format": output_format,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
@@ -1440,6 +1455,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
@@ -1539,6 +1555,9 @@ class Messages(SyncAPIResource):
               such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -1666,6 +1685,7 @@ class Messages(SyncAPIResource):
                     "model": model,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
+                    "output_config": output_config,
                     "output_format": output_format,
                     "system": system,
                     "thinking": thinking,
@@ -1716,6 +1736,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -1834,6 +1855,9 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -2003,6 +2027,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2124,6 +2149,9 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -2289,6 +2317,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2410,6 +2439,9 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -2574,6 +2606,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2622,6 +2655,7 @@ class AsyncMessages(AsyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "output_format": output_format,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
@@ -3049,6 +3083,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
@@ -3148,6 +3183,9 @@ class AsyncMessages(AsyncAPIResource):
               such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -3275,6 +3313,7 @@ class AsyncMessages(AsyncAPIResource):
                     "model": model,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
+                    "output_config": output_config,
                     "output_format": output_format,
                     "system": system,
                     "thinking": thinking,
