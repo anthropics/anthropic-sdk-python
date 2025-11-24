@@ -44,6 +44,7 @@ from ._exceptions import (
 )
 from ._base_client import DefaultHttpxClient, DefaultAioHttpClient, DefaultAsyncHttpxClient
 from ._utils._logs import setup_logging as _setup_logging
+from .lib._parse._transform import transform_schema
 
 __all__ = [
     "types",
@@ -91,6 +92,7 @@ __all__ = [
     "AI_PROMPT",
     "beta_tool",
     "beta_async_tool",
+    "transform_schema",
 ]
 
 if not _t.TYPE_CHECKING:
@@ -99,6 +101,7 @@ if not _t.TYPE_CHECKING:
 from .lib.tools import beta_tool, beta_async_tool
 from .lib.vertex import *
 from .lib.bedrock import *
+from .lib.foundry import AnthropicFoundry as AnthropicFoundry, AsyncAnthropicFoundry as AsyncAnthropicFoundry
 from .lib.streaming import *
 
 _setup_logging()

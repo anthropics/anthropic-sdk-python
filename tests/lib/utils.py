@@ -23,8 +23,14 @@ def print_obj(obj: object, monkeypatch: pytest.MonkeyPatch) -> str:
     def __repr_args__(self: pydantic.BaseModel) -> ReprArgs:
         return sorted(original_repr(self), key=lambda arg: arg[0] or arg)
 
+    def __repr_name__(self: pydantic.BaseModel) -> str:
+        # Drop generic parameters from the name
+        # e.g. `GenericModel[Location]` -> `GenericModel`
+        return self.__class__.__name__.split("[", maxsplit=1)[0]
+
     with monkeypatch.context() as m:
         m.setattr(pydantic.BaseModel, "__repr_args__", __repr_args__)
+        m.setattr(pydantic.BaseModel, "__repr_name__", __repr_name__)
 
         string = rich_print_str(obj)
 
@@ -54,23 +60,11 @@ def clear_locals(string: str, *, stacklevel: int) -> str:
     return string.replace(f"{caller}.<locals>.", "")
 
 
-def get_snapshot_value(snapshot: Any) -> Any:
-    if not hasattr(snapshot, "_old_value"):
-        return snapshot
-
-    old = snapshot._old_value
-    if not hasattr(old, "value"):
-        return old
-
-    loader = getattr(old.value, "_load_value", None)
-    return loader() if loader else old.value
-
-
 def rich_print_str(obj: object) -> str:
     """Like `rich.print()` but returns the string instead"""
     buf = io.StringIO()
 
     console = rich.console.Console(file=buf, width=120)
-    console.print(obj)
+    console.out(obj)
 
     return buf.getvalue()

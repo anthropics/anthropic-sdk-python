@@ -13,7 +13,7 @@ from respx import MockRouter
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._compat import PYDANTIC_V1
 from anthropic.types.beta.beta_message import BetaMessage
-from anthropic.lib.streaming._beta_types import BetaMessageStreamEvent
+from anthropic.lib.streaming._beta_types import ParsedBetaMessageStreamEvent
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
 from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
 
@@ -170,17 +170,17 @@ def assert_message_matches(message: BetaMessage, expected: Dict[str, Any]) -> No
     test_case.assertEqual(expected, json.loads(actual_message_json))
 
 
-def assert_basic_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
+def assert_basic_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
     assert_message_matches(message, EXPECTED_BASIC_MESSAGE)
     assert [e.type for e in events] == EXPECTED_BASIC_EVENT_TYPES
 
 
-def assert_tool_use_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
+def assert_tool_use_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
     assert_message_matches(message, EXPECTED_TOOL_USE_MESSAGE)
     assert [e.type for e in events] == EXPECTED_TOOL_USE_EVENT_TYPES
 
 
-def assert_incomplete_partial_input_response(events: list[BetaMessageStreamEvent], message: BetaMessage) -> None:
+def assert_incomplete_partial_input_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
     assert_message_matches(message, EXPECTED_INCOMPLETE_MESSAGE)
     assert [e.type for e in events] == EXPECTED_INCOMPLETE_EVENT_TYPES
 
@@ -384,6 +384,9 @@ def test_stream_method_definition_in_sync(sync: bool) -> None:
     for name, generated_param in generated_sig.parameters.items():
         if name == "stream":
             # intentionally excluded
+            continue
+
+        if name == "output_format":
             continue
 
         custom_param = sig.parameters.get(name)

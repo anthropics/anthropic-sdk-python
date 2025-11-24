@@ -44,3 +44,5 @@ class BetaWebFetchTool20250910Param(TypedDict, total=False):
 
     max_uses: Optional[int]
     """Maximum number of times the tool can be used in the API request."""
+
+    strict: bool

@@ -263,6 +263,7 @@ from anthropic.types.beta import (
     BetaInputJSONDelta,
     BetaInputTokensClearAtLeast,
     BetaInputTokensTrigger,
+    BetaJSONOutputFormat,
     BetaMCPToolResultBlock,
     BetaMCPToolUseBlock,
     BetaMCPToolUseBlockParam,

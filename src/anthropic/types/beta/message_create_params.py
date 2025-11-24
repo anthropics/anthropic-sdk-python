@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Union, Iterable, Optional
+from typing import List, Union, Generic, Iterable, Optional
 from typing_extensions import Literal, Required, Annotated, TypeAlias, TypedDict
 
 from ..._types import SequenceNotStr
@@ -10,16 +10,24 @@ from ..._utils import PropertyInfo
 from ..model_param import ModelParam
 from .beta_message_param import BetaMessageParam
 from .beta_metadata_param import BetaMetadataParam
+from .parsed_beta_message import ResponseFormatT
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_container_params import BetaContainerParams
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_tool_union_param import BetaToolUnionParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
+from .beta_json_output_format_param import BetaJSONOutputFormatParam
 from .beta_context_management_config_param import BetaContextManagementConfigParam
 from .beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
 
-__all__ = ["MessageCreateParamsBase", "Container", "MessageCreateParamsNonStreaming", "MessageCreateParamsStreaming"]
+__all__ = [
+    "MessageCreateParamsBase",
+    "Container",
+    "MessageCreateParamsNonStreaming",
+    "MessageCreateParamsStreaming",
+    "OutputFormat",
+]
 
 
 class MessageCreateParamsBase(TypedDict, total=False):
@@ -123,6 +131,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     metadata: BetaMetadataParam
     """An object describing metadata about the request."""
+
+    output_format: Optional[BetaJSONOutputFormatParam]
+    """A schema to specify Claude's output format in responses."""
 
     service_tier: Literal["auto", "standard_only"]
     """
@@ -288,6 +299,17 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
 
 Container: TypeAlias = Union[BetaContainerParams, str]
+
+
+class ParseMessageCreateParamsBase(MessageCreateParamsBase, Generic[ResponseFormatT]):
+    output_format: type[ResponseFormatT]  # type: ignore[misc]
+
+
+class OutputFormat(TypedDict, total=False):
+    schema: Required[object]
+    """The JSON schema of the format"""
+
+    type: Required[Literal["json_schema"]]
 
 
 class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):

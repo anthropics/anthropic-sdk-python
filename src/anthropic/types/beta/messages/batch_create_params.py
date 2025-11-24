@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from typing import List, Iterable
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Literal, Required, Annotated, TypedDict
 
 from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 from ..message_create_params import MessageCreateParamsNonStreaming
 
-__all__ = ["BatchCreateParams", "Request"]
+__all__ = ["BatchCreateParams", "Request", "RequestParamsOutputFormat"]
 
 
 class BatchCreateParams(TypedDict, total=False):
@@ -22,6 +22,12 @@ class BatchCreateParams(TypedDict, total=False):
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
 
+
+class RequestParamsOutputFormat(TypedDict, total=False):
+    schema: Required[object]
+    """The JSON schema of the format"""
+
+    type: Required[Literal["json_schema"]]
 
 
 class Request(TypedDict, total=False):
