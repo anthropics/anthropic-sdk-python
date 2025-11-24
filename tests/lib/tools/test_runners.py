@@ -11,6 +11,7 @@ from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import BetaFunctionToolResultType
+from anthropic.lib.tools._beta_runner import BetaToolRunner
 from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.types.beta.beta_message_param import BetaMessageParam
 from anthropic.types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
@@ -398,6 +399,115 @@ class TestSyncRunTools:
                 "message_stop",
                 "text",
             }
+        )
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_compaction_control(
+        self, client: Anthropic, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        @beta_tool
+        def submit_analysis(summary: str) -> str:  # noqa: ARG001
+            """Call this LAST with your final analysis."""
+            return "Analysis submitted"
+
+        def tool_runner(client: Anthropic) -> BetaToolRunner[None]:
+            runner = client.beta.messages.tool_runner(
+                model="claude-sonnet-4-5",
+                max_tokens=4000,
+                tools=[submit_analysis],
+                messages=[
+                    {
+                        "role": "user",
+                        "content": (
+                            "Write a detailed 500 word essay about dogs, cats, and birds. "
+                            "Call the tool submit_analysis with the information about all three animals. "
+                            "Note that you should call it only once at the end of your essay."
+                        ),
+                    }
+                ],
+                betas=["structured-outputs-2025-11-13"],
+                compaction_control={"enabled": True, "context_token_threshold": 500},
+                max_iterations=1,
+            )
+
+            next(runner)
+            runner.until_done()
+            return runner
+
+        with caplog.at_level(logging.INFO, logger="anthropic.lib.tools._beta_runner"):
+            runner = make_snapshot_request(
+                tool_runner,
+                content_snapshot=external("uuid:ab7b2edd-9c2d-4f53-9c04-92bb659b9caa.json"),
+                path="/v1/messages",
+                mock_client=client,
+                respx_mock=respx_mock,
+            )
+
+        messages = list(runner._params["messages"])
+        assert len(messages) == 1
+        assert messages[0]["role"] == "user"
+
+        content = list(messages[0]["content"])[0]
+        assert isinstance(content, dict)
+        assert content["type"] == "text"
+        assert content["text"] == snapshot("""\
+<summary>
+## 1. Task Overview
+The user requests a 500-word essay about dogs, cats, and birds, followed by a single call to the `submit_analysis` tool at the end containing information about all three animals. \n\
+
+**Key constraints:**
+- Essay must be detailed and approximately 500 words
+- Must cover all three animals: dogs, cats, and birds
+- Tool `submit_analysis` must be called exactly once, at the end
+- Tool call should contain information about all three animals
+
+## 2. Current State
+**Completed:** Nothing has been completed yet.
+
+**Status:** The task has been acknowledged but no essay has been written and no tool has been called.
+
+**Artifacts produced:** None yet.
+
+## 3. Important Discoveries
+**Technical requirements:**
+- Need to understand the parameters/schema for `submit_analysis` tool (not yet verified)
+- Must structure the tool call to include data about all three animal types in a single invocation
+
+**Approach to take:**
+- Write a comprehensive 500-word essay discussing dogs, cats, and birds
+- Essay should cover characteristics, behaviors, and comparisons between the three
+- Extract/organize key information about each animal for the tool call
+- Call `submit_analysis` once with consolidated data about all three animals
+
+## 4. Next Steps
+1. **Write the 500-word essay** covering:
+   - Dogs: characteristics, behavior, relationship with humans
+   - Cats: characteristics, behavior, relationship with humans
+   - Birds: characteristics, behavior, diversity
+   - Comparisons and contrasts between the three
+   \n\
+2. **Determine the schema for `submit_analysis` tool** - check what parameters it accepts and how to structure data about multiple animals
+
+3. **Call `submit_analysis` once** with information about all three animals in the appropriate format
+
+4. **Verify word count** is approximately 500 words
+
+## 5. Context to Preserve
+- User emphasized calling the tool "only once at the end"
+- Essay should be "detailed" - not superficial
+- The tool call must encompass information about all three animals, not separate calls per animal
+- This appears to be a test of following multi-step instructions precisely
+</summary>\
+""")
+        assert caplog.record_tuples == snapshot(
+            [
+                (
+                    "anthropic.lib.tools._beta_runner",
+                    20,
+                    "Token usage 1615 has exceeded the threshold of 500. Performing compaction.",
+                ),
+                ("anthropic.lib.tools._beta_runner", 20, "Compaction complete. New token usage: 496"),
+            ]
         )
 
 

@@ -106,6 +106,7 @@ class TestBatches:
                             }
                         ],
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+                        "output_config": {"effort": "low"},
                         "output_format": {
                             "schema": {"foo": "bar"},
                             "type": "json_schema",
@@ -153,11 +154,14 @@ class TestBatches:
                                     "required": ["location"],
                                 },
                                 "name": "name",
+                                "allowed_callers": ["direct"],
                                 "cache_control": {
                                     "type": "ephemeral",
                                     "ttl": "5m",
                                 },
+                                "defer_loading": True,
                                 "description": "Get the current weather in a given location",
+                                "input_examples": [{"foo": "bar"}],
                                 "strict": True,
                                 "type": "custom",
                             }
@@ -525,6 +529,7 @@ class TestAsyncBatches:
                             }
                         ],
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
+                        "output_config": {"effort": "low"},
                         "output_format": {
                             "schema": {"foo": "bar"},
                             "type": "json_schema",
@@ -572,11 +577,14 @@ class TestAsyncBatches:
                                     "required": ["location"],
                                 },
                                 "name": "name",
+                                "allowed_callers": ["direct"],
                                 "cache_control": {
                                     "type": "ephemeral",
                                     "ttl": "5m",
                                 },
+                                "defer_loading": True,
                                 "description": "Get the current weather in a given location",
+                                "input_examples": [{"foo": "bar"}],
                                 "strict": True,
                                 "type": "custom",
                             }

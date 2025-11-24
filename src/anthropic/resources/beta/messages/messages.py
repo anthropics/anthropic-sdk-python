@@ -55,6 +55,8 @@ from ....types.beta.parsed_beta_message import ParsedBetaMessage
 from ....types.beta.beta_text_block_param import BetaTextBlockParam
 from ....types.beta.beta_tool_union_param import BetaToolUnionParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
+from ....lib.tools._beta_compaction_control import CompactionControl
+from ....types.beta.beta_output_config_param import BetaOutputConfigParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
 from ....types.beta.beta_json_output_format_param import BetaJSONOutputFormatParam
@@ -103,6 +105,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -221,6 +224,9 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -390,6 +396,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -512,6 +519,9 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
+
           output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
@@ -676,6 +686,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -797,6 +808,9 @@ class Messages(SyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -961,6 +975,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -1009,6 +1024,7 @@ class Messages(SyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "output_format": output_format,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
@@ -1043,6 +1059,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -1124,6 +1141,7 @@ class Messages(SyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "output_format": transformed_output_format,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
@@ -1157,11 +1175,13 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaRunnableTool],
+        compaction_control: CompactionControl | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         max_iterations: int | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -1189,12 +1209,14 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaRunnableTool],
+        compaction_control: CompactionControl | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -1221,12 +1243,14 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaRunnableTool],
+        compaction_control: CompactionControl | Omit = omit,
         stream: bool,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -1252,11 +1276,13 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaRunnableTool],
+        compaction_control: CompactionControl | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -1299,6 +1325,7 @@ class Messages(SyncAPIResource):
                 "context_management": context_management,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
+                "output_config": output_config,
                 "output_format": output_format,
                 "service_tier": service_tier,
                 "stop_sequences": stop_sequences,
@@ -1324,6 +1351,7 @@ class Messages(SyncAPIResource):
                 },
                 client=cast("Anthropic", self._client),
                 max_iterations=max_iterations if is_given(max_iterations) else None,
+                compaction_control=compaction_control if is_given(compaction_control) else None,
             )
         return BetaToolRunner[ResponseFormatT](
             tools=tools,
@@ -1336,6 +1364,7 @@ class Messages(SyncAPIResource):
             },
             client=cast("Anthropic", self._client),
             max_iterations=max_iterations if is_given(max_iterations) else None,
+            compaction_control=compaction_control if is_given(compaction_control) else None,
         )
 
     def stream(
@@ -1348,6 +1377,7 @@ class Messages(SyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -1375,6 +1405,7 @@ class Messages(SyncAPIResource):
 
         """Create a Message stream"""
         extra_headers = {
+            "X-Stainless-Helper-Method": "stream",
             "X-Stainless-Stream-Helper": "beta.messages",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
@@ -1407,6 +1438,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "output_format": transformed_output_format,
                     "container": container,
                     "context_management": context_management,
@@ -1440,6 +1472,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
@@ -1539,6 +1572,9 @@ class Messages(SyncAPIResource):
               such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -1666,6 +1702,7 @@ class Messages(SyncAPIResource):
                     "model": model,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
+                    "output_config": output_config,
                     "output_format": output_format,
                     "system": system,
                     "thinking": thinking,
@@ -1716,6 +1753,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -1834,6 +1872,9 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -2003,6 +2044,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2125,6 +2167,9 @@ class AsyncMessages(AsyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
+
           output_format: A schema to specify Claude's output format in responses.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
@@ -2289,6 +2334,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2410,6 +2456,9 @@ class AsyncMessages(AsyncAPIResource):
           mcp_servers: MCP servers to be utilized in this request
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -2574,6 +2623,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2622,6 +2672,7 @@ class AsyncMessages(AsyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "output_format": output_format,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
@@ -2656,6 +2707,7 @@ class AsyncMessages(AsyncAPIResource):
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2735,6 +2787,7 @@ class AsyncMessages(AsyncAPIResource):
                     "container": container,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
+                    "output_config": output_config,
                     "metadata": metadata,
                     "output_format": transformed_output_format,
                     "service_tier": service_tier,
@@ -2769,11 +2822,13 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool],
+        compaction_control: CompactionControl | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2801,12 +2856,14 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool],
+        compaction_control: CompactionControl | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2833,12 +2890,14 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool],
+        compaction_control: CompactionControl | Omit = omit,
         stream: bool,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2864,11 +2923,13 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool],
+        compaction_control: CompactionControl | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2911,6 +2972,7 @@ class AsyncMessages(AsyncAPIResource):
                 "context_management": context_management,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
+                "output_config": output_config,
                 "output_format": output_format,
                 "service_tier": service_tier,
                 "stop_sequences": stop_sequences,
@@ -2936,6 +2998,7 @@ class AsyncMessages(AsyncAPIResource):
                 },
                 client=cast("AsyncAnthropic", self._client),
                 max_iterations=max_iterations if is_given(max_iterations) else None,
+                compaction_control=compaction_control if is_given(compaction_control) else None,
             )
         return BetaAsyncToolRunner[ResponseFormatT](
             tools=tools,
@@ -2948,6 +3011,7 @@ class AsyncMessages(AsyncAPIResource):
             },
             client=cast("AsyncAnthropic", self._client),
             max_iterations=max_iterations if is_given(max_iterations) else None,
+            compaction_control=compaction_control if is_given(compaction_control) else None,
         )
 
     def stream(
@@ -2957,6 +3021,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         metadata: BetaMetadataParam | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -2986,6 +3051,7 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         extra_headers = {
+            "X-Stainless-Helper-Method": "stream",
             "X-Stainless-Stream-Helper": "beta.messages",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **(extra_headers or {}),
@@ -3016,6 +3082,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "output_format": transformed_output_format,
                     "container": container,
                     "context_management": context_management,
@@ -3049,6 +3116,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
+        output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[BetaJSONOutputFormatParam] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
@@ -3148,6 +3216,9 @@ class AsyncMessages(AsyncAPIResource):
               such as whether to clear function results or not.
 
           mcp_servers: MCP servers to be utilized in this request
+
+          output_config: Configuration options for the model's output. Controls aspects like how much
+              effort the model puts into its response.
 
           output_format: A schema to specify Claude's output format in responses.
 
@@ -3275,6 +3346,7 @@ class AsyncMessages(AsyncAPIResource):
                     "model": model,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
+                    "output_config": output_config,
                     "output_format": output_format,
                     "system": system,
                     "thinking": thinking,

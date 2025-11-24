@@ -20,6 +20,7 @@ AnthropicBetaParam: TypeAlias = Union[
         "output-128k-2025-02-19",
         "files-api-2025-04-14",
         "mcp-client-2025-04-04",
+        "mcp-client-2025-11-20",
         "dev-full-thinking-2025-05-14",
         "interleaved-thinking-2025-05-14",
         "code-execution-2025-05-22",

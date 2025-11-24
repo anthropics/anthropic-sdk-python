@@ -991,6 +991,7 @@ class Messages(SyncAPIResource):
             )
 
         extra_headers = {
+            "X-Stainless-Helper-Method": "stream",
             "X-Stainless-Stream-Helper": "messages",
             **(extra_headers or {}),
         }
@@ -2174,6 +2175,7 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         extra_headers = {
+            "X-Stainless-Helper-Method": "stream",
             "X-Stainless-Stream-Helper": "messages",
             **(extra_headers or {}),
         }

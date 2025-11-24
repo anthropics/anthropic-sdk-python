@@ -41,7 +41,9 @@ def make_snapshot_request(
         )
     else:
         responses = get_snapshot_value(content_snapshot)
-        assert is_list(responses)
+
+        if not is_list(responses):
+            responses = [responses]
 
         curr = 0
 
