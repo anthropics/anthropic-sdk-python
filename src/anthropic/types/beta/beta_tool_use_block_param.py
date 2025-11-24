@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Dict, Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing import Dict, Union, Optional
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
+from .beta_direct_caller_param import BetaDirectCallerParam
+from .beta_server_tool_caller_param import BetaServerToolCallerParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
-__all__ = ["BetaToolUseBlockParam"]
+__all__ = ["BetaToolUseBlockParam", "Caller"]
+
+Caller: TypeAlias = Union[BetaDirectCallerParam, BetaServerToolCallerParam]
 
 
 class BetaToolUseBlockParam(TypedDict, total=False):
@@ -21,3 +25,6 @@ class BetaToolUseBlockParam(TypedDict, total=False):
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
+
+    caller: Caller
+    """Tool invocation directly from the model."""
