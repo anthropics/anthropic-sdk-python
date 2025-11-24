@@ -3,13 +3,11 @@ from typing import List, cast
 
 import httpx
 
+from anthropic.types.beta import BetaDirectCaller, BetaToolUseBlock, BetaInputJSONDelta, BetaRawContentBlockDeltaEvent
 from anthropic.types.tool_use_block import ToolUseBlock
 from anthropic.types.beta.beta_usage import BetaUsage
 from anthropic.lib.streaming._beta_messages import accumulate_event
-from anthropic.types.beta.beta_tool_use_block import BetaToolUseBlock
 from anthropic.types.beta.parsed_beta_message import ParsedBetaMessage
-from anthropic.types.beta.beta_input_json_delta import BetaInputJSONDelta
-from anthropic.types.beta.beta_raw_content_block_delta_event import BetaRawContentBlockDeltaEvent
 
 
 class TestPartialJson:
@@ -19,7 +17,15 @@ class TestPartialJson:
             id="msg_123",
             type="message",
             role="assistant",
-            content=[BetaToolUseBlock(type="tool_use", input={}, id="tool_123", name="test_tool")],
+            content=[
+                BetaToolUseBlock(
+                    type="tool_use",
+                    input={},
+                    id="tool_123",
+                    name="test_tool",
+                    caller=BetaDirectCaller(type="direct"),
+                )
+            ],
             model="claude-sonnet-4-5",
             stop_reason=None,
             stop_sequence=None,
@@ -105,7 +111,15 @@ class TestPartialJson:
             id="msg_123",
             type="message",
             role="assistant",
-            content=[BetaToolUseBlock(type="tool_use", input={}, id="tool_123", name="test_tool")],
+            content=[
+                BetaToolUseBlock(
+                    type="tool_use",
+                    input={},
+                    id="tool_123",
+                    name="test_tool",
+                    caller=BetaDirectCaller(type="direct"),
+                )
+            ],
             model="claude-sonnet-4-5",
             stop_reason=None,
             stop_sequence=None,

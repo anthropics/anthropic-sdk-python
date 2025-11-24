@@ -31,6 +31,7 @@ from ._beta_functions import (
     BetaBuiltinFunctionTool,
     BetaAsyncBuiltinFunctionTool,
 )
+from ._beta_compaction_control import DEFAULT_THRESHOLD, DEFAULT_SUMMARY_PROMPT, CompactionControl
 from ..streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 from ...types.beta.parsed_beta_message import ResponseFormatT, ParsedBetaMessage, ParsedBetaContentBlock
 from ...types.beta.message_create_params import ParseMessageCreateParamsBase
@@ -66,6 +67,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         options: RequestOptions,
         tools: Iterable[AnyFunctionToolT],
         max_iterations: int | None = None,
+        compaction_control: CompactionControl | None = None,
     ) -> None:
         self._tools_by_name = {tool.name: tool for tool in tools}
         self._params: ParseMessageCreateParamsBase[ResponseFormatT] = {
@@ -77,6 +79,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         self._cached_tool_call_response: BetaMessageParam | None = None
         self._max_iterations = max_iterations
         self._iteration_count = 0
+        self._compaction_control = compaction_control
 
     def set_messages_params(
         self,
@@ -122,9 +125,17 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         tools: Iterable[BetaRunnableTool],
         client: Anthropic,
         max_iterations: int | None = None,
+        compaction_control: CompactionControl | None = None,
     ) -> None:
-        super().__init__(params=params, options=options, tools=tools, max_iterations=max_iterations)
+        super().__init__(
+            params=params,
+            options=options,
+            tools=tools,
+            max_iterations=max_iterations,
+            compaction_control=compaction_control,
+        )
         self._client = client
+
         self._iterator = self.__run__()
         self._last_message: (
             Callable[[], ParsedBetaMessage[ResponseFormatT]] | ParsedBetaMessage[ResponseFormatT] | None
@@ -143,30 +154,111 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         raise NotImplementedError()
         yield  # type: ignore[unreachable]
 
+    def _check_and_compact(self) -> bool:
+        """
+        Check token usage and compact messages if threshold exceeded.
+        Returns True if compaction was performed, False otherwise.
+        """
+        if self._compaction_control is None or not self._compaction_control["enabled"]:
+            return False
+
+        message = self._get_last_message()
+        tokens_used = 0
+        if message is not None:
+            total_input_tokens = (
+                message.usage.input_tokens
+                + (message.usage.cache_creation_input_tokens or 0)
+                + (message.usage.cache_read_input_tokens or 0)
+            )
+            tokens_used = total_input_tokens + message.usage.output_tokens
+
+        threshold = self._compaction_control.get("context_token_threshold", DEFAULT_THRESHOLD)
+
+        if tokens_used < threshold:
+            return False
+
+        # Perform compaction
+        log.info(f"Token usage {tokens_used} has exceeded the threshold of {threshold}. Performing compaction.")
+
+        model = self._compaction_control.get("model", self._params["model"])
+
+        messages = list(self._params["messages"])
+
+        if messages[-1]["role"] == "assistant":
+            # Remove tool_use blocks from the last message to avoid 400 error
+            # (tool_use requires tool_result, which we don't have yet)
+            non_tool_blocks = [
+                block
+                for block in messages[-1]["content"]
+                if isinstance(block, dict) and block.get("type") != "tool_use"
+            ]
+
+            if non_tool_blocks:
+                messages[-1]["content"] = non_tool_blocks
+            else:
+                messages.pop()
+
+        messages = [
+            *self._params["messages"],
+            BetaMessageParam(
+                role="user",
+                content=self._compaction_control.get("summary_prompt", DEFAULT_SUMMARY_PROMPT),
+            ),
+        ]
+
+        response = self._client.beta.messages.create(
+            model=model,
+            messages=messages,
+            max_tokens=self._params["max_tokens"],
+            extra_headers={"X-Stainless-Helper": "compaction"},
+        )
+
+        log.info(f"Compaction complete. New token usage: {response.usage.output_tokens}")
+
+        first_content = list(response.content)[0]
+
+        if first_content.type != "text":
+            raise ValueError("Compaction response content is not of type 'text'")
+
+        self.set_messages_params(
+            lambda params: {
+                **params,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": first_content.text,
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+        return True
+
     def __run__(self) -> Iterator[RunnerItemT]:
-        with self._handle_request() as item:
-            yield item
-            message = self._get_last_message()
-            assert message is not None
-        self._iteration_count += 1
-
         while not self._should_stop():
-            response = self.generate_tool_call_response()
-            if response is None:
-                log.debug("Tool call was not requested, exiting from tool runner loop.")
-                return
-
-            if not self._messages_modified:
-                self.append_messages(message, response)
-
-            self._iteration_count += 1
-            self._messages_modified = False
-            self._cached_tool_call_response = None
-
             with self._handle_request() as item:
                 yield item
                 message = self._get_last_message()
                 assert message is not None
+
+            self._iteration_count += 1
+
+            # If the compaction was performed, skip tool call generation this iteration
+            if not self._check_and_compact():
+                response = self.generate_tool_call_response()
+                if response is None:
+                    log.debug("Tool call was not requested, exiting from tool runner loop.")
+                    return
+
+                if not self._messages_modified:
+                    self.append_messages(message, response)
+
+            self._messages_modified = False
+            self._cached_tool_call_response = None
 
     def until_done(self) -> ParsedBetaMessage[ResponseFormatT]:
         """
@@ -274,9 +366,17 @@ class BaseAsyncToolRunner(
         tools: Iterable[BetaAsyncRunnableTool],
         client: AsyncAnthropic,
         max_iterations: int | None = None,
+        compaction_control: CompactionControl | None = None,
     ) -> None:
-        super().__init__(params=params, options=options, tools=tools, max_iterations=max_iterations)
+        super().__init__(
+            params=params,
+            options=options,
+            tools=tools,
+            max_iterations=max_iterations,
+            compaction_control=compaction_control,
+        )
         self._client = client
+
         self._iterator = self.__run__()
         self._last_message: (
             Callable[[], Coroutine[None, None, ParsedBetaMessage[ResponseFormatT]]]
@@ -297,29 +397,111 @@ class BaseAsyncToolRunner(
         raise NotImplementedError()
         yield  # type: ignore[unreachable]
 
+    async def _check_and_compact(self) -> bool:
+        """
+        Check token usage and compact messages if threshold exceeded.
+        Returns True if compaction was performed, False otherwise.
+        """
+        if self._compaction_control is None or not self._compaction_control["enabled"]:
+            return False
+
+        message = await self._get_last_message()
+        tokens_used = 0
+        if message is not None:
+            total_input_tokens = (
+                message.usage.input_tokens
+                + (message.usage.cache_creation_input_tokens or 0)
+                + (message.usage.cache_read_input_tokens or 0)
+            )
+            tokens_used = total_input_tokens + message.usage.output_tokens
+
+        threshold = self._compaction_control.get("context_token_threshold", DEFAULT_THRESHOLD)
+
+        if tokens_used < threshold:
+            return False
+
+        # Perform compaction
+        log.info(f"Token usage {tokens_used} has exceeded the threshold of {threshold}. Performing compaction.")
+
+        model = self._compaction_control.get("model", self._params["model"])
+
+        messages = list(self._params["messages"])
+
+        if messages[-1]["role"] == "assistant":
+            # Remove tool_use blocks from the last message to avoid 400 error
+            # (tool_use requires tool_result, which we don't have yet)
+            non_tool_blocks = [
+                block
+                for block in messages[-1]["content"]
+                if isinstance(block, dict) and block.get("type") != "tool_use"
+            ]
+
+            if non_tool_blocks:
+                messages[-1]["content"] = non_tool_blocks
+            else:
+                messages.pop()
+
+        messages = [
+            *self._params["messages"],
+            BetaMessageParam(
+                role="user",
+                content=self._compaction_control.get("summary_prompt", DEFAULT_SUMMARY_PROMPT),
+            ),
+        ]
+
+        response = await self._client.beta.messages.create(
+            model=model,
+            messages=messages,
+            max_tokens=self._params["max_tokens"],
+            extra_headers={"X-Stainless-Helper": "compaction"},
+        )
+
+        log.info(f"Compaction complete. New token usage: {response.usage.output_tokens}")
+
+        first_content = list(response.content)[0]
+
+        if first_content.type != "text":
+            raise ValueError("Compaction response content is not of type 'text'")
+
+        self.set_messages_params(
+            lambda params: {
+                **params,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": first_content.text,
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+        return True
+
     async def __run__(self) -> AsyncIterator[RunnerItemT]:
-        async with self._handle_request() as item:
-            yield item
-            message = await self._get_last_message()
-            assert message is not None
-        self._iteration_count += 1
-
         while not self._should_stop():
-            response = await self.generate_tool_call_response()
-            if response is None:
-                log.debug("Tool call was not requested, exiting from tool runner loop.")
-                return
-
-            if not self._messages_modified:
-                self.append_messages(message, response)
-            self._iteration_count += 1
-            self._messages_modified = False
-            self._cached_tool_call_response = None
-
             async with self._handle_request() as item:
                 yield item
                 message = await self._get_last_message()
                 assert message is not None
+
+            self._iteration_count += 1
+
+            # If the compaction was performed, skip tool call generation this iteration
+            if not await self._check_and_compact():
+                response = await self.generate_tool_call_response()
+                if response is None:
+                    log.debug("Tool call was not requested, exiting from tool runner loop.")
+                    return
+
+                if not self._messages_modified:
+                    self.append_messages(message, response)
+
+            self._messages_modified = False
+            self._cached_tool_call_response = None
 
     async def until_done(self) -> ParsedBetaMessage[ResponseFormatT]:
         """

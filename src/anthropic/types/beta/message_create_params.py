@@ -16,6 +16,7 @@ from .beta_container_params import BetaContainerParams
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_tool_union_param import BetaToolUnionParam
 from .beta_tool_choice_param import BetaToolChoiceParam
+from .beta_output_config_param import BetaOutputConfigParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
 from .beta_json_output_format_param import BetaJSONOutputFormatParam
 from .beta_context_management_config_param import BetaContextManagementConfigParam
@@ -131,6 +132,12 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     metadata: BetaMetadataParam
     """An object describing metadata about the request."""
+
+    output_config: BetaOutputConfigParam
+    """Configuration options for the model's output.
+
+    Controls aspects like how much effort the model puts into its response.
+    """
 
     output_format: Optional[BetaJSONOutputFormatParam]
     """A schema to specify Claude's output format in responses."""

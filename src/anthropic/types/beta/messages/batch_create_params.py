@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Iterable
-from typing_extensions import Literal, Required, Annotated, TypedDict
+from typing_extensions import Required, Annotated, TypedDict
 
 from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
@@ -43,6 +43,6 @@ class Request(TypedDict, total=False):
     params: Required[MessageCreateParamsNonStreaming]
     """Messages API creation parameters for the individual request.
 
-    See the [Messages API reference](/en/api/messages) for full documentation on
-    available parameters.
+    See the [Messages API reference](https://docs.claude.com/en/api/messages) for
+    full documentation on available parameters.
     """

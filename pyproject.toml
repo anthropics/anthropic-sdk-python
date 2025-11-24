@@ -160,7 +160,7 @@ show_error_codes = true
 #
 # We also exclude our `tests` as mypy doesn't always infer
 # types correctly and Pyright will still catch any type errors.
-exclude = ['src/anthropic/_files.py', '_dev/.*.py', 'tests/.*', 'examples/mcp_server_weather.py', 'examples/tools_with_mcp.py', 'examples/memory/basic.py', 'src/anthropic/lib/_parse/_transform.py']
+exclude = ['src/anthropic/_files.py', '_dev/.*.py', 'tests/.*', 'examples/mcp_server_weather.py', 'examples/tools_with_mcp.py', 'examples/memory/basic.py', 'src/anthropic/lib/_parse/_transform.py', 'src/anthropic/lib/tools/_beta_functions.py']
 
 strict_equality = true
 implicit_reexport = true

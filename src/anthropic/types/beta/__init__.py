@@ -18,6 +18,7 @@ from .beta_skill_params import BetaSkillParams as BetaSkillParams
 from .model_list_params import ModelListParams as ModelListParams
 from .skill_list_params import SkillListParams as SkillListParams
 from .beta_content_block import BetaContentBlock as BetaContentBlock
+from .beta_direct_caller import BetaDirectCaller as BetaDirectCaller
 from .beta_message_param import BetaMessageParam as BetaMessageParam
 from .beta_text_citation import BetaTextCitation as BetaTextCitation
 from .file_upload_params import FileUploadParams as FileUploadParams
@@ -42,20 +43,26 @@ from .skill_create_response import SkillCreateResponse as SkillCreateResponse
 from .skill_delete_response import SkillDeleteResponse as SkillDeleteResponse
 from .beta_base64_pdf_source import BetaBase64PDFSource as BetaBase64PDFSource
 from .beta_image_block_param import BetaImageBlockParam as BetaImageBlockParam
+from .beta_mcp_toolset_param import BetaMCPToolsetParam as BetaMCPToolsetParam
 from .beta_plain_text_source import BetaPlainTextSource as BetaPlainTextSource
 from .beta_server_tool_usage import BetaServerToolUsage as BetaServerToolUsage
 from .beta_tool_choice_param import BetaToolChoiceParam as BetaToolChoiceParam
 from .beta_mcp_tool_use_block import BetaMCPToolUseBlock as BetaMCPToolUseBlock
+from .beta_server_tool_caller import BetaServerToolCaller as BetaServerToolCaller
 from .skill_retrieve_response import SkillRetrieveResponse as SkillRetrieveResponse
 from .beta_content_block_param import BetaContentBlockParam as BetaContentBlockParam
+from .beta_direct_caller_param import BetaDirectCallerParam as BetaDirectCallerParam
 from .beta_message_delta_usage import BetaMessageDeltaUsage as BetaMessageDeltaUsage
+from .beta_output_config_param import BetaOutputConfigParam as BetaOutputConfigParam
 from .beta_text_citation_param import BetaTextCitationParam as BetaTextCitationParam
 from .beta_message_tokens_count import BetaMessageTokensCount as BetaMessageTokensCount
 from .beta_thinking_block_param import BetaThinkingBlockParam as BetaThinkingBlockParam
 from .beta_thinking_turns_param import BetaThinkingTurnsParam as BetaThinkingTurnsParam
+from .beta_tool_reference_block import BetaToolReferenceBlock as BetaToolReferenceBlock
 from .beta_tool_use_block_param import BetaToolUseBlockParam as BetaToolUseBlockParam
 from .beta_tool_uses_keep_param import BetaToolUsesKeepParam as BetaToolUsesKeepParam
 from .beta_url_pdf_source_param import BetaURLPDFSourceParam as BetaURLPDFSourceParam
+from .beta_mcp_tool_config_param import BetaMCPToolConfigParam as BetaMCPToolConfigParam
 from .beta_mcp_tool_result_block import BetaMCPToolResultBlock as BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock as BetaServerToolUseBlock
 from .beta_thinking_config_param import BetaThinkingConfigParam as BetaThinkingConfigParam
@@ -86,6 +93,7 @@ from .beta_all_thinking_turns_param import BetaAllThinkingTurnsParam as BetaAllT
 from .beta_json_output_format_param import BetaJSONOutputFormatParam as BetaJSONOutputFormatParam
 from .beta_mcp_tool_use_block_param import BetaMCPToolUseBlockParam as BetaMCPToolUseBlockParam
 from .beta_raw_message_stream_event import BetaRawMessageStreamEvent as BetaRawMessageStreamEvent
+from .beta_server_tool_caller_param import BetaServerToolCallerParam as BetaServerToolCallerParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param as BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param as BetaToolBash20250124Param
 from .beta_base64_image_source_param import BetaBase64ImageSourceParam as BetaBase64ImageSourceParam
@@ -94,6 +102,7 @@ from .beta_content_block_source_param import BetaContentBlockSourceParam as Beta
 from .beta_file_document_source_param import BetaFileDocumentSourceParam as BetaFileDocumentSourceParam
 from .beta_input_tokens_trigger_param import BetaInputTokensTriggerParam as BetaInputTokensTriggerParam
 from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param as BetaMemoryTool20250818Param
+from .beta_tool_reference_block_param import BetaToolReferenceBlockParam as BetaToolReferenceBlockParam
 from .beta_code_execution_output_block import BetaCodeExecutionOutputBlock as BetaCodeExecutionOutputBlock
 from .beta_code_execution_result_block import BetaCodeExecutionResultBlock as BetaCodeExecutionResultBlock
 from .beta_context_management_response import BetaContextManagementResponse as BetaContextManagementResponse
@@ -108,10 +117,13 @@ from .beta_request_document_block_param import BetaRequestDocumentBlockParam as 
 from .beta_web_search_tool_result_block import BetaWebSearchToolResultBlock as BetaWebSearchToolResultBlock
 from .beta_web_search_tool_result_error import BetaWebSearchToolResultError as BetaWebSearchToolResultError
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam as BetaCacheControlEphemeralParam
+from .beta_mcp_tool_default_config_param import BetaMCPToolDefaultConfigParam as BetaMCPToolDefaultConfigParam
 from .beta_raw_content_block_delta_event import BetaRawContentBlockDeltaEvent as BetaRawContentBlockDeltaEvent
 from .beta_raw_content_block_start_event import BetaRawContentBlockStartEvent as BetaRawContentBlockStartEvent
 from .beta_redacted_thinking_block_param import BetaRedactedThinkingBlockParam as BetaRedactedThinkingBlockParam
 from .beta_thinking_config_enabled_param import BetaThinkingConfigEnabledParam as BetaThinkingConfigEnabledParam
+from .beta_tool_search_tool_result_block import BetaToolSearchToolResultBlock as BetaToolSearchToolResultBlock
+from .beta_tool_search_tool_result_error import BetaToolSearchToolResultError as BetaToolSearchToolResultError
 from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param as BetaWebFetchTool20250910Param
 from .beta_web_search_result_block_param import BetaWebSearchResultBlockParam as BetaWebSearchResultBlockParam
 from .beta_thinking_config_disabled_param import BetaThinkingConfigDisabledParam as BetaThinkingConfigDisabledParam
@@ -129,6 +141,7 @@ from .beta_code_execution_tool_result_block import BetaCodeExecutionToolResultBl
 from .beta_code_execution_tool_result_error import BetaCodeExecutionToolResultError as BetaCodeExecutionToolResultError
 from .beta_tool_computer_use_20241022_param import BetaToolComputerUse20241022Param as BetaToolComputerUse20241022Param
 from .beta_tool_computer_use_20250124_param import BetaToolComputerUse20250124Param as BetaToolComputerUse20250124Param
+from .beta_tool_computer_use_20251124_param import BetaToolComputerUse20251124Param as BetaToolComputerUse20251124Param
 from .beta_web_fetch_tool_result_error_code import BetaWebFetchToolResultErrorCode as BetaWebFetchToolResultErrorCode
 from .beta_code_execution_output_block_param import (
     BetaCodeExecutionOutputBlockParam as BetaCodeExecutionOutputBlockParam,
@@ -176,11 +189,23 @@ from .beta_memory_tool_20250818_rename_command import (
 from .beta_request_mcp_tool_result_block_param import (
     BetaRequestMCPToolResultBlockParam as BetaRequestMCPToolResultBlockParam,
 )
+from .beta_tool_search_tool_result_block_param import (
+    BetaToolSearchToolResultBlockParam as BetaToolSearchToolResultBlockParam,
+)
+from .beta_tool_search_tool_result_error_param import (
+    BetaToolSearchToolResultErrorParam as BetaToolSearchToolResultErrorParam,
+)
 from .beta_web_search_tool_request_error_param import (
     BetaWebSearchToolRequestErrorParam as BetaWebSearchToolRequestErrorParam,
 )
 from .beta_citations_web_search_result_location import (
     BetaCitationsWebSearchResultLocation as BetaCitationsWebSearchResultLocation,
+)
+from .beta_tool_search_tool_bm25_20251119_param import (
+    BetaToolSearchToolBm25_20251119Param as BetaToolSearchToolBm25_20251119Param,
+)
+from .beta_tool_search_tool_search_result_block import (
+    BetaToolSearchToolSearchResultBlock as BetaToolSearchToolSearchResultBlock,
 )
 from .beta_web_search_tool_result_block_content import (
     BetaWebSearchToolResultBlockContent as BetaWebSearchToolResultBlockContent,
@@ -202,6 +227,9 @@ from .beta_clear_thinking_20251015_edit_response import (
 )
 from .beta_code_execution_tool_result_error_code import (
     BetaCodeExecutionToolResultErrorCode as BetaCodeExecutionToolResultErrorCode,
+)
+from .beta_tool_search_tool_regex_20251119_param import (
+    BetaToolSearchToolRegex20251119Param as BetaToolSearchToolRegex20251119Param,
 )
 from .beta_bash_code_execution_output_block_param import (
     BetaBashCodeExecutionOutputBlockParam as BetaBashCodeExecutionOutputBlockParam,
@@ -235,6 +263,9 @@ from .beta_memory_tool_20250818_str_replace_command import (
 )
 from .beta_citation_web_search_result_location_param import (
     BetaCitationWebSearchResultLocationParam as BetaCitationWebSearchResultLocationParam,
+)
+from .beta_tool_search_tool_search_result_block_param import (
+    BetaToolSearchToolSearchResultBlockParam as BetaToolSearchToolSearchResultBlockParam,
 )
 from .beta_bash_code_execution_tool_result_block_param import (
     BetaBashCodeExecutionToolResultBlockParam as BetaBashCodeExecutionToolResultBlockParam,
