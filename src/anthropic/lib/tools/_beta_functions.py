@@ -109,7 +109,7 @@ class BaseFunctionTool(Generic[CallableT]):
             "input_schema": self.input_schema,
         }
         if self._defer_loading is not None:
-            defn["defer_loading"] = True
+            defn["defer_loading"] = self._defer_loading
         return defn
 
     @cached_property
