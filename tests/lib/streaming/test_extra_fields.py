@@ -8,13 +8,13 @@ from __future__ import annotations
 
 from typing import Any, cast
 
-from anthropic.types import Message, TextBlock, TextDelta, Usage
+from anthropic.types import Usage, Message, TextBlock, TextDelta
+from anthropic.lib.streaming._messages import accumulate_event
+from anthropic.types.message_delta_usage import MessageDeltaUsage
 from anthropic.types.raw_message_delta_event import Delta, RawMessageDeltaEvent
 from anthropic.types.raw_message_start_event import RawMessageStartEvent
-from anthropic.types.raw_content_block_start_event import RawContentBlockStartEvent
 from anthropic.types.raw_content_block_delta_event import RawContentBlockDeltaEvent
-from anthropic.types.message_delta_usage import MessageDeltaUsage
-from anthropic.lib.streaming._messages import accumulate_event
+from anthropic.types.raw_content_block_start_event import RawContentBlockStartEvent
 
 
 class TestExtraFieldsAccumulation:
