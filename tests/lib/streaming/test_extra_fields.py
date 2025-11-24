@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Any, cast
 
 from anthropic.types import Usage, Message, TextBlock, TextDelta
+from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.streaming._messages import accumulate_event
 from anthropic.types.message_delta_usage import MessageDeltaUsage
 from anthropic.types.raw_message_delta_event import Delta, RawMessageDeltaEvent
@@ -72,6 +73,10 @@ class TestExtraFieldsAccumulation:
             private_field={"nested": {"values": [6]}},  # type: ignore[call-arg]
         )
         snapshot = accumulate_event(event=message_delta, current_snapshot=snapshot)
+
+        # This feature requires Pydantic v2
+        if PYDANTIC_V1:
+            return
 
         # Verify extra fields were accumulated
         assert hasattr(snapshot, "__pydantic_extra__"), "Message should have __pydantic_extra__"
