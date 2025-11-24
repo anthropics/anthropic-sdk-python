@@ -6,116 +6,90 @@ accumulated during streaming, without exposing specific field names in the SDK.
 
 from __future__ import annotations
 
-import os
-import asyncio
 from typing import Any, cast
 
-import httpx
-import respx
-
-from anthropic import Anthropic, AsyncAnthropic
-
-from .helpers import get_response, to_async_iter
-
-base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
-api_key = "my-anthropic-api-key"
-
-sync_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
-async_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+from anthropic.types import Message, TextBlock, TextDelta, Usage
+from anthropic.types.raw_message_delta_event import Delta, RawMessageDeltaEvent
+from anthropic.types.raw_message_start_event import RawMessageStartEvent
+from anthropic.types.raw_content_block_start_event import RawContentBlockStartEvent
+from anthropic.types.raw_content_block_delta_event import RawContentBlockDeltaEvent
+from anthropic.types.message_delta_usage import MessageDeltaUsage
+from anthropic.lib.streaming._messages import accumulate_event
 
 
-def assert_extra_fields_accumulated(message: Any) -> None:
-    """Verify that extra fields are properly accumulated from streaming events.
-
-    This test is intentionally generic - it doesn't know the specific field names,
-    just that extra fields should be deep-merged correctly.
-    """
-    # Extra fields should be accessible via attribute access (pydantic's extra="allow")
-    assert hasattr(message, '__pydantic_extra__'), "Message should have __pydantic_extra__"
-
-    extra = message.__pydantic_extra__
-    assert 'private_field' in extra, "Extra fields should be accumulated"
-
-    # Verify deep merging: nested dicts should be merged, lists should be extended
-    private_field_value = extra['private_field']
-    assert isinstance(private_field_value, dict), "Extra field should be a dict"
-    private_field = cast(dict[str, object], private_field_value)
-    assert 'nested' in private_field, "Nested structure should be present"
-
-    nested_value = private_field['nested']
-    assert isinstance(nested_value, dict), "Nested field should be a dict"
-    nested = cast(dict[str, object], nested_value)
-    assert 'values' in nested, "Nested values should be present"
-
-    # The 'values' list should have been extended across all streaming events:
-    # message_start: [1, 2]
-    # content_block_delta 1: [3]
-    # content_block_delta 2: [4, 5]
-    # message_delta: [6]
-    # Expected: [1, 2, 3, 4, 5, 6]
-    values_value = nested['values']
-    assert isinstance(values_value, list), "Nested values should be a list"
-    values = cast(list[int], values_value)
-    assert values == [1, 2, 3, 4, 5, 6], "Lists should be extended, not replaced"
-
-    # Last value from dict merge should be present
-    assert nested.get('metadata') == 'chunk2', "Dict values should be merged"
-
-
-class TestSyncExtraFields:
+class TestExtraFieldsAccumulation:
     def test_extra_fields_accumulation(self) -> None:
-        """Test that extra fields are accumulated during streaming."""
-        with respx.mock(base_url=base_url) as respx_mock:
-            respx_mock.post("/v1/messages").mock(
-                return_value=httpx.Response(200, content=get_response("extra_fields_response.txt"))
-            )
-
-            with sync_client.messages.stream(
-                max_tokens=1024,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": "Say hello!",
-                    }
-                ],
+        """Test that extra fields are accumulated across streaming events."""
+        # Build message with extra field via message_start
+        message_start = RawMessageStartEvent(
+            type="message_start",
+            message=Message(
+                id="msg_123",
+                type="message",
+                role="assistant",
+                content=[],
                 model="claude-3-opus-latest",
-            ) as stream:
-                # Consume the stream
-                for _ in stream:
-                    pass
+                stop_reason=None,
+                stop_sequence=None,
+                usage=Usage(input_tokens=11, output_tokens=1),
+                # Extra field with nested structure
+                private_field={"nested": {"values": [1, 2]}},  # type: ignore[call-arg]
+            ),
+        )
+        snapshot = accumulate_event(event=message_start, current_snapshot=None)
 
-                message = stream.get_final_message()
-                assert_extra_fields_accumulated(message)
+        # content_block_start
+        content_block_start = RawContentBlockStartEvent(
+            type="content_block_start",
+            index=0,
+            content_block=TextBlock(type="text", text=""),
+        )
+        snapshot = accumulate_event(event=content_block_start, current_snapshot=snapshot)
 
+        # First content_block_delta with extra field
+        delta1 = RawContentBlockDeltaEvent(
+            type="content_block_delta",
+            index=0,
+            delta=TextDelta(type="text_delta", text="Hello"),
+            private_field={"nested": {"values": [3], "metadata": "chunk1"}},  # type: ignore[call-arg]
+        )
+        snapshot = accumulate_event(event=delta1, current_snapshot=snapshot)
 
-class TestAsyncExtraFields:
-    def test_extra_fields_accumulation(self) -> None:
-        """Test that extra fields are accumulated during async streaming."""
+        # Second content_block_delta with extra field
+        delta2 = RawContentBlockDeltaEvent(
+            type="content_block_delta",
+            index=0,
+            delta=TextDelta(type="text_delta", text="!"),
+            private_field={"nested": {"values": [4, 5], "metadata": "chunk2"}},  # type: ignore[call-arg]
+        )
+        snapshot = accumulate_event(event=delta2, current_snapshot=snapshot)
 
-        async def run_test() -> None:
-            with respx.mock(base_url=base_url) as respx_mock:
-                respx_mock.post("/v1/messages").mock(
-                    return_value=httpx.Response(200, content=to_async_iter(get_response("extra_fields_response.txt")))
-                )
+        # message_delta with extra field
+        message_delta = RawMessageDeltaEvent(
+            type="message_delta",
+            delta=Delta(stop_reason="end_turn", stop_sequence=None),
+            usage=MessageDeltaUsage(output_tokens=3),
+            private_field={"nested": {"values": [6]}},  # type: ignore[call-arg]
+        )
+        snapshot = accumulate_event(event=message_delta, current_snapshot=snapshot)
 
-                async with async_client.messages.stream(
-                    max_tokens=1024,
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": "Say hello!",
-                        }
-                    ],
-                    model="claude-3-opus-latest",
-                ) as stream:
-                    # Consume the stream
-                    async for _ in stream:
-                        pass
+        # Verify extra fields were accumulated
+        assert hasattr(snapshot, "__pydantic_extra__"), "Message should have __pydantic_extra__"
+        extra = snapshot.__pydantic_extra__
+        assert extra is not None
+        assert "private_field" in extra, "Extra fields should be accumulated"
 
-                    message = await stream.get_final_message()
-                    assert_extra_fields_accumulated(message)
+        private_field = cast(dict[str, Any], extra["private_field"])
+        assert "nested" in private_field
 
-        asyncio.run(run_test())
+        nested = cast(dict[str, Any], private_field["nested"])
+        assert "values" in nested
+
+        # Lists should be extended across all events: [1,2] + [3] + [4,5] + [6]
+        assert nested["values"] == [1, 2, 3, 4, 5, 6], "Lists should be extended, not replaced"
+
+        # Dict values should use the last value
+        assert nested.get("metadata") == "chunk2", "Dict values should be merged"
 
 
 def test_deep_merge_extra_fields_function() -> None:

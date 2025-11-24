@@ -21,7 +21,7 @@ from ._types import (
     ContentBlockStopEvent,
 )
 from ...types import Message, ContentBlock, RawMessageStreamEvent
-from ..._utils import consume_sync_iterator, consume_async_iterator
+from ..._utils import is_dict, is_list, consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
 from ..._streaming import Stream, AsyncStream
 
@@ -408,20 +408,16 @@ def _deep_merge_extra_fields(existing: object, new: object) -> object:
     - Lists: extend existing with new items (mutates existing list)
     - Other: replace with new value
     """
-    if isinstance(existing, dict) and isinstance(new, dict):
-        existing_dict = cast("dict[str, object]", existing)
-        new_dict = cast("dict[str, object]", new)
-        for key, value in new_dict.items():
-            if key in existing_dict:
-                existing_dict[key] = _deep_merge_extra_fields(existing_dict[key], value)
+    if is_dict(existing) and is_dict(new):
+        for key, value in new.items():
+            if key in existing:
+                existing[key] = _deep_merge_extra_fields(existing[key], value)
             else:
-                existing_dict[key] = value
-        return existing_dict  # Return mutated dict
-    elif isinstance(existing, list) and isinstance(new, list):
-        existing_list = cast("list[object]", existing)
-        new_list = cast("list[object]", new)
-        existing_list.extend(new_list)
-        return existing_list  # Return mutated list
+                existing[key] = value
+        return existing  # Return mutated dict
+    elif is_list(existing) and is_list(new):
+        existing.extend(new)
+        return existing  # Return mutated list
     else:
         return new
 
