@@ -31,9 +31,9 @@ DEFAULT_THRESHOLD = 100_000
 class CompactionControl(TypedDict, total=False):
     context_token_threshold: int
     """The context token threshold at which to trigger compaction.
-    
+
     When the cumulative token count (input + output) across all messages exceeds this threshold,
-    the message history will be automatically summarized and compressed. Defaults to 150,000 tokens.
+    the message history will be automatically summarized and compressed. Defaults to 100,000 tokens.
     """
 
     model: str
