@@ -81,20 +81,6 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
             if sse.event == "completion":
                 yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
-            if (
-                sse.event == "message_start"
-                or sse.event == "message_delta"
-                or sse.event == "message_stop"
-                or sse.event == "content_block_start"
-                or sse.event == "content_block_delta"
-                or sse.event == "content_block_stop"
-            ):
-                data = sse.json()
-                if is_dict(data) and "type" not in data:
-                    data["type"] = sse.event
-
-                yield process_data(data=data, cast_to=cast_to, response=response)
-
             if sse.event == "ping":
                 continue
 
@@ -112,6 +98,13 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
                     body=body,
                     response=self.response,
                 )
+
+            # Process any other event for forward compatibility
+            data = sse.json()
+            if is_dict(data) and "type" not in data:
+                data["type"] = sse.event
+
+            yield process_data(data=data, cast_to=cast_to, response=response)
 
         # As we might not fully consume the response stream, we need to close it explicitly
         response.close()
@@ -198,20 +191,6 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
             if sse.event == "completion":
                 yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
-            if (
-                sse.event == "message_start"
-                or sse.event == "message_delta"
-                or sse.event == "message_stop"
-                or sse.event == "content_block_start"
-                or sse.event == "content_block_delta"
-                or sse.event == "content_block_stop"
-            ):
-                data = sse.json()
-                if is_dict(data) and "type" not in data:
-                    data["type"] = sse.event
-
-                yield process_data(data=data, cast_to=cast_to, response=response)
-
             if sse.event == "ping":
                 continue
 
@@ -229,6 +208,13 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
                     body=body,
                     response=self.response,
                 )
+
+            # Process any other event for forward compatibility
+            data = sse.json()
+            if is_dict(data) and "type" not in data:
+                data["type"] = sse.event
+
+            yield process_data(data=data, cast_to=cast_to, response=response)
 
         # As we might not fully consume the response stream, we need to close it explicitly
         await response.aclose()
