@@ -58,8 +58,11 @@ function run_tests() {
     echo "==> Running tests with Pydantic v2"
     uv run --isolated --all-extras pytest "$@"
 
-    echo "==> Running tests with Pydantic v1"
-    uv run --isolated --all-extras --group=pydantic-v1 pytest "$@"
+    # Pydantic v1 does not support Python 3.14, skip these tests
+    if [[ "$UV_PYTHON" != "3.14" ]]; then
+        echo "==> Running tests with Pydantic v1"
+        uv run --isolated --all-extras --group=pydantic-v1 pytest "$@"
+    fi
 }
 
 # If UV_PYTHON is already set in the environment, just run the command once
@@ -71,6 +74,6 @@ else
   echo "==> Running tests for Python 3.9"
   UV_PYTHON=3.9 run_tests "$@"
 
-  echo "==> Running tests for Python 3.13"
-  UV_PYTHON=3.13 run_tests "$@"
+  echo "==> Running tests for Python 3.14"
+  UV_PYTHON=3.14 run_tests "$@"
 fi
