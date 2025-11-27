@@ -54,40 +54,41 @@ class Stream(Generic[_T]):
         process_data = self._client._process_response_data
         iterator = self._iter_events()
 
-        for sse in iterator:
-            if sse.event == "completion":
-                yield process_data(data=sse.json(), cast_to=cast_to, response=response)
+        try:
+            for sse in iterator:
+                if sse.event == "completion":
+                    yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
-            if (
-                sse.event == "message_start"
-                or sse.event == "message_delta"
-                or sse.event == "message_stop"
-                or sse.event == "content_block_start"
-                or sse.event == "content_block_delta"
-                or sse.event == "content_block_stop"
-            ):
-                yield process_data(data=sse.json(), cast_to=cast_to, response=response)
+                if (
+                    sse.event == "message_start"
+                    or sse.event == "message_delta"
+                    or sse.event == "message_stop"
+                    or sse.event == "content_block_start"
+                    or sse.event == "content_block_delta"
+                    or sse.event == "content_block_stop"
+                ):
+                    yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
-            if sse.event == "ping":
-                continue
+                if sse.event == "ping":
+                    continue
 
-            if sse.event == "error":
-                body = sse.data
+                if sse.event == "error":
+                    body = sse.data
 
-                try:
-                    body = sse.json()
-                    err_msg = f"{body}"
-                except Exception:
-                    err_msg = sse.data or f"Error code: {response.status_code}"
+                    try:
+                        body = sse.json()
+                        err_msg = f"{body}"
+                    except Exception:
+                        err_msg = sse.data or f"Error code: {response.status_code}"
 
-                raise self._client._make_status_error(
-                    err_msg,
-                    body=body,
-                    response=self.response,
-                )
-
-        # As we might not fully consume the response stream, we need to close it explicitly
-        response.close()
+                    raise self._client._make_status_error(
+                        err_msg,
+                        body=body,
+                        response=self.response,
+                    )
+        finally:
+            # Ensure the response is closed even if the consumer doesn't read all data
+            response.close()
 
     def __enter__(self) -> Self:
         return self
@@ -146,40 +147,41 @@ class AsyncStream(Generic[_T]):
         process_data = self._client._process_response_data
         iterator = self._iter_events()
 
-        async for sse in iterator:
-            if sse.event == "completion":
-                yield process_data(data=sse.json(), cast_to=cast_to, response=response)
+        try:
+            async for sse in iterator:
+                if sse.event == "completion":
+                    yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
-            if (
-                sse.event == "message_start"
-                or sse.event == "message_delta"
-                or sse.event == "message_stop"
-                or sse.event == "content_block_start"
-                or sse.event == "content_block_delta"
-                or sse.event == "content_block_stop"
-            ):
-                yield process_data(data=sse.json(), cast_to=cast_to, response=response)
+                if (
+                    sse.event == "message_start"
+                    or sse.event == "message_delta"
+                    or sse.event == "message_stop"
+                    or sse.event == "content_block_start"
+                    or sse.event == "content_block_delta"
+                    or sse.event == "content_block_stop"
+                ):
+                    yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
-            if sse.event == "ping":
-                continue
+                if sse.event == "ping":
+                    continue
 
-            if sse.event == "error":
-                body = sse.data
+                if sse.event == "error":
+                    body = sse.data
 
-                try:
-                    body = sse.json()
-                    err_msg = f"{body}"
-                except Exception:
-                    err_msg = sse.data or f"Error code: {response.status_code}"
+                    try:
+                        body = sse.json()
+                        err_msg = f"{body}"
+                    except Exception:
+                        err_msg = sse.data or f"Error code: {response.status_code}"
 
-                raise self._client._make_status_error(
-                    err_msg,
-                    body=body,
-                    response=self.response,
-                )
-
-        # As we might not fully consume the response stream, we need to close it explicitly
-        await response.aclose()
+                    raise self._client._make_status_error(
+                        err_msg,
+                        body=body,
+                        response=self.response,
+                    )
+        finally:
+            # Ensure the response is closed even if the consumer doesn't read all data
+            await response.aclose()
 
     async def __aenter__(self) -> Self:
         return self
