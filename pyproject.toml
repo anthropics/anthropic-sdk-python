@@ -55,7 +55,7 @@ conflicts = [
 # version pins are in uv.lock
 dev = [
     "pyright==1.1.399",
-    "mypy",
+    "mypy==1.17",
     "respx",
     "pytest",
     "pytest-asyncio",

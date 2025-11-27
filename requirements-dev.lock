@@ -51,7 +51,7 @@ markdown-it-py==4.0.0 ; python_full_version >= '3.10'
     # via rich
 mdurl==0.1.2
     # via markdown-it-py
-mypy==1.18.2
+mypy==1.17.0
 mypy-extensions==1.1.0
     # via mypy
 nodeenv==1.9.1
@@ -62,7 +62,7 @@ pathspec==0.12.1
     # via mypy
 pluggy==1.6.0
     # via pytest
-pydantic==2.12.4
+pydantic==2.12.5
     # via anthropic
 pydantic-core==2.41.5
     # via pydantic
