@@ -11,8 +11,8 @@ asttokens==3.0.1
     # via inline-snapshot
 backports-asyncio-runner==1.2.0 ; python_full_version < '3.11'
     # via pytest-asyncio
-boto3-stubs==1.41.4
-botocore-stubs==1.41.4
+boto3-stubs==1.41.5
+botocore-stubs==1.41.6
     # via boto3-stubs
 certifi==2025.11.12
     # via
@@ -63,7 +63,7 @@ markdown-it-py==4.0.0 ; python_full_version >= '3.10'
     # via rich
 mdurl==0.1.2
     # via markdown-it-py
-mypy==1.18.2
+mypy==1.17.0
 mypy-extensions==1.1.0
     # via mypy
 nodeenv==1.9.1
@@ -74,7 +74,7 @@ pathspec==0.12.1
     # via mypy
 pluggy==1.6.0
     # via pytest
-pydantic==2.12.4
+pydantic==2.12.5
     # via anthropic
 pydantic-core==2.41.5
     # via pydantic
@@ -115,7 +115,7 @@ tomli==2.3.0 ; python_full_version < '3.11'
     #   inline-snapshot
     #   mypy
     #   pytest
-types-awscrt==0.29.0
+types-awscrt==0.29.1
     # via botocore-stubs
 types-s3transfer==0.15.0
     # via boto3-stubs
