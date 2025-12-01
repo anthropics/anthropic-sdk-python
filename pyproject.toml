@@ -47,7 +47,7 @@ Repository = "https://github.com/anthropics/anthropic-sdk-python"
 
 [tool.uv]
 managed = true
-required-version = ">=0.5.0"
+required-version = ">=0.9"
 conflicts = [
     [
       { group = "pydantic-v1" },
