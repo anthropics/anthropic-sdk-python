@@ -26,7 +26,7 @@ jobs:
         if: ${{ steps.release.outputs.releases_created }}
         uses: astral-sh/setup-uv@v5
         with:
-          version: '0.8.11'
+          version: '0.9.13'
 
       - name: Publish to PyPI
         if: ${{ steps.release.outputs.releases_created }}
