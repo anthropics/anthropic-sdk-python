@@ -47,7 +47,14 @@ from ....types.model_param import ModelParam
 from ....lib._parse._response import ResponseFormatT, parse_response
 from ....lib._parse._transform import transform_schema
 from ....types.beta.beta_message import BetaMessage
-from ....lib.tools._beta_functions import BetaRunnableTool, BetaAsyncRunnableTool
+from ....lib.tools._beta_functions import (
+    BetaFunctionTool,
+    BetaRunnableTool,
+    BetaAsyncFunctionTool,
+    BetaAsyncRunnableTool,
+    BetaBuiltinFunctionTool,
+    BetaAsyncBuiltinFunctionTool,
+)
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_message_param import BetaMessageParam
 from ....types.beta.beta_metadata_param import BetaMetadataParam
@@ -1174,7 +1181,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool],
+        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1208,7 +1215,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool],
+        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
@@ -1242,7 +1249,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool],
+        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
         stream: bool,
         max_iterations: int | Omit = omit,
@@ -1275,7 +1282,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool],
+        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -1315,6 +1322,15 @@ class Messages(SyncAPIResource):
             **(extra_headers or {}),
         }
 
+        runnable_tools: list[BetaRunnableTool] = []
+        regular_tools: list[BetaToolUnionParam] = []
+
+        for tool in tools:
+            if isinstance(tool, (BetaFunctionTool, BetaBuiltinFunctionTool)):
+                runnable_tools.append(tool)
+            else:
+                regular_tools.append(tool)
+
         params = cast(
             message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
             {
@@ -1333,7 +1349,7 @@ class Messages(SyncAPIResource):
                 "temperature": temperature,
                 "thinking": thinking,
                 "tool_choice": tool_choice,
-                "tools": [tool.to_dict() for tool in tools],
+                "tools": [*[tool.to_dict() for tool in runnable_tools], *regular_tools],
                 "top_k": top_k,
                 "top_p": top_p,
             },
@@ -1341,7 +1357,7 @@ class Messages(SyncAPIResource):
 
         if stream:
             return BetaStreamingToolRunner[ResponseFormatT](
-                tools=tools,
+                tools=runnable_tools,
                 params=params,
                 options={
                     "extra_headers": extra_headers,
@@ -1354,7 +1370,7 @@ class Messages(SyncAPIResource):
                 compaction_control=compaction_control if is_given(compaction_control) else None,
             )
         return BetaToolRunner[ResponseFormatT](
-            tools=tools,
+            tools=runnable_tools,
             params=params,
             options={
                 "extra_headers": extra_headers,
@@ -2821,7 +2837,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool],
+        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -2855,7 +2871,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool],
+        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
@@ -2889,7 +2905,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool],
+        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
         stream: bool,
         max_iterations: int | Omit = omit,
@@ -2922,7 +2938,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool],
+        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -2962,6 +2978,15 @@ class AsyncMessages(AsyncAPIResource):
             **(extra_headers or {}),
         }
 
+        runnable_tools: list[BetaAsyncRunnableTool] = []
+        regular_tools: list[BetaToolUnionParam] = []
+
+        for tool in tools:
+            if isinstance(tool, (BetaAsyncFunctionTool, BetaAsyncBuiltinFunctionTool)):
+                runnable_tools.append(tool)
+            else:
+                regular_tools.append(tool)
+
         params = cast(
             message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
             {
@@ -2980,7 +3005,7 @@ class AsyncMessages(AsyncAPIResource):
                 "temperature": temperature,
                 "thinking": thinking,
                 "tool_choice": tool_choice,
-                "tools": [tool.to_dict() for tool in tools],
+                "tools": [*[tool.to_dict() for tool in runnable_tools], *regular_tools],
                 "top_k": top_k,
                 "top_p": top_p,
             },
@@ -2988,7 +3013,7 @@ class AsyncMessages(AsyncAPIResource):
 
         if stream:
             return BetaAsyncStreamingToolRunner[ResponseFormatT](
-                tools=tools,
+                tools=runnable_tools,
                 params=params,
                 options={
                     "extra_headers": extra_headers,
@@ -3001,7 +3026,7 @@ class AsyncMessages(AsyncAPIResource):
                 compaction_control=compaction_control if is_given(compaction_control) else None,
             )
         return BetaAsyncToolRunner[ResponseFormatT](
-            tools=tools,
+            tools=runnable_tools,
             params=params,
             options={
                 "extra_headers": extra_headers,
