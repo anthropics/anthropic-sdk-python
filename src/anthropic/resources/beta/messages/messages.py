@@ -1322,14 +1322,14 @@ class Messages(SyncAPIResource):
             **(extra_headers or {}),
         }
 
-        runnable_tools: list[BetaRunnableTool] = []
-        regular_tools: list[BetaToolUnionParam] = []
+        client_side_tools: list[BetaRunnableTool] = []
+        server_side_tools: list[BetaToolUnionParam] = []
 
         for tool in tools:
             if isinstance(tool, (BetaFunctionTool, BetaBuiltinFunctionTool)):
-                runnable_tools.append(tool)
+                client_side_tools.append(tool)
             else:
-                regular_tools.append(tool)
+                server_side_tools.append(tool)
 
         params = cast(
             message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
@@ -1349,7 +1349,7 @@ class Messages(SyncAPIResource):
                 "temperature": temperature,
                 "thinking": thinking,
                 "tool_choice": tool_choice,
-                "tools": [*[tool.to_dict() for tool in runnable_tools], *regular_tools],
+                "tools": [*[tool.to_dict() for tool in client_side_tools], *server_side_tools],
                 "top_k": top_k,
                 "top_p": top_p,
             },
@@ -1357,7 +1357,7 @@ class Messages(SyncAPIResource):
 
         if stream:
             return BetaStreamingToolRunner[ResponseFormatT](
-                tools=runnable_tools,
+                tools=client_side_tools,
                 params=params,
                 options={
                     "extra_headers": extra_headers,
@@ -1370,7 +1370,7 @@ class Messages(SyncAPIResource):
                 compaction_control=compaction_control if is_given(compaction_control) else None,
             )
         return BetaToolRunner[ResponseFormatT](
-            tools=runnable_tools,
+            tools=client_side_tools,
             params=params,
             options={
                 "extra_headers": extra_headers,
@@ -2978,14 +2978,14 @@ class AsyncMessages(AsyncAPIResource):
             **(extra_headers or {}),
         }
 
-        runnable_tools: list[BetaAsyncRunnableTool] = []
-        regular_tools: list[BetaToolUnionParam] = []
+        client_side_tools: list[BetaAsyncRunnableTool] = []
+        server_side_tools: list[BetaToolUnionParam] = []
 
         for tool in tools:
             if isinstance(tool, (BetaAsyncFunctionTool, BetaAsyncBuiltinFunctionTool)):
-                runnable_tools.append(tool)
+                client_side_tools.append(tool)
             else:
-                regular_tools.append(tool)
+                server_side_tools.append(tool)
 
         params = cast(
             message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
@@ -3005,7 +3005,7 @@ class AsyncMessages(AsyncAPIResource):
                 "temperature": temperature,
                 "thinking": thinking,
                 "tool_choice": tool_choice,
-                "tools": [*[tool.to_dict() for tool in runnable_tools], *regular_tools],
+                "tools": [*[tool.to_dict() for tool in client_side_tools], *server_side_tools],
                 "top_k": top_k,
                 "top_p": top_p,
             },
@@ -3013,7 +3013,7 @@ class AsyncMessages(AsyncAPIResource):
 
         if stream:
             return BetaAsyncStreamingToolRunner[ResponseFormatT](
-                tools=runnable_tools,
+                tools=client_side_tools,
                 params=params,
                 options={
                     "extra_headers": extra_headers,
@@ -3026,7 +3026,7 @@ class AsyncMessages(AsyncAPIResource):
                 compaction_control=compaction_control if is_given(compaction_control) else None,
             )
         return BetaAsyncToolRunner[ResponseFormatT](
-            tools=runnable_tools,
+            tools=client_side_tools,
             params=params,
             options={
                 "extra_headers": extra_headers,
