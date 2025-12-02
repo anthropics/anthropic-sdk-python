@@ -510,6 +510,34 @@ The user requests a 500-word essay about dogs, cats, and birds, followed by a si
             ]
         )
 
+    def test_compaction_infinite_loop_detection(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        with pytest.raises(
+            RuntimeError, match="Infinite compaction detected: two consecutive iterations performed compaction"
+        ):
+            make_snapshot_request(
+                lambda client: client.beta.messages.tool_runner(
+                    model="claude-sonnet-4-5",
+                    max_tokens=4000,
+                    tools=[],
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": (
+                                "Write a detailed 500 word essay about dogs, cats, and birds. "
+                                "Call the tool submit_analysis with the information about all three animals. "
+                                "Note that you should call it only once at the end of your essay."
+                            ),
+                        }
+                    ],
+                    betas=["structured-outputs-2025-11-13"],
+                    compaction_control={"enabled": True, "context_token_threshold": 400},
+                ).until_done(),
+                content_snapshot=external("uuid:4ee3afd0-b61d-4db6-b971-53e9aa5e286c.json"),
+                path="/v1/messages",
+                mock_client=client,
+                respx_mock=respx_mock,
+            )
+
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.respx(base_url=base_url)
