@@ -41,6 +41,7 @@ from ....types.beta import (
     message_count_tokens_params,
 )
 from ...._base_client import make_request_options
+from ...._utils._utils import is_dict
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS
 from ....types.model_param import ModelParam
@@ -1378,7 +1379,7 @@ class Messages(SyncAPIResource):
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
-        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        output_format: None | BetaJSONOutputFormatParam | type[ResponseFormatT] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
@@ -1411,14 +1412,16 @@ class Messages(SyncAPIResource):
             **(extra_headers or {}),
         }
 
-        transformed_output_format: Optional[message_create_params.OutputFormat] | NotGiven = NOT_GIVEN
+        transformed_output_format: Optional[BetaJSONOutputFormatParam] | NotGiven = NOT_GIVEN
 
-        if is_given(output_format) and output_format is not None:
+        if is_dict(output_format):
+            transformed_output_format = cast(BetaJSONOutputFormatParam, output_format)
+        elif is_given(output_format) and output_format is not None:
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
 
             try:
                 schema = adapted_type.json_schema()
-                transformed_output_format = message_create_params.OutputFormat(
+                transformed_output_format = BetaJSONOutputFormatParam(
                     schema=transform_schema(schema), type="json_schema"
                 )
             except pydantic.errors.PydanticSchemaGenerationError as e:
@@ -1428,7 +1431,6 @@ class Messages(SyncAPIResource):
                         "Use a type that works with `pydanitc.TypeAdapter`"
                     )
                 ) from e
-
         make_request = partial(
             self._post,
             "/v1/messages?beta=true",
@@ -1463,7 +1465,10 @@ class Messages(SyncAPIResource):
             stream=True,
             stream_cls=Stream[BetaRawMessageStreamEvent],
         )
-        return BetaMessageStreamManager(make_request, output_format=cast(ResponseFormatT, output_format))
+        return BetaMessageStreamManager(
+            make_request,
+            output_format=NOT_GIVEN if is_dict(output_format) else cast(ResponseFormatT, output_format),
+        )
 
     def count_tokens(
         self,
@@ -3022,7 +3027,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
-        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        output_format: None | type[ResponseFormatT] | BetaJSONOutputFormatParam | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
@@ -3057,14 +3062,16 @@ class AsyncMessages(AsyncAPIResource):
             **(extra_headers or {}),
         }
 
-        transformed_output_format: Optional[message_create_params.OutputFormat] | NotGiven = NOT_GIVEN
+        transformed_output_format: Optional[BetaJSONOutputFormatParam] | NotGiven = NOT_GIVEN
 
-        if is_given(output_format) and output_format is not None:
+        if is_dict(output_format):
+            transformed_output_format = cast(BetaJSONOutputFormatParam, output_format)
+        elif is_given(output_format) and output_format is not None:
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
 
             try:
                 schema = adapted_type.json_schema()
-                transformed_output_format = message_create_params.OutputFormat(
+                transformed_output_format = BetaJSONOutputFormatParam(
                     schema=transform_schema(schema), type="json_schema"
                 )
             except pydantic.errors.PydanticSchemaGenerationError as e:
@@ -3075,7 +3082,7 @@ class AsyncMessages(AsyncAPIResource):
                     )
                 ) from e
         request = self._post(
-            "/v1/messages",
+            "/v1/messages?beta=true",
             body=maybe_transform(
                 {
                     "max_tokens": max_tokens,
@@ -3107,7 +3114,10 @@ class AsyncMessages(AsyncAPIResource):
             stream=True,
             stream_cls=AsyncStream[BetaRawMessageStreamEvent],
         )
-        return BetaAsyncMessageStreamManager(request, output_format=cast(ResponseFormatT, output_format))
+        return BetaAsyncMessageStreamManager(
+            request,
+            output_format=NOT_GIVEN if is_dict(output_format) else cast(ResponseFormatT, output_format),
+        )
 
     async def count_tokens(
         self,
