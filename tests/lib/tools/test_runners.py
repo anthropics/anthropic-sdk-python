@@ -510,6 +510,43 @@ The user requests a 500-word essay about dogs, cats, and birds, followed by a si
             ]
         )
 
+    @pytest.mark.parametrize("client", [False], indirect=True)
+    @pytest.mark.respx(base_url=base_url)
+    def test_server_side_tool(
+        self,
+        client: Anthropic,
+        respx_mock: MockRouter,
+    ) -> None:
+        def tool_runner(client: Anthropic) -> BetaToolRunner[None]:
+            runner = client.beta.messages.tool_runner(
+                model="claude-haiku-4-5",
+                messages=[{"role": "user", "content": "What is the weather in SF?"}],
+                tools=[
+                    {
+                        "type": "web_search_20250305",
+                        "name": "web_search",
+                    }
+                ],
+                max_tokens=1024,
+            )
+
+            message = next(runner)
+
+            content_types = [content.type for content in message.content]
+
+            assert "server_tool_use" in content_types
+            assert "web_search_tool_result" in content_types
+
+            return runner
+
+        make_snapshot_request(
+            tool_runner,
+            content_snapshot=external("uuid:a0a711eb-ee0e-4a42-88d6-5c7f83c0f25a.txt"),
+            path="/v1/messages",
+            mock_client=client,
+            respx_mock=respx_mock,
+        )
+
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.respx(base_url=base_url)

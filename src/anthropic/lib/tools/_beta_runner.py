@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
@@ -298,6 +299,14 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         for tool_use in tool_use_blocks:
             tool = self._tools_by_name.get(tool_use.name)
             if tool is None:
+                warnings.warn(
+                    f"Tool '{tool_use.name}' not found in tool runner. "
+                    f"Available tools: {list(self._tools_by_name.keys())}. "
+                    f"If using a raw tool definition, handle the tool call manually and use `append_messages()` to add the result. "
+                    f"Otherwise, pass the tool using `beta_tool(func)` or a `@beta_tool` decorated function.",
+                    UserWarning,
+                    stacklevel=3,
+                )
                 results.append(
                     {
                         "type": "tool_result",
@@ -554,6 +563,14 @@ class BaseAsyncToolRunner(
         for tool_use in tool_use_blocks:
             tool = self._tools_by_name.get(tool_use.name)
             if tool is None:
+                warnings.warn(
+                    f"Tool '{tool_use.name}' not found in tool runner. "
+                    f"Available tools: {list(self._tools_by_name.keys())}. "
+                    f"If using a raw tool definition, handle the tool call manually and use `append_messages()` to add the result. "
+                    f"Otherwise, pass the tool using `beta_async_tool(func)` or a `@beta_async_tool` decorated function.",
+                    UserWarning,
+                    stacklevel=3,
+                )
                 results.append(
                     {
                         "type": "tool_result",
