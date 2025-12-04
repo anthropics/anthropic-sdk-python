@@ -54,12 +54,17 @@ fi
 
 export DEFER_PYDANTIC_BUILD=false
 
+# Note that we need to specify the patch version here so that uv
+# won't use unstable (alpha, beta, rc) releases for the tests
+PY_VERSION_MIN=">=3.9.0"
+PY_VERSION_MAX=">=3.14.0"
+
 function run_tests() {
     echo "==> Running tests with Pydantic v2"
     uv run --isolated --all-extras pytest "$@"
 
-    # Pydantic v1 does not support Python 3.14, skip these tests
-    if [[ "$UV_PYTHON" != "3.14" ]]; then
+    # Skip Pydantic v1 tests on latest Python (not supported)
+    if [[ "$UV_PYTHON" != "$PY_VERSION_MAX" ]]; then
         echo "==> Running tests with Pydantic v1"
         uv run --isolated --all-extras --group=pydantic-v1 pytest "$@"
     fi
@@ -71,9 +76,9 @@ if [[ -n "$UV_PYTHON" ]]; then
 else
   # If UV_PYTHON is not set, run the command for min and max versions
 
-  echo "==> Running tests for Python 3.9"
-  UV_PYTHON=3.9 run_tests "$@"
+  echo "==> Running tests for Python $PY_VERSION_MIN"
+  UV_PYTHON="$PY_VERSION_MIN" run_tests "$@"
 
-  echo "==> Running tests for Python 3.14"
-  UV_PYTHON=3.14 run_tests "$@"
+  echo "==> Running tests for Python $PY_VERSION_MAX"
+  UV_PYTHON="$PY_VERSION_MAX" run_tests "$@"
 fi
