@@ -1,0 +1,106 @@
+[
+  {
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "date": "Wed, 03 Dec 2025 16:59:38 GMT",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "request-id": "req_011CVk7MF3CAWoGsJWoWtwSF",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
+        "x-envoy-upstream-service-time": "1373",
+        "cf-cache-status": "DYNAMIC",
+        "x-robots-tag": "none",
+        "server": "cloudflare",
+        "cf-ray": "9a849d968f690bc0-AMS"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_01W4f7BbpEG9NWkq6hifE8si",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "I'll get the weather for each of these cities one at a time. Let me start with San Francisco."
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01FpmqujJtkj11RDCJySJWUH",
+            "name": "get_weather",
+            "input": {
+              "location": "San Francisco, CA",
+              "units": "f"
+            }
+          }
+        ],
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 701,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 96,
+          "service_tier": "standard"
+        }
+      }
+    }
+  },
+  {
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "date": "Wed, 03 Dec 2025 16:59:40 GMT",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "request-id": "req_011CVk7MMiH2qTFqRNanpHUe",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
+        "x-envoy-upstream-service-time": "1109",
+        "cf-cache-status": "DYNAMIC",
+        "x-robots-tag": "none",
+        "server": "cloudflare",
+        "cf-ray": "9a849da04ef60bc0-AMS"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_01NJyxkC7vtwSFZm4d3KJRUt",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "Now let me check New York:"
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_017cDHUBfAhBDseR2vW7axod",
+            "name": "get_weather",
+            "input": {
+              "location": "New York, NY",
+              "units": "f"
+            }
+          }
+        ],
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 837,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 81,
+          "service_tier": "standard"
+        }
+      }
+    }
+  }
+]

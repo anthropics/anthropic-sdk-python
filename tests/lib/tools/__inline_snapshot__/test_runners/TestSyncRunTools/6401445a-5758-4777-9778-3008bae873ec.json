@@ -1,0 +1,93 @@
+[
+  {
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "date": "Wed, 03 Dec 2025 16:59:32 GMT",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "request-id": "req_011CVk7LmzVt3Z3yYKFxpWbn",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
+        "x-envoy-upstream-service-time": "1315",
+        "cf-cache-status": "DYNAMIC",
+        "x-robots-tag": "none",
+        "server": "cloudflare",
+        "cf-ray": "9a849d6efcbe8c7a-AMS"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_01S4zx3T748n7ZVrLGAGfgFS",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01LTJ5KhgNy2y3RoyfR4dgBk",
+            "name": "get_weather",
+            "input": {
+              "location": "SF",
+              "units": "c"
+            }
+          }
+        ],
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 597,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 71,
+          "service_tier": "standard"
+        }
+      }
+    }
+  },
+  {
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "date": "Wed, 03 Dec 2025 16:59:33 GMT",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "request-id": "req_011CVk7LtNydsBSrctuycfL6",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
+        "x-envoy-upstream-service-time": "1013",
+        "cf-cache-status": "DYNAMIC",
+        "x-robots-tag": "none",
+        "server": "cloudflare",
+        "cf-ray": "9a849d785e5c8c7a-AMS"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_01JMXwhaAsHMreUdrfoNbQKs",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "The weather in SF is currently **20°C** and **Sunny**!"
+          }
+        ],
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 705,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 20,
+          "service_tier": "standard"
+        }
+      }
+    }
+  }
+]

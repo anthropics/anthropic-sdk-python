@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import re
 import inspect
 from typing import Any, Iterable
 from typing_extensions import TypeAlias
@@ -8,11 +9,13 @@ from typing_extensions import TypeAlias
 import rich
 import pytest
 import pydantic
+import rich.pretty
+import rich.console
 
 ReprArgs: TypeAlias = "Iterable[tuple[str | None, Any]]"
 
 
-def print_obj(obj: object, monkeypatch: pytest.MonkeyPatch) -> str:
+def print_obj(obj: object) -> str:
     """Pretty print an object to a string"""
 
     # monkeypatch pydantic model printing so that model fields
@@ -28,7 +31,7 @@ def print_obj(obj: object, monkeypatch: pytest.MonkeyPatch) -> str:
         # e.g. `GenericModel[Location]` -> `GenericModel`
         return self.__class__.__name__.split("[", maxsplit=1)[0]
 
-    with monkeypatch.context() as m:
+    with pytest.MonkeyPatch.context() as m:
         m.setattr(pydantic.BaseModel, "__repr_args__", __repr_args__)
         m.setattr(pydantic.BaseModel, "__repr_name__", __repr_name__)
 
@@ -61,10 +64,22 @@ def clear_locals(string: str, *, stacklevel: int) -> str:
 
 
 def rich_print_str(obj: object) -> str:
-    """Like `rich.print()` but returns the string instead"""
+    """Like `rich.print()` but returns a plain multi-line string (no ANSI codes)."""
+
     buf = io.StringIO()
+    console = rich.console.Console(
+        file=buf,
+        width=120,
+        force_terminal=False,  # disable terminal ANSI codes
+        color_system=None,  # disable colors
+        record=True,
+    )
 
-    console = rich.console.Console(file=buf, width=120)
-    console.out(obj)
+    # Use Rich's pretty printer for nice multi-line formatting
+    rich.pretty.install(console)
+    console.print(obj, overflow="fold", width=120)
 
-    return buf.getvalue()
+    result = buf.getvalue()
+    # Strip out [~...] patterns to exclude generic content from snapshots
+    result = re.sub(r"\[~[^\]]*\]", "", result)
+    return result

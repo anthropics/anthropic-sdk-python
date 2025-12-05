@@ -58,6 +58,22 @@ def client(request: FixtureRequest) -> Iterator[Anthropic]:
         yield client
 
 
+@pytest.fixture(scope="function")
+def snapshot_client(snapshot_sync_httpx_client: httpx.Client, is_recording: bool) -> Iterator[Anthropic]:
+    with Anthropic(http_client=snapshot_sync_httpx_client, api_key=None if is_recording else api_key) as client:
+        yield client
+
+
+@pytest.fixture(scope="function")
+async def async_snapshot_client(
+    snapshot_async_httpx_client: httpx.AsyncClient, is_recording: bool
+) -> AsyncIterator[AsyncAnthropic]:
+    async with AsyncAnthropic(
+        http_client=snapshot_async_httpx_client, api_key=None if is_recording else api_key
+    ) as client:
+        yield client
+
+
 @pytest.fixture(scope="session")
 async def async_client(request: FixtureRequest) -> AsyncIterator[AsyncAnthropic]:
     param = getattr(request, "param", True)

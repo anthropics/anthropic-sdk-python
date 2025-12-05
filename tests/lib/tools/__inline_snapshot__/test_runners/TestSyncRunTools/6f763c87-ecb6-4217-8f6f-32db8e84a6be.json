@@ -1,0 +1,183 @@
+[
+  {
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "date": "Fri, 05 Dec 2025 15:05:54 GMT",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "request-id": "req_011CVokHqKukgk86TgfHSWRn",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
+        "x-envoy-upstream-service-time": "3589",
+        "cf-cache-status": "DYNAMIC",
+        "x-robots-tag": "none",
+        "server": "cloudflare",
+        "cf-ray": "9a9471aa6f319a0e-AMS"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_01RAEMSsi4gkXbrnF8wr2FX5",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "server_tool_use",
+            "id": "srvtoolu_01A3t4TfPKgiXf6nKDGsD3c1",
+            "name": "web_search",
+            "input": {
+              "query": "SF weather today"
+            }
+          },
+          {
+            "type": "web_search_tool_result",
+            "tool_use_id": "srvtoolu_01A3t4TfPKgiXf6nKDGsD3c1",
+            "content": [
+              {
+                "type": "web_search_result",
+                "title": "San Francisco, CA Weather Forecast | AccuWeather",
+                "url": "https://www.accuweather.com/en/us/san-francisco/94103/weather-forecast/347629",
+                "encrypted_content": "EtYMCioIChgCIiQ1NTc2NjExZi1hMWVlLTQyN2MtOTgwMC0yOThkOTU3OTg5OWMSDC6+1cF/5oGziif1JBoM4tMn+KWAS4XfwRr9IjDyPqAutmu0TuuKfrF3KDnDm8l/lLxdkQq6ZDvXnpFHP3JQ0zsT2kc6fDo+ICy08HEq2Qu4Qe8ThdDP1+SYKZXJQuA3+s23P4npfnJdsH9LGxGXn+cS0YwbtdvtcobO53L0rYQ+IZrsgqqKz5uwAXGr7leoDOUAzwLhM6hz+ZJC9q2MfdTGe9+1eHRY6gfRQx3UzDBVH0N9Wg1eAe5FttuIO3izOg7XNCf+xez0DGd6CKC6hUlP8o4VT0lvHgCfAs4vqXeFyk02AgGOoJy0DdqPQHciJfhJphuDC9fapKWi0qAGFvneizL6jZMnVf3lVM3DlSAVW5D3/pO7Sr5YkAKaEHTqqN+WY6ddFfHpTzm7n9jHnIIArrTduNUoguVtNXDe19iCrHomwv1pTIqhMSO7cAUjcjKHp8zrqMvthgB7txuw/S76J2L3XRzgijGBaHDvIWmSPaAb8nGDK/F1SjODX6lHBdR2dIa8c4ByGqIZVysQW+V1WzYCmLzCthBbuGPrWg7nn7dZPuUbew8CJv+QTmuKli6UAgLmrPKeJi6XcYKQBaAXUo+KzNPXTEnNLQ+wE6/ledc7BITc/Yb5i+UthW+jbkmmFlFu2R897S9hhLXUE4XqNVcRWMGMhxIfTTIF5y2M6lRrz4/xV1zx5aDgKncU2s7dvWbv+UwRdkx9EpYdSBjQ89ytaJKwATI8qIUWFWHATuhzs4W6edwfnBiIZhKOt8HexrklbReVqzlyk76CIRzCGUHTrShyTjpMMpGTgp3PbK4Rg6f96gXtokBrs/jKh7HSFku4I7c55oLayNh43EeXzk7JO0BlCvDV3b2r6And5q922KNeM1qaoomjHtVXVJiMWdpC4glML11PTinM/CGGRjLZ/0yVwJLjU5mLQxixVsGzg2T0+pbmoSl8PgvBRtCwKTLPeCgR86xFWtHueIrdEjc/l87Fr4DfqTtrHyGUKCcoXqO3bLqlo9eJlk64buVr5SOOnB27v6PaDDMqZ2aEsTcByntsoAFz4oVzuxgJYH4+ulSq+1NCwQVBd3nGpyVwY4lDugjQL2L3ITo7pISnMKW1gWCjVA69YWZ9t1f88sP1kuDAheBmNicTQXJFsWw0O65Ff4T+05zQ28b8EEJO42eoCJu9ZuUSWof9lqT8al77rQ/LJYsPZcHlNVgUXf03Jjs7iLqDOIkGg6qf11Xgb5wUkxZsQxLTSWezcOwgR6vVRRKQ7yedG8bP43szZc63SoH9XQDTBS1QvomGXbjM/hw8arCRKRWH+JnPnWnvQumUO0fBcfa7ugyndFJJwl/6UmOlM35RI4OrEbHH2b4vm/9h7nt4ZZ6mrTV47Xr9erXrXpi5uPYCgAynBxBpED5bfYwK0d1uw/AGa6BkeokMaNGroFvF8qIs9xNxS6gmp4AY3gJJaos+AjeGsl6iFO4zJCrrxKM++o4kp2oJVY3joAzL+2LfOb3aSarCHaPnLcq6A5I6lhjLRdBZvu54pPKYlKBzBxrk+Og7sqr458AgklGi3ZKKgO0g58dAxZB1ROy9/NbSRrmaGY+lwjE0WpaME6UVKzXOAHnQrsnlnueoVxwizkqRV5ryTQcdFuiEJbKOydMkEus5JZi4ncv6pKdo8l0V+Cq/2WU1d841ImQ3ExC5aqw0fG+IeIHM/TcDFHZ8fEjq/krINwivsR6nQYAohmF9qzNZpu3dmHChHxP/VMwAJLJV93bVu+OJCpVP20rgfTCEZUC2d9gVFaWpwcLdasYZdgpH0norbBe0WUY27apXVCj573rMGQQnhpECKm3wJBOpn20djIkarBtxO9yO8e3S+9P4YD/AQ4nxGP8nmngcnijBkvoF2zstUkbra/uvz+ggoo6370rWnEv4qgnL7BReIhKHKzsP8XzQsQvJHi0B4r4i36p0UMN8oXyQE3DDfJoNSAKMTPmEx1JyV6jVNrrjFeIM1ra80rONYnDd4JjV5pg3wf2tDmJkJqKcfHl7Yx5HHRujHC7dYZ/eMKag/nALebWxmjEUsZQNRHHCpvnVr1EBTRZGw1P9Xzn62n19cLrMGLkYAw==",
+                "page_age": "3 days ago"
+              },
+              {
+                "type": "web_search_result",
+                "title": "San Francisco, CA Hourly Weather Forecast | Weather Underground",
+                "url": "https://www.wunderground.com/hourly/us/ca/san-francisco",
+                "encrypted_content": "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",
+                "page_age": null
+              },
+              {
+                "type": "web_search_result",
+                "title": "San Francisco, California | Current Weather Forecasts, Live Radar Maps & News | WeatherBug",
+                "url": "https://www.weatherbug.com/weather-forecast/now/san-francisco-ca-94103",
+                "encrypted_content": "Es8FCioIChgCIiQ1NTc2NjExZi1hMWVlLTQyN2MtOTgwMC0yOThkOTU3OTg5OWMSDNLGGckKftyYswszPxoMDmiHv3w66Sw+D0ysIjDd9n6R0C/xqnqcXZKvyR8pnGdX0esXL4zrqQ+1tOndVEBsDlOjkgUHxx/BBDNUx6Iq0gSoCPcHZysOCpOLDcVordlgS16IrElAkEbrErn2dW7qlY0GeIcQyEv6SsVv+V6p4/iKbq6lbGP3dF6D8TjCb5bRkmgYbtbG/2G0voaIx+zFdMbxp08YwkH5QCHRcFRjDw6cXYbgLLaOPfa5PgdzXZvH5t+HHJoMS12BCn3Sk/MYNwg+c6NhrdlWA9Uh+g/MGOQnvgTGq+qdEKAGKOL8Mhs8X6Idb2MRR8yJcnzSM6ZmX5hp3lxMRQ9V/29Hqvf+g6oWoamykkFHA43HbN9dAPjtYtzwfRNyE+2k0zJr4crpTi1VvBYuW8lo1g9Xdf0zF0r20x5C/yWSNVeGDA1IUkglw00O8lPcEqSxHubQXpojTJBBK1S5lGuFqZDP3pPDwmxnY9V1BsGU0O624H+Gg9zhQ1MofxM3GIYCTl1xqsCzI+7yH3xAFPhcDXhWfqb8Bxk4xFIahHXu0C9X5tGkQRJrN+KdluekV84mlhMTnDlBRgwn8CKrk+nBZSbEy7OcFiYuRiyO1/1iQwiqZBFoYI8QKyPH683hLvrTfmvWkOVwGkyDe4rL/VKWJN4EJYSNAUVS4s/jmeRBHtJBMY222wE+B5hCc/kfKG6XJ8va3mQcu/BTDEvpGh/DA/PdgVvJ9Ub1pWuEXrQMBLy7zx30wJ/3x+ByazCWj9fiDIE++7NvYqXgqo24vRlqT+AIXa/oI4ZbuZU0Wfm5jTX2J4dhKOumG1lq8FdTbD0BtjbX9TZ2z78nbrQUKlU4OWvKPmZQfQk99Euiz8W2TNnYO8ZQ3HRz+T0YAw==",
+                "page_age": null
+              },
+              {
+                "type": "web_search_result",
+                "title": "Weather | KTVU FOX 2",
+                "url": "https://www.ktvu.com/weather",
+                "encrypted_content": "EtQCCioIChgCIiQ1NTc2NjExZi1hMWVlLTQyN2MtOTgwMC0yOThkOTU3OTg5OWMSDHBQfYXedtFjXqDQDBoMUIt4GTWrKrhw6ktGIjCQ9cZg0jWCVR7wF2DcBFZwpB+m5NPAyv12rU7iRtO1nWMHMleA4UkSDJ6aoc6hszIq1wHfzXq7NONKBmbXHMjSGhbrj3WJdqW13T563jnRLVNNFBddsP0T+L5oR2LqGSxjPSrTbJms+Hux0eFyBpKqqNJMC7juWyWRyg8jJj3sRcGviB1Ka6bqiqlJcvqbuHcmYr7LWMWrYObRtIosIkHooZxPxn+LBfXLoIIjMfjrlLO1bm197xqZ67x0d1EuX9J4osJ+cFJVQR0IrZZNNFjMdDHoevsbd/15BITcDcF690Dz6F+Sy+iL2VZRMjY1UpkjXpJ9SNCVehIYhCJJkZ2eMWjPMH4w7ybRWRgD",
+                "page_age": "3 weeks ago"
+              },
+              {
+                "type": "web_search_result",
+                "title": "Fog Today",
+                "url": "https://fog.today/",
+                "encrypted_content": "EpoGCioIChgCIiQ1NTc2NjExZi1hMWVlLTQyN2MtOTgwMC0yOThkOTU3OTg5OWMSDMwOeyZE4pJY/EQKcBoMAyaukz8uXYHwk+qfIjDGhKpJ9gCAsAHBD3yOM56VwdECEgHNtsAadx0V5PHbr8GGHyXYG9wpCnRF6EiVtZ4qnQVgsTpM50aivIxkNkGSy29gfFGeYYbG/NcQSJQWqGgnzYhhtHkRDIp2whNuYhh6tREvV77X0CVxhy78m8Nts1bZK9tdWW4260INVLLaFsrCKnqy2t2VAczq3qu0qhUMlw9x7giot17fuYGs/WcXyfpZE/w4ca1h5x1PzYrAPNTBoxTJHbVA50Khob2nsBsJjbPOOMU2DFm6UoAnA5UskKU8Pv9okk1ai0W7LnnuNz4qC4Uk7qO/7OKu/zS0dtATPfXtAYxukMQlbQ5CgQVk0lH0eKrbOd4YuOjd76CfPiaulpjOu3Hj9aqKvFtcrR40qHRJBBYjhS+faO8TKg3FZAYvVETiqubgw79e2KueIMJs0zyaplFgtFXFt+fncXU+kUkf4fyUFHo5vfk+ibbnXH5ul4TanR6W//6HJmuTMmsIKBFrit6gg/wpC+hkcqn0uCFP8jGrdGeww7ZqpQpoU5NieJShqVZv/9iBV/rpitjDIqTlFpj+WW/FDYz3RvRt94KvRu9Mg/MI8bzoMQLwCLhUZyOqoUoCQE985Gol41DkQA1e3N+zapLAEdW/Z7+4RyBmSh58xoauCfT33FGp74OjnRpOh7g5t35dOShKUOhpXAYtXH7FZkPz2/FCZVJzolTUYTxqMD/EhHZfBdy+mAhvQ4Gvd8Z7sI3424ENrtYwr3BVh3iXJMbVhVzmDVEWHieUoY2nA32xXh22yKdsTNwWyHvkA4h31PizRA4B6GsKWTLR1DuDqPSWr+0xFREtk0B0KSUV4umkLX9QPIW2Cb75mwq5UzM9G+SD/uUMQyZ+4ICkt9FihnS6U1x9SaOprdLKXiR1hkB53JOuI3saEKQ8tr11L4bO11JPEs4l7K69npZ0m40NVCbiRutkJ+MYAw==",
+                "page_age": null
+              },
+              {
+                "type": "web_search_result",
+                "title": "San Francisco Bay Area weather and First Alert Weather forecasts - CBS San Francisco",
+                "url": "https://www.cbsnews.com/sanfrancisco/weather/",
+                "encrypted_content": "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",
+                "page_age": "4 weeks ago"
+              },
+              {
+                "type": "web_search_result",
+                "title": "San Francisco, CA Current Weather - The Weather Network",
+                "url": "https://www.theweathernetwork.com/en/city/us/california/san-francisco/current?_guid_iss_=1",
+                "encrypted_content": "EpwCCioIChgCIiQ1NTc2NjExZi1hMWVlLTQyN2MtOTgwMC0yOThkOTU3OTg5OWMSDPyCIpf18wmD2HpT3xoMTFduigKcaaj2EH0cIjAqHqZeoD5ISXHF5bJmC7m45trOlI9caV2BwXvmkbczUVstau4WjEHCnoVC8E7gC8UqnwEX/hr/LOOmDMks7MMNkqQrDte2Prh4DaJkKC3yoacmNV/6spCSSq01u41FKnBeHZNIvY9QYxQ5nZXcSPbwHqy1P+XLL3i/CWH7hFHFA8Kq2U8u2tn6ZynOMjRBEH/4c3PulDfrfFUuR1uRA1UNCObKn8s0JZEnQijWzD6HEL+Vr4YxYDC4aJesMu9xpHjC8zHZ38/dbfs1KRQyEDhNeMcYAw==",
+                "page_age": "4 days ago"
+              },
+              {
+                "type": "web_search_result",
+                "title": "San Francisco Bay Area, CA",
+                "url": "https://www.weather.gov/mtr/",
+                "encrypted_content": "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",
+                "page_age": "2 days ago"
+              },
+              {
+                "type": "web_search_result",
+                "title": "San Francisco Bay Area weather forecast – NBC Bay Area",
+                "url": "https://www.nbcbayarea.com/weather/",
+                "encrypted_content": "EsMICioIChgCIiQ1NTc2NjExZi1hMWVlLTQyN2MtOTgwMC0yOThkOTU3OTg5OWMSDLWt5CNE5+gd82RwBBoMihbjGRpjOMvBC+/rIjD6iKDuNo8ZRmIjMrToH9UflyCKZS1OpmD6kSF8elrc/8eXnUoEqR9kFJKzc10nfP4qxgfkkn2d1VG8OfKx3bX8XOJd4A7CfATqIk0i1ONXaIck1+Ts9hYU729hjbmNzup2uspCIxezHDTG/BkLFQc7Aa+kWExbAZHXcmotGOjdLjldyI+129pTuZEHav1sY9yazcmI0qpzJ0kRISwPtN5SnEycKVD7nEUR004HxDG/2BSO0cYLfBIJ0W2pVm19aUi7kCoFSl1UmwEEgOA3BN1J1ms+3P6gGuF9LIsjnVLM4omv9G3cN0YeR6h9LUMpFXQMbPRRXAzfdJKe0zc05r+4Wq0DkvNFfdKL7d23AIcObDFEAst7rSu7X2oJz7zosS0WsyKvYer/ss948tehjne4qGfEZfySMjoNlW1WnLNjWNo57IwAwOdVOyFYfUSnn7MI7l7mjhKg8NeHMVBj/fYFHimEaBsd78QIL1wIGnerku98wDiE9+s7mZwXM3vKh/ppn9TvgOB1C76UKuOaYWGCWaUaYFA9jrgnEg/GIgGZMqmrCpe9xUwsVopkg0Rk82I1lGC/Uyumu+X7FZYrixuhCh/IvlWSpkiUzaGwQGD/wQnkZc/NU1pWKR1yNlkGVbyQV155YWINOXvxyY76FvVKYJYDaRjQjpI74lYToNUK+ucVht0j71iKEus/9Ki6AMFS0606P5Pgzp/wxhJJPN9GQioH4UWNyk8zJBkWgyJGQVMQj/wUCQydFiE2lwe9vpb9/Xhbidem0mnbSIbTufVPluxfYeTNJPhB/aJd6xLQL7cDcHquHbUprXgyBFeYnoSzfdDMmH3AFkXsyvAF94+HiF1gIUCJxCm3W5WK8PiXsAlUul8ySYhXsJbXd2ojRIg6rwIzqsdmh33sWZx88Xwi78Pmn+6J7NzakEVGVj6+5wH17PTXtdln2Nd22QOzvn6SWmyyv50GwxpdEluMnAeyzzkkp6zGrBoSpKFHzjqrjYBiXbQWMut1+q0lK0b1SRTOChWCDjuG7FedM/n1yx4Zs/WYRauSn4DBBzU0OmvD0rcZGQPaHkXbh7PqNBZW4yVhSIO22MnlrN8flUWdJUK4xDGpTXeBtjh8eiwu9fk4+ACqWhxyjvNyrcfhcV8ScmG1tKFjsU8C2Z817zjqPiXcDSRrhJ5b35banK5n/2Yv47PAQXnfjNlDk4s9b49PhIaN5WnXLJSWpJZpz1zY5Ct7kF8ZzYPsqgSFPCcbEtCN/QEpLsZLfvZM1JYMUknWwrt5EGGrmGK9dqhOpOLBccWQ0yAEXzE8UbfuWS26ZttHO01ZCzzookNVB/0342QCCI3Op7Za3udzQoUYAw==",
+                "page_age": "3 days ago"
+              },
+              {
+                "type": "web_search_result",
+                "title": "San Francisco, CA Weather Forecast, Conditions, and Maps",
+                "url": "https://www.yahoo.com/news/weather/united-states/california/san-francisco-2487956",
+                "encrypted_content": "EswBCioIChgCIiQ1NTc2NjExZi1hMWVlLTQyN2MtOTgwMC0yOThkOTU3OTg5OWMSDFQaQjU3YjkQyuhdkBoMb/hFX/Eppc86YUC5IjABwWR/z3hhZ/1IOYeauzdY38Mc5cBeKJQaiNeYaG5mfhwxCZ0icRVJm5bw6zjbpIQqUD036oskC4KdqLkBFUyYwxJcc/EbdxXDNyb0Qv6IBBa6PHS/PvLkMFuXoBx7YYDFh6f6b9dSDpio9Jjtps/1o/4RMpBknxqLvxs5x+utHWSsGAM=",
+                "page_age": null
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "Based on the current weather forecast for San Francisco:\n\n"
+          },
+          {
+            "citations": [
+              {
+                "type": "web_search_result_location",
+                "cited_text": "zoom out · Showing Stations · Hourly Forecast for Today, Friday 12/05Hourly for Today, Fri 12/05 · Today 12/05 · 6% / 0 in · A good deal of sunshine. ",
+                "url": "https://www.wunderground.com/hourly/us/ca/san-francisco",
+                "title": "San Francisco, CA Hourly Weather Forecast | Weather Underground",
+                "encrypted_index": "Eo8BCioIChgCIiQ1NTc2NjExZi1hMWVlLTQyN2MtOTgwMC0yOThkOTU3OTg5OWMSDF3vaU6EU5iBxOhrQRoMFYIQ8+XE15PuZ0pKIjA4FQSdosGf5L6Ol7fIfpIJy5lid8Uy84RIIDuicPTQXDGtRjCWuP3CnNDVv36D3ZcqEzEyHm/WXGjf92QPwdyhgZaoFv0YBA=="
+              }
+            ],
+            "type": "text",
+            "text": "Today is expected to have a good deal of sunshine"
+          },
+          {
+            "type": "text",
+            "text": ", with "
+          },
+          {
+            "citations": [
+              {
+                "type": "web_search_result_location",
+                "cited_text": "High 58F. Winds N at 5 to 10 mph. ",
+                "url": "https://www.wunderground.com/hourly/us/ca/san-francisco",
+                "title": "San Francisco, CA Hourly Weather Forecast | Weather Underground",
+                "encrypted_index": "EpEBCioIChgCIiQ1NTc2NjExZi1hMWVlLTQyN2MtOTgwMC0yOThkOTU3OTg5OWMSDBwrHoCSxWPWRdrHcRoMHH5lBQOZwtO5+k3ZIjC8kOWVDaoLDQ3MIbdxZvI+A/1U4V+LsjOwGwXfeg7+HfnQzYBCygEh6mN6YJPxwAgqFXGba3zldKQEEGzVniRgCiaAxyOs6BgE"
+              }
+            ],
+            "type": "text",
+            "text": "a high of 58°F and winds from the north at 5 to 10 mph"
+          },
+          {
+            "type": "text",
+            "text": ". "
+          },
+          {
+            "citations": [
+              {
+                "type": "web_search_result_location",
+                "cited_text": "Tonight 12/05 · 8 % / 0 in · Partly cloudy skies. Low 47F. ",
+                "url": "https://www.wunderground.com/hourly/us/ca/san-francisco",
+                "title": "San Francisco, CA Hourly Weather Forecast | Weather Underground",
+                "encrypted_index": "EpEBCioIChgCIiQ1NTc2NjExZi1hMWVlLTQyN2MtOTgwMC0yOThkOTU3OTg5OWMSDOjg/daPzBMpVqtcBRoMFvN5srtrqjEwD4K9IjCOroiNwibFTmcvkWIaB32TxH8phnMjZJlXqBRfLN5USQuslXbr9vIEz21IMJzVqrcqFfb09hoAOJn6U7was5gtdsojZeftwRgE"
+              }
+            ],
+            "type": "text",
+            "text": "Tonight will be partly cloudy with a low of 47°F"
+          },
+          {
+            "type": "text",
+            "text": "."
+          }
+        ],
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 9656,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 176,
+          "service_tier": "standard",
+          "server_tool_use": {
+            "web_search_requests": 1
+          }
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,149 @@
+[
+  {
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "date": "Wed, 03 Dec 2025 16:59:23 GMT",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "request-id": "req_011CVk7L32bmhx4PN5W2e674",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
+        "x-envoy-upstream-service-time": "2019",
+        "cf-cache-status": "DYNAMIC",
+        "x-robots-tag": "none",
+        "server": "cloudflare",
+        "cf-ray": "9a849d30391fc13c-AMS"
+      },
+      "body": {
+        "model": "claude-3-5-haiku-20241022",
+        "id": "msg_01DXhC71psJn1RhEsecTydUB",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "I'll help you get the weather for San Francisco. I'll retrieve the temperature in Fahrenheit, which is typically preferred in the United States."
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01Not8sU7rvvvixVRigDz1ee",
+            "name": "get_weather",
+            "input": {
+              "location": "San Francisco, CA",
+              "units": "f"
+            }
+          }
+        ],
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 424,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 104,
+          "service_tier": "standard"
+        }
+      }
+    }
+  },
+  {
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "date": "Wed, 03 Dec 2025 16:59:25 GMT",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "request-id": "req_011CVk7LCRQJ2cqN2vpz4veM",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
+        "x-envoy-upstream-service-time": "2148",
+        "cf-cache-status": "DYNAMIC",
+        "x-robots-tag": "none",
+        "server": "cloudflare",
+        "cf-ray": "9a849d3dffa9c13c-AMS"
+      },
+      "body": {
+        "model": "claude-3-5-haiku-20241022",
+        "id": "msg_01WeMH1D2TYPZYj7Vbm2XVDN",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "I apologize, but it seems there was an unexpected error when trying to retrieve the weather information. This can happen due to temporary system issues. Let me try again:"
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01LJTxn5gThzGiq5MgRfbogp",
+            "name": "get_weather",
+            "input": {
+              "location": "San Francisco, CA",
+              "units": "f"
+            }
+          }
+        ],
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 557,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 109,
+          "service_tier": "standard"
+        }
+      }
+    }
+  },
+  {
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "date": "Wed, 03 Dec 2025 16:59:27 GMT",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "request-id": "req_011CVk7LNPBn1Qv62UVz8PSD",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
+        "x-envoy-upstream-service-time": "1650",
+        "cf-cache-status": "DYNAMIC",
+        "x-robots-tag": "none",
+        "server": "cloudflare",
+        "cf-ray": "9a849d4c7932c13c-AMS"
+      },
+      "body": {
+        "model": "claude-3-5-haiku-20241022",
+        "id": "msg_01Pq1Tj1FV2uXN5mZm7sphQi",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "Great! Here's the current weather in San Francisco:\n- Temperature: 68°F\n- Condition: Sunny\n\nIt looks like a beautiful, mild day in San Francisco with sunny skies and a comfortable temperature of 68 degrees Fahrenheit."
+          }
+        ],
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 705,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 59,
+          "service_tier": "standard"
+        }
+      }
+    }
+  }
+]

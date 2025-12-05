@@ -1,0 +1,93 @@
+[
+  {
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "date": "Wed, 03 Dec 2025 17:23:46 GMT",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "request-id": "req_011CVk9BvJJL9DSpQAbDcRJA",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
+        "x-envoy-upstream-service-time": "1525",
+        "cf-cache-status": "DYNAMIC",
+        "x-robots-tag": "none",
+        "server": "cloudflare",
+        "cf-ray": "9a84c0eb5eeb656e-AMS"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_017qL8GBMqwCsEmXujM6p775",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01EqKdVnvSZkNUXcxkJZsva7",
+            "name": "get_weather",
+            "input": {
+              "location": "San Francisco, CA",
+              "units": "f"
+            }
+          }
+        ],
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 656,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 74,
+          "service_tier": "standard"
+        }
+      }
+    }
+  },
+  {
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "date": "Wed, 03 Dec 2025 17:23:47 GMT",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "request-id": "req_011CVk9C3uCDkHzzBQZKzQ5h",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
+        "x-envoy-upstream-service-time": "1453",
+        "cf-cache-status": "DYNAMIC",
+        "x-robots-tag": "none",
+        "server": "cloudflare",
+        "cf-ray": "9a84c0f65f6c656e-AMS"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_01FvTMNojoLmBYw4KxJXB27y",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "The weather in San Francisco is currently **68°F and Sunny**. Great day to be out and about!"
+          }
+        ],
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 770,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 27,
+          "service_tier": "standard"
+        }
+      }
+    }
+  }
+]
