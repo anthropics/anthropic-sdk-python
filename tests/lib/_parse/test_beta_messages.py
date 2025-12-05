@@ -39,4 +39,4 @@ class TestAsyncMessages:
 
         response = await async_stream_parse(async_snapshot_client)
 
-        assert response.content[0].text == snapshot("[12345,67890]")
+        assert response.content[0].text == snapshot("[12345,67890]")  # type: ignore
