@@ -64,14 +64,14 @@ def clear_locals(string: str, *, stacklevel: int) -> str:
 
 
 def rich_print_str(obj: object) -> str:
-    """Like `rich.print()` but returns a plain multi-line string (no ANSI codes)."""
+    """Like `rich.print()` but returns the string instead"""
 
     buf = io.StringIO()
     console = rich.console.Console(
         file=buf,
         width=120,
-        force_terminal=False,  # disable terminal ANSI codes
-        color_system=None,  # disable colors
+        force_terminal=False,
+        color_system=None,
         record=True,
     )
 

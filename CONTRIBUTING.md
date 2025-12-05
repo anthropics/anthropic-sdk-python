@@ -109,7 +109,7 @@ Some tests use [inline-snapshot](https://15r10nk.github.io/inline-snapshot/lates
 In addition, some tests capture snapshots of the HTTP requests they make.
 To refresh these snapshots, run the tests with the `--http-record` flag:
 ```bash
-./scripts/test --inline-snapshot=fix --http-record
+./scripts/test --inline-snapshot=fix --http-record -n0
 ```
 
 > [!NOTE]
