@@ -734,20 +734,14 @@ requests = [
 
 [[package]]
 name = "griffe"
-version = "1.15.0"
+version = "1.13.0"
 source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-]
 dependencies = [
-    { name = "colorama", marker = "python_full_version >= '3.10' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+    { name = "colorama" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0d/0c/3a471b6e31951dce2360477420d0a8d1e00dea6cf33b70f3e8c3ab6e28e1/griffe-1.15.0.tar.gz", hash = "sha256:7726e3afd6f298fbc3696e67958803e7ac843c1cfe59734b6251a40cdbfb5eea", size = 424112, upload-time = "2025-11-10T15:03:15.52Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/b5/23b91f22b7b3a7f8f62223f6664946271c0f5cb4179605a3e6bbae863920/griffe-1.13.0.tar.gz", hash = "sha256:246ea436a5e78f7fbf5f24ca8a727bb4d2a4b442a2959052eea3d0bfe9a076e0", size = 412759, upload-time = "2025-08-26T13:27:11.422Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9c/83/3b1d03d36f224edded98e9affd0467630fc09d766c0e56fb1498cbb04a9b/griffe-1.15.0-py3-none-any.whl", hash = "sha256:6f6762661949411031f5fcda9593f586e6ce8340f0ba88921a0f2ef7a81eb9a3", size = 150705, upload-time = "2025-11-10T15:03:13.549Z" },
+    { url = "https://files.pythonhosted.org/packages/aa/8c/b7cfdd8dfe48f6b09f7353323732e1a290c388bd14f216947928dc85f904/griffe-1.13.0-py3-none-any.whl", hash = "sha256:470fde5b735625ac0a36296cd194617f039e9e83e301fcbd493e2b58382d0559", size = 139365, upload-time = "2025-08-26T13:27:09.882Z" },
 ]
 
 [[package]]
