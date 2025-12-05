@@ -82,4 +82,5 @@ def rich_print_str(obj: object) -> str:
     result = buf.getvalue()
     # Strip out [~...] patterns to exclude generic content from snapshots
     result = re.sub(r"\[~[^\]]*\]", "", result)
+    result = result.replace("[TypeVar]", "")
     return result
