@@ -352,6 +352,7 @@ AnthropicBedrock(
   aws_secret_key='...',
   aws_access_key='...',
   aws_session_token='...',
+  api_key='...', # defaults to AWS_BEARER_TOKEN_BEDROCK envvar
 )
 ```
 
