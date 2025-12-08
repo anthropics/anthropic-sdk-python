@@ -8,4 +8,6 @@ __all__ = ["BetaDirectCallerParam"]
 
 
 class BetaDirectCallerParam(TypedDict, total=False):
+    """Tool invocation directly from the model."""
+
     type: Required[Literal["direct"]]

@@ -26,6 +26,11 @@ class BatchCreateParams(TypedDict, total=False):
 
 
 class RequestParams(TypedDict, total=False):
+    """Messages API creation parameters for the individual request.
+
+    See the [Messages API reference](https://docs.claude.com/en/api/messages) for full documentation on available parameters.
+    """
+
     max_tokens: Required[int]
     """The maximum number of tokens to generate before stopping.
 

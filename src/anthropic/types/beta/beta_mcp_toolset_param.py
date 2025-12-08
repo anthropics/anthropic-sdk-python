@@ -13,6 +13,12 @@ __all__ = ["BetaMCPToolsetParam"]
 
 
 class BetaMCPToolsetParam(TypedDict, total=False):
+    """Configuration for a group of tools from an MCP server.
+
+    Allows configuring enabled status and defer_loading for all tools
+    from an MCP server, with optional per-tool overrides.
+    """
+
     mcp_server_name: Required[str]
     """Name of the MCP server to configure tools for"""
 
