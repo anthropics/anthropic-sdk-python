@@ -512,7 +512,12 @@ The user requests a 500-word essay about dogs, cats, and birds, followed by a si
 
     def test_compaction_infinite_loop_detection(self, client: Anthropic, respx_mock: MockRouter) -> None:
         with pytest.raises(
-            RuntimeError, match="Infinite compaction detected: two consecutive iterations performed compaction"
+            RuntimeError,
+            match=(
+                "Potentially infinite compaction loop detected: two consecutive iterations triggered compaction. "
+                "This usually means `context_token_threshold` is too small to hold the compacted output. "
+                "Try increasing it."
+            ),
         ):
             make_snapshot_request(
                 lambda client: client.beta.messages.tool_runner(

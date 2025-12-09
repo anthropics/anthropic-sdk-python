@@ -255,7 +255,11 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                 consecutive_compactions += 1
                 log.debug(f"Consecutive compactions: {consecutive_compactions}")
                 if consecutive_compactions >= 2:
-                    raise RuntimeError("Infinite compaction detected: two consecutive iterations performed compaction")
+                    raise RuntimeError(
+                        "Potentially infinite compaction loop detected: two consecutive iterations triggered compaction. "
+                        "This usually means `context_token_threshold` is too small to hold the compacted output. "
+                        "Try increasing it."
+                    )
             else:
                 log.debug("No compaction performed, resetting consecutive compactions counter.")
                 consecutive_compactions = 0
@@ -510,7 +514,11 @@ class BaseAsyncToolRunner(
             if compacted:
                 consecutive_compactions += 1
                 if consecutive_compactions >= 2:
-                    raise RuntimeError("Infinite compaction detected: two consecutive iterations performed compaction")
+                    raise RuntimeError(
+                        "Potentially infinite compaction loop detected: two consecutive iterations triggered compaction. "
+                        "This usually means `context_token_threshold` is too small to hold the compacted output. "
+                        "Try increasing it."
+                    )
             else:
                 consecutive_compactions = 0
 
