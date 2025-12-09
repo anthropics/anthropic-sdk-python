@@ -510,7 +510,6 @@ The user requests a 500-word essay about dogs, cats, and birds, followed by a si
             ]
         )
 
-
     def test_compaction_infinite_loop_detection(self, client: Anthropic, respx_mock: MockRouter) -> None:
         with pytest.raises(
             RuntimeError,
@@ -543,7 +542,6 @@ The user requests a 500-word essay about dogs, cats, and birds, followed by a si
                 mock_client=client,
                 respx_mock=respx_mock,
             )
-
 
     @pytest.mark.parametrize("client", [False], indirect=True)
     @pytest.mark.respx(base_url=base_url)
