@@ -203,10 +203,7 @@ def test_bearer_token_client_args(respx_mock: MockRouter) -> None:
         return_value=httpx.Response(200, json={"foo": "bar"})
     )
 
-    client = AnthropicBedrock(
-        aws_region="us-east-1",
-        api_key="test-bearer-token-from-args"
-    )
+    client = AnthropicBedrock(aws_region="us-east-1", api_key="test-bearer-token-from-args")
     client.messages.create(
         max_tokens=1024,
         messages=[
