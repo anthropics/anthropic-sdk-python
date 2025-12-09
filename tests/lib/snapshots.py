@@ -136,6 +136,65 @@ def make_stream_snapshot_request(
     return result
 
 
+async def make_async_stream_snapshot_request(
+    func: Callable[[AsyncAnthropic], Awaitable[_T]],
+    *,
+    content_snapshot: Any,
+    respx_mock: MockRouter,
+    mock_client: AsyncAnthropic,
+    path: str,
+) -> _T:
+    live = os.environ.get("ANTHROPIC_LIVE") == "1"
+    collected: list[str] = []
+    if live:
+
+        async def _on_response(response: httpx.Response) -> None:
+            await response.aread()
+            collected.append(response.text)
+
+        respx_mock.stop()
+
+        client = AsyncAnthropic(
+            http_client=httpx.AsyncClient(
+                event_hooks={
+                    "response": [_on_response],
+                }
+            )
+        )
+    else:
+        response_contents = get_snapshot_value(content_snapshot)
+        assert is_list(response_contents)
+
+        response_contents = cast(
+            List[str],
+            response_contents,
+        )
+
+        curr = 0
+
+        def get_response(_request: httpx.Request) -> httpx.Response:
+            nonlocal curr
+            content = response_contents[curr]
+            assert isinstance(content, str)
+
+            curr += 1
+            return httpx.Response(
+                200,
+                content=content.encode("utf-8"),
+                headers={"content-type": "text/event-stream"},
+            )
+
+        respx_mock.post(path).mock(side_effect=get_response)
+        client = mock_client
+
+    result = await func(client)
+    if not live:
+        return result
+
+    assert outsource(collected) == content_snapshot
+    return result
+
+
 async def make_async_snapshot_request(
     func: Callable[[AsyncAnthropic], Awaitable[_T]],
     *,
@@ -162,7 +221,9 @@ async def make_async_snapshot_request(
         )
     else:
         responses = get_snapshot_value(content_snapshot)
-        assert is_list(responses)
+
+        if not is_list(responses):
+            responses = [responses]
 
         curr = 0
 
