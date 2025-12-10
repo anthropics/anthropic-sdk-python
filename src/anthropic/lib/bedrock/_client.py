@@ -305,6 +305,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         # outlining your use-case to help us decide if it should be
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
+        api_key: str | None = None,
     ) -> None:
         self.aws_secret_key = aws_secret_key
 
@@ -314,6 +315,11 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         self.aws_profile = aws_profile
 
         self.aws_session_token = aws_session_token
+
+        if api_key is None:
+            api_key = os.environ.get("AWS_BEARER_TOKEN_BEDROCK")
+
+        self.api_key = api_key
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
@@ -359,6 +365,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             region=self.aws_region or "us-east-1",
             profile=self.aws_profile,
             data=data,
+            aws_bearer_token_bedrock=self.api_key,
         )
         request.headers.update(headers)
 
