@@ -8,6 +8,8 @@ __all__ = ["BetaToolChoiceAutoParam"]
 
 
 class BetaToolChoiceAutoParam(TypedDict, total=False):
+    """The model will automatically decide whether to use tools."""
+
     type: Required[Literal["auto"]]
 
     disable_parallel_tool_use: bool

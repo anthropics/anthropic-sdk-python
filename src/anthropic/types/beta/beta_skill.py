@@ -8,6 +8,8 @@ __all__ = ["BetaSkill"]
 
 
 class BetaSkill(BaseModel):
+    """A skill that was loaded in a container (response model)."""
+
     skill_id: str
     """Skill ID"""
 

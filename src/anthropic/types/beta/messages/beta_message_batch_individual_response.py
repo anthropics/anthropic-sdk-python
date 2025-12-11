@@ -7,6 +7,10 @@ __all__ = ["BetaMessageBatchIndividualResponse"]
 
 
 class BetaMessageBatchIndividualResponse(BaseModel):
+    """
+    This is a single line in the response `.jsonl` file and does not represent the response as a whole.
+    """
+
     custom_id: str
     """Developer-provided ID created for each request in a Message Batch.
 

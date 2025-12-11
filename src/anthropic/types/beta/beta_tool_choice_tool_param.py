@@ -8,6 +8,8 @@ __all__ = ["BetaToolChoiceToolParam"]
 
 
 class BetaToolChoiceToolParam(TypedDict, total=False):
+    """The model will use the specified tool with `tool_choice.name`."""
+
     name: Required[str]
     """The name of the tool to use."""
 

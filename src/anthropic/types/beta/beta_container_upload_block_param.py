@@ -11,6 +11,11 @@ __all__ = ["BetaContainerUploadBlockParam"]
 
 
 class BetaContainerUploadBlockParam(TypedDict, total=False):
+    """
+    A content block that represents a file to be uploaded to the container
+    Files uploaded via this block will be available in the container's input directory.
+    """
+
     file_id: Required[str]
 
     type: Required[Literal["container_upload"]]

@@ -8,4 +8,6 @@ __all__ = ["BetaToolChoiceNoneParam"]
 
 
 class BetaToolChoiceNoneParam(TypedDict, total=False):
+    """The model will not be allowed to use tools."""
+
     type: Required[Literal["none"]]
