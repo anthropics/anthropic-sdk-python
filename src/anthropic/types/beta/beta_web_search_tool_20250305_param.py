@@ -12,6 +12,11 @@ __all__ = ["BetaWebSearchTool20250305Param", "UserLocation"]
 
 
 class UserLocation(TypedDict, total=False):
+    """Parameters for the user's location.
+
+    Used to provide more relevant search results.
+    """
+
     type: Required[Literal["approximate"]]
 
     city: Optional[str]

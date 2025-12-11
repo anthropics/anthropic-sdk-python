@@ -11,6 +11,8 @@ __all__ = ["BetaContainerParams"]
 
 
 class BetaContainerParams(TypedDict, total=False):
+    """Container parameters with skills to be loaded."""
+
     id: Optional[str]
     """Container id"""
 

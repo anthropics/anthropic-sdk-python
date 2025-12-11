@@ -11,6 +11,8 @@ __all__ = ["BetaToolReferenceBlockParam"]
 
 
 class BetaToolReferenceBlockParam(TypedDict, total=False):
+    """Tool reference block that can be included in tool_result content."""
+
     tool_name: Required[str]
 
     type: Required[Literal["tool_reference"]]

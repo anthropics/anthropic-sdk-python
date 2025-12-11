@@ -13,6 +13,11 @@ __all__ = ["ToolParam", "InputSchema"]
 
 
 class InputSchemaTyped(TypedDict, total=False):
+    """[JSON schema](https://json-schema.org/draft/2020-12) for this tool's input.
+
+    This defines the shape of the `input` that your tool accepts and that the model will produce.
+    """
+
     type: Required[Literal["object"]]
 
     properties: Optional[Dict[str, object]]

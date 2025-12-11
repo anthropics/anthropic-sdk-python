@@ -10,6 +10,10 @@ __all__ = ["BetaContainer"]
 
 
 class BetaContainer(BaseModel):
+    """
+    Information about the container used in the request (for the code execution tool)
+    """
+
     id: str
     """Identifier for the container used in this request"""
 

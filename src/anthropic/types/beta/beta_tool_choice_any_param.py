@@ -8,6 +8,8 @@ __all__ = ["BetaToolChoiceAnyParam"]
 
 
 class BetaToolChoiceAnyParam(TypedDict, total=False):
+    """The model will use any available tools."""
+
     type: Required[Literal["any"]]
 
     disable_parallel_tool_use: bool
