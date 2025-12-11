@@ -376,7 +376,7 @@ def conversation_loop():
                 messages.append({"role": "assistant", "content": assistant_content})
 
             # Generate tool response automatically
-            tool_response = runner.generate_tool_call_response()
+            tool_response = runner.generate_tool_response()
             if tool_response and tool_response["content"]:
                 # Add tool results to messages
                 messages.append({"role": "user", "content": tool_response["content"]})

@@ -143,7 +143,7 @@ class TestSyncRunTools:
 
             actual_responses: List[Union[BetaMessageParam, None]] = []
             for _ in runner:
-                tool_call_response = runner.generate_tool_call_response()
+                tool_call_response = runner.generate_tool_response()
                 if tool_call_response is not None:
                     actual_responses.append(tool_call_response)
 
@@ -250,8 +250,8 @@ class TestSyncRunTools:
             )
 
             for _ in runner:
-                response1 = runner.generate_tool_call_response()
-                response2 = runner.generate_tool_call_response()
+                response1 = runner.generate_tool_response()
+                response2 = runner.generate_tool_response()
 
                 if response1 is not None:
                     assert response1 is response2
@@ -331,7 +331,7 @@ class TestSyncRunTools:
             answers: List[Union[BetaMessageParam, None]] = []
 
             for _ in runner:
-                answers.append(runner.generate_tool_call_response())
+                answers.append(runner.generate_tool_response())
 
             return answers
 
@@ -613,3 +613,27 @@ def test_tool_runner_method_in_sync(sync: bool, client: Anthropic, async_client:
             "stream",
         },
     )
+
+
+def test_generate_tool_call_response_deprecated(client: Anthropic) -> None:
+    runner = client.beta.messages.tool_runner(
+        model="claude-haiku-4-5",
+        messages=[{"role": "user", "content": "What's the weather in SF in Celsius?"}],
+        tools=[],
+        max_tokens=1024,
+    )
+
+    with pytest.deprecated_call():
+        runner.generate_tool_call_response()  # type: ignore[reportDeprecated]
+
+
+async def test_generate_tool_call_response_deprecated_async(async_client: AsyncAnthropic) -> None:
+    runner = async_client.beta.messages.tool_runner(
+        model="claude-haiku-4-5",
+        messages=[{"role": "user", "content": "What's the weather in SF in Celsius?"}],
+        tools=[],
+        max_tokens=1024,
+    )
+
+    with pytest.deprecated_call():
+        await runner.generate_tool_call_response()  # type: ignore[reportDeprecated]
