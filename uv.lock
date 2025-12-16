@@ -263,7 +263,7 @@ dev = [
     { name = "boto3-stubs", specifier = ">=1" },
     { name = "dirty-equals", specifier = ">=0.6.0" },
     { name = "griffe", specifier = ">=1" },
-    { name = "http-snapshot", extras = ["httpx"], specifier = "==0.1.5" },
+    { name = "http-snapshot", extras = ["httpx"], specifier = "==0.1.6" },
     { name = "importlib-metadata", specifier = ">=6.7.0" },
     { name = "inline-snapshot", specifier = ">=0.28.0" },
     { name = "mypy", specifier = "==1.17" },
@@ -755,14 +755,14 @@ wheels = [
 
 [[package]]
 name = "http-snapshot"
-version = "0.1.5"
+version = "0.1.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "inline-snapshot" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/91/31/0f689657847032261ad4efcaa202d7e9cacf97baba3b28e32f8b67621cdf/http_snapshot-0.1.5.tar.gz", hash = "sha256:8af9025dbc87b2325f0d1bbed853e82f961872a59792fc00d7bf1621b6334812", size = 10803, upload-time = "2025-12-16T09:22:28.141Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/41/a7/c94382d2b1bad33f9e7ac34048e0784be78f21c31693e8b354eec72a261a/http_snapshot-0.1.6.tar.gz", hash = "sha256:16b1cc04645e84b5d225ba272b3df4a29bbdb84386087e8435806299a7895a5d", size = 10835, upload-time = "2025-12-16T10:12:03.162Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/d4/d8bf5ad9491f677c04644ee8d298bbc6adcc16a5ba907792b45cdd40912c/http_snapshot-0.1.5-py3-none-any.whl", hash = "sha256:6db9d8c58f97365d0ccadbae7fc7a1ff90438a02aa83331c312723a2c32b1373", size = 11490, upload-time = "2025-12-16T09:22:27.167Z" },
+    { url = "https://files.pythonhosted.org/packages/5b/43/749861077584bd35c73482d38f625cd349efc6a5ec6f03ab8768ed5a6432/http_snapshot-0.1.6-py3-none-any.whl", hash = "sha256:a79adc33f840643750a5ecbd55988ebc009097d962af71857924aafcc16c086a", size = 11626, upload-time = "2025-12-16T10:12:01.823Z" },
 ]
 
 [package.optional-dependencies]
