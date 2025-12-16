@@ -1,36 +1,87 @@
 [
   {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.75.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.75.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.9.18",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "BetaToolRunner",
+        "anthropic-beta": "structured-outputs-2025-11-13",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "530"
+      },
+      "body": {
+        "max_tokens": 4000,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a detailed 500 word essay about dogs, cats, and birds. Call the tool submit_analysis with the information about all three animals. Note that you should call it only once at the end of your essay."
+          }
+        ],
+        "model": "claude-sonnet-4-5",
+        "tools": [
+          {
+            "name": "submit_analysis",
+            "description": "Call this LAST with your final analysis.",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "summary": {
+                  "title": "Summary",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "summary"
+              ],
+              "type": "object"
+            }
+          }
+        ]
+      }
+    },
     "response": {
       "status_code": 200,
       "headers": {
-        "date": "Wed, 03 Dec 2025 17:00:10 GMT",
         "content-type": "application/json",
         "connection": "keep-alive",
-        "request-id": "req_011CVk7N2gZrR5LZ96asq2gB",
-        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
-        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
-        "x-envoy-upstream-service-time": "22362",
         "cf-cache-status": "DYNAMIC",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "vary": "Accept-Encoding",
         "x-robots-tag": "none",
-        "server": "cloudflare",
-        "cf-ray": "9a849dd93c6bae1c-AMS"
+        "server": "cloudflare"
       },
       "body": {
         "model": "claude-sonnet-4-5-20250929",
-        "id": "msg_01E3KgQxmugcS6yfwKeWkXz1",
+        "id": "msg_015MZWkRKxG26Adm8rrYp2YL",
         "type": "message",
         "role": "assistant",
         "content": [
           {
             "type": "text",
-            "text": "# The Fascinating World of Dogs, Cats, and Birds: A Comparative Look at Popular Pets\n\nThroughout human history, animals have played pivotal roles in our lives, serving as companions, helpers, and sources of joy. Among the most beloved creatures that share our homes are dogs, cats, and birds—three distinctly different yet equally captivating groups of animals that have captured hearts worldwide.\n\n## Dogs: Humanity's Loyal Companions\n\nDogs, scientifically known as Canis familiaris, have earned their reputation as \"man's best friend\" through thousands of years of domestication. Descended from wolves, dogs have evolved alongside humans for approximately 15,000 to 40,000 years, developing an unparalleled bond with our species. Their remarkable diversity is astounding, with over 340 recognized breeds ranging from the tiny Chihuahua to the massive Great Dane.\n\nWhat sets dogs apart is their exceptional loyalty and trainability. They possess an innate desire to please their owners, making them ideal working animals in roles such as service dogs, police dogs, and therapy animals. Their acute sense of smell—up to 100,000 times more sensitive than humans—and keen hearing make them excellent guardians. Dogs are highly social creatures that thrive on interaction, requiring regular exercise, mental stimulation, and consistent companionship to maintain their physical and emotional well-being.\n\n## Cats: Independent Yet Affectionate\n\nCats, or Felis catus, present a fascinating contrast to their canine counterparts. These elegant felines were domesticated more recently, approximately 9,000 years ago in the Middle East. Unlike dogs, cats retain much of their wild independence, making them perfect companions for those who appreciate a more autonomous pet.\n\nCats are renowned for their grace, flexibility, and hunting prowess. Their retractable claws, exceptional night vision, and lightning-fast reflexes make them formidable predators of small prey. Despite their reputation for aloofness, cats form strong bonds with their owners, expressing affection through purring, head-butting, and kneading. They are relatively low-maintenance pets, being naturally clean animals that groom themselves meticulously and can be easily litter-trained. Cats are ideal for apartment living and busy individuals, as they require less direct attention than dogs while still providing meaningful companionship.\n\n## Birds: Colorful and Intelligent\n\nBirds represent an entirely different category of pet ownership, offering unique rewards and challenges. From small budgerigars to large parrots like macaws and African greys, pet birds display remarkable intelligence and personality. Many species can learn to mimic human speech and perform complex tricks, demonstrating cognitive abilities that rival some mammals.\n\nBirds are social creatures in the wild, and pet birds require significant mental stimulation and interaction to thrive. Their vibrant plumage, melodious songs, and playful behaviors bring joy and liveliness to any home. However, bird ownership demands commitment—proper housing, specialized diets, and regular veterinary care are essential. Some larger parrot species can live for 50 years or more, making them lifetime companions.\n\n## Conclusion\n\nDogs, cats, and birds each offer distinct advantages as companion animals. Dogs provide unwavering loyalty and active companionship, cats offer independent yet affectionate relationships, and birds deliver intelligence and beauty in compact packages. The choice between these wonderful creatures ultimately depends on individual lifestyle, living situation, and personal preferences, but all three have proven themselves as irreplaceable members of countless families worldwide."
+            "text": "# A Comparative Look at Three Beloved Companions: Dogs, Cats, and Birds\n\nThroughout human history, animals have played integral roles in our lives, serving as companions, helpers, and sources of joy. Among the most popular pets worldwide are dogs, cats, and birds, each offering unique characteristics and forming distinct relationships with their human caregivers.\n\n## Dogs: Loyal Companions\n\nDogs, often called \"man's best friend,\" have been domesticated for thousands of years, with archaeological evidence suggesting this partnership began over 15,000 years ago. Known for their unwavering loyalty and affectionate nature, dogs have evolved alongside humans to become remarkably attuned to our emotions and behaviors. They possess an extraordinary sense of smell, hearing far superior to humans, and an innate desire to please their owners.\n\nDogs come in hundreds of breeds, ranging from tiny Chihuahuas weighing just a few pounds to massive Great Danes standing over thirty inches tall. This diversity allows people to choose companions that fit their lifestyle, whether they need an energetic running partner, a gentle family dog, or a working animal for herding or protection. Dogs are highly trainable and social creatures, thriving on interaction and requiring regular exercise and mental stimulation. Their pack mentality makes them naturally inclined to form strong bonds with their human families, often displaying protective behaviors and genuine excitement at their owners' return home.\n\n## Cats: Independent Spirits\n\nCats represent a different approach to companionship. Domesticated approximately 10,000 years ago, these elegant felines maintain a reputation for independence while still forming deep attachments to their human companions. Unlike dogs, cats are typically more self-sufficient, content to entertain themselves and requiring less constant attention. This makes them ideal for people with busy schedules or smaller living spaces.\n\nCats are natural hunters, possessing remarkable agility, excellent night vision, and retractable claws that aid in climbing and catching prey. They communicate through various vocalizations, body language, and the famous purr—a sound that often indicates contentment but can also serve other purposes. Cats spend significant portions of their day grooming themselves, making them exceptionally clean animals. While they may seem aloof, cats often display affection on their own terms, seeking out their owners for cuddles and play when the mood strikes them.\n\n## Birds: Vibrant and Vocal\n\nBirds offer yet another dimension to pet ownership. From small finches and canaries to larger parrots and cockatoos, avian companions bring color, song, and remarkable intelligence into homes. Many bird species, particularly parrots, possess impressive cognitive abilities, capable of learning extensive vocabularies, solving puzzles, and even demonstrating emotional awareness.\n\nBirds require specialized care, including appropriate caging, specific diets, and mental enrichment to prevent boredom. Social species like parakeets and cockatiels thrive on interaction, while some birds can live for decades, representing a long-term commitment. Their ability to mimic sounds and human speech fascinates owners, and their playful antics provide endless entertainment.\n\n## Conclusion\n\nEach of these animals—dogs, cats, and birds—offers unique benefits and challenges. Dogs provide active companionship and loyalty, cats offer low-maintenance affection and independence, and birds bring beauty and intelligence in compact packages. The choice between them ultimately depends on individual lifestyle, living situation, and personal preferences, but all three have proven themselves worthy companions throughout human civilization."
           },
           {
             "type": "tool_use",
-            "id": "toolu_01M3sFZ6BzuiJc7mqwv79u8e",
+            "id": "toolu_01TGC8C88xDaCfXuuHhQqo8j",
             "name": "submit_analysis",
             "input": {
-              "summary": "This comprehensive essay explores three popular categories of companion animals: dogs, cats, and birds. Dogs (Canis familiaris) are highlighted as loyal, trainable companions domesticated 15,000-40,000 years ago, with over 340 breeds and exceptional abilities in smell and hearing, making them ideal service and working animals. Cats (Felis catus) are presented as independent yet affectionate pets domesticated around 9,000 years ago, known for their grace, hunting abilities, low-maintenance nature, and self-grooming habits. Birds, ranging from budgerigars to large parrots, are described as intelligent and colorful pets capable of mimicking speech and performing tricks, requiring significant mental stimulation and potentially living 50+ years. The essay emphasizes that each animal type offers unique advantages: dogs provide active companionship and loyalty, cats offer independent relationships suitable for busy lifestyles, and birds deliver intelligence and beauty. The choice among these pets depends on individual lifestyle, living situation, and personal preferences, with all three serving as beloved family members worldwide."
+              "summary": "This essay explores three popular pet categories: dogs, cats, and birds. Dogs are characterized as loyal, highly trainable companions domesticated over 15,000 years ago, available in hundreds of breeds with varying sizes and temperaments, requiring regular exercise and social interaction due to their pack mentality. Cats are presented as independent yet affectionate pets domesticated approximately 10,000 years ago, known for their self-sufficiency, hunting abilities, cleanliness, and suitability for smaller living spaces or busy owners. Birds, ranging from small finches to large parrots, are described as intelligent and vocal companions requiring specialized care, capable of mimicking speech, solving puzzles, and providing long-term companionship with some species living for decades. The essay concludes that each animal type offers distinct advantages—dogs provide active loyalty, cats offer low-maintenance independence, and birds bring beauty and intelligence—making the choice dependent on individual lifestyle and preferences."
             }
           }
         ],
@@ -44,37 +95,72 @@
             "ephemeral_5m_input_tokens": 0,
             "ephemeral_1h_input_tokens": 0
           },
-          "output_tokens": 1046,
+          "output_tokens": 992,
           "service_tier": "standard"
         }
       }
     }
   },
   {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.75.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.75.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.9.18",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "compaction",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "1666"
+      },
+      "body": {
+        "max_tokens": 4000,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a detailed 500 word essay about dogs, cats, and birds. Call the tool submit_analysis with the information about all three animals. Note that you should call it only once at the end of your essay."
+          },
+          {
+            "role": "user",
+            "content": "You have been working on the task described above but have not yet completed it. Write a continuation summary that will allow you (or another instance of yourself) to resume work efficiently in a future context window where the conversation history will be replaced with this summary. Your summary should be structured, concise, and actionable. Include:\n1. Task Overview\nThe user's core request and success criteria\nAny clarifications or constraints they specified\n2. Current State\nWhat has been completed so far\nFiles created, modified, or analyzed (with paths if relevant)\nKey outputs or artifacts produced\n3. Important Discoveries\nTechnical constraints or requirements uncovered\nDecisions made and their rationale\nErrors encountered and how they were resolved\nWhat approaches were tried that didn't work (and why)\n4. Next Steps\nSpecific actions needed to complete the task\nAny blockers or open questions to resolve\nPriority order if multiple steps remain\n5. Context to Preserve\nUser preferences or style requirements\nDomain-specific details that aren't obvious\nAny promises made to the user\nBe concise but complete—err on the side of including information that would prevent duplicate work or repeated mistakes. Write in a way that enables immediate resumption of the task.\nWrap your summary in <summary></summary> tags."
+          }
+        ],
+        "model": "claude-sonnet-4-5"
+      }
+    },
     "response": {
       "status_code": 200,
       "headers": {
-        "date": "Wed, 03 Dec 2025 17:00:24 GMT",
         "content-type": "application/json",
         "connection": "keep-alive",
-        "request-id": "req_011CVk7Ph89FopGzZt9w21Em",
-        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
-        "anthropic-organization-id": "5576611f-a1ee-427c-9800-298d9579899c",
-        "x-envoy-upstream-service-time": "13504",
         "cf-cache-status": "DYNAMIC",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "vary": "Accept-Encoding",
         "x-robots-tag": "none",
-        "server": "cloudflare",
-        "cf-ray": "9a849e663eb0ae1c-AMS"
+        "server": "cloudflare"
       },
       "body": {
         "model": "claude-sonnet-4-5-20250929",
-        "id": "msg_01DAVpeXCGJPScdQDECVbF8z",
+        "id": "msg_01QJzgcThZBbu3o4RMRKWYAz",
         "type": "message",
         "role": "assistant",
         "content": [
           {
             "type": "text",
-            "text": "<summary>\n## 1. Task Overview\nThe user has requested:\n- Write a detailed 500-word essay about dogs, cats, and birds\n- Call the tool `submit_analysis` ONCE at the end with information about all three animals\n- The tool should contain compiled information from the essay about all three animal types\n\nSuccess criteria:\n- Essay must be approximately 500 words\n- Must cover all three animals (dogs, cats, birds)\n- Must be detailed\n- Single tool call at the very end containing analysis/information about all three animals\n\n## 2. Current State\n**Completed:** Nothing has been completed yet.\n\n**Files/Outputs:** None created.\n\n**Status:** Task not started. No essay has been written, and no tool has been called.\n\n## 3. Important Discoveries\nNo technical constraints have been uncovered yet, as work hasn't begun.\n\n**Key requirements identified:**\n- Need to understand the `submit_analysis` tool parameters (what fields it accepts)\n- The tool call should synthesize information about all three animals from the essay\n- Only ONE tool call should be made, despite covering three different animals\n\n## 4. Next Steps\n**Immediate actions required:**\n\n1. **Write the 500-word essay** covering:\n   - Dogs (characteristics, behavior, role as pets, etc.)\n   - Cats (characteristics, behavior, role as pets, etc.)\n   - Birds (characteristics, behavior, role as pets, etc.)\n   - Ensure balanced coverage of all three animals\n   - Aim for approximately 500 words total\n\n2. **Call `submit_analysis` tool once** after completing the essay:\n   - Structure the tool call to include information about all three animals\n   - Likely format: summarize key points about each animal type\n   - May need to check tool schema to understand expected parameters\n\n**Priority:** Write essay first, then make single tool call.\n\n**Blockers/Questions:** \n- Need to determine exact parameters for `submit_analysis` tool when ready to call it\n\n## 5. Context to Preserve\n- User specifically emphasized calling the tool \"only once at the end\"\n- Essay should be \"detailed\" - aim for substantive content, not superficial\n- All three animals must be covered adequately\n- Word count target: approximately 500 words\n</summary>"
+            "text": "<summary>\n## 1. Task Overview\nThe user requested a detailed 500-word essay about dogs, cats, and birds, followed by a single call to a tool named `submit_analysis` with information about all three animals. Key requirements:\n- Essay must be approximately 500 words\n- Must cover all three animal types: dogs, cats, and birds\n- Must call `submit_analysis` tool exactly once at the end\n- The tool call should contain information about all three animals\n\n## 2. Current State\n**Completed:** Nothing has been completed yet. This appears to be the initial state of the task.\n\n**Not yet done:**\n- The 500-word essay has not been written\n- The `submit_analysis` tool has not been called\n\n## 3. Important Discoveries\n**Constraints identified:**\n- The tool `submit_analysis` must be called only once, not separately for each animal\n- The tool call should occur after the essay is complete\n- Need to determine the proper parameters/format for `submit_analysis` tool (this information was not provided in the initial request)\n\n**Uncertainty:**\n- The exact structure and parameters expected by `submit_analysis` are unclear. Will need to infer or use reasonable structure when calling the tool (e.g., might expect JSON with animal names and their characteristics, or separate parameters for each animal)\n\n## 4. Next Steps\n1. **Write the 500-word essay** covering:\n   - Dogs (characteristics, behavior, relationship with humans)\n   - Cats (characteristics, behavior, relationship with humans)\n   - Birds (characteristics, behavior, varieties/examples)\n   - Make it detailed and well-structured\n\n2. **Call submit_analysis tool once** after the essay with comprehensive information about all three animals. Since the tool structure wasn't specified, use a logical format such as:\n   - Pass information about dogs, cats, and birds as parameters\n   - Could structure as JSON or separate arguments depending on tool requirements\n   - Include key facts and characteristics for each animal type\n\n## 5. Context to Preserve\n- User specifically emphasized calling the tool \"only once at the end\"\n- Essay should be \"detailed\" - not just superficial information\n- Word count target is approximately 500 words\n- All three animals must be covered adequately in the essay\n- The tool call is a critical component - not optional\n</summary>"
           }
         ],
         "stop_reason": "end_turn",
@@ -87,7 +173,7 @@
             "ephemeral_5m_input_tokens": 0,
             "ephemeral_1h_input_tokens": 0
           },
-          "output_tokens": 518,
+          "output_tokens": 525,
           "service_tier": "standard"
         }
       }

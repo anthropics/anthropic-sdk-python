@@ -58,12 +58,12 @@ ParsedBetaMessage(
         ParsedBetaTextBlock(
             citations=None,
             parsed_output=None,
-            text='The weather in San Francisco is currently **68°F and Sunny**. Great day to be out and about!',
+            text='The weather in San Francisco is currently **sunny** with a temperature of **68°F** (20°C).',
             type='text'
         )
     ],
     context_management=None,
-    id='msg_01FvTMNojoLmBYw4KxJXB27y',
+    id='msg_016diNmBsVwjnEodFdXMgg4j',
     model='claude-haiku-4-5-20251001',
     role='assistant',
     stop_reason='end_turn',
@@ -145,7 +145,7 @@ ParsedBetaMessage(
         'content': [
             {
                 'type': 'tool_result',
-                'tool_use_id': 'toolu_01Not8sU7rvvvixVRigDz1ee',
+                'tool_use_id': 'toolu_01ASSujsMzFEe4PjhTGzbmdi',
                 'content': "RuntimeError('Unexpected error, try again')",
                 'is_error': True
             }
@@ -156,8 +156,18 @@ ParsedBetaMessage(
         'content': [
             {
                 'type': 'tool_result',
-                'tool_use_id': 'toolu_01LJTxn5gThzGiq5MgRfbogp',
+                'tool_use_id': 'toolu_01RPpGTPHZBTK27CruspxqvL',
                 'content': '{"location": "San Francisco, CA", "temperature": "68\\\\u00b0F", "condition": "Sunny"}'
+            }
+        ]
+    },
+    {
+        'role': 'user',
+        'content': [
+            {
+                'type': 'tool_result',
+                'tool_use_id': 'toolu_014Qf7b4odsWZYj4ngf41v5R',
+                'content': '{"location": "San Francisco, CA", "temperature": "20\\\\u00b0C", "condition": "Sunny"}'
             }
         ]
     }
@@ -218,12 +228,12 @@ ParsedBetaMessage(
         ParsedBetaTextBlock(
             citations=None,
             parsed_output=None,
-            text='The weather in San Francisco, CA is currently **sunny** with a temperature of **20°C**.',
+            text='The weather in San Francisco, CA is currently **sunny** with a temperature of **20°C** (about 68°F).',
             type='text'
         )
     ],
     context_management=None,
-    id='msg_01K4waJ1jAaJvWS9uatX5ANU',
+    id='msg_01Mp3aR278QuTCzCTtZNHAxD',
     model='claude-haiku-4-5-20251001',
     role='assistant',
     stop_reason='end_turn',
@@ -234,7 +244,7 @@ ParsedBetaMessage(
         cache_creation_input_tokens=0,
         cache_read_input_tokens=0,
         input_tokens=763,
-        output_tokens=24,
+        output_tokens=31,
         server_tool_use=None,
         service_tier='standard'
     )
@@ -321,12 +331,12 @@ ParsedBetaMessage(
             ParsedBetaTextBlock(
                 citations=None,
                 parsed_output=None,
-                text='The weather in San Francisco, CA is currently **68°F and Sunny** ☀️',
+                text='The weather in San Francisco, CA is currently **Sunny** with a temperature of **68°F**.',
                 type='text'
             )
         ],
         context_management=None,
-        id='msg_01ERB2ekevEhTbZtAuM2HjmS',
+        id='msg_0112kkkttNuK7GZWAFeFrBWm',
         model='claude-haiku-4-5-20251001',
         role='assistant',
         stop_reason='end_turn',
@@ -337,7 +347,7 @@ ParsedBetaMessage(
             cache_creation_input_tokens=0,
             cache_read_input_tokens=0,
             input_tokens=770,
-            output_tokens=24,
+            output_tokens=25,
             server_tool_use=None,
             service_tier='standard'
         )
@@ -398,7 +408,7 @@ ParsedBetaMessage(
         'content': [
             {
                 'type': 'tool_result',
-                'tool_use_id': 'toolu_01FpmqujJtkj11RDCJySJWUH',
+                'tool_use_id': 'toolu_01DUC5sKZofEcuFX4NTvXAGp',
                 'content': '{"location": "San Francisco, CA", "temperature": "68\\\\u00b0F", "condition": "Sunny"}'
             }
         ]
@@ -408,7 +418,7 @@ ParsedBetaMessage(
         'content': [
             {
                 'type': 'tool_result',
-                'tool_use_id': 'toolu_017cDHUBfAhBDseR2vW7axod',
+                'tool_use_id': 'toolu_01B3V3NpBkEHenKXsgAW7mhQ',
                 'content': '{"location": "New York, NY", "temperature": "68\\\\u00b0F", "condition": "Sunny"}'
             }
         ]
@@ -513,57 +523,46 @@ ParsedBetaMessage(
         assert content["text"] == snapshot("""\
 <summary>
 ## 1. Task Overview
-The user has requested:
-- Write a detailed 500-word essay about dogs, cats, and birds
-- Call the tool `submit_analysis` ONCE at the end with information about all three animals
-- The tool should contain compiled information from the essay about all three animal types
-
-Success criteria:
+The user requested a detailed 500-word essay about dogs, cats, and birds, followed by a single call to a tool named `submit_analysis` with information about all three animals. Key requirements:
 - Essay must be approximately 500 words
-- Must cover all three animals (dogs, cats, birds)
-- Must be detailed
-- Single tool call at the very end containing analysis/information about all three animals
+- Must cover all three animal types: dogs, cats, and birds
+- Must call `submit_analysis` tool exactly once at the end
+- The tool call should contain information about all three animals
 
 ## 2. Current State
-**Completed:** Nothing has been completed yet.
+**Completed:** Nothing has been completed yet. This appears to be the initial state of the task.
 
-**Files/Outputs:** None created.
-
-**Status:** Task not started. No essay has been written, and no tool has been called.
+**Not yet done:**
+- The 500-word essay has not been written
+- The `submit_analysis` tool has not been called
 
 ## 3. Important Discoveries
-No technical constraints have been uncovered yet, as work hasn't begun.
+**Constraints identified:**
+- The tool `submit_analysis` must be called only once, not separately for each animal
+- The tool call should occur after the essay is complete
+- Need to determine the proper parameters/format for `submit_analysis` tool (this information was not provided in the initial request)
 
-**Key requirements identified:**
-- Need to understand the `submit_analysis` tool parameters (what fields it accepts)
-- The tool call should synthesize information about all three animals from the essay
-- Only ONE tool call should be made, despite covering three different animals
+**Uncertainty:**
+- The exact structure and parameters expected by `submit_analysis` are unclear. Will need to infer or use reasonable structure when calling the tool (e.g., might expect JSON with animal names and their characteristics, or separate parameters for each animal)
 
 ## 4. Next Steps
-**Immediate actions required:**
-
 1. **Write the 500-word essay** covering:
-   - Dogs (characteristics, behavior, role as pets, etc.)
-   - Cats (characteristics, behavior, role as pets, etc.)
-   - Birds (characteristics, behavior, role as pets, etc.)
-   - Ensure balanced coverage of all three animals
-   - Aim for approximately 500 words total
+   - Dogs (characteristics, behavior, relationship with humans)
+   - Cats (characteristics, behavior, relationship with humans)
+   - Birds (characteristics, behavior, varieties/examples)
+   - Make it detailed and well-structured
 
-2. **Call `submit_analysis` tool once** after completing the essay:
-   - Structure the tool call to include information about all three animals
-   - Likely format: summarize key points about each animal type
-   - May need to check tool schema to understand expected parameters
-
-**Priority:** Write essay first, then make single tool call.
-
-**Blockers/Questions:** \n\
-- Need to determine exact parameters for `submit_analysis` tool when ready to call it
+2. **Call submit_analysis tool once** after the essay with comprehensive information about all three animals. Since the tool structure wasn't specified, use a logical format such as:
+   - Pass information about dogs, cats, and birds as parameters
+   - Could structure as JSON or separate arguments depending on tool requirements
+   - Include key facts and characteristics for each animal type
 
 ## 5. Context to Preserve
 - User specifically emphasized calling the tool "only once at the end"
-- Essay should be "detailed" - aim for substantive content, not superficial
-- All three animals must be covered adequately
-- Word count target: approximately 500 words
+- Essay should be "detailed" - not just superficial information
+- Word count target is approximately 500 words
+- All three animals must be covered adequately in the essay
+- The tool call is a critical component - not optional
 </summary>\
 """)
         assert caplog.record_tuples == snapshot(
@@ -571,9 +570,9 @@ No technical constraints have been uncovered yet, as work hasn't begun.
                 (
                     "anthropic.lib.tools._beta_runner",
                     20,
-                    "Token usage 1663 has exceeded the threshold of 500. Performing compaction.",
+                    "Token usage 1609 has exceeded the threshold of 500. Performing compaction.",
                 ),
-                ("anthropic.lib.tools._beta_runner", 20, "Compaction complete. New token usage: 518"),
+                ("anthropic.lib.tools._beta_runner", 20, "Compaction complete. New token usage: 525"),
             ]
         )
 
