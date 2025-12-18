@@ -660,7 +660,7 @@ will result in the client terminating the connection and retrying without receiv
 
 We set a [TCP socket keep-alive](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html) option in order
 to reduce the impact of idle connection timeouts on some networks.
-This can be [overriden](#Configuring-the-HTTP-client) by passing a `http_client` option to the client.
+This can be [overridden](#Configuring-the-HTTP-client) by passing a `http_client` option to the client.
 
 ## Default Headers
 
