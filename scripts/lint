@@ -4,8 +4,13 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-echo "==> Running ruff"
-uv run ruff check .
+if [ "$1" = "--fix" ]; then
+  echo "==> Running ruff with --fix"
+  uv run ruff check . --fix
+else
+  echo "==> Running ruff"
+  uv run ruff check .
+fi
 
 echo "==> Running pyright"
 uv run pyright
