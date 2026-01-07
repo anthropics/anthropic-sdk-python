@@ -183,14 +183,10 @@ class Anthropic(SyncAPIClient):
 
     @override
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
-        if self.api_key and headers.get("X-Api-Key"):
-            return
-        if isinstance(custom_headers.get("X-Api-Key"), Omit):
+        if headers.get("X-Api-Key") or isinstance(custom_headers.get("X-Api-Key"), Omit):
             return
 
-        if self.auth_token and headers.get("Authorization"):
-            return
-        if isinstance(custom_headers.get("Authorization"), Omit):
+        if headers.get("Authorization") or isinstance(custom_headers.get("Authorization"), Omit):
             return
 
         raise TypeError(
@@ -417,14 +413,10 @@ class AsyncAnthropic(AsyncAPIClient):
 
     @override
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
-        if self.api_key and headers.get("X-Api-Key"):
-            return
-        if isinstance(custom_headers.get("X-Api-Key"), Omit):
+        if headers.get("X-Api-Key") or isinstance(custom_headers.get("X-Api-Key"), Omit):
             return
 
-        if self.auth_token and headers.get("Authorization"):
-            return
-        if isinstance(custom_headers.get("Authorization"), Omit):
+        if headers.get("Authorization") or isinstance(custom_headers.get("Authorization"), Omit):
             return
 
         raise TypeError(
