@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Iterator, AsyncIterator
 
 import httpx
 import pytest
+from http_snapshot import SnapshotSerializerOptions
 from pytest_asyncio import is_async_test
 
 from anthropic import Anthropic, AsyncAnthropic, DefaultAioHttpClient
@@ -19,6 +20,18 @@ if TYPE_CHECKING:
 pytest.register_assert_rewrite("tests.utils")
 
 logging.getLogger("anthropic").setLevel(logging.DEBUG)
+
+SNAPSHOT_RESPONSE_HEADERS_EXCLUDE = [
+    "date",
+    "request-id",
+    "anthropic-organization-id",
+    "x-envoy-upstream-service-time",
+    "cf-ray",
+]
+
+SNAPSHOT_REQUEST_HEADERS_EXCLUDE = [
+    "x-api-key",
+]
 
 
 # automatically add `pytest.mark.asyncio()` to all of our async tests
@@ -55,6 +68,34 @@ def client(request: FixtureRequest) -> Iterator[Anthropic]:
         raise TypeError(f"Unexpected fixture parameter type {type(strict)}, expected {bool}")
 
     with Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=strict) as client:
+        yield client
+
+
+@pytest.fixture
+def http_snapshot_serializer_options() -> SnapshotSerializerOptions:
+    return SnapshotSerializerOptions(
+        exclude_response_headers=SNAPSHOT_RESPONSE_HEADERS_EXCLUDE,
+        exclude_request_headers=SNAPSHOT_REQUEST_HEADERS_EXCLUDE,
+        include_request=True,
+    )
+
+
+@pytest.fixture(scope="function")
+def snapshot_client(
+    snapshot_sync_httpx_client: httpx.Client,
+    is_recording: bool,
+) -> Iterator[Anthropic]:
+    with Anthropic(http_client=snapshot_sync_httpx_client, api_key=None if is_recording else api_key) as client:
+        yield client
+
+
+@pytest.fixture(scope="function")
+async def async_snapshot_client(
+    snapshot_async_httpx_client: httpx.AsyncClient, is_recording: bool
+) -> AsyncIterator[AsyncAnthropic]:
+    async with AsyncAnthropic(
+        http_client=snapshot_async_httpx_client, api_key=None if is_recording else api_key
+    ) as client:
         yield client
 
 

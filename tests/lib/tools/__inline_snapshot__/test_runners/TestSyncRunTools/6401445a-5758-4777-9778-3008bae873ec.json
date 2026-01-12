@@ -1,0 +1,237 @@
+[
+  {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.75.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.75.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.9.18",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "BetaToolRunner",
+        "anthropic-beta": "structured-outputs-2025-11-13",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "390"
+      },
+      "body": {
+        "max_tokens": 1024,
+        "messages": [
+          {
+            "role": "user",
+            "content": "What's the weather in SF in Celsius?"
+          }
+        ],
+        "model": "claude-haiku-4-5",
+        "tools": [
+          {
+            "name": "get_weather",
+            "description": "",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "location": {
+                  "title": "Location",
+                  "type": "string"
+                },
+                "units": {
+                  "enum": [
+                    "c",
+                    "f"
+                  ],
+                  "title": "Units",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location",
+                "units"
+              ],
+              "type": "object"
+            }
+          }
+        ]
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "cf-cache-status": "DYNAMIC",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "vary": "Accept-Encoding",
+        "x-robots-tag": "none",
+        "server": "cloudflare"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_016LXp91BGtikmRAGAeGuddr",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01Gioi16VivrVViPseH2cZDu",
+            "name": "get_weather",
+            "input": {
+              "location": "SF",
+              "units": "c"
+            }
+          }
+        ],
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 597,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 71,
+          "service_tier": "standard"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.75.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.75.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.9.18",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "BetaToolRunner",
+        "anthropic-beta": "structured-outputs-2025-11-13",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "732"
+      },
+      "body": {
+        "max_tokens": 1024,
+        "messages": [
+          {
+            "role": "user",
+            "content": "What's the weather in SF in Celsius?"
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "id": "toolu_01Gioi16VivrVViPseH2cZDu",
+                "input": {
+                  "location": "SF",
+                  "units": "c"
+                },
+                "name": "get_weather",
+                "type": "tool_use"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "toolu_01Gioi16VivrVViPseH2cZDu",
+                "content": "{\"location\": \"SF\", \"temperature\": \"20\\u00b0C\", \"condition\": \"Sunny\"}"
+              }
+            ]
+          }
+        ],
+        "model": "claude-haiku-4-5",
+        "tools": [
+          {
+            "name": "get_weather",
+            "description": "",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "location": {
+                  "title": "Location",
+                  "type": "string"
+                },
+                "units": {
+                  "enum": [
+                    "c",
+                    "f"
+                  ],
+                  "title": "Units",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location",
+                "units"
+              ],
+              "type": "object"
+            }
+          }
+        ]
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "cf-cache-status": "DYNAMIC",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "vary": "Accept-Encoding",
+        "x-robots-tag": "none",
+        "server": "cloudflare"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_018wBXcYwLjNFfcwWmQN1uGN",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "The weather in SF is currently **20°C** and **Sunny**!"
+          }
+        ],
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 705,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 20,
+          "service_tier": "standard"
+        }
+      }
+    }
+  }
+]

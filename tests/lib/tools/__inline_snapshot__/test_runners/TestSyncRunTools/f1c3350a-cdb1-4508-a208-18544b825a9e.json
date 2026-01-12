@@ -1,0 +1,241 @@
+[
+  {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.75.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.75.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.9.18",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "BetaToolRunner",
+        "anthropic-beta": "structured-outputs-2025-11-13",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "598"
+      },
+      "body": {
+        "max_tokens": 1024,
+        "messages": [
+          {
+            "role": "user",
+            "content": "What's the weather in SF in Celsius?"
+          }
+        ],
+        "model": "claude-haiku-4-5",
+        "tools": [
+          {
+            "name": "get_weather",
+            "description": "Lookup the weather for a given city in either celsius or fahrenheit",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "location": {
+                  "description": "The city and state, e.g. San Francisco, CA",
+                  "title": "Location",
+                  "type": "string"
+                },
+                "units": {
+                  "description": "Unit for the output, either 'c' for celsius or 'f' for fahrenheit",
+                  "enum": [
+                    "c",
+                    "f"
+                  ],
+                  "title": "Units",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location",
+                "units"
+              ],
+              "type": "object"
+            }
+          }
+        ]
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "cf-cache-status": "DYNAMIC",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "vary": "Accept-Encoding",
+        "x-robots-tag": "none",
+        "server": "cloudflare"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_01RbvNtiaJHKHJF3hmfMWMRU",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01RVA12CSF1d8nekhZFR7Bcb",
+            "name": "get_weather",
+            "input": {
+              "location": "San Francisco, CA",
+              "units": "c"
+            }
+          }
+        ],
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 659,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 74,
+          "service_tier": "standard"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.75.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.75.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.9.18",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "BetaToolRunner",
+        "anthropic-beta": "structured-outputs-2025-11-13",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "954"
+      },
+      "body": {
+        "max_tokens": 1024,
+        "messages": [
+          {
+            "role": "user",
+            "content": "What's the weather in SF in Celsius?"
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "id": "toolu_01RVA12CSF1d8nekhZFR7Bcb",
+                "input": {
+                  "location": "San Francisco, CA",
+                  "units": "c"
+                },
+                "name": "get_weather",
+                "type": "tool_use"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "tool_use_id": "toolu_01RVA12CSF1d8nekhZFR7Bcb",
+                "content": "The weather in San Francisco, CA is currently sunny with a temperature of 20°C.",
+                "type": "tool_result"
+              }
+            ]
+          }
+        ],
+        "model": "claude-haiku-4-5",
+        "tools": [
+          {
+            "name": "get_weather",
+            "description": "Lookup the weather for a given city in either celsius or fahrenheit",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "location": {
+                  "description": "The city and state, e.g. San Francisco, CA",
+                  "title": "Location",
+                  "type": "string"
+                },
+                "units": {
+                  "description": "Unit for the output, either 'c' for celsius or 'f' for fahrenheit",
+                  "enum": [
+                    "c",
+                    "f"
+                  ],
+                  "title": "Units",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location",
+                "units"
+              ],
+              "type": "object"
+            }
+          }
+        ]
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "cf-cache-status": "DYNAMIC",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "vary": "Accept-Encoding",
+        "x-robots-tag": "none",
+        "server": "cloudflare"
+      },
+      "body": {
+        "model": "claude-haiku-4-5-20251001",
+        "id": "msg_01Mp3aR278QuTCzCTtZNHAxD",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "The weather in San Francisco, CA is currently **sunny** with a temperature of **20°C** (about 68°F)."
+          }
+        ],
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 763,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 31,
+          "service_tier": "standard"
+        }
+      }
+    }
+  }
+]
