@@ -240,6 +240,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         return True
 
     def __run__(self) -> Iterator[RunnerItemT]:
+        consecutive_compactions = 0
+
         while not self._should_stop():
             with self._handle_request() as item:
                 yield item
@@ -248,8 +250,23 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
             self._iteration_count += 1
 
+            compacted = self._check_and_compact()
+
+            if compacted:
+                consecutive_compactions += 1
+                log.debug(f"Consecutive compactions: {consecutive_compactions}")
+                if consecutive_compactions >= 2:
+                    raise RuntimeError(
+                        "Potentially infinite compaction loop detected: two consecutive iterations triggered compaction. "
+                        "This usually means `context_token_threshold` is too small to hold the compacted output. "
+                        "Try increasing it."
+                    )
+            else:
+                log.debug("No compaction performed, resetting consecutive compactions counter.")
+                consecutive_compactions = 0
+
             # If the compaction was performed, skip tool call generation this iteration
-            if not self._check_and_compact():
+            if not compacted:
                 response = self.generate_tool_call_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
@@ -491,6 +508,8 @@ class BaseAsyncToolRunner(
         return True
 
     async def __run__(self) -> AsyncIterator[RunnerItemT]:
+        consecutive_compactions = 0
+
         while not self._should_stop():
             async with self._handle_request() as item:
                 yield item
@@ -499,8 +518,21 @@ class BaseAsyncToolRunner(
 
             self._iteration_count += 1
 
+            compacted = await self._check_and_compact()
+
+            if compacted:
+                consecutive_compactions += 1
+                if consecutive_compactions >= 2:
+                    raise RuntimeError(
+                        "Potentially infinite compaction loop detected: two consecutive iterations triggered compaction. "
+                        "This usually means `context_token_threshold` is too small to hold the compacted output. "
+                        "Try increasing it."
+                    )
+            else:
+                consecutive_compactions = 0
+
             # If the compaction was performed, skip tool call generation this iteration
-            if not await self._check_and_compact():
+            if not compacted:
                 response = await self.generate_tool_call_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")

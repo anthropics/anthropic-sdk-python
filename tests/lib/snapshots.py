@@ -63,19 +63,18 @@ def make_snapshot_request(
 
         client = mock_client
 
-    result = func(client)
-
     if not live:
+        return func(client)
+
+    try:
+        result = func(client)
         return result
-
-    client.close()
-
-    if len(collected) == 1:
-        assert collected[0] == content_snapshot
-    else:
-        assert collected == content_snapshot
-
-    return result
+    finally:
+        client.close()
+        if len(collected) == 1:
+            assert collected[0] == content_snapshot
+        else:
+            assert collected == content_snapshot
 
 
 def make_stream_snapshot_request(
