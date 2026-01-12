@@ -17,7 +17,7 @@ from typing import (
     AsyncIterator,
 )
 from contextlib import contextmanager, asynccontextmanager
-from typing_extensions import TypedDict, override
+from typing_extensions import TypedDict, override, deprecated
 
 import httpx
 
@@ -250,7 +250,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
             # If the compaction was performed, skip tool call generation this iteration
             if not self._check_and_compact():
-                response = self.generate_tool_call_response()
+                response = self.generate_tool_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     return
@@ -271,7 +271,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         assert last_message is not None
         return last_message
 
-    def generate_tool_call_response(self) -> BetaMessageParam | None:
+    def generate_tool_response(self) -> BetaMessageParam | None:
         """Generate a MessageParam by calling tool functions with any tool use blocks from the last message.
 
         Note the tool call response is cached, repeated calls to this method will return the same response.
@@ -284,6 +284,24 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         response = self._generate_tool_call_response()
         self._cached_tool_call_response = response
         return response
+
+    @deprecated("generate_tool_call_response is deprecated, use generate_tool_response instead")
+    def generate_tool_call_response(self) -> BetaMessageParam | None:
+        """Generate a MessageParam by calling tool functions with any tool use blocks from the last message.
+
+        .. deprecated::
+            Use :meth:`generate_tool_response` instead.
+
+        Note the tool call response is cached, repeated calls to this method will return the same response.
+
+        None can be returned if no tool call was applicable.
+        """
+        warnings.warn(
+            "generate_tool_call_response is deprecated, use generate_tool_response instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.generate_tool_response()
 
     def _generate_tool_call_response(self) -> BetaMessageParam | None:
         content = self._get_last_assistant_message_content()
@@ -501,7 +519,7 @@ class BaseAsyncToolRunner(
 
             # If the compaction was performed, skip tool call generation this iteration
             if not await self._check_and_compact():
-                response = await self.generate_tool_call_response()
+                response = await self.generate_tool_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     return
@@ -522,7 +540,7 @@ class BaseAsyncToolRunner(
         assert last_message is not None
         return last_message
 
-    async def generate_tool_call_response(self) -> BetaMessageParam | None:
+    async def generate_tool_response(self) -> BetaMessageParam | None:
         """Generate a MessageParam by calling tool functions with any tool use blocks from the last message.
 
         Note the tool call response is cached, repeated calls to this method will return the same response.
@@ -536,6 +554,24 @@ class BaseAsyncToolRunner(
         response = await self._generate_tool_call_response()
         self._cached_tool_call_response = response
         return response
+
+    @deprecated("generate_tool_call_response is deprecated, use generate_tool_response instead")
+    async def generate_tool_call_response(self) -> BetaMessageParam | None:
+        """Generate a MessageParam by calling tool functions with any tool use blocks from the last message.
+
+        .. deprecated::
+            Use :meth:`generate_tool_response` instead.
+
+        Note the tool call response is cached, repeated calls to this method will return the same response.
+
+        None can be returned if no tool call was applicable.
+        """
+        warnings.warn(
+            "generate_tool_call_response is deprecated, use generate_tool_response instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return await self.generate_tool_response()
 
     async def _get_last_message(self) -> ParsedBetaMessage[ResponseFormatT] | None:
         if callable(self._last_message):
