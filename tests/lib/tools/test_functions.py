@@ -438,6 +438,88 @@ class TestFunctionTool:
 
         assert function_tool.input_schema == expected_schema
 
+    def test_callable_class_instance(self) -> None:
+        """Test that callable class instances can be used as tools."""
+
+        class Calculator:
+            def __init__(self, multiplier: int):
+                self.multiplier = multiplier
+
+            def __call__(self, value: int) -> str:
+                """Multiply a value by the stored multiplier."""
+                return str(value * self.multiplier)
+
+        instance = Calculator(multiplier=3)
+        tool = beta_tool(instance, name="multiply_tool")
+
+        assert tool.name == "multiply_tool"
+        assert tool.description == "Multiply a value by the stored multiplier."
+
+        # Schema should not include 'self' parameter
+        expected_schema = {
+            "additionalProperties": False,
+            "type": "object",
+            "properties": {"value": {"title": "Value", "type": "integer"}},
+            "required": ["value"],
+        }
+        assert tool.input_schema == expected_schema
+
+        # Test calling the tool
+        result = tool.call({"value": 5})
+        assert result == "15"
+
+    def test_callable_class_instance_with_context(self) -> None:
+        """Test callable class instance with context dictionary (issue #1087 use case)."""
+
+        class FetchProduct:
+            def __init__(self, ctx: dict[str, Any]):
+                self.ctx = ctx
+
+            def __call__(self, product_id: int) -> str:
+                """Fetch a product by ID."""
+                return f"Product {product_id} from session {self.ctx.get('session')}"
+
+        instance = FetchProduct({"session": "test-session"})
+        tool = beta_tool(instance, name="fetch_product")
+
+        assert tool.name == "fetch_product"
+        properties = tool.input_schema.get("properties", {})
+        assert isinstance(properties, dict)
+        assert "product_id" in properties
+        assert "self" not in properties
+
+        result = tool.call({"product_id": 123})
+        assert result == "Product 123 from session test-session"
+
+    def test_bound_method(self) -> None:
+        """Test that bound methods can be used as tools."""
+
+        class WeatherService:
+            def __init__(self, api_key: str):
+                self.api_key = api_key
+
+            def get_weather(self, location: str) -> str:
+                """Get weather for a location."""
+                return f"Weather in {location} (key: {self.api_key})"
+
+        service = WeatherService("secret-key")
+        tool = beta_tool(service.get_weather, name="weather")
+
+        assert tool.name == "weather"
+        assert tool.description == "Get weather for a location."
+
+        # Schema should not include 'self' parameter
+        expected_schema = {
+            "additionalProperties": False,
+            "type": "object",
+            "properties": {"location": {"title": "Location", "type": "string"}},
+            "required": ["location"],
+        }
+        assert tool.input_schema == expected_schema
+
+        result = tool.call({"location": "NYC"})
+        assert result == "Weather in NYC (key: secret-key)"
+
 
 def _get_parameters_info(fn: BaseFunctionTool[Any]) -> dict[str, str]:
     param_info: dict[str, str] = {}

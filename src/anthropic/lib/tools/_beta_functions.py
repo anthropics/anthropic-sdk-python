@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Union, Generic, TypeVar, Callable, Iterable, Coroutine, cast, overload
-from inspect import iscoroutinefunction
+from inspect import ismethod, isfunction, iscoroutinefunction
 from typing_extensions import TypeAlias, override
 
 import pydantic
@@ -22,6 +22,37 @@ from ...types.beta.beta_tool_result_block_param import Content as BetaContent
 log = logging.getLogger(__name__)
 
 BetaFunctionToolResultType: TypeAlias = Union[str, Iterable[BetaContent]]
+
+
+def _normalize_callable(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Normalize a callable to a function that can be used with pydantic.validate_call.
+
+    If the callable is a class instance with a __call__ method (but not a function or method),
+    this extracts the bound __call__ method. This allows callable class instances to be used
+    as tools without requiring manual extraction of __call__.
+
+    Args:
+        func: A function, method, or callable instance
+
+    Returns:
+        A function or bound method suitable for use with pydantic.validate_call
+    """
+    # If it's already a function or method, use it directly
+    if isfunction(func) or ismethod(func):
+        return func
+
+    # If it's a callable instance (class with __call__), extract the bound __call__ method
+    # We use callable() to check if the object is callable, then access __call__ directly.
+    # B004 warning is suppressed because we're not using __call__ to test callability -
+    # we've already confirmed that with callable() above. We need __call__ to get the
+    # bound method for callable class instances.
+    if callable(func):
+        call_method = func.__call__  # pyright: ignore[reportFunctionMemberAccess]  # noqa: B004
+        if ismethod(call_method):
+            return call_method
+
+    return func
+
 
 Function = Callable[..., BetaFunctionToolResultType]
 FunctionT = TypeVar("FunctionT", bound=Function)
@@ -83,9 +114,11 @@ class BaseFunctionTool(Generic[CallableT]):
         if _compat.PYDANTIC_V1:
             raise RuntimeError("Tool functions are only supported with Pydantic v2")
 
-        self.func = func
-        self._func_with_validate = pydantic.validate_call(func)
-        self.name = name or func.__name__
+        # Normalize callable instances to their __call__ method
+        normalized_func = _normalize_callable(func)
+        self.func = cast(CallableT, normalized_func)
+        self._func_with_validate = pydantic.validate_call(normalized_func)
+        self.name = name or normalized_func.__name__
         self._defer_loading = defer_loading
 
         self.description = description or self._get_description_from_docstring()
