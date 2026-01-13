@@ -21,7 +21,7 @@ from ._types import (
     ContentBlockStopEvent,
 )
 from ...types import Message, ContentBlock, RawMessageStreamEvent
-from ..._utils import consume_sync_iterator, consume_async_iterator
+from ..._utils import is_dict, is_list, consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
 from ..._streaming import Stream, AsyncStream
 
@@ -401,6 +401,27 @@ TRACKS_TOOL_INPUT = (
 )
 
 
+def _deep_merge_extra_fields(existing: object, new: object) -> object:
+    """Deep merge new data into existing data, mutating containers in place.
+
+    - Dicts: recursively merge keys (mutates existing dict)
+    - Lists: extend existing with new items (mutates existing list)
+    - Other: replace with new value
+    """
+    if is_dict(existing) and is_dict(new):
+        for key, value in new.items():
+            if key in existing:
+                existing[key] = _deep_merge_extra_fields(existing[key], value)
+            else:
+                existing[key] = value
+        return existing  # Return mutated dict
+    elif is_list(existing) and is_list(new):
+        existing.extend(new)
+        return existing  # Return mutated list
+    else:
+        return new
+
+
 def accumulate_event(
     *,
     event: RawMessageStreamEvent,
@@ -480,5 +501,20 @@ def accumulate_event(
             current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
         if event.usage.server_tool_use is not None:
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+
+    # Accumulate any extra fields from the event into the snapshot
+    if hasattr(event, '__pydantic_extra__') and event.__pydantic_extra__:
+        if not hasattr(current_snapshot, '__pydantic_extra__') or current_snapshot.__pydantic_extra__ is None:
+            current_snapshot.__pydantic_extra__ = {}
+
+        snapshot_extra = current_snapshot.__pydantic_extra__
+        for key, value in event.__pydantic_extra__.items():
+            if key in snapshot_extra:
+                snapshot_extra[key] = _deep_merge_extra_fields(
+                    snapshot_extra[key],
+                    value
+                )
+            else:
+                snapshot_extra[key] = value
 
     return current_snapshot
