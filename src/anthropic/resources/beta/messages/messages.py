@@ -203,10 +203,14 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like how much
-              effort the model puts into its response.
+          output_config: Configuration options for the model's output. Controls aspects like output
+              format or how much effort the model puts into its response.
 
-          output_format: A schema to specify Claude's output format in responses.
+          output_format: Deprecated: Use `output_config.format` instead. See
+              [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+
+              A schema to specify Claude's output format in responses. This parameter will be
+              removed in a future release.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -497,10 +501,14 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like how much
-              effort the model puts into its response.
+          output_config: Configuration options for the model's output. Controls aspects like output
+              format or how much effort the model puts into its response.
 
-          output_format: A schema to specify Claude's output format in responses.
+          output_format: Deprecated: Use `output_config.format` instead. See
+              [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+
+              A schema to specify Claude's output format in responses. This parameter will be
+              removed in a future release.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -787,10 +795,14 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like how much
-              effort the model puts into its response.
+          output_config: Configuration options for the model's output. Controls aspects like output
+              format or how much effort the model puts into its response.
 
-          output_format: A schema to specify Claude's output format in responses.
+          output_format: Deprecated: Use `output_config.format` instead. See
+              [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+
+              A schema to specify Claude's output format in responses. This parameter will be
+              removed in a future release.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -1123,10 +1135,14 @@ class Messages(SyncAPIResource):
 
           mcp_servers: MCP servers to be utilized in this request
 
-          output_config: Configuration options for the model's output. Controls aspects like how much
-              effort the model puts into its response.
+          output_config: Configuration options for the model's output. Controls aspects like output
+              format or how much effort the model puts into its response.
 
-          output_format: A schema to specify Claude's output format in responses.
+          output_format: Deprecated: Use `output_config.format` instead. See
+              [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+
+              A schema to specify Claude's output format in responses. This parameter will be
+              removed in a future release.
 
           system: System prompt.
 
@@ -1416,10 +1432,14 @@ class AsyncMessages(AsyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like how much
-              effort the model puts into its response.
+          output_config: Configuration options for the model's output. Controls aspects like output
+              format or how much effort the model puts into its response.
 
-          output_format: A schema to specify Claude's output format in responses.
+          output_format: Deprecated: Use `output_config.format` instead. See
+              [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+
+              A schema to specify Claude's output format in responses. This parameter will be
+              removed in a future release.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -1710,10 +1730,14 @@ class AsyncMessages(AsyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like how much
-              effort the model puts into its response.
+          output_config: Configuration options for the model's output. Controls aspects like output
+              format or how much effort the model puts into its response.
 
-          output_format: A schema to specify Claude's output format in responses.
+          output_format: Deprecated: Use `output_config.format` instead. See
+              [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+
+              A schema to specify Claude's output format in responses. This parameter will be
+              removed in a future release.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -2000,10 +2024,14 @@ class AsyncMessages(AsyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like how much
-              effort the model puts into its response.
+          output_config: Configuration options for the model's output. Controls aspects like output
+              format or how much effort the model puts into its response.
 
-          output_format: A schema to specify Claude's output format in responses.
+          output_format: Deprecated: Use `output_config.format` instead. See
+              [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+
+              A schema to specify Claude's output format in responses. This parameter will be
+              removed in a future release.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -2336,10 +2364,14 @@ class AsyncMessages(AsyncAPIResource):
 
           mcp_servers: MCP servers to be utilized in this request
 
-          output_config: Configuration options for the model's output. Controls aspects like how much
-              effort the model puts into its response.
+          output_config: Configuration options for the model's output. Controls aspects like output
+              format or how much effort the model puts into its response.
 
-          output_format: A schema to specify Claude's output format in responses.
+          output_format: Deprecated: Use `output_config.format` instead. See
+              [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+
+              A schema to specify Claude's output format in responses. This parameter will be
+              removed in a future release.
 
           system: System prompt.
 

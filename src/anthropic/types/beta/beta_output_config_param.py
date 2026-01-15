@@ -5,9 +5,18 @@ from __future__ import annotations
 from typing import Optional
 from typing_extensions import Literal, TypedDict
 
+from .beta_json_output_format_param import BetaJSONOutputFormatParam
+
 __all__ = ["BetaOutputConfigParam"]
 
 
 class BetaOutputConfigParam(TypedDict, total=False):
     effort: Optional[Literal["low", "medium", "high"]]
     """All possible effort levels."""
+
+    format: Optional[BetaJSONOutputFormatParam]
+    """A schema to specify Claude's output format in responses.
+
+    See
+    [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+    """

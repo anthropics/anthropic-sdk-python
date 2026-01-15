@@ -8,6 +8,13 @@ __all__ = ["WebSearchToolResultError"]
 
 
 class WebSearchToolResultError(BaseModel):
-    error_code: Literal["invalid_tool_input", "unavailable", "max_uses_exceeded", "too_many_requests", "query_too_long"]
+    error_code: Literal[
+        "invalid_tool_input",
+        "unavailable",
+        "max_uses_exceeded",
+        "too_many_requests",
+        "query_too_long",
+        "request_too_large",
+    ]
 
     type: Literal["web_search_tool_result_error"]

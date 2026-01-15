@@ -1,6 +1,6 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
 from ..._utils import PropertyInfo
@@ -16,9 +16,6 @@ Caller: TypeAlias = Annotated[Union[BetaDirectCaller, BetaServerToolCaller], Pro
 class BetaServerToolUseBlock(BaseModel):
     id: str
 
-    caller: Caller
-    """Tool invocation directly from the model."""
-
     input: Dict[str, object]
 
     name: Literal[
@@ -32,3 +29,6 @@ class BetaServerToolUseBlock(BaseModel):
     ]
 
     type: Literal["server_tool_use"]
+
+    caller: Optional[Caller] = None
+    """Tool invocation directly from the model."""
