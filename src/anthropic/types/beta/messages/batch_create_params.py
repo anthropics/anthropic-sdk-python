@@ -27,7 +27,7 @@ class RequestParamsOutputFormat(TypedDict, total=False):
     schema: Required[object]
     """The JSON schema of the format"""
 
-    type: Required[Literal["json_schema"]]
+
 
 
 class Request(TypedDict, total=False):
