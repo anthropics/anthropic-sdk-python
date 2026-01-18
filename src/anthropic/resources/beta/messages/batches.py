@@ -49,7 +49,7 @@ class Batches(SyncAPIResource):
     def create(
         self,
         *,
-        requests: Iterable[batch_create_params.Request],
+        requests: Iterable[batch_create_params.BatchRequest],
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -436,7 +436,7 @@ class AsyncBatches(AsyncAPIResource):
     async def create(
         self,
         *,
-        requests: Iterable[batch_create_params.Request],
+        requests: Iterable[batch_create_params.BatchRequest],
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
