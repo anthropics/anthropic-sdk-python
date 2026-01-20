@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Iterable
+from typing import List, Iterable
 from typing_extensions import Required, Annotated, TypedDict
 
 from ...._utils import PropertyInfo
@@ -26,8 +26,6 @@ class BatchCreateParams(TypedDict, total=False):
 class RequestParamsOutputFormat(TypedDict, total=False):
     schema: Required[object]
     """The JSON schema of the format"""
-
-
 
 
 class Request(TypedDict, total=False):
