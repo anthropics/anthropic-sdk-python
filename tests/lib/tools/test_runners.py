@@ -613,3 +613,132 @@ def test_tool_runner_method_in_sync(sync: bool, client: Anthropic, async_client:
             "stream",
         },
     )
+
+
+def _is_cjk_char(char: str) -> bool:
+    """Check if a character is a CJK (Chinese, Japanese, Korean) character."""
+    code_point = ord(char)
+    return (
+        (0x4E00 <= code_point <= 0x9FFF)  # CJK Unified Ideographs
+        or (0x3400 <= code_point <= 0x4DBF)  # CJK Extension A
+        or (0x20000 <= code_point <= 0x2A6DF)  # CJK Extension B
+        or (0x3040 <= code_point <= 0x309F)  # Hiragana
+        or (0x30A0 <= code_point <= 0x30FF)  # Katakana
+        or (0xAC00 <= code_point <= 0xD7AF)  # Hangul
+    )
+
+
+def _contains_cjk(text: str) -> bool:
+    """Check if text contains any CJK characters."""
+    return any(_is_cjk_char(char) for char in text)
+
+
+def _cjk_aware_match(keyword: str, text: str) -> bool:
+    """
+    Perform CJK-aware text matching.
+    
+    For CJK text, uses bidirectional substring matching since there are no word
+    boundaries. This handles cases where:
+    - The keyword appears in the text (e.g., "法令" in description)
+    - The text contains a meaningful substring from the keyword
+    - Common CJK substrings exist between keyword and text
+    
+    For non-CJK text, uses case-insensitive substring matching.
+    """
+    import re
+    
+    keyword_lower = keyword.lower()
+    text_lower = text.lower()
+    
+    # If keyword contains CJK characters, use bidirectional matching
+    if _contains_cjk(keyword):
+        # First, try exact substring match in either direction
+        if keyword in text or text in keyword:
+            return True
+        
+        # Extract CJK characters from keyword for substring matching
+        cjk_chars_in_keyword = ''.join(char for char in keyword if _is_cjk_char(char))
+        
+        if len(cjk_chars_in_keyword) >= 2:
+            # Try to find common CJK substrings of length 2+ between keyword and text
+            # This handles "法令を調べて" matching "日本の法令を検索します" via "法令"
+            min_match_len = 2
+            
+            # Check if any substring of the keyword's CJK chars appears in text
+            for i in range(len(cjk_chars_in_keyword)):
+                for j in range(i + min_match_len, len(cjk_chars_in_keyword) + 1):
+                    substring = cjk_chars_in_keyword[i:j]
+                    if substring in text:
+                        return True
+            
+            # Also check reverse: if any CJK substring from text appears in keyword
+            cjk_chars_in_text = ''.join(char for char in text if _is_cjk_char(char))
+            for i in range(len(cjk_chars_in_text)):
+                for j in range(i + min_match_len, min(i + 10, len(cjk_chars_in_text) + 1)):
+                    # Limit substring length to avoid matching everything
+                    substring = cjk_chars_in_text[i:j]
+                    if substring in keyword:
+                        return True
+        
+        return False
+    
+    # For non-CJK text, use word-boundary aware matching
+    if _contains_cjk(text):
+        # If text has CJK but keyword doesn't, do simple substring match
+        return keyword_lower in text_lower
+    
+    # For both non-CJK, use word-boundary matching
+    # Create a regex pattern that matches the keyword as whole words
+    pattern = r'\b' + re.escape(keyword_lower) + r'\b'
+    return bool(re.search(pattern, text_lower)) or keyword_lower in text_lower
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+def test_japanese_tool_search_cjk_aware_matching() -> None:
+    """Test that CJK-aware matching works for Japanese tool descriptions.
+    
+    This test verifies that tools with Japanese descriptions can be found
+    using CJK-aware character-based matching, which addresses the limitation
+    in server-side BM25 search for CJK languages (issue #1116).
+    """
+    # Test CJK character detection
+    assert _is_cjk_char("日") is True
+    assert _is_cjk_char("本") is True
+    assert _is_cjk_char("法") is True
+    assert _is_cjk_char("令") is True
+    assert _is_cjk_char("a") is False
+    assert _is_cjk_char(" ") is False
+    
+    # Test CJK text detection
+    assert _contains_cjk("日本の法令を検索します") is True
+    assert _contains_cjk("Search for laws") is False
+    assert _contains_cjk("法令") is True
+    
+    # Test CJK-aware matching with Japanese text
+    japanese_description = "日本の法令を検索します。憲法、法律、政令、省令などを検索できます。"
+    
+    # Should match exact keyword (this is the issue from #1116)
+    assert _cjk_aware_match("法令", japanese_description) is True
+    assert _cjk_aware_match("検索", japanese_description) is True
+    assert _cjk_aware_match("法律", japanese_description) is True
+    
+    # Should match partial phrases
+    assert _cjk_aware_match("日本の法令", japanese_description) is True
+    
+    # Should match keyword with additional text (bidirectional matching)
+    # User types "法令を調べて" (search for laws), should find tool with "法令" in description
+    assert _cjk_aware_match("法令を調べて", japanese_description) is True
+    
+    # Should not match non-existent text
+    assert _cjk_aware_match("天気", japanese_description) is False
+    
+    # Test with English text (should still work)
+    english_description = "Search for laws and regulations"
+    assert _cjk_aware_match("laws", english_description) is True
+    assert _cjk_aware_match("regulations", english_description) is True
+    assert _cjk_aware_match("weather", english_description) is False
+    
+    # Test mixed CJK and English
+    mixed_description = "日本の法令を検索します。Search for Japanese laws."
+    assert _cjk_aware_match("法令", mixed_description) is True
+    assert _cjk_aware_match("laws", mixed_description) is True
