@@ -547,6 +547,86 @@ The user requests a 500-word essay about dogs, cats, and birds, followed by a si
             respx_mock=respx_mock,
         )
 
+    @pytest.mark.respx(base_url=base_url)
+    def test_callable_class_instance_tool(
+        self, client: Anthropic, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test that callable class instances work with tool_runner."""
+
+        class WeatherTool:
+            def __init__(self, default_units: str) -> None:
+                self.default_units = default_units
+
+            def __call__(self, location: str, units: Literal["c", "f"] = "c") -> str:
+                """Lookup the weather for a given city in either celsius or fahrenheit
+
+                Args:
+                    location: The city and state, e.g. San Francisco, CA
+                    units: Unit for the output, either 'c' for celsius or 'f' for fahrenheit
+                Returns:
+                    A dictionary containing the location, temperature, and weather condition.
+                """
+                actual_units = units or self.default_units
+                return json.dumps(_get_weather(location, actual_units))
+
+        weather_instance = WeatherTool(default_units="f")
+        weather_tool = beta_tool(weather_instance, name="get_weather")
+
+        message = make_snapshot_request(
+            lambda c: c.beta.messages.tool_runner(
+                max_tokens=1024,
+                model="claude-haiku-4-5",
+                tools=[weather_tool],
+                messages=[{"role": "user", "content": "What is the weather in SF?"}],
+            ).until_done(),
+            content_snapshot=snapshots["basic"]["responses"],
+            path="/v1/messages",
+            mock_client=client,
+            respx_mock=respx_mock,
+        )
+
+        assert print_obj(message, monkeypatch) == snapshots["basic"]["result"]
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_bound_method_tool(
+        self, client: Anthropic, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test that bound methods work with tool_runner."""
+
+        class WeatherService:
+            def __init__(self, api_key: str) -> None:
+                self.api_key = api_key
+
+            def get_weather(self, location: str, units: Literal["c", "f"]) -> str:
+                """Lookup the weather for a given city in either celsius or fahrenheit
+
+                Args:
+                    location: The city and state, e.g. San Francisco, CA
+                    units: Unit for the output, either 'c' for celsius or 'f' for fahrenheit
+                Returns:
+                    A dictionary containing the location, temperature, and weather condition.
+                """
+                # In a real scenario, self.api_key would be used
+                return json.dumps(_get_weather(location, units))
+
+        service = WeatherService(api_key="secret-key")
+        weather_tool = beta_tool(service.get_weather, name="get_weather")
+
+        message = make_snapshot_request(
+            lambda c: c.beta.messages.tool_runner(
+                max_tokens=1024,
+                model="claude-haiku-4-5",
+                tools=[weather_tool],
+                messages=[{"role": "user", "content": "What is the weather in SF?"}],
+            ).until_done(),
+            content_snapshot=snapshots["basic"]["responses"],
+            path="/v1/messages",
+            mock_client=client,
+            respx_mock=respx_mock,
+        )
+
+        assert print_obj(message, monkeypatch) == snapshots["basic"]["result"]
+
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.respx(base_url=base_url)
