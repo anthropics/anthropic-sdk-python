@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -exuo pipefail
+set -euo pipefail
 
 FILENAME=$(basename dist/*.whl)
 
@@ -14,11 +14,11 @@ if [[ "$SIGNED_URL" == "null" ]]; then
   exit 1
 fi
 
-UPLOAD_RESPONSE=$(curl -v -X PUT \
+HTTP_CODE=$(curl -w '%{http_code}' -o /dev/null -s -X PUT \
   -H "Content-Type: binary/octet-stream" \
-  --data-binary "@dist/$FILENAME" "$SIGNED_URL" 2>&1)
+  --data-binary "@dist/$FILENAME" "$SIGNED_URL")
 
-if echo "$UPLOAD_RESPONSE" | grep -q "HTTP/[0-9.]* 200"; then
+if [[ "$HTTP_CODE" == "200" ]]; then
   echo -e "\033[32mUploaded build to Stainless storage.\033[0m"
   echo -e "\033[32mInstallation: pip install 'https://pkg.stainless.com/s/anthropic-python/$SHA/$FILENAME'\033[0m"
 else
