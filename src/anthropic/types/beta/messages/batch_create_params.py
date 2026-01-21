@@ -38,6 +38,7 @@ class Request(TypedDict, total=False):
     order.
 
     Must be unique for each request within the Message Batch.
+    Must be 64 characters or fewer.
     """
 
     params: Required[MessageCreateParamsNonStreaming]
