@@ -155,6 +155,15 @@ class BaseFunctionTool(Generic[CallableT]):
                 if not properties or not is_dict(properties):
                     return schema
 
+                # Filter out 'self' and 'cls' parameters for class/instance methods
+                for param_name in ("self", "cls"):
+                    if param_name in properties:
+                        del properties[param_name]
+                    # Also remove from required if present
+                    required = schema.get("required")
+                    if required and isinstance(required, list) and param_name in required:
+                        cast(list[str], required).remove(param_name)
+
                 # Add parameter descriptions from docstring
                 for param in self._parsed_docstring.params:
                     prop_schema = properties.get(param.arg_name)
