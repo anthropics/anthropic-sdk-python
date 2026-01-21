@@ -43,7 +43,7 @@ from ....types.beta import (
 from ...._base_client import make_request_options
 from ...._utils._utils import is_dict
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
-from ...messages.messages import DEPRECATED_MODELS
+from ...messages.messages import DEPRECATED_MODELS, validate_sampling_params
 from ....types.model_param import ModelParam
 from ....lib._parse._response import ResponseFormatT, parse_response
 from ....lib._parse._transform import transform_schema
@@ -1010,6 +1010,8 @@ class Messages(SyncAPIResource):
                 max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
             )
 
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
+
         if model in DEPRECATED_MODELS:
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
@@ -1104,6 +1106,8 @@ class Messages(SyncAPIResource):
         if "structured-outputs-2025-11-13" not in betas:
             # Ensure structured outputs beta is included for parse method
             betas.append("structured-outputs-2025-11-13")
+
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
 
         extra_headers = {
             "X-Stainless-Helper": "beta.messages.parse",
@@ -1317,6 +1321,8 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
+
         extra_headers = {
             "X-Stainless-Helper": "BetaToolRunner",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
@@ -1421,6 +1427,9 @@ class Messages(SyncAPIResource):
             )
 
         """Create a Message stream"""
+
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
+
         extra_headers = {
             "X-Stainless-Helper-Method": "stream",
             "X-Stainless-Stream-Helper": "beta.messages",
@@ -2678,6 +2687,9 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
+
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
+
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
@@ -2764,6 +2776,9 @@ class AsyncMessages(AsyncAPIResource):
         if "structured-outputs-2025-11-13" not in betas:
             # Ensure structured outputs beta is included for parse method
             betas.append("structured-outputs-2025-11-13")
+
+
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
 
         extra_headers = {
             "X-Stainless-Helper": "beta.messages.parse",
@@ -2977,6 +2992,9 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
+
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
+
         extra_headers = {
             "X-Stainless-Helper": "BetaToolRunner",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
@@ -3079,6 +3097,9 @@ class AsyncMessages(AsyncAPIResource):
                 DeprecationWarning,
                 stacklevel=3,
             )
+
+
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
 
         extra_headers = {
             "X-Stainless-Helper-Method": "stream",

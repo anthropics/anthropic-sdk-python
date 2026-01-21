@@ -64,6 +64,25 @@ DEPRECATED_MODELS = {
 }
 
 
+def validate_sampling_params(
+    *,
+    temperature: float | Omit = omit,
+    top_k: int | Omit = omit,
+    top_p: float | Omit = omit,
+) -> None:
+    if is_given(temperature):
+        if temperature < 0.0 or temperature > 1.0:
+            raise ValueError(f"Invalid temperature: {temperature}; must be between 0.0 and 1.0")
+
+    if is_given(top_p):
+        if top_p < 0.0 or top_p > 1.0:
+            raise ValueError(f"Invalid top_p: {top_p}; must be between 0.0 and 1.0")
+
+    if is_given(top_k):
+        if top_k < 0:
+            raise ValueError(f"Invalid top_k: {top_k}; must be 0 or greater")
+
+
 class Messages(SyncAPIResource):
     @cached_property
     def batches(self) -> Batches:
@@ -922,6 +941,8 @@ class Messages(SyncAPIResource):
                 max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
             )
 
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
+
         if model in DEPRECATED_MODELS:
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
@@ -991,6 +1012,8 @@ class Messages(SyncAPIResource):
                 DeprecationWarning,
                 stacklevel=3,
             )
+
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
 
         extra_headers = {
             "X-Stainless-Helper-Method": "stream",
@@ -2106,6 +2129,8 @@ class AsyncMessages(AsyncAPIResource):
                 max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
             )
 
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
+
         if model in DEPRECATED_MODELS:
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
@@ -2175,6 +2200,8 @@ class AsyncMessages(AsyncAPIResource):
                 DeprecationWarning,
                 stacklevel=3,
             )
+
+        validate_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
 
         extra_headers = {
             "X-Stainless-Helper-Method": "stream",
