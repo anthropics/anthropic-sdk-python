@@ -14,6 +14,8 @@ __all__ = ["Messages", "AsyncMessages"]
 class Messages(SyncAPIResource):
     create = FirstPartyMessagesAPI.create
     stream = FirstPartyMessagesAPI.stream
+    parse = FirstPartyMessagesAPI.parse
+    tool_runner = FirstPartyMessagesAPI.tool_runner
     count_tokens = FirstPartyMessagesAPI.count_tokens
 
     @cached_property
@@ -39,6 +41,8 @@ class Messages(SyncAPIResource):
 class AsyncMessages(AsyncAPIResource):
     create = FirstPartyAsyncMessagesAPI.create
     stream = FirstPartyAsyncMessagesAPI.stream
+    parse = FirstPartyAsyncMessagesAPI.parse
+    tool_runner = FirstPartyAsyncMessagesAPI.tool_runner
     count_tokens = FirstPartyAsyncMessagesAPI.count_tokens
 
     @cached_property
@@ -68,6 +72,12 @@ class MessagesWithRawResponse:
         self.create = _legacy_response.to_raw_response_wrapper(
             messages.create,
         )
+        self.count_tokens = _legacy_response.to_raw_response_wrapper(
+            messages.count_tokens,
+        )
+        self.parse = _legacy_response.to_raw_response_wrapper(
+            messages.parse,
+        )
 
 
 class AsyncMessagesWithRawResponse:
@@ -76,6 +86,12 @@ class AsyncMessagesWithRawResponse:
 
         self.create = _legacy_response.async_to_raw_response_wrapper(
             messages.create,
+        )
+        self.count_tokens = _legacy_response.async_to_raw_response_wrapper(
+            messages.count_tokens,
+        )
+        self.parse = _legacy_response.async_to_raw_response_wrapper(
+            messages.parse,
         )
 
 
