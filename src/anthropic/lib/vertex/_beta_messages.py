@@ -15,6 +15,8 @@ class Messages(SyncAPIResource):
     create = FirstPartyMessagesAPI.create
     stream = FirstPartyMessagesAPI.stream
     count_tokens = FirstPartyMessagesAPI.count_tokens
+    parse = FirstPartyMessagesAPI.parse
+    tool_runner = FirstPartyMessagesAPI.tool_runner
 
     @cached_property
     def with_raw_response(self) -> MessagesWithRawResponse:
@@ -40,6 +42,8 @@ class AsyncMessages(AsyncAPIResource):
     create = FirstPartyAsyncMessagesAPI.create
     stream = FirstPartyAsyncMessagesAPI.stream
     count_tokens = FirstPartyAsyncMessagesAPI.count_tokens
+    parse = FirstPartyAsyncMessagesAPI.parse
+    tool_runner = FirstPartyAsyncMessagesAPI.tool_runner
 
     @cached_property
     def with_raw_response(self) -> AsyncMessagesWithRawResponse:
@@ -68,6 +72,12 @@ class MessagesWithRawResponse:
         self.create = _legacy_response.to_raw_response_wrapper(
             messages.create,
         )
+        self.count_tokens = _legacy_response.to_raw_response_wrapper(
+            messages.count_tokens,
+        )
+        self.parse = _legacy_response.to_raw_response_wrapper(
+            messages.parse,
+        )
 
 
 class AsyncMessagesWithRawResponse:
@@ -76,6 +86,12 @@ class AsyncMessagesWithRawResponse:
 
         self.create = _legacy_response.async_to_raw_response_wrapper(
             messages.create,
+        )
+        self.count_tokens = _legacy_response.async_to_raw_response_wrapper(
+            messages.count_tokens,
+        )
+        self.parse = _legacy_response.async_to_raw_response_wrapper(
+            messages.parse,
         )
 
 
@@ -86,6 +102,12 @@ class MessagesWithStreamingResponse:
         self.create = to_streamed_response_wrapper(
             messages.create,
         )
+        self.count_tokens = to_streamed_response_wrapper(
+            messages.count_tokens,
+        )
+        self.parse = to_streamed_response_wrapper(
+            messages.parse,
+        )
 
 
 class AsyncMessagesWithStreamingResponse:
@@ -94,4 +116,10 @@ class AsyncMessagesWithStreamingResponse:
 
         self.create = async_to_streamed_response_wrapper(
             messages.create,
+        )
+        self.count_tokens = async_to_streamed_response_wrapper(
+            messages.count_tokens,
+        )
+        self.parse = async_to_streamed_response_wrapper(
+            messages.parse,
         )
