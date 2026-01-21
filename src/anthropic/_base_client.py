@@ -810,6 +810,11 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
             log.debug("Retrying due to status code %i", response.status_code)
             return True
 
+        # Retry on failed dependency (often transient in Bedrock).
+        if response.status_code == 424:
+            log.debug("Retrying due to status code %i", response.status_code)
+            return True
+
         # Retry on lock timeouts.
         if response.status_code == 409:
             log.debug("Retrying due to status code %i", response.status_code)
