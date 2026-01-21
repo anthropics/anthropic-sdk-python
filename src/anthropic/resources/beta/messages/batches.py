@@ -92,7 +92,13 @@ class Batches(SyncAPIResource):
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
+        requests = [
+            {
+                **request,
+                "params": {**request["params"], "betas": omit} if "betas" in request["params"] else request["params"],
+            }
+            for request in requests
+        ]
         return self._post(
             "/v1/messages/batches?beta=true",
             body=maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
@@ -479,7 +485,13 @@ class AsyncBatches(AsyncAPIResource):
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
+        requests = [
+            {
+                **request,
+                "params": {**request["params"], "betas": omit} if "betas" in request["params"] else request["params"],
+            }
+            for request in requests
+        ]
         return await self._post(
             "/v1/messages/batches?beta=true",
             body=await async_maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
