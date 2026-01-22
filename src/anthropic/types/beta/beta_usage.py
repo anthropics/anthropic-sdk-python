@@ -29,5 +29,8 @@ class BetaUsage(BaseModel):
     server_tool_use: Optional[BetaServerToolUsage] = None
     """The number of server tool requests."""
 
+    thinking_tokens: Optional[int] = None
+    """The number of tokens used for thinking."""
+
     service_tier: Optional[Literal["standard", "priority", "batch"]] = None
     """If the request used the priority, standard, or batch tier."""

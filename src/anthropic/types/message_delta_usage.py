@@ -23,3 +23,6 @@ class MessageDeltaUsage(BaseModel):
 
     server_tool_use: Optional[ServerToolUsage] = None
     """The number of server tool requests."""
+
+    thinking_tokens: Optional[int] = None
+    """The cumulative number of tokens used for thinking."""
