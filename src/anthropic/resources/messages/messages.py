@@ -64,6 +64,25 @@ DEPRECATED_MODELS = {
 }
 
 
+def _strip_tools(
+    tools: Iterable[ToolUnionParam] | Omit | None,
+) -> Iterable[ToolUnionParam] | Omit | None:
+    if tools is omit or tools is None:
+        return tools
+
+    new_tools: list[ToolUnionParam] = []
+    for tool in tools:
+        if isinstance(tool, dict) and "input_schema" in tool:
+            # Make a copy to avoid mutating user data
+            tool = tool.copy()  # type: ignore
+            input_schema = tool.get("input_schema")
+            if isinstance(input_schema, dict) and "$schema" in input_schema:
+                tool["input_schema"] = input_schema.copy()  # type: ignore
+                tool["input_schema"].pop("$schema")  # type: ignore
+        new_tools.append(tool)
+    return new_tools
+
+
 class Messages(SyncAPIResource):
     @cached_property
     def batches(self) -> Batches:
@@ -944,7 +963,7 @@ class Messages(SyncAPIResource):
                     "temperature": temperature,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
-                    "tools": tools,
+                    "tools": _strip_tools(tools),
                     "top_k": top_k,
                     "top_p": top_p,
                 },
@@ -2128,7 +2147,7 @@ class AsyncMessages(AsyncAPIResource):
                     "temperature": temperature,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
-                    "tools": tools,
+                    "tools": _strip_tools(tools),
                     "top_k": top_k,
                     "top_p": top_p,
                 },
@@ -2196,7 +2215,7 @@ class AsyncMessages(AsyncAPIResource):
                     "temperature": temperature,
                     "top_k": top_k,
                     "top_p": top_p,
-                    "tools": tools,
+                    "tools": _strip_tools(tools),
                     "thinking": thinking,
                     "tool_choice": tool_choice,
                     "stream": True,
@@ -2420,7 +2439,7 @@ class AsyncMessages(AsyncAPIResource):
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
-                    "tools": tools,
+                    "tools": _strip_tools(tools),
                 },
                 message_count_tokens_params.MessageCountTokensParams,
             ),
