@@ -274,6 +274,9 @@ def _transform_typeddict(
 
         type_ = annotations.get(key)
         if type_ is None:
+            if key == "caller":
+                continue
+
             # we do not have a type annotation for this field, leave it as is
             result[key] = value
         else:
@@ -440,6 +443,9 @@ async def _async_transform_typeddict(
 
         type_ = annotations.get(key)
         if type_ is None:
+            if key == "caller":
+                continue
+
             # we do not have a type annotation for this field, leave it as is
             result[key] = value
         else:

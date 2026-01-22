@@ -26,6 +26,7 @@ from ..._base_client import (
 from ._stream_decoder import AWSEventStreamDecoder
 from ...resources.messages import Messages, AsyncMessages
 from ...resources.completions import Completions, AsyncCompletions
+from ._messages import BedrockMessages, AsyncBedrockMessages
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -61,8 +62,7 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
     if options.url.startswith("/v1/messages/batches"):
         raise AnthropicError("The Batch API is not supported in Bedrock yet")
 
-    if options.url == "/v1/messages/count_tokens":
-        raise AnthropicError("Token counting is not supported in Bedrock yet")
+
 
     return options
 
@@ -183,7 +183,9 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         )
 
         self.beta = Beta(self)
-        self.messages = Messages(self)
+        self.beta = Beta(self)
+        self.messages = BedrockMessages(self)
+        self.completions = Completions(self)
         self.completions = Completions(self)
 
     @override
@@ -324,7 +326,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             _strict_response_validation=_strict_response_validation,
         )
 
-        self.messages = AsyncMessages(self)
+        self.messages = AsyncBedrockMessages(self)
         self.completions = AsyncCompletions(self)
         self.beta = AsyncBeta(self)
 

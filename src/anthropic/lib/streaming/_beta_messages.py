@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import builtins
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Type, Generic, Callable, cast
@@ -133,6 +134,7 @@ class BetaMessageStream(Generic[ResponseFormatT]):
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
                 request_headers=self.response.request.headers,
+                request_body=self.response.request.content,
                 output_format=self.__output_format,
             )
 
@@ -282,6 +284,7 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
                 request_headers=self.response.request.headers,
+                request_body=self.response.request.content,
                 output_format=self.__output_format,
             )
 
@@ -440,6 +443,7 @@ def accumulate_event(
     event: BetaRawMessageStreamEvent,
     current_snapshot: ParsedBetaMessage[ResponseFormatT] | None,
     request_headers: httpx.Headers,
+    request_body: bytes | None = None,
     output_format: ResponseFormatT | NotGiven = NOT_GIVEN,
 ) -> ParsedBetaMessage[ResponseFormatT]:
     if not isinstance(cast(Any, event), BaseModel):
@@ -489,6 +493,17 @@ def accumulate_event(
                 if json_buf:
                     try:
                         anthropic_beta = request_headers.get("anthropic-beta", "") if request_headers else ""
+                        if not anthropic_beta and request_body:
+                            try:
+                                body = json.loads(request_body)
+                                if isinstance(body, dict):
+                                    beta = body.get("anthropic_beta")
+                                    if isinstance(beta, list):
+                                        anthropic_beta = ",".join(beta)
+                                    elif isinstance(beta, str):
+                                        anthropic_beta = beta
+                            except Exception:
+                                pass
 
                         if "fine-grained-tool-streaming-2025-05-14" in anthropic_beta:
                             content.input = from_json(json_buf, partial_mode="trailing-strings")

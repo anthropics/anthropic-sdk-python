@@ -383,6 +383,11 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
     if is_dict(options.json_data):
         options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
 
+        if is_given(options.headers):
+            betas = options.headers.get("anthropic-beta")
+            if betas:
+                options.json_data.setdefault("anthropic_beta", betas.split(","))
+
     if options.url in {"/v1/messages", "/v1/messages?beta=true"} and options.method == "post":
         if project_id is None:
             raise RuntimeError(

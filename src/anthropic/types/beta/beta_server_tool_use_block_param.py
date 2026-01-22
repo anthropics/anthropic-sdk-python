@@ -35,6 +35,3 @@ class BetaServerToolUseBlockParam(TypedDict, total=False):
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
-
-    caller: Caller
-    """Tool invocation directly from the model."""
