@@ -464,13 +464,14 @@ def accumulate_event(
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
     if event.type == "content_block_start":
-        # TODO: check index
-        current_snapshot.content.append(
-            cast(
-                Any,  # Pydantic does not support generic unions at runtime
-                construct_type(type_=ParsedBetaContentBlock, value=event.content_block.to_dict()),
-            ),
+        new_block = cast(
+            Any,  # Pydantic does not support generic unions at runtime
+            construct_type(type_=ParsedBetaContentBlock, value=event.content_block.to_dict()),
         )
+        if event.index >= len(current_snapshot.content):
+            current_snapshot.content.extend([None] * (event.index - len(current_snapshot.content) + 1))  # type: ignore[arg-type]
+
+        current_snapshot.content[event.index] = new_block
     elif event.type == "content_block_delta":
         content = current_snapshot.content[event.index]
         if event.delta.type == "text_delta":
@@ -536,5 +537,7 @@ def accumulate_event(
             current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
         if event.usage.server_tool_use is not None:
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+        if event.usage.thinking_tokens is not None:
+            current_snapshot.usage.thinking_tokens = event.usage.thinking_tokens
 
     return current_snapshot
