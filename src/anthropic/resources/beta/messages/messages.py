@@ -85,7 +85,7 @@ def _strip_tools(
         return tools
 
     new_tools: list[BetaToolUnionParam] = []
-    for tool in tools:
+    for tool in cast(Iterable[BetaToolUnionParam], tools):
         if isinstance(tool, dict) and "input_schema" in tool:
             # Make a copy to avoid mutating user data
             tool = tool.copy()  # type: ignore

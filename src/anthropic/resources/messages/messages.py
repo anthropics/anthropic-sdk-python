@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Union, Iterable, Optional
+from typing import Union, Iterable, Optional, cast
 from functools import partial
 from typing_extensions import Literal, overload
 
@@ -71,7 +71,7 @@ def _strip_tools(
         return tools
 
     new_tools: list[ToolUnionParam] = []
-    for tool in tools:
+    for tool in cast(Iterable[ToolUnionParam], tools):
         if isinstance(tool, dict) and "input_schema" in tool:
             # Make a copy to avoid mutating user data
             tool = tool.copy()  # type: ignore
