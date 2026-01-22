@@ -424,13 +424,14 @@ def accumulate_event(
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
     if event.type == "content_block_start":
-        # TODO: check index
-        current_snapshot.content.append(
-            cast(
-                ContentBlock,
-                construct_type(type_=ContentBlock, value=event.content_block.model_dump()),
-            ),
+        new_block = cast(
+            ContentBlock,
+            construct_type(type_=ContentBlock, value=event.content_block.model_dump()),
         )
+        if event.index >= len(current_snapshot.content):
+            current_snapshot.content.extend([None] * (event.index - len(current_snapshot.content) + 1))  # type: ignore[arg-type]
+
+        current_snapshot.content[event.index] = new_block
     elif event.type == "content_block_delta":
         content = current_snapshot.content[event.index]
         if event.delta.type == "text_delta":
