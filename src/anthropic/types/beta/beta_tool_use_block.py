@@ -24,3 +24,5 @@ class BetaToolUseBlock(BaseModel):
 
     caller: Optional[Caller] = None
     """Tool invocation directly from the model."""
+
+    __api_exclude__ = {"caller"}

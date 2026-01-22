@@ -19,6 +19,8 @@ class BetaServerToolUseBlock(BaseModel):
     caller: Caller
     """Tool invocation directly from the model."""
 
+    __api_exclude__ = {"caller"}
+
     input: Dict[str, object]
 
     name: Literal[
