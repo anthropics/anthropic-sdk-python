@@ -140,6 +140,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         aws_region: str | None = None,
         aws_profile: str | None = None,
         aws_session_token: str | None = None,
+        aws_bearer_token: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -165,6 +166,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         self.aws_profile = aws_profile
 
         self.aws_session_token = aws_session_token
+        self.aws_bearer_token = aws_bearer_token or os.environ.get("AWS_BEARER_TOKEN_BEDROCK")
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
@@ -196,6 +198,10 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
+        if self.aws_bearer_token:
+            request.headers["Authorization"] = f"Bearer {self.aws_bearer_token}"
+            return
+
         from ._auth import get_auth_headers
 
         data = request.read().decode()
@@ -220,6 +226,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         aws_access_key: str | None = None,
         aws_region: str | None = None,
         aws_session_token: str | None = None,
+        aws_bearer_token: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.Client | None = None,
@@ -256,6 +263,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_region=aws_region or self.aws_region,
             aws_session_token=aws_session_token or self.aws_session_token,
+            aws_bearer_token=aws_bearer_token or self.aws_bearer_token,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
@@ -282,6 +290,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         aws_region: str | None = None,
         aws_profile: str | None = None,
         aws_session_token: str | None = None,
+        aws_bearer_token: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -307,6 +316,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         self.aws_profile = aws_profile
 
         self.aws_session_token = aws_session_token
+        self.aws_bearer_token = aws_bearer_token or os.environ.get("AWS_BEARER_TOKEN_BEDROCK")
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
@@ -338,6 +348,10 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
 
     @override
     async def _prepare_request(self, request: httpx.Request) -> None:
+        if self.aws_bearer_token:
+            request.headers["Authorization"] = f"Bearer {self.aws_bearer_token}"
+            return
+
         from ._auth import get_auth_headers
 
         data = request.read().decode()
@@ -362,6 +376,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         aws_access_key: str | None = None,
         aws_region: str | None = None,
         aws_session_token: str | None = None,
+        aws_bearer_token: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.AsyncClient | None = None,
@@ -398,6 +413,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_region=aws_region or self.aws_region,
             aws_session_token=aws_session_token or self.aws_session_token,
+            aws_bearer_token=aws_bearer_token or self.aws_bearer_token,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
