@@ -3,10 +3,12 @@ from __future__ import annotations
 import os
 import logging
 import urllib.parse
-from typing import Any, Union, Mapping, TypeVar
+from typing import Any, Union, Mapping, TypeVar, TYPE_CHECKING
 from typing_extensions import Self, override
 
 import httpx
+if TYPE_CHECKING:
+    import boto3
 
 from ... import _exceptions
 from ._beta import Beta, AsyncBeta
@@ -67,11 +69,14 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
     return options
 
 
-def _infer_region() -> str:
+def _infer_region(aws_session: boto3.Session | None = None) -> str:
     """
     Infer the AWS region from the environment variables or
     from the boto3 session if available.
     """
+    if aws_session is not None and aws_session.region_name:
+        return aws_session.region_name
+
     aws_region = os.environ.get("AWS_REGION")
     if aws_region is None:
         try:
@@ -141,6 +146,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         aws_profile: str | None = None,
         aws_session_token: str | None = None,
         aws_bearer_token: str | None = None,
+        aws_session: boto3.Session | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -159,10 +165,10 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         _strict_response_validation: bool = False,
     ) -> None:
         self.aws_secret_key = aws_secret_key
-
         self.aws_access_key = aws_access_key
 
-        self.aws_region = _infer_region() if aws_region is None else aws_region
+        self.aws_session = aws_session
+        self.aws_region = aws_region or _infer_region(aws_session)
         self.aws_profile = aws_profile
 
         self.aws_session_token = aws_session_token
@@ -216,6 +222,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             region=self.aws_region or "us-east-1",
             profile=self.aws_profile,
             data=data,
+            aws_session=self.aws_session,
         )
         request.headers.update(headers)
 
@@ -227,6 +234,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         aws_region: str | None = None,
         aws_session_token: str | None = None,
         aws_bearer_token: str | None = None,
+        aws_session: boto3.Session | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.Client | None = None,
@@ -264,6 +272,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             aws_region=aws_region or self.aws_region,
             aws_session_token=aws_session_token or self.aws_session_token,
             aws_bearer_token=aws_bearer_token or self.aws_bearer_token,
+            aws_session=aws_session or self.aws_session,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
@@ -291,6 +300,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         aws_profile: str | None = None,
         aws_session_token: str | None = None,
         aws_bearer_token: str | None = None,
+        aws_session: boto3.Session | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -309,10 +319,10 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         _strict_response_validation: bool = False,
     ) -> None:
         self.aws_secret_key = aws_secret_key
-
         self.aws_access_key = aws_access_key
 
-        self.aws_region = _infer_region() if aws_region is None else aws_region
+        self.aws_session = aws_session
+        self.aws_region = aws_region or _infer_region(aws_session)
         self.aws_profile = aws_profile
 
         self.aws_session_token = aws_session_token
@@ -366,6 +376,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             region=self.aws_region or "us-east-1",
             profile=self.aws_profile,
             data=data,
+            aws_session=self.aws_session,
         )
         request.headers.update(headers)
 
@@ -414,6 +425,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             aws_region=aws_region or self.aws_region,
             aws_session_token=aws_session_token or self.aws_session_token,
             aws_bearer_token=aws_bearer_token or self.aws_bearer_token,
+            aws_session=aws_session or self.aws_session,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
