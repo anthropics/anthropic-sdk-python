@@ -457,16 +457,20 @@ def accumulate_event(
 
     if current_snapshot is None:
         if event.type == "message_start":
+            # Handle case where message might be a raw dict or a BaseModel
+            message_data = event.message if isinstance(event.message, dict) else event.message.to_dict()
             return cast(
-                ParsedBetaMessage[ResponseFormatT], ParsedBetaMessage.construct(**cast(Any, event.message.to_dict()))
+                ParsedBetaMessage[ResponseFormatT], ParsedBetaMessage.construct(**cast(Any, message_data))
             )
 
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
     if event.type == "content_block_start":
+        # Handle case where content_block might be a raw dict or a BaseModel
+        content_block_data = event.content_block if isinstance(event.content_block, dict) else event.content_block.to_dict()
         new_block = cast(
             Any,  # Pydantic does not support generic unions at runtime
-            construct_type(type_=ParsedBetaContentBlock, value=event.content_block.to_dict()),
+            construct_type(type_=ParsedBetaContentBlock, value=content_block_data),
         )
         if event.index >= len(current_snapshot.content):
             current_snapshot.content.extend([None] * (event.index - len(current_snapshot.content) + 1))  # type: ignore[arg-type]

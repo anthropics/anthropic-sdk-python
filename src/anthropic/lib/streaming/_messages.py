@@ -419,14 +419,18 @@ def accumulate_event(
 
     if current_snapshot is None:
         if event.type == "message_start":
-            return Message.construct(**cast(Any, event.message.to_dict()))
+            # Handle case where message might be a raw dict or a BaseModel
+            message_data = event.message if isinstance(event.message, dict) else event.message.to_dict()
+            return Message.construct(**cast(Any, message_data))
 
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
     if event.type == "content_block_start":
+        # Handle case where content_block might be a raw dict or a BaseModel
+        content_block_data = event.content_block if isinstance(event.content_block, dict) else event.content_block.model_dump()
         new_block = cast(
             ContentBlock,
-            construct_type(type_=ContentBlock, value=event.content_block.model_dump()),
+            construct_type(type_=ContentBlock, value=content_block_data),
         )
         if event.index >= len(current_snapshot.content):
             current_snapshot.content.extend([None] * (event.index - len(current_snapshot.content) + 1))  # type: ignore[arg-type]
