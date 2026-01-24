@@ -155,10 +155,14 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         raise NotImplementedError()
         yield  # type: ignore[unreachable]
 
-    def _check_and_compact(self) -> bool:
+    def _check_and_compact(self, current_message: ParsedBetaMessage[ResponseFormatT] | None = None) -> bool:
         """
         Check token usage and compact messages if threshold exceeded.
         Returns True if compaction was performed, False otherwise.
+
+        Args:
+            current_message: The current assistant message that hasn't been appended yet.
+                           This is needed to include server tool results in compaction.
         """
         if self._compaction_control is None or not self._compaction_control["enabled"]:
             return False
@@ -184,6 +188,10 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         model = self._compaction_control.get("model", self._params["model"])
 
         messages = list(self._params["messages"])
+
+        # Include current message if provided (contains server tool results not yet appended)
+        if current_message is not None:
+            messages.append({"role": current_message.role, "content": current_message.content})
 
         if messages[-1]["role"] == "assistant":
             # Remove tool_use and server_tool_use blocks from the last message to avoid 400 error
@@ -249,7 +257,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             self._iteration_count += 1
 
             # If the compaction was performed, skip tool call generation this iteration
-            if not self._check_and_compact():
+            # Pass current message so compaction can include server tool results
+            if not self._check_and_compact(message):
                 response = self.generate_tool_call_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
@@ -406,10 +415,14 @@ class BaseAsyncToolRunner(
         raise NotImplementedError()
         yield  # type: ignore[unreachable]
 
-    async def _check_and_compact(self) -> bool:
+    async def _check_and_compact(self, current_message: ParsedBetaMessage[ResponseFormatT] | None = None) -> bool:
         """
         Check token usage and compact messages if threshold exceeded.
         Returns True if compaction was performed, False otherwise.
+
+        Args:
+            current_message: The current assistant message that hasn't been appended yet.
+                           This is needed to include server tool results in compaction.
         """
         if self._compaction_control is None or not self._compaction_control["enabled"]:
             return False
@@ -435,6 +448,10 @@ class BaseAsyncToolRunner(
         model = self._compaction_control.get("model", self._params["model"])
 
         messages = list(self._params["messages"])
+
+        # Include current message if provided (contains server tool results not yet appended)
+        if current_message is not None:
+            messages.append({"role": current_message.role, "content": current_message.content})
 
         if messages[-1]["role"] == "assistant":
             # Remove tool_use and server_tool_use blocks from the last message to avoid 400 error
@@ -500,7 +517,8 @@ class BaseAsyncToolRunner(
             self._iteration_count += 1
 
             # If the compaction was performed, skip tool call generation this iteration
-            if not await self._check_and_compact():
+            # Pass current message so compaction can include server tool results
+            if not await self._check_and_compact(message):
                 response = await self.generate_tool_call_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
