@@ -190,8 +190,12 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         messages = list(self._params["messages"])
 
         # Include current message if provided (contains server tool results not yet appended)
+        # Convert content to dicts so the filter logic below works correctly
         if current_message is not None:
-            messages.append({"role": current_message.role, "content": current_message.content})
+            messages.append({
+                "role": current_message.role,
+                "content": [block.model_dump() for block in current_message.content]
+            })
 
         if messages[-1]["role"] == "assistant":
             # Remove tool_use and server_tool_use blocks from the last message to avoid 400 error
@@ -450,8 +454,12 @@ class BaseAsyncToolRunner(
         messages = list(self._params["messages"])
 
         # Include current message if provided (contains server tool results not yet appended)
+        # Convert content to dicts so the filter logic below works correctly
         if current_message is not None:
-            messages.append({"role": current_message.role, "content": current_message.content})
+            messages.append({
+                "role": current_message.role,
+                "content": [block.model_dump() for block in current_message.content]
+            })
 
         if messages[-1]["role"] == "assistant":
             # Remove tool_use and server_tool_use blocks from the last message to avoid 400 error
