@@ -186,12 +186,12 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         messages = list(self._params["messages"])
 
         if messages[-1]["role"] == "assistant":
-            # Remove tool_use blocks from the last message to avoid 400 error
-            # (tool_use requires tool_result, which we don't have yet)
+            # Remove tool_use and server_tool_use blocks from the last message to avoid 400 error
+            # (tool_use/server_tool_use requires corresponding result blocks, which we don't have yet)
             non_tool_blocks = [
                 block
                 for block in messages[-1]["content"]
-                if isinstance(block, dict) and block.get("type") != "tool_use"
+                if isinstance(block, dict) and block.get("type") not in ("tool_use", "server_tool_use")
             ]
 
             if non_tool_blocks:
@@ -437,12 +437,12 @@ class BaseAsyncToolRunner(
         messages = list(self._params["messages"])
 
         if messages[-1]["role"] == "assistant":
-            # Remove tool_use blocks from the last message to avoid 400 error
-            # (tool_use requires tool_result, which we don't have yet)
+            # Remove tool_use and server_tool_use blocks from the last message to avoid 400 error
+            # (tool_use/server_tool_use requires corresponding result blocks, which we don't have yet)
             non_tool_blocks = [
                 block
                 for block in messages[-1]["content"]
-                if isinstance(block, dict) and block.get("type") != "tool_use"
+                if isinstance(block, dict) and block.get("type") not in ("tool_use", "server_tool_use")
             ]
 
             if non_tool_blocks:
