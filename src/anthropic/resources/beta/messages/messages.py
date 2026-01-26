@@ -40,6 +40,7 @@ from ....types.beta import (
     message_create_params,
     message_count_tokens_params,
 )
+from ...._exceptions import AnthropicError
 from ...._base_client import make_request_options
 from ...._utils._utils import is_dict
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
@@ -1016,6 +1017,8 @@ class Messages(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
         validate_output_format(output_format)
+        _validate_output_config_conflict(output_config, output_format)
+        _warn_output_format_deprecated(output_format)
 
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
@@ -1028,6 +1031,8 @@ class Messages(SyncAPIResource):
                 DeprecationWarning,
                 stacklevel=3,
             )
+
+        merged_output_config = _merge_output_configs(output_config, output_format)
 
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -1044,8 +1049,8 @@ class Messages(SyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
-                    "output_config": output_config,
-                    "output_format": output_format,
+                    "output_config": merged_output_config,
+                    "output_format": omit,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -1099,6 +1104,9 @@ class Messages(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> ParsedBetaMessage[ResponseFormatT]:
+        _validate_output_config_conflict(output_config, output_format)
+        _warn_output_format_deprecated(output_format)
+
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
                 max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
@@ -1113,9 +1121,9 @@ class Messages(SyncAPIResource):
 
         betas = [beta for beta in betas] if is_given(betas) else []
 
-        if "structured-outputs-2025-11-13" not in betas and is_given(output_format):
+        if "structured-outputs-2025-12-15" not in betas and is_given(output_format):
             # Ensure structured outputs beta is included for parse method
-            betas.append("structured-outputs-2025-11-13")
+            betas.append("structured-outputs-2025-12-15")
 
         extra_headers = {
             "X-Stainless-Helper": "beta.messages.parse",
@@ -1123,23 +1131,25 @@ class Messages(SyncAPIResource):
             **(extra_headers or {}),
         }
 
-        transformed_output_format: Optional[message_create_params.OutputFormat] | NotGiven = NOT_GIVEN
-
         if is_given(output_format) and output_format is not None:
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
 
             try:
                 schema = adapted_type.json_schema()
-                transformed_output_format = message_create_params.OutputFormat(
+                transformed_output_format = BetaJSONOutputFormatParam(
                     schema=transform_schema(schema), type="json_schema"
                 )
             except pydantic.errors.PydanticSchemaGenerationError as e:
                 raise TypeError(
                     (
                         "Could not generate JSON schema for the given `output_format` type. "
-                        "Use a type that works with `pydanitc.TypeAdapter`"
+                        "Use a type that works with `pydantic.TypeAdapter`"
                     )
                 ) from e
+
+            merged_output_config = _merge_output_configs(output_config, transformed_output_format)
+        else:
+            merged_output_config = output_config
 
         def parser(response: BetaMessage) -> ParsedBetaMessage[ResponseFormatT]:
             return parse_response(
@@ -1161,8 +1171,8 @@ class Messages(SyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
-                    "output_config": output_config,
-                    "output_format": transformed_output_format,
+                    "output_config": merged_output_config,
+                    "output_format": omit,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -1322,6 +1332,9 @@ class Messages(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaStreamingToolRunner[ResponseFormatT] | BetaToolRunner[ResponseFormatT]:
         """Create a Message stream"""
+        _validate_output_config_conflict(output_config, output_format)
+        _warn_output_format_deprecated(output_format)
+
         if model in DEPRECATED_MODELS:
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
@@ -1425,6 +1438,9 @@ class Messages(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaMessageStreamManager[ResponseFormatT]:
+        _validate_output_config_conflict(output_config, output_format)
+        _warn_output_format_deprecated(output_format)
+
         if model in DEPRECATED_MODELS:
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
@@ -1440,7 +1456,7 @@ class Messages(SyncAPIResource):
             **(extra_headers or {}),
         }
 
-        transformed_output_format: Optional[BetaJSONOutputFormatParam] | NotGiven = NOT_GIVEN
+        transformed_output_format: BetaJSONOutputFormatParam | Omit = omit
 
         if is_dict(output_format):
             transformed_output_format = cast(BetaJSONOutputFormatParam, output_format)
@@ -1456,9 +1472,12 @@ class Messages(SyncAPIResource):
                 raise TypeError(
                     (
                         "Could not generate JSON schema for the given `output_format` type. "
-                        "Use a type that works with `pydanitc.TypeAdapter`"
+                        "Use a type that works with `pydantic.TypeAdapter`"
                     )
                 ) from e
+
+        merged_output_config = _merge_output_configs(output_config, transformed_output_format)
+
         make_request = partial(
             self._post,
             "/v1/messages?beta=true",
@@ -1468,8 +1487,8 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
-                    "output_config": output_config,
-                    "output_format": transformed_output_format,
+                    "output_config": merged_output_config,
+                    "output_format": omit,
                     "container": container,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
@@ -1720,6 +1739,11 @@ class Messages(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        _validate_output_config_conflict(output_config, output_format)
+        _warn_output_format_deprecated(output_format)
+
+        merged_output_config = _merge_output_configs(output_config, output_format)
+
         extra_headers = {
             **strip_not_given(
                 {
@@ -1739,8 +1763,8 @@ class Messages(SyncAPIResource):
                     "model": model,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
-                    "output_config": output_config,
-                    "output_format": output_format,
+                    "output_config": merged_output_config,
+                    "output_format": omit,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
@@ -2693,6 +2717,8 @@ class AsyncMessages(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
         validate_output_format(output_format)
+        _validate_output_config_conflict(output_config, output_format)
+        _warn_output_format_deprecated(output_format)
 
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
@@ -2705,6 +2731,8 @@ class AsyncMessages(AsyncAPIResource):
                 DeprecationWarning,
                 stacklevel=3,
             )
+
+        merged_output_config = _merge_output_configs(output_config, output_format)
 
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -2721,8 +2749,8 @@ class AsyncMessages(AsyncAPIResource):
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
-                    "output_config": output_config,
-                    "output_format": output_format,
+                    "output_config": merged_output_config,
+                    "output_format": omit,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -2776,6 +2804,9 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> ParsedBetaMessage[ResponseFormatT]:
+        _validate_output_config_conflict(output_config, output_format)
+        _warn_output_format_deprecated(output_format)
+
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
                 max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
@@ -2789,9 +2820,9 @@ class AsyncMessages(AsyncAPIResource):
             )
         betas = [beta for beta in betas] if is_given(betas) else []
 
-        if "structured-outputs-2025-11-13" not in betas and is_given(output_format):
+        if "structured-outputs-2025-12-15" not in betas and is_given(output_format):
             # Ensure structured outputs beta is included for parse method
-            betas.append("structured-outputs-2025-11-13")
+            betas.append("structured-outputs-2025-12-15")
 
         extra_headers = {
             "X-Stainless-Helper": "beta.messages.parse",
@@ -2799,23 +2830,25 @@ class AsyncMessages(AsyncAPIResource):
             **(extra_headers or {}),
         }
 
-        transformed_output_format: Optional[message_create_params.OutputFormat] | NotGiven = NOT_GIVEN
-
         if is_given(output_format) and output_format is not None:
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
 
             try:
                 schema = adapted_type.json_schema()
-                transformed_output_format = message_create_params.OutputFormat(
+                transformed_output_format = BetaJSONOutputFormatParam(
                     schema=transform_schema(schema), type="json_schema"
                 )
             except pydantic.errors.PydanticSchemaGenerationError as e:
                 raise TypeError(
                     (
                         "Could not generate JSON schema for the given `output_format` type. "
-                        "Use a type that works with `pydanitc.TypeAdapter`"
+                        "Use a type that works with `pydantic.TypeAdapter`"
                     )
                 ) from e
+
+            merged_output_config = _merge_output_configs(output_config, transformed_output_format)
+        else:
+            merged_output_config = output_config
 
         def parser(response: BetaMessage) -> ParsedBetaMessage[ResponseFormatT]:
             return parse_response(
@@ -2836,9 +2869,9 @@ class AsyncMessages(AsyncAPIResource):
                     "container": container,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
-                    "output_config": output_config,
+                    "output_config": merged_output_config,
                     "metadata": metadata,
-                    "output_format": transformed_output_format,
+                    "output_format": omit,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -2998,6 +3031,9 @@ class AsyncMessages(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaAsyncToolRunner[ResponseFormatT] | BetaAsyncStreamingToolRunner[ResponseFormatT]:
         """Create a Message stream"""
+        _validate_output_config_conflict(output_config, output_format)
+        _warn_output_format_deprecated(output_format)
+
         if model in DEPRECATED_MODELS:
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
@@ -3101,6 +3137,9 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> BetaAsyncMessageStreamManager[ResponseFormatT]:
+        _validate_output_config_conflict(output_config, output_format)
+        _warn_output_format_deprecated(output_format)
+
         if model in DEPRECATED_MODELS:
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
@@ -3115,7 +3154,7 @@ class AsyncMessages(AsyncAPIResource):
             **(extra_headers or {}),
         }
 
-        transformed_output_format: Optional[BetaJSONOutputFormatParam] | NotGiven = NOT_GIVEN
+        transformed_output_format: BetaJSONOutputFormatParam | Omit = omit
 
         if is_dict(output_format):
             transformed_output_format = cast(BetaJSONOutputFormatParam, output_format)
@@ -3131,9 +3170,12 @@ class AsyncMessages(AsyncAPIResource):
                 raise TypeError(
                     (
                         "Could not generate JSON schema for the given `output_format` type. "
-                        "Use a type that works with `pydanitc.TypeAdapter`"
+                        "Use a type that works with `pydantic.TypeAdapter`"
                     )
                 ) from e
+
+        merged_output_config = _merge_output_configs(output_config, transformed_output_format)
+
         request = self._post(
             "/v1/messages?beta=true",
             body=maybe_transform(
@@ -3142,8 +3184,8 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
-                    "output_config": output_config,
-                    "output_format": transformed_output_format,
+                    "output_config": merged_output_config,
+                    "output_format": omit,
                     "container": container,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
@@ -3394,6 +3436,11 @@ class AsyncMessages(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        _validate_output_config_conflict(output_config, output_format)
+        _warn_output_format_deprecated(output_format)
+
+        merged_output_config = _merge_output_configs(output_config, output_format)
+
         extra_headers = {
             **strip_not_given(
                 {
@@ -3413,8 +3460,8 @@ class AsyncMessages(AsyncAPIResource):
                     "model": model,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
-                    "output_config": output_config,
-                    "output_format": output_format,
+                    "output_config": merged_output_config,
+                    "output_format": omit,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
@@ -3436,6 +3483,9 @@ class MessagesWithRawResponse:
         self.create = _legacy_response.to_raw_response_wrapper(
             messages.create,
         )
+        self.parse = _legacy_response.to_raw_response_wrapper(
+            messages.parse,
+        )
         self.count_tokens = _legacy_response.to_raw_response_wrapper(
             messages.count_tokens,
         )
@@ -3451,6 +3501,9 @@ class AsyncMessagesWithRawResponse:
 
         self.create = _legacy_response.async_to_raw_response_wrapper(
             messages.create,
+        )
+        self.parse = _legacy_response.async_to_raw_response_wrapper(
+            messages.parse,
         )
         self.count_tokens = _legacy_response.async_to_raw_response_wrapper(
             messages.count_tokens,
@@ -3497,4 +3550,38 @@ def validate_output_format(output_format: object) -> None:
     if inspect.isclass(output_format) and issubclass(output_format, pydantic.BaseModel):
         raise TypeError(
             "You tried to pass a `BaseModel` class to `beta.messages.create()`; You must use `beta.messages.parse()` instead"
+        )
+
+
+def _validate_output_config_conflict(
+    output_config: BetaOutputConfigParam | Omit,
+    output_format: object,
+) -> None:
+    if is_given(output_format) and output_format is not None and is_given(output_config):
+        if "format" in output_config and output_config["format"] is not None:
+            raise AnthropicError(
+                "Both output_format and output_config.format were provided. "
+                "Please use only output_config.format (output_format is deprecated).",
+            )
+
+
+def _merge_output_configs(
+    output_config: BetaOutputConfigParam | Omit,
+    output_format: Optional[BetaJSONOutputFormatParam] | Omit,
+) -> BetaOutputConfigParam | Omit:
+    if is_given(output_format):
+        if is_given(output_config):
+            return {**output_config, "format": output_format}
+        else:
+            return {"format": output_format}
+    return output_config
+
+
+def _warn_output_format_deprecated(output_format: object) -> None:
+    """Emit deprecation warning if output_format is provided."""
+    if is_given(output_format) and output_format is not None:
+        warnings.warn(
+            "The 'output_format' parameter is deprecated. Please use 'output_config.format' instead.",
+            DeprecationWarning,
+            stacklevel=4,
         )

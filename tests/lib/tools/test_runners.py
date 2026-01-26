@@ -425,7 +425,7 @@ class TestSyncRunTools:
                         ),
                     }
                 ],
-                betas=["structured-outputs-2025-11-13"],
+                betas=["structured-outputs-2025-12-15"],
                 compaction_control={"enabled": True, "context_token_threshold": 500},
                 max_iterations=1,
             )
