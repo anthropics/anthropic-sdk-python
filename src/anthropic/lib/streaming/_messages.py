@@ -419,7 +419,9 @@ def accumulate_event(
 
     if current_snapshot is None:
         if event.type == "message_start":
-            return Message.construct(**cast(Any, event.message.to_dict()))
+            return Message.construct(
+                **cast(Any, event.message.to_dict() if hasattr(event.message, "to_dict") else event.message)
+            )
 
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
@@ -428,7 +430,12 @@ def accumulate_event(
         current_snapshot.content.append(
             cast(
                 ContentBlock,
-                construct_type(type_=ContentBlock, value=event.content_block.model_dump()),
+                construct_type(
+                    type_=ContentBlock,
+                    value=event.content_block.model_dump()
+                    if hasattr(event.content_block, "model_dump")
+                    else event.content_block,
+                ),
             ),
         )
     elif event.type == "content_block_delta":
