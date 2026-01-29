@@ -32,6 +32,11 @@ from .text_citation import TextCitation as TextCitation
 from .beta_api_error import BetaAPIError as BetaAPIError
 from .cache_creation import CacheCreation as CacheCreation
 from .metadata_param import MetadataParam as MetadataParam
+from .parsed_message import (
+    ParsedMessage as ParsedMessage,
+    ParsedTextBlock as ParsedTextBlock,
+    ParsedContentBlock as ParsedContentBlock,
+)
 from .thinking_block import ThinkingBlock as ThinkingBlock
 from .thinking_delta import ThinkingDelta as ThinkingDelta
 from .tool_use_block import ToolUseBlock as ToolUseBlock
@@ -51,6 +56,7 @@ from .content_block_param import ContentBlockParam as ContentBlockParam
 from .message_delta_event import MessageDeltaEvent as MessageDeltaEvent
 from .message_delta_usage import MessageDeltaUsage as MessageDeltaUsage
 from .message_start_event import MessageStartEvent as MessageStartEvent
+from .output_config_param import OutputConfigParam as OutputConfigParam
 from .text_citation_param import TextCitationParam as TextCitationParam
 from .anthropic_beta_param import AnthropicBetaParam as AnthropicBetaParam
 from .beta_not_found_error import BetaNotFoundError as BetaNotFoundError
@@ -85,6 +91,7 @@ from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockPara
 from .web_search_result_block import WebSearchResultBlock as WebSearchResultBlock
 from .completion_create_params import CompletionCreateParams as CompletionCreateParams
 from .content_block_stop_event import ContentBlockStopEvent as ContentBlockStopEvent
+from .json_output_format_param import JSONOutputFormatParam as JSONOutputFormatParam
 from .raw_message_stream_event import RawMessageStreamEvent as RawMessageStreamEvent
 from .tool_bash_20250124_param import ToolBash20250124Param as ToolBash20250124Param
 from .base64_image_source_param import Base64ImageSourceParam as Base64ImageSourceParam

@@ -9,6 +9,7 @@ from .model_param import ModelParam
 from .message_param import MessageParam
 from .text_block_param import TextBlockParam
 from .tool_choice_param import ToolChoiceParam
+from .output_config_param import OutputConfigParam
 from .thinking_config_param import ThinkingConfigParam
 from .message_count_tokens_tool_param import MessageCountTokensToolParam
 
@@ -90,6 +91,9 @@ class MessageCountTokensParams(TypedDict, total=False):
     [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
+
+    output_config: OutputConfigParam
+    """Configuration options for the model's output, such as the output format."""
 
     system: Union[str, Iterable[TextBlockParam]]
     """System prompt.

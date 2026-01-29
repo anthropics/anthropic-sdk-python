@@ -1,0 +1,3 @@
+[
+  "{\"model\":\"claude-sonnet-4-5-20250929\",\"id\":\"msg_017WC3Wjr8Kdh76hKBq93NRi\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"{\\\"name\\\":\\\"John Doe\\\",\\\"age\\\":30}\"}],\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"usage\":{\"input_tokens\":222,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":14,\"service_tier\":\"standard\"}}"
+]

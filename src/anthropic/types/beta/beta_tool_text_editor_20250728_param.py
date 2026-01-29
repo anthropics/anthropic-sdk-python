@@ -39,3 +39,4 @@ class BetaToolTextEditor20250728Param(TypedDict, total=False):
     """
 
     strict: bool
+    """When true, guarantees schema validation on tool names and inputs"""

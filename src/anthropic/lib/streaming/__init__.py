@@ -6,6 +6,9 @@ from ._types import (
     MessageStopEvent as MessageStopEvent,
     MessageStreamEvent as MessageStreamEvent,
     ContentBlockStopEvent as ContentBlockStopEvent,
+    ParsedMessageStopEvent as ParsedMessageStopEvent,
+    ParsedMessageStreamEvent as ParsedMessageStreamEvent,
+    ParsedContentBlockStopEvent as ParsedContentBlockStopEvent,
 )
 from ._messages import (
     MessageStream as MessageStream,

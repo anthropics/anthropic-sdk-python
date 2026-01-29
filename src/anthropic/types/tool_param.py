@@ -56,4 +56,7 @@ class ToolParam(TypedDict, total=False):
     aspects of the tool input JSON schema.
     """
 
+    strict: bool
+    """When true, guarantees schema validation on tool names and inputs"""
+
     type: Optional[Literal["custom"]]

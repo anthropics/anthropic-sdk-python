@@ -125,13 +125,17 @@ class MessageCountTokensParams(TypedDict, total=False):
     """MCP servers to be utilized in this request"""
 
     output_config: BetaOutputConfigParam
-    """Configuration options for the model's output.
-
-    Controls aspects like how much effort the model puts into its response.
-    """
+    """Configuration options for the model's output, such as the output format."""
 
     output_format: Optional[BetaJSONOutputFormatParam]
-    """A schema to specify Claude's output format in responses."""
+    """Deprecated: Use `output_config.format` instead.
+
+    See
+    [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+
+    A schema to specify Claude's output format in responses. This parameter will be
+    removed in a future release.
+    """
 
     system: Union[str, Iterable[BetaTextBlockParam]]
     """System prompt.
