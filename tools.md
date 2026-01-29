@@ -47,11 +47,11 @@ The `@beta_tool` decorator will inspect the function arguments and the docstring
 }
 ```
 
-If you want to implement calling the tool yourself, you can then pass the to the API like so:
+If you want to implement calling the tool yourself, you can then pass it to the API like so:
 
 ```python
 message = client.beta.messages.create(
-    tools=[get_weather.to_dict()],
+    tools=[sum.to_dict()],
     # ...
     max_tokens=1024,
     model="claude-sonnet-4-5-20250929",
@@ -63,7 +63,7 @@ or you can use our [tool runner](#tool-runner)!
 
 ## Tool runner
 
-We provide a `client.beta.messages.tool_runner()` method that can automatically call tools defined with `@beta_tool()`. This method returns a `BetaToolRunner` class that is an iterator where each iteration yields a new `BetaMessage` instance from an API call, iteration will stop when there no tool call content blocks.
+We provide a `client.beta.messages.tool_runner()` method that can automatically call tools defined with `@beta_tool()`. This method returns a `BetaToolRunner` class that is an iterator where each iteration yields a new `BetaMessage` instance from an API call, iteration will stop when there are no tool call content blocks.
 
 ```py
 runner = client.beta.messages.tool_runner(
