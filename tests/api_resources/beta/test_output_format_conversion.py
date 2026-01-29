@@ -122,7 +122,7 @@ class TestOutputFormatConversion:
                 messages=[{"role": "user", "content": "Test"}],
                 model="claude-sonnet-4-5",
                 output_format={"type": "json_schema", "schema": {"type": "string"}},
-            ) as stream: # type: ignore
+            ) as stream:  # type: ignore
                 pass
 
         request = respx_mock.calls.last.request
@@ -239,7 +239,7 @@ class TestOutputFormatDeprecation:
                 messages=[{"role": "user", "content": "Test"}],
                 model="claude-sonnet-4-5",
                 output_format={"type": "json_schema", "schema": {"type": "string"}},
-            ) as stream: # type: ignore
+            ) as stream:  # type: ignore
                 pass
 
     def test_count_tokens_emits_deprecation_warning(self, client: Anthropic, respx_mock: MockRouter) -> None:

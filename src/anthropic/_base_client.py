@@ -89,8 +89,8 @@ from ._exceptions import (
     APIConnectionError,
     APIResponseValidationError,
 )
-from ._utils._httpx import get_environment_proxies
 from ._utils._json import openapi_dumps
+from ._utils._httpx import get_environment_proxies
 from ._legacy_response import LegacyAPIResponse
 
 log: logging.Logger = logging.getLogger(__name__)
