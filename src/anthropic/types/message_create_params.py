@@ -12,6 +12,7 @@ from .metadata_param import MetadataParam
 from .text_block_param import TextBlockParam
 from .tool_union_param import ToolUnionParam
 from .tool_choice_param import ToolChoiceParam
+from .output_config_param import OutputConfigParam
 from .thinking_config_param import ThinkingConfigParam
 
 __all__ = ["MessageCreateParamsBase", "MessageCreateParamsNonStreaming", "MessageCreateParamsStreaming"]
@@ -105,6 +106,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     metadata: MetadataParam
     """An object describing metadata about the request."""
+
+    output_config: OutputConfigParam
+    """Configuration options for the model's output, such as the output format."""
 
     service_tier: Literal["auto", "standard_only"]
     """

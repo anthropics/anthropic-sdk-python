@@ -54,3 +54,4 @@ class BetaWebFetchTool20250910Param(TypedDict, total=False):
     """Maximum number of times the tool can be used in the API request."""
 
     strict: bool
+    """When true, guarantees schema validation on tool names and inputs"""

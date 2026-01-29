@@ -203,8 +203,7 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -501,8 +500,7 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -795,8 +793,7 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -1135,8 +1132,7 @@ class Messages(SyncAPIResource):
 
           mcp_servers: MCP servers to be utilized in this request
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -1432,8 +1428,7 @@ class AsyncMessages(AsyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -1730,8 +1725,7 @@ class AsyncMessages(AsyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -2024,8 +2018,7 @@ class AsyncMessages(AsyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -2364,8 +2357,7 @@ class AsyncMessages(AsyncAPIResource):
 
           mcp_servers: MCP servers to be utilized in this request
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)

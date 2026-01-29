@@ -72,6 +72,7 @@ class BetaWebSearchTool20250305Param(TypedDict, total=False):
     """Maximum number of times the tool can be used in the API request."""
 
     strict: bool
+    """When true, guarantees schema validation on tool names and inputs"""
 
     user_location: Optional[UserLocation]
     """Parameters for the user's location.

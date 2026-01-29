@@ -36,6 +36,7 @@ from ...types.metadata_param import MetadataParam
 from ...types.text_block_param import TextBlockParam
 from ...types.tool_union_param import ToolUnionParam
 from ...types.tool_choice_param import ToolChoiceParam
+from ...types.output_config_param import OutputConfigParam
 from ...types.message_tokens_count import MessageTokensCount
 from ...types.thinking_config_param import ThinkingConfigParam
 from ...types.raw_message_stream_event import RawMessageStreamEvent
@@ -76,6 +77,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
@@ -183,6 +185,8 @@ class Messages(SyncAPIResource):
               details and options.
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -345,6 +349,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -456,6 +461,8 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
+          output_config: Configuration options for the model's output, such as the output format.
+
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
 
@@ -613,6 +620,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: bool,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -723,6 +731,8 @@ class Messages(SyncAPIResource):
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -880,6 +890,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
@@ -907,6 +918,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -935,6 +947,7 @@ class Messages(SyncAPIResource):
         *,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        output_config: OutputConfigParam | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
@@ -1025,6 +1038,8 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           system: System prompt.
 
@@ -1135,6 +1150,7 @@ class Messages(SyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "output_config": output_config,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
@@ -1181,6 +1197,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
@@ -1288,6 +1305,8 @@ class AsyncMessages(AsyncAPIResource):
               details and options.
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -1450,6 +1469,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1560,6 +1580,8 @@ class AsyncMessages(AsyncAPIResource):
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -1718,6 +1740,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: bool,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1828,6 +1851,8 @@ class AsyncMessages(AsyncAPIResource):
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -1985,6 +2010,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
@@ -2012,6 +2038,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -2040,6 +2067,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        output_config: OutputConfigParam | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
@@ -2130,6 +2158,8 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           system: System prompt.
 
@@ -2240,6 +2270,7 @@ class AsyncMessages(AsyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "output_config": output_config,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,

@@ -33,3 +33,4 @@ class BetaToolTextEditor20250429Param(TypedDict, total=False):
     input_examples: Iterable[Dict[str, object]]
 
     strict: bool
+    """When true, guarantees schema validation on tool names and inputs"""

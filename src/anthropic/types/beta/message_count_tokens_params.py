@@ -125,11 +125,7 @@ class MessageCountTokensParams(TypedDict, total=False):
     """MCP servers to be utilized in this request"""
 
     output_config: BetaOutputConfigParam
-    """Configuration options for the model's output.
-
-    Controls aspects like output format or how much effort the model puts into its
-    response.
-    """
+    """Configuration options for the model's output, such as the output format."""
 
     output_format: Optional[BetaJSONOutputFormatParam]
     """Deprecated: Use `output_config.format` instead.
