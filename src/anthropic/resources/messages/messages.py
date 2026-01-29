@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import warnings
-from typing import Union, Iterable, Optional
+from typing import Type, Union, Iterable, Optional, cast
 from functools import partial
 from typing_extensions import Literal, overload
 
 import httpx
+import pydantic
 
 from ... import _legacy_response
 from ...types import (
@@ -26,21 +27,28 @@ from .batches import (
 from ..._types import NOT_GIVEN, Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ..._utils import is_given, required_args, maybe_transform, async_maybe_transform
 from ..._compat import cached_property
+from ..._models import TypeAdapter
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
 from ..._constants import DEFAULT_TIMEOUT, MODEL_NONSTREAMING_TOKENS
 from ..._streaming import Stream, AsyncStream
 from ..._base_client import make_request_options
+from ..._utils._utils import is_dict
 from ...lib.streaming import MessageStreamManager, AsyncMessageStreamManager
 from ...types.message import Message
 from ...types.model_param import ModelParam
 from ...types.message_param import MessageParam
+from ...lib._parse._response import ResponseFormatT, parse_response
 from ...types.metadata_param import MetadataParam
+from ...types.parsed_message import ParsedMessage
+from ...lib._parse._transform import transform_schema
 from ...types.text_block_param import TextBlockParam
 from ...types.tool_union_param import ToolUnionParam
 from ...types.tool_choice_param import ToolChoiceParam
+from ...types.output_config_param import OutputConfigParam
 from ...types.message_tokens_count import MessageTokensCount
 from ...types.thinking_config_param import ThinkingConfigParam
+from ...types.json_output_format_param import JSONOutputFormatParam
 from ...types.raw_message_stream_event import RawMessageStreamEvent
 from ...types.message_count_tokens_tool_param import MessageCountTokensToolParam
 
@@ -96,6 +104,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
@@ -203,6 +212,8 @@ class Messages(SyncAPIResource):
               details and options.
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -365,6 +376,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -476,6 +488,8 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
+          output_config: Configuration options for the model's output, such as the output format.
+
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
 
@@ -633,6 +647,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: bool,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -743,6 +758,8 @@ class Messages(SyncAPIResource):
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -900,6 +917,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
@@ -937,6 +955,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -967,6 +986,8 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
+        output_format: None | JSONOutputFormatParam | type[ResponseFormatT] | Omit = omit,
         container: Optional[str] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -983,7 +1004,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> MessageStreamManager:
+    ) -> MessageStreamManager[ResponseFormatT]:
         """Create a Message stream"""
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -997,6 +1018,35 @@ class Messages(SyncAPIResource):
             "X-Stainless-Stream-Helper": "messages",
             **(extra_headers or {}),
         }
+
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+
+        if is_dict(output_format):
+            transformed_output_format = cast(JSONOutputFormatParam, output_format)
+        elif is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydantic.TypeAdapter`"
+                    )
+                ) from e
+
+        # Merge output_format into output_config
+        merged_output_config: OutputConfigParam | Omit = omit
+        if is_given(transformed_output_format):
+            if is_given(output_config):
+                merged_output_config = {**output_config, "format": transformed_output_format}
+            else:
+                merged_output_config = {"format": transformed_output_format}
+        elif is_given(output_config):
+            merged_output_config = output_config
+
         make_request = partial(
             self._post,
             "/v1/messages",
@@ -1006,6 +1056,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "output_config": merged_output_config,
                     "container": container,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
@@ -1027,13 +1078,129 @@ class Messages(SyncAPIResource):
             stream=True,
             stream_cls=Stream[RawMessageStreamEvent],
         )
-        return MessageStreamManager(make_request)
+        return MessageStreamManager(
+            make_request,
+            output_format=NOT_GIVEN if is_dict(output_format) else cast(ResponseFormatT, output_format),
+        )
+
+    def parse(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[MessageParam],
+        model: ModelParam,
+        metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ParsedMessage[ResponseFormatT]:
+        if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+            timeout = self._client._calculate_nonstreaming_timeout(
+                max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
+            )
+
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+        extra_headers = {
+            "X-Stainless-Helper": "messages.parse",
+            **(extra_headers or {}),
+        }
+
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+
+        if is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydantic.TypeAdapter`"
+                    )
+                ) from e
+
+        def parser(response: Message) -> ParsedMessage[ResponseFormatT]:
+            return parse_response(
+                response=response,
+                output_format=cast(
+                    ResponseFormatT,
+                    output_format if is_given(output_format) and output_format is not None else NOT_GIVEN,
+                ),
+            )
+
+        # Merge output_format into output_config
+        merged_output_config: OutputConfigParam | Omit = omit
+        if is_given(transformed_output_format):
+            if is_given(output_config):
+                merged_output_config = {**output_config, "format": transformed_output_format}
+            else:
+                merged_output_config = {"format": transformed_output_format}
+        elif is_given(output_config):
+            merged_output_config = output_config
+
+        return self._post(
+            "/v1/messages",
+            body=maybe_transform(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "metadata": metadata,
+                    "output_config": merged_output_config,
+                    "service_tier": service_tier,
+                    "stop_sequences": stop_sequences,
+                    "stream": stream,
+                    "system": system,
+                    "temperature": temperature,
+                    "thinking": thinking,
+                    "tool_choice": tool_choice,
+                    "tools": tools,
+                    "top_k": top_k,
+                    "top_p": top_p,
+                },
+                message_create_params.MessageCreateParamsNonStreaming,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                post_parser=parser,
+            ),
+            cast_to=cast(Type[ParsedMessage[ResponseFormatT]], Message),
+            stream=False,
+        )
 
     def count_tokens(
         self,
         *,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        output_config: OutputConfigParam | Omit = omit,
+        output_format: None | JSONOutputFormatParam | type | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
@@ -1124,6 +1291,14 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          output_config: Configuration options for the model's output, such as the output format.
+
+          output_format: A Pydantic model, JSON schema dictionary, or type that will be
+              converted to a JSON schema for structured output. This is a convenience parameter
+              that will be merged into output_config.format. See
+              [structured outputs](https://docs.anthropic.com/en/docs/build-with-claude/structured-outputs)
+              for more details.
 
           system: System prompt.
 
@@ -1228,12 +1403,42 @@ class Messages(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        # Transform output_format if provided
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+
+        if is_dict(output_format):
+            transformed_output_format = cast(JSONOutputFormatParam, output_format)
+        elif is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[type] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydantic.TypeAdapter`"
+                    )
+                ) from e
+
+        # Merge output_format into output_config
+        merged_output_config: OutputConfigParam | Omit = omit
+        if is_given(transformed_output_format):
+            if is_given(output_config):
+                merged_output_config = {**output_config, "format": transformed_output_format}
+            else:
+                merged_output_config = {"format": transformed_output_format}
+        elif is_given(output_config):
+            merged_output_config = output_config
+
         return self._post(
             "/v1/messages/count_tokens",
             body=maybe_transform(
                 {
                     "messages": messages,
                     "model": model,
+                    "output_config": merged_output_config,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
@@ -1280,6 +1485,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
@@ -1387,6 +1593,8 @@ class AsyncMessages(AsyncAPIResource):
               details and options.
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -1549,6 +1757,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1659,6 +1868,8 @@ class AsyncMessages(AsyncAPIResource):
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -1817,6 +2028,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: bool,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1927,6 +2139,8 @@ class AsyncMessages(AsyncAPIResource):
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
           metadata: An object describing metadata about the request.
+
+          output_config: Configuration options for the model's output, such as the output format.
 
           service_tier: Determines whether to use priority capacity (if available) or standard capacity
               for this request.
@@ -2084,6 +2298,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
@@ -2121,6 +2336,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "output_config": output_config,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
@@ -2151,6 +2367,8 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
+        output_format: None | JSONOutputFormatParam | type[ResponseFormatT] | Omit = omit,
         container: Optional[str] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -2167,7 +2385,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncMessageStreamManager:
+    ) -> AsyncMessageStreamManager[ResponseFormatT]:
         """Create a Message stream"""
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -2181,6 +2399,35 @@ class AsyncMessages(AsyncAPIResource):
             "X-Stainless-Stream-Helper": "messages",
             **(extra_headers or {}),
         }
+
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+
+        if is_dict(output_format):
+            transformed_output_format = cast(JSONOutputFormatParam, output_format)
+        elif is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydantic.TypeAdapter`"
+                    )
+                ) from e
+
+        # Merge output_format into output_config
+        merged_output_config: OutputConfigParam | Omit = omit
+        if is_given(transformed_output_format):
+            if is_given(output_config):
+                merged_output_config = {**output_config, "format": transformed_output_format}
+            else:
+                merged_output_config = {"format": transformed_output_format}
+        elif is_given(output_config):
+            merged_output_config = output_config
+
         request = self._post(
             "/v1/messages",
             body=maybe_transform(
@@ -2189,6 +2436,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "metadata": metadata,
+                    "output_config": merged_output_config,
                     "container": container,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
@@ -2210,13 +2458,129 @@ class AsyncMessages(AsyncAPIResource):
             stream=True,
             stream_cls=AsyncStream[RawMessageStreamEvent],
         )
-        return AsyncMessageStreamManager(request)
+        return AsyncMessageStreamManager(
+            request,
+            output_format=NOT_GIVEN if is_dict(output_format) else cast(ResponseFormatT, output_format),
+        )
+
+    async def parse(
+        self,
+        *,
+        max_tokens: int,
+        messages: Iterable[MessageParam],
+        model: ModelParam,
+        metadata: MetadataParam | Omit = omit,
+        output_config: OutputConfigParam | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        stop_sequences: SequenceNotStr[str] | Omit = omit,
+        stream: Literal[False] | Literal[True] | Omit = omit,
+        system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
+        temperature: float | Omit = omit,
+        thinking: ThinkingConfigParam | Omit = omit,
+        tool_choice: ToolChoiceParam | Omit = omit,
+        tools: Iterable[ToolUnionParam] | Omit = omit,
+        top_k: int | Omit = omit,
+        top_p: float | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> ParsedMessage[ResponseFormatT]:
+        if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+            timeout = self._client._calculate_nonstreaming_timeout(
+                max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
+            )
+
+        if model in DEPRECATED_MODELS:
+            warnings.warn(
+                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+        extra_headers = {
+            "X-Stainless-Helper": "messages.parse",
+            **(extra_headers or {}),
+        }
+
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+
+        if is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydantic.TypeAdapter`"
+                    )
+                ) from e
+
+        def parser(response: Message) -> ParsedMessage[ResponseFormatT]:
+            return parse_response(
+                response=response,
+                output_format=cast(
+                    ResponseFormatT,
+                    output_format if is_given(output_format) and output_format is not None else NOT_GIVEN,
+                ),
+            )
+
+        # Merge output_format into output_config
+        merged_output_config: OutputConfigParam | Omit = omit
+        if is_given(transformed_output_format):
+            if is_given(output_config):
+                merged_output_config = {**output_config, "format": transformed_output_format}
+            else:
+                merged_output_config = {"format": transformed_output_format}
+        elif is_given(output_config):
+            merged_output_config = output_config
+
+        return await self._post(
+            "/v1/messages",
+            body=await async_maybe_transform(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "metadata": metadata,
+                    "output_config": merged_output_config,
+                    "service_tier": service_tier,
+                    "stop_sequences": stop_sequences,
+                    "stream": stream,
+                    "system": system,
+                    "temperature": temperature,
+                    "thinking": thinking,
+                    "tool_choice": tool_choice,
+                    "tools": tools,
+                    "top_k": top_k,
+                    "top_p": top_p,
+                },
+                message_create_params.MessageCreateParamsNonStreaming,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                post_parser=parser,
+            ),
+            cast_to=cast(Type[ParsedMessage[ResponseFormatT]], Message),
+            stream=False,
+        )
 
     async def count_tokens(
         self,
         *,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        output_config: OutputConfigParam | Omit = omit,
+        output_format: None | JSONOutputFormatParam | type | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
@@ -2307,6 +2671,14 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          output_config: Configuration options for the model's output, such as the output format.
+
+          output_format: A Pydantic model, JSON schema dictionary, or type that will be
+              converted to a JSON schema for structured output. This is a convenience parameter
+              that will be merged into output_config.format. See
+              [structured outputs](https://docs.anthropic.com/en/docs/build-with-claude/structured-outputs)
+              for more details.
 
           system: System prompt.
 
@@ -2411,12 +2783,42 @@ class AsyncMessages(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        # Transform output_format if provided
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+
+        if is_dict(output_format):
+            transformed_output_format = cast(JSONOutputFormatParam, output_format)
+        elif is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[type] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydantic.TypeAdapter`"
+                    )
+                ) from e
+
+        # Merge output_format into output_config
+        merged_output_config: OutputConfigParam | Omit = omit
+        if is_given(transformed_output_format):
+            if is_given(output_config):
+                merged_output_config = {**output_config, "format": transformed_output_format}
+            else:
+                merged_output_config = {"format": transformed_output_format}
+        elif is_given(output_config):
+            merged_output_config = output_config
+
         return await self._post(
             "/v1/messages/count_tokens",
             body=await async_maybe_transform(
                 {
                     "messages": messages,
                     "model": model,
+                    "output_config": merged_output_config,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,

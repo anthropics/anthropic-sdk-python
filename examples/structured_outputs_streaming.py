@@ -1,13 +1,3 @@
-# /// script
-# requires-python = ">=3.9"
-# dependencies = [
-#     "anthropic",
-# ]
-#
-# [tool.uv.sources]
-# anthropic = { path = "../", editable = true }
-# ///
-
 import pydantic
 
 import anthropic
@@ -23,10 +13,10 @@ client = anthropic.Anthropic()
 
 prompt = """
 Extract the product name, price, and quantity from this customer message:
-"Hi, I’d like to order 2 packs of Green Tea for 5.50 dollars each."
+"Hi, I'd like to order 2 packs of Green Tea for 5.50 dollars each."
 """
 
-with client.beta.messages.stream(
+with client.messages.stream(
     model="claude-sonnet-4-5",
     messages=[{"role": "user", "content": prompt}],
     max_tokens=1024,
@@ -35,3 +25,7 @@ with client.beta.messages.stream(
     for event in stream:
         if event.type == "text":
             print(event.parsed_snapshot())
+
+    # Get the final parsed output
+    final_message = stream.get_final_message()
+    print(f"\nFinal parsed order: {final_message.parsed_output}")

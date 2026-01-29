@@ -10,7 +10,7 @@ from respx import MockRouter
 
 from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
 from anthropic._compat import PYDANTIC_V1
-from anthropic.lib.streaming import MessageStreamEvent
+from anthropic.lib.streaming import ParsedMessageStreamEvent
 from anthropic.types.message import Message
 from anthropic.resources.messages import DEPRECATED_MODELS
 from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
@@ -26,7 +26,7 @@ async_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_respon
 _T = TypeVar("_T")
 
 
-def assert_basic_response(events: list[MessageStreamEvent], message: Message) -> None:
+def assert_basic_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
     assert message.id == "msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK"
     assert message.model == "claude-3-opus-latest"
     assert message.role == "assistant"
@@ -53,7 +53,7 @@ def assert_basic_response(events: list[MessageStreamEvent], message: Message) ->
     ]
 
 
-def assert_tool_use_response(events: list[MessageStreamEvent], message: Message) -> None:
+def assert_tool_use_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
     assert message.id == "msg_019Q1hrJbZG26Fb9BQhrkHEr"
     assert message.model == "claude-sonnet-4-20250514"
     assert message.role == "assistant"

@@ -46,7 +46,7 @@ from ...._utils._utils import is_dict
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS
 from ....types.model_param import ModelParam
-from ....lib._parse._response import ResponseFormatT, parse_response
+from ....lib._parse._response import ResponseFormatT, parse_beta_response
 from ....lib._parse._transform import transform_schema
 from ....types.beta.beta_message import BetaMessage
 from ....lib.tools._beta_functions import (
@@ -234,8 +234,7 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -532,8 +531,7 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -826,8 +824,7 @@ class Messages(SyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -1152,7 +1149,7 @@ class Messages(SyncAPIResource):
             merged_output_config = output_config
 
         def parser(response: BetaMessage) -> ParsedBetaMessage[ResponseFormatT]:
-            return parse_response(
+            return parse_beta_response(
                 response=response,
                 output_format=cast(
                     ResponseFormatT,
@@ -1625,8 +1622,7 @@ class Messages(SyncAPIResource):
 
           mcp_servers: MCP servers to be utilized in this request
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -1934,8 +1930,7 @@ class AsyncMessages(AsyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -2232,8 +2227,7 @@ class AsyncMessages(AsyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -2526,8 +2520,7 @@ class AsyncMessages(AsyncAPIResource):
 
           metadata: An object describing metadata about the request.
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
@@ -2851,7 +2844,7 @@ class AsyncMessages(AsyncAPIResource):
             merged_output_config = output_config
 
         def parser(response: BetaMessage) -> ParsedBetaMessage[ResponseFormatT]:
-            return parse_response(
+            return parse_beta_response(
                 response=response,
                 output_format=cast(
                     ResponseFormatT,
@@ -3322,8 +3315,7 @@ class AsyncMessages(AsyncAPIResource):
 
           mcp_servers: MCP servers to be utilized in this request
 
-          output_config: Configuration options for the model's output. Controls aspects like output
-              format or how much effort the model puts into its response.
+          output_config: Configuration options for the model's output, such as the output format.
 
           output_format: Deprecated: Use `output_config.format` instead. See
               [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)

@@ -1,5 +1,7 @@
-from typing import Union
+from typing import TYPE_CHECKING, Any, Dict, Union, Generic, cast
 from typing_extensions import List, Literal, Annotated
+
+import jiter
 
 from ...types import (
     Message,
@@ -11,8 +13,10 @@ from ...types import (
     ContentBlockStartEvent as RawContentBlockStartEvent,
     RawContentBlockStopEvent,
 )
-from ..._models import BaseModel
+from ..._models import BaseModel, GenericModel
+from .._parse._response import ResponseFormatT
 from ..._utils._transform import PropertyInfo
+from ...types.parsed_message import ParsedMessage, ParsedContentBlock
 from ...types.citations_delta import Citation
 
 
@@ -24,6 +28,9 @@ class TextEvent(BaseModel):
 
     snapshot: str
     """The entire accumulated text"""
+
+    def parsed_snapshot(self) -> Dict[str, Any]:
+        return cast(Dict[str, Any], jiter.from_json(self.snapshot.encode("utf-8"), partial_mode="trailing-strings"))
 
 
 class CitationEvent(BaseModel):
@@ -95,6 +102,39 @@ MessageStreamEvent = Annotated[
         RawContentBlockStartEvent,
         RawContentBlockDeltaEvent,
         ContentBlockStopEvent,
+    ],
+    PropertyInfo(discriminator="type"),
+]
+
+
+class ParsedMessageStopEvent(RawMessageStopEvent, GenericModel, Generic[ResponseFormatT]):
+    type: Literal["message_stop"]
+
+    message: ParsedMessage[ResponseFormatT]
+
+
+class ParsedContentBlockStopEvent(RawContentBlockStopEvent, GenericModel, Generic[ResponseFormatT]):
+    type: Literal["content_block_stop"]
+
+    if TYPE_CHECKING:
+        content_block: ParsedContentBlock[ResponseFormatT]
+    else:
+        content_block: ParsedContentBlock
+
+
+ParsedMessageStreamEvent = Annotated[
+    Union[
+        TextEvent,
+        CitationEvent,
+        ThinkingEvent,
+        SignatureEvent,
+        InputJsonEvent,
+        RawMessageStartEvent,
+        RawMessageDeltaEvent,
+        ParsedMessageStopEvent[ResponseFormatT],
+        RawContentBlockStartEvent,
+        RawContentBlockDeltaEvent,
+        ParsedContentBlockStopEvent[ResponseFormatT],
     ],
     PropertyInfo(discriminator="type"),
 ]

@@ -12,7 +12,12 @@ __all__ = ["BetaOutputConfigParam"]
 
 class BetaOutputConfigParam(TypedDict, total=False):
     effort: Optional[Literal["low", "medium", "high"]]
-    """All possible effort levels."""
+    """How much effort the model should put into its response.
+
+    Higher effort levels may result in more thorough analysis but take longer.
+
+    Valid values are `low`, `medium`, or `high`.
+    """
 
     format: Optional[BetaJSONOutputFormatParam]
     """A schema to specify Claude's output format in responses.

@@ -21,3 +21,6 @@ class ToolTextEditor20250429Param(TypedDict, total=False):
 
     cache_control: Optional[CacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
+
+    strict: bool
+    """When true, guarantees schema validation on tool names and inputs"""

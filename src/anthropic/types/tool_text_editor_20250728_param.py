@@ -27,3 +27,6 @@ class ToolTextEditor20250728Param(TypedDict, total=False):
 
     If not specified, defaults to displaying the full file.
     """
+
+    strict: bool
+    """When true, guarantees schema validation on tool names and inputs"""
