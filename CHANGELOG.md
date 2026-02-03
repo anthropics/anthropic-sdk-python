@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.77.1 (2026-02-03)
+
+Full Changelog: [v0.77.0...v0.77.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.77.0...v0.77.1)
+
+### Bug Fixes
+
+* **structured outputs:** send structured output beta header when format is omitted ([#1158](https://github.com/anthropics/anthropic-sdk-python/issues/1158)) ([258494e](https://github.com/anthropics/anthropic-sdk-python/commit/258494e2b814a6a096b01e50f83560b4cf4a98ad))
+
+
+### Chores
+
+* remove claude-code-review workflow ([#1338](https://github.com/anthropics/anthropic-sdk-python/issues/1338)) ([aec4512](https://github.com/anthropics/anthropic-sdk-python/commit/aec4512305e8dce41df8ef0ab225f4939e099bcf))
+
 ## 0.77.0 (2026-01-29)
 
 Full Changelog: [v0.76.0...v0.77.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.76.0...v0.77.0)
