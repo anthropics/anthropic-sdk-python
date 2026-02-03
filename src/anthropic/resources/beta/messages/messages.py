@@ -1118,7 +1118,7 @@ class Messages(SyncAPIResource):
 
         betas = [beta for beta in betas] if is_given(betas) else []
 
-        if "structured-outputs-2025-12-15" not in betas and is_given(output_format):
+        if "structured-outputs-2025-11-13" not in betas:
             # Ensure structured outputs beta is included for parse method
             betas.append("structured-outputs-2025-12-15")
 
@@ -2813,7 +2813,7 @@ class AsyncMessages(AsyncAPIResource):
             )
         betas = [beta for beta in betas] if is_given(betas) else []
 
-        if "structured-outputs-2025-12-15" not in betas and is_given(output_format):
+        if "structured-outputs-2025-11-13" not in betas:
             # Ensure structured outputs beta is included for parse method
             betas.append("structured-outputs-2025-12-15")
 
