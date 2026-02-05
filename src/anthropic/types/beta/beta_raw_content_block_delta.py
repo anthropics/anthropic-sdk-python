@@ -9,10 +9,18 @@ from .beta_thinking_delta import BetaThinkingDelta
 from .beta_citations_delta import BetaCitationsDelta
 from .beta_signature_delta import BetaSignatureDelta
 from .beta_input_json_delta import BetaInputJSONDelta
+from .beta_compaction_content_block_delta import BetaCompactionContentBlockDelta
 
 __all__ = ["BetaRawContentBlockDelta"]
 
 BetaRawContentBlockDelta: TypeAlias = Annotated[
-    Union[BetaTextDelta, BetaInputJSONDelta, BetaCitationsDelta, BetaThinkingDelta, BetaSignatureDelta],
+    Union[
+        BetaTextDelta,
+        BetaInputJSONDelta,
+        BetaCitationsDelta,
+        BetaThinkingDelta,
+        BetaSignatureDelta,
+        BetaCompactionContentBlockDelta,
+    ],
     PropertyInfo(discriminator="type"),
 ]

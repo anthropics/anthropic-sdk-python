@@ -23,6 +23,7 @@ class BatchCreateParams(TypedDict, total=False):
     """Optional header to specify the beta version(s) you want to use."""
 
 
+
 class Request(TypedDict, total=False):
     custom_id: Required[str]
     """Developer-provided ID created for each request in a Message Batch.

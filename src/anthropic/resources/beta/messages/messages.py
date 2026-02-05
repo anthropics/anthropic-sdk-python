@@ -44,7 +44,7 @@ from ...._exceptions import AnthropicError
 from ...._base_client import make_request_options
 from ...._utils._utils import is_dict
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
-from ...messages.messages import DEPRECATED_MODELS
+from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ....types.model_param import ModelParam
 from ....lib._parse._response import ResponseFormatT, parse_beta_response
 from ....lib._parse._transform import transform_schema
@@ -112,6 +112,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -229,6 +230,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -406,6 +410,7 @@ class Messages(SyncAPIResource):
         stream: Literal[True],
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -526,6 +531,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -699,6 +707,7 @@ class Messages(SyncAPIResource):
         stream: bool,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -819,6 +828,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -991,6 +1003,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1029,6 +1042,13 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
+                stacklevel=3,
+            )
+
         merged_output_config = _merge_output_configs(output_config, output_format)
 
         extra_headers = {
@@ -1044,6 +1064,7 @@ class Messages(SyncAPIResource):
                     "model": model,
                     "container": container,
                     "context_management": context_management,
+                    "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
                     "output_config": merged_output_config,
@@ -1079,6 +1100,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1113,6 +1135,13 @@ class Messages(SyncAPIResource):
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
                 DeprecationWarning,
+                stacklevel=3,
+            )
+
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
                 stacklevel=3,
             )
 
@@ -1166,6 +1195,7 @@ class Messages(SyncAPIResource):
                     "model": model,
                     "container": container,
                     "context_management": context_management,
+                    "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
                     "output_config": merged_output_config,
@@ -1205,6 +1235,7 @@ class Messages(SyncAPIResource):
         compaction_control: CompactionControl | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         max_iterations: int | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1241,6 +1272,7 @@ class Messages(SyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1275,6 +1307,7 @@ class Messages(SyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1307,6 +1340,7 @@ class Messages(SyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1339,6 +1373,20 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
+                stacklevel=3,
+            )
+
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
+                stacklevel=3,
+            )
+
         extra_headers = {
             "X-Stainless-Helper": "BetaToolRunner",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
@@ -1362,6 +1410,7 @@ class Messages(SyncAPIResource):
                 "model": model,
                 "container": container,
                 "context_management": context_management,
+                "inference_geo": inference_geo,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
                 "output_config": output_config,
@@ -1414,6 +1463,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1442,6 +1492,13 @@ class Messages(SyncAPIResource):
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
                 DeprecationWarning,
+                stacklevel=3,
+            )
+
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
                 stacklevel=3,
             )
 
@@ -1488,6 +1545,7 @@ class Messages(SyncAPIResource):
                     "output_format": omit,
                     "container": container,
                     "context_management": context_management,
+                    "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,
@@ -1808,6 +1866,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1925,6 +1984,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -2102,6 +2164,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[True],
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -2222,6 +2285,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -2395,6 +2461,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: bool,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -2515,6 +2582,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -2687,6 +2757,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -2725,6 +2796,13 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
+                stacklevel=3,
+            )
+
         merged_output_config = _merge_output_configs(output_config, output_format)
 
         extra_headers = {
@@ -2740,6 +2818,7 @@ class AsyncMessages(AsyncAPIResource):
                     "model": model,
                     "container": container,
                     "context_management": context_management,
+                    "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
                     "output_config": merged_output_config,
@@ -2775,6 +2854,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -2809,6 +2889,13 @@ class AsyncMessages(AsyncAPIResource):
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
                 DeprecationWarning,
+                stacklevel=3,
+            )
+
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
                 stacklevel=3,
             )
         betas = [beta for beta in betas] if is_given(betas) else []
@@ -2861,6 +2948,7 @@ class AsyncMessages(AsyncAPIResource):
                     "model": model,
                     "container": container,
                     "context_management": context_management,
+                    "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "output_config": merged_output_config,
                     "metadata": metadata,
@@ -2901,6 +2989,7 @@ class AsyncMessages(AsyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -2936,6 +3025,7 @@ class AsyncMessages(AsyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -2970,6 +3060,7 @@ class AsyncMessages(AsyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -3002,6 +3093,7 @@ class AsyncMessages(AsyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -3034,6 +3126,13 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
+                stacklevel=3,
+            )
+
         extra_headers = {
             "X-Stainless-Helper": "BetaToolRunner",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
@@ -3057,6 +3156,7 @@ class AsyncMessages(AsyncAPIResource):
                 "model": model,
                 "container": container,
                 "context_management": context_management,
+                "inference_geo": inference_geo,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
                 "output_config": output_config,
@@ -3112,6 +3212,7 @@ class AsyncMessages(AsyncAPIResource):
         output_format: None | type[ResponseFormatT] | BetaJSONOutputFormatParam | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
@@ -3137,6 +3238,13 @@ class AsyncMessages(AsyncAPIResource):
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
                 DeprecationWarning,
+                stacklevel=3,
+            )
+
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
                 stacklevel=3,
             )
 
@@ -3181,6 +3289,7 @@ class AsyncMessages(AsyncAPIResource):
                     "output_format": omit,
                     "container": container,
                     "context_management": context_management,
+                    "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "service_tier": service_tier,
                     "stop_sequences": stop_sequences,

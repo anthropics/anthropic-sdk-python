@@ -20,6 +20,9 @@ class Usage(BaseModel):
     cache_read_input_tokens: Optional[int] = None
     """The number of input tokens read from the cache."""
 
+    inference_geo: Optional[str] = None
+    """The geographic region where inference was performed for this request."""
+
     input_tokens: int
     """The number of input tokens which were used."""
 

@@ -32,7 +32,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -47,7 +47,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
             container={
                 "id": "id",
                 "skills": [
@@ -79,6 +79,7 @@ class TestMessages:
                     }
                 ]
             },
+            inference_geo="inference_geo",
             mcp_servers=[
                 {
                     "name": "name",
@@ -153,6 +154,7 @@ class TestMessages:
                     },
                     "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "eager_input_streaming": True,
                     "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
@@ -175,7 +177,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
         )
 
         assert response.is_closed is True
@@ -194,7 +196,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -215,7 +217,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
             stream=True,
         )
         message_stream.response.close()
@@ -231,7 +233,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
             stream=True,
             container={
                 "id": "id",
@@ -264,6 +266,7 @@ class TestMessages:
                     }
                 ]
             },
+            inference_geo="inference_geo",
             mcp_servers=[
                 {
                     "name": "name",
@@ -337,6 +340,7 @@ class TestMessages:
                     },
                     "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "eager_input_streaming": True,
                     "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
@@ -359,7 +363,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
             stream=True,
         )
 
@@ -378,7 +382,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -399,7 +403,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-5-20251101",
+            model="claude-opus-4-6",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -413,7 +417,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-5-20251101",
+            model="claude-opus-4-6",
             context_management={
                 "edits": [
                     {
@@ -504,6 +508,7 @@ class TestMessages:
                     },
                     "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "eager_input_streaming": True,
                     "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
@@ -523,7 +528,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-5-20251101",
+            model="claude-opus-4-6",
         )
 
         assert response.is_closed is True
@@ -541,7 +546,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-5-20251101",
+            model="claude-opus-4-6",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -585,7 +590,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -600,7 +605,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
             container={
                 "id": "id",
                 "skills": [
@@ -632,6 +637,7 @@ class TestAsyncMessages:
                     }
                 ]
             },
+            inference_geo="inference_geo",
             mcp_servers=[
                 {
                     "name": "name",
@@ -706,6 +712,7 @@ class TestAsyncMessages:
                     },
                     "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "eager_input_streaming": True,
                     "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
@@ -728,7 +735,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
         )
 
         assert response.is_closed is True
@@ -747,7 +754,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -768,7 +775,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
             stream=True,
         )
         await message_stream.response.aclose()
@@ -784,7 +791,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
             stream=True,
             container={
                 "id": "id",
@@ -817,6 +824,7 @@ class TestAsyncMessages:
                     }
                 ]
             },
+            inference_geo="inference_geo",
             mcp_servers=[
                 {
                     "name": "name",
@@ -890,6 +898,7 @@ class TestAsyncMessages:
                     },
                     "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "eager_input_streaming": True,
                     "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
@@ -912,7 +921,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
             stream=True,
         )
 
@@ -931,7 +940,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-opus-4-6",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -952,7 +961,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-5-20251101",
+            model="claude-opus-4-6",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -966,7 +975,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-5-20251101",
+            model="claude-opus-4-6",
             context_management={
                 "edits": [
                     {
@@ -1057,6 +1066,7 @@ class TestAsyncMessages:
                     },
                     "defer_loading": True,
                     "description": "Get the current weather in a given location",
+                    "eager_input_streaming": True,
                     "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
@@ -1076,7 +1086,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-5-20251101",
+            model="claude-opus-4-6",
         )
 
         assert response.is_closed is True
@@ -1094,7 +1104,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-5-20251101",
+            model="claude-opus-4-6",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
