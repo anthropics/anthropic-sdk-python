@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Optional
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 from .json_output_format_param import JSONOutputFormatParam
 
@@ -11,6 +11,9 @@ __all__ = ["OutputConfigParam"]
 
 
 class OutputConfigParam(TypedDict, total=False):
+    effort: Optional[Literal["low", "medium", "high", "max"]]
+    """All possible effort levels."""
+
     format: Optional[JSONOutputFormatParam]
     """A schema to specify Claude's output format in responses.
 

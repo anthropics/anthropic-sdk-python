@@ -61,6 +61,16 @@ class BetaToolParam(TypedDict, total=False):
     aspects of the tool input JSON schema.
     """
 
+    eager_input_streaming: Optional[bool]
+    """Enable eager input streaming for this tool.
+
+    When true, tool input parameters will be streamed incrementally as they are
+    generated, and types will be inferred on-the-fly rather than buffering the full
+    JSON output. When false, streaming is disabled for this tool even if the
+    fine-grained-tool-streaming beta is active. When null (default), uses the
+    default behavior based on beta headers.
+    """
+
     input_examples: Iterable[Dict[str, object]]
 
     strict: bool

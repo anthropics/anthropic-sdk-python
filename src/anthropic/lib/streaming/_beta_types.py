@@ -75,6 +75,13 @@ class BetaInputJsonEvent(BaseModel):
     """
 
 
+class BetaCompactionEvent(BaseModel):
+    type: Literal["compaction"]
+
+    content: Union[str, None]
+    """The compaction content"""
+
+
 class ParsedBetaMessageStopEvent(BetaRawMessageStopEvent, GenericModel, Generic[ResponseFormatT]):
     type: Literal["message_stop"]
 
@@ -97,6 +104,7 @@ ParsedBetaMessageStreamEvent = Annotated[
         BetaThinkingEvent,
         BetaSignatureEvent,
         BetaInputJsonEvent,
+        BetaCompactionEvent,
         BetaRawMessageStartEvent,
         BetaRawMessageDeltaEvent,
         ParsedBetaMessageStopEvent[ResponseFormatT],

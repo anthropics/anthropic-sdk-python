@@ -10,6 +10,7 @@ from .beta_text_block_param import BetaTextBlockParam
 from .beta_image_block_param import BetaImageBlockParam
 from .beta_thinking_block_param import BetaThinkingBlockParam
 from .beta_tool_use_block_param import BetaToolUseBlockParam
+from .beta_compaction_block_param import BetaCompactionBlockParam
 from .beta_tool_result_block_param import BetaToolResultBlockParam
 from .beta_mcp_tool_use_block_param import BetaMCPToolUseBlockParam
 from .beta_search_result_block_param import BetaSearchResultBlockParam
@@ -46,5 +47,6 @@ BetaContentBlockParam: TypeAlias = Union[
     BetaMCPToolUseBlockParam,
     BetaRequestMCPToolResultBlockParam,
     BetaContainerUploadBlockParam,
+    BetaCompactionBlockParam,
     BetaContentBlock,
 ]

@@ -39,7 +39,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-5-20250929",
+                        "model": "claude-opus-4-6",
                     },
                 }
             ],
@@ -61,7 +61,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-5-20250929",
+                        "model": "claude-opus-4-6",
                         "container": {
                             "id": "id",
                             "skills": [
@@ -93,6 +93,7 @@ class TestBatches:
                                 }
                             ]
                         },
+                        "inference_geo": "inference_geo",
                         "mcp_servers": [
                             {
                                 "name": "name",
@@ -167,6 +168,7 @@ class TestBatches:
                                 },
                                 "defer_loading": True,
                                 "description": "Get the current weather in a given location",
+                                "eager_input_streaming": True,
                                 "input_examples": [{"foo": "bar"}],
                                 "strict": True,
                                 "type": "custom",
@@ -196,7 +198,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-5-20250929",
+                        "model": "claude-opus-4-6",
                     },
                 }
             ],
@@ -222,7 +224,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-5-20250929",
+                        "model": "claude-opus-4-6",
                     },
                 }
             ],
@@ -468,7 +470,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-5-20250929",
+                        "model": "claude-opus-4-6",
                     },
                 }
             ],
@@ -490,7 +492,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-5-20250929",
+                        "model": "claude-opus-4-6",
                         "container": {
                             "id": "id",
                             "skills": [
@@ -522,6 +524,7 @@ class TestAsyncBatches:
                                 }
                             ]
                         },
+                        "inference_geo": "inference_geo",
                         "mcp_servers": [
                             {
                                 "name": "name",
@@ -596,6 +599,7 @@ class TestAsyncBatches:
                                 },
                                 "defer_loading": True,
                                 "description": "Get the current weather in a given location",
+                                "eager_input_streaming": True,
                                 "input_examples": [{"foo": "bar"}],
                                 "strict": True,
                                 "type": "custom",
@@ -625,7 +629,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-5-20250929",
+                        "model": "claude-opus-4-6",
                     },
                 }
             ],
@@ -651,7 +655,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-sonnet-4-5-20250929",
+                        "model": "claude-opus-4-6",
                     },
                 }
             ],

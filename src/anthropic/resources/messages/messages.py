@@ -71,6 +71,8 @@ DEPRECATED_MODELS = {
     "claude-3-5-haiku-20241022": "February 19th, 2026",
 }
 
+MODELS_TO_WARN_WITH_THINKING_ENABLED = ["claude-opus-4-6"]
+
 
 class Messages(SyncAPIResource):
     @cached_property
@@ -103,6 +105,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -210,6 +213,9 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -375,6 +381,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -485,6 +492,9 @@ class Messages(SyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -646,6 +656,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -756,6 +767,9 @@ class Messages(SyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -916,6 +930,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -947,6 +962,13 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
+                stacklevel=3,
+            )
+
         return self._post(
             "/v1/messages",
             body=maybe_transform(
@@ -954,6 +976,7 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "inference_geo": inference_geo,
                     "metadata": metadata,
                     "output_config": output_config,
                     "service_tier": service_tier,
@@ -985,6 +1008,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         output_format: None | JSONOutputFormatParam | type[ResponseFormatT] | Omit = omit,
@@ -1010,6 +1034,13 @@ class Messages(SyncAPIResource):
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
                 DeprecationWarning,
+                stacklevel=3,
+            )
+
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
                 stacklevel=3,
             )
 
@@ -1055,6 +1086,7 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "inference_geo": inference_geo,
                     "metadata": metadata,
                     "output_config": merged_output_config,
                     "container": container,
@@ -1118,6 +1150,13 @@ class Messages(SyncAPIResource):
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
                 DeprecationWarning,
+                stacklevel=3,
+            )
+
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
                 stacklevel=3,
             )
 
@@ -1484,6 +1523,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1591,6 +1631,9 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -1756,6 +1799,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1866,6 +1910,9 @@ class AsyncMessages(AsyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -2027,6 +2074,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -2137,6 +2185,9 @@ class AsyncMessages(AsyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -2297,6 +2348,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -2328,6 +2380,13 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
+                stacklevel=3,
+            )
+
         return await self._post(
             "/v1/messages",
             body=await async_maybe_transform(
@@ -2335,6 +2394,7 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "inference_geo": inference_geo,
                     "metadata": metadata,
                     "output_config": output_config,
                     "service_tier": service_tier,
@@ -2366,6 +2426,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         output_format: None | JSONOutputFormatParam | type[ResponseFormatT] | Omit = omit,
@@ -2391,6 +2452,13 @@ class AsyncMessages(AsyncAPIResource):
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
                 DeprecationWarning,
+                stacklevel=3,
+            )
+
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
                 stacklevel=3,
             )
 
@@ -2435,6 +2503,7 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "inference_geo": inference_geo,
                     "metadata": metadata,
                     "output_config": merged_output_config,
                     "container": container,
@@ -2498,6 +2567,13 @@ class AsyncMessages(AsyncAPIResource):
             warnings.warn(
                 f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
                 DeprecationWarning,
+                stacklevel=3,
+            )
+
+        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+            warnings.warn(
+                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                UserWarning,
                 stacklevel=3,
             )
 

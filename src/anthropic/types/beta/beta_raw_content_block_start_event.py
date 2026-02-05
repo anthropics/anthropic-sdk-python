@@ -8,6 +8,7 @@ from ..._models import BaseModel
 from .beta_text_block import BetaTextBlock
 from .beta_thinking_block import BetaThinkingBlock
 from .beta_tool_use_block import BetaToolUseBlock
+from .beta_compaction_block import BetaCompactionBlock
 from .beta_mcp_tool_use_block import BetaMCPToolUseBlock
 from .beta_mcp_tool_result_block import BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock
@@ -38,6 +39,7 @@ ContentBlock: TypeAlias = Annotated[
         BetaMCPToolUseBlock,
         BetaMCPToolResultBlock,
         BetaContainerUploadBlock,
+        BetaCompactionBlock,
     ],
     PropertyInfo(discriminator="type"),
 ]

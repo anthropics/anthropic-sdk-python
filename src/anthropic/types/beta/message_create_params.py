@@ -127,6 +127,12 @@ class MessageCreateParamsBase(TypedDict, total=False):
     such as whether to clear function results or not.
     """
 
+    inference_geo: Optional[str]
+    """Specifies the geographic region for inference processing.
+
+    If not specified, the workspace's `default_inference_geo` is used.
+    """
+
     mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam]
     """MCP servers to be utilized in this request"""
 

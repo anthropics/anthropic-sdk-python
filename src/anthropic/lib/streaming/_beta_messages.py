@@ -20,6 +20,7 @@ from ._beta_types import (
     BetaThinkingEvent,
     BetaInputJsonEvent,
     BetaSignatureEvent,
+    BetaCompactionEvent,
     ParsedBetaTextEvent,
     ParsedBetaMessageStopEvent,
     ParsedBetaMessageStreamEvent,
@@ -403,6 +404,15 @@ def build_events(
                     )
                 )
             pass
+        elif event.delta.type == "compaction_delta":
+            if content_block.type == "compaction":
+                events_to_fire.append(
+                    build(
+                        BetaCompactionEvent,
+                        type="compaction",
+                        content=content_block.content,
+                    )
+                )
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
@@ -512,6 +522,9 @@ def accumulate_event(
         elif event.delta.type == "signature_delta":
             if content.type == "thinking":
                 content.signature = event.delta.signature
+        elif event.delta.type == "compaction_delta":
+            if content.type == "compaction":
+                content.content = event.delta.content
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
@@ -536,5 +549,7 @@ def accumulate_event(
             current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
         if event.usage.server_tool_use is not None:
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+        if event.usage.iterations is not None:
+            current_snapshot.usage.iterations = event.usage.iterations
 
     return current_snapshot
