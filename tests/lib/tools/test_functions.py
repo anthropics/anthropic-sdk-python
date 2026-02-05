@@ -439,6 +439,80 @@ class TestFunctionTool:
         assert function_tool.input_schema == expected_schema
 
 
+    def test_callable_class_instance(self) -> None:
+        """Test that callable class instances can be used as tools."""
+
+        class FetchProduct:
+            def __init__(self, ctx: dict[str, str]) -> None:
+                self.ctx = ctx
+
+            def __call__(self, product_id: int) -> str:
+                """Fetch a product by ID."""
+                return f"Product {product_id} from {self.ctx['session']}"
+
+        instance = FetchProduct({"session": "test-session"})
+        tool = beta_tool(instance, name="fetch_product")
+
+        assert tool.name == "fetch_product"
+        assert tool.description == "Fetch a product by ID."
+        assert tool.call({"product_id": 123}) == "Product 123 from test-session"
+
+        # Check schema
+        expected_schema = {
+            "additionalProperties": False,
+            "type": "object",
+            "properties": {
+                "product_id": {"title": "Product Id", "type": "integer"},
+            },
+            "required": ["product_id"],
+        }
+        assert tool.input_schema == expected_schema
+
+    def test_bound_method(self) -> None:
+        """Test that bound methods can be used as tools."""
+
+        class WeatherService:
+            def __init__(self, api_key: str) -> None:
+                self.api_key = api_key
+
+            def get_weather(self, location: str) -> str:
+                """Get weather for a location."""
+                return f"Weather in {location} (using key: {self.api_key[:4]}...)"
+
+        service = WeatherService("secret-api-key")
+        tool = beta_tool(service.get_weather, name="weather")
+
+        assert tool.name == "weather"
+        assert tool.description == "Get weather for a location."
+        assert tool.call({"location": "London"}) == "Weather in London (using key: secr...)"
+
+        # Check schema
+        expected_schema = {
+            "additionalProperties": False,
+            "type": "object",
+            "properties": {
+                "location": {"title": "Location", "type": "string"},
+            },
+            "required": ["location"],
+        }
+        assert tool.input_schema == expected_schema
+
+    def test_callable_class_without_explicit_name(self) -> None:
+        """Test that callable class instances infer name from __call__ method."""
+
+        class MyTool:
+            def __call__(self, x: int) -> str:
+                """Process x."""
+                return str(x)
+
+        instance = MyTool()
+        tool = beta_tool(instance)
+
+        # Should use __call__ as the name since that's the actual method
+        assert tool.name == "__call__"
+        assert tool.description == "Process x."
+
+
 def _get_parameters_info(fn: BaseFunctionTool[Any]) -> dict[str, str]:
     param_info: dict[str, str] = {}
     for param in fn._parsed_docstring.params:
