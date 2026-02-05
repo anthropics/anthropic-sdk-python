@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Union, Iterable
+from typing import Union, Iterable, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from ..._types import SequenceNotStr
@@ -115,6 +115,12 @@ class RequestParams(TypedDict, total=False):
     The model that will complete your prompt.\n\nSee
     [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
+    """
+
+    inference_geo: Optional[str]
+    """Specifies the geographic region for inference processing.
+
+    If not specified, the workspace's `default_inference_geo` is used.
     """
 
     metadata: MetadataParam

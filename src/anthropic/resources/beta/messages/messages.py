@@ -81,6 +81,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -198,6 +199,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -375,6 +379,7 @@ class Messages(SyncAPIResource):
         stream: Literal[True],
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -495,6 +500,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -668,6 +676,7 @@ class Messages(SyncAPIResource):
         stream: bool,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -788,6 +797,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -960,6 +972,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -997,6 +1010,7 @@ class Messages(SyncAPIResource):
                     "model": model,
                     "container": container,
                     "context_management": context_management,
+                    "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
                     "output_config": output_config,
@@ -1306,6 +1320,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1423,6 +1438,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -1600,6 +1618,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[True],
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1720,6 +1739,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -1893,6 +1915,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: bool,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -2013,6 +2036,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           mcp_servers: MCP servers to be utilized in this request
 
@@ -2185,6 +2211,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -2222,6 +2249,7 @@ class AsyncMessages(AsyncAPIResource):
                     "model": model,
                     "container": container,
                     "context_management": context_management,
+                    "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
                     "output_config": output_config,

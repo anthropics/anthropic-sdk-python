@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Union, Iterable
+from typing import Union, Iterable, Optional
 from typing_extensions import Literal, overload
 
 import httpx
@@ -76,6 +76,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -183,6 +184,9 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -348,6 +352,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -458,6 +463,9 @@ class Messages(SyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -619,6 +627,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -729,6 +738,9 @@ class Messages(SyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -889,6 +901,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -917,6 +930,7 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "inference_geo": inference_geo,
                     "metadata": metadata,
                     "output_config": output_config,
                     "service_tier": service_tier,
@@ -1196,6 +1210,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1303,6 +1318,9 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -1468,6 +1486,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1578,6 +1597,9 @@ class AsyncMessages(AsyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -1739,6 +1761,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -1849,6 +1872,9 @@ class AsyncMessages(AsyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          inference_geo: Specifies the geographic region for inference processing. If not specified, the
+              workspace's `default_inference_geo` is used.
 
           metadata: An object describing metadata about the request.
 
@@ -2009,6 +2035,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -2037,6 +2064,7 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "inference_geo": inference_geo,
                     "metadata": metadata,
                     "output_config": output_config,
                     "service_tier": service_tier,
