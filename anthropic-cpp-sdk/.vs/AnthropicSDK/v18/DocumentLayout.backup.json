@@ -1,11 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{B7D3C25A-235F-4370-BA62-B0C250AE864A}|..\\example\\example.vcxproj|C:\\SOURCES\\anthropic-sdk\\example\\example.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -13,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -46,19 +42,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "example.cpp",
-              "DocumentMoniker": "C:\\SOURCES\\anthropic-sdk\\example\\example.cpp",
-              "RelativeDocumentMoniker": "..\\example\\example.cpp",
-              "ToolTip": "C:\\SOURCES\\anthropic-sdk\\example\\example.cpp",
-              "RelativeToolTip": "..\\example\\example.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAATAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-02-06T10:32:24.17Z",
-              "EditorCaption": ""
             }
           ]
         },

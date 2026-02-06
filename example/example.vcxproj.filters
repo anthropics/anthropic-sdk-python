@@ -22,9 +22,4 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\anthropic-cpp-sdk\include\anthropic\client.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-  </ItemGroup>
 </Project>
