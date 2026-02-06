@@ -111,7 +111,6 @@
     <ClInclude Include="include\anthropic\resources\messages.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="examples\basic_message.cpp" />
     <ClCompile Include="src\anthropic\client.cpp" />
     <ClCompile Include="src\anthropic\http\winhttp_client.cpp" />
     <ClCompile Include="src\anthropic\http\sse_parser.cpp" />

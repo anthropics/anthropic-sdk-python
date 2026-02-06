@@ -25,9 +25,6 @@
     <ClCompile Include="src\anthropic\utils\retry_logic.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="examples\basic_message.cpp">
-      <Filter>Examples</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\anthropic\client.hpp">
@@ -79,9 +76,6 @@
     </Filter>
     <Filter Include="Docs">
       <UniqueIdentifier>{05187db0-eda1-4f8a-94e7-b7e06d1da2ab}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Examples">
-      <UniqueIdentifier>{e9d05229-6c8b-430c-a00b-9c98d5704312}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
