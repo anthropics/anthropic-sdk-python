@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/anthropic.svg)](https://pypi.org/project/anthropic/)
 
-The Anthropic Python library provides access to the [Anthropic API](https://docs.anthropic.com/en/api/) from Python applications.
+The Anthropic Python library provides access to the [Claude API](https://docs.anthropic.com/en/api/) from Python applications.
 
 ## Documentation
 
