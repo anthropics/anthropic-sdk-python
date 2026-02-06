@@ -16,3 +16,4 @@ Brewfile.lock.json
 /anthropic-cpp-sdk/.vs/
 /anthropic-cpp-sdk/bin/
 /anthropic-cpp-sdk/obj/
+/anthropic-cpp-sdk/.vs/AnthropicSDK/v18/Browse.VC.db
