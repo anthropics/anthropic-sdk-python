@@ -111,6 +111,7 @@
     <ClInclude Include="include\anthropic\resources\messages.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="examples\basic_message.cpp" />
     <ClCompile Include="src\anthropic\client.cpp" />
     <ClCompile Include="src\anthropic\http\winhttp_client.cpp" />
     <ClCompile Include="src\anthropic\http\sse_parser.cpp" />
@@ -122,6 +123,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.gitignore" />
+    <None Include="ARCHITECTURE.md">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="BUILDING.md">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="IMPLEMENTATION_STATUS.md">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="README.md">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

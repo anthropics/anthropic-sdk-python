@@ -1,32 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\include\\anthropic\\resources\\messages.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|solutionrelative:include\\anthropic\\resources\\messages.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\include\\anthropic\\utils\\retry_logic.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|solutionrelative:include\\anthropic\\utils\\retry_logic.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\src\\anthropic\\resources\\messages.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|solutionrelative:src\\anthropic\\resources\\messages.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\src\\anthropic\\utils\\env.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|solutionrelative:src\\anthropic\\utils\\env.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\src\\anthropic\\utils\\retry_logic.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|solutionrelative:src\\anthropic\\utils\\retry_logic.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\include\\anthropic\\types\\content_block.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{B12E3F52-8B4A-4D0F-8D11-00A0C91BC942}|AnthropicSDK.vcxproj|solutionrelative:include\\anthropic\\types\\content_block.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -34,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 11,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -67,84 +42,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "content_block.hpp",
-              "DocumentMoniker": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\include\\anthropic\\types\\content_block.hpp",
-              "RelativeDocumentMoniker": "include\\anthropic\\types\\content_block.hpp",
-              "ToolTip": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\include\\anthropic\\types\\content_block.hpp",
-              "RelativeToolTip": "include\\anthropic\\types\\content_block.hpp",
-              "ViewState": "AgIAAEcAAAAAAAAAAIBMwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-02-06T10:06:31.371Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "retry_logic.cpp",
-              "DocumentMoniker": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\src\\anthropic\\utils\\retry_logic.cpp",
-              "RelativeDocumentMoniker": "src\\anthropic\\utils\\retry_logic.cpp",
-              "ToolTip": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\src\\anthropic\\utils\\retry_logic.cpp",
-              "RelativeToolTip": "src\\anthropic\\utils\\retry_logic.cpp",
-              "ViewState": "AgIAADwAAAAAAAAAAIBMwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-02-06T10:06:22.296Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "env.cpp",
-              "DocumentMoniker": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\src\\anthropic\\utils\\env.cpp",
-              "RelativeDocumentMoniker": "src\\anthropic\\utils\\env.cpp",
-              "ToolTip": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\src\\anthropic\\utils\\env.cpp",
-              "RelativeToolTip": "src\\anthropic\\utils\\env.cpp",
-              "ViewState": "AgIAABIAAAAAAAAAAIBMwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-02-06T09:29:13.55Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "messages.hpp",
-              "DocumentMoniker": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\include\\anthropic\\resources\\messages.hpp",
-              "RelativeDocumentMoniker": "include\\anthropic\\resources\\messages.hpp",
-              "ToolTip": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\include\\anthropic\\resources\\messages.hpp",
-              "RelativeToolTip": "include\\anthropic\\resources\\messages.hpp",
-              "ViewState": "AgIAABcAAAAAAAAAAAAwwBsAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-02-06T09:27:37.209Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "messages.cpp",
-              "DocumentMoniker": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\src\\anthropic\\resources\\messages.cpp",
-              "RelativeDocumentMoniker": "src\\anthropic\\resources\\messages.cpp",
-              "ToolTip": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\src\\anthropic\\resources\\messages.cpp",
-              "RelativeToolTip": "src\\anthropic\\resources\\messages.cpp",
-              "ViewState": "AgIAAKcAAAAAAAAAAIBMwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-02-06T09:27:20.534Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "retry_logic.hpp",
-              "DocumentMoniker": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\include\\anthropic\\utils\\retry_logic.hpp",
-              "RelativeDocumentMoniker": "include\\anthropic\\utils\\retry_logic.hpp",
-              "ToolTip": "C:\\SOURCES\\anthropic-sdk\\anthropic-cpp-sdk\\include\\anthropic\\utils\\retry_logic.hpp",
-              "RelativeToolTip": "include\\anthropic\\utils\\retry_logic.hpp",
-              "ViewState": "AgIAAC8AAAAAAAAAAAAwwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-02-06T09:27:12.806Z",
-              "EditorCaption": ""
             }
           ]
         },
