@@ -79,17 +79,17 @@ if TYPE_CHECKING:
 __all__ = ["Messages", "AsyncMessages"]
 
 
-class BetaMessagesParseParamsWithoutFormat(message_create_params.MessageCreateParamsNonStreaming):
+class _BetaMessagesParseParamsWithoutOutputFormat(message_create_params.MessageCreateParamsNonStreaming):
     output_format: None | Omit = omit  # type: ignore[assignment, misc]
 
 
-class BetaMessagesParseParamsWithFormatType(
+class _BetaMessagesParseParamsWithOutputFormat(
     message_create_params.MessageCreateParamsNonStreaming, Generic[ResponseFormatT]
 ):
     output_format: ResponseFormatT  # type: ignore[assignment, misc]
 
 
-class BetaMessagesParseParamsIntersection(
+class _BetaMessagesParseParamsWithAnyFormat(
     message_create_params.MessageCreateParamsNonStreaming, Generic[ResponseFormatT]
 ):
     output_format: None | type[ResponseFormatT] | ResponseFormatT | Omit = omit  # type: ignore[assignment, misc]
@@ -1118,7 +1118,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-        **kwargs: Unpack[BetaMessagesParseParamsWithoutFormat],
+        **kwargs: Unpack[_BetaMessagesParseParamsWithoutOutputFormat],
     ) -> ParsedBetaMessage[None]: ...
 
     @overload
@@ -1131,7 +1131,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-        **kwargs: Unpack[BetaMessagesParseParamsWithFormatType[type[ResponseFormatT]]],
+        **kwargs: Unpack[_BetaMessagesParseParamsWithOutputFormat[type[ResponseFormatT]]],
     ) -> ParsedBetaMessage[ResponseFormatT]: ...
 
     @overload
@@ -1144,7 +1144,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-        **kwargs: Unpack[BetaMessagesParseParamsWithFormatType[ResponseFormatT]],
+        **kwargs: Unpack[_BetaMessagesParseParamsWithOutputFormat[ResponseFormatT]],
     ) -> ParsedBetaMessage[ResponseFormatT]: ...
 
     def parse(
@@ -1156,7 +1156,7 @@ class Messages(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-        **kwargs: Unpack[BetaMessagesParseParamsIntersection[ResponseFormatT]],
+        **kwargs: Unpack[_BetaMessagesParseParamsWithAnyFormat[ResponseFormatT]],
     ) -> ParsedBetaMessage[ResponseFormatT]:
         output_config = kwargs.get("output_config", omit)
         output_format = kwargs.get("output_format", omit)
