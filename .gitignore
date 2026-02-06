@@ -17,3 +17,5 @@ Brewfile.lock.json
 /anthropic-cpp-sdk/bin/
 /anthropic-cpp-sdk/obj/
 /anthropic-cpp-sdk/.vs/AnthropicSDK/v18/Browse.VC.db
+/anthropic-cpp-sdk/.vs/AnthropicSDK/CopilotIndices/18.0.988.22099/CodeChunks.db
+/anthropic-cpp-sdk/.vs/AnthropicSDK/CopilotIndices/18.0.988.22099/SemanticSymbols.db
