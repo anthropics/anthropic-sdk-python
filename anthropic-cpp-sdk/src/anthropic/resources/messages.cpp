@@ -5,6 +5,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+#include <thread>
 
 namespace anthropic {
 namespace resources {
@@ -24,10 +25,13 @@ std::string Messages::build_request_body(const MessageCreateParams& params) {
 
     // Messages array
     rapidjson::Value messages_array(rapidjson::kArrayType);
-    for (const auto& msg : params.messages) {
+    for (size_t i = 0; i < params.messages.size(); ++i) {
+        const auto& msg = params.messages[i];
         rapidjson::Value message_obj(rapidjson::kObjectType);
-        message_obj.AddMember("role", rapidjson::Value(msg.role.c_str(), allocator), allocator);
-        message_obj.AddMember("content", rapidjson::Value(msg.content.c_str(), allocator), allocator);
+        rapidjson::Value role_value(msg.role.c_str(), allocator);
+        rapidjson::Value content_value(msg.content.c_str(), allocator);
+        message_obj.AddMember("role", role_value, allocator);
+        message_obj.AddMember("content", content_value, allocator);
         messages_array.PushBack(message_obj, allocator);
     }
     doc.AddMember("messages", messages_array, allocator);
@@ -63,10 +67,10 @@ std::string Messages::build_request_body(const MessageCreateParams& params) {
     return utils::json_to_string(doc);
 }
 
-types::Message Messages::parse_response(const std::string& response_body) {
+anthropic::types::Message Messages::parse_response(const std::string& response_body) {
     rapidjson::Document doc = utils::string_to_json(response_body);
 
-    types::Message message;
+    anthropic::types::Message message;
 
     // Parse required fields
     message.id = utils::get_required_string(doc, "id");
@@ -80,7 +84,7 @@ types::Message Messages::parse_response(const std::string& response_body) {
             std::string block_type = utils::get_required_string(block, "type");
 
             if (block_type == "text") {
-                types::TextBlock text_block;
+                anthropic::types::TextBlock text_block;
                 text_block.type = "text";
                 text_block.text = utils::get_required_string(block, "text");
                 message.content.push_back(text_block);
@@ -91,7 +95,7 @@ types::Message Messages::parse_response(const std::string& response_body) {
 
     // Parse stop_reason
     if (auto stop_reason_str = utils::get_optional_string(doc, "stop_reason")) {
-        message.stop_reason = types::stop_reason_from_string(*stop_reason_str);
+        message.stop_reason = anthropic::types::stop_reason_from_string(*stop_reason_str);
     }
 
     message.stop_sequence = utils::get_optional_string(doc, "stop_sequence");
@@ -110,7 +114,7 @@ types::Message Messages::parse_response(const std::string& response_body) {
     return message;
 }
 
-types::Message Messages::create(const MessageCreateParams& params) {
+anthropic::types::Message Messages::create(const MessageCreateParams& params) {
     // Build request
     http::Request request;
     request.method = "POST";

@@ -4,6 +4,7 @@
 #include <random>
 #include <functional>
 #include <optional>
+#include <thread>
 
 namespace anthropic {
 namespace utils {
@@ -29,6 +30,8 @@ public:
     // Parse Retry-After header (returns delay in milliseconds, or nullopt if not present/invalid)
     static std::optional<std::chrono::milliseconds> parse_retry_after(const std::string& retry_after_value);
 
+    int max_retries() const { return config_.max_retries; }
+
 private:
     RetryConfig config_;
     mutable std::mt19937 rng_;
@@ -45,7 +48,7 @@ auto execute_with_retry(const RetryPolicy& policy, Func&& func) -> decltype(func
             return result;
         } catch (const std::exception&) {
             // Check if we should retry
-            if (attempt >= policy.max_retries) {
+            if (attempt >= policy.max_retries()) {
                 throw;  // Re-throw the exception
             }
 

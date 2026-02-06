@@ -12,6 +12,14 @@ class Client;
 
 namespace resources {
 
+// Simplified message param for input
+namespace types {
+struct MessageParam {
+    std::string role;  // "user" or "assistant"
+    std::string content;  // Simplified - full version supports content blocks
+};
+}
+
 // Message creation request parameters
 struct MessageCreateParams {
     std::string model;
@@ -28,14 +36,6 @@ struct MessageCreateParams {
 
     // TODO: Add tools, tool_choice, thinking, output_config, metadata, etc.
 };
-
-// Simplified message param for input
-namespace types {
-struct MessageParam {
-    std::string role;  // "user" or "assistant"
-    std::string content;  // Simplified - full version supports content blocks
-};
-}
 
 class Messages {
 public:
