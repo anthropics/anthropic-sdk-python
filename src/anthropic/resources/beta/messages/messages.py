@@ -80,19 +80,19 @@ __all__ = ["Messages", "AsyncMessages"]
 
 
 class BetaMessagesParseParamsWithoutFormat(message_create_params.MessageCreateParamsNonStreaming):
-    output_format: None | Omit = omit  # type: ignore[assignment]
+    output_format: None | Omit = omit  # type: ignore[assignment, misc]
 
 
 class BetaMessagesParseParamsWithFormatType(
     message_create_params.MessageCreateParamsNonStreaming, Generic[ResponseFormatT]
 ):
-    output_format: ResponseFormatT  # type: ignore[assignment]
+    output_format: ResponseFormatT  # type: ignore[assignment, misc]
 
 
 class BetaMessagesParseParamsIntersection(
     message_create_params.MessageCreateParamsNonStreaming, Generic[ResponseFormatT]
 ):
-    output_format: None | type[ResponseFormatT] | ResponseFormatT | Omit = omit  # type: ignore[assignment]
+    output_format: None | type[ResponseFormatT] | ResponseFormatT | Omit = omit  # type: ignore[assignment, misc]
 
 
 class Messages(SyncAPIResource):
@@ -1164,7 +1164,7 @@ class Messages(SyncAPIResource):
         _validate_output_config_conflict(output_config, output_format)
         _warn_output_format_deprecated(output_format)
 
-        if kwargs.get("stream", False) and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+        if not kwargs.get("stream", False) and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
                 kwargs["max_tokens"], MODEL_NONSTREAMING_TOKENS.get(kwargs["model"], None)
             )
@@ -1176,10 +1176,8 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
-        if (
-            kwargs["model"] in MODELS_TO_WARN_WITH_THINKING_ENABLED
-            and kwargs.get("thinking", {}).get("type") == "enabled"
-        ):
+        thinking = kwargs.get("thinking")
+        if kwargs["model"] in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking.get("type") == "enabled":
             warnings.warn(
                 f"Using Claude with {kwargs['model']} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
                 UserWarning,
