@@ -32,7 +32,7 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-5-20250929",
+    model="claude-opus-4-6",
 )
 print(message.content)
 ```
