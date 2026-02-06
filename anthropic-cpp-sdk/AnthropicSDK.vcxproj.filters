@@ -91,5 +91,6 @@
     <None Include="README.md">
       <Filter>Docs</Filter>
     </None>
+    <None Include="..\.gitignore" />
   </ItemGroup>
 </Project>

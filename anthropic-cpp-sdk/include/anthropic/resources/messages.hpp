@@ -23,7 +23,7 @@ struct MessageParam {
 // Message creation request parameters
 struct MessageCreateParams {
     std::string model;
-    int max_tokens;
+    int max_tokens = 0; // Initialize to a sensible default (e.g., 0)
     std::vector<types::MessageParam> messages;
 
     // Optional parameters

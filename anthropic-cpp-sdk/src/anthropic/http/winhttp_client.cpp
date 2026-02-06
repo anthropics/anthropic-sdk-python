@@ -3,7 +3,7 @@
 #include <sstream>
 #include <algorithm>
 
-#pragma comment(lib, "winhttp.lib")
+//#pragma comment(lib, "winhttp.lib")
 
 namespace anthropic {
 namespace http {
@@ -78,7 +78,7 @@ WinHttpClient::URLComponents WinHttpClient::parse_url(const std::string& url) {
 }
 
 HINTERNET WinHttpClient::get_connection(const std::wstring& host, int port) {
-    HINTERNET connect = WinHttpConnect(session_handle_, host.c_str(), port, 0);
+    HINTERNET connect = WinHttpConnect(session_handle_, host.c_str(), static_cast<INTERNET_PORT>(port), 0);
     if (!connect) {
         throw ConnectionError("Failed to connect to host");
     }
@@ -176,7 +176,7 @@ Response WinHttpClient::execute(const Request& request) {
         BOOL result = WinHttpSendRequest(
             request_handle,
             headers_str.c_str(),
-            -1,
+            static_cast<DWORD>(-1), // Fix: cast -1 to DWORD to resolve C4245
             const_cast<void*>(body_ptr),
             body_size,
             body_size,
@@ -286,7 +286,7 @@ Response WinHttpClient::execute_stream(const Request& request, StreamCallback ca
         BOOL result = WinHttpSendRequest(
             request_handle,
             headers_str.c_str(),
-            -1,
+            static_cast<DWORD>(-1),
             const_cast<void*>(body_ptr),
             body_size,
             body_size,
