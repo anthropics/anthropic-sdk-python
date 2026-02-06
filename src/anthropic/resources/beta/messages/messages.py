@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import inspect
 import warnings
-from typing import TYPE_CHECKING, List, Type, Union, Iterable, Optional, cast
+from typing import TYPE_CHECKING, List, Type, Union, Generic, Iterable, Optional, cast
 from functools import partial
 from itertools import chain
-from typing_extensions import Literal, overload
+from typing_extensions import Unpack, Literal, overload
 
 import httpx
 import pydantic
@@ -77,6 +77,22 @@ if TYPE_CHECKING:
     from ...._client import Anthropic, AsyncAnthropic
 
 __all__ = ["Messages", "AsyncMessages"]
+
+
+class BetaMessagesParseParamsWithoutFormat(message_create_params.MessageCreateParamsNonStreaming):
+    output_format: None | Omit = omit  # type: ignore[assignment]
+
+
+class BetaMessagesParseParamsWithFormatType(
+    message_create_params.MessageCreateParamsNonStreaming, Generic[ResponseFormatT]
+):
+    output_format: ResponseFormatT  # type: ignore[assignment]
+
+
+class BetaMessagesParseParamsIntersection(
+    message_create_params.MessageCreateParamsNonStreaming, Generic[ResponseFormatT]
+):
+    output_format: None | type[ResponseFormatT] | ResponseFormatT | Omit = omit  # type: ignore[assignment]
 
 
 class Messages(SyncAPIResource):
@@ -1092,60 +1108,85 @@ class Messages(SyncAPIResource):
             stream_cls=Stream[BetaRawMessageStreamEvent],
         )
 
+    @overload
     def parse(
         self,
         *,
-        max_tokens: int,
-        messages: Iterable[BetaMessageParam],
-        model: ModelParam,
-        container: Optional[message_create_params.Container] | Omit = omit,
-        context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
-        inference_geo: Optional[str] | Omit = omit,
-        mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
-        metadata: BetaMetadataParam | Omit = omit,
-        output_config: BetaOutputConfigParam | Omit = omit,
-        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
-        service_tier: Literal["auto", "standard_only"] | Omit = omit,
-        stop_sequences: SequenceNotStr[str] | Omit = omit,
-        stream: Literal[False] | Literal[True] | Omit = omit,
-        system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
-        temperature: float | Omit = omit,
-        thinking: BetaThinkingConfigParam | Omit = omit,
-        tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
-        top_k: int | Omit = omit,
-        top_p: float | Omit = omit,
-        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        **kwargs: Unpack[BetaMessagesParseParamsWithoutFormat],
+    ) -> ParsedBetaMessage[None]: ...
+
+    @overload
+    def parse(
+        self,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        **kwargs: Unpack[BetaMessagesParseParamsWithFormatType[type[ResponseFormatT]]],
+    ) -> ParsedBetaMessage[ResponseFormatT]: ...
+
+    @overload
+    def parse(
+        self,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        **kwargs: Unpack[BetaMessagesParseParamsWithFormatType[ResponseFormatT]],
+    ) -> ParsedBetaMessage[ResponseFormatT]: ...
+
+    def parse(
+        self,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        **kwargs: Unpack[BetaMessagesParseParamsIntersection[ResponseFormatT]],
     ) -> ParsedBetaMessage[ResponseFormatT]:
+        output_config = kwargs.get("output_config", omit)
+        output_format = kwargs.get("output_format", omit)
+
         _validate_output_config_conflict(output_config, output_format)
         _warn_output_format_deprecated(output_format)
 
-        if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
+        if kwargs.get("stream", False) and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
-                max_tokens, MODEL_NONSTREAMING_TOKENS.get(model, None)
+                kwargs["max_tokens"], MODEL_NONSTREAMING_TOKENS.get(kwargs["model"], None)
             )
 
-        if model in DEPRECATED_MODELS:
+        if kwargs["model"] in DEPRECATED_MODELS:
             warnings.warn(
-                f"The model '{model}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[model]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
+                f"The model '{kwargs['model']}' is deprecated and will reach end-of-life on {DEPRECATED_MODELS[kwargs['model']]}.\nPlease migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
                 DeprecationWarning,
                 stacklevel=3,
             )
 
-        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
+        if (
+            kwargs["model"] in MODELS_TO_WARN_WITH_THINKING_ENABLED
+            and kwargs.get("thinking", {}).get("type") == "enabled"
+        ):
             warnings.warn(
-                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
+                f"Using Claude with {kwargs['model']} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
                 UserWarning,
                 stacklevel=3,
             )
 
-        betas = [beta for beta in betas] if is_given(betas) else []
+        betas = [beta for beta in kwargs.get("betas", [])]
 
         if "structured-outputs-2025-12-15" not in betas:
             # Ensure structured outputs beta is included for parse method
@@ -1190,26 +1231,11 @@ class Messages(SyncAPIResource):
             "/v1/messages?beta=true",
             body=maybe_transform(
                 {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "container": container,
-                    "context_management": context_management,
-                    "inference_geo": inference_geo,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "output_format": omit,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "stream": stream,
-                    "system": system,
-                    "temperature": temperature,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                    "top_k": top_k,
-                    "top_p": top_p,
+                    **kwargs,
+                    **{
+                        "output_config": merged_output_config,
+                        "output_format": omit,
+                    },
                 },
                 message_create_params.MessageCreateParamsNonStreaming,
             ),
