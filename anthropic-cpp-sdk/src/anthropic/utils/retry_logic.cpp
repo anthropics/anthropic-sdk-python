@@ -2,6 +2,8 @@
 #include <thread>
 #include <ctime>
 #include <regex>
+#include <cmath>
+#include <string>
 
 namespace anthropic {
 namespace utils {
