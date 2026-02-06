@@ -15,4 +15,4 @@ codegen.log
 Brewfile.lock.json
 /anthropic-cpp-sdk/.vs/
 /anthropic-cpp-sdk/bin/
-/anthropic-cpp-sdk/obj/x64/Debug
+/anthropic-cpp-sdk/obj/

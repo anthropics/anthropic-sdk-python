@@ -120,6 +120,9 @@
     <ClCompile Include="src\anthropic\types\content_block.cpp" />
     <ClCompile Include="src\anthropic\resources\messages.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.gitignore" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
