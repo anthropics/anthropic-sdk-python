@@ -13,3 +13,4 @@ dist
 .envrc
 codegen.log
 Brewfile.lock.json
+/anthropic-cpp-sdk/.vs/AnthropicSDK
