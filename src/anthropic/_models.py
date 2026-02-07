@@ -507,15 +507,21 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
     else:
         meta = tuple()
 
+    # we allow `object` as the input type because otherwise, passing things like
+    # `Literal['value']` will be reported as a type error by type checkers
+    type_ = cast(Any, type_)
+
     while is_type_alias_type(type_) or is_annotated_type(type_):
         if is_type_alias_type(type_):
-            type_ = cast("type[object]", type_.__value__)
+            type_ = cast(Any, type_.__value__)
             continue
 
         if is_annotated_type(type_):
             meta = meta + get_args(type_)[1:]
-            type_ = cast("type[object]", extract_type_arg(type_, 0))
+            type_ = cast(Any, extract_type_arg(type_, 0))
             continue
+
+    type_ = cast(Any, type_)
 
     # we need to use the origin class for any types that are subscripted generics
     # e.g. Dict[str, object]
