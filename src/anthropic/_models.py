@@ -509,8 +509,8 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
     # `Literal['value']` will be reported as a type error by type checkers
     type_ = cast("type[object]", type_)
     if is_type_alias_type(type_):
-        original_type = type_
-        type_ = type_.__value__
+        original_type = type_  # type: ignore[unreachable]
+        type_ = type_.__value__  # type: ignore[unreachable]
 
     # unwrap `Annotated[T, ...]` -> `T`
     if metadata is not None and len(metadata) > 0:
