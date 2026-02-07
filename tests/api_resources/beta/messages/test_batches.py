@@ -118,6 +118,7 @@ class TestBatches:
                             "type": "json_schema",
                         },
                         "service_tier": "auto",
+                        "speed": "standard",
                         "stop_sequences": ["string"],
                         "stream": True,
                         "system": [
@@ -560,6 +561,7 @@ class TestAsyncBatches:
                             "type": "json_schema",
                         },
                         "service_tier": "auto",
+                        "speed": "standard",
                         "stop_sequences": ["string"],
                         "stream": True,
                         "system": [
