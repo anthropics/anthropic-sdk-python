@@ -30,9 +30,23 @@ UnwrappingAlias = TypeAliasType("UnwrappingAlias", UnwrappingDiscriminatedUnion)
 UnwrappingUnionAlias = TypeAliasType("UnwrappingUnionAlias", Union[UnwrappingVariantA, UnwrappingVariantB])
 UnwrappingAnnotatedAlias = Annotated[UnwrappingUnionAlias, PropertyInfo(discriminator="type")]
 
+UnwrappingDeepUnionAlias = TypeAliasType("UnwrappingDeepUnionAlias", UnwrappingVariantA)
+UnwrappingDeepAnnotated1 = Annotated[UnwrappingDeepUnionAlias, "some metadata"]
+UnwrappingDeepAlias1 = TypeAliasType("UnwrappingDeepAlias1", UnwrappingDeepAnnotated1)
+UnwrappingDeepAnnotated2 = Annotated[UnwrappingDeepAlias1, PropertyInfo(discriminator="type")]
+UnwrappingDeepAlias2 = TypeAliasType("UnwrappingDeepAlias2", UnwrappingDeepAnnotated2)
 
 class BasicModel(BaseModel):
     foo: str
+
+
+AnnotatedModel = Annotated[BasicModel, "random metadata"]
+
+DiscriminatedUnionA = Union[UnwrappingVariantA, UnwrappingVariantB]
+DiscriminatedUnionAnnotated = Annotated[DiscriminatedUnionA, PropertyInfo(discriminator="type")]
+
+DiscriminatedUnionC = Union[Union[UnwrappingVariantA, UnwrappingVariantB], UnwrappingVariantB]  # Adjusted for test
+# Actually let's use the ones already in the tests if possible, but move them up.
 
 
 @pytest.mark.parametrize("value", ["hello", 1], ids=["correct type", "mismatched"])
@@ -667,7 +681,7 @@ def test_annotated_types() -> None:
 
     m = construct_type(
         value={"value": "foo"},
-        type_=cast(Any, Annotated[Model, "random metadata"]),
+        type_=Annotated[Model, "random metadata"],
     )
     assert isinstance(m, Model)
     assert m.value == "foo"
@@ -1010,13 +1024,7 @@ def test_annotated_type_alias_unwrapping() -> None:
 
 def test_deeply_nested_unwrapping() -> None:
     # Case 3: Deeply nested TypeAliasType and Annotated
-    UnionAlias = cast(Any, TypeAliasType("UnionAlias", UnwrappingVariantA))
-    Annotated1 = cast(Any, Annotated[UnionAlias, "some metadata"])
-    Alias1 = cast(Any, TypeAliasType("Alias1", Annotated1))
-    Annotated2 = cast(Any, Annotated[Alias1, PropertyInfo(discriminator="type")])
-    Alias2 = cast(Any, TypeAliasType("Alias2", Annotated2))
-
     data = {"type": "a", "value": "foo"}
-    m = construct_type(type_=Alias2, value=data)
+    m = construct_type(type_=UnwrappingDeepAlias2, value=data)
     assert isinstance(m, UnwrappingVariantA)
     assert m.value == "foo"

@@ -509,28 +509,26 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
 
     # we allow `object` as the input type because otherwise, passing things like
     # `Literal['value']` will be reported as a type error by type checkers
-    type_ = cast(Any, type_)
+    _type = cast(Any, type_)
 
-    while is_type_alias_type(type_) or is_annotated_type(type_):
-        if is_type_alias_type(type_):
-            type_ = cast(Any, type_.__value__)
+    while is_type_alias_type(_type) or is_annotated_type(_type):
+        if is_type_alias_type(_type):
+            _type = cast(Any, _type.__value__)
             continue
 
-        if is_annotated_type(type_):
-            meta = meta + get_args(type_)[1:]
-            type_ = cast(Any, extract_type_arg(type_, 0))
+        if is_annotated_type(_type):
+            meta = meta + get_args(_type)[1:]
+            _type = cast(Any, extract_type_arg(_type, 0))
             continue
-
-    type_ = cast(Any, type_)
 
     # we need to use the origin class for any types that are subscripted generics
     # e.g. Dict[str, object]
-    origin = get_origin(type_) or type_
-    args = get_args(type_)
+    origin = get_origin(_type) or _type
+    args = get_args(_type)
 
     if is_union(origin):
         try:
-            return validate_type(type_=cast("type[object]", type_), value=value)
+            return validate_type(type_=cast(Any, _type), value=value)
         except Exception:
             pass
 
@@ -548,7 +546,7 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
         #
         # without this block, if the data we get is something like `{'kind': 'bar', 'value': 'foo'}` then
         # we'd end up constructing `FooType` when it should be `BarType`.
-        discriminator = _build_discriminated_union_meta(union=type_, meta_annotations=meta)
+        discriminator = _build_discriminated_union_meta(union=cast(Any, _type), meta_annotations=meta)
         if discriminator and is_mapping(value):
             variant_value = value.get(discriminator.field_alias_from or discriminator.field_name)
             if variant_value and isinstance(variant_value, str):
@@ -569,22 +567,22 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
         if not is_mapping(value):
             return value
 
-        _, items_type = get_args(type_)  # Dict[_, items_type]
+        _, items_type = get_args(_type)  # Dict[_, items_type]
         return {key: construct_type(value=item, type_=items_type) for key, item in value.items()}
 
     if (
-        not is_literal_type(type_)
+        not is_literal_type(_type)
         and inspect.isclass(origin)
         and (issubclass(origin, BaseModel) or issubclass(origin, GenericModel))
     ):
         if is_list(value):
-            return [cast(Any, type_).construct(**entry) if is_mapping(entry) else entry for entry in value]
+            return [cast(Any, _type).construct(**entry) if is_mapping(entry) else entry for entry in value]
 
         if is_mapping(value):
-            if issubclass(type_, BaseModel):
-                return type_.construct(**value)  # type: ignore[arg-type]
+            if inspect.isclass(_type) and issubclass(_type, BaseModel):
+                return _type.construct(**value)  # type: ignore[arg-type]
 
-            return cast(Any, type_).construct(**value)
+            return cast(Any, _type).construct(**value)
 
     if origin == list:
         if not is_list(value):
