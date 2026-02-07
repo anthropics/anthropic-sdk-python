@@ -513,12 +513,12 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
 
     while is_type_alias_type(_type) or is_annotated_type(_type):
         if is_type_alias_type(_type):
-            _type = cast(Any, _type.__value__)
+            _type = _type.__value__
             continue
 
         if is_annotated_type(_type):
             meta = meta + get_args(_type)[1:]
-            _type = cast(Any, extract_type_arg(_type, 0))
+            _type = extract_type_arg(_type, 0)
             continue
 
     # we need to use the origin class for any types that are subscripted generics
@@ -528,7 +528,7 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
 
     if is_union(origin):
         try:
-            return validate_type(type_=cast(Any, _type), value=value)
+            return validate_type(type_=_type, value=value)
         except Exception:
             pass
 
@@ -546,7 +546,7 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
         #
         # without this block, if the data we get is something like `{'kind': 'bar', 'value': 'foo'}` then
         # we'd end up constructing `FooType` when it should be `BarType`.
-        discriminator = _build_discriminated_union_meta(union=cast(Any, _type), meta_annotations=meta)
+        discriminator = _build_discriminated_union_meta(union=_type, meta_annotations=meta)
         if discriminator and is_mapping(value):
             variant_value = value.get(discriminator.field_alias_from or discriminator.field_name)
             if variant_value and isinstance(variant_value, str):
@@ -576,13 +576,13 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
         and (issubclass(origin, BaseModel) or issubclass(origin, GenericModel))
     ):
         if is_list(value):
-            return [cast(Any, _type).construct(**entry) if is_mapping(entry) else entry for entry in value]
+            return [_type.construct(**entry) if is_mapping(entry) else entry for entry in value]
 
         if is_mapping(value):
             if inspect.isclass(_type) and issubclass(_type, BaseModel):
                 return _type.construct(**value)  # type: ignore[arg-type]
 
-            return cast(Any, _type).construct(**value)
+            return _type.construct(**value)
 
     if origin == list:
         if not is_list(value):
