@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Union, Iterable, Optional
-from typing_extensions import Required, Annotated, TypeAlias, TypedDict
+from typing_extensions import Literal, Required, Annotated, TypeAlias, TypedDict
 
 from ..._utils import PropertyInfo
 from ..model_param import ModelParam
@@ -135,6 +135,12 @@ class MessageCountTokensParams(TypedDict, total=False):
 
     A schema to specify Claude's output format in responses. This parameter will be
     removed in a future release.
+    """
+
+    speed: Optional[Literal["standard", "fast"]]
+    """The inference speed mode for this request.
+
+    `"fast"` enables high output-tokens-per-second inference.
     """
 
     system: Union[str, Iterable[BetaTextBlockParam]]

@@ -37,7 +37,7 @@ snapshots = {
             ]
         ),
         "result": snapshot(
-            "ParsedBetaMessage(container=None, content=[ParsedBetaTextBlock(citations=None, parsed_output=None, text=\"The weather in San Francisco, CA is currently **68°F** and **Sunny**. It's a nice day! ☀️\", type='text')], context_management=None, id='msg_014x2Sxq2p6sewFyUbJp8Mg3', model='claude-haiku-4-5-20251001', role='assistant', stop_reason='end_turn', stop_sequence=None, type='message', usage=BetaUsage(cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0), cache_creation_input_tokens=0, cache_read_input_tokens=0, inference_geo=None, input_tokens=770, iterations=None, output_tokens=33, server_tool_use=None, service_tier='standard'))\n"
+            "ParsedBetaMessage(container=None, content=[ParsedBetaTextBlock(citations=None, parsed_output=None, text=\"The weather in San Francisco, CA is currently **68°F** and **Sunny**. It's a nice day! ☀️\", type='text')], context_management=None, id='msg_014x2Sxq2p6sewFyUbJp8Mg3', model='claude-haiku-4-5-20251001', role='assistant', stop_reason='end_turn', stop_sequence=None, type='message', usage=BetaUsage(cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0), cache_creation_input_tokens=0, cache_read_input_tokens=0, inference_geo=None, input_tokens=770, iterations=None, output_tokens=33, server_tool_use=None, service_tier='standard', speed=None))\n"
         ),
     },
     "custom": {
@@ -48,12 +48,12 @@ snapshots = {
             ]
         ),
         "result": snapshot(
-            "ParsedBetaMessage(container=None, content=[ParsedBetaTextBlock(citations=None, parsed_output=None, text='The weather in San Francisco, CA is currently **20°C** and **Sunny**. Nice weather!', type='text')], context_management=None, id='msg_01DSPL7PHKQYTe9VAFkHzsA3', model='claude-haiku-4-5-20251001', role='assistant', stop_reason='end_turn', stop_sequence=None, type='message', usage=BetaUsage(cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0), cache_creation_input_tokens=0, cache_read_input_tokens=0, inference_geo=None, input_tokens=787, iterations=None, output_tokens=26, server_tool_use=None, service_tier='standard'))\n"
+            "ParsedBetaMessage(container=None, content=[ParsedBetaTextBlock(citations=None, parsed_output=None, text='The weather in San Francisco, CA is currently **20°C** and **Sunny**. Nice weather!', type='text')], context_management=None, id='msg_01DSPL7PHKQYTe9VAFkHzsA3', model='claude-haiku-4-5-20251001', role='assistant', stop_reason='end_turn', stop_sequence=None, type='message', usage=BetaUsage(cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0), cache_creation_input_tokens=0, cache_read_input_tokens=0, inference_geo=None, input_tokens=787, iterations=None, output_tokens=26, server_tool_use=None, service_tier='standard', speed=None))\n"
         ),
     },
     "streaming": {
         "result": snapshot(
-            "ParsedBetaMessage(container=None, content=[ParsedBetaTextBlock(citations=None, parsed_output=None, text='The weather in San Francisco, CA is currently **Sunny** with a temperature of **68°F**.', type='text')], context_management=None, id='msg_01Vm8Ddgc8qm4iuUSKbf6jku', model='claude-haiku-4-5-20251001', role='assistant', stop_reason='end_turn', stop_sequence=None, type='message', usage=BetaUsage(cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0), cache_creation_input_tokens=0, cache_read_input_tokens=0, inference_geo=None, input_tokens=781, iterations=None, output_tokens=25, server_tool_use=None, service_tier='standard'))\n"
+            "ParsedBetaMessage(container=None, content=[ParsedBetaTextBlock(citations=None, parsed_output=None, text='The weather in San Francisco, CA is currently **Sunny** with a temperature of **68°F**.', type='text')], context_management=None, id='msg_01Vm8Ddgc8qm4iuUSKbf6jku', model='claude-haiku-4-5-20251001', role='assistant', stop_reason='end_turn', stop_sequence=None, type='message', usage=BetaUsage(cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0), cache_creation_input_tokens=0, cache_read_input_tokens=0, inference_geo=None, input_tokens=781, iterations=None, output_tokens=25, server_tool_use=None, service_tier='standard', speed=None))\n"
         )
     },
     "tool_call": {
