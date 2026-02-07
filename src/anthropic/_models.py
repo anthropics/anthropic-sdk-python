@@ -501,17 +501,7 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
     If the given value does not match the expected type then it is returned as-is.
     """
 
-    # store a reference to the original type we were given before we extract any inner
-    # types so that we can properly resolve forward references in `TypeAliasType` annotations
-    original_type = type_
-
-    # unwrap `Annotated[T, ...]` -> `T` and `TypeAliasType` -> `T.__value__`
-    # while collecting metadata from `Annotated`
-    #
-    # we allow `object` as the input type because otherwise, passing things like
-    # `Literal['value']` will be reported as a type error by type checkers
-    type_ = cast("type[object]", type_)
-
+    meta: tuple[Any, ...]
     if metadata is not None:
         meta = tuple(metadata)
     else:
@@ -523,13 +513,9 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
             continue
 
         if is_annotated_type(type_):
-            if not meta:
-                meta = get_args(type_)[1:]
-
+            meta = meta + get_args(type_)[1:]
             type_ = cast("type[object]", extract_type_arg(type_, 0))
             continue
-
-
 
     # we need to use the origin class for any types that are subscripted generics
     # e.g. Dict[str, object]
@@ -538,7 +524,7 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
 
     if is_union(origin):
         try:
-            return validate_type(type_=cast("type[object]", original_type or type_), value=value)
+            return validate_type(type_=cast("type[object]", type_), value=value)
         except Exception:
             pass
 
