@@ -148,6 +148,8 @@ def model_dump(
     by_alias: bool | None = None,
 ) -> dict[str, Any]:
     if (not PYDANTIC_V1) or hasattr(model, "model_dump"):
+        # Convert None to False explicitly to avoid TypeError in Pydantic v2
+        by_alias_value = by_alias if by_alias is not None else False
         return model.model_dump(
             mode=mode,
             exclude=exclude,
@@ -155,7 +157,7 @@ def model_dump(
             exclude_defaults=exclude_defaults,
             # warnings are not supported in Pydantic v1
             warnings=True if PYDANTIC_V1 else warnings,
-            by_alias=by_alias,
+            by_alias=by_alias_value,
         )
     return cast(
         "dict[str, Any]",
