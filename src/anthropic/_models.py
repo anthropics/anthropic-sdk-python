@@ -509,17 +509,25 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
     # `Literal['value']` will be reported as a type error by type checkers
     type_ = cast("type[object]", type_)
     if is_type_alias_type(type_):
-        original_type = type_  # type: ignore[unreachable]
-        type_ = type_.__value__  # type: ignore[unreachable]
+        original_type = type_
+        type_ = type_.__value__
 
     # unwrap `Annotated[T, ...]` -> `T`
     if metadata is not None and len(metadata) > 0:
         meta: tuple[Any, ...] = tuple(metadata)
-    elif is_annotated_type(type_):
-        meta = get_args(type_)[1:]
-        type_ = extract_type_arg(type_, 0)
     else:
         meta = tuple()
+
+    if is_annotated_type(type_):
+        if not meta:
+            meta = get_args(type_)[1:]
+
+        if original_type is None:
+            original_type = type_
+
+        type_ = extract_type_arg(type_, 0)
+
+
 
     # we need to use the origin class for any types that are subscripted generics
     # e.g. Dict[str, object]
