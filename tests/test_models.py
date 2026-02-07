@@ -48,6 +48,8 @@ DiscriminatedUnionAnnotated = Annotated[DiscriminatedUnionA, PropertyInfo(discri
 DiscriminatedUnionC = Union[Union[UnwrappingVariantA, UnwrappingVariantB], UnwrappingVariantB]  # Adjusted for test
 # Actually let's use the ones already in the tests if possible, but move them up.
 
+TestAlias = TypeAliasType("TestAlias", str)
+
 
 @pytest.mark.parametrize("value", ["hello", 1], ids=["correct type", "mismatched"])
 def test_basic(value: object) -> None:
@@ -868,11 +870,9 @@ def test_discriminated_unions_invalid_data_uses_cache() -> None:
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="TypeAliasType is not supported in Pydantic v1")
 def test_type_alias_type() -> None:
-    Alias = TypeAliasType("Alias", str)  # pyright: ignore
-
     class Model(BaseModel):
-        alias: Alias
-        union: Union[int, Alias]
+        alias: TestAlias
+        union: Union[int, TestAlias]
 
     m = construct_type(value={"alias": "foo", "union": "bar"}, type_=Model)
     assert isinstance(m, Model)
