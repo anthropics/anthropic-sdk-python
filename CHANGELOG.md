@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.79.0 (2026-02-07)
+
+Full Changelog: [v0.78.0...v0.79.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.78.0...v0.79.0)
+
+### Features
+
+* **api:** enabling fast-mode in claude-opus-4-6 ([5953ba7](https://github.com/anthropics/anthropic-sdk-python/commit/5953ba7b425ba113595de570bc8c639ff4dc4047))
+
+
+### Bug Fixes
+
+* pass speed parameter through in sync beta count_tokens ([1dd6119](https://github.com/anthropics/anthropic-sdk-python/commit/1dd6119daca6de7a6eb730eb2494f368889ea050))
+
 ## 0.78.0 (2026-02-05)
 
 Full Changelog: [v0.77.1...v0.78.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.77.1...v0.78.0)
