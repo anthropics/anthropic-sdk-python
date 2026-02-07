@@ -96,6 +96,8 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         if callable(params):
             params = params(self._params)
         self._params = params
+        self._cached_tool_call_response = None
+        self._messages_modified = True
 
     def append_messages(self, *messages: BetaMessageParam | ParsedBetaMessage[ResponseFormatT]) -> None:
         """Add one or more messages to the conversation history.
