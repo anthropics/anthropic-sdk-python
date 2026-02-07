@@ -95,7 +95,20 @@ class Batches(SyncAPIResource):
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
             "/v1/messages/batches?beta=true",
-            body=maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
+            body=maybe_transform(
+                {
+                    "requests": [
+                        {
+                            **request,
+                            "params": {  # type: ignore[misc]
+                                k: v for k, v in request["params"].items() if k not in {"betas", "anthropic-beta"}
+                            },
+                        }
+                        for request in requests
+                    ]
+                },
+                batch_create_params.BatchCreateParams,
+            ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -482,7 +495,20 @@ class AsyncBatches(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
             "/v1/messages/batches?beta=true",
-            body=await async_maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
+            body=await async_maybe_transform(
+                {
+                    "requests": [
+                        {
+                            **request,
+                            "params": {  # type: ignore[misc]
+                                k: v for k, v in request["params"].items() if k not in {"betas", "anthropic-beta"}
+                            },
+                        }
+                        for request in requests
+                    ]
+                },
+                batch_create_params.BatchCreateParams,
+            ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
