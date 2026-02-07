@@ -576,13 +576,13 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
         and (issubclass(origin, BaseModel) or issubclass(origin, GenericModel))
     ):
         if is_list(value):
-            return [_type.construct(**entry) if is_mapping(entry) else entry for entry in value]
+            return [_type.construct(**entry) if is_mapping(entry) else entry for entry in value]  # type: ignore[arg-type]
 
         if is_mapping(value):
             if inspect.isclass(_type) and issubclass(_type, BaseModel):
                 return _type.construct(**value)  # type: ignore[arg-type]
 
-            return _type.construct(**value)
+            return _type.construct(**value)  # type: ignore[arg-type, return-value]
 
     if origin == list:
         if not is_list(value):
