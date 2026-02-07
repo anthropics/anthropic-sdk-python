@@ -503,29 +503,31 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
 
     # store a reference to the original type we were given before we extract any inner
     # types so that we can properly resolve forward references in `TypeAliasType` annotations
-    original_type = None
+    original_type = type_
 
+    # unwrap `Annotated[T, ...]` -> `T` and `TypeAliasType` -> `T.__value__`
+    # while collecting metadata from `Annotated`
+    #
     # we allow `object` as the input type because otherwise, passing things like
     # `Literal['value']` will be reported as a type error by type checkers
     type_ = cast("type[object]", type_)
-    if is_type_alias_type(type_):
-        original_type = type_  # type: ignore[unreachable]
-        type_ = type_.__value__  # type: ignore[unreachable]
 
-    # unwrap `Annotated[T, ...]` -> `T`
-    if metadata is not None and len(metadata) > 0:
-        meta: tuple[Any, ...] = tuple(metadata)
+    if metadata is not None:
+        meta = tuple(metadata)
     else:
         meta = tuple()
 
-    if is_annotated_type(type_):
-        if not meta:
-            meta = get_args(type_)[1:]
+    while is_type_alias_type(type_) or is_annotated_type(type_):
+        if is_type_alias_type(type_):
+            type_ = cast("type[object]", type_.__value__)
+            continue
 
-        if original_type is None:
-            original_type = type_
+        if is_annotated_type(type_):
+            if not meta:
+                meta = get_args(type_)[1:]
 
-        type_ = extract_type_arg(type_, 0)
+            type_ = cast("type[object]", extract_type_arg(type_, 0))
+            continue
 
 
 
