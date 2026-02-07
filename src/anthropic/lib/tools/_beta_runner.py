@@ -246,6 +246,10 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                 message = self._get_last_message()
                 assert message is not None
 
+                # Update container from response for programmatic tool calling support
+                if message.container is not None:
+                    self._params["container"] = message.container.id
+
             self._iteration_count += 1
 
             # If the compaction was performed, skip tool call generation this iteration
@@ -496,6 +500,10 @@ class BaseAsyncToolRunner(
                 yield item
                 message = await self._get_last_message()
                 assert message is not None
+
+                # Update container from response for programmatic tool calling support
+                if message.container is not None:
+                    self._params["container"] = message.container.id
 
             self._iteration_count += 1
 
