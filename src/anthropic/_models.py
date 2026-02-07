@@ -528,7 +528,7 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
 
     if is_union(origin):
         try:
-            return validate_type(type_=_type, value=value)
+            return validate_type(type_=_type, value=value)  # pyright: ignore[reportUnknownVariableType]
         except Exception:
             pass
 
