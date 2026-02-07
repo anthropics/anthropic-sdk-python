@@ -1846,6 +1846,7 @@ class Messages(SyncAPIResource):
                     "mcp_servers": mcp_servers,
                     "output_config": merged_output_config,
                     "output_format": omit,
+                    "speed": speed,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
