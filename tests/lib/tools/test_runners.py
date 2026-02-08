@@ -581,6 +581,80 @@ async def test_basic_call_async(
     assert print_obj(message, monkeypatch) == snapshots["basic"]["result"]
 
 
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+async def test_async_compaction_filters_tool_use(async_client: AsyncAnthropic) -> None:
+    """Test that async compaction correctly filters out tool_use blocks.
+
+    When compaction runs and the last message is an assistant message with only
+    tool_use blocks (no text), the filtering should remove it to avoid API errors
+    about tool_use without corresponding tool_result.
+
+    This is a regression test for a bug where the async version used
+    self._params["messages"] instead of the filtered local `messages` variable.
+    """
+    from unittest.mock import AsyncMock, MagicMock
+
+    runner = async_client.beta.messages.tool_runner(
+        model="claude-sonnet-4-20250514",
+        max_tokens=500,
+        tools=[],
+        messages=[{"role": "user", "content": "test"}],
+        compaction_control={
+            "enabled": True,
+            "context_token_threshold": 100,
+        },
+    )
+
+    # Set up messages ending with assistant containing ONLY tool_use (no text)
+    runner._params["messages"] = [
+        {"role": "user", "content": "What is 2+2?"},
+        {
+            "role": "assistant",
+            "content": [
+                {
+                    "type": "tool_use",
+                    "id": "toolu_test123",
+                    "name": "calculator",
+                    "input": {"a": 2, "b": 2}
+                }
+            ]
+        },
+    ]
+
+    # Mock _get_last_message to return high token usage to trigger compaction
+    mock_message = MagicMock()
+    mock_message.usage.input_tokens = 500
+    mock_message.usage.output_tokens = 100
+    mock_message.usage.cache_creation_input_tokens = 0
+    mock_message.usage.cache_read_input_tokens = 0
+    runner._get_last_message = AsyncMock(return_value=mock_message)
+
+    # Mock the API call for compaction summary
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(type="text", text="Summary of conversation")]
+    mock_response.usage.output_tokens = 50
+    runner._client.beta.messages.create = AsyncMock(return_value=mock_response)
+
+    # This should succeed - the tool_use should be filtered out
+    # Before the fix, this would send tool_use without tool_result and fail
+    result = await runner._check_and_compact()
+
+    assert result is True, "Compaction should have run"
+
+    # Verify the API was called (compaction happened)
+    runner._client.beta.messages.create.assert_called_once()
+
+    # Get the messages that were sent to the API
+    call_kwargs = runner._client.beta.messages.create.call_args[1]
+    sent_messages = call_kwargs["messages"]
+
+    # The tool_use-only assistant message should have been removed
+    # So we should have: [user_message, summary_prompt]
+    assert len(sent_messages) == 2, f"Expected 2 messages, got {len(sent_messages)}"
+    assert sent_messages[0]["role"] == "user"
+    assert sent_messages[1]["role"] == "user"  # Summary prompt is a user message
+
+
 def _get_weather(location: str, units: Literal["c", "f"]) -> Dict[str, Any]:
     # Simulate a weather API call
     print(f"Fetching weather for {location} in {units}")
