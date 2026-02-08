@@ -255,8 +255,13 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     return
 
-                if not self._messages_modified:
-                    self.append_messages(message, response)
+                # Only append message if there's actual content to add
+                if response is not None and response.get("content"):
+                    if not self._messages_modified:
+                        self.append_messages(message, response)
+                elif response is not None:
+                    # Empty content means we have server tools in pause_turn state, just continue
+                    log.debug("Server tools detected with pause_turn, continuing the loop.")
 
             self._messages_modified = False
             self._cached_tool_call_response = None
@@ -290,7 +295,21 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         if not content:
             return None
 
+        # Check for client-side tool_use blocks (tools that we can execute)
         tool_use_blocks = [block for block in content if block.type == "tool_use"]
+
+        # Check for server_tool_use blocks (server-side tools like web_search, web_fetch)
+        server_tool_use_blocks = [block for block in content if block.type == "server_tool_use"]
+
+        # If we have server tool use blocks and stop reason is pause_turn, continue the loop
+        # by returning an empty tool result list so the conversation continues
+        if server_tool_use_blocks:
+            last_message = self._get_last_message()
+            if last_message is not None and last_message.stop_reason == "pause_turn":
+                # Return empty content to signal the loop should continue
+                return {"role": "user", "content": []}
+
+        # If no client-side tool_use blocks, nothing to execute
         if not tool_use_blocks:
             return None
 
@@ -506,8 +525,13 @@ class BaseAsyncToolRunner(
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     return
 
-                if not self._messages_modified:
-                    self.append_messages(message, response)
+                # Only append message if there's actual content to add
+                if response is not None and response.get("content"):
+                    if not self._messages_modified:
+                        self.append_messages(message, response)
+                elif response is not None:
+                    # Empty content means we have server tools in pause_turn state, just continue
+                    log.debug("Server tools detected with pause_turn, continuing the loop.")
 
             self._messages_modified = False
             self._cached_tool_call_response = None
@@ -554,7 +578,21 @@ class BaseAsyncToolRunner(
         if not content:
             return None
 
+        # Check for client-side tool_use blocks (tools that we can execute)
         tool_use_blocks = [block for block in content if block.type == "tool_use"]
+
+        # Check for server_tool_use blocks (server-side tools like web_search, web_fetch)
+        server_tool_use_blocks = [block for block in content if block.type == "server_tool_use"]
+
+        # If we have server tool use blocks and stop reason is pause_turn, continue the loop
+        # by returning an empty tool result list so the conversation continues
+        if server_tool_use_blocks:
+            last_message = await self._get_last_message()
+            if last_message is not None and last_message.stop_reason == "pause_turn":
+                # Return empty content to signal the loop should continue
+                return {"role": "user", "content": []}
+
+        # If no client-side tool_use blocks, nothing to execute
         if not tool_use_blocks:
             return None
 
