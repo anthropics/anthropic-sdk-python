@@ -93,9 +93,20 @@ class Batches(SyncAPIResource):
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
+
+        # Strip 'betas' from individual request params as it should only be at batch level
+        cleaned_requests = []
+        for request in requests:
+            request_dict = dict(request)
+            if "params" in request_dict and isinstance(request_dict["params"], dict):
+                params_copy = dict(request_dict["params"])
+                params_copy.pop("betas", None)
+                request_dict["params"] = params_copy
+            cleaned_requests.append(request_dict)
+
         return self._post(
             "/v1/messages/batches?beta=true",
-            body=maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
+            body=maybe_transform({"requests": cleaned_requests}, batch_create_params.BatchCreateParams),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -480,9 +491,20 @@ class AsyncBatches(AsyncAPIResource):
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
+
+        # Strip 'betas' from individual request params as it should only be at batch level
+        cleaned_requests = []
+        for request in requests:
+            request_dict = dict(request)
+            if "params" in request_dict and isinstance(request_dict["params"], dict):
+                params_copy = dict(request_dict["params"])
+                params_copy.pop("betas", None)
+                request_dict["params"] = params_copy
+            cleaned_requests.append(request_dict)
+
         return await self._post(
             "/v1/messages/batches?beta=true",
-            body=await async_maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
+            body=await async_maybe_transform({"requests": cleaned_requests}, batch_create_params.BatchCreateParams),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
