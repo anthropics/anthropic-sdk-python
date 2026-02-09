@@ -256,10 +256,10 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                     return
 
                 # Only append message if there's actual content to add
-                if response is not None and response.get("content"):
+                if response.get("content"):
                     if not self._messages_modified:
                         self.append_messages(message, response)
-                elif response is not None:
+                else:
                     # Empty content means we have server tools in pause_turn state, just continue
                     log.debug("Server tools detected with pause_turn, continuing the loop.")
 
@@ -526,10 +526,10 @@ class BaseAsyncToolRunner(
                     return
 
                 # Only append message if there's actual content to add
-                if response is not None and response.get("content"):
+                if response.get("content"):
                     if not self._messages_modified:
                         self.append_messages(message, response)
-                elif response is not None:
+                else:
                     # Empty content means we have server tools in pause_turn state, just continue
                     log.debug("Server tools detected with pause_turn, continuing the loop.")
 
