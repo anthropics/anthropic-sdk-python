@@ -3,7 +3,7 @@
 -e .
 annotated-types==0.7.0
     # via pydantic
-anyio==4.12.0
+anyio==4.12.1
     # via
     #   anthropic
     #   httpx
@@ -11,10 +11,10 @@ asttokens==3.0.1
     # via inline-snapshot
 backports-asyncio-runner==1.2.0 ; python_full_version < '3.11'
     # via pytest-asyncio
-boto3-stubs==1.41.5
-botocore-stubs==1.41.6
+boto3-stubs==1.42.44
+botocore-stubs==1.42.41
     # via boto3-stubs
-certifi==2025.11.12
+certifi==2026.1.4
     # via
     #   httpcore
     #   httpx
@@ -49,13 +49,13 @@ idna==3.11
     # via
     #   anyio
     #   httpx
-importlib-metadata==8.7.0
+importlib-metadata==8.7.1
 iniconfig==2.1.0 ; python_full_version < '3.10'
     # via pytest
 iniconfig==2.3.0 ; python_full_version >= '3.10'
     # via pytest
 inline-snapshot==0.31.1
-jiter==0.12.0
+jiter==0.13.0
     # via anthropic
 markdown-it-py==3.0.0 ; python_full_version < '3.10'
     # via rich
@@ -66,11 +66,11 @@ mdurl==0.1.2
 mypy==1.17.0
 mypy-extensions==1.1.0
     # via mypy
-nodeenv==1.9.1
+nodeenv==1.10.0
     # via pyright
 packaging==25.0
     # via pytest
-pathspec==0.12.1
+pathspec==1.0.3
     # via mypy
 pluggy==1.6.0
     # via pytest
@@ -88,7 +88,7 @@ pytest==8.4.2 ; python_full_version < '3.10'
     #   inline-snapshot
     #   pytest-asyncio
     #   pytest-xdist
-pytest==9.0.1 ; python_full_version >= '3.10'
+pytest==9.0.2 ; python_full_version >= '3.10'
     # via
     #   inline-snapshot
     #   pytest-asyncio
@@ -101,21 +101,21 @@ python-dateutil==2.9.0.post0 ; python_full_version < '3.10'
 respx==0.22.0
 rich==14.2.0
     # via inline-snapshot
-ruff==0.14.7
+ruff==0.14.13
 six==1.17.0 ; python_full_version < '3.10'
     # via python-dateutil
 sniffio==1.3.1
     # via anthropic
 time-machine==2.19.0 ; python_full_version < '3.10'
-time-machine==3.1.0 ; python_full_version >= '3.10'
-tomli==2.3.0 ; python_full_version < '3.11'
+time-machine==3.2.0 ; python_full_version >= '3.10'
+tomli==2.4.0 ; python_full_version < '3.11'
     # via
     #   inline-snapshot
     #   mypy
     #   pytest
-types-awscrt==0.29.1
+types-awscrt==0.31.1
     # via botocore-stubs
-types-s3transfer==0.15.0
+types-s3transfer==0.16.0
     # via boto3-stubs
 typing-extensions==4.15.0
     # via
