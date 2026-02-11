@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import json
+import base64
 import logging
 import urllib.parse
 from typing import Any, Union, Mapping, TypeVar
@@ -62,7 +64,23 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
         raise AnthropicError("The Batch API is not supported in Bedrock yet")
 
     if options.url == "/v1/messages/count_tokens":
-        raise AnthropicError("Token counting is not supported in Bedrock yet")
+        if not is_dict(options.json_data):
+            raise RuntimeError("Expected dictionary json_data for /v1/messages/count_tokens endpoint")
+
+        model = options.json_data.pop("model", None)
+        model = urllib.parse.quote(str(model), safe=":")
+
+        # max_tokens is required for the request to be valid.
+        # Use 500 which is enough to get a response.
+        options.json_data["max_tokens"] = 500
+
+        # body element of the request is base64 encoded.
+        # See https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModelTokensRequest.html
+        input_to_count = json.dumps(options.json_data)
+        encoded_bytes = base64.b64encode(input_to_count.encode("utf-8")).decode("utf-8")
+        options.json_data = {"input": {"invokeModel": {"body": encoded_bytes}}}
+
+        options.url = f"/model/{model}/count-tokens"
 
     return options
 

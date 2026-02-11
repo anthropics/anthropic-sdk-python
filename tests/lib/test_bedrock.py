@@ -1,4 +1,6 @@
 import re
+import json
+import base64
 import typing as t
 import tempfile
 from typing import TypedDict, cast
@@ -94,6 +96,38 @@ def test_messages_retries(respx_mock: MockRouter) -> None:
         calls[1].request.url
         == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke"
     )
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_messages_count_tokens(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/count-tokens")).mock(
+        side_effect=[httpx.Response(200, json={"foo": "bar"})],
+    )
+
+    sync_client.messages.count_tokens(
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        messages=[{"role": "user", "content": "Hello, world!"}],
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert (
+        calls[0].request.url
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/count-tokens"
+    )
+
+    # Check that the request content is correct.
+    requested_content = json.loads(calls[0].request.content)
+    assert "input" in requested_content
+    assert "invokeModel" in requested_content["input"]
+    assert "body" in requested_content["input"]["invokeModel"]
+    decoded_body = base64.b64decode(requested_content["input"]["invokeModel"]["body"]).decode("utf-8")
+    assert json.loads(decoded_body) == {
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 500,
+        "messages": [{"role": "user", "content": "Hello, world!"}],
+    }
 
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
