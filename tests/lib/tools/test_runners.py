@@ -3,6 +3,7 @@ import logging
 from typing import Any, Dict, List, Union
 from typing_extensions import Literal, TypeVar
 
+import httpx
 import pytest
 from respx import MockRouter
 from inline_snapshot import external, snapshot
@@ -546,6 +547,79 @@ The user requests a 500-word essay about dogs, cats, and birds, followed by a si
             mock_client=client,
             respx_mock=respx_mock,
         )
+
+    @pytest.mark.parametrize("client", [False], indirect=True)
+    @pytest.mark.respx(base_url=base_url)
+    def test_pause_turn_continues_loop(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        @beta_tool
+        def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+            """Lookup the weather for a given city in either celsius or fahrenheit
+
+            Args:
+                location: The city and state, e.g. San Francisco, CA
+                units: Unit for the output, either 'c' for celsius or 'f' for fahrenheit
+            Returns:
+                A dictionary containing the location, temperature, and weather condition.
+            """
+            return json.dumps(_get_weather(location, units))
+
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                httpx.Response(
+                    200,
+                    json={
+                        "model": "claude-haiku-4-5-20251001",
+                        "id": "msg_pause1",
+                        "type": "message",
+                        "role": "assistant",
+                        "content": [{"type": "text", "text": "Checking weather..."}],
+                        "stop_reason": "pause_turn",
+                    },
+                ),
+                httpx.Response(
+                    200,
+                    json={
+                        "model": "claude-haiku-4-5-20251001",
+                        "id": "msg_tool_use",
+                        "type": "message",
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "tool_use",
+                                "id": "toolu_test",
+                                "name": "get_weather",
+                                "input": {"location": "SF", "units": "f"},
+                            }
+                        ],
+                        "stop_reason": "tool_use",
+                    },
+                ),
+                httpx.Response(
+                    200,
+                    json={
+                        "model": "claude-haiku-4-5-20251001",
+                        "id": "msg_final",
+                        "type": "message",
+                        "role": "assistant",
+                        "content": [{"type": "text", "text": "It's 68°F and Sunny in SF"}],
+                        "stop_reason": "end_turn",
+                    },
+                ),
+            ]
+        )
+
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
+
+        message = runner.until_done()
+
+        assert message.stop_reason == "end_turn"
+        assert message.id == "msg_final"
+        assert len(respx_mock.calls) == 3
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")

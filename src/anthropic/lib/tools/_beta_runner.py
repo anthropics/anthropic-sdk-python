@@ -251,11 +251,11 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             # If the compaction was performed, skip tool call generation this iteration
             if not self._check_and_compact():
                 response = self.generate_tool_call_response()
-                if response is None:
+                if response is None and message.stop_reason != "pause_turn":
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     return
 
-                if not self._messages_modified:
+                if response is not None and not self._messages_modified:
                     self.append_messages(message, response)
 
             self._messages_modified = False
@@ -502,11 +502,11 @@ class BaseAsyncToolRunner(
             # If the compaction was performed, skip tool call generation this iteration
             if not await self._check_and_compact():
                 response = await self.generate_tool_call_response()
-                if response is None:
+                if response is None and message.stop_reason != "pause_turn":
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     return
 
-                if not self._messages_modified:
+                if response is not None and not self._messages_modified:
                     self.append_messages(message, response)
 
             self._messages_modified = False
