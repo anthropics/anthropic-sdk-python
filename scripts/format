@@ -11,4 +11,4 @@ uv run ruff check --fix .
 uv run ruff format
 
 echo "==> Formatting docs"
-uv run python scripts/utils/ruffen-docs.py README.md api.md
+uv run python scripts/utils/ruffen-docs.py README.md $(find . -type f -name api.md)
