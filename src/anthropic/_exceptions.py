@@ -13,6 +13,7 @@ __all__ = [
     "NotFoundError",
     "ConflictError",
     "UnprocessableEntityError",
+    "FailedDependencyError",
     "RateLimitError",
     "InternalServerError",
 ]
@@ -107,6 +108,10 @@ class RequestTooLargeError(APIStatusError):
 
 class UnprocessableEntityError(APIStatusError):
     status_code: Literal[422] = 422  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class FailedDependencyError(APIStatusError):
+    status_code: Literal[424] = 424  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
 class RateLimitError(APIStatusError):

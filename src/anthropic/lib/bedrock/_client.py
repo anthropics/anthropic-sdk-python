@@ -117,6 +117,9 @@ class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         if response.status_code == 422:
             return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
 
+        if response.status_code == 424:
+            return _exceptions.FailedDependencyError(err_msg, response=response, body=body)
+
         if response.status_code == 429:
             return _exceptions.RateLimitError(err_msg, response=response, body=body)
 
