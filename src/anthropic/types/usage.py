@@ -34,3 +34,6 @@ class Usage(BaseModel):
 
     service_tier: Optional[Literal["standard", "priority", "batch"]] = None
     """If the request used the priority, standard, or batch tier."""
+
+    speed: Optional[Literal["standard", "fast"]] = None
+    """The inference speed mode used for this request."""

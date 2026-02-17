@@ -105,10 +105,12 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -214,6 +216,8 @@ class Messages(SyncAPIResource):
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
+          container: Container identifier for reuse across requests.
+
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
 
@@ -226,6 +230,9 @@ class Messages(SyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -381,10 +388,12 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
@@ -493,6 +502,8 @@ class Messages(SyncAPIResource):
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
+          container: Container identifier for reuse across requests.
+
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
 
@@ -505,6 +516,9 @@ class Messages(SyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -656,10 +670,12 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
@@ -768,6 +784,8 @@ class Messages(SyncAPIResource):
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
+          container: Container identifier for reuse across requests.
+
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
 
@@ -780,6 +798,9 @@ class Messages(SyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -930,10 +951,12 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -976,10 +999,12 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "container": container,
                     "inference_geo": inference_geo,
                     "metadata": metadata,
                     "output_config": output_config,
                     "service_tier": service_tier,
+                    "speed": speed,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -1014,6 +1039,7 @@ class Messages(SyncAPIResource):
         output_format: None | JSONOutputFormatParam | type[ResponseFormatT] | Omit = omit,
         container: Optional[str] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
@@ -1091,6 +1117,7 @@ class Messages(SyncAPIResource):
                     "output_config": merged_output_config,
                     "container": container,
                     "service_tier": service_tier,
+                    "speed": speed,
                     "stop_sequences": stop_sequences,
                     "system": system,
                     "temperature": temperature,
@@ -1125,6 +1152,7 @@ class Messages(SyncAPIResource):
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1210,6 +1238,7 @@ class Messages(SyncAPIResource):
                     "metadata": metadata,
                     "output_config": merged_output_config,
                     "service_tier": service_tier,
+                    "speed": speed,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -1333,11 +1362,6 @@ class Messages(SyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
-          output_format: A Pydantic model, JSON schema dictionary, or type that will be
-              converted to a JSON schema for structured output. This is a convenience parameter
-              that will be merged into output_config.format. See
-              [structured outputs](https://docs.anthropic.com/en/docs/build-with-claude/structured-outputs)
-              for more details.
 
           system: System prompt.
 
@@ -1477,7 +1501,10 @@ class Messages(SyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "messages": messages,
+                    "model": model,
                     "output_config": merged_output_config,
+                    "speed": speed,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
@@ -1523,10 +1550,12 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1632,6 +1661,8 @@ class AsyncMessages(AsyncAPIResource):
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
+          container: Container identifier for reuse across requests.
+
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
 
@@ -1644,6 +1675,9 @@ class AsyncMessages(AsyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1799,10 +1833,12 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
@@ -1911,6 +1947,8 @@ class AsyncMessages(AsyncAPIResource):
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
+          container: Container identifier for reuse across requests.
+
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
 
@@ -1923,6 +1961,9 @@ class AsyncMessages(AsyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2074,10 +2115,12 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
@@ -2186,6 +2229,8 @@ class AsyncMessages(AsyncAPIResource):
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
+          container: Container identifier for reuse across requests.
+
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
 
@@ -2198,6 +2243,9 @@ class AsyncMessages(AsyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2348,10 +2396,12 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -2394,10 +2444,12 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "container": container,
                     "inference_geo": inference_geo,
                     "metadata": metadata,
                     "output_config": output_config,
                     "service_tier": service_tier,
+                    "speed": speed,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -2432,6 +2484,7 @@ class AsyncMessages(AsyncAPIResource):
         output_format: None | JSONOutputFormatParam | type[ResponseFormatT] | Omit = omit,
         container: Optional[str] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
@@ -2508,6 +2561,7 @@ class AsyncMessages(AsyncAPIResource):
                     "output_config": merged_output_config,
                     "container": container,
                     "service_tier": service_tier,
+                    "speed": speed,
                     "stop_sequences": stop_sequences,
                     "system": system,
                     "temperature": temperature,
@@ -2542,6 +2596,7 @@ class AsyncMessages(AsyncAPIResource):
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -2627,6 +2682,7 @@ class AsyncMessages(AsyncAPIResource):
                     "metadata": metadata,
                     "output_config": merged_output_config,
                     "service_tier": service_tier,
+                    "speed": speed,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -2750,11 +2806,6 @@ class AsyncMessages(AsyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
-          output_format: A Pydantic model, JSON schema dictionary, or type that will be
-              converted to a JSON schema for structured output. This is a convenience parameter
-              that will be merged into output_config.format. See
-              [structured outputs](https://docs.anthropic.com/en/docs/build-with-claude/structured-outputs)
-              for more details.
 
           system: System prompt.
 
@@ -2894,7 +2945,10 @@ class AsyncMessages(AsyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "messages": messages,
+                    "model": model,
                     "output_config": merged_output_config,
+                    "speed": speed,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,

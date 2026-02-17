@@ -46,6 +46,7 @@ class TestMessages:
                 }
             ],
             model="claude-opus-4-6",
+            container="container",
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -56,6 +57,7 @@ class TestMessages:
                 },
             },
             service_tier="auto",
+            speed="standard",
             stop_sequences=["string"],
             stream=False,
             system=[
@@ -97,12 +99,15 @@ class TestMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
                     "eager_input_streaming": True,
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -177,6 +182,7 @@ class TestMessages:
             ],
             model="claude-opus-4-6",
             stream=True,
+            container="container",
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -187,6 +193,7 @@ class TestMessages:
                 },
             },
             service_tier="auto",
+            speed="standard",
             stop_sequences=["string"],
             system=[
                 {
@@ -227,12 +234,15 @@ class TestMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
                     "eager_input_streaming": True,
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -321,6 +331,7 @@ class TestMessages:
                     "type": "json_schema",
                 },
             },
+            speed="standard",
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -359,12 +370,15 @@ class TestMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
                     "eager_input_streaming": True,
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -439,6 +453,7 @@ class TestAsyncMessages:
                 }
             ],
             model="claude-opus-4-6",
+            container="container",
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -449,6 +464,7 @@ class TestAsyncMessages:
                 },
             },
             service_tier="auto",
+            speed="standard",
             stop_sequences=["string"],
             stream=False,
             system=[
@@ -490,12 +506,15 @@ class TestAsyncMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
                     "eager_input_streaming": True,
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -570,6 +589,7 @@ class TestAsyncMessages:
             ],
             model="claude-opus-4-6",
             stream=True,
+            container="container",
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -580,6 +600,7 @@ class TestAsyncMessages:
                 },
             },
             service_tier="auto",
+            speed="standard",
             stop_sequences=["string"],
             system=[
                 {
@@ -620,12 +641,15 @@ class TestAsyncMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
                     "eager_input_streaming": True,
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }
@@ -714,6 +738,7 @@ class TestAsyncMessages:
                     "type": "json_schema",
                 },
             },
+            speed="standard",
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -752,12 +777,15 @@ class TestAsyncMessages:
                         "required": ["location"],
                     },
                     "name": "name",
+                    "allowed_callers": ["direct"],
                     "cache_control": {
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
                     "description": "Get the current weather in a given location",
                     "eager_input_streaming": True,
+                    "input_examples": [{"foo": "bar"}],
                     "strict": True,
                     "type": "custom",
                 }

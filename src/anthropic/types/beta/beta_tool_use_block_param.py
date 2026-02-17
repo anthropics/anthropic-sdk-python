@@ -8,10 +8,11 @@ from typing_extensions import Literal, Required, TypeAlias, TypedDict
 from .beta_direct_caller_param import BetaDirectCallerParam
 from .beta_server_tool_caller_param import BetaServerToolCallerParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
+from .beta_server_tool_caller_20260120_param import BetaServerToolCaller20260120Param
 
 __all__ = ["BetaToolUseBlockParam", "Caller"]
 
-Caller: TypeAlias = Union[BetaDirectCallerParam, BetaServerToolCallerParam]
+Caller: TypeAlias = Union[BetaDirectCallerParam, BetaServerToolCallerParam, BetaServerToolCaller20260120Param]
 
 
 class BetaToolUseBlockParam(TypedDict, total=False):
