@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Union, Iterable, Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing import Union, Iterable
+from typing_extensions import Required, TypedDict
 
 from .model_param import ModelParam
 from .message_param import MessageParam
@@ -94,12 +94,6 @@ class MessageCountTokensParams(TypedDict, total=False):
 
     output_config: OutputConfigParam
     """Configuration options for the model's output, such as the output format."""
-
-    speed: Optional[Literal["standard", "fast"]]
-    """The inference speed mode for this request.
-
-    `"fast"` enables high output-tokens-per-second inference.
-    """
 
     system: Union[str, Iterable[TextBlockParam]]
     """System prompt.

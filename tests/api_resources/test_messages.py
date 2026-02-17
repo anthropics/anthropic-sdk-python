@@ -57,7 +57,6 @@ class TestMessages:
                 },
             },
             service_tier="auto",
-            speed="standard",
             stop_sequences=["string"],
             stream=False,
             system=[
@@ -193,7 +192,6 @@ class TestMessages:
                 },
             },
             service_tier="auto",
-            speed="standard",
             stop_sequences=["string"],
             system=[
                 {
@@ -331,7 +329,6 @@ class TestMessages:
                     "type": "json_schema",
                 },
             },
-            speed="standard",
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -464,7 +461,6 @@ class TestAsyncMessages:
                 },
             },
             service_tier="auto",
-            speed="standard",
             stop_sequences=["string"],
             stream=False,
             system=[
@@ -600,7 +596,6 @@ class TestAsyncMessages:
                 },
             },
             service_tier="auto",
-            speed="standard",
             stop_sequences=["string"],
             system=[
                 {
@@ -738,7 +733,6 @@ class TestAsyncMessages:
                     "type": "json_schema",
                 },
             },
-            speed="standard",
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",

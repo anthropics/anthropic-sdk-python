@@ -110,7 +110,6 @@ class Messages(SyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
-        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -230,9 +229,6 @@ class Messages(SyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
-
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -393,7 +389,6 @@ class Messages(SyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
-        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
@@ -516,9 +511,6 @@ class Messages(SyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
-
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -675,7 +667,6 @@ class Messages(SyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
-        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
@@ -798,9 +789,6 @@ class Messages(SyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
-
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -956,7 +944,6 @@ class Messages(SyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
-        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1004,7 +991,6 @@ class Messages(SyncAPIResource):
                     "metadata": metadata,
                     "output_config": output_config,
                     "service_tier": service_tier,
-                    "speed": speed,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -1504,7 +1490,6 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "output_config": merged_output_config,
-                    "speed": speed,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
@@ -1555,7 +1540,6 @@ class AsyncMessages(AsyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
-        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1675,9 +1659,6 @@ class AsyncMessages(AsyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
-
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1838,7 +1819,6 @@ class AsyncMessages(AsyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
-        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
@@ -1961,9 +1941,6 @@ class AsyncMessages(AsyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
-
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2120,7 +2097,6 @@ class AsyncMessages(AsyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
-        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         temperature: float | Omit = omit,
@@ -2243,9 +2219,6 @@ class AsyncMessages(AsyncAPIResource):
 
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
-
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2401,7 +2374,6 @@ class AsyncMessages(AsyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
-        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -2449,7 +2421,6 @@ class AsyncMessages(AsyncAPIResource):
                     "metadata": metadata,
                     "output_config": output_config,
                     "service_tier": service_tier,
-                    "speed": speed,
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
@@ -2948,7 +2919,6 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "output_config": merged_output_config,
-                    "speed": speed,
                     "system": system,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
