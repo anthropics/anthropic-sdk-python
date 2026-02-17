@@ -61,6 +61,7 @@ EXPECTED_TOOL_USE_MESSAGE = {
         {"type": "text", "text": "I'll check the current weather in Paris for you."},
         {
             "type": "tool_use",
+            "caller": {"type": "direct"},
             "id": "toolu_01NRLabsLyVHZPKxbKvkfSMn",
             "name": "get_weather",
             "input": {"location": "Paris"},

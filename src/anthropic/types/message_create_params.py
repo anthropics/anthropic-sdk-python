@@ -116,6 +116,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
     details and options.
     """
 
+    container: Optional[str]
+    """Container identifier for reuse across requests."""
+
     inference_geo: Optional[str]
     """Specifies the geographic region for inference processing.
 

@@ -7,10 +7,13 @@ from ..._utils import PropertyInfo
 from ..._models import BaseModel
 from .beta_direct_caller import BetaDirectCaller
 from .beta_server_tool_caller import BetaServerToolCaller
+from .beta_server_tool_caller_20260120 import BetaServerToolCaller20260120
 
 __all__ = ["BetaServerToolUseBlock", "Caller"]
 
-Caller: TypeAlias = Annotated[Union[BetaDirectCaller, BetaServerToolCaller], PropertyInfo(discriminator="type")]
+Caller: TypeAlias = Annotated[
+    Union[BetaDirectCaller, BetaServerToolCaller, BetaServerToolCaller20260120], PropertyInfo(discriminator="type")
+]
 
 
 class BetaServerToolUseBlock(BaseModel):

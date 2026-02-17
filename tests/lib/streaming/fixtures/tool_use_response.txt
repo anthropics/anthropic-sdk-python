@@ -17,7 +17,7 @@ event: content_block_stop
 data: {"type":"content_block_stop","index":0}
 
 event: content_block_start
-data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_01NRLabsLyVHZPKxbKvkfSMn","name":"get_weather","input":{}}}
+data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_01NRLabsLyVHZPKxbKvkfSMn","name":"get_weather","caller":{"type":"direct"},"input":{}}}
 
 event: content_block_delta
 data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}}

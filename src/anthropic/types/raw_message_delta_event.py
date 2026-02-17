@@ -4,6 +4,7 @@ from typing import Optional
 from typing_extensions import Literal
 
 from .._models import BaseModel
+from .container import Container
 from .stop_reason import StopReason
 from .message_delta_usage import MessageDeltaUsage
 
@@ -11,6 +12,12 @@ __all__ = ["RawMessageDeltaEvent", "Delta"]
 
 
 class Delta(BaseModel):
+    container: Optional[Container] = None
+    """
+    Information about the container used in the request (for the code execution
+    tool)
+    """
+
     stop_reason: Optional[StopReason] = None
 
     stop_sequence: Optional[str] = None

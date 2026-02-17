@@ -105,6 +105,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -213,6 +214,8 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          container: Container identifier for reuse across requests.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -381,6 +384,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -492,6 +496,8 @@ class Messages(SyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          container: Container identifier for reuse across requests.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -656,6 +662,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -767,6 +774,8 @@ class Messages(SyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          container: Container identifier for reuse across requests.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -930,6 +939,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -976,6 +986,7 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "container": container,
                     "inference_geo": inference_geo,
                     "metadata": metadata,
                     "output_config": output_config,
@@ -1333,11 +1344,6 @@ class Messages(SyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
-          output_format: A Pydantic model, JSON schema dictionary, or type that will be
-              converted to a JSON schema for structured output. This is a convenience parameter
-              that will be merged into output_config.format. See
-              [structured outputs](https://docs.anthropic.com/en/docs/build-with-claude/structured-outputs)
-              for more details.
 
           system: System prompt.
 
@@ -1477,6 +1483,8 @@ class Messages(SyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "messages": messages,
+                    "model": model,
                     "output_config": merged_output_config,
                     "system": system,
                     "thinking": thinking,
@@ -1523,6 +1531,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -1631,6 +1640,8 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          container: Container identifier for reuse across requests.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1799,6 +1810,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -1910,6 +1922,8 @@ class AsyncMessages(AsyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          container: Container identifier for reuse across requests.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2074,6 +2088,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -2185,6 +2200,8 @@ class AsyncMessages(AsyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          container: Container identifier for reuse across requests.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2348,6 +2365,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -2394,6 +2412,7 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "container": container,
                     "inference_geo": inference_geo,
                     "metadata": metadata,
                     "output_config": output_config,
@@ -2750,11 +2769,6 @@ class AsyncMessages(AsyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
-          output_format: A Pydantic model, JSON schema dictionary, or type that will be
-              converted to a JSON schema for structured output. This is a convenience parameter
-              that will be merged into output_config.format. See
-              [structured outputs](https://docs.anthropic.com/en/docs/build-with-claude/structured-outputs)
-              for more details.
 
           system: System prompt.
 
@@ -2892,6 +2906,8 @@ class AsyncMessages(AsyncAPIResource):
             "/v1/messages/count_tokens",
             body=await async_maybe_transform(
                 {
+                    "messages": messages,
+                    "model": model,
                     "messages": messages,
                     "model": model,
                     "output_config": merged_output_config,

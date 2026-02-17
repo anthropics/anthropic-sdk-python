@@ -6,34 +6,10 @@ from typing import List, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from ..._types import SequenceNotStr
+from .beta_user_location_param import BetaUserLocationParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
-__all__ = ["BetaWebSearchTool20250305Param", "UserLocation"]
-
-
-class UserLocation(TypedDict, total=False):
-    """Parameters for the user's location.
-
-    Used to provide more relevant search results.
-    """
-
-    type: Required[Literal["approximate"]]
-
-    city: Optional[str]
-    """The city of the user."""
-
-    country: Optional[str]
-    """
-    The two letter
-    [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the
-    user.
-    """
-
-    region: Optional[str]
-    """The region of the user."""
-
-    timezone: Optional[str]
-    """The [IANA timezone](https://nodatime.org/TimeZones) of the user."""
+__all__ = ["BetaWebSearchTool20250305Param"]
 
 
 class BetaWebSearchTool20250305Param(TypedDict, total=False):
@@ -74,7 +50,7 @@ class BetaWebSearchTool20250305Param(TypedDict, total=False):
     strict: bool
     """When true, guarantees schema validation on tool names and inputs"""
 
-    user_location: Optional[UserLocation]
+    user_location: Optional[BetaUserLocationParam]
     """Parameters for the user's location.
 
     Used to provide more relevant search results.

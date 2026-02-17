@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, Union, Optional
+from typing import Dict, List, Union, Iterable, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .._types import SequenceNotStr
@@ -44,8 +44,16 @@ class ToolParam(TypedDict, total=False):
     This is how the tool will be called by the model and in `tool_use` blocks.
     """
 
+    allowed_callers: List[Literal["direct", "code_execution_20250825"]]
+
     cache_control: Optional[CacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
+
+    defer_loading: bool
+    """If true, tool will not be included in initial system prompt.
+
+    Only loaded when returned via tool_reference from tool search.
+    """
 
     description: str
     """Description of what this tool does.
@@ -65,6 +73,8 @@ class ToolParam(TypedDict, total=False):
     fine-grained-tool-streaming beta is active. When null (default), uses the
     default behavior based on beta headers.
     """
+
+    input_examples: Iterable[Dict[str, object]]
 
     strict: bool
     """When true, guarantees schema validation on tool names and inputs"""
