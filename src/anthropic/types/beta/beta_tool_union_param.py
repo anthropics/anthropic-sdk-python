@@ -11,7 +11,9 @@ from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
 from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
 from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param
+from .beta_web_fetch_tool_20260209_param import BetaWebFetchTool20260209Param
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
+from .beta_web_search_tool_20260209_param import BetaWebSearchTool20260209Param
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param
 from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param
 from .beta_tool_text_editor_20250429_param import BetaToolTextEditor20250429Param
@@ -21,6 +23,7 @@ from .beta_tool_computer_use_20250124_param import BetaToolComputerUse20250124Pa
 from .beta_tool_computer_use_20251124_param import BetaToolComputerUse20251124Param
 from .beta_code_execution_tool_20250522_param import BetaCodeExecutionTool20250522Param
 from .beta_code_execution_tool_20250825_param import BetaCodeExecutionTool20250825Param
+from .beta_code_execution_tool_20260120_param import BetaCodeExecutionTool20260120Param
 from .beta_tool_search_tool_bm25_20251119_param import BetaToolSearchToolBm25_20251119Param
 from .beta_tool_search_tool_regex_20251119_param import BetaToolSearchToolRegex20251119Param
 
@@ -32,6 +35,7 @@ BetaToolUnionParam: TypeAlias = Union[
     BetaToolBash20250124Param,
     BetaCodeExecutionTool20250522Param,
     BetaCodeExecutionTool20250825Param,
+    BetaCodeExecutionTool20260120Param,
     BetaToolComputerUse20241022Param,
     BetaMemoryTool20250818Param,
     BetaToolComputerUse20250124Param,
@@ -42,6 +46,8 @@ BetaToolUnionParam: TypeAlias = Union[
     BetaToolTextEditor20250728Param,
     BetaWebSearchTool20250305Param,
     BetaWebFetchTool20250910Param,
+    BetaWebSearchTool20260209Param,
+    BetaWebFetchTool20260209Param,
     BetaToolSearchToolBm25_20251119Param,
     BetaToolSearchToolRegex20251119Param,
     BetaMCPToolsetParam,

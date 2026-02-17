@@ -6,6 +6,7 @@ from typing_extensions import Literal
 from .model import Model
 from .usage import Usage
 from .._models import BaseModel
+from .container import Container
 from .stop_reason import StopReason
 from .content_block import ContentBlock, ContentBlock as ContentBlock
 
@@ -17,6 +18,12 @@ class Message(BaseModel):
     """Unique object identifier.
 
     The format and length of IDs may change over time.
+    """
+
+    container: Optional[Container] = None
+    """
+    Information about the container used in the request (for the code execution
+    tool)
     """
 
     content: List[ContentBlock]

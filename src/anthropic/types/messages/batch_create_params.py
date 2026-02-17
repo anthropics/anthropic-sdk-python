@@ -117,6 +117,9 @@ class RequestParams(TypedDict, total=False):
     details and options.
     """
 
+    container: Optional[str]
+    """Container identifier for reuse across requests."""
+
     inference_geo: Optional[str]
     """Specifies the geographic region for inference processing.
 
@@ -136,6 +139,12 @@ class RequestParams(TypedDict, total=False):
 
     Anthropic offers different levels of service for your API requests. See
     [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+    """
+
+    speed: Optional[Literal["standard", "fast"]]
+    """The inference speed mode for this request.
+
+    `"fast"` enables high output-tokens-per-second inference.
     """
 
     stop_sequences: SequenceNotStr[str]

@@ -13,6 +13,7 @@ __all__ = ["BetaCodeExecutionToolResultBlockParam"]
 
 class BetaCodeExecutionToolResultBlockParam(TypedDict, total=False):
     content: Required[BetaCodeExecutionToolResultBlockParamContentParam]
+    """Code execution result with encrypted stdout for PFC + web_search results."""
 
     tool_use_id: Required[str]
 

@@ -1,14 +1,32 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing_extensions import Literal
+from typing import Union
+from typing_extensions import Literal, Annotated, TypeAlias
 
+from .._utils import PropertyInfo
 from .._models import BaseModel
+from .direct_caller import DirectCaller
+from .server_tool_caller import ServerToolCaller
 from .web_search_tool_result_block_content import WebSearchToolResultBlockContent
 
-__all__ = ["WebSearchToolResultBlock"]
+__all__ = ["WebSearchToolResultBlock", "Caller", "CallerServerToolCaller20260120"]
+
+
+class CallerServerToolCaller20260120(BaseModel):
+    tool_id: str
+
+    type: Literal["code_execution_20260120"]
+
+
+Caller: TypeAlias = Annotated[
+    Union[DirectCaller, ServerToolCaller, CallerServerToolCaller20260120], PropertyInfo(discriminator="type")
+]
 
 
 class WebSearchToolResultBlock(BaseModel):
+    caller: Caller
+    """Tool invocation directly from the model."""
+
     content: WebSearchToolResultBlockContent
 
     tool_use_id: str

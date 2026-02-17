@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import List, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from .._types import SequenceNotStr
@@ -45,6 +45,8 @@ class WebSearchTool20250305Param(TypedDict, total=False):
 
     type: Required[Literal["web_search_20250305"]]
 
+    allowed_callers: List[Literal["direct", "code_execution_20250825"]]
+
     allowed_domains: Optional[SequenceNotStr[str]]
     """If provided, only these domains will be included in results.
 
@@ -59,6 +61,12 @@ class WebSearchTool20250305Param(TypedDict, total=False):
 
     cache_control: Optional[CacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
+
+    defer_loading: bool
+    """If true, tool will not be included in initial system prompt.
+
+    Only loaded when returned via tool_reference from tool search.
+    """
 
     max_uses: Optional[int]
     """Maximum number of times the tool can be used in the API request."""
