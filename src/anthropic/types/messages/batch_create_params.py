@@ -141,12 +141,6 @@ class RequestParams(TypedDict, total=False):
     [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
     """
 
-    speed: Optional[Literal["standard", "fast"]]
-    """The inference speed mode for this request.
-
-    `"fast"` enables high output-tokens-per-second inference.
-    """
-
     stop_sequences: SequenceNotStr[str]
     """Custom text sequences that will cause the model to stop generating.
 
