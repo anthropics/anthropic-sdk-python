@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.80.0 (2026-02-17)
+
+Full Changelog: [v0.79.0...v0.80.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.79.0...v0.80.0)
+
+### Features
+
+* **api:** Releasing claude-sonnet-4-6 ([d518d6e](https://github.com/anthropics/anthropic-sdk-python/commit/d518d6ecede3d0638f0b14950dc2be8efa0b4ff4))
+
+
+### Bug Fixes
+
+* **api:** fix spec errors ([1413a76](https://github.com/anthropics/anthropic-sdk-python/commit/1413a76f905e590fab583417f5cb1eef9f537c2c))
+* remove speed from ga messages ([#1402](https://github.com/anthropics/anthropic-sdk-python/issues/1402)) ([f6ce67c](https://github.com/anthropics/anthropic-sdk-python/commit/f6ce67c3ed5f2fc4a2fc48fb9d7bc6f1bbb5bd4a))
+
+
+### Chores
+
+* format all `api.md` files ([28a0eb5](https://github.com/anthropics/anthropic-sdk-python/commit/28a0eb55c031a9ed584eafe7f9096b32f9883e6f))
+* **internal:** bump dependencies ([99f3014](https://github.com/anthropics/anthropic-sdk-python/commit/99f301460a3933229768d19fa7ae725072012592))
+* **internal:** fix lint error on Python 3.14 ([a90d71b](https://github.com/anthropics/anthropic-sdk-python/commit/a90d71bfcdef5592f0f7f9a176cf347163ee2137))
+
+
+### Refactors
+
+* **vertex:** remove redundant isinstance check in `load_auth` ([#1387](https://github.com/anthropics/anthropic-sdk-python/issues/1387)) ([6b7a7dc](https://github.com/anthropics/anthropic-sdk-python/commit/6b7a7dce065b7bfbf6c5d8ed41825f36b36fc402))
+
 ## 0.79.0 (2026-02-07)
 
 Full Changelog: [v0.78.0...v0.79.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.78.0...v0.79.0)
