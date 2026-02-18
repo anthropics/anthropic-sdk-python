@@ -91,6 +91,25 @@ class TestSyncParse:
         assert response.parsed_output.items[0].product_name == "Green Tea"
         assert response.parsed_output.total == 14.0
 
+    def test_rejects_invalid_output_format_types(self, client: Anthropic) -> None:
+        """Test that invalid output_format types raise a helpful error message."""
+
+        with pytest.raises(
+            TypeError,
+            match="Invalid `output_format` type. Please pass a Pydantic model or valid Python type. To use a raw JSON schema, use the `.create\\(\\)` method instead.",
+        ):
+            client.messages.parse(
+                model="claude-sonnet-4-5",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": "Extract data.",
+                    }
+                ],
+                output_format={},  # type: ignore
+                max_tokens=1024,
+            )
+
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
 class TestAsyncParse:
@@ -157,6 +176,25 @@ class TestAsyncParse:
         assert len(response.parsed_output.items) == 2
         assert response.parsed_output.items[0].product_name == "Green Tea"
         assert response.parsed_output.total == 14.0
+
+    async def test_rejects_invalid_output_format_types(self, async_client: AsyncAnthropic) -> None:
+        """Test that invalid output_format types raise a helpful error message."""
+
+        with pytest.raises(
+            TypeError,
+            match="Invalid `output_format` type. Please pass a Pydantic model or valid Python type. To use a raw JSON schema, use the `.create\\(\\)` method instead.",
+        ):
+            await async_client.messages.parse(
+                model="claude-sonnet-4-5",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": "Extract data.",
+                    }
+                ],
+                output_format={},  # type: ignore
+                max_tokens=1024,
+            )
 
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
