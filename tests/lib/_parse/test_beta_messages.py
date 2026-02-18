@@ -129,3 +129,20 @@ My name is John Doe and I am 30 years old.\
                 },
                 max_tokens=1024,
             )
+
+    async def test_rejects_invalid_output_format_types(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(
+            TypeError,
+            match="Invalid `output_format` type. Please pass a Pydantic model or valid Python type. To use a raw JSON schema, use the `.create\\(\\)` method instead.",
+        ):
+            await async_client.beta.messages.parse(
+                model="claude-sonnet-4-5",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": "Extract data.",
+                    }
+                ],
+                output_format={},  # type: ignore
+                max_tokens=1024,
+            )

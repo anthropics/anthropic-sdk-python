@@ -1179,7 +1179,14 @@ class Messages(SyncAPIResource):
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
 
         if is_given(output_format) and output_format is not None:
-            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+            try:
+                adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+            except TypeError as e:
+                raise TypeError(
+                    "Invalid `output_format` type. "
+                    "Please pass a Pydantic model or valid Python type. "
+                    "To use a raw JSON schema, use the `.create()` method instead."
+                ) from e
 
             try:
                 schema = adapted_type.json_schema()
@@ -2604,7 +2611,14 @@ class AsyncMessages(AsyncAPIResource):
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
 
         if is_given(output_format) and output_format is not None:
-            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+            try:
+                adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
+            except TypeError as e:
+                raise TypeError(
+                    "Invalid `output_format` type. "
+                    "Please pass a Pydantic model or valid Python type. "
+                    "To use a raw JSON schema, use the `.create()` method instead."
+                ) from e
 
             try:
                 schema = adapted_type.json_schema()
