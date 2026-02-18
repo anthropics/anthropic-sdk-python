@@ -9,20 +9,14 @@ from .direct_caller_param import DirectCallerParam
 from .web_fetch_block_param import WebFetchBlockParam
 from .server_tool_caller_param import ServerToolCallerParam
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
+from .server_tool_caller_20260120_param import ServerToolCaller20260120Param
 from .web_fetch_tool_result_error_block_param import WebFetchToolResultErrorBlockParam
 
-__all__ = ["WebFetchToolResultBlockParam", "Content", "Caller", "CallerServerToolCaller20260120"]
+__all__ = ["WebFetchToolResultBlockParam", "Content", "Caller"]
 
 Content: TypeAlias = Union[WebFetchToolResultErrorBlockParam, WebFetchBlockParam]
 
-
-class CallerServerToolCaller20260120(TypedDict, total=False):
-    tool_id: Required[str]
-
-    type: Required[Literal["code_execution_20260120"]]
-
-
-Caller: TypeAlias = Union[DirectCallerParam, ServerToolCallerParam, CallerServerToolCaller20260120]
+Caller: TypeAlias = Union[DirectCallerParam, ServerToolCallerParam, ServerToolCaller20260120Param]
 
 
 class WebFetchToolResultBlockParam(TypedDict, total=False):

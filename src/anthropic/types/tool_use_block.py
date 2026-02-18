@@ -7,18 +7,12 @@ from .._utils import PropertyInfo
 from .._models import BaseModel
 from .direct_caller import DirectCaller
 from .server_tool_caller import ServerToolCaller
+from .server_tool_caller_20260120 import ServerToolCaller20260120
 
-__all__ = ["ToolUseBlock", "Caller", "CallerServerToolCaller20260120"]
-
-
-class CallerServerToolCaller20260120(BaseModel):
-    tool_id: str
-
-    type: Literal["code_execution_20260120"]
-
+__all__ = ["ToolUseBlock", "Caller"]
 
 Caller: TypeAlias = Annotated[
-    Union[DirectCaller, ServerToolCaller, CallerServerToolCaller20260120], PropertyInfo(discriminator="type")
+    Union[DirectCaller, ServerToolCaller, ServerToolCaller20260120], PropertyInfo(discriminator="type")
 ]
 
 
