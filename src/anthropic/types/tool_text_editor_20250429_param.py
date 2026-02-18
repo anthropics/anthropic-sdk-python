@@ -19,7 +19,7 @@ class ToolTextEditor20250429Param(TypedDict, total=False):
 
     type: Required[Literal["text_editor_20250429"]]
 
-    allowed_callers: List[Literal["direct", "code_execution_20250825"]]
+    allowed_callers: List[Literal["direct", "code_execution_20250825", "code_execution_20260120"]]
 
     cache_control: Optional[CacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
