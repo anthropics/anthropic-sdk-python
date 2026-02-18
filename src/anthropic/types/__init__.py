@@ -67,6 +67,7 @@ from .message_delta_usage import MessageDeltaUsage as MessageDeltaUsage
 from .message_start_event import MessageStartEvent as MessageStartEvent
 from .output_config_param import OutputConfigParam as OutputConfigParam
 from .text_citation_param import TextCitationParam as TextCitationParam
+from .user_location_param import UserLocationParam as UserLocationParam
 from .anthropic_beta_param import AnthropicBetaParam as AnthropicBetaParam
 from .beta_not_found_error import BetaNotFoundError as BetaNotFoundError
 from .document_block_param import DocumentBlockParam as DocumentBlockParam
@@ -159,6 +160,7 @@ from .code_execution_result_block_param import CodeExecutionResultBlockParam as 
 from .server_tool_caller_20260120_param import ServerToolCaller20260120Param as ServerToolCaller20260120Param
 from .web_fetch_tool_result_block_param import WebFetchToolResultBlockParam as WebFetchToolResultBlockParam
 from .web_fetch_tool_result_error_block import WebFetchToolResultErrorBlock as WebFetchToolResultErrorBlock
+from .web_search_tool_result_error_code import WebSearchToolResultErrorCode as WebSearchToolResultErrorCode
 from .code_execution_tool_20250522_param import CodeExecutionTool20250522Param as CodeExecutionTool20250522Param
 from .code_execution_tool_20250825_param import CodeExecutionTool20250825Param as CodeExecutionTool20250825Param
 from .code_execution_tool_20260120_param import CodeExecutionTool20260120Param as CodeExecutionTool20260120Param
