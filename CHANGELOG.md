@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.81.0 (2026-02-18)
+
+Full Changelog: [v0.80.0...v0.81.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.80.0...v0.81.0)
+
+### Features
+
+* **api:** manual updates ([0a385c2](https://github.com/anthropics/anthropic-sdk-python/commit/0a385c29d26981f846b7394aefc89eebb43a4b60))
+
 ## 0.80.0 (2026-02-17)
 
 Full Changelog: [v0.79.0...v0.80.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.79.0...v0.80.0)

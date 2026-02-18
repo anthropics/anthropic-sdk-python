@@ -5,23 +5,27 @@ from __future__ import annotations
 from typing import List, Optional
 from typing_extensions import Literal, Required, TypedDict
 
-from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
+from .cache_control_ephemeral_param import CacheControlEphemeralParam
 
-__all__ = ["BetaCodeExecutionTool20250825Param"]
+__all__ = ["CodeExecutionTool20260120Param"]
 
 
-class BetaCodeExecutionTool20250825Param(TypedDict, total=False):
+class CodeExecutionTool20260120Param(TypedDict, total=False):
+    """
+    Code execution tool with REPL state persistence (daemon mode + gVisor checkpoint).
+    """
+
     name: Required[Literal["code_execution"]]
     """Name of the tool.
 
     This is how the tool will be called by the model and in `tool_use` blocks.
     """
 
-    type: Required[Literal["code_execution_20250825"]]
+    type: Required[Literal["code_execution_20260120"]]
 
     allowed_callers: List[Literal["direct", "code_execution_20250825", "code_execution_20260120"]]
 
-    cache_control: Optional[BetaCacheControlEphemeralParam]
+    cache_control: Optional[CacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
 
     defer_loading: bool

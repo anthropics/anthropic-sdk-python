@@ -19,7 +19,7 @@ class ToolSearchToolRegex20251119Param(TypedDict, total=False):
 
     type: Required[Literal["tool_search_tool_regex_20251119", "tool_search_tool_regex"]]
 
-    allowed_callers: List[Literal["direct", "code_execution_20250825"]]
+    allowed_callers: List[Literal["direct", "code_execution_20250825", "code_execution_20260120"]]
 
     cache_control: Optional[CacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
