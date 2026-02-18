@@ -9,7 +9,7 @@ from .._types import SequenceNotStr
 from .user_location_param import UserLocationParam
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
 
-__all__ = ["WebSearchTool20260209Param"]
+__all__ = ["WebSearchTool20260209Param", "UserLocation"]
 
 
 class WebSearchTool20260209Param(TypedDict, total=False):
@@ -55,3 +55,6 @@ class WebSearchTool20260209Param(TypedDict, total=False):
 
     Used to provide more relevant search results.
     """
+
+
+UserLocation = UserLocationParam  # backward compat alias
