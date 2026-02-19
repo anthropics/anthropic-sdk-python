@@ -19,6 +19,7 @@ from .beta_json_output_format_param import BetaJSONOutputFormatParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
 from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
+from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param
 from .beta_web_fetch_tool_20260209_param import BetaWebFetchTool20260209Param
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
@@ -115,6 +116,12 @@ class MessageCountTokensParams(TypedDict, total=False):
     The model that will complete your prompt.\n\nSee
     [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
+    """
+
+    cache_control: Optional[BetaCacheControlEphemeralParam]
+    """
+    Top-level cache control automatically applies a cache_control marker to the last
+    cacheable block in the request.
     """
 
     context_management: Optional[BetaContextManagementConfigParam]

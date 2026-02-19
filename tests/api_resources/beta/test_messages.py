@@ -48,6 +48,10 @@ class TestMessages:
                 }
             ],
             model="claude-opus-4-6",
+            cache_control={
+                "type": "ephemeral",
+                "ttl": "5m",
+            },
             container={
                 "id": "id",
                 "skills": [
@@ -236,6 +240,10 @@ class TestMessages:
             ],
             model="claude-opus-4-6",
             stream=True,
+            cache_control={
+                "type": "ephemeral",
+                "ttl": "5m",
+            },
             container={
                 "id": "id",
                 "skills": [
@@ -420,6 +428,10 @@ class TestMessages:
                 }
             ],
             model="claude-opus-4-6",
+            cache_control={
+                "type": "ephemeral",
+                "ttl": "5m",
+            },
             context_management={
                 "edits": [
                     {
@@ -609,6 +621,10 @@ class TestAsyncMessages:
                 }
             ],
             model="claude-opus-4-6",
+            cache_control={
+                "type": "ephemeral",
+                "ttl": "5m",
+            },
             container={
                 "id": "id",
                 "skills": [
@@ -797,6 +813,10 @@ class TestAsyncMessages:
             ],
             model="claude-opus-4-6",
             stream=True,
+            cache_control={
+                "type": "ephemeral",
+                "ttl": "5m",
+            },
             container={
                 "id": "id",
                 "skills": [
@@ -981,6 +1001,10 @@ class TestAsyncMessages:
                 }
             ],
             model="claude-opus-4-6",
+            cache_control={
+                "type": "ephemeral",
+                "ttl": "5m",
+            },
             context_management={
                 "edits": [
                     {

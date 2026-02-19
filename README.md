@@ -482,9 +482,9 @@ message = client.messages.create(
         }
     ],
     model="claude-opus-4-6",
-    metadata={},
+    cache_control={"type": "ephemeral"},
 )
-print(message.metadata)
+print(message.cache_control)
 ```
 
 ## File uploads

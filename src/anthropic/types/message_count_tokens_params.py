@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Union, Iterable
+from typing import Union, Iterable, Optional
 from typing_extensions import Required, TypedDict
 
 from .model_param import ModelParam
@@ -11,6 +11,7 @@ from .text_block_param import TextBlockParam
 from .tool_choice_param import ToolChoiceParam
 from .output_config_param import OutputConfigParam
 from .thinking_config_param import ThinkingConfigParam
+from .cache_control_ephemeral_param import CacheControlEphemeralParam
 from .message_count_tokens_tool_param import MessageCountTokensToolParam
 
 __all__ = ["MessageCountTokensParams"]
@@ -90,6 +91,12 @@ class MessageCountTokensParams(TypedDict, total=False):
     The model that will complete your prompt.\n\nSee
     [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
+    """
+
+    cache_control: Optional[CacheControlEphemeralParam]
+    """
+    Top-level cache control automatically applies a cache_control marker to the last
+    cacheable block in the request.
     """
 
     output_config: OutputConfigParam
