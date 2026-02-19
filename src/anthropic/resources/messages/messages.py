@@ -40,6 +40,7 @@ from ...types.output_config_param import OutputConfigParam
 from ...types.message_tokens_count import MessageTokensCount
 from ...types.thinking_config_param import ThinkingConfigParam
 from ...types.raw_message_stream_event import RawMessageStreamEvent
+from ...types.cache_control_ephemeral_param import CacheControlEphemeralParam
 from ...types.message_count_tokens_tool_param import MessageCountTokensToolParam
 
 __all__ = ["Messages", "AsyncMessages"]
@@ -76,6 +77,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
@@ -185,6 +187,9 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           container: Container identifier for reuse across requests.
 
@@ -355,6 +360,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
+        cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
@@ -468,6 +474,9 @@ class Messages(SyncAPIResource):
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
+
           container: Container identifier for reuse across requests.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
@@ -633,6 +642,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
+        cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
@@ -745,6 +755,9 @@ class Messages(SyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           container: Container identifier for reuse across requests.
 
@@ -910,6 +923,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
@@ -940,6 +954,7 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "container": container,
                     "inference_geo": inference_geo,
                     "metadata": metadata,
@@ -972,6 +987,7 @@ class Messages(SyncAPIResource):
         *,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -1063,6 +1079,9 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           output_config: Configuration options for the model's output, such as the output format.
 
@@ -1175,6 +1194,7 @@ class Messages(SyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "output_config": output_config,
                     "system": system,
                     "thinking": thinking,
@@ -1221,6 +1241,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
@@ -1330,6 +1351,9 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           container: Container identifier for reuse across requests.
 
@@ -1500,6 +1524,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: Literal[True],
+        cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
@@ -1612,6 +1637,9 @@ class AsyncMessages(AsyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           container: Container identifier for reuse across requests.
 
@@ -1778,6 +1806,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         stream: bool,
+        cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
@@ -1890,6 +1919,9 @@ class AsyncMessages(AsyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           container: Container identifier for reuse across requests.
 
@@ -2055,6 +2087,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[str] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
@@ -2085,6 +2118,7 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "container": container,
                     "inference_geo": inference_geo,
                     "metadata": metadata,
@@ -2117,6 +2151,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -2208,6 +2243,9 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           output_config: Configuration options for the model's output, such as the output format.
 
@@ -2320,6 +2358,7 @@ class AsyncMessages(AsyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "output_config": output_config,
                     "system": system,
                     "thinking": thinking,

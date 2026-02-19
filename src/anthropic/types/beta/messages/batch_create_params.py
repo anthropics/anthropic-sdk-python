@@ -18,6 +18,7 @@ from ..beta_tool_choice_param import BetaToolChoiceParam
 from ..beta_output_config_param import BetaOutputConfigParam
 from ..beta_thinking_config_param import BetaThinkingConfigParam
 from ..beta_json_output_format_param import BetaJSONOutputFormatParam
+from ..beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 from ..beta_context_management_config_param import BetaContextManagementConfigParam
 from ..beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
 
@@ -127,6 +128,12 @@ class RequestParams(TypedDict, total=False):
     The model that will complete your prompt.\n\nSee
     [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
+    """
+
+    cache_control: Optional[BetaCacheControlEphemeralParam]
+    """
+    Top-level cache control automatically applies a cache_control marker to the last
+    cacheable block in the request.
     """
 
     container: Optional[RequestParamsContainer]
