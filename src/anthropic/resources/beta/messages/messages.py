@@ -70,6 +70,7 @@ from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
 from ....types.beta.beta_json_output_format_param import BetaJSONOutputFormatParam
 from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
+from ....types.beta.beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 from ....types.beta.beta_context_management_config_param import BetaContextManagementConfigParam
 from ....types.beta.beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
 
@@ -110,6 +111,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -224,6 +226,9 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           container: Container identifier for reuse across requests.
 
@@ -412,6 +417,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -530,6 +536,9 @@ class Messages(SyncAPIResource):
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
+
           container: Container identifier for reuse across requests.
 
           context_management: Context management configuration.
@@ -713,6 +722,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -830,6 +840,9 @@ class Messages(SyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           container: Container identifier for reuse across requests.
 
@@ -1013,6 +1026,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -1075,6 +1089,7 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
                     "inference_geo": inference_geo,
@@ -1112,6 +1127,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -1208,6 +1224,7 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
                     "inference_geo": inference_geo,
@@ -1249,6 +1266,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -1284,6 +1302,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction_control: CompactionControl | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
@@ -1323,6 +1342,7 @@ class Messages(SyncAPIResource):
         compaction_control: CompactionControl | Omit = omit,
         stream: bool,
         max_iterations: int | Omit = omit,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -1357,6 +1377,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
         max_iterations: int | Omit = omit,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -1428,6 +1449,7 @@ class Messages(SyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "cache_control": cache_control,
                 "container": container,
                 "context_management": context_management,
                 "inference_geo": inference_geo,
@@ -1482,6 +1504,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -1562,6 +1585,7 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "metadata": metadata,
                     "output_config": merged_output_config,
                     "output_format": omit,
@@ -1600,6 +1624,7 @@ class Messages(SyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1696,6 +1721,9 @@ class Messages(SyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           context_management: Context management configuration.
 
@@ -1842,6 +1870,7 @@ class Messages(SyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "output_config": merged_output_config,
@@ -1892,6 +1921,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -2006,6 +2036,9 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           container: Container identifier for reuse across requests.
 
@@ -2194,6 +2227,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -2312,6 +2346,9 @@ class AsyncMessages(AsyncAPIResource):
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
 
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
+
           container: Container identifier for reuse across requests.
 
           context_management: Context management configuration.
@@ -2495,6 +2532,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -2612,6 +2650,9 @@ class AsyncMessages(AsyncAPIResource):
           stream: Whether to incrementally stream the response using server-sent events.
 
               See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           container: Container identifier for reuse across requests.
 
@@ -2795,6 +2836,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -2857,6 +2899,7 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
                     "inference_geo": inference_geo,
@@ -2894,6 +2937,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -2989,6 +3033,7 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
                     "inference_geo": inference_geo,
@@ -3029,6 +3074,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction_control: CompactionControl | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3068,6 +3114,7 @@ class AsyncMessages(AsyncAPIResource):
         compaction_control: CompactionControl | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -3104,6 +3151,7 @@ class AsyncMessages(AsyncAPIResource):
         compaction_control: CompactionControl | Omit = omit,
         stream: bool,
         max_iterations: int | Omit = omit,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -3138,6 +3186,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         compaction_control: CompactionControl | Omit = omit,
         max_iterations: int | Omit = omit,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
@@ -3202,6 +3251,7 @@ class AsyncMessages(AsyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "cache_control": cache_control,
                 "container": container,
                 "context_management": context_management,
                 "inference_geo": inference_geo,
@@ -3256,6 +3306,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
         output_format: None | type[ResponseFormatT] | BetaJSONOutputFormatParam | Omit = omit,
@@ -3334,6 +3385,7 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "metadata": metadata,
                     "output_config": merged_output_config,
                     "output_format": omit,
@@ -3372,6 +3424,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -3468,6 +3521,9 @@ class AsyncMessages(AsyncAPIResource):
           model: The model that will complete your prompt.\n\nSee
               [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          cache_control: Top-level cache control automatically applies a cache_control marker to the last
+              cacheable block in the request.
 
           context_management: Context management configuration.
 
@@ -3614,6 +3670,7 @@ class AsyncMessages(AsyncAPIResource):
                 {
                     "messages": messages,
                     "model": model,
+                    "cache_control": cache_control,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "mcp_servers": mcp_servers,

@@ -62,6 +62,10 @@ class TestBatches:
                             }
                         ],
                         "model": "claude-opus-4-6",
+                        "cache_control": {
+                            "type": "ephemeral",
+                            "ttl": "5m",
+                        },
                         "container": {
                             "id": "id",
                             "skills": [
@@ -494,6 +498,10 @@ class TestAsyncBatches:
                             }
                         ],
                         "model": "claude-opus-4-6",
+                        "cache_control": {
+                            "type": "ephemeral",
+                            "ttl": "5m",
+                        },
                         "container": {
                             "id": "id",
                             "skills": [

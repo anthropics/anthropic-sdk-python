@@ -17,6 +17,7 @@ from .thinking_config_param import ThinkingConfigParam
 from .tool_choice_any_param import ToolChoiceAnyParam
 from .tool_choice_auto_param import ToolChoiceAutoParam
 from .tool_choice_tool_param import ToolChoiceToolParam
+from .cache_control_ephemeral_param import CacheControlEphemeralParam
 
 __all__ = [
     "MessageCreateParamsBase",
@@ -114,6 +115,12 @@ class MessageCreateParamsBase(TypedDict, total=False):
     The model that will complete your prompt.\n\nSee
     [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
+    """
+
+    cache_control: Optional[CacheControlEphemeralParam]
+    """
+    Top-level cache control automatically applies a cache_control marker to the last
+    cacheable block in the request.
     """
 
     container: Optional[str]
