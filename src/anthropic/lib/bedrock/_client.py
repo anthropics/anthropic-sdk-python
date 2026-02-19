@@ -196,8 +196,15 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
-        from ._auth import get_auth_headers
+        from ._auth import get_auth_headers, get_bearer_token
 
+        # Check for bearer token first (AWS_BEARER_TOKEN_BEDROCK env var)
+        bearer_token = get_bearer_token()
+        if bearer_token is not None:
+            request.headers["Authorization"] = f"Bearer {bearer_token}"
+            return
+
+        # Fall back to SigV4 auth
         data = request.read().decode()
 
         headers = get_auth_headers(
@@ -338,8 +345,15 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
 
     @override
     async def _prepare_request(self, request: httpx.Request) -> None:
-        from ._auth import get_auth_headers
+        from ._auth import get_auth_headers, get_bearer_token
 
+        # Check for bearer token first (AWS_BEARER_TOKEN_BEDROCK env var)
+        bearer_token = get_bearer_token()
+        if bearer_token is not None:
+            request.headers["Authorization"] = f"Bearer {bearer_token}"
+            return
+
+        # Fall back to SigV4 auth
         data = request.read().decode()
 
         headers = get_auth_headers(

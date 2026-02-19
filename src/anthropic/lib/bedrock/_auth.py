@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 import httpx
@@ -8,6 +9,14 @@ from ..._utils import lru_cache
 
 if TYPE_CHECKING:
     import boto3
+
+
+def get_bearer_token() -> str | None:
+    """Get the bearer token from the AWS_BEARER_TOKEN_BEDROCK environment variable.
+
+    Returns the token if set, otherwise None.
+    """
+    return os.environ.get("AWS_BEARER_TOKEN_BEDROCK")
 
 
 @lru_cache(maxsize=512)
