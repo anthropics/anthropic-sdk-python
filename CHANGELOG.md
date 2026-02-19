@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.83.0 (2026-02-19)
+
+Full Changelog: [v0.82.0...v0.83.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.82.0...v0.83.0)
+
+### Features
+
+* **api:** Add top-level cache control (automatic caching) ([a940123](https://github.com/anthropics/anthropic-sdk-python/commit/a940123da34ac33f0b6f20ce91807829451d1233))
+
+
+### Chores
+
+* update mock server docs ([34ef48c](https://github.com/anthropics/anthropic-sdk-python/commit/34ef48ceb0f1734d6b695890f689dc42eb0b004e))
+
 ## 0.82.0 (2026-02-18)
 
 Full Changelog: [v0.81.0...v0.82.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.81.0...v0.82.0)
