@@ -195,3 +195,51 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+@pytest.mark.respx()
+def test_bearer_token_client_args(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx.Response(200, json={"foo": "bar"})
+    )
+
+    client = AnthropicBedrock(aws_region="us-east-1", api_key="test-bearer-token-from-args")
+    client.messages.create(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    auth_header = calls[0].request.headers.get("Authorization")
+    assert auth_header == "Bearer test-bearer-token-from-args"
+
+
+@pytest.mark.respx()
+def test_bearer_token_env(monkeypatch: pytest.MonkeyPatch, respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx.Response(200, json={"foo": "bar"})
+    )
+
+    monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "test-bearer-token-from-env")
+
+    client = AnthropicBedrock(aws_region="us-east-1")
+    client.messages.create(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    auth_header = calls[0].request.headers.get("Authorization")
+    assert auth_header == "Bearer test-bearer-token-from-env"

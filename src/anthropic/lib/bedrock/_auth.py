@@ -41,7 +41,13 @@ def get_auth_headers(
     region: str | None,
     profile: str | None,
     data: str | None,
+    aws_bearer_token_bedrock: str | None = None,
 ) -> dict[str, str]:
+    if aws_bearer_token_bedrock is not None:
+        headers = headers.copy()
+        headers["Authorization"] = f"Bearer {aws_bearer_token_bedrock}"
+        return dict(headers)
+
     from botocore.auth import SigV4Auth
     from botocore.awsrequest import AWSRequest
 
