@@ -1,4 +1,5 @@
 import re
+import os
 import typing as t
 import tempfile
 from typing import TypedDict, cast
@@ -53,12 +54,18 @@ def mock_aws_config(
     profiles: t.List[AwsConfigProfile],
     monkeypatch: t.Any,
 ) -> t.Iterable[None]:
-    with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
+    temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False)
+    try:
         for profile in profiles:
             temp_file.write(profile_to_ini(profile))
         temp_file.flush()
+        temp_file.close()
         monkeypatch.setenv("AWS_CONFIG_FILE", str(temp_file.name))
+        monkeypatch.setenv("AWS_SDK_LOAD_CONFIG", "1")
         yield
+    finally:
+        if os.path.exists(temp_file.name):
+            os.unlink(temp_file.name)
 
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
