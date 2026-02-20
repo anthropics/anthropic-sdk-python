@@ -12,8 +12,43 @@ from anthropic._compat import PYDANTIC_V1, parse_obj, model_dump, model_json
 from anthropic._models import DISCRIMINATOR_CACHE, BaseModel, construct_type
 
 
+class UnwrappingVariantA(BaseModel):
+    type: Literal["a"]
+    value: str
+
+
+class UnwrappingVariantB(BaseModel):
+    type: Literal["b"]
+    value: int
+
+
+UnwrappingDiscriminatedUnion = Annotated[
+    Union[UnwrappingVariantA, UnwrappingVariantB], PropertyInfo(discriminator="type")
+]
+UnwrappingAlias = TypeAliasType("UnwrappingAlias", UnwrappingDiscriminatedUnion)
+
+UnwrappingUnionAlias = TypeAliasType("UnwrappingUnionAlias", Union[UnwrappingVariantA, UnwrappingVariantB])
+UnwrappingAnnotatedAlias = Annotated[UnwrappingUnionAlias, PropertyInfo(discriminator="type")]
+
+UnwrappingDeepUnionAlias = TypeAliasType("UnwrappingDeepUnionAlias", UnwrappingVariantA)
+UnwrappingDeepAnnotated1 = Annotated[UnwrappingDeepUnionAlias, "some metadata"]
+UnwrappingDeepAlias1 = TypeAliasType("UnwrappingDeepAlias1", UnwrappingDeepAnnotated1)
+UnwrappingDeepAnnotated2 = Annotated[UnwrappingDeepAlias1, PropertyInfo(discriminator="type")]
+UnwrappingDeepAlias2 = TypeAliasType("UnwrappingDeepAlias2", UnwrappingDeepAnnotated2)
+
 class BasicModel(BaseModel):
     foo: str
+
+
+AnnotatedModel = Annotated[BasicModel, "random metadata"]
+
+DiscriminatedUnionA = Union[UnwrappingVariantA, UnwrappingVariantB]
+DiscriminatedUnionAnnotated = Annotated[DiscriminatedUnionA, PropertyInfo(discriminator="type")]
+
+DiscriminatedUnionC = Union[Union[UnwrappingVariantA, UnwrappingVariantB], UnwrappingVariantB]  # Adjusted for test
+# Actually let's use the ones already in the tests if possible, but move them up.
+
+TestAlias = TypeAliasType("TestAlias", str)
 
 
 @pytest.mark.parametrize("value", ["hello", 1], ids=["correct type", "mismatched"])
@@ -648,7 +683,7 @@ def test_annotated_types() -> None:
 
     m = construct_type(
         value={"value": "foo"},
-        type_=cast(Any, Annotated[Model, "random metadata"]),
+        type_=Annotated[Model, "random metadata"],
     )
     assert isinstance(m, Model)
     assert m.value == "foo"
@@ -835,11 +870,9 @@ def test_discriminated_unions_invalid_data_uses_cache() -> None:
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="TypeAliasType is not supported in Pydantic v1")
 def test_type_alias_type() -> None:
-    Alias = TypeAliasType("Alias", str)  # pyright: ignore
-
     class Model(BaseModel):
-        alias: Alias
-        union: Union[int, Alias]
+        alias: TestAlias
+        union: Union[int, TestAlias]
 
     m = construct_type(value={"alias": "foo", "union": "bar"}, type_=Model)
     assert isinstance(m, Model)
@@ -961,3 +994,37 @@ def test_extra_properties() -> None:
     assert model.a.prop == 1
     assert isinstance(model.a, Item)
     assert model.other == "foo"
+
+
+def test_type_alias_annotated_unwrapping() -> None:
+    # Case 1: TypeAliasType of Annotated Union
+    # This is similar to how RawMessageStreamEvent might be defined in some environments
+    # Test deserialization via Alias
+    data = {"type": "a", "value": "foo"}
+    m = construct_type(type_=UnwrappingAlias, value=data)
+    assert isinstance(m, UnwrappingVariantA)
+    assert m.type == "a"
+    assert m.value == "foo"
+
+    data = {"type": "b", "value": 123}
+    m = construct_type(type_=UnwrappingAlias, value=data)
+    assert isinstance(m, UnwrappingVariantB)
+    assert m.type == "b"
+    assert m.value == 123
+
+
+def test_annotated_type_alias_unwrapping() -> None:
+    # Case 2: Annotated of TypeAliasType of Union
+    data = {"type": "a", "value": "foo"}
+    m = construct_type(type_=UnwrappingAnnotatedAlias, value=data)
+    assert isinstance(m, UnwrappingVariantA)
+    assert m.type == "a"
+    assert m.value == "foo"
+
+
+def test_deeply_nested_unwrapping() -> None:
+    # Case 3: Deeply nested TypeAliasType and Annotated
+    data = {"type": "a", "value": "foo"}
+    m = construct_type(type_=UnwrappingDeepAlias2, value=data)
+    assert isinstance(m, UnwrappingVariantA)
+    assert m.value == "foo"
