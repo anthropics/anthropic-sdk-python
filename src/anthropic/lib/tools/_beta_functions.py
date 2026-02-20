@@ -87,6 +87,8 @@ class BaseFunctionTool(Generic[CallableT]):
         self._func_with_validate = pydantic.validate_call(func)
         self.name = name or func.__name__
         self._defer_loading = defer_loading
+        self._is_classmethod = False
+        self._is_staticmethod = False
 
         self.description = description or self._get_description_from_docstring()
 
@@ -98,9 +100,25 @@ class BaseFunctionTool(Generic[CallableT]):
         else:
             self.input_schema = self._create_schema_from_function()
 
-    @property
-    def __call__(self) -> CallableT:
-        return self.func
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return self.func(*args, **kwargs)
+
+    def __get__(self, instance: Any, owner: Any) -> Any:
+        if instance is None:
+            if owner is not None and self._is_classmethod:
+                instance = owner
+            else:
+                return self
+
+        tool = self.__class__(
+            func=self.func.__get__(instance, owner),
+            name=self.name,
+            description=self.description,
+            defer_loading=self._defer_loading,
+        )
+        tool._is_classmethod = self._is_classmethod
+        tool._is_staticmethod = self._is_staticmethod
+        return tool
 
     def to_dict(self) -> BetaToolParam:
         defn: BetaToolParam = {
@@ -147,6 +165,9 @@ class BaseFunctionTool(Generic[CallableT]):
                 arguments: "list[ArgumentsParameter]",
                 var_kwargs_schema: CoreSchema | None,
             ) -> JsonSchemaValue:
+                # Remove self and cls from the schema as they are handled by the SDK
+                arguments = [arg for arg in arguments if arg["name"] not in {"self", "cls"}]
+
                 schema = super().kw_arguments_schema(arguments, var_kwargs_schema)
                 if schema.get("type") != "object":
                     return schema
@@ -250,17 +271,40 @@ def beta_tool(
     if _compat.PYDANTIC_V1:
         raise RuntimeError("Tool functions are only supported with Pydantic v2")
 
-    if func is not None:
+    is_classmethod = isinstance(func, classmethod)
+    is_staticmethod = isinstance(func, staticmethod)
+    if is_classmethod or is_staticmethod:
+        # We unwrap the classmethod/staticmethod so that we can wrap it
+        # with our own tool class which implements the descriptor protocol
+        # correctly.
+        real_func = func.__func__  # type: ignore
+    else:
+        real_func = cast(FunctionT, func)
+
+    if real_func is not None:
         # @beta_tool called without parentheses
-        return BetaFunctionTool(
-            func=func, name=name, description=description, input_schema=input_schema, defer_loading=defer_loading
+        tool = BetaFunctionTool(
+            func=real_func, name=name, description=description, input_schema=input_schema, defer_loading=defer_loading
         )
+        tool._is_classmethod = is_classmethod
+        tool._is_staticmethod = is_staticmethod
+        return tool  # type: ignore
 
     # @beta_tool()
     def decorator(func: FunctionT) -> BetaFunctionTool[FunctionT]:
-        return BetaFunctionTool(
-            func=func, name=name, description=description, input_schema=input_schema, defer_loading=defer_loading
+        is_classmethod = isinstance(func, classmethod)
+        is_staticmethod = isinstance(func, staticmethod)
+        if is_classmethod or is_staticmethod:
+            real_func = func.__func__  # type: ignore
+        else:
+            real_func = func
+
+        tool = BetaFunctionTool(
+            func=real_func, name=name, description=description, input_schema=input_schema, defer_loading=defer_loading
         )
+        tool._is_classmethod = is_classmethod
+        tool._is_staticmethod = is_staticmethod
+        return tool  # type: ignore
 
     return decorator
 
@@ -314,25 +358,45 @@ def beta_async_tool(
     if _compat.PYDANTIC_V1:
         raise RuntimeError("Tool functions are only supported with Pydantic v2")
 
-    if func is not None:
+    is_classmethod = isinstance(func, classmethod)
+    is_staticmethod = isinstance(func, staticmethod)
+    if is_classmethod or is_staticmethod:
+        real_func = func.__func__  # type: ignore
+    else:
+        real_func = cast(AsyncFunctionT, func)
+
+    if real_func is not None:
         # @beta_async_tool called without parentheses
-        return BetaAsyncFunctionTool(
-            func=func,
+        tool = BetaAsyncFunctionTool(
+            func=real_func,
             name=name,
             description=description,
             input_schema=input_schema,
             defer_loading=defer_loading,
         )
+        tool._is_classmethod = is_classmethod
+        tool._is_staticmethod = is_staticmethod
+        return tool  # type: ignore
 
     # @beta_async_tool()
     def decorator(func: AsyncFunctionT) -> BetaAsyncFunctionTool[AsyncFunctionT]:
-        return BetaAsyncFunctionTool(
-            func=func,
+        is_classmethod = isinstance(func, classmethod)
+        is_staticmethod = isinstance(func, staticmethod)
+        if is_classmethod or is_staticmethod:
+            real_func = func.__func__  # type: ignore
+        else:
+            real_func = func
+
+        tool = BetaAsyncFunctionTool(
+            func=real_func,
             name=name,
             description=description,
             input_schema=input_schema,
             defer_loading=defer_loading,
         )
+        tool._is_classmethod = is_classmethod
+        tool._is_staticmethod = is_staticmethod
+        return tool  # type: ignore
 
     return decorator
 
