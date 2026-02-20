@@ -150,7 +150,7 @@ class Anthropic(SyncAPIClient):
     @property
     @override
     def qs(self) -> Querystring:
-        return Querystring(array_format="brackets")
+        return Querystring(array_format="comma")
 
     @property
     @override
@@ -380,7 +380,7 @@ class AsyncAnthropic(AsyncAPIClient):
     @property
     @override
     def qs(self) -> Querystring:
-        return Querystring(array_format="brackets")
+        return Querystring(array_format="comma")
 
     @property
     @override
