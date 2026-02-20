@@ -155,10 +155,14 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         raise NotImplementedError()
         yield  # type: ignore[unreachable]
 
-    def _check_and_compact(self) -> bool:
+    def _check_and_compact(self, current_message: ParsedBetaMessage[ResponseFormatT] | None = None) -> bool:
         """
         Check token usage and compact messages if threshold exceeded.
         Returns True if compaction was performed, False otherwise.
+
+        Args:
+            current_message: The current assistant message that hasn't been appended yet.
+                           This is needed to include server tool results in compaction.
         """
         if self._compaction_control is None or not self._compaction_control["enabled"]:
             return False
@@ -185,13 +189,21 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
         messages = list(self._params["messages"])
 
+        # Include current message if provided (contains server tool results not yet appended)
+        # Convert content to dicts so the filter logic below works correctly
+        if current_message is not None:
+            messages.append({
+                "role": current_message.role,
+                "content": [block.model_dump() for block in current_message.content]
+            })
+
         if messages[-1]["role"] == "assistant":
-            # Remove tool_use blocks from the last message to avoid 400 error
-            # (tool_use requires tool_result, which we don't have yet)
+            # Remove tool_use and server_tool_use blocks from the last message to avoid 400 error
+            # (tool_use/server_tool_use requires corresponding result blocks, which we don't have yet)
             non_tool_blocks = [
                 block
                 for block in messages[-1]["content"]
-                if isinstance(block, dict) and block.get("type") != "tool_use"
+                if isinstance(block, dict) and block.get("type") not in ("tool_use", "server_tool_use")
             ]
 
             if non_tool_blocks:
@@ -249,7 +261,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             self._iteration_count += 1
 
             # If the compaction was performed, skip tool call generation this iteration
-            if not self._check_and_compact():
+            # Pass current message so compaction can include server tool results
+            if not self._check_and_compact(message):
                 response = self.generate_tool_call_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
@@ -406,10 +419,14 @@ class BaseAsyncToolRunner(
         raise NotImplementedError()
         yield  # type: ignore[unreachable]
 
-    async def _check_and_compact(self) -> bool:
+    async def _check_and_compact(self, current_message: ParsedBetaMessage[ResponseFormatT] | None = None) -> bool:
         """
         Check token usage and compact messages if threshold exceeded.
         Returns True if compaction was performed, False otherwise.
+
+        Args:
+            current_message: The current assistant message that hasn't been appended yet.
+                           This is needed to include server tool results in compaction.
         """
         if self._compaction_control is None or not self._compaction_control["enabled"]:
             return False
@@ -436,13 +453,21 @@ class BaseAsyncToolRunner(
 
         messages = list(self._params["messages"])
 
+        # Include current message if provided (contains server tool results not yet appended)
+        # Convert content to dicts so the filter logic below works correctly
+        if current_message is not None:
+            messages.append({
+                "role": current_message.role,
+                "content": [block.model_dump() for block in current_message.content]
+            })
+
         if messages[-1]["role"] == "assistant":
-            # Remove tool_use blocks from the last message to avoid 400 error
-            # (tool_use requires tool_result, which we don't have yet)
+            # Remove tool_use and server_tool_use blocks from the last message to avoid 400 error
+            # (tool_use/server_tool_use requires corresponding result blocks, which we don't have yet)
             non_tool_blocks = [
                 block
                 for block in messages[-1]["content"]
-                if isinstance(block, dict) and block.get("type") != "tool_use"
+                if isinstance(block, dict) and block.get("type") not in ("tool_use", "server_tool_use")
             ]
 
             if non_tool_blocks:
@@ -500,7 +525,8 @@ class BaseAsyncToolRunner(
             self._iteration_count += 1
 
             # If the compaction was performed, skip tool call generation this iteration
-            if not await self._check_and_compact():
+            # Pass current message so compaction can include server tool results
+            if not await self._check_and_compact(message):
                 response = await self.generate_tool_call_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
