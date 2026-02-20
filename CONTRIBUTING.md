@@ -98,7 +98,6 @@ $ ./scripts/test
 ### Snapshots
 
 Some tests use [inline-snapshot](https://15r10nk.github.io/inline-snapshot/latest/). To update them after making changes, rerun the tests with the `--inline-snapshot=fix` and `-n0` options:
-
 ```bash
 ./scripts/test --inline-snapshot=fix -n0
 ```
@@ -107,15 +106,14 @@ Some tests use [inline-snapshot](https://15r10nk.github.io/inline-snapshot/lates
 > `inline-snapshot` is incompatible with [pytest-xdist](https://github.com/pytest-dev/pytest-xdist), so you need to disable parallel execution `(-n0)` when using the `--inline-snapshot` option.
 
 In addition, some tests capture snapshots of the HTTP requests they make.
-To refresh these snapshots, run the tests with the `ANTHROPIC_LIVE=1` environment variable enabled.
-
+To refresh these snapshots, run the tests with the `--http-record` flag:
 ```bash
-ANTHROPIC_LIVE=1 ./scripts/test --inline-snapshot=fix
+./scripts/test --inline-snapshot=fix --http-record -n0
 ```
 
 > [!NOTE]
-> Sometimes it makes sense to update only the inline snapshots `(--inline-snapshot=fix)` without refreshing the HTTP snapshots `(ANTHROPIC_LIVE=1)`.
-> This is useful when the endpoint hasn’t changed, but your code handles the response differently and the assertions need updating.
+> Sometimes it makes sense to update only the inline snapshots `(--inline-snapshot=fix)` without refreshing the HTTP snapshots `(--http-record)`.
+> This is useful when the endpoint hasn't changed, but your code handles the response differently and the assertions need updating.
 
 ## Linting and formatting
 

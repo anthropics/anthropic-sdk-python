@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import os
 import logging
-from typing import TYPE_CHECKING, Iterator, AsyncIterator
+from typing import TYPE_CHECKING, Any, Iterator, AsyncIterator
 
 import httpx
 import pytest
+import inline_snapshot
+from http_snapshot import SnapshotSerializerOptions
 from pytest_asyncio import is_async_test
+from http_snapshot.httpx import HttpxSyncSnapshotClient, HttpxAsyncSnapshotClient
 
 from anthropic import Anthropic, AsyncAnthropic, DefaultAioHttpClient
 from anthropic._utils import is_dict
@@ -19,6 +22,18 @@ if TYPE_CHECKING:
 pytest.register_assert_rewrite("tests.utils")
 
 logging.getLogger("anthropic").setLevel(logging.DEBUG)
+
+SNAPSHOT_RESPONSE_HEADERS_EXCLUDE = [
+    "date",
+    "request-id",
+    "anthropic-organization-id",
+    "x-envoy-upstream-service-time",
+    "cf-ray",
+]
+
+SNAPSHOT_REQUEST_HEADERS_EXCLUDE = [
+    "x-api-key",
+]
 
 
 # automatically add `pytest.mark.asyncio()` to all of our async tests
@@ -55,6 +70,41 @@ def client(request: FixtureRequest) -> Iterator[Anthropic]:
         raise TypeError(f"Unexpected fixture parameter type {type(strict)}, expected {bool}")
 
     with Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=strict) as client:
+        yield client
+
+
+@pytest.fixture
+def http_snapshot_serializer_options() -> SnapshotSerializerOptions:
+    return SnapshotSerializerOptions(
+        exclude_response_headers=SNAPSHOT_RESPONSE_HEADERS_EXCLUDE,
+        exclude_request_headers=SNAPSHOT_REQUEST_HEADERS_EXCLUDE,
+        include_request=True,
+    )
+
+
+@pytest.fixture(scope="function")
+def snapshot_client(
+    is_recording: bool,
+    http_snapshot_serializer_options: SnapshotSerializerOptions,
+    http_snapshot: inline_snapshot.Snapshot[Any],
+) -> Iterator[Anthropic]:
+    with HttpxSyncSnapshotClient(
+        http_snapshot, is_recording, serializer_options=http_snapshot_serializer_options
+    ) as snapshot_client:
+        with Anthropic(http_client=snapshot_client, api_key=None if is_recording else api_key) as client:
+            yield client
+
+
+@pytest.fixture(scope="function")
+async def async_snapshot_client(
+    is_recording: bool,
+    http_snapshot_serializer_options: SnapshotSerializerOptions,
+    http_snapshot: inline_snapshot.Snapshot[Any],
+) -> AsyncIterator[AsyncAnthropic]:
+    async with HttpxAsyncSnapshotClient(
+        http_snapshot, is_recording, serializer_options=http_snapshot_serializer_options
+    ) as snapshot_client:
+        client = AsyncAnthropic(http_client=snapshot_client, api_key=None if is_recording else api_key)
         yield client
 
 
