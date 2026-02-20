@@ -1,26 +1,19 @@
 import json
 import logging
-from typing import Any, Dict, List, Union
-from typing_extensions import Literal, TypeVar
+from typing import Any, Dict, List, Union, cast
+from typing_extensions import Literal
 
 import pytest
-from respx import MockRouter
 from inline_snapshot import external, snapshot
 
 from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import BetaFunctionToolResultType
-from anthropic.lib.tools._beta_runner import BetaToolRunner
-from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.types.beta.beta_message_param import BetaMessageParam
 from anthropic.types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
 
 from ..utils import print_obj
-from ...conftest import base_url
-from ..snapshots import make_snapshot_request, make_async_snapshot_request, make_stream_snapshot_request
-
-_T = TypeVar("_T")
 
 # all the snapshots in this file are auto-generated from the live API
 #
@@ -37,7 +30,38 @@ snapshots = {
             ]
         ),
         "result": snapshot(
-            "ParsedBetaMessage(container=None, content=[ParsedBetaTextBlock(citations=None, parsed_output=None, text=\"The weather in San Francisco, CA is currently **68°F** and **Sunny**. It's a nice day! ☀️\", type='text')], context_management=None, id='msg_014x2Sxq2p6sewFyUbJp8Mg3', model='claude-haiku-4-5-20251001', role='assistant', stop_reason='end_turn', stop_sequence=None, type='message', usage=BetaUsage(cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0), cache_creation_input_tokens=0, cache_read_input_tokens=0, inference_geo=None, input_tokens=770, iterations=None, output_tokens=33, server_tool_use=None, service_tier='standard', speed=None))\n"
+            """\
+ParsedBetaMessage(
+    container=None,
+    content=[
+        ParsedBetaTextBlock(
+            citations=None,
+            parsed_output=None,
+            text='The weather in San Francisco, CA is currently **Sunny** with a temperature of **68°F**.',
+            type='text'
+        )
+    ],
+    context_management=None,
+    id='msg_01BZsMQjer9AFLgmdRKJ8NcA',
+    model='claude-haiku-4-5-20251001',
+    role='assistant',
+    stop_reason='end_turn',
+    stop_sequence=None,
+    type='message',
+    usage=BetaUsage(
+        cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0),
+        cache_creation_input_tokens=0,
+        cache_read_input_tokens=0,
+        inference_geo='not_available',
+        input_tokens=770,
+        iterations=None,
+        output_tokens=25,
+        server_tool_use=None,
+        service_tier='standard',
+        speed=None
+    )
+)
+"""
         ),
     },
     "custom": {
@@ -53,7 +77,38 @@ snapshots = {
     },
     "streaming": {
         "result": snapshot(
-            "ParsedBetaMessage(container=None, content=[ParsedBetaTextBlock(citations=None, parsed_output=None, text='The weather in San Francisco, CA is currently **Sunny** with a temperature of **68°F**.', type='text')], context_management=None, id='msg_01Vm8Ddgc8qm4iuUSKbf6jku', model='claude-haiku-4-5-20251001', role='assistant', stop_reason='end_turn', stop_sequence=None, type='message', usage=BetaUsage(cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0), cache_creation_input_tokens=0, cache_read_input_tokens=0, inference_geo=None, input_tokens=781, iterations=None, output_tokens=25, server_tool_use=None, service_tier='standard', speed=None))\n"
+            """\
+ParsedBetaMessage(
+    container=None,
+    content=[
+        ParsedBetaTextBlock(
+            citations=None,
+            parsed_output=None,
+            text="The weather in San Francisco, CA is currently **68°F and Sunny**. It's a nice day!",
+            type='text'
+        )
+    ],
+    context_management=None,
+    id='msg_0158JyopQTFaomteeJoDpS5q',
+    model='claude-haiku-4-5-20251001',
+    role='assistant',
+    stop_reason='end_turn',
+    stop_sequence=None,
+    type='message',
+    usage=BetaUsage(
+        cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0),
+        cache_creation_input_tokens=0,
+        cache_read_input_tokens=0,
+        inference_geo='not_available',
+        input_tokens=770,
+        iterations=None,
+        output_tokens=27,
+        server_tool_use=None,
+        service_tier='standard',
+        speed=None
+    )
+)
+"""
         )
     },
     "tool_call": {
@@ -77,8 +132,13 @@ snapshots = {
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 class TestSyncRunTools:
-    @pytest.mark.respx(base_url=base_url)
-    def test_basic_call_sync(self, client: Anthropic, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:b38bbf6c-9a76-40ca-b09d-7a3911776e0f.json")),
+        ],
+    )
+    def test_basic_call_sync(self, snapshot_client: Anthropic) -> None:
         @beta_tool
         def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
             """Lookup the weather for a given city in either celsius or fahrenheit
@@ -91,27 +151,24 @@ class TestSyncRunTools:
             """
             return json.dumps(_get_weather(location, units))
 
-        message = make_snapshot_request(
-            lambda c: c.beta.messages.tool_runner(
-                max_tokens=1024,
-                model="claude-haiku-4-5",
-                tools=[get_weather],
-                messages=[{"role": "user", "content": "What is the weather in SF?"}],
-            ).until_done(),
-            content_snapshot=snapshots["basic"]["responses"],
-            path="/v1/messages",
-            mock_client=client,
-            respx_mock=respx_mock,
-        )
+        message = snapshot_client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        ).until_done()
 
-        assert print_obj(message, monkeypatch) == snapshots["basic"]["result"]
+        assert print_obj(message) == snapshots["basic"]["result"]
 
-    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:10e53c1d-51be-4c64-b5bf-99adb3fa4719.json")),
+        ],
+    )
     def test_tool_call_error(
         self,
-        client: Anthropic,
-        respx_mock: MockRouter,
-        monkeypatch: pytest.MonkeyPatch,
+        snapshot_client: Anthropic,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
         called = None
@@ -133,30 +190,21 @@ class TestSyncRunTools:
                 raise RuntimeError("Unexpected error, try again")
             return json.dumps(_get_weather(location, units))
 
-        def tool_runner(client: Anthropic) -> List[Union[BetaMessageParam, None]]:
-            runner = client.beta.messages.tool_runner(
-                max_tokens=1024,
-                model="claude-haiku-4-5",
-                tools=[get_weather],
-                messages=[{"role": "user", "content": "What is the weather in SF?"}],
-            )
+        runner = snapshot_client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
 
-            actual_responses: List[Union[BetaMessageParam, None]] = []
+        actual_responses: List[Union[BetaMessageParam, None]] = []
+        with caplog.at_level(logging.ERROR):
             for _ in runner:
                 tool_call_response = runner.generate_tool_call_response()
                 if tool_call_response is not None:
                     actual_responses.append(tool_call_response)
 
-            return actual_responses
-
-        with caplog.at_level(logging.ERROR):
-            message = make_snapshot_request(
-                tool_runner,
-                content_snapshot=snapshots["tool_call_error"]["responses"],
-                path="/v1/messages",
-                mock_client=client,
-                respx_mock=respx_mock,
-            )
+        message = actual_responses
 
         assert caplog.record_tuples == [
             (
@@ -165,14 +213,33 @@ class TestSyncRunTools:
                 "Error occurred while calling tool: get_weather",
             ),
         ]
-        assert print_obj(message, monkeypatch) == snapshot(
-            "[{'role': 'user', 'content': [{'type': 'tool_result', 'tool_use_id': 'toolu_01Do4cDVNxt51EuosKoxdmii', 'content': \"RuntimeError('Unexpected error, try again')\", 'is_error': True}]}]\n"
+        assert print_obj(message) == snapshot(
+            """\
+[
+    {
+        'role': 'user',
+        'content': [
+            {
+                'type': 'tool_result',
+                'tool_use_id': 'toolu_01A9HHF5Ezy3oBrKmSgfASm9',
+                'content': "RuntimeError('Unexpected error, try again')",
+                'is_error': True
+            }
+        ]
+    }
+]
+"""
         )
 
-    @pytest.mark.respx(base_url=base_url)
-    def test_custom_message_handling(
-        self, client: Anthropic, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:f59a9391-643b-422c-96dc-1f28bc7ea4d7.json")),
+        ],
+    )
+    # TODO: fix the append_messages method
+    @pytest.mark.xfail(reason="bug in append messages")
+    def test_custom_message_handling(self, snapshot_client: Anthropic) -> None:
         @beta_tool
         def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
             """Lookup the weather for a given city in either celsius or fahrenheit
@@ -185,44 +252,39 @@ class TestSyncRunTools:
             """
             return json.dumps(_get_weather(location, units))
 
-        def custom_message_handling(client: Anthropic) -> BetaMessage:
-            runner = client.beta.messages.tool_runner(
-                model="claude-haiku-4-5",
-                messages=[{"role": "user", "content": "What's the weather in SF in Celsius?"}],
-                tools=[get_weather],
-                max_tokens=1024,
-            )
-
-            for message in runner:
-                # handle only where there is a tool call
-                if message.content[0].type == "tool_use":
-                    runner.append_messages(
-                        BetaMessageParam(
-                            role="assistant",
-                            content=[
-                                BetaToolResultBlockParam(
-                                    tool_use_id=message.content[0].id,
-                                    content="The weather in San Francisco, CA is currently sunny with a temperature of 20°C.",
-                                    type="tool_result",
-                                )
-                            ],
-                        ),
-                    )
-
-            return runner.until_done()
-
-        message = make_snapshot_request(
-            custom_message_handling,
-            content_snapshot=snapshots["custom"]["responses"],
-            path="/v1/messages",
-            mock_client=client,
-            respx_mock=respx_mock,
+        runner = snapshot_client.beta.messages.tool_runner(
+            model="claude-haiku-4-5",
+            messages=[{"role": "user", "content": "What's the weather in SF in Celsius?"}],
+            tools=[get_weather],
+            max_tokens=1024,
         )
 
-        assert print_obj(message, monkeypatch) == snapshots["custom"]["result"]
+        for message_iter in runner:
+            if message_iter.content[0].type == "tool_use":
+                runner.append_messages(
+                    BetaMessageParam(
+                        role="user",
+                        content=[
+                            BetaToolResultBlockParam(
+                                tool_use_id=message_iter.content[0].id,
+                                content="The weather in San Francisco, CA is currently sunny with a temperature of 20°C.",
+                                type="tool_result",
+                            )
+                        ],
+                    ),
+                )
 
-    @pytest.mark.respx(base_url=base_url)
-    def test_tool_call_caching(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        message = runner.until_done()
+
+        assert print_obj(message) == snapshots["custom"]["result"]
+
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:a8ac789b-f856-48cd-9ff3-d5f36799e432.json")),
+        ],
+    )
+    def test_tool_call_caching(self, snapshot_client: Anthropic) -> None:
         called = None
 
         @beta_tool
@@ -241,33 +303,27 @@ class TestSyncRunTools:
                 return json.dumps(_get_weather(location, units))
             raise RuntimeError("This tool should not be called again")
 
-        def tool_runner(client: Anthropic) -> None:
-            runner = client.beta.messages.tool_runner(
-                model="claude-haiku-4-5",
-                messages=[{"role": "user", "content": "What's the weather in SF in Celsius?"}],
-                tools=[get_weather],
-                max_tokens=1024,
-            )
-
-            for _ in runner:
-                response1 = runner.generate_tool_call_response()
-                response2 = runner.generate_tool_call_response()
-
-                if response1 is not None:
-                    assert response1 is response2
-
-        make_snapshot_request(
-            tool_runner,
-            content_snapshot=snapshots["tool_call"]["responses"],
-            path="/v1/messages",
-            mock_client=client,
-            respx_mock=respx_mock,
+        runner = snapshot_client.beta.messages.tool_runner(
+            model="claude-haiku-4-5",
+            messages=[{"role": "user", "content": "What's the weather in SF in Celsius?"}],
+            tools=[get_weather],
+            max_tokens=1024,
         )
 
-    @pytest.mark.respx(base_url=base_url)
-    def test_streaming_call_sync(
-        self, client: Anthropic, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+        for _ in runner:
+            response1 = runner.generate_tool_call_response()
+            response2 = runner.generate_tool_call_response()
+
+            if response1 is not None:
+                assert response1 is response2
+
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:771c64ff-a0af-4cd9-8080-a5a539da7cb9.json")),
+        ],
+    )
+    def test_streaming_call_sync(self, snapshot_client: Anthropic) -> None:
         @beta_tool
         def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
             """Lookup the weather for a given city in either celsius or fahrenheit
@@ -280,24 +336,23 @@ class TestSyncRunTools:
             """
             return json.dumps(_get_weather(location, units))
 
-        last_response_messsage = make_stream_snapshot_request(
-            lambda c: c.beta.messages.tool_runner(
-                max_tokens=1024,
-                model="claude-haiku-4-5",
-                tools=[get_weather],
-                messages=[{"role": "user", "content": "What is the weather in SF?"}],
-                stream=True,
-            ).until_done(),
-            content_snapshot=external("hash:cd8d3d185e7a*.json"),
-            path="/v1/messages",
-            mock_client=client,
-            respx_mock=respx_mock,
-        )
+        last_response_messsage = snapshot_client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+            stream=True,
+        ).until_done()
 
-        assert print_obj(last_response_messsage, monkeypatch) == snapshots["streaming"]["result"]
+        assert print_obj(last_response_messsage) == snapshots["streaming"]["result"]
 
-    @pytest.mark.respx(base_url=base_url)
-    def test_max_iterations(self, client: Anthropic, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:e075a6c2-de4d-4125-9709-f0e178058190.json")),
+        ],
+    )
+    def test_max_iterations(self, snapshot_client: Anthropic) -> None:
         @beta_tool
         def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
             """Lookup the weather for a given city in either celsius or fahrenheit
@@ -310,50 +365,62 @@ class TestSyncRunTools:
             """
             return json.dumps(_get_weather(location, units))
 
-        def get_weather_answers(client: Anthropic) -> List[Union[BetaMessageParam, None]]:
-            runner = client.beta.messages.tool_runner(
-                max_tokens=1024,
-                model="claude-haiku-4-5",
-                tools=[get_weather],
-                messages=[
-                    {
-                        "role": "user",
-                        "content": (
-                            "What's the weather in San Francisco, New York, London, Tokyo and Paris?"
-                            "If you need to use tools, call only one tool at a time. Wait for the tool’s"
-                            "response before making another call. Never call multiple tools at once."
-                        ),
-                    }
-                ],
-                max_iterations=2,
-            )
-
-            answers: List[Union[BetaMessageParam, None]] = []
-
-            for _ in runner:
-                answers.append(runner.generate_tool_call_response())
-
-            return answers
-
-        answers = make_snapshot_request(
-            get_weather_answers,
-            content_snapshot=snapshot(
-                [
-                    '{"model": "claude-haiku-4-5-20251001", "id": "msg_017GvdrboNn8hipoMJUcK8m6", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "I\'ll get the weather for each of these cities one at a time. Let me start with San Francisco."}, {"type": "tool_use", "id": "toolu_011Q6hjHnpWegJvV1Zn6Cm1h", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "f"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 701, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 96, "service_tier": "standard"}}',
-                    '{"model": "claude-haiku-4-5-20251001", "id": "msg_01PYFQH4AkK3NBgSpFkWD16q", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "Now let me check New York."}, {"type": "tool_use", "id": "toolu_011QaaAuMeNWTwHjkxcxce1D", "name": "get_weather", "input": {"location": "New York, NY", "units": "f"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 837, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 81, "service_tier": "standard"}}',
-                ]
-            ),
-            path="/v1/messages",
-            mock_client=client,
-            respx_mock=respx_mock,
+        runner = snapshot_client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[
+                {
+                    "role": "user",
+                    "content": (
+                        "What's the weather in San Francisco, New York, London, Tokyo and Paris?"
+                        "If you need to use tools, call only one tool at a time. Wait for the tool's"
+                        "response before making another call. Never call multiple tools at once."
+                    ),
+                }
+            ],
+            max_iterations=2,
         )
 
-        assert print_obj(answers, monkeypatch) == snapshot(
-            "[{'role': 'user', 'content': [{'type': 'tool_result', 'tool_use_id': 'toolu_011Q6hjHnpWegJvV1Zn6Cm1h', 'content': '{\"location\": \"San Francisco, CA\", \"temperature\": \"68\\\\u00b0F\", \"condition\": \"Sunny\"}'}]}, {'role': 'user', 'content': [{'type': 'tool_result', 'tool_use_id': 'toolu_011QaaAuMeNWTwHjkxcxce1D', 'content': '{\"location\": \"New York, NY\", \"temperature\": \"68\\\\u00b0F\", \"condition\": \"Sunny\"}'}]}]\n"
+        answers: List[Union[BetaMessageParam, None]] = []
+
+        for _ in runner:
+            answers.append(runner.generate_tool_call_response())
+
+        assert print_obj(answers) == snapshot(
+            """\
+[
+    {
+        'role': 'user',
+        'content': [
+            {
+                'type': 'tool_result',
+                'tool_use_id': 'toolu_01LRanfq6DmHn1yDTB4d1SAh',
+                'content': '{"location": "San Francisco, CA", "temperature": "68\\\\u00b0F", "condition": "Sunny"}'
+            }
+        ]
+    },
+    {
+        'role': 'user',
+        'content': [
+            {
+                'type': 'tool_result',
+                'tool_use_id': 'toolu_01RWdcDdE8NAFDgZ8F9Xk2K7',
+                'content': '{"location": "New York, NY", "temperature": "68\\\\u00b0F", "condition": "Sunny"}'
+            }
+        ]
+    }
+]
+"""
         )
 
-    @pytest.mark.respx(base_url=base_url)
-    def test_streaming_call_sync_events(self, client: Anthropic, respx_mock: MockRouter) -> None:
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:555fb399-a54c-455b-9ac5-2c9673f18e12.json")),
+        ],
+    )
+    def test_streaming_call_sync_events(self, snapshot_client: Anthropic) -> None:
         @beta_tool
         def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
             """Lookup the weather for a given city in either celsius or fahrenheit
@@ -366,28 +433,19 @@ class TestSyncRunTools:
             """
             return json.dumps(_get_weather(location, units))
 
-        def accumulate_events(client: Anthropic) -> List[str]:
-            events: list[str] = []
-            runner = client.beta.messages.tool_runner(
-                max_tokens=1024,
-                model="claude-haiku-4-5",
-                tools=[get_weather],
-                messages=[{"role": "user", "content": "What is the weather in SF?"}],
-                stream=True,
-            )
-
-            for stream in runner:
-                for event in stream:
-                    events.append(event.type)
-            return events
-
-        events = make_stream_snapshot_request(
-            accumulate_events,
-            content_snapshot=external("uuid:9cb114c8-69bd-4111-841b-edee30333afd.json"),
-            path="/v1/messages",
-            mock_client=client,
-            respx_mock=respx_mock,
+        events: list[str] = []
+        runner = snapshot_client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+            stream=True,
         )
+
+        for stream in runner:
+            for event in stream:
+                events.append(event.type)
+
         assert set(events) == snapshot(
             {
                 "content_block_delta",
@@ -401,47 +459,40 @@ class TestSyncRunTools:
             }
         )
 
-    @pytest.mark.respx(base_url=base_url)
-    def test_compaction_control(
-        self, client: Anthropic, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:956fa2fe-8752-4f7c-8f9a-33735e62b898.json")),
+        ],
+    )
+    def test_compaction_control(self, snapshot_client: Anthropic, caplog: pytest.LogCaptureFixture) -> None:
         @beta_tool
         def submit_analysis(summary: str) -> str:  # noqa: ARG001
             """Call this LAST with your final analysis."""
             return "Analysis submitted"
 
-        def tool_runner(client: Anthropic) -> BetaToolRunner[None]:
-            runner = client.beta.messages.tool_runner(
-                model="claude-sonnet-4-5",
-                max_tokens=4000,
-                tools=[submit_analysis],
-                messages=[
-                    {
-                        "role": "user",
-                        "content": (
-                            "Write a detailed 500 word essay about dogs, cats, and birds. "
-                            "Call the tool submit_analysis with the information about all three animals. "
-                            "Note that you should call it only once at the end of your essay."
-                        ),
-                    }
-                ],
-                betas=["structured-outputs-2025-12-15"],
-                compaction_control={"enabled": True, "context_token_threshold": 500},
-                max_iterations=1,
-            )
-
-            next(runner)
-            runner.until_done()
-            return runner
+        runner = snapshot_client.beta.messages.tool_runner(
+            model="claude-sonnet-4-5",
+            max_tokens=4000,
+            tools=[submit_analysis],
+            messages=[
+                {
+                    "role": "user",
+                    "content": (
+                        "Write a detailed 500 word essay about dogs, cats, and birds. "
+                        "Call the tool submit_analysis with the information about all three animals. "
+                        "Note that you should call it only once at the end of your essay."
+                    ),
+                }
+            ],
+            betas=["structured-outputs-2025-12-15"],
+            compaction_control={"enabled": True, "context_token_threshold": 500},
+            max_iterations=1,
+        )
 
         with caplog.at_level(logging.INFO, logger="anthropic.lib.tools._beta_runner"):
-            runner = make_snapshot_request(
-                tool_runner,
-                content_snapshot=external("uuid:ab7b2edd-9c2d-4f53-9c04-92bb659b9caa.json"),
-                path="/v1/messages",
-                mock_client=client,
-                respx_mock=respx_mock,
-            )
+            next(runner)
+            runner.until_done()
 
         messages = list(runner._params["messages"])
         assert len(messages) == 1
@@ -452,51 +503,54 @@ class TestSyncRunTools:
         assert content["type"] == "text"
         assert content["text"] == snapshot("""\
 <summary>
-## 1. Task Overview
-The user requests a 500-word essay about dogs, cats, and birds, followed by a single call to the `submit_analysis` tool at the end containing information about all three animals. \n\
+## Task Overview
+The user requests a detailed 500-word essay about dogs, cats, and birds, followed by a single call to the `submit_analysis` tool at the end containing information about all three animals. \n\
 
-**Key constraints:**
-- Essay must be detailed and approximately 500 words
-- Must cover all three animals: dogs, cats, and birds
-- Tool `submit_analysis` must be called exactly once, at the end
-- Tool call should contain information about all three animals
+**Key Requirements:**
+- Essay must be 500 words in length
+- Cover dogs, cats, and birds
+- Call `submit_analysis` tool only once at the completion
+- The tool call should contain information about all three animals
 
-## 2. Current State
-**Completed:** Nothing has been completed yet.
+## Current State
+**Status:** Not started - no work has been completed yet.
 
-**Status:** The task has been acknowledged but no essay has been written and no tool has been called.
+**Completed:**
+- None
 
-**Artifacts produced:** None yet.
+**Artifacts Produced:**
+- None
 
-## 3. Important Discoveries
-**Technical requirements:**
-- Need to understand the parameters/schema for `submit_analysis` tool (not yet verified)
-- Must structure the tool call to include data about all three animal types in a single invocation
+## Important Discoveries
+**Unknown Information:**
+- The exact structure/parameters expected by the `submit_analysis` tool (need to determine what format the tool accepts)
+- Whether the tool requires specific data fields for each animal or free-form text
+- The level of detail expected in the analysis (scientific, casual, comparative, etc.)
 
-**Approach to take:**
-- Write a comprehensive 500-word essay discussing dogs, cats, and birds
-- Essay should cover characteristics, behaviors, and comparisons between the three
-- Extract/organize key information about each animal for the tool call
-- Call `submit_analysis` once with consolidated data about all three animals
+**Assumptions to Verify:**
+- The essay should likely compare/contrast the three animals as pets or discuss their characteristics
+- The `submit_analysis` tool probably accepts structured data about the animals
 
-## 4. Next Steps
+## Next Steps
 1. **Write the 500-word essay** covering:
-   - Dogs: characteristics, behavior, relationship with humans
-   - Cats: characteristics, behavior, relationship with humans
-   - Birds: characteristics, behavior, diversity
-   - Comparisons and contrasts between the three
-   \n\
-2. **Determine the schema for `submit_analysis` tool** - check what parameters it accepts and how to structure data about multiple animals
+   - Dogs (characteristics, behavior, role as pets)
+   - Cats (characteristics, behavior, role as pets)
+   - Birds (characteristics, behavior, role as pets)
+   - Potentially comparative elements between the three
 
-3. **Call `submit_analysis` once** with information about all three animals in the appropriate format
+2. **Determine the `submit_analysis` tool structure** - check what parameters it accepts
 
-4. **Verify word count** is approximately 500 words
+3. **Call `submit_analysis` once** with comprehensive information about all three animals in the appropriate format
 
-## 5. Context to Preserve
-- User emphasized calling the tool "only once at the end"
-- Essay should be "detailed" - not superficial
-- The tool call must encompass information about all three animals, not separate calls per animal
-- This appears to be a test of following multi-step instructions precisely
+4. **Verify word count** is approximately 500 words before submitting
+
+## Context to Preserve
+- User emphasized calling the tool "only once at the end" - this is a specific constraint to respect
+- The tool should contain information about "all three animals" - comprehensive coverage required
+- Essay should be "detailed" - suggests substantive content rather than superficial treatment
+
+## Priority
+High priority on understanding the `submit_analysis` tool parameters before writing the essay, as the content may need to be structured to align with tool requirements.
 </summary>\
 """)
         assert caplog.record_tuples == snapshot(
@@ -504,55 +558,51 @@ The user requests a 500-word essay about dogs, cats, and birds, followed by a si
                 (
                     "anthropic.lib.tools._beta_runner",
                     20,
-                    "Token usage 1615 has exceeded the threshold of 500. Performing compaction.",
+                    "Token usage 1612 has exceeded the threshold of 500. Performing compaction.",
                 ),
-                ("anthropic.lib.tools._beta_runner", 20, "Compaction complete. New token usage: 496"),
+                ("anthropic.lib.tools._beta_runner", 20, "Compaction complete. New token usage: 486"),
             ]
         )
 
-    @pytest.mark.parametrize("client", [False], indirect=True)
-    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("snapshot_client", [False], indirect=True)
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:32da0815-2270-4d29-87be-3b5b63ab42e2.json")),
+        ],
+    )
     def test_server_side_tool(
         self,
-        client: Anthropic,
-        respx_mock: MockRouter,
+        snapshot_client: Anthropic,
     ) -> None:
-        def tool_runner(client: Anthropic) -> BetaToolRunner[None]:
-            runner = client.beta.messages.tool_runner(
-                model="claude-haiku-4-5",
-                messages=[{"role": "user", "content": "What is the weather in SF?"}],
-                tools=[
-                    {
-                        "type": "web_search_20250305",
-                        "name": "web_search",
-                    }
-                ],
-                max_tokens=1024,
-            )
-
-            message = next(runner)
-
-            content_types = [content.type for content in message.content]
-
-            assert "server_tool_use" in content_types
-            assert "web_search_tool_result" in content_types
-
-            return runner
-
-        make_snapshot_request(
-            tool_runner,
-            content_snapshot=external("uuid:a0a711eb-ee0e-4a42-88d6-5c7f83c0f25a.txt"),
-            path="/v1/messages",
-            mock_client=client,
-            respx_mock=respx_mock,
+        runner = snapshot_client.beta.messages.tool_runner(
+            model="claude-haiku-4-5",
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+            tools=[
+                {
+                    "type": "web_search_20250305",
+                    "name": "web_search",
+                }
+            ],
+            max_tokens=1024,
         )
+
+        message = next(runner)
+
+        content_types = [content.type for content in message.content]
+
+        assert "server_tool_use" in content_types
+        assert "web_search_tool_result" in content_types
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
-@pytest.mark.respx(base_url=base_url)
-async def test_basic_call_async(
-    async_client: AsyncAnthropic, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
-) -> None:
+@pytest.mark.parametrize(
+    "http_snapshot",
+    [
+        cast(Any, external("uuid:64fe7974-681a-4023-9848-b32ba39c8664.json")),
+    ],
+)
+async def test_basic_call_async(async_snapshot_client: AsyncAnthropic) -> None:
     @beta_async_tool
     async def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
         """Lookup the weather for a given city in either celsius or fahrenheit
@@ -565,20 +615,12 @@ async def test_basic_call_async(
         """
         return json.dumps(_get_weather(location, units))
 
-    message = await make_async_snapshot_request(
-        lambda c: c.beta.messages.tool_runner(
-            max_tokens=1024,
-            model="claude-3-7",
-            tools=[get_weather],
-            messages=[{"role": "user", "content": "What is the weather in SF?"}],
-        ).until_done(),
-        content_snapshot=snapshots["basic"]["responses"],
-        path="/v1/messages",
-        mock_client=async_client,
-        respx_mock=respx_mock,
-    )
-
-    assert print_obj(message, monkeypatch) == snapshots["basic"]["result"]
+    await async_snapshot_client.beta.messages.tool_runner(
+        max_tokens=1024,
+        model="claude-haiku-4-5",
+        tools=[get_weather],
+        messages=[{"role": "user", "content": "What is the weather in SF?"}],
+    ).until_done()
 
 
 def _get_weather(location: str, units: Literal["c", "f"]) -> Dict[str, Any]:

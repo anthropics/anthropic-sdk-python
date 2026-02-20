@@ -1,0 +1,130 @@
+[
+  {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.82.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.82.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.9.18",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "messages.parse",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "749"
+      },
+      "body": {
+        "max_tokens": 1024,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Extract order: 2 Green Tea at $5.50 and 1 Coffee at $3.00. Total $14."
+          }
+        ],
+        "model": "claude-sonnet-4-5",
+        "output_config": {
+          "format": {
+            "schema": {
+              "$defs": {
+                "OrderItem": {
+                  "type": "object",
+                  "title": "OrderItem",
+                  "properties": {
+                    "product_name": {
+                      "type": "string",
+                      "title": "Product Name"
+                    },
+                    "price": {
+                      "type": "number",
+                      "title": "Price"
+                    },
+                    "quantity": {
+                      "type": "integer",
+                      "title": "Quantity"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "product_name",
+                    "price",
+                    "quantity"
+                  ]
+                }
+              },
+              "type": "object",
+              "title": "OrderDetails",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "title": "Items",
+                  "items": {
+                    "$ref": "#/$defs/OrderItem"
+                  }
+                },
+                "total": {
+                  "type": "number",
+                  "title": "Total"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "items",
+                "total"
+              ]
+            },
+            "type": "json_schema"
+          }
+        }
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "x-robots-tag": "none",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "server": "cloudflare",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "body": {
+        "model": "claude-sonnet-4-5-20250929",
+        "id": "msg_01T4jd6NyD9xGGtTPDC4ogy5",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"items\":[{\"product_name\":\"Green Tea\",\"price\":5.50,\"quantity\":2},{\"product_name\":\"Coffee\",\"price\":3.00,\"quantity\":1}],\"total\":14.0}"
+          }
+        ],
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 406,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 50,
+          "service_tier": "standard",
+          "inference_geo": "not_available"
+        }
+      }
+    }
+  }
+]
