@@ -10,7 +10,6 @@ import pytest
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
 from anthropic.pagination import SyncPage, AsyncPage
-from anthropic._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
 from anthropic.types.beta.messages import (
     BetaMessageBatch,
     BetaDeletedMessageBatch,
@@ -420,7 +419,8 @@ class TestBatches:
         batch_stream = client.beta.messages.batches.results(
             message_batch_id="message_batch_id",
         )
-        assert_matches_type(JSONLDecoder[BetaMessageBatchIndividualResponse], batch_stream, path=["response"])
+        for item in batch_stream:
+            assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["response"])
 
     @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
@@ -429,7 +429,8 @@ class TestBatches:
             message_batch_id="message_batch_id",
             betas=["string"],
         )
-        assert_matches_type(JSONLDecoder[BetaMessageBatchIndividualResponse], batch_stream, path=["response"])
+        for item in batch_stream:
+            assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["response"])
 
     @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
@@ -440,7 +441,8 @@ class TestBatches:
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         stream = response.parse()
-        stream.close()
+        for item in stream:
+            assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
 
     @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
@@ -452,7 +454,8 @@ class TestBatches:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             stream = response.parse()
-            stream.close()
+            for item in stream:
+                assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["item"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -867,7 +870,8 @@ class TestAsyncBatches:
         batch_stream = await async_client.beta.messages.batches.results(
             message_batch_id="message_batch_id",
         )
-        assert_matches_type(AsyncJSONLDecoder[BetaMessageBatchIndividualResponse], batch_stream, path=["response"])
+        async for item in batch_stream:
+            assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["response"])
 
     @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
@@ -876,7 +880,8 @@ class TestAsyncBatches:
             message_batch_id="message_batch_id",
             betas=["string"],
         )
-        assert_matches_type(AsyncJSONLDecoder[BetaMessageBatchIndividualResponse], batch_stream, path=["response"])
+        async for item in batch_stream:
+            assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["response"])
 
     @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
@@ -887,7 +892,8 @@ class TestAsyncBatches:
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         stream = response.parse()
-        await stream.close()
+        async for item in stream:
+            assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
 
     @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
@@ -899,7 +905,8 @@ class TestAsyncBatches:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             stream = await response.parse()
-            await stream.close()
+            async for item in stream:
+                assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["item"])
 
         assert cast(Any, response.is_closed) is True
 
