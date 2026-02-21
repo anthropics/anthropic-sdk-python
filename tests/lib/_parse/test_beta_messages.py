@@ -1,21 +1,24 @@
 import json
+from typing import Any, cast
 
 import pytest
-from respx import MockRouter
 from pydantic import BaseModel
 from inline_snapshot import external, snapshot
 
 from anthropic import AnthropicError, AsyncAnthropic, _compat
-from anthropic._legacy_response import LegacyAPIResponse
 from anthropic.types.beta.parsed_beta_message import ParsedBetaMessage
-
-from ..snapshots import make_async_stream_snapshot_request
 
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 class TestAsyncMessages:
-    async def test_stream_with_raw_schema(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:9381e2b7-7fa1-46f7-9f78-46dc8431ea9d.json")),
+        ],
+    )
+    async def test_stream_with_raw_schema(self, async_snapshot_client: AsyncAnthropic) -> None:
         async def async_stream_parse(client: AsyncAnthropic) -> ParsedBetaMessage[None]:
             async with client.beta.messages.stream(
                 model="claude-sonnet-4-5",
@@ -37,40 +40,31 @@ class TestAsyncMessages:
             ) as stream:
                 return await stream.get_final_message()
 
-        response = await make_async_stream_snapshot_request(
-            async_stream_parse,
-            content_snapshot=external("uuid:48aac7c3-f271-47b3-854b-af4ed31e10bb.json"),
-            respx_mock=respx_mock,
-            mock_client=async_client,
-            path="/v1/messages?beta=true",
-        )
+        response = await async_stream_parse(async_snapshot_client)
 
-        assert response.content[0].text == snapshot("[12345,67890]")
+        assert response.content[0].text == snapshot("[12345,67890]")  # type: ignore
 
-    async def test_parse_uses_output_config(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:d7092a7d-b723-4470-8fb0-da138cd103a1.json")),
+        ],
+    )
+    async def test_parse_uses_output_config(self, async_snapshot_client: AsyncAnthropic) -> None:
         class User(BaseModel):
             name: str
             age: int
 
-        async def simple_parse(client: AsyncAnthropic) -> LegacyAPIResponse[ParsedBetaMessage[User]]:
-            return await client.beta.with_raw_response.messages.parse(
-                model="claude-sonnet-4-5",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": "Extract the user's name and age from the following text:\n\nMy name is John Doe and I am 30 years old.",
-                    }
-                ],
-                output_format=User,
-                max_tokens=1024,
-            )
-
-        response = await make_async_stream_snapshot_request(
-            simple_parse,
-            content_snapshot=external("uuid:044ce19d-3e9c-42d2-90e7-759c978cd94b.json"),
-            respx_mock=respx_mock,
-            mock_client=async_client,
-            path="/v1/messages?beta=true",
+        response = await async_snapshot_client.beta.with_raw_response.messages.parse(
+            model="claude-sonnet-4-5",
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Extract the user's name and age from the following text:\n\nMy name is John Doe and I am 30 years old.",
+                }
+            ],
+            output_format=User,
+            max_tokens=1024,
         )
 
         request_json = json.loads(response.http_request.content)
