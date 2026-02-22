@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.84.0 (2026-02-22)
+
+Full Changelog: [v0.83.0...v0.84.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.83.0...v0.84.0)
+
+### Features
+
+* **api:** change array_format to brackets ([925d2ad](https://github.com/anthropics/anthropic-sdk-python/commit/925d2ad6b76ad7c15de07b9b2768738775f71631))
+* **api:** remove publishing section from cli target ([7bc7ceb](https://github.com/anthropics/anthropic-sdk-python/commit/7bc7cebc68db70f08fce23e7e0b24acbc9ff37a7))
+
+
+### Chores
+
+* **internal:** update jsonl tests ([a8e6a6e](https://github.com/anthropics/anthropic-sdk-python/commit/a8e6a6e5544b9f1626e3fb5faa31a1accfc81441))
+
 ## 0.83.0 (2026-02-19)
 
 Full Changelog: [v0.82.0...v0.83.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.82.0...v0.83.0)
