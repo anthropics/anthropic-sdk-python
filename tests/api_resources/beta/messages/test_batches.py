@@ -454,6 +454,33 @@ class TestBatches:
                 message_batch_id="",
             )
 
+    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
+    @parametrize
+    def test_raw_response_results(self, client: Anthropic) -> None:
+        response = client.beta.messages.batches.with_raw_response.results(
+            message_batch_id="message_batch_id",
+        )
+
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        stream = response.parse()
+        for item in stream:
+            assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
+
+    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
+    @parametrize
+    def test_streaming_response_results(self, client: Anthropic) -> None:
+        with client.beta.messages.batches.with_streaming_response.results(
+            message_batch_id="message_batch_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            stream = response.parse()
+            for item in stream:
+                assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["item"])
+
+        assert cast(Any, response.is_closed) is True
+
 
 class TestAsyncBatches:
     parametrize = pytest.mark.parametrize(
@@ -890,3 +917,15 @@ class TestAsyncBatches:
             await async_client.beta.messages.batches.results(
                 message_batch_id="",
             )
+
+    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
+    @parametrize
+    async def test_raw_response_results(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.beta.messages.batches.with_raw_response.results(
+            message_batch_id="message_batch_id",
+        )
+
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        stream = response.parse()
+        async for item in stream:
+            assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
