@@ -1,0 +1,103 @@
+[
+  {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "AsyncAnthropic/Python 0.82.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.82.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.9.18",
+        "x-stainless-async": "async:asyncio",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "beta.messages.parse",
+        "anthropic-beta": "structured-outputs-2025-12-15",
+        "x-stainless-raw-response": "true",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "432"
+      },
+      "body": {
+        "max_tokens": 1024,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Extract the user's name and age from the following text:\n\nMy name is John Doe and I am 30 years old."
+          }
+        ],
+        "model": "claude-sonnet-4-5",
+        "output_config": {
+          "format": {
+            "schema": {
+              "type": "object",
+              "title": "User",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name"
+                },
+                "age": {
+                  "type": "integer",
+                  "title": "Age"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "age"
+              ]
+            },
+            "type": "json_schema"
+          }
+        }
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "x-robots-tag": "none",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "server": "cloudflare",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "body": {
+        "model": "claude-sonnet-4-5-20250929",
+        "id": "msg_01EojSKby3oqoP7mb4PHsMJ7",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"name\":\"John Doe\",\"age\":30}"
+          }
+        ],
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 222,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 14,
+          "service_tier": "standard",
+          "inference_geo": "not_available"
+        }
+      }
+    }
+  }
+]
