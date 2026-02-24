@@ -1,3 +1,7 @@
+## Contributing to documentation
+
+The documentation for this SDK lives at [platform.claude.com/docs/en/api/sdks/python](https://platform.claude.com/docs/en/api/sdks/python). To suggest changes, open an issue.
+
 ## Setting up the environment
 
 ### With `uv`
