@@ -16,6 +16,7 @@ from anthropic.pagination import SyncPage, AsyncPage
 from anthropic.types.beta.messages import (
     BetaMessageBatch,
     BetaDeletedMessageBatch,
+    BetaMessageBatchIndividualResponse,
 )
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
