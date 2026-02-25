@@ -8,7 +8,10 @@ import httpx
 import pytest
 from respx import MockRouter
 
+from pydantic import BaseModel
+
 from anthropic import AnthropicVertex, AsyncAnthropicVertex
+from anthropic._exceptions import AnthropicError
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -144,6 +147,21 @@ class TestAnthropicVertex:
             base_url="https://test.googleapis.com/v1",
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
+
+    def test_structured_outputs_raises_error(self) -> None:
+        """Vertex AI does not support output_config, so parse() should raise a clear error."""
+
+        class ContactInfo(BaseModel):
+            name: str
+            email: str
+
+        with pytest.raises(AnthropicError, match="Structured outputs.*not supported.*Vertex"):
+            self.client.messages.parse(
+                model="claude-sonnet-4-6",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Name: Alice, email: alice@example.com"}],
+                output_format=ContactInfo,
+            )
 
 
 class TestAsyncAnthropicVertex:
