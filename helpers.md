@@ -28,7 +28,7 @@ The stream will be cancelled when the context manager exits but you can also clo
 
 See an example of streaming helpers in action in [`examples/messages_stream.py`](examples/messages_stream.py).
 
-> [!NOTE]  
+> [!NOTE]
 > The synchronous client has the same interface just without `async/await`.
 
 ### Lenses
@@ -131,7 +131,91 @@ Blocks until the stream has been read to completion and returns the accumulated 
 
 #### `await .get_final_text()`
 
-> [!NOTE]  
+> [!NOTE]
 > Currently the API will only ever return 1 content block
 
 Blocks until the stream has been read to completion and returns all `text` content blocks concatenated together.
+
+## MCP Helpers
+
+This SDK provides helpers for integrating with [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) servers. These helpers convert MCP types to Anthropic API types, reducing boilerplate when working with MCP tools, prompts, and resources.
+
+> **Note:** The Claude API also supports an [`mcp_servers` parameter](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) that lets Claude connect directly to remote MCP servers.
+>
+> - Use `mcp_servers` when you have remote servers accessible via URL and only need tool support.
+> - Use the MCP helpers when you need local MCP servers, prompts, resources, or more control over the MCP connection.
+
+> **Requires:** `pip install anthropic[mcp]` (Python 3.10+)
+
+### Using MCP tools with tool_runner
+
+```py
+from anthropic import AsyncAnthropic
+from anthropic.lib.tools.mcp import async_mcp_tool
+from mcp import ClientSession
+from mcp.client.stdio import stdio_client, StdioServerParameters
+
+client = AsyncAnthropic()
+
+async with stdio_client(StdioServerParameters(command="mcp-server")) as (read, write):
+    async with ClientSession(read, write) as mcp_client:
+        await mcp_client.initialize()
+
+        tools_result = await mcp_client.list_tools()
+        runner = await client.beta.messages.tool_runner(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Use the available tools"}],
+            tools=[async_mcp_tool(t, mcp_client) for t in tools_result.tools],
+        )
+        async for message in runner:
+            print(message)
+```
+
+> [!TIP]
+> If you're using the sync client, replace `async_mcp_tool` with `mcp_tool`.
+
+### Using MCP prompts
+
+```py
+from anthropic.lib.tools.mcp import mcp_message
+
+prompt = await mcp_client.get_prompt(name="my-prompt")
+response = await client.beta.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[mcp_message(m) for m in prompt.messages],
+)
+```
+
+### Using MCP resources as content
+
+```py
+from anthropic.lib.tools.mcp import mcp_resource_to_content
+
+resource = await mcp_client.read_resource(uri="file:///path/to/doc.txt")
+response = await client.beta.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[{
+        "role": "user",
+        "content": [
+            mcp_resource_to_content(resource),
+            {"type": "text", "text": "Summarize this document"},
+        ],
+    }],
+)
+```
+
+### Uploading MCP resources as files
+
+```py
+from anthropic.lib.tools.mcp import mcp_resource_to_file
+
+resource = await mcp_client.read_resource(uri="file:///path/to/data.json")
+uploaded = await client.beta.files.upload(file=mcp_resource_to_file(resource))
+```
+
+### Error handling
+
+The conversion functions raise `UnsupportedMCPValueError` if an MCP value cannot be converted to a format supported by the Claude API (e.g., unsupported content type like audio, unsupported MIME type).

@@ -42,6 +42,7 @@ classifiers = [
 aiohttp = ["aiohttp", "httpx_aiohttp>=0.1.9"]
 vertex = ["google-auth[requests] >=2, <3"]
 bedrock = ["boto3 >= 1.28.57", "botocore >= 1.31.57"]
+mcp = ["mcp>=1.0; python_version >= '3.10'"]
 
 [project.urls]
 Homepage = "https://github.com/anthropics/anthropic-sdk-python"
@@ -50,10 +51,16 @@ Repository = "https://github.com/anthropics/anthropic-sdk-python"
 [tool.uv]
 managed = true
 required-version = ">=0.9"
+# Ensure the lockfile always uses public PyPI, regardless of contributor's global uv config
+index = [{ url = "https://pypi.org/simple", default = true }]
 conflicts = [
     [
       { group = "pydantic-v1" },
       { group = "pydantic-v2" },
+    ],
+    [
+      { group = "pydantic-v1" },
+      { extra = "mcp" },
     ],
 ]
 
@@ -147,6 +154,7 @@ exclude = [
     "_dev",
     ".venv",
     ".nox",
+    "examples/mcp_tool_runner.py",  # mcp requires Python 3.10+, lint runs on 3.9
 ]
 
 reportImplicitOverride = true
@@ -165,7 +173,7 @@ show_error_codes = true
 #
 # We also exclude our `tests` as mypy doesn't always infer
 # types correctly and Pyright will still catch any type errors.
-exclude = ['src/anthropic/_files.py', '_dev/.*.py', 'tests/.*', 'examples/mcp_server_weather.py', 'examples/tools_with_mcp.py', 'examples/memory/basic.py', 'src/anthropic/lib/_parse/_transform.py', 'src/anthropic/lib/tools/_beta_functions.py']
+exclude = ['src/anthropic/_files.py', '_dev/.*.py', 'tests/.*', 'examples/mcp_server_weather.py', 'examples/mcp_tool_runner.py', 'examples/tools_with_mcp.py', 'examples/memory/basic.py', 'src/anthropic/lib/_parse/_transform.py', 'src/anthropic/lib/tools/_beta_functions.py']
 
 strict_equality = true
 implicit_reexport = true
@@ -209,6 +217,10 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "anthropic.lib.vertex._auth"
 disallow_untyped_calls = false
+
+[[tool.mypy.overrides]]
+module = "tests.lib.tools.test_mcp_tool"
+follow_imports = "skip"
 
 [tool.ruff]
 line-length = 120

@@ -27,6 +27,7 @@ from ..._response import (
 from ...pagination import SyncPage, AsyncPage
 from ...types.beta import file_list_params, file_upload_params
 from ..._base_client import AsyncPaginator, make_request_options
+from ...lib._stainless_helpers import stainless_helper_header_from_file as _stainless_helper_header_from_file
 from ...types.beta.deleted_file import DeletedFile
 from ...types.beta.file_metadata import FileMetadata
 from ...types.anthropic_beta_param import AnthropicBetaParam
@@ -311,6 +312,7 @@ class Files(SyncAPIResource):
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
+        extra_headers = {**_stainless_helper_header_from_file(file), **extra_headers}
         body = deepcopy_minimal({"file": file})
         files = extract_files(cast(Mapping[str, object], body), paths=[["file"]])
         # It should be noted that the actual Content-Type header that will be
@@ -605,6 +607,7 @@ class AsyncFiles(AsyncAPIResource):
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
+        extra_headers = {**_stainless_helper_header_from_file(file), **extra_headers}
         body = deepcopy_minimal({"file": file})
         files = extract_files(cast(Mapping[str, object], body), paths=[["file"]])
         # It should be noted that the actual Content-Type header that will be

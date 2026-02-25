@@ -25,6 +25,7 @@ from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ...types.beta import BetaMessage, BetaMessageParam
 from ._beta_functions import (
+    ToolError,
     BetaFunctionTool,
     BetaRunnableTool,
     BetaAsyncFunctionTool,
@@ -32,6 +33,7 @@ from ._beta_functions import (
     BetaBuiltinFunctionTool,
     BetaAsyncBuiltinFunctionTool,
 )
+from .._stainless_helpers import stainless_helper_header
 from ._beta_compaction_control import DEFAULT_THRESHOLD, DEFAULT_SUMMARY_PROMPT, CompactionControl
 from ..streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 from ...types.beta.parsed_beta_message import ResponseFormatT, ParsedBetaMessage, ParsedBetaContentBlock
@@ -75,6 +77,13 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
             **params,
             "messages": [message for message in params["messages"]],
         }
+        helper_header = stainless_helper_header(
+            tools=self._tools_by_name.values(),
+            messages=params.get("messages"),
+        )
+        if helper_header:
+            merged_headers = {**helper_header, **(options.get("extra_headers") or {})}
+            options = {**options, "extra_headers": merged_headers}
         self._options = options
         self._messages_modified = False
         self._cached_tool_call_response: BetaMessageParam | None = None
@@ -320,6 +329,15 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             try:
                 result = tool.call(tool_use.input)
                 results.append({"type": "tool_result", "tool_use_id": tool_use.id, "content": result})
+            except ToolError as exc:
+                results.append(
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": tool_use.id,
+                        "content": exc.content,
+                        "is_error": True,
+                    }
+                )
             except Exception as exc:
                 log.exception(f"Error occurred while calling tool: {tool.name}", exc_info=exc)
                 results.append(
@@ -584,6 +602,15 @@ class BaseAsyncToolRunner(
             try:
                 result = await tool.call(tool_use.input)
                 results.append({"type": "tool_result", "tool_use_id": tool_use.id, "content": result})
+            except ToolError as exc:
+                results.append(
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": tool_use.id,
+                        "content": exc.content,
+                        "is_error": True,
+                    }
+                )
             except Exception as exc:
                 log.exception(f"Error occurred while calling tool: {tool.name}", exc_info=exc)
                 results.append(

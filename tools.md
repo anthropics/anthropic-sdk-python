@@ -75,3 +75,28 @@ runner = client.beta.messages.tool_runner(
 for message in runner:
     rich.print(message)
 ```
+
+## ToolError
+
+To report an error from a tool back to the model, raise a `ToolError`. Unlike a plain exception, `ToolError` accepts content blocks, allowing you to include images or other structured content in the error response:
+
+```py
+from anthropic import beta_tool
+from anthropic.lib.tools import ToolError
+
+@beta_tool
+def take_screenshot(url: str) -> str:
+    """Take a screenshot of a URL."""
+    if not is_valid_url(url):
+        raise ToolError(f"Invalid URL: {url}")
+    result = capture(url)
+    if result.error:
+        # Include the error screenshot so the model can see what went wrong
+        raise ToolError([
+            {"type": "text", "text": f"Failed to load page: {result.error}"},
+            {"type": "image", "source": {"type": "base64", "data": result.screenshot, "media_type": "image/png"}},
+        ])
+    return result.data
+```
+
+If a plain exception is raised, its `repr()` will be sent to the model as a text error and logged. `ToolError` is not logged since it represents an intentional error response.

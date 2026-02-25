@@ -48,6 +48,7 @@ from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING
 from ....types.model_param import ModelParam
 from ....lib._parse._response import ResponseFormatT, parse_beta_response
 from ....lib._parse._transform import transform_schema
+from ....lib._stainless_helpers import stainless_helper_header as _stainless_helper_header
 from ....types.beta.beta_message import BetaMessage
 from ....lib.tools._beta_functions import (
     BetaFunctionTool,
@@ -1080,6 +1081,7 @@ class Messages(SyncAPIResource):
 
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **_stainless_helper_header(tools, messages),
             **(extra_headers or {}),
         }
         return self._post(
@@ -1185,6 +1187,7 @@ class Messages(SyncAPIResource):
         extra_headers = {
             "X-Stainless-Helper": "beta.messages.parse",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **_stainless_helper_header(tools, messages),
             **(extra_headers or {}),
         }
 
@@ -1431,6 +1434,7 @@ class Messages(SyncAPIResource):
         extra_headers = {
             "X-Stainless-Helper": "BetaToolRunner",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **_stainless_helper_header(tools, messages),
             **(extra_headers or {}),
         }
 
@@ -1552,6 +1556,7 @@ class Messages(SyncAPIResource):
             "X-Stainless-Helper-Method": "stream",
             "X-Stainless-Stream-Helper": "beta.messages",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **_stainless_helper_header(tools, messages),
             **(extra_headers or {}),
         }
 
@@ -2890,6 +2895,7 @@ class AsyncMessages(AsyncAPIResource):
 
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **_stainless_helper_header(tools, messages),
             **(extra_headers or {}),
         }
         return await self._post(
@@ -2994,6 +3000,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers = {
             "X-Stainless-Helper": "beta.messages.parse",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **_stainless_helper_header(tools, messages),
             **(extra_headers or {}),
         }
 
@@ -3233,6 +3240,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers = {
             "X-Stainless-Helper": "BetaToolRunner",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **_stainless_helper_header(tools, messages),
             **(extra_headers or {}),
         }
 
@@ -3353,6 +3361,7 @@ class AsyncMessages(AsyncAPIResource):
             "X-Stainless-Helper-Method": "stream",
             "X-Stainless-Stream-Helper": "beta.messages",
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            **_stainless_helper_header(tools, messages),
             **(extra_headers or {}),
         }
 

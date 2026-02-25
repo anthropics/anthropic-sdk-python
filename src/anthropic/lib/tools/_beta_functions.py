@@ -4,7 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Union, Generic, TypeVar, Callable, Iterable, Coroutine, cast, overload
 from inspect import iscoroutinefunction
-from typing_extensions import TypeAlias, override
+from typing_extensions import Literal, TypeAlias, override
 
 import pydantic
 import docstring_parser
@@ -14,7 +14,7 @@ from ... import _compat
 from ..._utils import is_dict
 from ..._compat import cached_property
 from ..._models import TypeAdapter
-from ...types.beta import BetaToolParam, BetaToolUnionParam
+from ...types.beta import BetaToolParam, BetaToolUnionParam, BetaCacheControlEphemeralParam
 from ..._utils._utils import CallableT
 from ...types.tool_param import InputSchema
 from ...types.beta.beta_tool_result_block_param import Content as BetaContent
@@ -22,6 +22,38 @@ from ...types.beta.beta_tool_result_block_param import Content as BetaContent
 log = logging.getLogger(__name__)
 
 BetaFunctionToolResultType: TypeAlias = Union[str, Iterable[BetaContent]]
+
+
+class ToolError(Exception):
+    """Error that can be raised from a tool to return structured content with ``is_error: True``.
+
+    When the tool runner catches this error, it will use the :attr:`content`
+    property as the tool result instead of ``repr(exc)``.
+
+    Example::
+
+        raise ToolError([
+            {"type": "text", "text": "Error details here"},
+            {"type": "image", "source": {"type": "base64", "data": "...", "media_type": "image/png"}},
+        ])
+    """
+
+    content: BetaFunctionToolResultType
+
+    def __init__(self, content: BetaFunctionToolResultType) -> None:
+        if isinstance(content, str):
+            message = content
+        else:
+            parts: list[str] = []
+            for block in content:
+                text = block.get("text")
+                if text is not None:
+                    parts.append(str(text))
+                else:
+                    parts.append(f"[{block.get('type', 'unknown')}]")
+            message = " ".join(parts) if parts else "Tool error"
+        super().__init__(message)
+        self.content = content
 
 Function = Callable[..., BetaFunctionToolResultType]
 FunctionT = TypeVar("FunctionT", bound=Function)
@@ -79,6 +111,11 @@ class BaseFunctionTool(Generic[CallableT]):
         description: str | None = None,
         input_schema: InputSchema | type[BaseModel] | None = None,
         defer_loading: bool | None = None,
+        cache_control: BetaCacheControlEphemeralParam | None = None,
+        allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+        eager_input_streaming: bool | None = None,
+        input_examples: Iterable[dict[str, object]] | None = None,
+        strict: bool | None = None,
     ) -> None:
         if _compat.PYDANTIC_V1:
             raise RuntimeError("Tool functions are only supported with Pydantic v2")
@@ -87,6 +124,11 @@ class BaseFunctionTool(Generic[CallableT]):
         self._func_with_validate = pydantic.validate_call(func)
         self.name = name or func.__name__
         self._defer_loading = defer_loading
+        self._cache_control = cache_control
+        self._allowed_callers = allowed_callers
+        self._eager_input_streaming = eager_input_streaming
+        self._input_examples = input_examples
+        self._strict = strict
 
         self.description = description or self._get_description_from_docstring()
 
@@ -110,6 +152,16 @@ class BaseFunctionTool(Generic[CallableT]):
         }
         if self._defer_loading is not None:
             defn["defer_loading"] = self._defer_loading
+        if self._cache_control is not None:
+            defn["cache_control"] = self._cache_control
+        if self._allowed_callers is not None:
+            defn["allowed_callers"] = self._allowed_callers
+        if self._eager_input_streaming is not None:
+            defn["eager_input_streaming"] = self._eager_input_streaming
+        if self._input_examples is not None:
+            defn["input_examples"] = self._input_examples
+        if self._strict is not None:
+            defn["strict"] = self._strict
         return defn
 
     @cached_property
@@ -213,6 +265,12 @@ def beta_tool(
     name: str | None = None,
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
+    defer_loading: bool | None = None,
+    cache_control: BetaCacheControlEphemeralParam | None = None,
+    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    eager_input_streaming: bool | None = None,
+    input_examples: Iterable[dict[str, object]] | None = None,
+    strict: bool | None = None,
 ) -> BetaFunctionTool[FunctionT]: ...
 
 
@@ -223,6 +281,11 @@ def beta_tool(
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
+    cache_control: BetaCacheControlEphemeralParam | None = None,
+    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    eager_input_streaming: bool | None = None,
+    input_examples: Iterable[dict[str, object]] | None = None,
+    strict: bool | None = None,
 ) -> Callable[[FunctionT], BetaFunctionTool[FunctionT]]: ...
 
 
@@ -233,6 +296,11 @@ def beta_tool(
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
+    cache_control: BetaCacheControlEphemeralParam | None = None,
+    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    eager_input_streaming: bool | None = None,
+    input_examples: Iterable[dict[str, object]] | None = None,
+    strict: bool | None = None,
 ) -> BetaFunctionTool[FunctionT] | Callable[[FunctionT], BetaFunctionTool[FunctionT]]:
     """Create a FunctionTool from a function with automatic schema inference.
 
@@ -250,19 +318,24 @@ def beta_tool(
     if _compat.PYDANTIC_V1:
         raise RuntimeError("Tool functions are only supported with Pydantic v2")
 
+    def _make(fn: FunctionT) -> BetaFunctionTool[FunctionT]:
+        return BetaFunctionTool(
+            fn,
+            name=name,
+            description=description,
+            input_schema=input_schema,
+            defer_loading=defer_loading,
+            cache_control=cache_control,
+            allowed_callers=allowed_callers,
+            eager_input_streaming=eager_input_streaming,
+            input_examples=input_examples,
+            strict=strict,
+        )
+
     if func is not None:
-        # @beta_tool called without parentheses
-        return BetaFunctionTool(
-            func=func, name=name, description=description, input_schema=input_schema, defer_loading=defer_loading
-        )
+        return _make(func)
 
-    # @beta_tool()
-    def decorator(func: FunctionT) -> BetaFunctionTool[FunctionT]:
-        return BetaFunctionTool(
-            func=func, name=name, description=description, input_schema=input_schema, defer_loading=defer_loading
-        )
-
-    return decorator
+    return _make
 
 
 @overload
@@ -277,7 +350,12 @@ def beta_async_tool(
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
-) -> BetaAsyncFunctionTool[AsyncFunctionT]: ...
+    cache_control: BetaCacheControlEphemeralParam | None = None,
+    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    eager_input_streaming: bool | None = None,
+    input_examples: Iterable[dict[str, object]] | None = None,
+    strict: bool | None = None,
+) -> BetaAsyncFunctionTool[AsyncFunctionT]: ...  # noqa: E501
 
 
 @overload
@@ -287,6 +365,11 @@ def beta_async_tool(
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
+    cache_control: BetaCacheControlEphemeralParam | None = None,
+    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    eager_input_streaming: bool | None = None,
+    input_examples: Iterable[dict[str, object]] | None = None,
+    strict: bool | None = None,
 ) -> Callable[[AsyncFunctionT], BetaAsyncFunctionTool[AsyncFunctionT]]: ...
 
 
@@ -297,6 +380,11 @@ def beta_async_tool(
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
+    cache_control: BetaCacheControlEphemeralParam | None = None,
+    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    eager_input_streaming: bool | None = None,
+    input_examples: Iterable[dict[str, object]] | None = None,
+    strict: bool | None = None,
 ) -> BetaAsyncFunctionTool[AsyncFunctionT] | Callable[[AsyncFunctionT], BetaAsyncFunctionTool[AsyncFunctionT]]:
     """Create an AsyncFunctionTool from a function with automatic schema inference.
 
@@ -314,27 +402,24 @@ def beta_async_tool(
     if _compat.PYDANTIC_V1:
         raise RuntimeError("Tool functions are only supported with Pydantic v2")
 
+    def _make(fn: AsyncFunctionT) -> BetaAsyncFunctionTool[AsyncFunctionT]:
+        return BetaAsyncFunctionTool(
+            fn,
+            name=name,
+            description=description,
+            input_schema=input_schema,
+            defer_loading=defer_loading,
+            cache_control=cache_control,
+            allowed_callers=allowed_callers,
+            eager_input_streaming=eager_input_streaming,
+            input_examples=input_examples,
+            strict=strict,
+        )
+
     if func is not None:
-        # @beta_async_tool called without parentheses
-        return BetaAsyncFunctionTool(
-            func=func,
-            name=name,
-            description=description,
-            input_schema=input_schema,
-            defer_loading=defer_loading,
-        )
+        return _make(func)
 
-    # @beta_async_tool()
-    def decorator(func: AsyncFunctionT) -> BetaAsyncFunctionTool[AsyncFunctionT]:
-        return BetaAsyncFunctionTool(
-            func=func,
-            name=name,
-            description=description,
-            input_schema=input_schema,
-            defer_loading=defer_loading,
-        )
-
-    return decorator
+    return _make
 
 
 BetaRunnableTool = Union[BetaFunctionTool[Any], BetaBuiltinFunctionTool]
