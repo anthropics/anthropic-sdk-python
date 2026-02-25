@@ -56,8 +56,9 @@ def get_auth_headers(
     # The connection header may be stripped by a proxy somewhere, so the receiver
     # of this message may not see this header, so we remove it from the set of headers
     # that are signed.
+    # Note: HTTP/2 requests don't have a Connection header, so we safely remove it only if present.
     headers = headers.copy()
-    del headers["connection"]
+    headers.pop("connection", None)
 
     request = AWSRequest(method=method.upper(), url=url, headers=headers, data=data)
     credentials = session.get_credentials()
