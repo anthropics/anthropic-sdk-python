@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.84.0 (2026-02-25)
+
+Full Changelog: [v0.83.0...v0.84.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.83.0...v0.84.0)
+
+### Features
+
+* **api:** change array_format to brackets ([925d2ad](https://github.com/anthropics/anthropic-sdk-python/commit/925d2ad6b76ad7c15de07b9b2768738775f71631))
+* **api:** remove publishing section from cli target ([7bc7ceb](https://github.com/anthropics/anthropic-sdk-python/commit/7bc7cebc68db70f08fce23e7e0b24acbc9ff37a7))
+* **helpers:** add conversion helpers for MCP tools, prompts, and resources ([#1383](https://github.com/anthropics/anthropic-sdk-python/issues/1383)) ([9489751](https://github.com/anthropics/anthropic-sdk-python/commit/9489751386d1540bf80eff63ab47ca2b3cc18fa1))
+
+
+### Chores
+
+* add missing raw jsonl results method ([1009d4a](https://github.com/anthropics/anthropic-sdk-python/commit/1009d4aca8be42973ca39104bc9bd8087f51ff9c))
+* **internal:** add request options to SSE classes ([4f4bc8e](https://github.com/anthropics/anthropic-sdk-python/commit/4f4bc8e6241c2ccee8dfe4cdbc522081e3e30f08))
+* **internal:** make `test_proxy_environment_variables` more resilient ([f7056e0](https://github.com/anthropics/anthropic-sdk-python/commit/f7056e09411a45798a678be5766a7b7d6dcbc7a9))
+* **internal:** make `test_proxy_environment_variables` more resilient to env ([143efcc](https://github.com/anthropics/anthropic-sdk-python/commit/143efccfcc20c12f920b6ba242eff7c0feeea7c4))
+* **internal:** simplify http snapshots ([#1092](https://github.com/anthropics/anthropic-sdk-python/issues/1092)) ([4a4dc9f](https://github.com/anthropics/anthropic-sdk-python/commit/4a4dc9f6b36ab0224095790f4311c7f60c9845f7))
+* **internal:** update jsonl tests ([a8e6a6e](https://github.com/anthropics/anthropic-sdk-python/commit/a8e6a6e5544b9f1626e3fb5faa31a1accfc81441))
+
+
+### Documentation
+
+* rebrand to Claude SDK and streamline README ([6b54405](https://github.com/anthropics/anthropic-sdk-python/commit/6b544058ab19e55e1c76a4ba9816205d1eedc630))
+
 ## 0.83.0 (2026-02-19)
 
 Full Changelog: [v0.82.0...v0.83.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.82.0...v0.83.0)
