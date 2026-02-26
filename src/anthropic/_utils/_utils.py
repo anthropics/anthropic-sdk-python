@@ -181,6 +181,7 @@ def deepcopy_minimal(item: _T) -> _T:
 
     - mappings, e.g. `dict`
     - list
+    - tuple (recursively copies contents)
 
     This is done for performance reasons.
     """
@@ -188,6 +189,8 @@ def deepcopy_minimal(item: _T) -> _T:
         return cast(_T, {k: deepcopy_minimal(v) for k, v in item.items()})
     if is_list(item):
         return cast(_T, [deepcopy_minimal(entry) for entry in item])
+    if isinstance(item, tuple):
+        return cast(_T, tuple(deepcopy_minimal(entry) for entry in item))
     return item
 
 
