@@ -45,7 +45,6 @@ class TestIsFileContent:
             pytest.param(None, False, id="none-rejected"),
             pytest.param(["a", "list"], False, id="list-rejected"),
         ],
-        ids=str,
     )
     def test_type_guard(self, value: object, expected: bool) -> None:
         assert is_file_content(value) is expected
@@ -66,7 +65,6 @@ class TestIsBase64FileInput:
             pytest.param("string", False, id="str-rejected"),
             pytest.param(None, False, id="none-rejected"),
         ],
-        ids=str,
     )
     def test_type_guard(self, value: object, expected: bool) -> None:
         assert is_base64_file_input(value) is expected
@@ -100,7 +98,12 @@ class TestAssertIsFileContent:
         with pytest.raises(RuntimeError, match="Expected entry at `mykey`"):
             assert_is_file_content("bad", key="mykey")
 
+    def test_accepts_valid_tuple(self) -> None:
+        """Should not raise for tuple input."""
+        assert_is_file_content(("name", b"content"))
+
     def test_rejects_int(self) -> None:
+        """Integers are not valid file content."""
         with pytest.raises(RuntimeError):
             assert_is_file_content(42)
 
@@ -189,16 +192,22 @@ class TestToHttpxFiles:
         assert entry == ("doc.pdf", b"pdf-bytes", "application/pdf")
 
     def test_tuple_passed_through(self) -> None:
-        """Tuples are valid FileContent and pass through is_file_content as-is.
+        """Tuples match is_file_content and pass through _transform_file as-is.
 
-        Because isinstance(tuple, tuple) is True, tuples match is_file_content
-        and are returned without further transformation. The PathLike inside
-        the tuple is NOT read — callers handle that downstream.
+        A tuple instance satisfies isinstance(t, tuple), so is_file_content
+        returns True and the tuple is returned without reading its contents.
+        PathLike elements inside the tuple are NOT resolved here.
         """
         t = ("doc.md", readme_path)
         result = to_httpx_files({"file": t})
         assert isinstance(result, dict)
         assert result["file"] is t
+
+    # -- Error cases for top-level input --
+    def test_invalid_top_level_type_raises(self) -> None:
+        """Non-mapping, non-sequence input raises TypeError."""
+        with pytest.raises(TypeError, match="Unexpected file type input"):
+            to_httpx_files(42)  # type: ignore
 
     # -- Sequence inputs --
     def test_sequence_input(self) -> None:
@@ -280,12 +289,17 @@ class TestAsyncToHttpxFiles:
         assert entry == ("doc.pdf", b"pdf-bytes", "application/pdf")
 
     async def test_tuple_passed_through(self) -> None:
-        """Tuples are valid FileContent and pass through as-is.
+        """Tuples match is_file_content and pass through as-is.
 
-        Same as sync: tuples match is_file_content, so PathLike inside
-        the tuple is NOT read by _transform_file.
+        A tuple instance satisfies isinstance(t, tuple), so is_file_content
+        returns True. PathLike inside the tuple is NOT read here.
         """
         t = ("doc.md", readme_path)
         result = await async_to_httpx_files({"file": t})
         assert isinstance(result, dict)
         assert result["file"] is t
+
+    async def test_invalid_top_level_type_raises(self) -> None:
+        """Non-mapping, non-sequence input raises TypeError."""
+        with pytest.raises(TypeError, match="Unexpected file type input"):
+            await async_to_httpx_files(42)  # type: ignore
