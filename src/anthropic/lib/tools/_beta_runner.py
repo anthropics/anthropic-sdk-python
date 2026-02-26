@@ -255,6 +255,11 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                 message = self._get_last_message()
                 assert message is not None
 
+                # Update container from response for programmatic tool calling support
+                last_assistant_message = self._get_last_assistant_message()
+                if last_assistant_message is not None and last_assistant_message.container is not None:
+                    self._params["container"] = last_assistant_message.container.id
+
             self._iteration_count += 1
 
             # If the compaction was performed, skip tool call generation this iteration
@@ -356,12 +361,19 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             return self._last_message()
         return self._last_message
 
-    def _get_last_assistant_message_content(self) -> list[ParsedBetaContentBlock[ResponseFormatT]] | None:
+    def _get_last_assistant_message(self) -> ParsedBetaMessage[ResponseFormatT] | None:
         last_message = self._get_last_message()
         if last_message is None or last_message.role != "assistant" or not last_message.content:
             return None
 
-        return last_message.content
+        return last_message
+
+    def _get_last_assistant_message_content(self) -> list[ParsedBetaContentBlock[ResponseFormatT]] | None:
+        last_assistant_message = self._get_last_assistant_message()
+        if last_assistant_message is None:
+            return None
+
+        return last_assistant_message.content
 
 
 class BetaToolRunner(BaseSyncToolRunner[ParsedBetaMessage[ResponseFormatT], ResponseFormatT]):
@@ -515,6 +527,11 @@ class BaseAsyncToolRunner(
                 message = await self._get_last_message()
                 assert message is not None
 
+                # Update container from response for programmatic tool calling support
+                last_assistant_message = await self._get_last_assistant_message()
+                if last_assistant_message is not None and last_assistant_message.container is not None:
+                    self._params["container"] = last_assistant_message.container.id
+
             self._iteration_count += 1
 
             # If the compaction was performed, skip tool call generation this iteration
@@ -560,12 +577,19 @@ class BaseAsyncToolRunner(
             return await self._last_message()
         return self._last_message
 
-    async def _get_last_assistant_message_content(self) -> list[ParsedBetaContentBlock[ResponseFormatT]] | None:
+    async def _get_last_assistant_message(self) -> ParsedBetaMessage[ResponseFormatT] | None:
         last_message = await self._get_last_message()
         if last_message is None or last_message.role != "assistant" or not last_message.content:
             return None
 
-        return last_message.content
+        return last_message
+
+    async def _get_last_assistant_message_content(self) -> list[ParsedBetaContentBlock[ResponseFormatT]] | None:
+        last_assistant_message = await self._get_last_assistant_message()
+        if last_assistant_message is None:
+            return None
+
+        return last_assistant_message.content
 
     async def _generate_tool_call_response(self) -> BetaMessageParam | None:
         content = await self._get_last_assistant_message_content()

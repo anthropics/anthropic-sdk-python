@@ -594,6 +594,43 @@ High priority on understanding the `submit_analysis` tool parameters before writ
         assert "server_tool_use" in content_types
         assert "web_search_tool_result" in content_types
 
+    @pytest.mark.parametrize(
+        "http_snapshot",
+        [
+            cast(Any, external("uuid:092be1de-d3f8-4c22-a4ea-a7ad54689836.json")),
+        ],
+    )
+    def test_programmatic_tool_call(self, snapshot_client: Anthropic) -> None:
+        @beta_tool(allowed_callers=["code_execution_20260120"])
+        def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+            """Lookup the weather for a given city in either celsius or fahrenheit
+
+            Args:
+                location: The city and state, e.g. San Francisco, CA
+                units: Unit for the output, either 'c' for celsius or 'f' for fahrenheit
+            Returns:
+                A dictionary containing the location, temperature, and weather condition.
+            """
+            return json.dumps(_get_weather(location, units))
+
+        runner = snapshot_client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-opus-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF, NY, and London in Celsius?"}],
+        )
+
+        first_response = next(runner)
+
+        # one more iteration so runner can process the tool call response and update its params with the container info
+        next(runner)
+
+        assert first_response.container is not None
+        container_id = first_response.container.id
+        assert "container" in runner._params
+        assert runner._params["container"] is not None
+        assert container_id == runner._params["container"]
+
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.parametrize(
