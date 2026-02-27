@@ -70,3 +70,16 @@ def get_auth_headers(
     prepped = request.prepare()
 
     return {key: value for key, value in dict(prepped.headers).items() if value is not None}
+
+def get_credentials(
+    *,
+    aws_role_arn: str | None,
+) -> dict:
+    import boto3
+
+    response = boto3.client('sts').assume_role(RoleArn=aws_role_arn, RoleSessionName='assume-role')
+    return {
+        'aws_access_key': response['Credentials']['AccessKeyId'],
+        'aws_secret_key': response['Credentials']['SecretAccessKey'],
+        'aws_session_token': response['Credentials']['SessionToken'],
+    }
