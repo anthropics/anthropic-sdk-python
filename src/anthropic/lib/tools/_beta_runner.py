@@ -15,7 +15,6 @@ from typing import (
     Iterator,
     Coroutine,
     AsyncIterator,
-    cast,
 )
 from contextlib import contextmanager, asynccontextmanager
 from typing_extensions import TypedDict, override
@@ -110,10 +109,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         ]
         self._messages_modified = True
         self.set_messages_params(
-            lambda params: cast(
-                ParseMessageCreateParamsBase[ResponseFormatT],
-                {**params, "messages": [*params["messages"], *message_params]},
-            )
+            lambda params: {**params, "messages": [*params["messages"], *message_params]}
         )
         self._cached_tool_call_response = None
 
