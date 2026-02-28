@@ -18,8 +18,12 @@ def _get_session(
     aws_session_token: str | None,
     region: str | None,
     profile: str | None,
+    aws_session: boto3.Session | None = None,
 ) -> boto3.Session:
     import boto3
+
+    if aws_session is not None:
+        return aws_session
 
     return boto3.Session(
         profile_name=profile,
@@ -41,6 +45,7 @@ def get_auth_headers(
     region: str | None,
     profile: str | None,
     data: str | None,
+    aws_session: boto3.Session | None = None,
 ) -> dict[str, str]:
     from botocore.auth import SigV4Auth
     from botocore.awsrequest import AWSRequest
@@ -51,13 +56,14 @@ def get_auth_headers(
         aws_access_key=aws_access_key,
         aws_secret_key=aws_secret_key,
         aws_session_token=aws_session_token,
+        aws_session=aws_session,
     )
 
     # The connection header may be stripped by a proxy somewhere, so the receiver
     # of this message may not see this header, so we remove it from the set of headers
     # that are signed.
     headers = headers.copy()
-    del headers["connection"]
+    headers.pop("connection", None)
 
     request = AWSRequest(method=method.upper(), url=url, headers=headers, data=data)
     credentials = session.get_credentials()
