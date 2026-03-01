@@ -469,7 +469,7 @@ class BaseAsyncToolRunner(
                 messages.pop()
 
         messages = [
-            *self._params["messages"],
+            *messages,
             BetaMessageParam(
                 role="user",
                 content=self._compaction_control.get("summary_prompt", DEFAULT_SUMMARY_PROMPT),
