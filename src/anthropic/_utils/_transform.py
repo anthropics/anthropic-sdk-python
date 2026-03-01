@@ -395,7 +395,7 @@ async def _async_transform_recursive(
 
     elif dispatch == _DISPATCH_DICT:
         if is_mapping(data) and type_arg is not None:
-            return {key: _transform_recursive(value, annotation=type_arg) for key, value in data.items()}
+            return {key: await _async_transform_recursive(value, annotation=type_arg) for key, value in data.items()}
 
     elif dispatch == _DISPATCH_SEQUENCE:
         if not isinstance(data, (str, dict)):
