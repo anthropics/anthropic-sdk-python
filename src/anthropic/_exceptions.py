@@ -12,8 +12,12 @@ __all__ = [
     "PermissionDeniedError",
     "NotFoundError",
     "ConflictError",
+    "RequestTooLargeError",
     "UnprocessableEntityError",
     "RateLimitError",
+    "ServiceUnavailableError",
+    "OverloadedError",
+    "DeadlineExceededError",
     "InternalServerError",
 ]
 
