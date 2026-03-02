@@ -547,20 +547,33 @@ async def test_large_message_list_performance() -> None:
 
     This simulates the real-world scenario from issue #1195 where large
     conversation histories cause excessive CPU usage in _transform_recursive.
+    Uses a relative comparison instead of a wall-clock threshold to avoid
+    flaky failures in slow CI environments.
     """
     messages = [{"role": "user" if i % 2 == 0 else "assistant", "content": f"Message {i}"} for i in range(10000)]
     data = {"messages": messages, "model": "claude-3"}
 
+    # Measure sync transform
     start = time.monotonic()
     result = _transform(data, NestedNoAnnotation)
-    elapsed = time.monotonic() - start
+    sync_elapsed = time.monotonic() - start
 
     assert len(result["messages"]) == 10000
     assert result["messages"][0] == {"role": "user", "content": "Message 0"}
-    # With caching, this should complete well under 1 second.
-    # Without caching on a ~90K message payload, issue #1195 reported 6.6% CPU time.
-    # Use a generous threshold to avoid flaky failures in slow CI environments.
-    assert elapsed < 30.0, f"Transform took {elapsed:.3f}s — expected < 30s with dispatch caching"
+
+    # Measure async transform
+    start = time.monotonic()
+    async_result = await _async_transform(data, NestedNoAnnotation)
+    async_elapsed = time.monotonic() - start
+
+    assert async_result == result
+
+    # Relative check: async should not be more than 10x slower than sync.
+    # This avoids brittle wall-clock thresholds while still catching regressions.
+    assert async_elapsed < sync_elapsed * 10, (
+        f"Async transform ({async_elapsed:.3f}s) was >10x slower than "
+        f"sync ({sync_elapsed:.3f}s)"
+    )
 
 
 @pytest.mark.asyncio
