@@ -447,7 +447,6 @@ class TestBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
     def test_path_params_results(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
@@ -455,8 +454,8 @@ class TestBatches:
                 message_batch_id="",
             )
 
-    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
+    @pytest.mark.skip(reason="somehow hitting prod endpoint")
     def test_raw_response_results(self, client: Anthropic) -> None:
         response = client.beta.messages.batches.with_raw_response.results(
             message_batch_id="message_batch_id",
@@ -467,8 +466,8 @@ class TestBatches:
         for item in stream:
             assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
 
-    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
+    @pytest.mark.skip(reason="somehow hitting prod endpoint")
     def test_streaming_response_results(self, client: Anthropic) -> None:
         with client.beta.messages.batches.with_streaming_response.results(
             message_batch_id="message_batch_id",
@@ -481,6 +480,7 @@ class TestBatches:
                 assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["item"])
 
         assert cast(Any, response.is_closed) is True
+
 
 
 class TestAsyncBatches:
@@ -911,7 +911,6 @@ class TestAsyncBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
     async def test_path_params_results(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
@@ -919,8 +918,8 @@ class TestAsyncBatches:
                 message_batch_id="",
             )
 
-    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
+    @pytest.mark.skip(reason="somehow hitting prod endpoint")
     async def test_raw_response_results(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.messages.batches.with_raw_response.results(
             message_batch_id="message_batch_id",
@@ -930,3 +929,4 @@ class TestAsyncBatches:
         stream = response.parse()
         async for item in stream:
             assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
+
