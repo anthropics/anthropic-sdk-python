@@ -41,6 +41,37 @@ def test_nested_list() -> None:
     assert_different_identities(obj1[1], obj2[1])
 
 
+def test_simple_tuple() -> None:
+    obj1 = ("a", "b", "c")
+    obj2 = deepcopy_minimal(obj1)
+    assert_different_identities(obj1, obj2)
+
+
+def test_tuple_with_nested_dict() -> None:
+    """Tuples containing dicts should have those dicts deep-copied.
+
+    This is the core fix for issue #1202: FileTypes tuples like
+    (filename, content, content_type, headers_dict) must not share
+    the headers dict reference with the original.
+    """
+    headers = {"X-Custom": "value"}
+    obj1 = ("file.txt", b"content", "text/plain", headers)
+    obj2 = deepcopy_minimal(obj1)
+    assert_different_identities(obj1, obj2)
+    # The nested dict inside the tuple must be a separate copy
+    assert_different_identities(obj1[3], obj2[3])
+
+
+def test_dict_with_tuple_value() -> None:
+    """Dicts containing tuples with nested dicts should be fully deep-copied."""
+    inner_dict = {"key": "value"}
+    obj1 = {"file": ("name", b"data", "type", inner_dict)}
+    obj2 = deepcopy_minimal(obj1)
+    assert_different_identities(obj1, obj2)
+    assert_different_identities(obj1["file"], obj2["file"])
+    assert_different_identities(obj1["file"][3], obj2["file"][3])
+
+
 class MyObject: ...
 
 
@@ -51,8 +82,3 @@ def test_ignores_other_types() -> None:
     obj2 = deepcopy_minimal(obj1)
     assert_different_identities(obj1, obj2)
     assert obj1["foo"] is my_obj
-
-    # tuples
-    obj3 = ("a", "b")
-    obj4 = deepcopy_minimal(obj3)
-    assert obj3 is obj4
