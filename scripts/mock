@@ -21,7 +21,7 @@ echo "==> Starting mock server with URL ${URL}"
 
 # Run steady mock on the given spec
 if [ "$1" == "--daemon" ]; then
-  npm exec --package=@stdy/cli@0.19.1 -- steady --host 127.0.0.1 -p 4010 --validator-query-array-format=comma --validator-query-object-format=brackets "$URL" &> .stdy.log &
+  npm exec --package=@stdy/cli@0.19.3 -- steady --host 127.0.0.1 -p 4010 --validator-query-array-format=comma --validator-query-object-format=brackets "$URL" &> .stdy.log &
 
   # Wait for server to come online via health endpoint (max 5s)
   echo -n "Waiting for server"
@@ -45,5 +45,5 @@ if [ "$1" == "--daemon" ]; then
 
   echo
 else
-  npm exec --package=@stdy/cli@0.19.1 -- steady --host 127.0.0.1 -p 4010 --validator-query-array-format=comma --validator-query-object-format=brackets "$URL"
+  npm exec --package=@stdy/cli@0.19.3 -- steady --host 127.0.0.1 -p 4010 --validator-query-array-format=comma --validator-query-object-format=brackets "$URL"
 fi
