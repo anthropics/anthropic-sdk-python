@@ -30,7 +30,8 @@ class Request(TypedDict, total=False):
     Useful for matching results to requests, as results may be given out of request
     order.
 
-    Must be unique for each request within the Message Batch.
+    Must be unique for each request within the Message Batch. Must be 64 characters
+    or fewer.
     """
 
     params: Required[MessageCreateParamsNonStreaming]
