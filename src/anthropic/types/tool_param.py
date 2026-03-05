@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Union, Iterable, Optional
-from typing_extensions import Literal, Required, TypeAlias, TypedDict
+from typing import Dict, List, Iterable, Optional
+from typing_extensions import Literal, Required, TypedDict
 
 from .._types import SequenceNotStr
 from .._models import set_pydantic_config
@@ -12,7 +12,7 @@ from .cache_control_ephemeral_param import CacheControlEphemeralParam
 __all__ = ["ToolParam", "InputSchema"]
 
 
-class InputSchemaTyped(TypedDict, total=False):
+class InputSchema(TypedDict, total=False, extra_items=object):  # type: ignore[call-arg]
     """[JSON schema](https://json-schema.org/draft/2020-12) for this tool's input.
 
     This defines the shape of the `input` that your tool accepts and that the model will produce.
