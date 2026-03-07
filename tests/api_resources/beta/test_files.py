@@ -229,14 +229,14 @@ class TestFiles:
     @parametrize
     def test_method_upload(self, client: Anthropic) -> None:
         file = client.beta.files.upload(
-            file=b"raw file contents",
+            file=b"Example data",
         )
         assert_matches_type(FileMetadata, file, path=["response"])
 
     @parametrize
     def test_method_upload_with_all_params(self, client: Anthropic) -> None:
         file = client.beta.files.upload(
-            file=b"raw file contents",
+            file=b"Example data",
             betas=["string"],
         )
         assert_matches_type(FileMetadata, file, path=["response"])
@@ -244,7 +244,7 @@ class TestFiles:
     @parametrize
     def test_raw_response_upload(self, client: Anthropic) -> None:
         response = client.beta.files.with_raw_response.upload(
-            file=b"raw file contents",
+            file=b"Example data",
         )
 
         assert response.is_closed is True
@@ -255,7 +255,7 @@ class TestFiles:
     @parametrize
     def test_streaming_response_upload(self, client: Anthropic) -> None:
         with client.beta.files.with_streaming_response.upload(
-            file=b"raw file contents",
+            file=b"Example data",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -472,14 +472,14 @@ class TestAsyncFiles:
     @parametrize
     async def test_method_upload(self, async_client: AsyncAnthropic) -> None:
         file = await async_client.beta.files.upload(
-            file=b"raw file contents",
+            file=b"Example data",
         )
         assert_matches_type(FileMetadata, file, path=["response"])
 
     @parametrize
     async def test_method_upload_with_all_params(self, async_client: AsyncAnthropic) -> None:
         file = await async_client.beta.files.upload(
-            file=b"raw file contents",
+            file=b"Example data",
             betas=["string"],
         )
         assert_matches_type(FileMetadata, file, path=["response"])
@@ -487,7 +487,7 @@ class TestAsyncFiles:
     @parametrize
     async def test_raw_response_upload(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.files.with_raw_response.upload(
-            file=b"raw file contents",
+            file=b"Example data",
         )
 
         assert response.is_closed is True
@@ -498,7 +498,7 @@ class TestAsyncFiles:
     @parametrize
     async def test_streaming_response_upload(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.files.with_streaming_response.upload(
-            file=b"raw file contents",
+            file=b"Example data",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

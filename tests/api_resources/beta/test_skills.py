@@ -32,7 +32,7 @@ class TestSkills:
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         skill = client.beta.skills.create(
             display_title="display_title",
-            files=[b"raw file contents"],
+            files=[b"Example data"],
             betas=["string"],
         )
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
@@ -199,7 +199,7 @@ class TestAsyncSkills:
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.create(
             display_title="display_title",
-            files=[b"raw file contents"],
+            files=[b"Example data"],
             betas=["string"],
         )
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
