@@ -34,7 +34,7 @@ class TestVersions:
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         version = client.beta.skills.versions.create(
             skill_id="skill_id",
-            files=[b"raw file contents"],
+            files=[b"Example data"],
             betas=["string"],
         )
         assert_matches_type(VersionCreateResponse, version, path=["response"])
@@ -249,7 +249,7 @@ class TestAsyncVersions:
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         version = await async_client.beta.skills.versions.create(
             skill_id="skill_id",
-            files=[b"raw file contents"],
+            files=[b"Example data"],
             betas=["string"],
         )
         assert_matches_type(VersionCreateResponse, version, path=["response"])
