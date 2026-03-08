@@ -10,6 +10,8 @@ from anthropic import AnthropicBedrock
 # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
 client = AnthropicBedrock()
 
+model = "anthropic.claude-sonnet-4-5-20250929-v1:0"
+
 print("------ standard response ------")
 message = client.messages.create(
     max_tokens=1024,
@@ -19,7 +21,7 @@ message = client.messages.create(
             "content": "Hello!",
         }
     ],
-    model="anthropic.claude-sonnet-4-5-20250929-v1:0",
+    model=model,
 )
 print(message.model_dump_json(indent=2))
 
@@ -33,7 +35,7 @@ with client.messages.stream(
             "content": "Say hello there!",
         }
     ],
-    model="anthropic.claude-sonnet-4-5-20250929-v1:0",
+    model=model,
 ) as stream:
     for text in stream.text_stream:
         print(text, end="", flush=True)
@@ -44,3 +46,15 @@ with client.messages.stream(
     # inside of the context manager
     accumulated = stream.get_final_message()
     print("accumulated message: ", accumulated.model_dump_json(indent=2))
+
+print("------ count tokens ------")
+count = client.messages.count_tokens(
+    model=model,
+    messages=[
+        {
+            "role": "user",
+            "content": "Hello, world!",
+        }
+    ],
+)
+print(count.model_dump_json(indent=2))
