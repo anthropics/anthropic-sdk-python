@@ -52,7 +52,50 @@ def test_ignores_other_types() -> None:
     assert_different_identities(obj1, obj2)
     assert obj1["foo"] is my_obj
 
-    # tuples
+    # tuples (immutable contents only — still creates new tuple object)
     obj3 = ("a", "b")
     obj4 = deepcopy_minimal(obj3)
-    assert obj3 is obj4
+    assert obj3 is not obj4
+    assert obj3 == obj4
+
+
+def test_tuple_with_mutable_contents() -> None:
+    """Tuples containing mutable objects (like dicts) should have their contents copied.
+
+    This prevents in-place mutation of the original data when the copy is modified.
+    See: https://github.com/anthropics/anthropic-sdk-python/issues/1202
+    """
+    inner_dict = {"content-type": "application/json"}
+    obj1 = ("filename.txt", b"content", "application/json", inner_dict)
+    obj2 = deepcopy_minimal(obj1)
+    assert obj1 == obj2
+    # The tuple itself should be a new object
+    assert obj1 is not obj2
+    # The inner dict should be a different object (deep copied)
+    assert obj1[3] is not obj2[3]
+    assert obj1[3] == obj2[3]
+    # Mutating the copy should not affect the original
+    obj2[3]["x-custom"] = "value"
+    assert "x-custom" not in obj1[3]
+
+
+def test_nested_tuple_in_dict() -> None:
+    """Tuples nested inside dicts should also have their mutable contents copied."""
+    inner_dict = {"key": "value"}
+    obj1 = {"file": ("name.txt", b"data", "text/plain", inner_dict)}
+    obj2 = deepcopy_minimal(obj1)
+    assert_different_identities(obj1, obj2)
+    # The tuple should be a new object
+    assert obj1["file"] is not obj2["file"]
+    # The inner dict should be a new object
+    assert obj1["file"][3] is not obj2["file"][3]
+
+
+def test_tuple_in_list() -> None:
+    """Tuples inside lists should also be deep copied."""
+    inner_dict = {"header": "value"}
+    obj1 = [("file.txt", b"content", "text/plain", inner_dict)]
+    obj2 = deepcopy_minimal(obj1)
+    assert_different_identities(obj1, obj2)
+    assert obj1[0] is not obj2[0]
+    assert obj1[0][3] is not obj2[0][3]
