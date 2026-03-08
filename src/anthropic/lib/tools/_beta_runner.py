@@ -261,10 +261,17 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             if not self._check_and_compact():
                 response = self.generate_tool_call_response()
                 if response is None:
-                    log.debug("Tool call was not requested, exiting from tool runner loop.")
-                    return
-
-                if not self._messages_modified:
+                    # When stop_reason is "pause_turn", the server is still processing
+                    # server tool use blocks (e.g. web_search, web_fetch). Continue the
+                    # loop so the API can resolve them on the next iteration.
+                    if message.stop_reason == "pause_turn":
+                        log.debug("Server tool use in progress (pause_turn), continuing loop.")
+                        if not self._messages_modified:
+                            self.append_messages(message)
+                    else:
+                        log.debug("Tool call was not requested, exiting from tool runner loop.")
+                        return
+                elif not self._messages_modified:
                     self.append_messages(message, response)
 
             self._messages_modified = False
@@ -521,10 +528,17 @@ class BaseAsyncToolRunner(
             if not await self._check_and_compact():
                 response = await self.generate_tool_call_response()
                 if response is None:
-                    log.debug("Tool call was not requested, exiting from tool runner loop.")
-                    return
-
-                if not self._messages_modified:
+                    # When stop_reason is "pause_turn", the server is still processing
+                    # server tool use blocks (e.g. web_search, web_fetch). Continue the
+                    # loop so the API can resolve them on the next iteration.
+                    if message.stop_reason == "pause_turn":
+                        log.debug("Server tool use in progress (pause_turn), continuing loop.")
+                        if not self._messages_modified:
+                            self.append_messages(message)
+                    else:
+                        log.debug("Tool call was not requested, exiting from tool runner loop.")
+                        return
+                elif not self._messages_modified:
                     self.append_messages(message, response)
 
             self._messages_modified = False
