@@ -344,7 +344,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": repr(exc),
+                        "content": f"Error: Tool '{tool_use.name}' execution failed. Check logs for details.",
                         "is_error": True,
                     }
                 )
@@ -617,7 +617,7 @@ class BaseAsyncToolRunner(
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": repr(exc),
+                        "content": f"Error: Tool '{tool_use.name}' execution failed. Check logs for details.",
                         "is_error": True,
                     }
                 )
