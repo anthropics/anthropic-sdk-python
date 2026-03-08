@@ -52,7 +52,22 @@ def test_ignores_other_types() -> None:
     assert_different_identities(obj1, obj2)
     assert obj1["foo"] is my_obj
 
-    # tuples
-    obj3 = ("a", "b")
-    obj4 = deepcopy_minimal(obj3)
-    assert obj3 is obj4
+
+def test_simple_tuple() -> None:
+    obj1 = ("a", "b")
+    obj2 = deepcopy_minimal(obj1)
+    assert_different_identities(obj1, obj2)
+
+
+def test_tuple_with_nested_dict() -> None:
+    """Regression test for #1202: deepcopy_minimal should recurse into tuples
+    so that dicts nested inside tuples (e.g. FileTypes headers) are copied,
+    not shared with the caller."""
+    headers = {"content-type": "application/pdf"}
+    obj1 = ("file.pdf", b"content", "application/pdf", headers)
+    obj2 = deepcopy_minimal(obj1)
+    assert_different_identities(obj1, obj2)
+    assert_different_identities(obj1[3], obj2[3])
+    # mutating the copy must not affect the original
+    obj2[3]["x-custom"] = "injected"
+    assert "x-custom" not in headers
