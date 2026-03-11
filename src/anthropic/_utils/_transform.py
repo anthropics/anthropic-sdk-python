@@ -266,17 +266,18 @@ def _transform_recursive(
     if isinstance(data, pydantic.BaseModel):
         return model_dump(data, exclude_unset=True, mode="json", exclude=getattr(data, "__api_exclude__", None))
 
+    unchanged = cast(object, data)
     annotated_type = _get_annotated_type(annotation)
     if annotated_type is None:
-        return data
+        return unchanged
 
     # ignore the first argument as it is the actual type
     annotations = get_args(annotated_type)[1:]
     for annotation in annotations:
         if isinstance(annotation, PropertyInfo) and annotation.format is not None:
-            return _format_data(data, annotation.format, annotation.format_template)
+            return _format_data(unchanged, annotation.format, annotation.format_template)
 
-    return data
+    return unchanged
 
 
 def _format_data(data: object, format_: PropertyFormat, format_template: str | None) -> object:
@@ -415,17 +416,18 @@ async def _async_transform_recursive(
     if isinstance(data, pydantic.BaseModel):
         return model_dump(data, exclude_unset=True, mode="json")
 
+    unchanged = cast(object, data)
     annotated_type = _get_annotated_type(annotation)
     if annotated_type is None:
-        return data
+        return unchanged
 
     # ignore the first argument as it is the actual type
     annotations = get_args(annotated_type)[1:]
     for annotation in annotations:
         if isinstance(annotation, PropertyInfo) and annotation.format is not None:
-            return await _async_format_data(data, annotation.format, annotation.format_template)
+            return await _async_format_data(unchanged, annotation.format, annotation.format_template)
 
-    return data
+    return unchanged
 
 
 async def _async_format_data(data: object, format_: PropertyFormat, format_template: str | None) -> object:
