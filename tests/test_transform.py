@@ -5,7 +5,7 @@ import time
 import pathlib
 from typing import Any, Dict, List, Union, TypeVar, Iterable, Optional, cast
 from datetime import date, datetime
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Protocol, Required, Annotated, TypedDict
 
 import pytest
 
@@ -20,6 +20,20 @@ from anthropic._compat import PYDANTIC_V1
 from anthropic._models import BaseModel
 
 _T = TypeVar("_T")
+
+
+class _CachedTransformDispatch(Protocol):
+    def __call__(self, inner_type: type) -> tuple[int, Any]: ...
+
+    def cache_clear(self) -> None: ...
+
+    def cache_info(self) -> Any: ...
+
+
+class _CacheInfo(Protocol):
+    hits: int
+    misses: int
+
 
 SAMPLE_FILE_PATH = pathlib.Path(__file__).parent.joinpath("sample_file.txt")
 
@@ -579,20 +593,22 @@ async def test_large_message_list_performance() -> None:
 @pytest.mark.asyncio
 async def test_dispatch_cache_hit() -> None:
     """Verify the dispatch cache is populated after first use."""
-    from anthropic._utils._transform import _cached_transform_dispatch
+    from anthropic._utils._transform import _cached_transform_dispatch as cached_transform_dispatch_fn
+
+    cached_transform_dispatch = cast(_CachedTransformDispatch, cached_transform_dispatch_fn)
 
     # Clear cache to get a clean baseline
-    _cached_transform_dispatch.cache_clear()
+    cached_transform_dispatch.cache_clear()
 
     # First call populates the cache
     _transform({"role": "user", "content": "hi"}, NoAnnotationDict)
-    info = _cached_transform_dispatch.cache_info()
+    info = cast(_CacheInfo, cached_transform_dispatch.cache_info())
     assert info.misses > 0, "Expected cache misses on first call"
 
     # Second call should hit the cache
     misses_before = info.misses
     _transform({"role": "user", "content": "hello"}, NoAnnotationDict)
-    info2 = _cached_transform_dispatch.cache_info()
+    info2 = cast(_CacheInfo, cached_transform_dispatch.cache_info())
     assert info2.hits > 0, "Expected cache hits on second call"
     assert info2.misses == misses_before, "Expected no new cache misses on second call"
 
