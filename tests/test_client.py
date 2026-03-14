@@ -112,6 +112,22 @@ def _get_open_connections(client: Anthropic | AsyncAnthropic) -> int:
     return len(pool._requests)
 
 
+@pytest.mark.parametrize("status_code", [400, 401, 403, 404, 409, 413, 422, 429, 500, 503, 529])
+def test_make_status_error_sync_async_parity(status_code: int) -> None:
+    # Anthropic._make_status_error and AsyncAnthropic._make_status_error are
+    # separate manually-maintained copies; this guards against them drifting.
+    sync_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+    async_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+    response = httpx.Response(status_code, request=httpx.Request("GET", "/"))
+
+    sync_err = sync_client._make_status_error("msg", body=None, response=response)
+    async_err = async_client._make_status_error("msg", body=None, response=response)
+
+    assert type(sync_err) is type(async_err), (
+        f"sync returned {type(sync_err).__name__}, async returned {type(async_err).__name__}"
+    )
+
+
 class TestAnthropic:
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response(self, respx_mock: MockRouter, client: Anthropic) -> None:
