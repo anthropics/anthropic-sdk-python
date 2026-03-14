@@ -67,7 +67,7 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
     return options
 
 
-def _infer_region() -> str:
+def _infer_region(aws_profile: str | None = None) -> str:
     """
     Infer the AWS region from the environment variables or
     from the boto3 session if available.
@@ -77,7 +77,7 @@ def _infer_region() -> str:
         try:
             import boto3
 
-            session = boto3.Session()
+            session = boto3.Session(profile_name=aws_profile)
             if session.region_name:
                 aws_region = session.region_name
         except ImportError:
@@ -161,8 +161,8 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
 
         self.aws_access_key = aws_access_key
 
-        self.aws_region = _infer_region() if aws_region is None else aws_region
         self.aws_profile = aws_profile
+        self.aws_region = _infer_region(aws_profile=aws_profile) if aws_region is None else aws_region
 
         self.aws_session_token = aws_session_token
 
@@ -303,8 +303,8 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
 
         self.aws_access_key = aws_access_key
 
-        self.aws_region = _infer_region() if aws_region is None else aws_region
         self.aws_profile = aws_profile
+        self.aws_region = _infer_region(aws_profile=aws_profile) if aws_region is None else aws_region
 
         self.aws_session_token = aws_session_token
 
