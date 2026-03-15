@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.85.0 (2026-03-15)
+
+Full Changelog: [v0.84.0...v0.85.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.84.0...v0.85.0)
+
+### Features
+
+* **api:** chore(config): clean up model enum list ([#31](https://github.com/anthropics/anthropic-sdk-python/issues/31)) ([cce1a5b](https://github.com/anthropics/anthropic-sdk-python/commit/cce1a5b9e6fce4f269cec42803f37ce5e2ac2f76))
+* **tests:** update mock server ([7dc86a4](https://github.com/anthropics/anthropic-sdk-python/commit/7dc86a4ffc9e70533a58065496c78394c6a6e97a))
+
+
+### Bug Fixes
+
+* **client:** add missing 413 and 529 error handlers to async client ([#1554](https://github.com/anthropics/anthropic-sdk-python/issues/1554)) ([9c2986f](https://github.com/anthropics/anthropic-sdk-python/commit/9c2986fb9c046b4cffa1b03ca8762f9c9dea0bab))
+* **tool runner:** propagate container_id for programmatic tool calling ([#1462](https://github.com/anthropics/anthropic-sdk-python/issues/1462)) ([3ae7ff6](https://github.com/anthropics/anthropic-sdk-python/commit/3ae7ff6ff7af8a881706ae8068b1040a23c96fbd))
+* **tools:** use filtered messages list in async compaction ([#1124](https://github.com/anthropics/anthropic-sdk-python/issues/1124)) ([710d666](https://github.com/anthropics/anthropic-sdk-python/commit/710d666f80b7667e3551c1a68d7c0ffaad115de1))
+
+
+### Chores
+
+* **ci:** bump uv version ([09656ac](https://github.com/anthropics/anthropic-sdk-python/commit/09656acef77fa459d30d811bd51aa780a567182b))
+* **internal:** codegen related update ([c9e9fc2](https://github.com/anthropics/anthropic-sdk-python/commit/c9e9fc240334fc466426646d7acd64904f881a80))
+* **internal:** codegen related update ([77f77d1](https://github.com/anthropics/anthropic-sdk-python/commit/77f77d19b4657a7ad0d31de42504c25cf4ed76ef))
+* **tests:** unskip tests that are now supported in steady ([827330b](https://github.com/anthropics/anthropic-sdk-python/commit/827330b527b4af299af084752a7317b0596956af))
+
 ## 0.84.0 (2026-02-25)
 
 Full Changelog: [v0.83.0...v0.84.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.83.0...v0.84.0)
