@@ -32,10 +32,12 @@ class ToolError(Exception):
 
     Example::
 
-        raise ToolError([
-            {"type": "text", "text": "Error details here"},
-            {"type": "image", "source": {"type": "base64", "data": "...", "media_type": "image/png"}},
-        ])
+        raise ToolError(
+            [
+                {"type": "text", "text": "Error details here"},
+                {"type": "image", "source": {"type": "base64", "data": "...", "media_type": "image/png"}},
+            ]
+        )
     """
 
     content: BetaFunctionToolResultType
@@ -54,6 +56,7 @@ class ToolError(Exception):
             message = " ".join(parts) if parts else "Tool error"
         super().__init__(message)
         self.content = content
+
 
 Function = Callable[..., BetaFunctionToolResultType]
 FunctionT = TypeVar("FunctionT", bound=Function)

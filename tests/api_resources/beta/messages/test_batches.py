@@ -25,7 +25,6 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 class TestBatches:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
-    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.create(
@@ -47,7 +46,6 @@ class TestBatches:
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
-    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.create(
@@ -189,7 +187,6 @@ class TestBatches:
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
-    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.messages.batches.with_raw_response.create(
@@ -215,7 +212,6 @@ class TestBatches:
         batch = response.parse()
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
-    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.messages.batches.with_streaming_response.create(
@@ -447,7 +443,6 @@ class TestBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
     def test_path_params_results(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
@@ -455,8 +450,8 @@ class TestBatches:
                 message_batch_id="",
             )
 
-    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
+    @pytest.mark.skip(reason="somehow hitting prod endpoint")
     def test_raw_response_results(self, client: Anthropic) -> None:
         response = client.beta.messages.batches.with_raw_response.results(
             message_batch_id="message_batch_id",
@@ -467,8 +462,8 @@ class TestBatches:
         for item in stream:
             assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
 
-    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
+    @pytest.mark.skip(reason="somehow hitting prod endpoint")
     def test_streaming_response_results(self, client: Anthropic) -> None:
         with client.beta.messages.batches.with_streaming_response.results(
             message_batch_id="message_batch_id",
@@ -483,12 +478,12 @@ class TestBatches:
         assert cast(Any, response.is_closed) is True
 
 
+
 class TestAsyncBatches:
     parametrize = pytest.mark.parametrize(
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
 
-    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.create(
@@ -510,7 +505,6 @@ class TestAsyncBatches:
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
-    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.create(
@@ -652,7 +646,6 @@ class TestAsyncBatches:
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
-    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.messages.batches.with_raw_response.create(
@@ -678,7 +671,6 @@ class TestAsyncBatches:
         batch = response.parse()
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
-    @pytest.mark.skip(reason="prism validates based on the non-beta endpoint")
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.messages.batches.with_streaming_response.create(
@@ -911,7 +903,6 @@ class TestAsyncBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
     async def test_path_params_results(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
@@ -919,8 +910,8 @@ class TestAsyncBatches:
                 message_batch_id="",
             )
 
-    @pytest.mark.skip(reason="Mock server doesn't support application/x-jsonl responses")
     @parametrize
+    @pytest.mark.skip(reason="somehow hitting prod endpoint")
     async def test_raw_response_results(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.messages.batches.with_raw_response.results(
             message_batch_id="message_batch_id",
@@ -930,3 +921,4 @@ class TestAsyncBatches:
         stream = response.parse()
         async for item in stream:
             assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
+

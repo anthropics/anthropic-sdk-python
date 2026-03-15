@@ -1,0 +1,317 @@
+[
+  {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.84.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.84.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.12.6",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "BetaToolRunner",
+        "anthropic-beta": "structured-outputs-2025-12-15",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "660"
+      },
+      "body": {
+        "max_tokens": 1024,
+        "messages": [
+          {
+            "role": "user",
+            "content": "What is the weather in SF, NY, and London in Celsius?"
+          }
+        ],
+        "model": "claude-opus-4-5",
+        "tools": [
+          {
+            "name": "get_weather",
+            "description": "Lookup the weather for a given city in either celsius or fahrenheit",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "location": {
+                  "description": "The city and state, e.g. San Francisco, CA",
+                  "title": "Location",
+                  "type": "string"
+                },
+                "units": {
+                  "description": "Unit for the output, either 'c' for celsius or 'f' for fahrenheit",
+                  "enum": [
+                    "c",
+                    "f"
+                  ],
+                  "title": "Units",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location",
+                "units"
+              ],
+              "type": "object"
+            },
+            "allowed_callers": [
+              "code_execution_20260120"
+            ]
+          }
+        ]
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "anthropic-ratelimit-input-tokens-limit": "30000",
+        "anthropic-ratelimit-input-tokens-remaining": "28000",
+        "anthropic-ratelimit-input-tokens-reset": "2026-02-25T20:02:37Z",
+        "anthropic-ratelimit-output-tokens-limit": "8000",
+        "anthropic-ratelimit-output-tokens-remaining": "8000",
+        "anthropic-ratelimit-output-tokens-reset": "2026-02-25T20:02:36Z",
+        "anthropic-ratelimit-requests-limit": "50",
+        "anthropic-ratelimit-requests-remaining": "49",
+        "anthropic-ratelimit-requests-reset": "2026-02-25T20:02:32Z",
+        "anthropic-ratelimit-tokens-limit": "38000",
+        "anthropic-ratelimit-tokens-remaining": "36000",
+        "anthropic-ratelimit-tokens-reset": "2026-02-25T20:02:36Z",
+        "x-robots-tag": "none",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "server": "cloudflare",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "body": {
+        "model": "claude-opus-4-5-20251101",
+        "id": "msg_01LAwUK3MeXUxoNW5ZgnPpGy",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "I'll check the weather for all three cities in Celsius simultaneously."
+          },
+          {
+            "type": "server_tool_use",
+            "id": "srvtoolu_017SzB73BSitzNFo1Xb3bq7S",
+            "name": "code_execution",
+            "input": {
+              "code": "import json\n\n# Get weather for all three cities in Celsius\nsf_weather = await get_weather({\"location\": \"San Francisco, CA\", \"units\": \"c\"})\nny_weather = await get_weather({\"location\": \"New York, NY\", \"units\": \"c\"})\nlondon_weather = await get_weather({\"location\": \"London, UK\", \"units\": \"c\"})\n\n# Parse and display results\nsf = json.loads(sf_weather)\nny = json.loads(ny_weather)\nlondon = json.loads(london_weather)\n\nprint(\"Weather in Celsius:\")\nprint(f\"San Francisco: {sf}\")\nprint(f\"New York: {ny}\")\nprint(f\"London: {london}\")\n"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_011MDRpaZRMRRjtFkJizD6nS",
+            "name": "get_weather",
+            "input": {
+              "location": "San Francisco, CA",
+              "units": "c"
+            },
+            "caller": {
+              "type": "code_execution_20260120",
+              "tool_id": "srvtoolu_017SzB73BSitzNFo1Xb3bq7S"
+            }
+          }
+        ],
+        "container": {
+          "id": "container_011CYVPF4iP8oD6Vsz1NhVih",
+          "expires_at": "2026-02-25T20:07:37.475893Z"
+        },
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 3182,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 237,
+          "service_tier": "standard",
+          "inference_geo": "not_available",
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          }
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.84.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.84.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.12.6",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "BetaToolRunner",
+        "anthropic-beta": "structured-outputs-2025-12-15",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "1978"
+      },
+      "body": {
+        "max_tokens": 1024,
+        "messages": [
+          {
+            "role": "user",
+            "content": "What is the weather in SF, NY, and London in Celsius?"
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "text": "I'll check the weather for all three cities in Celsius simultaneously.",
+                "type": "text"
+              },
+              {
+                "id": "srvtoolu_017SzB73BSitzNFo1Xb3bq7S",
+                "input": {
+                  "code": "import json\n\n# Get weather for all three cities in Celsius\nsf_weather = await get_weather({\"location\": \"San Francisco, CA\", \"units\": \"c\"})\nny_weather = await get_weather({\"location\": \"New York, NY\", \"units\": \"c\"})\nlondon_weather = await get_weather({\"location\": \"London, UK\", \"units\": \"c\"})\n\n# Parse and display results\nsf = json.loads(sf_weather)\nny = json.loads(ny_weather)\nlondon = json.loads(london_weather)\n\nprint(\"Weather in Celsius:\")\nprint(f\"San Francisco: {sf}\")\nprint(f\"New York: {ny}\")\nprint(f\"London: {london}\")\n"
+                },
+                "name": "code_execution",
+                "type": "server_tool_use",
+                "caller": {
+                  "type": "direct"
+                }
+              },
+              {
+                "id": "toolu_011MDRpaZRMRRjtFkJizD6nS",
+                "input": {
+                  "location": "San Francisco, CA",
+                  "units": "c"
+                },
+                "name": "get_weather",
+                "type": "tool_use",
+                "caller": {
+                  "tool_id": "srvtoolu_017SzB73BSitzNFo1Xb3bq7S",
+                  "type": "code_execution_20260120"
+                }
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "toolu_011MDRpaZRMRRjtFkJizD6nS",
+                "content": "{\"location\": \"San Francisco, CA\", \"temperature\": \"20\\u00b0C\", \"condition\": \"Sunny\"}"
+              }
+            ]
+          }
+        ],
+        "model": "claude-opus-4-5",
+        "container": "container_011CYVPF4iP8oD6Vsz1NhVih",
+        "tools": [
+          {
+            "name": "get_weather",
+            "description": "Lookup the weather for a given city in either celsius or fahrenheit",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "location": {
+                  "description": "The city and state, e.g. San Francisco, CA",
+                  "title": "Location",
+                  "type": "string"
+                },
+                "units": {
+                  "description": "Unit for the output, either 'c' for celsius or 'f' for fahrenheit",
+                  "enum": [
+                    "c",
+                    "f"
+                  ],
+                  "title": "Units",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location",
+                "units"
+              ],
+              "type": "object"
+            },
+            "allowed_callers": [
+              "code_execution_20260120"
+            ]
+          }
+        ]
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "x-robots-tag": "none",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "server": "cloudflare",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "body": {
+        "model": "claude-opus-4-5-20251101",
+        "id": "msg_0147NV7w8PyZ6bSUsNY79cYj",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01RXQDRjwv5Un7n98xFahjo8",
+            "name": "get_weather",
+            "input": {
+              "location": "New York, NY",
+              "units": "c"
+            },
+            "caller": {
+              "type": "code_execution_20260120",
+              "tool_id": "srvtoolu_017SzB73BSitzNFo1Xb3bq7S"
+            }
+          }
+        ],
+        "container": {
+          "id": "container_011CYVPF4iP8oD6Vsz1NhVih",
+          "expires_at": "2026-02-25T20:07:39.078916Z"
+        },
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          }
+        }
+      }
+    }
+  }
+]

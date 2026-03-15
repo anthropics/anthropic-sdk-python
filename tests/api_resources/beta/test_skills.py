@@ -23,23 +23,20 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 class TestSkills:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
-    @pytest.mark.skip(reason="prism binary unsupported")
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         skill = client.beta.skills.create()
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
-    @pytest.mark.skip(reason="prism binary unsupported")
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         skill = client.beta.skills.create(
             display_title="display_title",
-            files=[b"raw file contents"],
+            files=[b"Example data"],
             betas=["string"],
         )
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
-    @pytest.mark.skip(reason="prism binary unsupported")
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.skills.with_raw_response.create()
@@ -49,7 +46,6 @@ class TestSkills:
         skill = response.parse()
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
-    @pytest.mark.skip(reason="prism binary unsupported")
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.skills.with_streaming_response.create() as response:
@@ -194,23 +190,20 @@ class TestAsyncSkills:
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
 
-    @pytest.mark.skip(reason="prism binary unsupported")
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.create()
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
-    @pytest.mark.skip(reason="prism binary unsupported")
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.create(
             display_title="display_title",
-            files=[b"raw file contents"],
+            files=[b"Example data"],
             betas=["string"],
         )
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
-    @pytest.mark.skip(reason="prism binary unsupported")
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.skills.with_raw_response.create()
@@ -220,7 +213,6 @@ class TestAsyncSkills:
         skill = response.parse()
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
-    @pytest.mark.skip(reason="prism binary unsupported")
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.skills.with_streaming_response.create() as response:
