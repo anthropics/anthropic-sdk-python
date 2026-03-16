@@ -10,6 +10,7 @@ from .tool_bash_20250124_param import ToolBash20250124Param
 from .memory_tool_20250818_param import MemoryTool20250818Param
 from .web_fetch_tool_20250910_param import WebFetchTool20250910Param
 from .web_fetch_tool_20260209_param import WebFetchTool20260209Param
+from .web_fetch_tool_20260309_param import WebFetchTool20260309Param
 from .web_search_tool_20250305_param import WebSearchTool20250305Param
 from .web_search_tool_20260209_param import WebSearchTool20260209Param
 from .tool_text_editor_20250124_param import ToolTextEditor20250124Param
@@ -37,6 +38,7 @@ MessageCountTokensToolParam: TypeAlias = Union[
     WebFetchTool20250910Param,
     WebSearchTool20260209Param,
     WebFetchTool20260209Param,
+    WebFetchTool20260309Param,
     ToolSearchToolBm25_20251119Param,
     ToolSearchToolRegex20251119Param,
 ]

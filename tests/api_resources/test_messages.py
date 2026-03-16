@@ -84,8 +84,8 @@ class TestMessages:
             ],
             temperature=1,
             thinking={
-                "budget_tokens": 1024,
-                "type": "enabled",
+                "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
@@ -223,8 +223,8 @@ class TestMessages:
             ],
             temperature=1,
             thinking={
-                "budget_tokens": 1024,
-                "type": "enabled",
+                "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
@@ -353,8 +353,8 @@ class TestMessages:
                 }
             ],
             thinking={
-                "budget_tokens": 1024,
-                "type": "enabled",
+                "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
@@ -493,8 +493,8 @@ class TestAsyncMessages:
             ],
             temperature=1,
             thinking={
-                "budget_tokens": 1024,
-                "type": "enabled",
+                "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
@@ -632,8 +632,8 @@ class TestAsyncMessages:
             ],
             temperature=1,
             thinking={
-                "budget_tokens": 1024,
-                "type": "enabled",
+                "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
@@ -762,8 +762,8 @@ class TestAsyncMessages:
                 }
             ],
             thinking={
-                "budget_tokens": 1024,
-                "type": "enabled",
+                "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
