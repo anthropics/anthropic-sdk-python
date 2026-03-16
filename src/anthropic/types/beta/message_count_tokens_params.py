@@ -22,6 +22,7 @@ from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param
 from .beta_web_fetch_tool_20260209_param import BetaWebFetchTool20260209Param
+from .beta_web_fetch_tool_20260309_param import BetaWebFetchTool20260309Param
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
 from .beta_web_search_tool_20260209_param import BetaWebSearchTool20260209Param
 from .beta_context_management_config_param import BetaContextManagementConfigParam
@@ -281,6 +282,7 @@ Tool: TypeAlias = Union[
     BetaWebFetchTool20250910Param,
     BetaWebSearchTool20260209Param,
     BetaWebFetchTool20260209Param,
+    BetaWebFetchTool20260309Param,
     BetaToolSearchToolBm25_20251119Param,
     BetaToolSearchToolRegex20251119Param,
     BetaMCPToolsetParam,
