@@ -254,7 +254,7 @@ requires-dist = [
     { name = "jiter", specifier = ">=0.4.0,<1" },
     { name = "pydantic", specifier = ">=1.9.0,<3" },
     { name = "sniffio" },
-    { name = "typing-extensions", specifier = ">=4.10,<5" },
+    { name = "typing-extensions", specifier = ">=4.14,<5" },
 ]
 provides-extras = ["aiohttp", "vertex", "bedrock"]
 
