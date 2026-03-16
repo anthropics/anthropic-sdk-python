@@ -1,3 +1,11 @@
+"""
+Example script demonstrating basic message creation with Claude.
+
+This script shows how to:
+1. Send a simple message to Claude
+2. Continue a conversation by including previous messages in the context
+"""
+
 from anthropic import Anthropic
 
 client = Anthropic()
