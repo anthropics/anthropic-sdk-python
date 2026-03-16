@@ -12,6 +12,7 @@ from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
 from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
 from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param
 from .beta_web_fetch_tool_20260209_param import BetaWebFetchTool20260209Param
+from .beta_web_fetch_tool_20260309_param import BetaWebFetchTool20260309Param
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
 from .beta_web_search_tool_20260209_param import BetaWebSearchTool20260209Param
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param
@@ -48,6 +49,7 @@ BetaToolUnionParam: TypeAlias = Union[
     BetaWebFetchTool20250910Param,
     BetaWebSearchTool20260209Param,
     BetaWebFetchTool20260209Param,
+    BetaWebFetchTool20260309Param,
     BetaToolSearchToolBm25_20251119Param,
     BetaToolSearchToolRegex20251119Param,
     BetaMCPToolsetParam,

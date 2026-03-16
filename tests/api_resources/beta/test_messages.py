@@ -129,6 +129,7 @@ class TestMessages:
             temperature=1,
             thinking={
                 "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
@@ -311,6 +312,7 @@ class TestMessages:
             temperature=1,
             thinking={
                 "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
@@ -475,6 +477,7 @@ class TestMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
@@ -675,6 +678,7 @@ class TestAsyncMessages:
             temperature=1,
             thinking={
                 "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
@@ -857,6 +861,7 @@ class TestAsyncMessages:
             temperature=1,
             thinking={
                 "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",
@@ -1021,6 +1026,7 @@ class TestAsyncMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "display": "summarized",
             },
             tool_choice={
                 "type": "auto",

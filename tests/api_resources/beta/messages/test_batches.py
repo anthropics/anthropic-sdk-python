@@ -147,8 +147,8 @@ class TestBatches:
                         ],
                         "temperature": 1,
                         "thinking": {
-                            "budget_tokens": 1024,
-                            "type": "enabled",
+                            "type": "adaptive",
+                            "display": "summarized",
                         },
                         "tool_choice": {
                             "type": "auto",
@@ -606,8 +606,8 @@ class TestAsyncBatches:
                         ],
                         "temperature": 1,
                         "thinking": {
-                            "budget_tokens": 1024,
-                            "type": "enabled",
+                            "type": "adaptive",
+                            "display": "summarized",
                         },
                         "tool_choice": {
                             "type": "auto",
