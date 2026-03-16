@@ -112,13 +112,17 @@ def transform(
     # no date formatting, no base64 fields), skip the expensive recursive walk.
     # This is a significant optimization for types like MessageCreateParams where
     # the transform produces an identical copy of the input.
+    # Return a shallow copy to preserve the old contract that callers may mutate
+    # the result without corrupting their original input.
     if not _type_has_transforms(cast(type, expected_type)):
+        if isinstance(data, dict):
+            return cast(_T, dict(data))
         return cast(_T, data)
     transformed = _transform_recursive(data, annotation=cast(type, expected_type))
     return cast(_T, transformed)
 
 
-@lru_cache(maxsize=8096)
+@lru_cache(maxsize=8192)
 def _get_annotated_type(type_: type) -> type | None:
     """If the given type is an `Annotated` type then it is returned, if not `None` is returned.
 
@@ -157,7 +161,7 @@ def _no_transform_needed(annotation: type) -> bool:
     return annotation == float or annotation == int
 
 
-@lru_cache(maxsize=8096)
+@lru_cache(maxsize=8192)
 def _type_has_transforms(type_: type) -> bool:
     """Check if a type (recursively) has any PropertyInfo annotations that would
     require transformation. Returns False if the entire type tree is annotation-free,
@@ -203,7 +207,15 @@ def _type_has_transforms(type_: type) -> bool:
                 # Check element type of List[T], Iterable[T], Sequence[T]
                 args = get_args(stripped)
                 if args:
-                    elem_type = strip_annotated_type(args[0])
+                    elem = args[0]
+                    # Check if the element itself is Annotated with PropertyInfo
+                    elem_annotated = _get_annotated_type(elem)
+                    if elem_annotated is not None:
+                        for ann in get_args(elem_annotated)[1:]:
+                            if isinstance(ann, PropertyInfo):
+                                if ann.alias is not None or ann.format is not None:
+                                    return True
+                    elem_type = strip_annotated_type(elem)
                     if is_typeddict(elem_type) and _type_has_transforms(elem_type):
                         return True
                     elif is_union_type(elem_type):
@@ -383,6 +395,8 @@ async def async_transform(
     """
     # Fast path: same optimization as sync transform()
     if not _type_has_transforms(cast(type, expected_type)):
+        if isinstance(data, dict):
+            return cast(_T, dict(data))
         return cast(_T, data)
     transformed = await _async_transform_recursive(data, annotation=cast(type, expected_type))
     return cast(_T, transformed)
@@ -518,7 +532,7 @@ async def _async_transform_typeddict(
     return result
 
 
-@lru_cache(maxsize=8096)
+@lru_cache(maxsize=8192)
 def get_type_hints(
     obj: Any,
     globalns: dict[str, Any] | None = None,
