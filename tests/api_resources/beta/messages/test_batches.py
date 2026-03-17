@@ -478,7 +478,6 @@ class TestBatches:
         assert cast(Any, response.is_closed) is True
 
 
-
 class TestAsyncBatches:
     parametrize = pytest.mark.parametrize(
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
@@ -921,4 +920,3 @@ class TestAsyncBatches:
         stream = response.parse()
         async for item in stream:
             assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
-

@@ -1,38 +1,22 @@
 import time
-import shutil
 import threading
-from typing import List, Optional, cast
-from pathlib import Path
-from typing_extensions import override
+from typing import Optional
 
 from pydantic import TypeAdapter
 
 from anthropic import Anthropic
-from anthropic.lib.tools import BetaAbstractMemoryTool
+from anthropic.tools import BetaLocalFilesystemMemoryTool
 from anthropic.types.beta import (
     BetaMessageParam,
     BetaContentBlockParam,
     BetaMemoryTool20250818Command,
-    BetaContextManagementConfigParam,
     BetaMemoryTool20250818ViewCommand,
-    BetaMemoryTool20250818CreateCommand,
-    BetaMemoryTool20250818DeleteCommand,
-    BetaMemoryTool20250818InsertCommand,
-    BetaMemoryTool20250818RenameCommand,
-    BetaMemoryTool20250818StrReplaceCommand,
 )
-
-MEMORY_SYSTEM_PROMPT = """- ***DO NOT just store the conversation history**
-        - No need to mention your memory tool or what you are writting in it to the user, unless they ask
-        - Store facts about the user and their preferences
-        - Before responding, check memory to adjust technical depth and response style appropriately
-        - Keep memories up-to-date - remove outdated info, add new details as you learn them
-        - Use an xml format like <xml><name>John Doe</name></user></xml>"""
-
+from anthropic.types.beta.beta_context_management_config_param import BetaContextManagementConfigParam
 
 # Context management automatically clears old tool results to stay within token limits
-# Triggers when input exceeds 20k tokens, clears down to 10k tokens
-CONTEXT_MANAGEMENT = {
+# Triggers when input exceeds 30k tokens, keeps 3 tool uses after clearing
+DEFAULT_CONTEXT_MANAGEMENT: BetaContextManagementConfigParam = {
     "edits": [
         {
             "type": "clear_tool_uses_20250919",
@@ -49,145 +33,12 @@ CONTEXT_MANAGEMENT = {
     ]
 }
 
-
-class LocalFilesystemMemoryTool(BetaAbstractMemoryTool):
-    """File-based memory storage implementation for Claude conversations"""
-
-    def __init__(self, base_path: str = "./memory"):
-        super().__init__()
-        self.base_path = Path(base_path)
-        self.memory_root = self.base_path / "memories"
-        self.memory_root.mkdir(parents=True, exist_ok=True)
-
-    def _validate_path(self, path: str) -> Path:
-        """Validate and resolve memory paths"""
-        if not path.startswith("/memories"):
-            raise ValueError(f"Path must start with /memories, got: {path}")
-
-        relative_path = path[len("/memories") :].lstrip("/")
-        full_path = self.memory_root / relative_path if relative_path else self.memory_root
-
-        try:
-            full_path.resolve().relative_to(self.memory_root.resolve())
-        except ValueError as e:
-            raise ValueError(f"Path {path} would escape /memories directory") from e
-
-        return full_path
-
-    @override
-    def view(self, command: BetaMemoryTool20250818ViewCommand) -> str:
-        full_path = self._validate_path(command.path)
-
-        if full_path.is_dir():
-            items: List[str] = []
-            try:
-                for item in sorted(full_path.iterdir()):
-                    if item.name.startswith("."):
-                        continue
-                    items.append(f"{item.name}/" if item.is_dir() else item.name)
-                return f"Directory: {command.path}" + "\n".join([f"- {item}" for item in items])
-            except Exception as e:
-                raise RuntimeError(f"Cannot read directory {command.path}: {e}") from e
-
-        elif full_path.is_file():
-            try:
-                content = full_path.read_text(encoding="utf-8")
-                lines = content.splitlines()
-                view_range = command.view_range
-                if view_range:
-                    start_line = max(1, view_range[0]) - 1
-                    end_line = len(lines) if view_range[1] == -1 else view_range[1]
-                    lines = lines[start_line:end_line]
-                    start_num = start_line + 1
-                else:
-                    start_num = 1
-
-                numbered_lines = [f"{i + start_num:4d}: {line}" for i, line in enumerate(lines)]
-                return "\n".join(numbered_lines)
-            except Exception as e:
-                raise RuntimeError(f"Cannot read file {command.path}: {e}") from e
-        else:
-            raise RuntimeError(f"Path not found: {command.path}")
-
-    @override
-    def create(self, command: BetaMemoryTool20250818CreateCommand) -> str:
-        full_path = self._validate_path(command.path)
-        full_path.parent.mkdir(parents=True, exist_ok=True)
-        full_path.write_text(command.file_text, encoding="utf-8")
-        return f"File created successfully at {command.path}"
-
-    @override
-    def str_replace(self, command: BetaMemoryTool20250818StrReplaceCommand) -> str:
-        full_path = self._validate_path(command.path)
-
-        if not full_path.is_file():
-            raise FileNotFoundError(f"File not found: {command.path}")
-
-        content = full_path.read_text(encoding="utf-8")
-        count = content.count(command.old_str)
-        if count == 0:
-            raise ValueError(f"Text not found in {command.path}")
-        elif count > 1:
-            raise ValueError(f"Text appears {count} times in {command.path}. Must be unique.")
-
-        new_content = content.replace(command.old_str, command.new_str)
-        full_path.write_text(new_content, encoding="utf-8")
-        return f"File {command.path} has been edited"
-
-    @override
-    def insert(self, command: BetaMemoryTool20250818InsertCommand) -> str:
-        full_path = self._validate_path(command.path)
-        insert_line = command.insert_line
-        insert_text = command.insert_text
-
-        if not full_path.is_file():
-            raise FileNotFoundError(f"File not found: {command.path}")
-
-        lines = full_path.read_text(encoding="utf-8").splitlines()
-        if insert_line < 0 or insert_line > len(lines):
-            raise ValueError(f"Invalid insert_line {insert_line}. Must be 0-{len(lines)}")
-
-        lines.insert(insert_line, insert_text.rstrip("\n"))
-        full_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        return f"Text inserted at line {insert_line} in {command.path}"
-
-    @override
-    def delete(self, command: BetaMemoryTool20250818DeleteCommand) -> str:
-        full_path = self._validate_path(command.path)
-
-        if command.path == "/memories":
-            raise ValueError("Cannot delete the /memories directory itself")
-
-        if full_path.is_file():
-            full_path.unlink()
-            return f"File deleted: {command.path}"
-        elif full_path.is_dir():
-            shutil.rmtree(full_path)
-            return f"Directory deleted: {command.path}"
-        else:
-            raise FileNotFoundError(f"Path not found: {command.path}")
-
-    @override
-    def rename(self, command: BetaMemoryTool20250818RenameCommand) -> str:
-        old_full_path = self._validate_path(command.old_path)
-        new_full_path = self._validate_path(command.new_path)
-
-        if not old_full_path.exists():
-            raise FileNotFoundError(f"Source path not found: {command.old_path}")
-        if new_full_path.exists():
-            raise ValueError(f"Destination already exists: {command.new_path}")
-
-        new_full_path.parent.mkdir(parents=True, exist_ok=True)
-        old_full_path.rename(new_full_path)
-        return f"Renamed {command.old_path} to {command.new_path}"
-
-    @override
-    def clear_all_memory(self) -> str:
-        """Override the base implementation to provide file system clearing."""
-        if self.memory_root.exists():
-            shutil.rmtree(self.memory_root)
-        self.memory_root.mkdir(parents=True, exist_ok=True)
-        return "All memory cleared"
+DEFAULT_MEMORY_SYSTEM_PROMPT = """- ***DO NOT just store the conversation history**
+        - No need to mention your memory tool or what you are writing in it to the user, unless they ask
+        - Store facts about the user and their preferences
+        - Before responding, check memory to adjust technical depth and response style appropriately
+        - Keep memories up-to-date - remove outdated info, add new details as you learn them
+        - Use an xml format like <xml><name>John Doe</name></user></xml>"""
 
 
 class Spinner:
@@ -218,7 +69,7 @@ class Spinner:
 
 def conversation_loop():
     client = Anthropic()
-    memory = LocalFilesystemMemoryTool()
+    memory = BetaLocalFilesystemMemoryTool()
 
     messages: list[BetaMessageParam] = []
 
@@ -280,7 +131,7 @@ def conversation_loop():
                 print(f"   Cached: {cached_tokens:,} tokens")
                 print(f"   Uncached: {uncached_tokens:,} tokens")
 
-                threshold = CONTEXT_MANAGEMENT["edits"][0]["trigger"]["value"]  # type: ignore
+                threshold = DEFAULT_CONTEXT_MANAGEMENT["edits"][0]["trigger"]["value"]  # type: ignore
                 print(f"   Context clearing threshold: {threshold:,} tokens")
                 if input_tokens >= threshold:
                     print(f"   🧹 Context clearing should trigger soon!")
@@ -325,10 +176,10 @@ def conversation_loop():
                 betas=["context-management-2025-06-27"],
                 model="claude-sonnet-4-20250514",
                 max_tokens=2048,
-                system=MEMORY_SYSTEM_PROMPT,
+                system=DEFAULT_MEMORY_SYSTEM_PROMPT,
                 messages=messages,
                 tools=[memory],
-                context_management=cast(BetaContextManagementConfigParam, CONTEXT_MANAGEMENT),
+                context_management=DEFAULT_CONTEXT_MANAGEMENT,
             )
         except Exception:
             spinner.stop()
