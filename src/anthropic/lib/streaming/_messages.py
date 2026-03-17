@@ -348,6 +348,10 @@ def build_events(
     elif event.type == "content_block_delta":
         events_to_fire.append(event)
 
+        if event.index >= len(message_snapshot.content):
+            # Delta arrived for a block that was never started — skip gracefully.
+            return events_to_fire
+
         content_block = message_snapshot.content[event.index]
         if event.delta.type == "text_delta":
             if content_block.type == "text":
@@ -404,6 +408,10 @@ def build_events(
             if TYPE_CHECKING:  # type: ignore[unreachable]
                 assert_never(event.delta)
     elif event.type == "content_block_stop":
+        if event.index >= len(message_snapshot.content):
+            # Stop arrived for a block that was never started — skip gracefully.
+            return events_to_fire
+
         content_block = message_snapshot.content[event.index]
 
         event_to_fire = build(
@@ -454,7 +462,26 @@ def accumulate_event(
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
     if event.type == "content_block_start":
-        # TODO: check index
+        expected_index = len(current_snapshot.content)
+        if event.index > expected_index:
+            # The server skipped one or more indices (non-contiguous block start).
+            # Pad with placeholder text blocks so that subsequent delta/stop events
+            # that reference those indices don't raise an IndexError.
+            import warnings
+
+            warnings.warn(
+                f"content_block_start received out-of-order index {event.index} "
+                f"(expected {expected_index}). Padding snapshot with {event.index - expected_index} "
+                "placeholder block(s). This may indicate a protocol issue.",
+                RuntimeWarning,
+                stacklevel=4,
+            )
+            from ...types.parsed_message import ParsedTextBlock
+
+            for _ in range(event.index - expected_index):
+                current_snapshot.content.append(
+                    cast(Any, ParsedTextBlock.construct(type="text", text="", citations=None))
+                )
         current_snapshot.content.append(
             cast(
                 Any,  # Pydantic does not support generic unions at runtime
@@ -462,6 +489,10 @@ def accumulate_event(
             ),
         )
     elif event.type == "content_block_delta":
+        if event.index >= len(current_snapshot.content):
+            # Delta arrived for a block that was never started — skip gracefully.
+            return current_snapshot
+
         content = current_snapshot.content[event.index]
         if event.delta.type == "text_delta":
             if content.type == "text":
@@ -497,6 +528,10 @@ def accumulate_event(
             if TYPE_CHECKING:  # type: ignore[unreachable]
                 assert_never(event.delta)
     elif event.type == "content_block_stop":
+        if event.index >= len(current_snapshot.content):
+            # Stop arrived for a block that was never started — skip gracefully.
+            return current_snapshot
+
         content_block = current_snapshot.content[event.index]
         if content_block.type == "text" and is_given(output_format):
             content_block.parsed_output = parse_text(content_block.text, output_format)
