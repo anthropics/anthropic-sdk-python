@@ -117,9 +117,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
             for message in messages
         ]
         self._messages_modified = True
-        self.set_messages_params(
-            lambda params: {**params, "messages": [*params["messages"], *message_params]}
-        )
+        self.set_messages_params(lambda params: {**params, "messages": [*params["messages"], *message_params]})
         self._cached_tool_call_response = None
 
     def _should_stop(self) -> bool:

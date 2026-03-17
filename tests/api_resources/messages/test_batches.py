@@ -248,9 +248,7 @@ class TestBatches:
     @pytest.mark.parametrize("client", [False], indirect=True)
     def test_method_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/messages/batches/message_batch_id").mock(
-            return_value=httpx.Response(
-                200, json={"results_url": "/v1/messages/batches/message_batch_id/results"}
-            )
+            return_value=httpx.Response(200, json={"results_url": "/v1/messages/batches/message_batch_id/results"})
         )
         respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
             return_value=httpx.Response(
@@ -507,9 +505,7 @@ class TestAsyncBatches:
     @pytest.mark.parametrize("async_client", [False], indirect=True)
     async def test_method_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/messages/batches/message_batch_id").mock(
-            return_value=httpx.Response(
-                200, json={"results_url": "/v1/messages/batches/message_batch_id/results"}
-            )
+            return_value=httpx.Response(200, json={"results_url": "/v1/messages/batches/message_batch_id/results"})
         )
         respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
             return_value=httpx.Response(
