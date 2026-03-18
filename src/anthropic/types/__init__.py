@@ -43,6 +43,7 @@ from .parsed_message import (
 )
 from .thinking_block import ThinkingBlock as ThinkingBlock
 from .thinking_delta import ThinkingDelta as ThinkingDelta
+from .thinking_types import ThinkingTypes as ThinkingTypes
 from .tool_use_block import ToolUseBlock as ToolUseBlock
 from .citations_delta import CitationsDelta as CitationsDelta
 from .signature_delta import SignatureDelta as SignatureDelta
@@ -52,13 +53,16 @@ from .input_json_delta import InputJSONDelta as InputJSONDelta
 from .text_block_param import TextBlockParam as TextBlockParam
 from .tool_union_param import ToolUnionParam as ToolUnionParam
 from .base64_pdf_source import Base64PDFSource as Base64PDFSource
+from .effort_capability import EffortCapability as EffortCapability
 from .image_block_param import ImageBlockParam as ImageBlockParam
 from .model_list_params import ModelListParams as ModelListParams
 from .plain_text_source import PlainTextSource as PlainTextSource
 from .server_tool_usage import ServerToolUsage as ServerToolUsage
 from .tool_choice_param import ToolChoiceParam as ToolChoiceParam
 from .beta_billing_error import BetaBillingError as BetaBillingError
+from .capability_support import CapabilitySupport as CapabilitySupport
 from .message_stop_event import MessageStopEvent as MessageStopEvent
+from .model_capabilities import ModelCapabilities as ModelCapabilities
 from .server_tool_caller import ServerToolCaller as ServerToolCaller
 from .beta_error_response import BetaErrorResponse as BetaErrorResponse
 from .content_block_param import ContentBlockParam as ContentBlockParam
@@ -68,6 +72,7 @@ from .message_delta_usage import MessageDeltaUsage as MessageDeltaUsage
 from .message_start_event import MessageStartEvent as MessageStartEvent
 from .output_config_param import OutputConfigParam as OutputConfigParam
 from .text_citation_param import TextCitationParam as TextCitationParam
+from .thinking_capability import ThinkingCapability as ThinkingCapability
 from .user_location_param import UserLocationParam as UserLocationParam
 from .anthropic_beta_param import AnthropicBetaParam as AnthropicBetaParam
 from .beta_not_found_error import BetaNotFoundError as BetaNotFoundError
@@ -132,6 +137,7 @@ from .raw_content_block_stop_event import RawContentBlockStopEvent as RawContent
 from .web_search_tool_result_block import WebSearchToolResultBlock as WebSearchToolResultBlock
 from .web_search_tool_result_error import WebSearchToolResultError as WebSearchToolResultError
 from .cache_control_ephemeral_param import CacheControlEphemeralParam as CacheControlEphemeralParam
+from .context_management_capability import ContextManagementCapability as ContextManagementCapability
 from .raw_content_block_delta_event import RawContentBlockDeltaEvent as RawContentBlockDeltaEvent
 from .raw_content_block_start_event import RawContentBlockStartEvent as RawContentBlockStartEvent
 from .redacted_thinking_block_param import RedactedThinkingBlockParam as RedactedThinkingBlockParam
