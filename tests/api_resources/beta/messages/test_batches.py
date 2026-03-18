@@ -66,9 +66,9 @@ class TestBatches:
                             "id": "id",
                             "skills": [
                                 {
-                                    "skill_id": "x",
+                                    "skill_id": "pdf",
                                     "type": "anthropic",
-                                    "version": "x",
+                                    "version": "latest",
                                 }
                             ],
                         },
@@ -508,9 +508,9 @@ class TestAsyncBatches:
                             "id": "id",
                             "skills": [
                                 {
-                                    "skill_id": "x",
+                                    "skill_id": "pdf",
                                     "type": "anthropic",
-                                    "version": "x",
+                                    "version": "latest",
                                 }
                             ],
                         },

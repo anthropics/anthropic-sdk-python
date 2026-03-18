@@ -27,6 +27,7 @@ from .beta_document_block import BetaDocumentBlock as BetaDocumentBlock
 from .beta_metadata_param import BetaMetadataParam as BetaMetadataParam
 from .beta_thinking_block import BetaThinkingBlock as BetaThinkingBlock
 from .beta_thinking_delta import BetaThinkingDelta as BetaThinkingDelta
+from .beta_thinking_types import BetaThinkingTypes as BetaThinkingTypes
 from .beta_tool_use_block import BetaToolUseBlock as BetaToolUseBlock
 from .skill_create_params import SkillCreateParams as SkillCreateParams
 from .skill_list_response import SkillListResponse as SkillListResponse
@@ -44,12 +45,15 @@ from .message_create_params import MessageCreateParams as MessageCreateParams
 from .skill_create_response import SkillCreateResponse as SkillCreateResponse
 from .skill_delete_response import SkillDeleteResponse as SkillDeleteResponse
 from .beta_base64_pdf_source import BetaBase64PDFSource as BetaBase64PDFSource
+from .beta_effort_capability import BetaEffortCapability as BetaEffortCapability
 from .beta_image_block_param import BetaImageBlockParam as BetaImageBlockParam
 from .beta_mcp_toolset_param import BetaMCPToolsetParam as BetaMCPToolsetParam
 from .beta_plain_text_source import BetaPlainTextSource as BetaPlainTextSource
 from .beta_server_tool_usage import BetaServerToolUsage as BetaServerToolUsage
 from .beta_tool_choice_param import BetaToolChoiceParam as BetaToolChoiceParam
+from .beta_capability_support import BetaCapabilitySupport as BetaCapabilitySupport
 from .beta_mcp_tool_use_block import BetaMCPToolUseBlock as BetaMCPToolUseBlock
+from .beta_model_capabilities import BetaModelCapabilities as BetaModelCapabilities
 from .beta_server_tool_caller import BetaServerToolCaller as BetaServerToolCaller
 from .skill_retrieve_response import SkillRetrieveResponse as SkillRetrieveResponse
 from .beta_content_block_param import BetaContentBlockParam as BetaContentBlockParam
@@ -57,6 +61,7 @@ from .beta_direct_caller_param import BetaDirectCallerParam as BetaDirectCallerP
 from .beta_message_delta_usage import BetaMessageDeltaUsage as BetaMessageDeltaUsage
 from .beta_output_config_param import BetaOutputConfigParam as BetaOutputConfigParam
 from .beta_text_citation_param import BetaTextCitationParam as BetaTextCitationParam
+from .beta_thinking_capability import BetaThinkingCapability as BetaThinkingCapability
 from .beta_user_location_param import BetaUserLocationParam as BetaUserLocationParam
 from .beta_message_tokens_count import BetaMessageTokensCount as BetaMessageTokensCount
 from .beta_thinking_block_param import BetaThinkingBlockParam as BetaThinkingBlockParam
@@ -125,6 +130,7 @@ from .beta_request_document_block_param import BetaRequestDocumentBlockParam as 
 from .beta_web_search_tool_result_block import BetaWebSearchToolResultBlock as BetaWebSearchToolResultBlock
 from .beta_web_search_tool_result_error import BetaWebSearchToolResultError as BetaWebSearchToolResultError
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam as BetaCacheControlEphemeralParam
+from .beta_context_management_capability import BetaContextManagementCapability as BetaContextManagementCapability
 from .beta_mcp_tool_default_config_param import BetaMCPToolDefaultConfigParam as BetaMCPToolDefaultConfigParam
 from .beta_raw_content_block_delta_event import BetaRawContentBlockDeltaEvent as BetaRawContentBlockDeltaEvent
 from .beta_raw_content_block_start_event import BetaRawContentBlockStartEvent as BetaRawContentBlockStartEvent

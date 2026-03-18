@@ -53,9 +53,9 @@ class TestMessages:
                 "id": "id",
                 "skills": [
                     {
-                        "skill_id": "x",
+                        "skill_id": "pdf",
                         "type": "anthropic",
-                        "version": "x",
+                        "version": "latest",
                     }
                 ],
             },
@@ -241,9 +241,9 @@ class TestMessages:
                 "id": "id",
                 "skills": [
                     {
-                        "skill_id": "x",
+                        "skill_id": "pdf",
                         "type": "anthropic",
-                        "version": "x",
+                        "version": "latest",
                     }
                 ],
             },
@@ -597,9 +597,9 @@ class TestAsyncMessages:
                 "id": "id",
                 "skills": [
                     {
-                        "skill_id": "x",
+                        "skill_id": "pdf",
                         "type": "anthropic",
-                        "version": "x",
+                        "version": "latest",
                     }
                 ],
             },
@@ -785,9 +785,9 @@ class TestAsyncMessages:
                 "id": "id",
                 "skills": [
                     {
-                        "skill_id": "x",
+                        "skill_id": "pdf",
                         "type": "anthropic",
-                        "version": "x",
+                        "version": "latest",
                     }
                 ],
             },
