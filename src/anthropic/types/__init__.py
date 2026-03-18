@@ -5,6 +5,7 @@ from __future__ import annotations
 from .model import Model as Model
 from .usage import Usage as Usage
 from .shared import (
+    ErrorType as ErrorType,
     ErrorObject as ErrorObject,
     BillingError as BillingError,
     ErrorResponse as ErrorResponse,
