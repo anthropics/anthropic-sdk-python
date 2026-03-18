@@ -7,6 +7,7 @@ from anthropic.types import (
     BillingError,
     ErrorObject,
     ErrorResponse,
+    ErrorType,
     GatewayTimeoutError,
     InvalidRequestError,
     NotFoundError,
