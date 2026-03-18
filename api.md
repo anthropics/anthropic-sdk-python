@@ -227,7 +227,15 @@ Methods:
 Types:
 
 ```python
-from anthropic.types import ModelInfo
+from anthropic.types import (
+    CapabilitySupport,
+    ContextManagementCapability,
+    EffortCapability,
+    ModelCapabilities,
+    ModelInfo,
+    ThinkingCapability,
+    ThinkingTypes,
+)
 ```
 
 Methods:
@@ -261,7 +269,15 @@ from anthropic.types import (
 Types:
 
 ```python
-from anthropic.types.beta import BetaModelInfo
+from anthropic.types.beta import (
+    BetaCapabilitySupport,
+    BetaContextManagementCapability,
+    BetaEffortCapability,
+    BetaModelCapabilities,
+    BetaModelInfo,
+    BetaThinkingCapability,
+    BetaThinkingTypes,
+)
 ```
 
 Methods:
