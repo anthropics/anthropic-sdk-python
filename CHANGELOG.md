@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.86.0 (2026-03-18)
+
+Full Changelog: [v0.85.0...v0.86.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.85.0...v0.86.0)
+
+### Features
+
+* add support for filesystem memory tools ([#1247](https://github.com/anthropics/anthropic-sdk-python/issues/1247)) ([235d218](https://github.com/anthropics/anthropic-sdk-python/commit/235d218211ac4b8f1aa37e29bedc998bfb6ce77d))
+* **api:** manual updates ([86dbe4a](https://github.com/anthropics/anthropic-sdk-python/commit/86dbe4aa58386bfb8d1497debf342e929e9bb5e5))
+* **api:** manual updates ([45d9cc0](https://github.com/anthropics/anthropic-sdk-python/commit/45d9cc0914200a43743ab11aa311392e9d8c1b4f))
+
+
+### Bug Fixes
+
+* AsyncAnthropic._make_status_error missing 529 and 413 cases ([#1244](https://github.com/anthropics/anthropic-sdk-python/issues/1244)) ([05220bc](https://github.com/anthropics/anthropic-sdk-python/commit/05220bc1c1079fe01f5c4babc007ec7a990859d9))
+* **deps:** bump minimum typing-extensions version ([09ab112](https://github.com/anthropics/anthropic-sdk-python/commit/09ab112289815ba6f19d8fb3da1e715748182799))
+* **pydantic:** do not pass `by_alias` unless set ([b17480e](https://github.com/anthropics/anthropic-sdk-python/commit/b17480e9d06613aa597dd40d5a47f4f1250ac762))
+
+
+### Chores
+
+* **internal:** tweak CI branches ([3c0308c](https://github.com/anthropics/anthropic-sdk-python/commit/3c0308c97804ababfd3f37330e129e68ccfe4bbc))
+
 ## 0.85.0 (2026-03-16)
 
 Full Changelog: [v0.84.0...v0.85.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.84.0...v0.85.0)
