@@ -1,18 +1,18 @@
+from __future__ import annotations
+
 import json
 from typing import Any, List
-from typing_extensions import Literal
 from unittest.mock import MagicMock, NonCallableMagicMock
 
 import pytest
 
 from anthropic import Anthropic, beta_tool
 from anthropic._compat import PYDANTIC_V1
-from anthropic.lib.tools import BetaFunctionToolResultType
-from anthropic.lib.tools._beta_functions import ToolError
 from anthropic.lib.tools._beta_runner import BetaToolRunner
+from anthropic.lib.tools._beta_functions import ToolError
 
 
-def _make_tool_call_msg(tool_name: str, tool_input: dict, tool_id: str = "toolu_01") -> Any:
+def _make_tool_call_msg(tool_name: str, tool_input: dict[str, Any], tool_id: str = "toolu_01") -> Any:
     msg = NonCallableMagicMock()
     msg.role = "assistant"
     msg.stop_reason = "tool_use"
@@ -56,11 +56,11 @@ def _make_text_msg(text: str) -> Any:
     return msg
 
 
-def _make_runner(tool_fn: Any, responses: list) -> BetaToolRunner:
+def _make_runner(tool_fn: Any, responses: list[Any]) -> BetaToolRunner[Any]:
     client = Anthropic.__new__(Anthropic)
-    idx = {"n": 0}
+    idx: dict[str, int] = {"n": 0}
 
-    def fake_parse(**kwargs: Any) -> Any:
+    def fake_parse(**_kwargs: Any) -> Any:
         r = responses[idx["n"]]
         idx["n"] += 1
         return r
@@ -69,10 +69,10 @@ def _make_runner(tool_fn: Any, responses: list) -> BetaToolRunner:
     bm.parse.side_effect = fake_parse
     b = MagicMock()
     b.messages = bm
-    client.beta = b
+    object.__setattr__(client, "beta", b)
 
     return BetaToolRunner(
-        params={
+        params={  # type: ignore[arg-type]
             "model": "claude-haiku-4-5",
             "max_tokens": 512,
             "messages": [{"role": "user", "content": "test"}],
@@ -88,7 +88,7 @@ def _make_runner(tool_fn: Any, responses: list) -> BetaToolRunner:
 class TestObservabilityHooks:
     def test_hooks_default_to_none(self) -> None:
         @beta_tool
-        def get_weather(location: str) -> str:
+        def get_weather(location: str) -> str:  # noqa: ARG001
             """Get weather. Args: location: City name."""
             return json.dumps({"temp": "22C"})
 
@@ -105,7 +105,7 @@ class TestObservabilityHooks:
         calls: List[tuple[str, Any]] = []
 
         @beta_tool
-        def get_weather(location: str) -> str:
+        def get_weather(location: str) -> str:  # noqa: ARG001
             """Get weather. Args: location: City name."""
             return json.dumps({"temp": "22C"})
 
@@ -124,7 +124,7 @@ class TestObservabilityHooks:
         results: List[tuple[str, Any]] = []
 
         @beta_tool
-        def get_weather(location: str) -> str:
+        def get_weather(location: str) -> str:  # noqa: ARG001
             """Get weather. Args: location: City name."""
             return json.dumps({"temp": "22C"})
 
@@ -132,7 +132,7 @@ class TestObservabilityHooks:
             get_weather,
             [_make_tool_call_msg("get_weather", {"location": "London"}), _make_text_msg("done")],
         )
-        runner.on_tool_result = lambda name, result: results.append((name, result))
+        runner.on_tool_result = lambda _name, _result: results.append((_name, _result))
         runner.until_done()
 
         assert len(results) == 1
@@ -142,7 +142,7 @@ class TestObservabilityHooks:
         events: List[str] = []
 
         @beta_tool
-        def get_weather(location: str) -> str:
+        def get_weather(location: str) -> str:  # noqa: ARG001
             """Get weather. Args: location: City name."""
             return json.dumps({"temp": "22C"})
 
@@ -150,8 +150,8 @@ class TestObservabilityHooks:
             get_weather,
             [_make_tool_call_msg("get_weather", {"location": "Paris"}), _make_text_msg("done")],
         )
-        runner.on_tool_call = lambda name, inp: events.append("call")
-        runner.on_tool_result = lambda name, result: events.append("result")
+        runner.on_tool_call = lambda _name, _inp: events.append("call")
+        runner.on_tool_result = lambda _name, _result: events.append("result")
         runner.until_done()
 
         assert events == ["call", "result"]
@@ -181,7 +181,7 @@ class TestObservabilityHooks:
         errors: List[tuple[str, BaseException]] = []
 
         @beta_tool
-        def crash(msg: str) -> str:
+        def crash(msg: str) -> str:  # noqa: ARG001
             """Crash. Args: msg: ignored."""
             raise RuntimeError("unexpected crash")
 
@@ -211,8 +211,8 @@ class TestObservabilityHooks:
             divide,
             [_make_tool_call_msg("divide", {"a": 5.0, "b": 0.0}), _make_text_msg("done")],
         )
-        runner.on_tool_result = lambda name, v: results.append(v)
-        runner.on_tool_error = lambda name, e: errors.append(e)
+        runner.on_tool_result = lambda _name, v: results.append(v)
+        runner.on_tool_error = lambda _name, e: errors.append(e)
         runner.until_done()
 
         assert results == []
@@ -220,7 +220,7 @@ class TestObservabilityHooks:
 
     def test_no_hooks_runner_works_normally(self) -> None:
         @beta_tool
-        def get_weather(location: str) -> str:
+        def get_weather(location: str) -> str:  # noqa: ARG001
             """Get weather. Args: location: City name."""
             return json.dumps({"temp": "22C"})
 
