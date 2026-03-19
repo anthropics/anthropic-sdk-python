@@ -9,7 +9,15 @@ import httpx
 
 from ... import _legacy_response
 from ..._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
-from ..._utils import is_given, extract_files, maybe_transform, strip_not_given, deepcopy_minimal, async_maybe_transform
+from ..._utils import (
+    is_given,
+    extract_files,
+    path_template,
+    maybe_transform,
+    strip_not_given,
+    deepcopy_minimal,
+    async_maybe_transform,
+)
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -166,7 +174,7 @@ class Files(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
         return self._delete(
-            f"/v1/files/{file_id}?beta=true",
+            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -216,7 +224,7 @@ class Files(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
         return self._get(
-            f"/v1/files/{file_id}/content?beta=true",
+            path_template("/v1/files/{file_id}/content?beta=true", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -265,7 +273,7 @@ class Files(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
         return self._get(
-            f"/v1/files/{file_id}?beta=true",
+            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -460,7 +468,7 @@ class AsyncFiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
         return await self._delete(
-            f"/v1/files/{file_id}?beta=true",
+            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -510,7 +518,7 @@ class AsyncFiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
         return await self._get(
-            f"/v1/files/{file_id}/content?beta=true",
+            path_template("/v1/files/{file_id}/content?beta=true", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -559,7 +567,7 @@ class AsyncFiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
         return await self._get(
-            f"/v1/files/{file_id}?beta=true",
+            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
