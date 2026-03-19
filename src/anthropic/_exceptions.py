@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+from typing import Union, cast
 from typing_extensions import Literal
 
 import httpx
+
+from ._utils import is_dict
+from .types.shared.error_type import ErrorType
 
 __all__ = [
     "BadRequestError",
@@ -60,12 +64,19 @@ class APIStatusError(APIError):
     response: httpx.Response
     status_code: int
     request_id: str | None
+    type: ErrorType | None
 
     def __init__(self, message: str, *, response: httpx.Response, body: object | None) -> None:
         super().__init__(message, response.request, body=body)
         self.response = response
         self.status_code = response.status_code
         self.request_id = response.headers.get("request-id")
+
+        self.type = None
+        if is_dict(body):
+            error = body.get("error")
+            if is_dict(error):
+                self.type = cast(Union[ErrorType, None], error.get("type"))
 
 
 class APIConnectionError(APIError):
