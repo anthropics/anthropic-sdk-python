@@ -1113,6 +1113,23 @@ class TestAnthropic:
         assert exc_info.value.response.status_code == 302
         assert exc_info.value.response.headers["Location"] == f"{base_url}/redirected"
 
+    @pytest.mark.respx(base_url=base_url)
+    def test_status_error_type_field(self, respx_mock: MockRouter, client: Anthropic) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(
+                400,
+                json={"type": "error", "error": {"type": "invalid_request_error", "message": "Bad request"}},
+            )
+        )
+        with pytest.raises(APIStatusError) as exc_info:
+            client.messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Hello"}],
+                model="claude-opus-4-6",
+            )
+        assert exc_info.value.type == "invalid_request_error"
+        assert exc_info.value.status_code == 400
+
 
 class TestAsyncAnthropic:
     @pytest.mark.respx(base_url=base_url)
@@ -2125,3 +2142,20 @@ class TestAsyncAnthropic:
 
         assert exc_info.value.response.status_code == 302
         assert exc_info.value.response.headers["Location"] == f"{base_url}/redirected"
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_status_error_type_field(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(
+                400,
+                json={"type": "error", "error": {"type": "invalid_request_error", "message": "Bad request"}},
+            )
+        )
+        with pytest.raises(APIStatusError) as exc_info:
+            await async_client.messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Hello"}],
+                model="claude-opus-4-6",
+            )
+        assert exc_info.value.type == "invalid_request_error"
+        assert exc_info.value.status_code == 400
