@@ -19,6 +19,28 @@ if TYPE_CHECKING:
 
 
 _T = TypeVar("_T")
+# Mapping from SSE error type to HTTP status code
+# See: https://docs.anthropic.com/en/api/error-codes
+_SSE_ERROR_TYPE_TO_STATUS = {
+    "overloaded_error": 529,
+    "rate_limit_error": 429,
+    "api_error": 500,
+    "internal_server_error": 500,
+    "authentication_error": 401,
+    "invalid_request_error": 400,
+    "not_found_error": 404,
+}
+
+
+def _get_status_code_from_sse_error(body: dict, default_status_code: int) -> int:
+    """Extract the appropriate HTTP status code from an SSE error body."""
+    if isinstance(body, dict) and "error" in body:
+        error_type = body["error"].get("type")
+        if error_type in _SSE_ERROR_TYPE_TO_STATUS:
+            return _SSE_ERROR_TYPE_TO_STATUS[error_type]
+    return default_status_code
+
+
 
 
 class _SyncStreamMeta(abc.ABCMeta):
@@ -111,10 +133,21 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
                     except Exception:
                         err_msg = sse.data or f"Error code: {response.status_code}"
 
+                    # Create a mock response with the correct status code based on SSE error type
+                    status_code = _get_status_code_from_sse_error(
+                        body if isinstance(body, dict) else {},
+                        response.status_code
+                    )
+                    error_response = httpx.Response(
+                        status_code=status_code,
+                        content=response.content,
+                        headers=response.headers,
+                        request=response.request,
+                    )
                     raise self._client._make_status_error(
                         err_msg,
                         body=body,
-                        response=self.response,
+                        response=error_response,
                     )
         finally:
             # Ensure the response is closed even if the consumer doesn't read all data
@@ -231,10 +264,21 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
                     except Exception:
                         err_msg = sse.data or f"Error code: {response.status_code}"
 
+                    # Create a mock response with the correct status code based on SSE error type
+                    status_code = _get_status_code_from_sse_error(
+                        body if isinstance(body, dict) else {},
+                        response.status_code
+                    )
+                    error_response = httpx.Response(
+                        status_code=status_code,
+                        content=response.content,
+                        headers=response.headers,
+                        request=response.request,
+                    )
                     raise self._client._make_status_error(
                         err_msg,
                         body=body,
-                        response=self.response,
+                        response=error_response,
                     )
         finally:
             # Ensure the response is closed even if the consumer doesn't read all data
