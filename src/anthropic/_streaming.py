@@ -42,6 +42,28 @@ class _SyncStreamMeta(abc.ABCMeta):
         return False
 
 
+# Mapping from SSE error event types to HTTP status codes
+# Reference: https://docs.anthropic.com/en/docs/errors
+_SSE_ERROR_TYPE_TO_STATUS_CODE: dict[str, int] = {
+    "overloaded_error": 529,
+    "rate_limit_error": 429,
+    "api_error": 500,
+    "authentication_error": 401,
+    "invalid_request_error": 400,
+    "not_found_error": 404,
+    "permission_error": 403,
+}
+
+
+def _extract_sse_error_status_code(body: object) -> int | None:
+    """Extract HTTP status code from SSE error event body."""
+    if isinstance(body, dict):
+        error_type = body.get("error", {}).get("type") if isinstance(body.get("error"), dict) else body.get("type")
+        if isinstance(error_type, str):
+            return _SSE_ERROR_TYPE_TO_STATUS_CODE.get(error_type)
+    return None
+
+
 class Stream(Generic[_T], metaclass=_SyncStreamMeta):
     """Provides the core interface to iterate over a synchronous stream response."""
 
@@ -110,6 +132,21 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
                         err_msg = f"{body}"
                     except Exception:
                         err_msg = sse.data or f"Error code: {response.status_code}"
+
+                    # Extract status code from SSE error event
+                    status_code = _extract_sse_error_status_code(body)
+                    if status_code is not None:
+                        # Create a synthetic response with the correct status code
+                        error_response = httpx.Response(
+                            status_code=status_code,
+                            content=err_msg.encode() if err_msg else b"",
+                            request=response.request,
+                        )
+                        raise self._client._make_status_error(
+                            err_msg,
+                            body=body,
+                            response=error_response,
+                        )
 
                     raise self._client._make_status_error(
                         err_msg,
@@ -230,6 +267,21 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
                         err_msg = f"{body}"
                     except Exception:
                         err_msg = sse.data or f"Error code: {response.status_code}"
+
+                    # Extract status code from SSE error event
+                    status_code = _extract_sse_error_status_code(body)
+                    if status_code is not None:
+                        # Create a synthetic response with the correct status code
+                        error_response = httpx.Response(
+                            status_code=status_code,
+                            content=err_msg.encode() if err_msg else b"",
+                            request=response.request,
+                        )
+                        raise self._client._make_status_error(
+                            err_msg,
+                            body=body,
+                            response=error_response,
+                        )
 
                     raise self._client._make_status_error(
                         err_msg,
