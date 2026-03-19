@@ -51,37 +51,41 @@ def _extract_last_json(text: str) -> str | None:
         if last_close == -1:
             continue
 
-        # Find the matching open bracket by scanning forward from each candidate.
-        # We use a simple depth-count approach on the substring ending at last_close.
+        # Scan backwards through all candidate open-bracket positions so that a
+        # malformed/partial JSON object appearing *before* the final valid payload
+        # does not shadow it.  We try each position from the end towards the start
+        # and return the first (i.e. rightmost) substring that has balanced
+        # braces/brackets, which corresponds to the last valid JSON in the text.
         candidate = stripped[: last_close + 1]
-        first_open = candidate.find(open_char)
-        if first_open == -1:
-            continue
 
-        json_candidate = candidate[first_open:]
-        # Quick sanity check: balanced braces/brackets.
-        depth = 0
-        in_string = False
-        escape_next = False
-        for ch in json_candidate:
-            if escape_next:
-                escape_next = False
+        for start in range(last_close, -1, -1):
+            if candidate[start] != open_char:
                 continue
-            if ch == "\\" and in_string:
-                escape_next = True
-                continue
-            if ch == '"':
-                in_string = not in_string
-                continue
-            if in_string:
-                continue
-            if ch == open_char:
-                depth += 1
-            elif ch == close_char:
-                depth -= 1
 
-        if depth == 0:
-            return json_candidate
+            json_candidate = candidate[start : last_close + 1]
+            # Quick sanity check: balanced braces/brackets.
+            depth = 0
+            in_string = False
+            escape_next = False
+            for ch in json_candidate:
+                if escape_next:
+                    escape_next = False
+                    continue
+                if ch == "\\" and in_string:
+                    escape_next = True
+                    continue
+                if ch == '"':
+                    in_string = not in_string
+                    continue
+                if in_string:
+                    continue
+                if ch == open_char:
+                    depth += 1
+                elif ch == close_char:
+                    depth -= 1
+
+            if depth == 0:
+                return json_candidate
 
     return None
 

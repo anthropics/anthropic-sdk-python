@@ -14,9 +14,6 @@ Bug 2 – malformed JSON prefix: when the model prefixes the JSON payload with
 
 from __future__ import annotations
 
-from typing import Optional
-from unittest.mock import MagicMock
-
 import pytest
 from pydantic import BaseModel, ValidationError
 
@@ -69,6 +66,14 @@ class TestParseText:
         assert isinstance(result, Location)
         assert result.city == "Tokyo"
         assert result.country == "Japan"
+
+    def test_malformed_prefix_with_partial_object_recovers_last_json(self) -> None:
+        """Prefix contains a broken JSON object before the final valid payload."""
+        text = '{"city": "Unfinished\ntail garbage\n{"city": "Berlin", "country": "Germany"}'
+        result = parse_text(text, Location)
+        assert isinstance(result, Location)
+        assert result.city == "Berlin"
+        assert result.country == "Germany"
 
     def test_completely_invalid_text_raises_validation_error(self) -> None:
         with pytest.raises(ValidationError):
