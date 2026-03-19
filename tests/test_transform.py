@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import io
+import time
 import pathlib
 from typing import Any, Dict, List, Union, TypeVar, Iterable, Optional, cast
 from datetime import date, datetime
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Protocol, Required, Annotated, TypedDict
 
 import pytest
 
@@ -19,6 +20,20 @@ from anthropic._compat import PYDANTIC_V1
 from anthropic._models import BaseModel
 
 _T = TypeVar("_T")
+
+
+class _CachedTransformDispatch(Protocol):
+    def __call__(self, inner_type: type) -> tuple[int, Any]: ...
+
+    def cache_clear(self) -> None: ...
+
+    def cache_info(self) -> Any: ...
+
+
+class _CacheInfo(Protocol):
+    hits: int
+    misses: int
+
 
 SAMPLE_FILE_PATH = pathlib.Path(__file__).parent.joinpath("sample_file.txt")
 
@@ -458,3 +473,155 @@ async def test_strips_notgiven(use_async: bool) -> None:
 async def test_strips_omit(use_async: bool) -> None:
     assert await transform({"foo_bar": "bar"}, Foo1, use_async) == {"fooBar": "bar"}
     assert await transform({"foo_bar": omit}, Foo1, use_async) == {}
+
+
+# --- Dispatch cache and performance tests ---
+
+
+class NoAnnotationDict(TypedDict):
+    """TypedDict with no PropertyInfo annotations — the common case for Messages API types."""
+
+    role: str
+    content: str
+
+
+class NestedNoAnnotation(TypedDict):
+    messages: List[NoAnnotationDict]
+    model: str
+
+
+class MixedAnnotations(TypedDict, total=False):
+    name: Annotated[str, PropertyInfo(alias="fullName")]
+    age: int
+    tags: List[str]
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_no_annotation_typeddict_passthrough(use_async: bool) -> None:
+    """TypedDicts with no PropertyInfo should still transform correctly (no key renames)."""
+    result = await transform({"role": "user", "content": "hello"}, NoAnnotationDict, use_async)
+    assert result == {"role": "user", "content": "hello"}
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_nested_no_annotation(use_async: bool) -> None:
+    """Nested TypedDicts with no PropertyInfo should preserve structure."""
+    data = {
+        "messages": [
+            {"role": "user", "content": "hi"},
+            {"role": "assistant", "content": "hello"},
+        ],
+        "model": "claude-3",
+    }
+    result = await transform(data, NestedNoAnnotation, use_async)
+    assert result == data
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_mixed_annotations_still_work(use_async: bool) -> None:
+    """Types with PropertyInfo annotations continue to work correctly with caching."""
+    result = await transform({"name": "Alice", "age": 30, "tags": ["a", "b"]}, MixedAnnotations, use_async)
+    assert result == {"fullName": "Alice", "age": 30, "tags": ["a", "b"]}
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_str_list_skip_optimization(use_async: bool) -> None:
+    """Lists of str should be returned as-is (expanded _no_transform_needed)."""
+    data = ["a", "b", "c"]
+    result = await transform(data, List[str], use_async)
+    assert result is data
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_bool_list_skip_optimization(use_async: bool) -> None:
+    """Lists of bool should be returned as-is (expanded _no_transform_needed)."""
+    data = [True, False, True]
+    result = await transform(data, List[bool], use_async)
+    assert result is data
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_cached_dispatch_consistency(use_async: bool) -> None:
+    """Verify that repeated transforms with the same type produce identical results."""
+    data = {"name": "Bob", "age": 25}
+    for _ in range(100):
+        result = await transform(data, MixedAnnotations, use_async)
+        assert result == {"fullName": "Bob", "age": 25}
+
+
+@pytest.mark.asyncio
+async def test_large_message_list_performance() -> None:
+    """Verify that transforming large message lists completes in reasonable time.
+
+    This simulates the real-world scenario from issue #1195 where large
+    conversation histories cause excessive CPU usage in _transform_recursive.
+    Uses a relative comparison instead of a wall-clock threshold to avoid
+    flaky failures in slow CI environments.
+    """
+    messages = [{"role": "user" if i % 2 == 0 else "assistant", "content": f"Message {i}"} for i in range(10000)]
+    data = {"messages": messages, "model": "claude-3"}
+
+    # Measure sync transform
+    start = time.monotonic()
+    result = _transform(data, NestedNoAnnotation)
+    sync_elapsed = time.monotonic() - start
+
+    assert len(result["messages"]) == 10000
+    assert result["messages"][0] == {"role": "user", "content": "Message 0"}
+
+    # Measure async transform
+    start = time.monotonic()
+    async_result = await _async_transform(data, NestedNoAnnotation)
+    async_elapsed = time.monotonic() - start
+
+    assert async_result == result
+
+    # Relative check: async should not be more than 10x slower than sync.
+    # This avoids brittle wall-clock thresholds while still catching regressions.
+    assert async_elapsed < sync_elapsed * 10, (
+        f"Async transform ({async_elapsed:.3f}s) was >10x slower than "
+        f"sync ({sync_elapsed:.3f}s)"
+    )
+
+
+@pytest.mark.asyncio
+async def test_dispatch_cache_hit() -> None:
+    """Verify the dispatch cache is populated after first use."""
+    from anthropic._utils._transform import _cached_transform_dispatch as cached_transform_dispatch_fn
+
+    cached_transform_dispatch = cast(_CachedTransformDispatch, cached_transform_dispatch_fn)
+
+    # Clear cache to get a clean baseline
+    cached_transform_dispatch.cache_clear()
+
+    # First call populates the cache
+    _transform({"role": "user", "content": "hi"}, NoAnnotationDict)
+    info = cast(_CacheInfo, cached_transform_dispatch.cache_info())
+    assert info.misses > 0, "Expected cache misses on first call"
+
+    # Second call should hit the cache
+    misses_before = info.misses
+    _transform({"role": "user", "content": "hello"}, NoAnnotationDict)
+    info2 = cast(_CacheInfo, cached_transform_dispatch.cache_info())
+    assert info2.hits > 0, "Expected cache hits on second call"
+    assert info2.misses == misses_before, "Expected no new cache misses on second call"
+
+
+@pytest.mark.asyncio
+async def test_field_key_map_cache() -> None:
+    """Verify that _get_field_key_map caches key transformations."""
+    from anthropic._utils._transform import _get_field_key_map
+
+    # No aliases
+    key_map = _get_field_key_map(NoAnnotationDict)
+    assert key_map == {}, "Expected empty key map for TypedDict with no aliases"
+
+    # With alias
+    key_map = _get_field_key_map(MixedAnnotations)
+    assert key_map == {"name": "fullName"}, "Expected alias mapping for 'name' → 'fullName'"
