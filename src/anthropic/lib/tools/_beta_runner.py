@@ -90,6 +90,9 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         self._max_iterations = max_iterations
         self._iteration_count = 0
         self._compaction_control = compaction_control
+        self.on_tool_call: Callable[[str, object], None] | None = None
+        self.on_tool_result: Callable[[str, object], None] | None = None
+        self.on_tool_error: Callable[[str, BaseException], None] | None = None
 
     def set_messages_params(
         self,
@@ -187,7 +190,6 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         if tokens_used < threshold:
             return False
 
-        # Perform compaction
         log.info(f"Token usage {tokens_used} has exceeded the threshold of {threshold}. Performing compaction.")
 
         model = self._compaction_control.get("model", self._params["model"])
@@ -195,8 +197,6 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         messages = list(self._params["messages"])
 
         if messages[-1]["role"] == "assistant":
-            # Remove tool_use blocks from the last message to avoid 400 error
-            # (tool_use requires tool_result, which we don't have yet)
             non_tool_blocks = [
                 block
                 for block in messages[-1]["content"]
@@ -255,14 +255,12 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                 message = self._get_last_message()
                 assert message is not None
 
-                # Update container from response for programmatic tool calling support
                 last_assistant_message = self._get_last_assistant_message()
                 if last_assistant_message is not None and last_assistant_message.container is not None:
                     self._params["container"] = last_assistant_message.container.id
 
             self._iteration_count += 1
 
-            # If the compaction was performed, skip tool call generation this iteration
             if not self._check_and_compact():
                 response = self.generate_tool_call_response()
                 if response is None:
@@ -331,10 +329,17 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                 )
                 continue
 
+            if self.on_tool_call is not None:
+                self.on_tool_call(tool_use.name, tool_use.input)
+
             try:
                 result = tool.call(tool_use.input)
                 results.append({"type": "tool_result", "tool_use_id": tool_use.id, "content": result})
+                if self.on_tool_result is not None:
+                    self.on_tool_result(tool_use.name, result)
             except ToolError as exc:
+                if self.on_tool_error is not None:
+                    self.on_tool_error(tool_use.name, exc)
                 results.append(
                     {
                         "type": "tool_result",
@@ -345,6 +350,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                 )
             except Exception as exc:
                 log.exception(f"Error occurred while calling tool: {tool.name}", exc_info=exc)
+                if self.on_tool_error is not None:
+                    self.on_tool_error(tool_use.name, exc)
                 results.append(
                     {
                         "type": "tool_result",
@@ -459,7 +466,6 @@ class BaseAsyncToolRunner(
         if tokens_used < threshold:
             return False
 
-        # Perform compaction
         log.info(f"Token usage {tokens_used} has exceeded the threshold of {threshold}. Performing compaction.")
 
         model = self._compaction_control.get("model", self._params["model"])
@@ -467,8 +473,6 @@ class BaseAsyncToolRunner(
         messages = list(self._params["messages"])
 
         if messages[-1]["role"] == "assistant":
-            # Remove tool_use blocks from the last message to avoid 400 error
-            # (tool_use requires tool_result, which we don't have yet)
             non_tool_blocks = [
                 block
                 for block in messages[-1]["content"]
@@ -527,14 +531,12 @@ class BaseAsyncToolRunner(
                 message = await self._get_last_message()
                 assert message is not None
 
-                # Update container from response for programmatic tool calling support
                 last_assistant_message = await self._get_last_assistant_message()
                 if last_assistant_message is not None and last_assistant_message.container is not None:
                     self._params["container"] = last_assistant_message.container.id
 
             self._iteration_count += 1
 
-            # If the compaction was performed, skip tool call generation this iteration
             if not await self._check_and_compact():
                 response = await self.generate_tool_call_response()
                 if response is None:
@@ -623,10 +625,17 @@ class BaseAsyncToolRunner(
                 )
                 continue
 
+            if self.on_tool_call is not None:
+                self.on_tool_call(tool_use.name, tool_use.input)
+
             try:
                 result = await tool.call(tool_use.input)
                 results.append({"type": "tool_result", "tool_use_id": tool_use.id, "content": result})
+                if self.on_tool_result is not None:
+                    self.on_tool_result(tool_use.name, result)
             except ToolError as exc:
+                if self.on_tool_error is not None:
+                    self.on_tool_error(tool_use.name, exc)
                 results.append(
                     {
                         "type": "tool_result",
@@ -637,6 +646,8 @@ class BaseAsyncToolRunner(
                 )
             except Exception as exc:
                 log.exception(f"Error occurred while calling tool: {tool.name}", exc_info=exc)
+                if self.on_tool_error is not None:
+                    self.on_tool_error(tool_use.name, exc)
                 results.append(
                     {
                         "type": "tool_result",
