@@ -110,6 +110,10 @@ def transform_schema(
 
         strict_schema["type"] = type_
 
+    enum = json_schema.pop("enum", None)
+    if is_list(enum):
+        strict_schema['enum'] = enum
+
     description = json_schema.pop("description", None)
     if description is not None:
         strict_schema["description"] = description
