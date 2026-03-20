@@ -30,6 +30,7 @@ from ...._types import (
 from ...._utils import (
     is_given,
     extract_files,
+    path_template,
     maybe_transform,
     strip_not_given,
     deepcopy_minimal,
@@ -187,7 +188,7 @@ class Skills(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._get(
-            f"/v1/skills/{skill_id}?beta=true",
+            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -313,7 +314,7 @@ class Skills(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._delete(
-            f"/v1/skills/{skill_id}?beta=true",
+            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -458,7 +459,7 @@ class AsyncSkills(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return await self._get(
-            f"/v1/skills/{skill_id}?beta=true",
+            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -584,7 +585,7 @@ class AsyncSkills(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return await self._delete(
-            f"/v1/skills/{skill_id}?beta=true",
+            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
