@@ -175,11 +175,39 @@ def _type_has_transforms(type_: type) -> bool:
         if is_union_type(type_):
             return any(_type_has_transforms(arg) for arg in get_args(type_))
 
-        if not is_typeddict(type_):
-            # For non-TypedDict, non-Union types, assume transforms may be needed
+        # Primitive types never have transforms - safe to skip
+        _PRIMITIVE_TYPES = {str, int, float, bool, bytes, type(None)}
+        if type_ in _PRIMITIVE_TYPES:
+            return False
+
+        # Check Annotated types for PropertyInfo transforms
+        annotated = _get_annotated_type(type_)
+        if annotated is not None:
+            for ann in get_args(annotated)[1:]:
+                if isinstance(ann, PropertyInfo):
+                    if ann.alias is not None or ann.format is not None:
+                        return True
+
+        # Recurse into container element types
+        stripped = strip_annotated_type(type_)
+
+        # Iterable[T] always needs transformation (iterator -> list materialization)
+        if is_iterable_type(stripped):
             return True
 
-        hints = _get_type_hints(type_, include_extras=True)
+        # List[T] and Sequence[T] only need transformation if elements do
+        if is_list_type(stripped) or is_sequence_type(stripped):
+            args = get_args(stripped)
+            if args:
+                return _type_has_transforms(args[0])
+            return False
+
+        if not is_typeddict(stripped):
+            # For non-TypedDict, non-Union, non-primitive, non-container types,
+            # assume transforms may be needed (conservative)
+            return True
+
+        hints = _get_type_hints(stripped, include_extras=True)
         for hint_type in hints.values():
             annotated = _get_annotated_type(hint_type)
             if annotated is not None:
@@ -190,39 +218,13 @@ def _type_has_transforms(type_: type) -> bool:
                             return True
 
             # Recurse into the inner type to check nested TypedDicts
-            stripped = strip_annotated_type(hint_type)
-            if is_required_type(stripped):
-                stripped = get_args(stripped)[0]
-                stripped = strip_annotated_type(stripped)
+            inner_stripped = strip_annotated_type(hint_type)
+            if is_required_type(inner_stripped):
+                inner_stripped = get_args(inner_stripped)[0]
+                inner_stripped = strip_annotated_type(inner_stripped)
 
-            if is_typeddict(stripped):
-                if _type_has_transforms(stripped):
-                    return True
-            elif is_union_type(stripped):
-                for arg in get_args(stripped):
-                    inner = strip_annotated_type(arg)
-                    if is_typeddict(inner) and _type_has_transforms(inner):
-                        return True
-            elif is_list_type(stripped) or is_iterable_type(stripped) or is_sequence_type(stripped):
-                # Check element type of List[T], Iterable[T], Sequence[T]
-                args = get_args(stripped)
-                if args:
-                    elem = args[0]
-                    # Check if the element itself is Annotated with PropertyInfo
-                    elem_annotated = _get_annotated_type(elem)
-                    if elem_annotated is not None:
-                        for ann in get_args(elem_annotated)[1:]:
-                            if isinstance(ann, PropertyInfo):
-                                if ann.alias is not None or ann.format is not None:
-                                    return True
-                    elem_type = strip_annotated_type(elem)
-                    if is_typeddict(elem_type) and _type_has_transforms(elem_type):
-                        return True
-                    elif is_union_type(elem_type):
-                        for arg in get_args(elem_type):
-                            inner = strip_annotated_type(arg)
-                            if is_typeddict(inner) and _type_has_transforms(inner):
-                                return True
+            if _type_has_transforms(inner_stripped):
+                return True
 
         return False
     except Exception:
