@@ -22,6 +22,7 @@ from ...._types import (
 from ...._utils import (
     is_given,
     extract_files,
+    path_template,
     maybe_transform,
     strip_not_given,
     deepcopy_minimal,
@@ -118,7 +119,7 @@ class Versions(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return self._post(
-            f"/v1/skills/{skill_id}/versions?beta=true",
+            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
             body=maybe_transform(body, version_create_params.VersionCreateParams),
             files=extracted_files,
             options=make_request_options(
@@ -178,7 +179,7 @@ class Versions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._get(
-            f"/v1/skills/{skill_id}/versions/{version}?beta=true",
+            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -237,7 +238,7 @@ class Versions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._get_api_list(
-            f"/v1/skills/{skill_id}/versions?beta=true",
+            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
             page=SyncPageCursor[VersionListResponse],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -306,7 +307,7 @@ class Versions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._delete(
-            f"/v1/skills/{skill_id}/versions/{version}?beta=true",
+            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -390,7 +391,7 @@ class AsyncVersions(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return await self._post(
-            f"/v1/skills/{skill_id}/versions?beta=true",
+            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
             body=await async_maybe_transform(body, version_create_params.VersionCreateParams),
             files=extracted_files,
             options=make_request_options(
@@ -450,7 +451,7 @@ class AsyncVersions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return await self._get(
-            f"/v1/skills/{skill_id}/versions/{version}?beta=true",
+            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -509,7 +510,7 @@ class AsyncVersions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._get_api_list(
-            f"/v1/skills/{skill_id}/versions?beta=true",
+            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
             page=AsyncPageCursor[VersionListResponse],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -578,7 +579,7 @@ class AsyncVersions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return await self._delete(
-            f"/v1/skills/{skill_id}/versions/{version}?beta=true",
+            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
