@@ -1,4 +1,5 @@
 import copy
+import pytest
 from typing import List, cast
 
 import httpx
@@ -6,8 +7,15 @@ import httpx
 from anthropic.types.beta import BetaDirectCaller, BetaToolUseBlock, BetaInputJSONDelta, BetaRawContentBlockDeltaEvent
 from anthropic.types.tool_use_block import ToolUseBlock
 from anthropic.types.beta.beta_usage import BetaUsage
-from anthropic.lib.streaming._beta_messages import accumulate_event
+from anthropic.lib.streaming._beta_messages import accumulate_event as beta_accumulate_event
 from anthropic.types.beta.parsed_beta_message import ParsedBetaMessage
+
+from anthropic.types.direct_caller import DirectCaller
+from anthropic.types.input_json_delta import InputJSONDelta
+from anthropic.types.raw_content_block_delta_event import RawContentBlockDeltaEvent
+from anthropic.types.usage import Usage
+from anthropic.lib.streaming._messages import accumulate_event
+from anthropic.types.parsed_message import ParsedMessage
 
 
 class TestPartialJson:
@@ -41,12 +49,12 @@ class TestPartialJson:
         )
 
         # Both modes should handle complete JSON the same way
-        message1 = accumulate_event(
+        message1 = beta_accumulate_event(
             event=event_complete,
             current_snapshot=copy.deepcopy(message),
             request_headers=httpx.Headers({"some-header": "value"}),
         )
-        message2 = accumulate_event(
+        message2 = beta_accumulate_event(
             event=event_complete,
             current_snapshot=copy.deepcopy(message),
             request_headers=httpx.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
@@ -66,14 +74,14 @@ class TestPartialJson:
         )
 
         # Without beta header (standard mode)
-        message_standard = accumulate_event(
+        message_standard = beta_accumulate_event(
             event=event_incomplete,
             current_snapshot=copy.deepcopy(message),
             request_headers=httpx.Headers({"some-header": "value"}),
         )
 
         # With beta header (trailing strings mode)
-        message_trailing = accumulate_event(
+        message_trailing = beta_accumulate_event(
             event=event_incomplete,
             current_snapshot=copy.deepcopy(message),
             request_headers=httpx.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
@@ -135,7 +143,7 @@ class TestPartialJson:
         )
         # Expect an error when trying to accumulate the invalid JSON
         try:
-            accumulate_event(
+            beta_accumulate_event(
                 event=event_invalid,
                 current_snapshot=copy.deepcopy(message),
                 request_headers=httpx.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
@@ -147,3 +155,39 @@ class TestPartialJson:
             )
         except Exception as e:
             raise AssertionError(f"Unexpected error type: {type(e).__name__} with message: {str(e)}") from e
+
+
+class TestNonBetaPartialJson:
+    def test_malformed_json_error_message(self) -> None:
+        """Test that the non-beta path raises a helpful error on malformed tool JSON."""
+        message = ParsedMessage(
+            id="msg_123",
+            type="message",
+            role="assistant",
+            content=[
+                ToolUseBlock(
+                    type="tool_use",
+                    input={},
+                    id="tool_123",
+                    name="test_tool",
+                    caller=DirectCaller(type="direct"),
+                )
+            ],
+            model="claude-sonnet-4-5",
+            stop_reason=None,
+            stop_sequence=None,
+            usage=Usage(input_tokens=10, output_tokens=10),
+        )
+
+        invalid_json = '{"city": INVALID_VALUE}'
+        event = RawContentBlockDeltaEvent(
+            type="content_block_delta",
+            index=0,
+            delta=InputJSONDelta(type="input_json_delta", partial_json=invalid_json),
+        )
+
+        with pytest.raises(ValueError, match="Unable to parse tool parameter JSON from model"):
+            accumulate_event(
+                event=event,
+                current_snapshot=copy.deepcopy(message),
+            )
