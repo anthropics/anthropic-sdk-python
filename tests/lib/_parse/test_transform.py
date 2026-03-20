@@ -33,6 +33,18 @@ def test_anyof_schema():
     )
 
 
+def test_enum_schema():
+    schema = {
+        "type": "string",
+        "enum": [
+            "foo",
+            "bar",
+        ],
+    }
+    result = transform_schema(schema)
+    assert result == snapshot({"type": "string", "enum": ["foo", "bar"]})
+
+
 def test_allof():
     schema = {
         "allOf": [
