@@ -187,6 +187,22 @@ def test_region_infer_from_profile(
         ),
     ],
 )
+def test_bedrock_beta_messages_stream_exists() -> None:
+    """Regression test: Bedrock beta.messages.stream should exist and be callable.
+
+    This ensures parity with first-party SDK's beta.messages.stream method.
+    Previously, Bedrock clients lacked the stream() method on beta.messages,
+    causing breakage when switching from Anthropic() to AnthropicBedrock().
+    """
+    # Check sync client
+    assert hasattr(sync_client.beta.messages, "stream"), "sync client beta.messages.stream not found"
+    assert callable(sync_client.beta.messages.stream), "sync client beta.messages.stream is not callable"
+
+    # Check async client
+    assert hasattr(async_client.beta.messages, "stream"), "async client beta.messages.stream not found"
+    assert callable(async_client.beta.messages.stream), "async client beta.messages.stream is not callable"
+
+
 def test_region_infer_from_specified_profile(
     mock_aws_config: None,  # noqa: ARG001
     profiles: t.List[AwsConfigProfile],
