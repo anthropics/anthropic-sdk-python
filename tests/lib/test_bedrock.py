@@ -1,7 +1,8 @@
+import inspect
 import re
 import typing as t
 import tempfile
-from typing import TypedDict, cast
+from typing import Any, TypedDict, cast
 from typing_extensions import Protocol
 
 import httpx
@@ -9,6 +10,7 @@ import pytest
 from respx import MockRouter
 
 from anthropic import AnthropicBedrock, AsyncAnthropicBedrock
+from anthropic.lib.streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 
 sync_client = AnthropicBedrock(
     aws_region="us-east-1",
@@ -195,3 +197,45 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+def test_beta_messages_stream_method_parity(sync: bool) -> None:
+    """
+    Regression test: verify that beta.messages.stream exists and has the same
+    signature as beta.messages.create (parity with first-party client).
+
+    This ensures that code using client.beta.messages.stream() works when
+    switching from Anthropic() to AnthropicBedrock().
+    """
+    client: Any = sync_client if sync else async_client
+
+    sig = inspect.signature(client.beta.messages.stream)
+    generated_sig = inspect.signature(client.beta.messages.create)
+
+    errors: list[str] = []
+
+    for name, generated_param in generated_sig.parameters.items():
+        if name == "stream":
+            # intentionally excluded
+            continue
+
+        if name == "output_format":
+            continue
+
+        custom_param = sig.parameters.get(name)
+        if not custom_param:
+            errors.append(f"the `{name}` param is missing")
+            continue
+
+        if custom_param.annotation != generated_param.annotation:
+            errors.append(
+                f"types for the `{name}` param do not match; generated={repr(generated_param.annotation)} custom={repr(custom_param.annotation)}"
+            )
+            continue
+
+    if errors:
+        raise AssertionError(
+            f"{len(errors)} errors encountered with the {'sync' if sync else 'async'} client `beta.messages.stream()` method:\n\n"
+            + "\n\n".join(errors)
+        )
