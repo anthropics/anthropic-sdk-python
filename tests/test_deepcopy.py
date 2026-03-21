@@ -52,7 +52,16 @@ def test_ignores_other_types() -> None:
     assert_different_identities(obj1, obj2)
     assert obj1["foo"] is my_obj
 
-    # tuples
+    # tuples - new tuple created but immutable contents not copied
     obj3 = ("a", "b")
     obj4 = deepcopy_minimal(obj3)
-    assert obj3 is obj4
+    assert obj3 is not obj4  # new tuple created
+    assert obj3[0] is obj4[0]  # but immutable strings are same object
+    assert obj3[1] is obj4[1]
+
+    # tuples with dicts inside - dict should be copied
+    inner_dict = {"bar": True}
+    obj5 = ("a", inner_dict)
+    obj6 = deepcopy_minimal(obj5)
+    assert obj5 is not obj6  # new tuple created
+    assert obj5[1] is not obj6[1]  # dict inside is copied
