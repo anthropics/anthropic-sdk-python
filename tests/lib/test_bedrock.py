@@ -195,3 +195,58 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+@pytest.mark.parametrize(
+    "profiles, aws_profile",
+    [
+        pytest.param(
+            [{"name": "default", "region": "us-east-2"}, {"name": "custom", "region": "eu-west-1"}],
+            "custom",
+            id="custom profile via constructor",
+        ),
+    ],
+)
+def test_region_infer_from_constructor_aws_profile(
+    mock_aws_config: None,  # noqa: ARG001
+    profiles: t.List[AwsConfigProfile],
+    aws_profile: str,
+    monkeypatch: t.Any,
+) -> None:
+    """aws_profile passed to constructor should be used for region inference,
+    even when AWS_PROFILE env var is not set."""
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+
+    client = AnthropicBedrock(aws_profile=aws_profile)
+
+    expected_region = next(p for p in profiles if p["name"] == aws_profile)["region"]
+    assert client.aws_region == expected_region
+
+
+@pytest.mark.parametrize(
+    "profiles, aws_profile",
+    [
+        pytest.param(
+            [{"name": "default", "region": "us-east-2"}, {"name": "custom", "region": "eu-west-1"}],
+            "custom",
+            id="async custom profile via constructor",
+        ),
+    ],
+)
+def test_region_infer_from_constructor_aws_profile_async(
+    mock_aws_config: None,  # noqa: ARG001
+    profiles: t.List[AwsConfigProfile],
+    aws_profile: str,
+    monkeypatch: t.Any,
+) -> None:
+    """AsyncAnthropicBedrock should also use constructor aws_profile for region inference."""
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+
+    client = AsyncAnthropicBedrock(aws_profile=aws_profile)
+
+    expected_region = next(p for p in profiles if p["name"] == aws_profile)["region"]
+    assert client.aws_region == expected_region
