@@ -406,9 +406,7 @@ class Batches(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get(
-            path_template(
-                batch.results_url, message_batch_id=message_batch_id
-            ),
+            path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -797,9 +795,7 @@ class AsyncBatches(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._get(
-            path_template(
-                batch.results_url, message_batch_id=message_batch_id
-            ),
+            path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
