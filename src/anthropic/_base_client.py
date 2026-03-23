@@ -380,7 +380,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         version: str,
         base_url: str | URL,
         _strict_response_validation: bool,
-        max_retries: int = DEFAULT_MAX_RETRIES,
+        max_retries: int | float = DEFAULT_MAX_RETRIES,
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
@@ -913,7 +913,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
         *,
         version: str,
         base_url: str | URL,
-        max_retries: int = DEFAULT_MAX_RETRIES,
+        max_retries: int | float = DEFAULT_MAX_RETRIES,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
         custom_headers: Mapping[str, str] | None = None,
@@ -1050,7 +1050,11 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
         # Cap max_retries for range() — math.inf is a float and cannot be passed
         # to range(). The error message in __init__ advertises math.inf as valid,
         # so we must handle it here. Use sys.maxsize as the effective upper bound.
-        range_limit = max_retries + 1 if max_retries < sys.maxsize else sys.maxsize
+        # Also wrap with int() to handle finite floats like 2.0 (range(3.0) raises TypeError).
+        if max_retries == math.inf or max_retries >= sys.maxsize:
+            range_limit = sys.maxsize
+        else:
+            range_limit = int(max_retries) + 1
         for retries_taken in range(range_limit):
             options = model_copy(input_options)
             options = self._prepare_options(options)
@@ -1556,7 +1560,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
         version: str,
         base_url: str | URL,
         _strict_response_validation: bool,
-        max_retries: int = DEFAULT_MAX_RETRIES,
+        max_retries: int | float = DEFAULT_MAX_RETRIES,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
         custom_headers: Mapping[str, str] | None = None,
@@ -1691,7 +1695,12 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
         max_retries = input_options.get_max_retries(self.max_retries)
 
         retries_taken = 0
-        range_limit = max_retries + 1 if max_retries < sys.maxsize else sys.maxsize
+        # Cap max_retries for range() — math.inf is a float and cannot be passed
+        # to range(). Also wrap with int() to handle finite floats like 2.0 (range(3.0) raises TypeError).
+        if max_retries == math.inf or max_retries >= sys.maxsize:
+            range_limit = sys.maxsize
+        else:
+            range_limit = int(max_retries) + 1
         for retries_taken in range(range_limit):
             options = model_copy(input_options)
             options = await self._prepare_options(options)
