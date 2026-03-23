@@ -91,7 +91,8 @@ class MessageStream(Generic[ResponseFormatT]):
         the accumulated `Message` object.
         """
         self.until_done()
-        assert self.__final_message_snapshot is not None
+        if self.__final_message_snapshot is None:
+            raise RuntimeError("message snapshot is not available; ensure the stream has been consumed")
         return self.__final_message_snapshot
 
     def get_final_text(self) -> str:
@@ -122,7 +123,8 @@ class MessageStream(Generic[ResponseFormatT]):
     # properties
     @property
     def current_message_snapshot(self) -> ParsedMessage[ResponseFormatT]:
-        assert self.__final_message_snapshot is not None
+        if self.__final_message_snapshot is None:
+            raise RuntimeError("message snapshot is not available; ensure the stream has been consumed")
         return self.__final_message_snapshot
 
     def __stream__(self) -> Iterator[ParsedMessageStreamEvent[ResponseFormatT]]:
@@ -239,7 +241,8 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
         the accumulated `Message` object.
         """
         await self.until_done()
-        assert self.__final_message_snapshot is not None
+        if self.__final_message_snapshot is None:
+            raise RuntimeError("message snapshot is not available; ensure the stream has been consumed")
         return self.__final_message_snapshot
 
     async def get_final_text(self) -> str:
@@ -270,7 +273,8 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
     # properties
     @property
     def current_message_snapshot(self) -> ParsedMessage[ResponseFormatT]:
-        assert self.__final_message_snapshot is not None
+        if self.__final_message_snapshot is None:
+            raise RuntimeError("message snapshot is not available; ensure the stream has been consumed")
         return self.__final_message_snapshot
 
     async def __stream__(self) -> AsyncIterator[ParsedMessageStreamEvent[ResponseFormatT]]:

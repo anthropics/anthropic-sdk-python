@@ -1138,7 +1138,8 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
 
             break
 
-        assert response is not None, "could not resolve response (should never happen)"
+        if response is None:
+            raise RuntimeError("could not resolve response after retries")
         return self._process_response(
             cast_to=cast_to,
             options=options,
@@ -1778,7 +1779,8 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
 
             break
 
-        assert response is not None, "could not resolve response (should never happen)"
+        if response is None:
+            raise RuntimeError("could not resolve response after retries")
         return await self._process_response(
             cast_to=cast_to,
             options=options,

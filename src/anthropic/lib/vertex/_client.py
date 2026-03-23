@@ -170,7 +170,10 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         if not self.credentials.token:
             raise RuntimeError("Could not resolve API token from the environment")
 
-        assert isinstance(self.credentials.token, str)
+        if not isinstance(self.credentials.token, str):
+            raise TypeError(
+                f"Expected credentials.token to be a string, got {type(self.credentials.token).__name__}"
+            )
         return self.credentials.token
 
     def copy(
@@ -315,7 +318,10 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         if not self.credentials.token:
             raise RuntimeError("Could not resolve API token from the environment")
 
-        assert isinstance(self.credentials.token, str)
+        if not isinstance(self.credentials.token, str):
+            raise TypeError(
+                f"Expected credentials.token to be a string, got {type(self.credentials.token).__name__}"
+            )
         return self.credentials.token
 
     def copy(
