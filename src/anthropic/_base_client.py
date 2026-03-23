@@ -368,7 +368,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     _client: _HttpxClientT
     _version: str
     _base_url: URL
-    max_retries: int
+    max_retries: int | float
     timeout: Union[float, Timeout, None]
     _strict_response_validation: bool
     _idempotency_header: str | None
@@ -1047,7 +1047,11 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
         max_retries = input_options.get_max_retries(self.max_retries)
 
         retries_taken = 0
-        for retries_taken in range(max_retries + 1):
+        # Cap max_retries for range() — math.inf is a float and cannot be passed
+        # to range(). The error message in __init__ advertises math.inf as valid,
+        # so we must handle it here. Use sys.maxsize as the effective upper bound.
+        range_limit = max_retries + 1 if max_retries < sys.maxsize else sys.maxsize
+        for retries_taken in range(range_limit):
             options = model_copy(input_options)
             options = self._prepare_options(options)
 
@@ -1687,7 +1691,8 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
         max_retries = input_options.get_max_retries(self.max_retries)
 
         retries_taken = 0
-        for retries_taken in range(max_retries + 1):
+        range_limit = max_retries + 1 if max_retries < sys.maxsize else sys.maxsize
+        for retries_taken in range(range_limit):
             options = model_copy(input_options)
             options = await self._prepare_options(options)
 
