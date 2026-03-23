@@ -76,3 +76,8 @@ def test_array_brackets(method: str) -> None:
 def test_unknown_array_format() -> None:
     with pytest.raises(NotImplementedError, match="Unknown array_format value: foo, choose from comma, repeat"):
         stringify({"a": ["foo", "bar"]}, array_format=cast(Any, "foo"))
+
+
+def test_unknown_nested_format() -> None:
+    with pytest.raises(NotImplementedError, match="Unknown nested_format value: 'semicolon', choose from dots, brackets"):
+        stringify({"a": {"b": "c"}}, nested_format=cast(Any, "semicolon"))

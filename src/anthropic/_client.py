@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING, Any, Callable, Mapping, Optional
 from typing_extensions import Self, override
 
 import httpx
@@ -27,6 +27,7 @@ from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
 from ._base_client import (
     DEFAULT_MAX_RETRIES,
+    RetryInfo,
     SyncAPIClient,
     AsyncAPIClient,
 )
@@ -82,6 +83,10 @@ class Anthropic(SyncAPIClient):
         # outlining your use-case to help us decide if it should be
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
+        # Optional callback invoked before each retry sleep.  Receives a
+        # :class:`RetryInfo` instance describing the retry that is about to
+        # happen.  Useful for logging, metrics, or custom alerting.
+        on_retry: Optional[Callable[[RetryInfo], None]] = None,
     ) -> None:
         """Construct a new synchronous Anthropic client instance.
 
@@ -111,6 +116,7 @@ class Anthropic(SyncAPIClient):
             custom_headers=default_headers,
             custom_query=default_query,
             _strict_response_validation=_strict_response_validation,
+            on_retry=on_retry,
         )
 
         self._default_stream_cls = Stream
@@ -210,6 +216,7 @@ class Anthropic(SyncAPIClient):
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        on_retry: Optional[Callable[[RetryInfo], None]] | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -243,6 +250,7 @@ class Anthropic(SyncAPIClient):
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            on_retry=self._on_retry if isinstance(on_retry, NotGiven) else on_retry,
             **_extra_kwargs,
         )
 
@@ -322,6 +330,7 @@ class AsyncAnthropic(AsyncAPIClient):
         # outlining your use-case to help us decide if it should be
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
+        on_retry: Optional[Callable[[RetryInfo], None]] = None,
     ) -> None:
         """Construct a new async AsyncAnthropic client instance.
 
@@ -351,6 +360,7 @@ class AsyncAnthropic(AsyncAPIClient):
             custom_headers=default_headers,
             custom_query=default_query,
             _strict_response_validation=_strict_response_validation,
+            on_retry=on_retry,
         )
 
         self._default_stream_cls = AsyncStream
@@ -450,6 +460,7 @@ class AsyncAnthropic(AsyncAPIClient):
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        on_retry: Optional[Callable[[RetryInfo], None]] | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -483,6 +494,7 @@ class AsyncAnthropic(AsyncAPIClient):
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            on_retry=self._on_retry if isinstance(on_retry, NotGiven) else on_retry,
             **_extra_kwargs,
         )
 

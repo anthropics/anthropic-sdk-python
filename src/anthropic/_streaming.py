@@ -108,7 +108,7 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
                     try:
                         body = sse.json()
                         err_msg = f"{body}"
-                    except Exception:
+                    except json.JSONDecodeError:
                         err_msg = sse.data or f"Error code: {response.status_code}"
 
                     raise self._client._make_status_error(
@@ -228,7 +228,7 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
                     try:
                         body = sse.json()
                         err_msg = f"{body}"
-                    except Exception:
+                    except json.JSONDecodeError:
                         err_msg = sse.data or f"Error code: {response.status_code}"
 
                     raise self._client._make_status_error(

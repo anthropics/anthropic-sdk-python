@@ -474,7 +474,12 @@ def accumulate_event(
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
     if event.type == "content_block_start":
-        # TODO: check index
+        expected_index = len(current_snapshot.content)
+        if event.index != expected_index:
+            raise RuntimeError(
+                f"Unexpected content_block_start index {event.index!r}, "
+                f"expected {expected_index!r}"
+            )
         current_snapshot.content.append(
             cast(
                 Any,  # Pydantic does not support generic unions at runtime
@@ -482,6 +487,12 @@ def accumulate_event(
             ),
         )
     elif event.type == "content_block_delta":
+        num_blocks = len(current_snapshot.content)
+        if event.index >= num_blocks:
+            raise RuntimeError(
+                f"Unexpected content_block_delta index {event.index!r}: "
+                f"only {num_blocks} content block(s) have been started"
+            )
         content = current_snapshot.content[event.index]
         if event.delta.type == "text_delta":
             if content.type == "text":

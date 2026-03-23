@@ -42,7 +42,7 @@ from ._exceptions import (
     UnprocessableEntityError,
     APIResponseValidationError,
 )
-from ._base_client import DefaultHttpxClient, DefaultAioHttpClient, DefaultAsyncHttpxClient
+from ._base_client import DefaultHttpxClient, DefaultAioHttpClient, DefaultAsyncHttpxClient, RetryInfo
 from ._utils._logs import setup_logging as _setup_logging
 from .lib._parse._transform import transform_schema
 
@@ -88,6 +88,7 @@ __all__ = [
     "DefaultHttpxClient",
     "DefaultAsyncHttpxClient",
     "DefaultAioHttpClient",
+    "RetryInfo",
     "HUMAN_PROMPT",
     "AI_PROMPT",
     "beta_tool",

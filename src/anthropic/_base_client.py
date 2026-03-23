@@ -14,6 +14,7 @@ import warnings
 import email.utils
 from types import TracebackType
 from random import random
+from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -365,6 +366,30 @@ _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncCl
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
+@dataclass
+class RetryInfo:
+    """Information about a retry attempt, passed to the ``on_retry`` callback.
+
+    Attributes:
+        attempt: The 1-based index of the retry that is *about to happen*
+            (e.g. 1 for the first retry, 2 for the second, …).
+        max_retries: The maximum number of retries configured for this request.
+        url: The URL that is being retried.
+        wait_seconds: How many seconds the SDK will sleep before issuing the
+            next request.
+        response: The HTTP response that triggered the retry, or ``None`` if the
+            retry is caused by a network-level error (timeout / connection error).
+        error: The exception that caused the retry (always present).
+    """
+
+    attempt: int
+    max_retries: int
+    url: str
+    wait_seconds: float
+    response: httpx.Response | None
+    error: BaseException
+
+
 class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     _client: _HttpxClientT
     _version: str
@@ -385,6 +410,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
+        on_retry: Optional[Callable[[RetryInfo], None]] = None,
     ) -> None:
         self._version = version
         self._base_url = self._enforce_trailing_slash(URL(base_url))
@@ -395,6 +421,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         self._strict_response_validation = _strict_response_validation
         self._idempotency_header = None
         self._platform: Platform | None = None
+        self._on_retry = on_retry
 
         if max_retries is None:  # pyright: ignore[reportUnnecessaryComparison]
             raise TypeError(
@@ -922,6 +949,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
         _strict_response_validation: bool,
+        on_retry: Optional[Callable[[RetryInfo], None]] = None,
     ) -> None:
         if not is_given(timeout):
             # if the user passed in a custom http client with a non-default
@@ -950,6 +978,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
             custom_query=custom_query,
             custom_headers=custom_headers,
             _strict_response_validation=_strict_response_validation,
+            on_retry=on_retry,
         )
         self._client = http_client or SyncHttpxClientWrapper(
             base_url=base_url,
@@ -1083,6 +1112,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
                         max_retries=max_retries,
                         options=input_options,
                         response=None,
+                        error=err,
                     )
                     continue
 
@@ -1097,6 +1127,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
                         max_retries=max_retries,
                         options=input_options,
                         response=None,
+                        error=err,
                     )
                     continue
 
@@ -1125,6 +1156,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
                         max_retries=max_retries,
                         options=input_options,
                         response=response,
+                        error=err,
                     )
                     continue
 
@@ -1149,7 +1181,13 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
         )
 
     def _sleep_for_retry(
-        self, *, retries_taken: int, max_retries: int, options: FinalRequestOptions, response: httpx.Response | None
+        self,
+        *,
+        retries_taken: int,
+        max_retries: int,
+        options: FinalRequestOptions,
+        response: httpx.Response | None,
+        error: BaseException | None = None,
     ) -> None:
         remaining_retries = max_retries - retries_taken
         if remaining_retries == 1:
@@ -1159,6 +1197,17 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
 
         timeout = self._calculate_retry_timeout(remaining_retries, options, response.headers if response else None)
         log.info("Retrying request to %s in %f seconds", options.url, timeout)
+
+        if self._on_retry is not None:
+            info = RetryInfo(
+                attempt=retries_taken + 1,
+                max_retries=max_retries,
+                url=options.url,
+                wait_seconds=timeout,
+                response=response,
+                error=error or Exception("unknown"),
+            )
+            self._on_retry(info)
 
         time.sleep(timeout)
 
@@ -1560,6 +1609,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
         http_client: httpx.AsyncClient | None = None,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
+        on_retry: Optional[Callable[[RetryInfo], None]] = None,
     ) -> None:
         if not is_given(timeout):
             # if the user passed in a custom http client with a non-default
@@ -1588,6 +1638,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
             custom_query=custom_query,
             custom_headers=custom_headers,
             _strict_response_validation=_strict_response_validation,
+            on_retry=on_retry,
         )
         self._client = http_client or AsyncHttpxClientWrapper(
             base_url=base_url,
@@ -1723,6 +1774,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
                         max_retries=max_retries,
                         options=input_options,
                         response=None,
+                        error=err,
                     )
                     continue
 
@@ -1737,6 +1789,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
                         max_retries=max_retries,
                         options=input_options,
                         response=None,
+                        error=err,
                     )
                     continue
 
@@ -1765,6 +1818,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
                         max_retries=max_retries,
                         options=input_options,
                         response=response,
+                        error=err,
                     )
                     continue
 
@@ -1789,7 +1843,13 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
         )
 
     async def _sleep_for_retry(
-        self, *, retries_taken: int, max_retries: int, options: FinalRequestOptions, response: httpx.Response | None
+        self,
+        *,
+        retries_taken: int,
+        max_retries: int,
+        options: FinalRequestOptions,
+        response: httpx.Response | None,
+        error: BaseException | None = None,
     ) -> None:
         remaining_retries = max_retries - retries_taken
         if remaining_retries == 1:
@@ -1799,6 +1859,17 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
 
         timeout = self._calculate_retry_timeout(remaining_retries, options, response.headers if response else None)
         log.info("Retrying request to %s in %f seconds", options.url, timeout)
+
+        if self._on_retry is not None:
+            info = RetryInfo(
+                attempt=retries_taken + 1,
+                max_retries=max_retries,
+                url=options.url,
+                wait_seconds=timeout,
+                response=response,
+                error=error or Exception("unknown"),
+            )
+            self._on_retry(info)
 
         await anyio.sleep(timeout)
 
