@@ -255,7 +255,8 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
                 headers["Authorization"] = f"Bearer {azure_ad_token}"
         elif self.api_key is not None:
             if headers.get("api-key") is None:
-                assert self.api_key is not None
+                if self.api_key is None:
+                    raise RuntimeError("api_key is unexpectedly None during auth header construction")
                 headers["api-key"] = self.api_key
         else:
             # should never be hit

@@ -253,7 +253,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             with self._handle_request() as item:
                 yield item
                 message = self._get_last_message()
-                assert message is not None
+                if message is None:
+                    raise RuntimeError("expected a message after request but got None")
 
                 # Update container from response for programmatic tool calling support
                 last_assistant_message = self._get_last_assistant_message()
@@ -282,7 +283,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         """
         consume_sync_iterator(self)
         last_message = self._get_last_message()
-        assert last_message is not None
+        if last_message is None:
+            raise RuntimeError("no messages were produced by the tool runner")
         return last_message
 
     def generate_tool_call_response(self) -> BetaMessageParam | None:
