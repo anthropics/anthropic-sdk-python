@@ -211,9 +211,14 @@ def test_region_infer_from_constructor_aws_profile(
     mock_aws_config: None,  # noqa: ARG001
     profiles: t.List[AwsConfigProfile],
     aws_profile: str,
+    monkeypatch: t.Any,
 ) -> None:
     """aws_profile passed to constructor should be used for region inference,
     even when AWS_PROFILE env var is not set."""
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+
     client = AnthropicBedrock(aws_profile=aws_profile)
 
     expected_region = next(p for p in profiles if p["name"] == aws_profile)["region"]
@@ -234,8 +239,13 @@ def test_region_infer_from_constructor_aws_profile_async(
     mock_aws_config: None,  # noqa: ARG001
     profiles: t.List[AwsConfigProfile],
     aws_profile: str,
+    monkeypatch: t.Any,
 ) -> None:
     """AsyncAnthropicBedrock should also use constructor aws_profile for region inference."""
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+
     client = AsyncAnthropicBedrock(aws_profile=aws_profile)
 
     expected_region = next(p for p in profiles if p["name"] == aws_profile)["region"]
