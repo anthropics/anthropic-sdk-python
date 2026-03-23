@@ -182,7 +182,8 @@ def deepcopy_minimal(item: _T) -> _T:
     - mappings, e.g. `dict`
     - list
 
-    This is done for performance reasons.
+    This is done for performance reasons. Tuples and other immutable containers
+    are intentionally not copied since they cannot be mutated.
     """
     if is_mapping(item):
         return cast(_T, {k: deepcopy_minimal(v) for k, v in item.items()})
@@ -272,8 +273,7 @@ def required_args(*variants: Sequence[str]) -> Callable[[CallableT], CallableT]:
                 else:
                     assert len(variants) > 0
 
-                    # TODO: this error message is not deterministic
-                    missing = list(set(variants[0]) - given_params)
+                    missing = sorted(set(variants[0]) - given_params)
                     if len(missing) > 1:
                         msg = f"Missing required arguments: {human_join([quote(arg) for arg in missing])}"
                     else:
@@ -411,6 +411,9 @@ def json_safe(data: object) -> object:
     """
     if is_mapping(data):
         return {json_safe(key): json_safe(value) for key, value in data.items()}
+
+    if isinstance(data, (set, frozenset)):
+        return [json_safe(item) for item in sorted(data, key=repr)]
 
     if is_iterable(data) and not isinstance(data, (str, bytes, bytearray)):
         return [json_safe(item) for item in data]

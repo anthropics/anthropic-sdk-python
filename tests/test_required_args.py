@@ -86,6 +86,27 @@ def test_multiple_variants() -> None:
         foo()
 
 
+def test_missing_args_error_is_deterministic() -> None:
+    """The error message listing missing arguments must always use the same ordering."""
+
+    @required_args(["a", "b", "c"])
+    def foo(*, a: str | None = None, b: str | None = None, c: str | None = None) -> None:
+        pass
+
+    messages: list[str] = []
+    for _ in range(20):
+        try:
+            foo()
+        except TypeError as exc:
+            messages.append(str(exc))
+
+    # All 20 calls must produce the same message.
+    assert len(set(messages)) == 1, f"Error message is not deterministic: {set(messages)}"
+
+    # Arguments must appear in sorted (alphabetical) order.
+    assert messages[0] == "Missing required arguments: 'a', 'b' or 'c'"
+
+
 def test_multiple_params_multiple_variants() -> None:
     @required_args(["a", "b"], ["c"])
     def foo(*, a: str | None = None, b: str | None = None, c: str | None = None) -> str | None:

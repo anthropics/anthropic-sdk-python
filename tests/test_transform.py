@@ -397,6 +397,40 @@ async def test_dictionary_items(use_async: bool) -> None:
     assert await transform({"foo": {"foo_baz": "bar"}}, Dict[str, DictItems], use_async) == {"foo": {"fooBaz": "bar"}}
 
 
+class _AsyncDictInner(TypedDict):
+    snake_case: Annotated[str, PropertyInfo(alias="camelCase")]
+
+
+class _AsyncDictOuter(TypedDict):
+    data: Dict[str, _AsyncDictInner]
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_async_dict_values_are_awaited(use_async: bool) -> None:
+    """Regression test: async transform must await inner dict values, not call the sync version.
+
+    Previously, _async_transform_recursive called the *sync* _transform_recursive when the
+    outer type was Dict[str, T]. This meant that any async-only work inside T was silently
+    skipped in the async path.
+    """
+    # Dict[str, _AsyncDictInner] – the async path must transform the values correctly.
+    result = await transform(
+        {"key1": {"snake_case": "v1"}, "key2": {"snake_case": "v2"}},
+        Dict[str, _AsyncDictInner],
+        use_async,
+    )
+    assert result == {"key1": {"camelCase": "v1"}, "key2": {"camelCase": "v2"}}
+
+    # Nested TypedDict with Dict[str, _AsyncDictInner] – multiple levels must all be awaited.
+    result2 = await transform(
+        {"data": {"a": {"snake_case": "hello"}, "b": {"snake_case": "world"}}},
+        _AsyncDictOuter,
+        use_async,
+    )
+    assert result2 == {"data": {"a": {"camelCase": "hello"}, "b": {"camelCase": "world"}}}
+
+
 class TypedDictIterableUnionStr(TypedDict):
     foo: Annotated[Union[str, Iterable[Baz8]], PropertyInfo(alias="FOO")]
 

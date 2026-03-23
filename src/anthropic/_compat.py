@@ -70,8 +70,14 @@ if TYPE_CHECKING:
     from pydantic import ConfigDict as ConfigDict
 else:
     if PYDANTIC_V1:
-        # TODO: provide an error message here?
-        ConfigDict = None
+
+        class ConfigDict:  # type: ignore[no-redef]
+            def __new__(cls, **kwargs: object) -> "ConfigDict":
+                raise RuntimeError(
+                    "ConfigDict is not supported in Pydantic v1. "
+                    "Please upgrade to Pydantic v2 to use this feature."
+                )
+
     else:
         from pydantic import ConfigDict as ConfigDict
 
