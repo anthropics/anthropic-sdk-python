@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import json
-import inspect
 from typing import Any, Set, Dict, TypeVar, cast
 from unittest import TestCase
 
@@ -11,6 +10,7 @@ import pytest
 from respx import MockRouter
 
 from anthropic import Anthropic, AsyncAnthropic
+from anthropic._utils import assert_overloads_in_sync, assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_types import ParsedBetaMessageStreamEvent
@@ -376,36 +376,31 @@ class TestAsyncMessages:
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
 def test_stream_method_definition_in_sync(sync: bool) -> None:
     client: Anthropic | AsyncAnthropic = sync_client if sync else async_client
+    assert_signatures_in_sync(
+        client.beta.messages.create,
+        client.beta.messages.stream,
+        exclude_params={"stream", "output_format"},
+    )
 
-    sig = inspect.signature(client.beta.messages.stream)
-    generated_sig = inspect.signature(client.beta.messages.create)
 
-    errors: list[str] = []
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+def test_parse_method_definition_in_sync(sync: bool) -> None:
+    client: Anthropic | AsyncAnthropic = sync_client if sync else async_client
+    assert_signatures_in_sync(
+        client.beta.messages.create,
+        client.beta.messages.parse,
+        exclude_params={"stream", "output_format"},
+    )
 
-    for name, generated_param in generated_sig.parameters.items():
-        if name == "stream":
-            # intentionally excluded
-            continue
 
-        if name == "output_format":
-            continue
-
-        custom_param = sig.parameters.get(name)
-        if not custom_param:
-            errors.append(f"the `{name}` param is missing")
-            continue
-
-        if custom_param.annotation != generated_param.annotation:
-            errors.append(
-                f"types for the `{name}` param are do not match; generated={repr(generated_param.annotation)} custom={repr(custom_param.annotation)}"
-            )
-            continue
-
-    if errors:
-        raise AssertionError(
-            f"{len(errors)} errors encountered with the {'sync' if sync else 'async'} client `messages.stream()` method:\n\n"
-            + "\n\n".join(errors)
-        )
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+def test_tool_runner_method_definition_in_sync(sync: bool) -> None:
+    client: Anthropic | AsyncAnthropic = sync_client if sync else async_client
+    assert_overloads_in_sync(
+        client.beta.messages.create,
+        client.beta.messages.tool_runner,
+        exclude_params={"stream", "tools", "max_iterations", "compaction_control", "output_format"},
+    )
 
 
 # go through all the ContentBlock types to make sure the type alias is up to date
