@@ -92,6 +92,27 @@ def _infer_region() -> str:
 
 class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
     @override
+    def _should_retry(self, response: httpx.Response) -> bool:
+        if super()._should_retry(response):
+            return True
+
+        if response.status_code == 400:
+            error_type = response.headers.get("x-amzn-errortype", "")
+            if any(
+                exc in error_type
+                for exc in (
+                    "ThrottlingException",
+                    "TooManyRequestsException",
+                    "ModelTimeoutException",
+                    "ServiceUnavailableException",
+                )
+            ):
+                log.debug("Retrying due to Bedrock transient error: %s", error_type)
+                return True
+
+        return False
+
+    @override
     def _make_status_error(
         self,
         err_msg: str,
