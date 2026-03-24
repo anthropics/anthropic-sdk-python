@@ -195,3 +195,44 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+def test_region_infer_from_aws_default_region_env(monkeypatch: t.Any) -> None:
+    """AWS_DEFAULT_REGION is the standard env var used by botocore/boto3."""
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-central-1")
+    client = AnthropicBedrock()
+    assert client.aws_region == "eu-central-1"
+
+
+def test_aws_region_env_takes_precedence_over_aws_default_region(monkeypatch: t.Any) -> None:
+    """AWS_REGION (legacy) takes precedence over AWS_DEFAULT_REGION when both are set."""
+    monkeypatch.setenv("AWS_REGION", "us-west-2")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-central-1")
+    client = AnthropicBedrock()
+    assert client.aws_region == "us-west-2"
+
+
+@pytest.mark.parametrize(
+    "profiles, aws_profile",
+    [
+        pytest.param(
+            [{"name": "default", "region": "us-east-2"}, {"name": "staging", "region": "ap-northeast-1"}],
+            "staging",
+            id="non-default profile passed explicitly",
+        ),
+    ],
+)
+def test_region_infer_from_explicit_aws_profile_arg(
+    mock_aws_config: None,  # noqa: ARG001
+    profiles: t.List[AwsConfigProfile],
+    aws_profile: str,
+    monkeypatch: t.Any,
+) -> None:
+    """When aws_profile is passed directly to the client, its region should be used."""
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+    client = AnthropicBedrock(aws_profile=aws_profile)
+    expected_region = next(p for p in profiles if p["name"] == aws_profile)["region"]
+    assert client.aws_region == expected_region
