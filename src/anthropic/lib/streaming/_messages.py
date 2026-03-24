@@ -21,6 +21,12 @@ from ._types import (
     ParsedContentBlockStopEvent,
 )
 from ...types import RawMessageStreamEvent
+from ...types.raw_message_start_event import RawMessageStartEvent
+from ...types.raw_message_delta_event import RawMessageDeltaEvent
+from ...types.raw_message_stop_event import RawMessageStopEvent
+from ...types.raw_content_block_start_event import RawContentBlockStartEvent
+from ...types.raw_content_block_delta_event import RawContentBlockDeltaEvent
+from ...types.raw_content_block_stop_event import RawContentBlockStopEvent
 from ..._types import NOT_GIVEN, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
@@ -28,6 +34,15 @@ from ..._streaming import Stream, AsyncStream
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
 from ...types.parsed_message import ParsedMessage, ParsedContentBlock
+
+_RAW_EVENT_TYPE_MAP: dict[str, type[BaseModel]] = {
+    "message_start": RawMessageStartEvent,
+    "message_delta": RawMessageDeltaEvent,
+    "message_stop": RawMessageStopEvent,
+    "content_block_start": RawContentBlockStartEvent,
+    "content_block_delta": RawContentBlockDeltaEvent,
+    "content_block_stop": RawContentBlockStopEvent,
+}
 
 
 class MessageStream(Generic[ResponseFormatT]):
@@ -445,7 +460,18 @@ def accumulate_event(
             ),
         )
         if not isinstance(cast(Any, event), BaseModel):
-            raise TypeError(f"Unexpected event runtime type, after deserialising twice - {event} - {type(event)}")
+            # Union discriminator deserialization silently returned the raw dict in some
+            # environments (e.g. older pydantic versions). Fall back to a direct type-map
+            # lookup using the 'type' field so that well-formed events (including
+            # content_block_delta) are always promoted to the correct BaseModel. See #941.
+            raw = cast(Any, event)
+            if isinstance(raw, dict):
+                event_type = raw.get("type")
+                target_cls = _RAW_EVENT_TYPE_MAP.get(event_type) if isinstance(event_type, str) else None
+                if target_cls is not None:
+                    event = cast(RawMessageStreamEvent, target_cls.model_construct(**raw))
+            if not isinstance(cast(Any, event), BaseModel):
+                raise TypeError(f"Unexpected event runtime type, after deserialising twice - {event} - {type(event)}")
 
     if current_snapshot is None:
         if event.type == "message_start":

@@ -13,7 +13,9 @@ from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.streaming import ParsedMessageStreamEvent
 from anthropic.types.message import Message
 from anthropic.resources.messages import DEPRECATED_MODELS
-from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
+from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT, accumulate_event
+from anthropic.types.raw_message_stream_event import RawMessageStreamEvent
+from anthropic._models import construct_type
 
 from .helpers import get_response, to_async_iter
 
@@ -336,3 +338,45 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+def test_accumulate_event_handles_raw_dict_content_block_delta() -> None:
+    """Regression test for #941.
+
+    When the union discriminator deserialization silently returns a raw dict
+    (e.g. in older pydantic versions or specific environments), accumulate_event
+    must fall back to the direct type-map lookup and successfully process
+    content_block_delta events without raising TypeError.
+    """
+    # Build a valid message snapshot via normal deserialization
+    msg_start = construct_type(
+        type_=RawMessageStreamEvent,
+        value={
+            "type": "message_start",
+            "message": {
+                "id": "msg_test941",
+                "type": "message",
+                "role": "assistant",
+                "content": [],
+                "model": "claude-3-5-sonnet-20241022",
+                "stop_reason": None,
+                "stop_sequence": None,
+                "usage": {"input_tokens": 5, "output_tokens": 0},
+            },
+        },
+    )
+    snapshot = accumulate_event(event=msg_start, current_snapshot=None)
+
+    cbs = construct_type(
+        type_=RawMessageStreamEvent,
+        value={"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}},
+    )
+    snapshot = accumulate_event(event=cbs, current_snapshot=snapshot)
+
+    # Simulate the bug: pass a raw dict directly instead of a typed BaseModel
+    # (as if _process_response_data / construct_type silently returned the dict)
+    raw_delta: Any = {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "hello"}}
+    snapshot = accumulate_event(event=raw_delta, current_snapshot=snapshot)
+
+    assert snapshot.content[0].type == "text"
+    assert snapshot.content[0].text == "hello"
