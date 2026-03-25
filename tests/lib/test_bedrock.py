@@ -1,6 +1,6 @@
-import inspect
 import re
 import typing as t
+import inspect
 import tempfile
 from typing import Any, TypedDict, cast
 from typing_extensions import Protocol
@@ -10,7 +10,6 @@ import pytest
 from respx import MockRouter
 
 from anthropic import AnthropicBedrock, AsyncAnthropicBedrock
-from anthropic.lib.streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 
 sync_client = AnthropicBedrock(
     aws_region="us-east-1",
