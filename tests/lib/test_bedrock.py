@@ -176,17 +176,6 @@ def test_region_infer_from_profile(
     assert client.aws_region == profiles[0]["region"]
 
 
-@pytest.mark.parametrize(
-    "profiles, aws_profile",
-    [
-        pytest.param([{"name": "default", "region": "us-east-2"}], "default", id="default profile"),
-        pytest.param(
-            [{"name": "default", "region": "us-east-2"}, {"name": "custom", "region": "us-west-1"}],
-            "custom",
-            id="custom profile",
-        ),
-    ],
-)
 def test_bedrock_beta_messages_stream_exists() -> None:
     """Regression test: Bedrock beta.messages.stream should exist and be callable.
 
@@ -203,6 +192,17 @@ def test_bedrock_beta_messages_stream_exists() -> None:
     assert callable(async_client.beta.messages.stream), "async client beta.messages.stream is not callable"
 
 
+@pytest.mark.parametrize(
+    "profiles, aws_profile",
+    [
+        pytest.param([{"name": "default", "region": "us-east-2"}], "default", id="default profile"),
+        pytest.param(
+            [{"name": "default", "region": "us-east-2"}, {"name": "custom", "region": "us-west-1"}],
+            "custom",
+            id="custom profile",
+        ),
+    ],
+)
 def test_region_infer_from_specified_profile(
     mock_aws_config: None,  # noqa: ARG001
     profiles: t.List[AwsConfigProfile],
