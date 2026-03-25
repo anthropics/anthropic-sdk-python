@@ -157,7 +157,7 @@ class BetaAbstractMemoryTool(BetaBuiltinFunctionTool):
 
 
 class BetaAsyncAbstractMemoryTool(BetaAsyncBuiltinFunctionTool):
-    """Abstract base class for memory tool implementations.
+    """Abstract base class for async memory tool implementations.
 
     This class provides the interface for implementing a custom memory backend for Claude.
 
@@ -166,25 +166,29 @@ class BetaAsyncAbstractMemoryTool(BetaAsyncBuiltinFunctionTool):
     Example usage:
 
     ```py
-    class MyMemoryTool(BetaAbstractMemoryTool):
-        def view(self, command: BetaMemoryTool20250818ViewCommand) -> BetaFunctionToolResultType:
+    class MyMemoryTool(BetaAsyncAbstractMemoryTool):
+        async def view(self, command: BetaMemoryTool20250818ViewCommand) -> BetaFunctionToolResultType:
             ...
             return "view result"
 
-        def create(self, command: BetaMemoryTool20250818CreateCommand) -> BetaFunctionToolResultType:
+        async def create(self, command: BetaMemoryTool20250818CreateCommand) -> BetaFunctionToolResultType:
             ...
             return "created successfully"
 
         # ... implement other abstract methods
 
 
-    client = Anthropic()
-    memory_tool = MyMemoryTool()
-    message = client.beta.messages.run_tools(
-        model="claude-sonnet-4-5",
-        messages=[{"role": "user", "content": "Remember that I like coffee"}],
-        tools=[memory_tool],
-    ).until_done()
+    async def main():
+        client = AsyncAnthropic()
+        memory_tool = MyMemoryTool()
+        message = await client.beta.messages.run_tools(
+            model="claude-sonnet-4-5",
+            messages=[{"role": "user", "content": "Remember that I like coffee"}],
+            tools=[memory_tool],
+        ).until_done()
+
+
+    asyncio.run(main())
     ```
     """
 
