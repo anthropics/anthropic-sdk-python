@@ -166,21 +166,21 @@ class BetaAsyncAbstractMemoryTool(BetaAsyncBuiltinFunctionTool):
     Example usage:
 
     ```py
-    class MyMemoryTool(BetaAbstractMemoryTool):
-        def view(self, command: BetaMemoryTool20250818ViewCommand) -> BetaFunctionToolResultType:
+    class MyMemoryTool(BetaAsyncAbstractMemoryTool):
+        async def view(self, command: BetaMemoryTool20250818ViewCommand) -> BetaFunctionToolResultType:
             ...
             return "view result"
 
-        def create(self, command: BetaMemoryTool20250818CreateCommand) -> BetaFunctionToolResultType:
+        async def create(self, command: BetaMemoryTool20250818CreateCommand) -> BetaFunctionToolResultType:
             ...
             return "created successfully"
 
         # ... implement other abstract methods
 
 
-    client = Anthropic()
+    client = AsyncAnthropic()
     memory_tool = MyMemoryTool()
-    message = client.beta.messages.run_tools(
+    message = await client.beta.messages.run_tools(
         model="claude-sonnet-4-5",
         messages=[{"role": "user", "content": "Remember that I like coffee"}],
         tools=[memory_tool],
