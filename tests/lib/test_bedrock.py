@@ -2,6 +2,7 @@ import re
 import typing as t
 import inspect
 import tempfile
+from contextlib import AbstractAsyncContextManager, AbstractContextManager
 from typing import Any, TypedDict, cast
 from typing_extensions import Protocol
 
@@ -175,20 +176,25 @@ def test_region_infer_from_profile(
     assert client.aws_region == profiles[0]["region"]
 
 
-def test_bedrock_beta_messages_stream_exists() -> None:
-    """Regression test: Bedrock beta.messages.stream should exist and be callable.
+def test_beta_messages_stream_exists_sync() -> None:
+    stream_ctx = sync_client.beta.messages.stream(
+        max_tokens=1,
+        messages=[{"role": "user", "content": "hello"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
 
-    This ensures parity with first-party SDK's beta.messages.stream method.
-    Previously, Bedrock clients lacked the stream() method on beta.messages,
-    causing breakage when switching from Anthropic() to AnthropicBedrock().
-    """
-    # Check sync client
-    assert hasattr(sync_client.beta.messages, "stream"), "sync client beta.messages.stream not found"
-    assert callable(sync_client.beta.messages.stream), "sync client beta.messages.stream is not callable"
+    assert isinstance(stream_ctx, AbstractContextManager)
 
-    # Check async client
-    assert hasattr(async_client.beta.messages, "stream"), "async client beta.messages.stream not found"
-    assert callable(async_client.beta.messages.stream), "async client beta.messages.stream is not callable"
+
+@pytest.mark.asyncio()
+async def test_beta_messages_stream_exists_async() -> None:
+    stream_ctx = async_client.beta.messages.stream(
+        max_tokens=1,
+        messages=[{"role": "user", "content": "hello"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    assert isinstance(stream_ctx, AbstractAsyncContextManager)
 
 
 @pytest.mark.parametrize(
