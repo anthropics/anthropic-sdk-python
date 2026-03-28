@@ -73,8 +73,7 @@ def _merge_output_configs(
 def _warn_output_format_deprecated(output_format: object) -> None:
     if is_given(output_format) and output_format is not None:
         warnings.warn(
-            "The 'output_format' parameter is deprecated. "
-            "Please use 'output_config.format' instead.",
+            "The 'output_format' parameter is deprecated. Please use 'output_config.format' instead.",
             DeprecationWarning,
             stacklevel=4,
         )
@@ -200,9 +199,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers = {
             "X-Stainless-Helper-Method": "stream",
             "X-Stainless-Stream-Helper": "beta.messages",
-            **strip_not_given(
-                {"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}
-            ),
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             **_stainless_helper_header(tools, messages),
             **(extra_headers or {}),
         }
