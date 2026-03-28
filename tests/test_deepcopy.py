@@ -68,16 +68,18 @@ def test_ignores_other_types() -> None:
     assert_different_identities(obj1, obj2)
     assert obj1["foo"] is my_obj
 
-    # tuples - new tuple created but immutable contents not copied
-    obj3 = ("a", "b")
-    obj4 = deepcopy_minimal(obj3)
-    assert obj3 is not obj4  # new tuple created
-    assert obj3[0] is obj4[0]  # but immutable strings are same object
-    assert obj3[1] is obj4[1]
+    # tuples with lists inside - list should be copied
+    inner_list = [1, {"x": "y"}]
+    obj7 = ("z", inner_list)
+    obj8 = deepcopy_minimal(obj7)
+    assert obj7 is not obj8  # new tuple created
+    assert obj7[1] is not obj8[1]  # list inside is copied
+    assert obj7[1][1] is not obj8[1][1]  # dict inside that list is also copied
 
-    # tuples with dicts inside - dict should be copied
-    inner_dict = {"bar": True}
-    obj5 = ("a", inner_dict)
-    obj6 = deepcopy_minimal(obj5)
-    assert obj5 is not obj6  # new tuple created
-    assert obj5[1] is not obj6[1]  # dict inside is copied
+    # deeply nested: tuple -> dict -> list -> dict
+    obj9 = ({"items": [{"name": "a"}]},)
+    obj10 = deepcopy_minimal(obj9)
+    assert obj9 is not obj10
+    assert obj9[0] is not obj10[0]  # dict in tuple copied
+    assert obj9[0]["items"] is not obj10[0]["items"]  # list in dict copied
+    assert obj9[0]["items"][0] is not obj10[0]["items"][0]  # dict in list copied
