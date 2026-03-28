@@ -41,6 +41,22 @@ def test_nested_list() -> None:
     assert_different_identities(obj1[1], obj2[1])
 
 
+def test_simple_tuple() -> None:
+    obj1 = ("a", "b")
+    obj2 = deepcopy_minimal(obj1)
+    assert_different_identities(obj1, obj2)
+    assert obj1[0] is obj2[0]  # immutable strings are same object
+    assert obj1[1] is obj2[1]
+
+
+def test_nested_tuple() -> None:
+    obj1 = ("a", {"bar": True})
+    obj2 = deepcopy_minimal(obj1)
+    assert_different_identities(obj1, obj2)
+    assert_different_identities(obj1[1], obj2[1])
+    assert obj1[0] is obj2[0]  # immutable string preserved
+
+
 class MyObject: ...
 
 
