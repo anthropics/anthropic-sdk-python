@@ -188,6 +188,7 @@ def test_beta_messages_stream_exists_sync() -> None:
     )
 
     assert isinstance(stream_ctx, AbstractContextManager)
+    assert isinstance(stream_ctx, BetaMessageStreamManager)
 
 
 @pytest.mark.asyncio()
@@ -199,6 +200,7 @@ async def test_beta_messages_stream_exists_async() -> None:
     )
 
     assert isinstance(stream_ctx, AbstractAsyncContextManager)
+    assert isinstance(stream_ctx, BetaAsyncMessageStreamManager)
 
 
 @pytest.mark.parametrize(
