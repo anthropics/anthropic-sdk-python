@@ -203,6 +203,35 @@ async def test_beta_messages_stream_exists_async() -> None:
     assert isinstance(stream_ctx, BetaAsyncMessageStreamManager)
 
 
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+def test_beta_messages_stream_default_constructor(sync: bool) -> None:
+    """
+    Regression test: verify that beta.messages.stream is callable and returns the
+    correct stream manager type when the client is instantiated with default
+    credentials (no explicit aws_access_key / aws_secret_key arguments).
+
+    This mirrors the real-world usage pattern where a user calls
+    AnthropicBedrock() or AsyncAnthropicBedrock() with no arguments and the SDK
+    resolves credentials from the environment.
+    """
+    client: Any = AnthropicBedrock() if sync else AsyncAnthropicBedrock()
+
+    assert hasattr(client.beta.messages, "stream")
+    assert callable(client.beta.messages.stream)
+
+    stream_ctx = client.beta.messages.stream(
+        max_tokens=1,
+        messages=[{"role": "user", "content": "hello"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    expected_cls = BetaMessageStreamManager if sync else BetaAsyncMessageStreamManager
+    context_cls = AbstractContextManager if sync else AbstractAsyncContextManager
+
+    assert isinstance(stream_ctx, context_cls)
+    assert isinstance(stream_ctx, expected_cls)
+
+
 @pytest.mark.parametrize(
     "profiles, aws_profile",
     [
