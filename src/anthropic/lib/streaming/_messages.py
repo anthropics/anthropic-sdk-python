@@ -445,7 +445,38 @@ def accumulate_event(
             ),
         )
         if not isinstance(cast(Any, event), BaseModel):
-            raise TypeError(f"Unexpected event runtime type, after deserialising twice - {event} - {type(event)}")
+            # If the event is still a dict, it likely means construct_type failed to
+            # properly deserialize it. This can happen with nested discriminated unions
+            # where the inner union type isn't properly handled.
+            # As a fallback, we manually construct the event based on the 'type' field.
+            from ...types import (
+                RawMessageStartEvent,
+                RawMessageDeltaEvent,
+                RawMessageStopEvent,
+                RawContentBlockStartEvent,
+                RawContentBlockDeltaEvent,
+                RawContentBlockStopEvent,
+            )
+
+            event_dict = cast(Any, event)
+            if isinstance(event_dict, dict):
+                event_type = event_dict.get("type")
+                if event_type == "message_start":
+                    event = cast(RawMessageStreamEvent, RawMessageStartEvent.construct(**event_dict))
+                elif event_type == "message_delta":
+                    event = cast(RawMessageStreamEvent, RawMessageDeltaEvent.construct(**event_dict))
+                elif event_type == "message_stop":
+                    event = cast(RawMessageStreamEvent, RawMessageStopEvent.construct(**event_dict))
+                elif event_type == "content_block_start":
+                    event = cast(RawMessageStreamEvent, RawContentBlockStartEvent.construct(**event_dict))
+                elif event_type == "content_block_delta":
+                    event = cast(RawMessageStreamEvent, RawContentBlockDeltaEvent.construct(**event_dict))
+                elif event_type == "content_block_stop":
+                    event = cast(RawMessageStreamEvent, RawContentBlockStopEvent.construct(**event_dict))
+                else:
+                    raise TypeError(f"Unexpected event runtime type, after deserialising twice - {event} - {type(event)}")
+            else:
+                raise TypeError(f"Unexpected event runtime type, after deserialising twice - {event} - {type(event)}")
 
     if current_snapshot is None:
         if event.type == "message_start":
