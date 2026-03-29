@@ -72,8 +72,8 @@ def _infer_region() -> str:
     Infer the AWS region from the environment variables or
     from the boto3 session if available.
     """
-    aws_region = os.environ.get("AWS_REGION")
-    if aws_region is None:
+    aws_region = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")
+    if not aws_region:
         try:
             import boto3
 
@@ -83,7 +83,7 @@ def _infer_region() -> str:
         except ImportError:
             pass
 
-    if aws_region is None:
+    if not aws_region:
         log.warning("No AWS region specified, defaulting to us-east-1")
         aws_region = "us-east-1"  # fall back to legacy behavior
 

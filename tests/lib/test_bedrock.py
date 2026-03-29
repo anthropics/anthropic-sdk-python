@@ -195,3 +195,36 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+def test_region_infer_from_aws_default_region(
+    monkeypatch: t.Any,
+) -> None:
+    """Test that AWS_DEFAULT_REGION environment variable is respected."""
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-1")
+    # Ensure AWS_REGION is not set
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    client = AnthropicBedrock()
+    assert client.aws_region == "eu-west-1"
+
+
+def test_region_aws_region_takes_precedence_over_aws_default_region(
+    monkeypatch: t.Any,
+) -> None:
+    """Test that AWS_REGION takes precedence over AWS_DEFAULT_REGION."""
+    monkeypatch.setenv("AWS_REGION", "us-west-2")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-1")
+    client = AnthropicBedrock()
+    assert client.aws_region == "us-west-2"
+
+
+def test_region_infer_from_profile_when_aws_region_is_empty_string(
+    mock_aws_config: None,  # noqa: ARG001
+    profiles: t.List[AwsConfigProfile],
+    monkeypatch: t.Any,
+) -> None:
+    """Test that empty AWS_REGION falls back to boto3/config file."""
+    monkeypatch.setenv("AWS_REGION", "")
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+    client = AnthropicBedrock()
+    assert client.aws_region == profiles[0]["region"]
