@@ -166,6 +166,86 @@ def test_application_inference_profile(respx_mock: MockRouter) -> None:
     )
 
 
+sync_api_key_client = AnthropicBedrock(
+    aws_region="us-east-1",
+    api_key="test-api-key",
+)
+async_api_key_client = AsyncAnthropicBedrock(
+    aws_region="us-east-1",
+    api_key="test-api-key",
+)
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_api_key_auth(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx.Response(200, json={"foo": "bar"}),
+    )
+
+    sync_api_key_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert calls[0].request.headers["Authorization"] == "Bearer test-api-key"
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_api_key_auth_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx.Response(200, json={"foo": "bar"}),
+    )
+
+    await async_api_key_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert calls[0].request.headers["Authorization"] == "Bearer test-api-key"
+
+
+def test_api_key_from_env(monkeypatch: t.Any) -> None:
+    monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "env-api-key")
+    client = AnthropicBedrock(aws_region="us-east-1")
+    assert client.api_key == "env-api-key"
+
+
+def test_api_key_mutual_exclusion() -> None:
+    with pytest.raises(ValueError, match="Cannot specify both"):
+        AnthropicBedrock(
+            aws_region="us-east-1",
+            api_key="test-api-key",
+            aws_access_key="example-access-key",
+        )
+
+
+def test_api_key_mutual_exclusion_async() -> None:
+    with pytest.raises(ValueError, match="Cannot specify both"):
+        AsyncAnthropicBedrock(
+            aws_region="us-east-1",
+            api_key="test-api-key",
+            aws_secret_key="example-secret-key",
+        )
+
+
+def test_api_key_env_mutual_exclusion(monkeypatch: t.Any) -> None:
+    monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "env-api-key")
+    with pytest.raises(ValueError, match="Cannot specify both"):
+        AnthropicBedrock(
+            aws_region="us-east-1",
+            aws_access_key="example-access-key",
+        )
+
+
 def test_region_infer_from_profile(
     mock_aws_config: None,  # noqa: ARG001
     profiles: t.List[AwsConfigProfile],
