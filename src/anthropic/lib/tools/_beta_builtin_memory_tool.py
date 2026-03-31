@@ -42,6 +42,15 @@ from ._beta_functions import (
 MAX_LINES = 999999
 LINE_NUMBER_WIDTH = len(str(MAX_LINES))
 
+# Owner read/write only. Avoids 0o666 which, in environments with a permissive
+# umask (e.g. Docker where umask is often 0o000), would make memory files
+# world-readable or even world-writable.
+_FILE_CREATE_MODE = 0o600
+# The default mkdir mode is 0o777, but we want to be more restrictive for memory
+# directories to avoid them being world-accessible in environments with permissive umasks
+# (eg Docker)
+_DIR_CREATE_MODE = 0o700
+
 
 class BetaAbstractMemoryTool(BetaBuiltinFunctionTool):
     """Abstract base class for memory tool implementations.
@@ -275,7 +284,7 @@ def _atomic_write_file(target_path: Path, content: str) -> None:
     data = content.encode("utf-8")
 
     try:
-        fd = os.open(temp_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o666)
+        fd = os.open(temp_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
         try:
             offset = 0
             while offset < len(data):
@@ -342,7 +351,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
         super().__init__()
         self.base_path = Path(base_path)
         self.memory_root = self.base_path / "memories"
-        self.memory_root.mkdir(parents=True, exist_ok=True)
+        self.memory_root.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
 
     def _validate_path(self, path: str) -> Path:
         """Validate and resolve memory paths"""
@@ -434,10 +443,10 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
     def create(self, command: BetaMemoryTool20250818CreateCommand) -> str:
         full_path = self._validate_path(command.path)
 
-        full_path.parent.mkdir(parents=True, exist_ok=True)
+        full_path.parent.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
 
         try:
-            fd = os.open(full_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o666)
+            fd = os.open(full_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
             try:
                 os.write(fd, command.file_text.encode("utf-8"))
                 os.fsync(fd)
@@ -549,7 +558,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
         if new_full_path.exists():
             raise ToolError(f"The destination {command.new_path} already exists")
 
-        new_full_path.parent.mkdir(parents=True, exist_ok=True)
+        new_full_path.parent.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
 
         try:
             old_full_path.rename(new_full_path)
@@ -563,7 +572,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
         """Override the base implementation to provide file system clearing."""
         if self.memory_root.exists():
             shutil.rmtree(self.memory_root)
-        self.memory_root.mkdir(parents=True, exist_ok=True)
+        self.memory_root.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
         return "All memory cleared"
 
 
@@ -576,7 +585,7 @@ async def _async_atomic_write_file(target_path: AsyncPath, content: str) -> None
     try:
 
         def write_replace_and_sync() -> None:
-            fd = os.open(sync_temp_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o666)
+            fd = os.open(sync_temp_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
             try:
                 offset = 0
                 while offset < len(data):
@@ -624,7 +633,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
 
     async def _ensure_memory_root(self) -> None:
         """Ensure the memory root directory exists"""
-        await self.memory_root.mkdir(parents=True, exist_ok=True)
+        await self.memory_root.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
 
     async def _validate_path(self, path: str) -> AsyncPath:
         """Validate and resolve memory paths"""
@@ -724,13 +733,13 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         await self._ensure_memory_root()
         full_path = await self._validate_path(command.path)
 
-        await full_path.parent.mkdir(parents=True, exist_ok=True)
+        await full_path.parent.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
 
         try:
             sync_full_path = Path(str(full_path))
 
             def create_exclusive() -> None:
-                fd = os.open(sync_full_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o666)
+                fd = os.open(sync_full_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
                 try:
                     os.write(fd, command.file_text.encode("utf-8"))
                     os.fsync(fd)
@@ -848,7 +857,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         if await new_full_path.exists():
             raise ToolError(f"The destination {command.new_path} already exists")
 
-        await new_full_path.parent.mkdir(parents=True, exist_ok=True)
+        await new_full_path.parent.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
 
         try:
             await old_full_path.rename(new_full_path)
@@ -862,5 +871,5 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         """Override the base implementation to provide file system clearing."""
         if await self.memory_root.exists():
             await run_sync(shutil.rmtree, str(self.memory_root))
-        await self.memory_root.mkdir(parents=True, exist_ok=True)
+        await self.memory_root.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
         return "All memory cleared"
