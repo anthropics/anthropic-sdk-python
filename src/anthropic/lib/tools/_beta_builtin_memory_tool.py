@@ -653,7 +653,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
 
         await _async_validate_no_symlink_escape(full_path, self.memory_root)
 
-        return full_path
+        return AsyncPath(resolved_path)
 
     @override
     async def view(self, command: BetaMemoryTool20250818ViewCommand) -> str:
