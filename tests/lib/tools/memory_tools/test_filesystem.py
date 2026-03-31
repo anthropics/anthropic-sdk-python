@@ -945,6 +945,39 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
                 )
             )
 
+    async def test_validate_path_returns_resolved_path_not_symlink_target(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+    ) -> None:
+        """_validate_path must return the resolved path so that subsequent file
+        operations hit the real location, not the (potentially swappable) symlink.
+
+        Without this fix, an attacker could:
+        1. Create /memories/link -> /memories/legit  (passes validation)
+        2. Swap /memories/link -> /etc between validation and the file operation
+        3. The file operation would follow the new symlink target
+        """
+        memories_path = Path(str(async_local_filesystem_tool.memory_root))
+        memories_path.mkdir(parents=True, exist_ok=True)
+
+        # Create a real directory inside memories and a symlink pointing to it
+        legit_dir = memories_path / "legit"
+        legit_dir.mkdir()
+        (legit_dir / "file.txt").write_text("content", encoding="utf-8")
+
+        link_path = memories_path / "link"
+        os.symlink(legit_dir, link_path, target_is_directory=True)
+
+        # _validate_path should return the resolved real path, not the symlink path
+        result = await async_local_filesystem_tool._validate_path("/memories/link/file.txt")
+        result_str = str(result)
+
+        # The returned path should point to the resolved location (under legit/),
+        # not through the symlink
+        assert "link" not in result_str, (
+            f"_validate_path returned unresolved symlink path: {result_str}"
+        )
+        assert str(legit_dir.resolve()) in result_str
+
     async def test_symlink_validation_reject_symlink_pointing_outside_memories(
         self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
     ) -> None:
