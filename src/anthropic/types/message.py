@@ -9,6 +9,7 @@ from .._models import BaseModel
 from .container import Container
 from .stop_reason import StopReason
 from .content_block import ContentBlock, ContentBlock as ContentBlock
+from .refusal_stop_details import RefusalStopDetails
 
 __all__ = ["Message"]
 
@@ -73,6 +74,9 @@ class Message(BaseModel):
 
     This will always be `"assistant"`.
     """
+
+    stop_details: Optional[RefusalStopDetails] = None
+    """Structured information about a refusal."""
 
     stop_reason: Optional[StopReason] = None
     """The reason that we stopped.

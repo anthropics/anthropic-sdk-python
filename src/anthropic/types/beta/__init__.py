@@ -64,6 +64,7 @@ from .beta_text_citation_param import BetaTextCitationParam as BetaTextCitationP
 from .beta_thinking_capability import BetaThinkingCapability as BetaThinkingCapability
 from .beta_user_location_param import BetaUserLocationParam as BetaUserLocationParam
 from .beta_message_tokens_count import BetaMessageTokensCount as BetaMessageTokensCount
+from .beta_refusal_stop_details import BetaRefusalStopDetails as BetaRefusalStopDetails
 from .beta_thinking_block_param import BetaThinkingBlockParam as BetaThinkingBlockParam
 from .beta_thinking_turns_param import BetaThinkingTurnsParam as BetaThinkingTurnsParam
 from .beta_tool_reference_block import BetaToolReferenceBlock as BetaToolReferenceBlock
