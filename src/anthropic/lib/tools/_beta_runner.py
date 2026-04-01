@@ -146,6 +146,15 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         )
         self._client = client
 
+        if compaction_control is not None and compaction_control.get("enabled"):
+            warnings.warn(
+                "The 'compaction_control' parameter is deprecated and will be removed in a future version. "
+                "Use server-side compaction instead by passing `edits=[{'type': 'compact_20260112'}]` in your "
+                "the params passed to `tool_runner()`. See https://platform.claude.com/docs/en/build-with-claude/compaction",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
         self._iterator = self.__run__()
         self._last_message: (
             Callable[[], ParsedBetaMessage[ResponseFormatT]] | ParsedBetaMessage[ResponseFormatT] | None
@@ -415,6 +424,15 @@ class BaseAsyncToolRunner(
             compaction_control=compaction_control,
         )
         self._client = client
+
+        if compaction_control is not None and compaction_control.get("enabled"):
+            warnings.warn(
+                "The 'compaction_control' parameter is deprecated and will be removed in a future version. "
+                "Use server-side compaction instead by passing `edits=[{'type': 'compact_20260112'}]` in your "
+                "the params passed to `tool_runner()`. See https://platform.claude.com/docs/en/build-with-claude/compaction",
+                DeprecationWarning,
+                stacklevel=3,
+            )
 
         self._iterator = self.__run__()
         self._last_message: (

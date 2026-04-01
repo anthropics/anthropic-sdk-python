@@ -473,24 +473,25 @@ class TestSyncRunTools:
             """Call this LAST with your final analysis."""
             return "Analysis submitted"
 
-        runner = snapshot_client.beta.messages.tool_runner(
-            model="claude-sonnet-4-5",
-            max_tokens=4000,
-            tools=[submit_analysis],
-            messages=[
-                {
-                    "role": "user",
-                    "content": (
-                        "Write a detailed 500 word essay about dogs, cats, and birds. "
-                        "Call the tool submit_analysis with the information about all three animals. "
-                        "Note that you should call it only once at the end of your essay."
-                    ),
-                }
-            ],
-            betas=["structured-outputs-2025-12-15"],
-            compaction_control={"enabled": True, "context_token_threshold": 500},
-            max_iterations=1,
-        )
+        with pytest.warns(DeprecationWarning, match="compaction_control.*deprecated"):
+            runner = snapshot_client.beta.messages.tool_runner(
+                model="claude-sonnet-4-5",
+                max_tokens=4000,
+                tools=[submit_analysis],
+                messages=[
+                    {
+                        "role": "user",
+                        "content": (
+                            "Write a detailed 500 word essay about dogs, cats, and birds. "
+                            "Call the tool submit_analysis with the information about all three animals. "
+                            "Note that you should call it only once at the end of your essay."
+                        ),
+                    }
+                ],
+                betas=["structured-outputs-2025-12-15"],
+                compaction_control={"enabled": True, "context_token_threshold": 500},
+                max_iterations=1,
+            )
 
         with caplog.at_level(logging.INFO, logger="anthropic.lib.tools._beta_runner"):
             next(runner)
