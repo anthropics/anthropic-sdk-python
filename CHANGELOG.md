@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.88.0 (2026-04-01)
+
+Full Changelog: [v0.87.0...v0.88.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.87.0...v0.88.0)
+
+### Features
+
+* **api:** add structured stop_details to message responses ([fd82d6b](https://github.com/anthropics/anthropic-sdk-python/commit/fd82d6b87ef0db5b2970d8f27ccc6d5981745572))
+* bedrock api key auth ([#1623](https://github.com/anthropics/anthropic-sdk-python/issues/1623)) ([a95a3fc](https://github.com/anthropics/anthropic-sdk-python/commit/a95a3fc586b8de63e3c2b386cee5e312d96bf5d8))
+* prepare aws package ([#1615](https://github.com/anthropics/anthropic-sdk-python/issues/1615)) ([6875fab](https://github.com/anthropics/anthropic-sdk-python/commit/6875fab38ac27ab3a09b97088a49925abe011bdc))
+
+
+### Chores
+
+* **tests:** bump steady to v0.20.2 ([1bc4e9f](https://github.com/anthropics/anthropic-sdk-python/commit/1bc4e9ffc160eb1ded6294652936caafd6dfc64a))
+
 ## 0.87.0 (2026-03-31)
 
 Full Changelog: [v0.86.0...v0.87.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.86.0...v0.87.0)
