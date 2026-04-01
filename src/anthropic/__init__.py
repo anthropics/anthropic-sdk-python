@@ -98,6 +98,7 @@ __all__ = [
 if not _t.TYPE_CHECKING:
     from ._utils._resources_proxy import resources as resources
 
+from .lib.aws import AnthropicAWS as AnthropicAWS, AsyncAnthropicAWS as AsyncAnthropicAWS
 from .lib.tools import beta_tool, beta_async_tool
 from .lib.vertex import *
 from .lib.bedrock import *

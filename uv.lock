@@ -2,13 +2,18 @@ version = 1
 revision = 3
 requires-python = ">=3.9"
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version < '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version < '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version < '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
     "python_full_version < '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version < '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version < '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version < '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 conflicts = [[
     { package = "anthropic", group = "pydantic-v1" },
@@ -189,7 +194,7 @@ wheels = [
 
 [[package]]
 name = "anthropic"
-version = "0.85.0"
+version = "0.86.0"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },
@@ -207,6 +212,10 @@ dependencies = [
 aiohttp = [
     { name = "aiohttp" },
     { name = "httpx-aiohttp" },
+]
+aws = [
+    { name = "boto3" },
+    { name = "botocore" },
 ]
 bedrock = [
     { name = "boto3" },
@@ -252,7 +261,9 @@ pydantic-v2 = [
 requires-dist = [
     { name = "aiohttp", marker = "extra == 'aiohttp'" },
     { name = "anyio", specifier = ">=3.5.0,<5" },
+    { name = "boto3", marker = "extra == 'aws'", specifier = ">=1.28.57" },
     { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.28.57" },
+    { name = "botocore", marker = "extra == 'aws'", specifier = ">=1.31.57" },
     { name = "botocore", marker = "extra == 'bedrock'", specifier = ">=1.31.57" },
     { name = "distro", specifier = ">=1.7.0,<2" },
     { name = "docstring-parser", specifier = ">=0.15,<1" },
@@ -265,7 +276,7 @@ requires-dist = [
     { name = "sniffio" },
     { name = "typing-extensions", specifier = ">=4.14,<5" },
 ]
-provides-extras = ["aiohttp", "vertex", "bedrock", "mcp"]
+provides-extras = ["aiohttp", "vertex", "aws", "bedrock", "mcp"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -934,15 +945,19 @@ name = "griffe"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 dependencies = [
     { name = "griffecli", marker = "python_full_version >= '3.10' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "griffelib", marker = "python_full_version >= '3.10' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/04/56/28a0accac339c164b52a92c6cfc45a903acc0c174caa5c1713803467b533/griffe-2.0.0.tar.gz", hash = "sha256:c68979cd8395422083a51ea7cf02f9c119d889646d99b7b656ee43725de1b80f", size = 293906, upload-time = "2026-03-23T21:06:53.402Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8b/94/ee21d41e7eb4f823b94603b9d40f86d3c7fde80eacc2c3c71845476dddaa/griffe-2.0.0-py3-none-any.whl", hash = "sha256:5418081135a391c3e6e757a7f3f156f1a1a746cc7b4023868ff7d5e2f9a980aa", size = 5214, upload-time = "2026-02-09T19:09:44.105Z" },
 ]
@@ -955,6 +970,7 @@ dependencies = [
     { name = "colorama", marker = "python_full_version >= '3.10' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "griffelib", marker = "python_full_version >= '3.10' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/a4/f8/2e129fd4a86e52e58eefe664de05e7d502decf766e7316cc9e70fdec3e18/griffecli-2.0.0.tar.gz", hash = "sha256:312fa5ebb4ce6afc786356e2d0ce85b06c1c20d45abc42d74f0cda65e159f6ef", size = 56213, upload-time = "2026-03-23T21:06:54.8Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e6/ed/d93f7a447bbf7a935d8868e9617cbe1cadf9ee9ee6bd275d3040fbf93d60/griffecli-2.0.0-py3-none-any.whl", hash = "sha256:9f7cd9ee9b21d55e91689358978d2385ae65c22f307a63fb3269acf3f21e643d", size = 9345, upload-time = "2026-02-09T19:09:42.554Z" },
 ]
@@ -963,6 +979,7 @@ wheels = [
 name = "griffelib"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ad/06/eccbd311c9e2b3ca45dbc063b93134c57a1ccc7607c5e545264ad092c4a9/griffelib-2.0.0.tar.gz", hash = "sha256:e504d637a089f5cab9b5daf18f7645970509bf4f53eda8d79ed71cce8bd97934", size = 166312, upload-time = "2026-03-23T21:06:55.954Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4d/51/c936033e16d12b627ea334aaaaf42229c37620d0f15593456ab69ab48161/griffelib-2.0.0-py3-none-any.whl", hash = "sha256:01284878c966508b6d6f1dbff9b6fa607bc062d8261c5c7253cb285b06422a7f", size = 142004, upload-time = "2026-02-09T19:09:40.561Z" },
 ]
@@ -1081,10 +1098,13 @@ name = "iniconfig"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/72/34/14ca021ce8e5dfedc35312d08ba8bf51fdd999c576889fc2c24cb97f4f10/iniconfig-2.3.0.tar.gz", hash = "sha256:c76315c77db068650d49c5b56314774a7804df16fee4402c1f19d6d15d8c4730", size = 20503, upload-time = "2025-10-18T21:55:43.219Z" }
 wheels = [
@@ -1274,10 +1294,13 @@ name = "markdown-it-py"
 version = "4.0.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 dependencies = [
     { name = "mdurl", marker = "python_full_version >= '3.10' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -1298,7 +1321,7 @@ dependencies = [
     { name = "jsonschema", marker = "python_full_version >= '3.10'" },
     { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "pydantic-settings", marker = "python_full_version >= '3.10'" },
-    { name = "pyjwt", extra = ["crypto"], marker = "(python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp') or (python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1') or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+    { name = "pyjwt", extra = ["crypto"], marker = "(python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp') or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "python-multipart", marker = "python_full_version >= '3.10'" },
     { name = "pywin32", marker = "python_full_version >= '3.10' and sys_platform == 'win32'" },
     { name = "sse-starlette", marker = "python_full_version >= '3.10'" },
@@ -1734,10 +1757,13 @@ name = "pycparser"
 version = "3.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1b/7d/92392ff7815c21062bea51aa7b87d45576f649f16458d78b7cf94b9ab2e6/pycparser-3.0.tar.gz", hash = "sha256:600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29", size = 103492, upload-time = "2026-01-21T14:26:51.89Z" }
 wheels = [
@@ -1795,17 +1821,22 @@ name = "pydantic"
 version = "2.12.5"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version < '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version < '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version < '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version < '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version < '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version < '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 dependencies = [
-    { name = "annotated-types" },
-    { name = "pydantic-core" },
-    { name = "typing-extensions" },
-    { name = "typing-inspection" },
+    { name = "annotated-types", marker = "extra == 'extra-9-anthropic-mcp' or extra != 'group-9-anthropic-pydantic-v1' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+    { name = "pydantic-core", marker = "extra == 'extra-9-anthropic-mcp' or extra != 'group-9-anthropic-pydantic-v1' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+    { name = "typing-extensions", marker = "extra == 'extra-9-anthropic-mcp' or extra != 'group-9-anthropic-pydantic-v1' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+    { name = "typing-inspection", marker = "extra == 'extra-9-anthropic-mcp' or extra != 'group-9-anthropic-pydantic-v1' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/69/44/36f1a6e523abc58ae5f928898e4aca2e0ea509b5aa6f6f392a5d882be928/pydantic-2.12.5.tar.gz", hash = "sha256:4d351024c75c0f085a9febbb665ce8c0c6ec5d30e903bdb6394b7ede26aebb49", size = 821591, upload-time = "2025-11-26T15:11:46.471Z" }
 wheels = [
@@ -1817,7 +1848,7 @@ name = "pydantic-core"
 version = "2.41.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "extra == 'extra-9-anthropic-mcp' or extra != 'group-9-anthropic-pydantic-v1' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/71/70/23b021c950c2addd24ec408e9ab05d59b035b39d97cdc1130e1bce647bb6/pydantic_core-2.41.5.tar.gz", hash = "sha256:08daa51ea16ad373ffd5e7606252cc32f07bc72b28284b6bc9c6df804816476e", size = 460952, upload-time = "2025-11-04T13:43:49.098Z" }
 wheels = [
@@ -2022,10 +2053,13 @@ name = "pytest"
 version = "9.0.2"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 dependencies = [
     { name = "colorama", marker = "(python_full_version >= '3.10' and sys_platform == 'win32') or (python_full_version < '3.10' and extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (python_full_version < '3.10' and extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2') or (sys_platform != 'win32' and extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (sys_platform != 'win32' and extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -2063,10 +2097,13 @@ name = "pytest-asyncio"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 dependencies = [
     { name = "backports-asyncio-runner", marker = "python_full_version == '3.10.*' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -2513,10 +2550,13 @@ name = "time-machine"
 version = "3.2.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/02/fc/37b02f6094dbb1f851145330460532176ed2f1dc70511a35828166c41e52/time_machine-3.2.0.tar.gz", hash = "sha256:a4ddd1cea17b8950e462d1805a42b20c81eb9aafc8f66b392dd5ce997e037d79", size = 14804, upload-time = "2025-12-17T23:33:02.599Z" }
 wheels = [
@@ -2685,7 +2725,7 @@ name = "typing-inspection"
 version = "0.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "extra == 'extra-9-anthropic-mcp' or extra != 'group-9-anthropic-pydantic-v1' or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/55/e3/70399cb7dd41c10ac53367ae42139cf4b1ca5f36bb3dc6c9d33acdb43655/typing_inspection-0.4.2.tar.gz", hash = "sha256:ba561c48a67c5958007083d386c3295464928b01faa735ab8547c5692e87f464", size = 75949, upload-time = "2025-10-01T02:14:41.687Z" }
 wheels = [
@@ -2709,10 +2749,13 @@ name = "urllib3"
 version = "2.6.3"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz", hash = "sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed", size = 435556, upload-time = "2026-01-07T16:24:43.925Z" }
 wheels = [
@@ -2883,10 +2926,13 @@ name = "yarl"
 version = "1.23.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and python_full_version < '3.14' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "python_full_version >= '3.10' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra == 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "python_full_version >= '3.10' and extra != 'extra-9-anthropic-mcp' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
 ]
 dependencies = [
     { name = "idna", marker = "python_full_version >= '3.10' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
