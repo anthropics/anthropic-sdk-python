@@ -79,6 +79,7 @@ from .beta_not_found_error import BetaNotFoundError as BetaNotFoundError
 from .document_block_param import DocumentBlockParam as DocumentBlockParam
 from .message_stream_event import MessageStreamEvent as MessageStreamEvent
 from .message_tokens_count import MessageTokensCount as MessageTokensCount
+from .refusal_stop_details import RefusalStopDetails as RefusalStopDetails
 from .thinking_block_param import ThinkingBlockParam as ThinkingBlockParam
 from .tool_reference_block import ToolReferenceBlock as ToolReferenceBlock
 from .tool_use_block_param import ToolUseBlockParam as ToolUseBlockParam

@@ -7,6 +7,7 @@ from .._models import BaseModel
 from .container import Container
 from .stop_reason import StopReason
 from .message_delta_usage import MessageDeltaUsage
+from .refusal_stop_details import RefusalStopDetails
 
 __all__ = ["RawMessageDeltaEvent", "Delta"]
 
@@ -17,6 +18,9 @@ class Delta(BaseModel):
     Information about the container used in the request (for the code execution
     tool)
     """
+
+    stop_details: Optional[RefusalStopDetails] = None
+    """Structured information about a refusal."""
 
     stop_reason: Optional[StopReason] = None
 
