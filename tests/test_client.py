@@ -453,6 +453,22 @@ class TestAnthropic:
 
         client.close()
 
+    def test_hardcoded_query_params_in_url(self, client: Anthropic) -> None:
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo?beta=true"))
+        url = httpx.URL(request.url)
+        assert dict(url.params) == {"beta": "true"}
+
+    def test_hardcoded_query_params_with_extra_params(self, client: Anthropic) -> None:
+        request = client._build_request(
+            FinalRequestOptions(
+                method="get",
+                url="/foo?beta=true",
+                params={"limit": "10", "page": "abc"},
+            )
+        )
+        url = httpx.URL(request.url)
+        assert dict(url.params) == {"beta": "true", "limit": "10", "page": "abc"}
+
     def test_request_extra_json(self, client: Anthropic) -> None:
         request = client._build_request(
             FinalRequestOptions(
@@ -1457,6 +1473,22 @@ class TestAsyncAnthropic:
         assert dict(url.params) == {"foo": "baz", "query_param": "overridden"}
 
         await client.close()
+
+    def test_hardcoded_query_params_in_url(self, async_client: AsyncAnthropic) -> None:
+        request = async_client._build_request(FinalRequestOptions(method="get", url="/foo?beta=true"))
+        url = httpx.URL(request.url)
+        assert dict(url.params) == {"beta": "true"}
+
+    def test_hardcoded_query_params_with_extra_params(self, async_client: AsyncAnthropic) -> None:
+        request = async_client._build_request(
+            FinalRequestOptions(
+                method="get",
+                url="/foo?beta=true",
+                params={"limit": "10", "page": "abc"},
+            )
+        )
+        url = httpx.URL(request.url)
+        assert dict(url.params) == {"beta": "true", "limit": "10", "page": "abc"}
 
     def test_request_extra_json(self, client: Anthropic) -> None:
         request = client._build_request(
