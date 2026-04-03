@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.89.0 (2026-04-03)
+
+Full Changelog: [v0.88.0...v0.89.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.88.0...v0.89.0)
+
+### Features
+
+* **vertex:** add support for US multi-region endpoint ([4e732da](https://github.com/anthropics/anthropic-sdk-python/commit/4e732dada087146cfeff1f4afdf90513590e248d))
+
+
+### Bug Fixes
+
+* **client:** preserve hardcoded query params when merging with user params ([e7f4a3c](https://github.com/anthropics/anthropic-sdk-python/commit/e7f4a3cada266e9719e5c3b9ba09514c3842a638))
+
+
+### Chores
+
+* **client:** deprecate client-side compaction helpers ([e60affc](https://github.com/anthropics/anthropic-sdk-python/commit/e60affc656e4165de7cb15f73351175507b0b441))
+
 ## 0.88.0 (2026-04-01)
 
 Full Changelog: [v0.87.0...v0.88.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.87.0...v0.88.0)
