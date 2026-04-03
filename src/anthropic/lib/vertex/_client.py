@@ -119,6 +119,8 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
             if base_url is None:
                 if region == "global":
                     base_url = "https://aiplatform.googleapis.com/v1"
+                elif region == "us":
+                    base_url = "https://aiplatform.us.rep.googleapis.com/v1"
                 else:
                     base_url = f"https://{region}-aiplatform.googleapis.com/v1"
 
