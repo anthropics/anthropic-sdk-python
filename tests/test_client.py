@@ -458,7 +458,6 @@ class TestAnthropic:
         url = httpx.URL(request.url)
         assert dict(url.params) == {"beta": "true"}
 
-    def test_hardcoded_query_params_with_extra_params(self, client: Anthropic) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="get",
@@ -468,6 +467,15 @@ class TestAnthropic:
         )
         url = httpx.URL(request.url)
         assert dict(url.params) == {"beta": "true", "limit": "10", "page": "abc"}
+
+        request = client._build_request(
+            FinalRequestOptions(
+                method="get",
+                url="/files/a%2Fb?beta=true",
+                params={"limit": "10"},
+            )
+        )
+        assert request.url.raw_path == b"/files/a%2Fb?beta=true&limit=10"
 
     def test_request_extra_json(self, client: Anthropic) -> None:
         request = client._build_request(
@@ -1474,12 +1482,11 @@ class TestAsyncAnthropic:
 
         await client.close()
 
-    def test_hardcoded_query_params_in_url(self, async_client: AsyncAnthropic) -> None:
+    async def test_hardcoded_query_params_in_url(self, async_client: AsyncAnthropic) -> None:
         request = async_client._build_request(FinalRequestOptions(method="get", url="/foo?beta=true"))
         url = httpx.URL(request.url)
         assert dict(url.params) == {"beta": "true"}
 
-    def test_hardcoded_query_params_with_extra_params(self, async_client: AsyncAnthropic) -> None:
         request = async_client._build_request(
             FinalRequestOptions(
                 method="get",
@@ -1489,6 +1496,15 @@ class TestAsyncAnthropic:
         )
         url = httpx.URL(request.url)
         assert dict(url.params) == {"beta": "true", "limit": "10", "page": "abc"}
+
+        request = async_client._build_request(
+            FinalRequestOptions(
+                method="get",
+                url="/files/a%2Fb?beta=true",
+                params={"limit": "10"},
+            )
+        )
+        assert request.url.raw_path == b"/files/a%2Fb?beta=true&limit=10"
 
     def test_request_extra_json(self, client: Anthropic) -> None:
         request = client._build_request(
