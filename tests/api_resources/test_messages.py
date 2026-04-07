@@ -318,7 +318,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-mythos-preview",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -331,7 +331,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-mythos-preview",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -407,7 +407,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-mythos-preview",
         )
 
         assert response.is_closed is True
@@ -424,7 +424,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-mythos-preview",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -737,7 +737,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-mythos-preview",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -750,7 +750,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-mythos-preview",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -826,7 +826,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-mythos-preview",
         )
 
         assert response.is_closed is True
@@ -843,7 +843,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-mythos-preview",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
