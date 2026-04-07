@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.91.0 (2026-04-07)
+
+Full Changelog: [v0.90.0...v0.91.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.90.0...v0.91.0)
+
+### Features
+
+* **client:** Create Bedrock Mantle client ([#1616](https://github.com/anthropics/anthropic-sdk-python/issues/1616)) ([fd195a2](https://github.com/anthropics/anthropic-sdk-python/commit/fd195a2fa2cd44ebf4513e69f671def88d2b6ec9))
+
 ## 0.90.0 (2026-04-07)
 
 Full Changelog: [v0.89.0...v0.90.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.89.0...v0.90.0)

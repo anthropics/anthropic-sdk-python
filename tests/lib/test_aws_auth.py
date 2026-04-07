@@ -144,7 +144,7 @@ class TestResolveAuthMode:
         )
 
     def test_custom_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setenv("ANTHROPIC_BEDROCK_MANTLE_API_KEY", "mantle-key")
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "mantle-key")
         monkeypatch.delenv("ANTHROPIC_AWS_API_KEY", raising=False)
         assert (
             resolve_auth_mode(
@@ -152,13 +152,13 @@ class TestResolveAuthMode:
                 aws_access_key=None,
                 aws_secret_key=None,
                 aws_profile=None,
-                api_key_env_vars=("ANTHROPIC_BEDROCK_MANTLE_API_KEY",),
+                api_key_env_vars=("AWS_BEARER_TOKEN_BEDROCK",),
             )
             is False
         )
 
     def test_custom_env_var_not_set_defaults_to_sigv4(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.delenv("ANTHROPIC_BEDROCK_MANTLE_API_KEY", raising=False)
+        monkeypatch.delenv("AWS_BEARER_TOKEN_BEDROCK", raising=False)
         monkeypatch.delenv("ANTHROPIC_AWS_API_KEY", raising=False)
         assert (
             resolve_auth_mode(
@@ -166,14 +166,14 @@ class TestResolveAuthMode:
                 aws_access_key=None,
                 aws_secret_key=None,
                 aws_profile=None,
-                api_key_env_vars=("ANTHROPIC_BEDROCK_MANTLE_API_KEY",),
+                api_key_env_vars=("AWS_BEARER_TOKEN_BEDROCK",),
             )
             is True
         )
 
     def test_env_var_fallback_chain_first_wins(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """First env var in the chain takes priority."""
-        monkeypatch.setenv("ANTHROPIC_BEDROCK_MANTLE_API_KEY", "mantle-key")
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "mantle-key")
         monkeypatch.setenv("ANTHROPIC_AWS_API_KEY", "aws-key")
         assert (
             resolve_auth_mode(
@@ -181,14 +181,14 @@ class TestResolveAuthMode:
                 aws_access_key=None,
                 aws_secret_key=None,
                 aws_profile=None,
-                api_key_env_vars=("ANTHROPIC_BEDROCK_MANTLE_API_KEY", "ANTHROPIC_AWS_API_KEY"),
+                api_key_env_vars=("AWS_BEARER_TOKEN_BEDROCK", "ANTHROPIC_AWS_API_KEY"),
             )
             is False
         )
 
     def test_env_var_fallback_chain_falls_through(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Falls back to second env var when first is not set."""
-        monkeypatch.delenv("ANTHROPIC_BEDROCK_MANTLE_API_KEY", raising=False)
+        monkeypatch.delenv("AWS_BEARER_TOKEN_BEDROCK", raising=False)
         monkeypatch.setenv("ANTHROPIC_AWS_API_KEY", "aws-key")
         assert (
             resolve_auth_mode(
@@ -196,14 +196,14 @@ class TestResolveAuthMode:
                 aws_access_key=None,
                 aws_secret_key=None,
                 aws_profile=None,
-                api_key_env_vars=("ANTHROPIC_BEDROCK_MANTLE_API_KEY", "ANTHROPIC_AWS_API_KEY"),
+                api_key_env_vars=("AWS_BEARER_TOKEN_BEDROCK", "ANTHROPIC_AWS_API_KEY"),
             )
             is False
         )
 
     def test_env_var_fallback_chain_none_set(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Defaults to SigV4 when no env vars in the chain are set."""
-        monkeypatch.delenv("ANTHROPIC_BEDROCK_MANTLE_API_KEY", raising=False)
+        monkeypatch.delenv("AWS_BEARER_TOKEN_BEDROCK", raising=False)
         monkeypatch.delenv("ANTHROPIC_AWS_API_KEY", raising=False)
         assert (
             resolve_auth_mode(
@@ -211,7 +211,7 @@ class TestResolveAuthMode:
                 aws_access_key=None,
                 aws_secret_key=None,
                 aws_profile=None,
-                api_key_env_vars=("ANTHROPIC_BEDROCK_MANTLE_API_KEY", "ANTHROPIC_AWS_API_KEY"),
+                api_key_env_vars=("AWS_BEARER_TOKEN_BEDROCK", "ANTHROPIC_AWS_API_KEY"),
             )
             is True
         )
@@ -244,36 +244,36 @@ class TestResolveApiKey:
         assert resolve_api_key(api_key=None, use_sigv4=True) is None
 
     def test_custom_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setenv("ANTHROPIC_BEDROCK_MANTLE_API_KEY", "mantle-key")
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "mantle-key")
         assert (
             resolve_api_key(
                 api_key=None,
                 use_sigv4=False,
-                api_key_env_vars=("ANTHROPIC_BEDROCK_MANTLE_API_KEY",),
+                api_key_env_vars=("AWS_BEARER_TOKEN_BEDROCK",),
             )
             == "mantle-key"
         )
 
     def test_env_var_fallback_chain_first_wins(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setenv("ANTHROPIC_BEDROCK_MANTLE_API_KEY", "mantle-key")
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "mantle-key")
         monkeypatch.setenv("ANTHROPIC_AWS_API_KEY", "aws-key")
         assert (
             resolve_api_key(
                 api_key=None,
                 use_sigv4=False,
-                api_key_env_vars=("ANTHROPIC_BEDROCK_MANTLE_API_KEY", "ANTHROPIC_AWS_API_KEY"),
+                api_key_env_vars=("AWS_BEARER_TOKEN_BEDROCK", "ANTHROPIC_AWS_API_KEY"),
             )
             == "mantle-key"
         )
 
     def test_env_var_fallback_chain_falls_through(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.delenv("ANTHROPIC_BEDROCK_MANTLE_API_KEY", raising=False)
+        monkeypatch.delenv("AWS_BEARER_TOKEN_BEDROCK", raising=False)
         monkeypatch.setenv("ANTHROPIC_AWS_API_KEY", "aws-key")
         assert (
             resolve_api_key(
                 api_key=None,
                 use_sigv4=False,
-                api_key_env_vars=("ANTHROPIC_BEDROCK_MANTLE_API_KEY", "ANTHROPIC_AWS_API_KEY"),
+                api_key_env_vars=("AWS_BEARER_TOKEN_BEDROCK", "ANTHROPIC_AWS_API_KEY"),
             )
             == "aws-key"
         )
