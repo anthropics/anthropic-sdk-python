@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.90.0 (2026-04-07)
+
+Full Changelog: [v0.89.0...v0.90.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.89.0...v0.90.0)
+
+### Features
+
+* **api:** Add support for claude-mythos-preview ([fc7ddd8](https://github.com/anthropics/anthropic-sdk-python/commit/fc7ddd8e0296a578f09c7fa2baf00e50d81cf980))
+
+
+### Bug Fixes
+
+* **client:** preserve hardcoded query params when merging with user params ([32d35e0](https://github.com/anthropics/anthropic-sdk-python/commit/32d35e0ae67ab0d076a60d38fa5177b5635e9c0c))
+
 ## 0.89.0 (2026-04-03)
 
 Full Changelog: [v0.88.0...v0.89.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.88.0...v0.89.0)
