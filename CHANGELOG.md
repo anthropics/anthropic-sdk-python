@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.92.0 (2026-04-08)
+
+Full Changelog: [v0.91.0...v0.92.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.91.0...v0.92.0)
+
+### Features
+
+* **api:** add support for Claude Managed Agents ([5b879a7](https://github.com/anthropics/anthropic-sdk-python/commit/5b879a7d929bd93332d777bed067be680819dfac))
+
 ## 0.91.0 (2026-04-07)
 
 Full Changelog: [v0.90.0...v0.91.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.90.0...v0.91.0)
