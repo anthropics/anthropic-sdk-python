@@ -16,6 +16,14 @@ from .files import (
     FilesWithStreamingResponse,
     AsyncFilesWithStreamingResponse,
 )
+from .agents import (
+    Agents,
+    AsyncAgents,
+    AgentsWithRawResponse,
+    AsyncAgentsWithRawResponse,
+    AgentsWithStreamingResponse,
+    AsyncAgentsWithStreamingResponse,
+)
 from .models import (
     Models,
     AsyncModels,
@@ -32,6 +40,14 @@ from .skills import (
     SkillsWithStreamingResponse,
     AsyncSkillsWithStreamingResponse,
 )
+from .vaults import (
+    Vaults,
+    AsyncVaults,
+    VaultsWithRawResponse,
+    AsyncVaultsWithRawResponse,
+    VaultsWithStreamingResponse,
+    AsyncVaultsWithStreamingResponse,
+)
 from .messages import (
     Messages,
     AsyncMessages,
@@ -39,6 +55,22 @@ from .messages import (
     AsyncMessagesWithRawResponse,
     MessagesWithStreamingResponse,
     AsyncMessagesWithStreamingResponse,
+)
+from .sessions import (
+    Sessions,
+    AsyncSessions,
+    SessionsWithRawResponse,
+    AsyncSessionsWithRawResponse,
+    SessionsWithStreamingResponse,
+    AsyncSessionsWithStreamingResponse,
+)
+from .environments import (
+    Environments,
+    AsyncEnvironments,
+    EnvironmentsWithRawResponse,
+    AsyncEnvironmentsWithRawResponse,
+    EnvironmentsWithStreamingResponse,
+    AsyncEnvironmentsWithStreamingResponse,
 )
 
 __all__ = [
@@ -54,6 +86,30 @@ __all__ = [
     "AsyncMessagesWithRawResponse",
     "MessagesWithStreamingResponse",
     "AsyncMessagesWithStreamingResponse",
+    "Agents",
+    "AsyncAgents",
+    "AgentsWithRawResponse",
+    "AsyncAgentsWithRawResponse",
+    "AgentsWithStreamingResponse",
+    "AsyncAgentsWithStreamingResponse",
+    "Environments",
+    "AsyncEnvironments",
+    "EnvironmentsWithRawResponse",
+    "AsyncEnvironmentsWithRawResponse",
+    "EnvironmentsWithStreamingResponse",
+    "AsyncEnvironmentsWithStreamingResponse",
+    "Sessions",
+    "AsyncSessions",
+    "SessionsWithRawResponse",
+    "AsyncSessionsWithRawResponse",
+    "SessionsWithStreamingResponse",
+    "AsyncSessionsWithStreamingResponse",
+    "Vaults",
+    "AsyncVaults",
+    "VaultsWithRawResponse",
+    "AsyncVaultsWithRawResponse",
+    "VaultsWithStreamingResponse",
+    "AsyncVaultsWithStreamingResponse",
     "Files",
     "AsyncFiles",
     "FilesWithRawResponse",

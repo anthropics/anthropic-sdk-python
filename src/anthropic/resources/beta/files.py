@@ -68,6 +68,7 @@ class Files(SyncAPIResource):
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
         limit: int | Omit = omit,
+        scope_id: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -90,6 +91,9 @@ class Files(SyncAPIResource):
           limit: Number of items to return per page.
 
               Defaults to `20`. Ranges from `1` to `1000`.
+
+          scope_id: Filter by scope ID. Only returns files associated with the specified scope
+              (e.g., a session ID).
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -125,6 +129,7 @@ class Files(SyncAPIResource):
                         "after_id": after_id,
                         "before_id": before_id,
                         "limit": limit,
+                        "scope_id": scope_id,
                     },
                     file_list_params.FileListParams,
                 ),
@@ -362,6 +367,7 @@ class AsyncFiles(AsyncAPIResource):
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
         limit: int | Omit = omit,
+        scope_id: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -384,6 +390,9 @@ class AsyncFiles(AsyncAPIResource):
           limit: Number of items to return per page.
 
               Defaults to `20`. Ranges from `1` to `1000`.
+
+          scope_id: Filter by scope ID. Only returns files associated with the specified scope
+              (e.g., a session ID).
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -419,6 +428,7 @@ class AsyncFiles(AsyncAPIResource):
                         "after_id": after_id,
                         "before_id": before_id,
                         "limit": limit,
+                        "scope_id": scope_id,
                     },
                     file_list_params.FileListParams,
                 ),

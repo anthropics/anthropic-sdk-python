@@ -69,6 +69,7 @@ class Stream(Generic[_T]):
                     or sse.event == "content_block_start"
                     or sse.event == "content_block_delta"
                     or sse.event == "content_block_stop"
+                    or sse.event == "message"
                 ):
                     yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
@@ -164,6 +165,7 @@ class AsyncStream(Generic[_T]):
                     or sse.event == "content_block_start"
                     or sse.event == "content_block_delta"
                     or sse.event == "content_block_stop"
+                    or sse.event == "message"
                 ):
                     yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
