@@ -30,5 +30,11 @@ class FileListParams(TypedDict, total=False):
     Defaults to `20`. Ranges from `1` to `1000`.
     """
 
+    scope_id: str
+    """Filter by scope ID.
+
+    Only returns files associated with the specified scope (e.g., a session ID).
+    """
+
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""

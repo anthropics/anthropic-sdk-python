@@ -6,22 +6,30 @@ from .beta_skill import BetaSkill as BetaSkill
 from .beta_usage import BetaUsage as BetaUsage
 from .beta_message import BetaMessage as BetaMessage
 from .deleted_file import DeletedFile as DeletedFile
+from .beta_packages import BetaPackages as BetaPackages
 from .file_metadata import FileMetadata as FileMetadata
 from .beta_container import BetaContainer as BetaContainer
+from .beta_file_scope import BetaFileScope as BetaFileScope
 from .beta_model_info import BetaModelInfo as BetaModelInfo
 from .beta_text_block import BetaTextBlock as BetaTextBlock
 from .beta_text_delta import BetaTextDelta as BetaTextDelta
 from .beta_tool_param import BetaToolParam as BetaToolParam
+from .beta_environment import BetaEnvironment as BetaEnvironment
 from .beta_stop_reason import BetaStopReason as BetaStopReason
 from .file_list_params import FileListParams as FileListParams
+from .agent_list_params import AgentListParams as AgentListParams
+from .beta_cloud_config import BetaCloudConfig as BetaCloudConfig
 from .beta_skill_params import BetaSkillParams as BetaSkillParams
 from .model_list_params import ModelListParams as ModelListParams
 from .skill_list_params import SkillListParams as SkillListParams
+from .vault_list_params import VaultListParams as VaultListParams
 from .beta_content_block import BetaContentBlock as BetaContentBlock
 from .beta_direct_caller import BetaDirectCaller as BetaDirectCaller
 from .beta_message_param import BetaMessageParam as BetaMessageParam
 from .beta_text_citation import BetaTextCitation as BetaTextCitation
 from .file_upload_params import FileUploadParams as FileUploadParams
+from .agent_create_params import AgentCreateParams as AgentCreateParams
+from .agent_update_params import AgentUpdateParams as AgentUpdateParams
 from .beta_cache_creation import BetaCacheCreation as BetaCacheCreation
 from .beta_document_block import BetaDocumentBlock as BetaDocumentBlock
 from .beta_metadata_param import BetaMetadataParam as BetaMetadataParam
@@ -29,12 +37,18 @@ from .beta_thinking_block import BetaThinkingBlock as BetaThinkingBlock
 from .beta_thinking_delta import BetaThinkingDelta as BetaThinkingDelta
 from .beta_thinking_types import BetaThinkingTypes as BetaThinkingTypes
 from .beta_tool_use_block import BetaToolUseBlock as BetaToolUseBlock
+from .session_list_params import SessionListParams as SessionListParams
 from .skill_create_params import SkillCreateParams as SkillCreateParams
 from .skill_list_response import SkillListResponse as SkillListResponse
+from .vault_create_params import VaultCreateParams as VaultCreateParams
+from .vault_update_params import VaultUpdateParams as VaultUpdateParams
 from .beta_citation_config import BetaCitationConfig as BetaCitationConfig
 from .beta_citations_delta import BetaCitationsDelta as BetaCitationsDelta
+from .beta_limited_network import BetaLimitedNetwork as BetaLimitedNetwork
+from .beta_packages_params import BetaPackagesParams as BetaPackagesParams
 from .beta_signature_delta import BetaSignatureDelta as BetaSignatureDelta
 from .beta_web_fetch_block import BetaWebFetchBlock as BetaWebFetchBlock
+from .agent_retrieve_params import AgentRetrieveParams as AgentRetrieveParams
 from .beta_compaction_block import BetaCompactionBlock as BetaCompactionBlock
 from .beta_container_params import BetaContainerParams as BetaContainerParams
 from .beta_input_json_delta import BetaInputJSONDelta as BetaInputJSONDelta
@@ -42,6 +56,8 @@ from .beta_iterations_usage import BetaIterationsUsage as BetaIterationsUsage
 from .beta_text_block_param import BetaTextBlockParam as BetaTextBlockParam
 from .beta_tool_union_param import BetaToolUnionParam as BetaToolUnionParam
 from .message_create_params import MessageCreateParams as MessageCreateParams
+from .session_create_params import SessionCreateParams as SessionCreateParams
+from .session_update_params import SessionUpdateParams as SessionUpdateParams
 from .skill_create_response import SkillCreateResponse as SkillCreateResponse
 from .skill_delete_response import SkillDeleteResponse as SkillDeleteResponse
 from .beta_base64_pdf_source import BetaBase64PDFSource as BetaBase64PDFSource
@@ -55,7 +71,9 @@ from .beta_capability_support import BetaCapabilitySupport as BetaCapabilitySupp
 from .beta_mcp_tool_use_block import BetaMCPToolUseBlock as BetaMCPToolUseBlock
 from .beta_model_capabilities import BetaModelCapabilities as BetaModelCapabilities
 from .beta_server_tool_caller import BetaServerToolCaller as BetaServerToolCaller
+from .environment_list_params import EnvironmentListParams as EnvironmentListParams
 from .skill_retrieve_response import SkillRetrieveResponse as SkillRetrieveResponse
+from .beta_cloud_config_params import BetaCloudConfigParams as BetaCloudConfigParams
 from .beta_content_block_param import BetaContentBlockParam as BetaContentBlockParam
 from .beta_direct_caller_param import BetaDirectCallerParam as BetaDirectCallerParam
 from .beta_message_delta_usage import BetaMessageDeltaUsage as BetaMessageDeltaUsage
@@ -63,6 +81,9 @@ from .beta_output_config_param import BetaOutputConfigParam as BetaOutputConfigP
 from .beta_text_citation_param import BetaTextCitationParam as BetaTextCitationParam
 from .beta_thinking_capability import BetaThinkingCapability as BetaThinkingCapability
 from .beta_user_location_param import BetaUserLocationParam as BetaUserLocationParam
+from .beta_managed_agents_agent import BetaManagedAgentsAgent as BetaManagedAgentsAgent
+from .beta_managed_agents_model import BetaManagedAgentsModel as BetaManagedAgentsModel
+from .beta_managed_agents_vault import BetaManagedAgentsVault as BetaManagedAgentsVault
 from .beta_message_tokens_count import BetaMessageTokensCount as BetaMessageTokensCount
 from .beta_refusal_stop_details import BetaRefusalStopDetails as BetaRefusalStopDetails
 from .beta_thinking_block_param import BetaThinkingBlockParam as BetaThinkingBlockParam
@@ -70,7 +91,10 @@ from .beta_thinking_turns_param import BetaThinkingTurnsParam as BetaThinkingTur
 from .beta_tool_reference_block import BetaToolReferenceBlock as BetaToolReferenceBlock
 from .beta_tool_use_block_param import BetaToolUseBlockParam as BetaToolUseBlockParam
 from .beta_tool_uses_keep_param import BetaToolUsesKeepParam as BetaToolUsesKeepParam
+from .beta_unrestricted_network import BetaUnrestrictedNetwork as BetaUnrestrictedNetwork
 from .beta_url_pdf_source_param import BetaURLPDFSourceParam as BetaURLPDFSourceParam
+from .environment_create_params import EnvironmentCreateParams as EnvironmentCreateParams
+from .environment_update_params import EnvironmentUpdateParams as EnvironmentUpdateParams
 from .beta_mcp_tool_config_param import BetaMCPToolConfigParam as BetaMCPToolConfigParam
 from .beta_mcp_tool_result_block import BetaMCPToolResultBlock as BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock as BetaServerToolUseBlock
@@ -83,6 +107,8 @@ from .beta_citation_page_location import BetaCitationPageLocation as BetaCitatio
 from .beta_citations_config_param import BetaCitationsConfigParam as BetaCitationsConfigParam
 from .beta_compaction_block_param import BetaCompactionBlockParam as BetaCompactionBlockParam
 from .beta_container_upload_block import BetaContainerUploadBlock as BetaContainerUploadBlock
+from .beta_limited_network_params import BetaLimitedNetworkParams as BetaLimitedNetworkParams
+from .beta_managed_agents_session import BetaManagedAgentsSession as BetaManagedAgentsSession
 from .beta_raw_message_stop_event import BetaRawMessageStopEvent as BetaRawMessageStopEvent
 from .beta_tool_choice_auto_param import BetaToolChoiceAutoParam as BetaToolChoiceAutoParam
 from .beta_tool_choice_none_param import BetaToolChoiceNoneParam as BetaToolChoiceNoneParam
@@ -113,18 +139,31 @@ from .beta_compaction_iteration_usage import BetaCompactionIterationUsage as Bet
 from .beta_content_block_source_param import BetaContentBlockSourceParam as BetaContentBlockSourceParam
 from .beta_file_document_source_param import BetaFileDocumentSourceParam as BetaFileDocumentSourceParam
 from .beta_input_tokens_trigger_param import BetaInputTokensTriggerParam as BetaInputTokensTriggerParam
+from .beta_managed_agents_custom_tool import BetaManagedAgentsCustomTool as BetaManagedAgentsCustomTool
+from .beta_managed_agents_mcp_toolset import BetaManagedAgentsMCPToolset as BetaManagedAgentsMCPToolset
+from .beta_managed_agents_model_param import BetaManagedAgentsModelParam as BetaManagedAgentsModelParam
 from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param as BetaMemoryTool20250818Param
 from .beta_tool_reference_block_param import BetaToolReferenceBlockParam as BetaToolReferenceBlockParam
+from .beta_unrestricted_network_param import BetaUnrestrictedNetworkParam as BetaUnrestrictedNetworkParam
 from .beta_code_execution_output_block import BetaCodeExecutionOutputBlock as BetaCodeExecutionOutputBlock
 from .beta_code_execution_result_block import BetaCodeExecutionResultBlock as BetaCodeExecutionResultBlock
 from .beta_compact_20260112_edit_param import BetaCompact20260112EditParam as BetaCompact20260112EditParam
 from .beta_context_management_response import BetaContextManagementResponse as BetaContextManagementResponse
+from .beta_environment_delete_response import BetaEnvironmentDeleteResponse as BetaEnvironmentDeleteResponse
+from .beta_managed_agents_agent_params import BetaManagedAgentsAgentParams as BetaManagedAgentsAgentParams
+from .beta_managed_agents_custom_skill import BetaManagedAgentsCustomSkill as BetaManagedAgentsCustomSkill
+from .beta_managed_agents_model_config import BetaManagedAgentsModelConfig as BetaManagedAgentsModelConfig
+from .beta_managed_agents_skill_params import BetaManagedAgentsSkillParams as BetaManagedAgentsSkillParams
 from .beta_server_tool_caller_20260120 import BetaServerToolCaller20260120 as BetaServerToolCaller20260120
 from .beta_server_tool_use_block_param import BetaServerToolUseBlockParam as BetaServerToolUseBlockParam
 from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock as BetaWebFetchToolResultBlock
 from .beta_citation_char_location_param import BetaCitationCharLocationParam as BetaCitationCharLocationParam
 from .beta_citation_page_location_param import BetaCitationPageLocationParam as BetaCitationPageLocationParam
 from .beta_container_upload_block_param import BetaContainerUploadBlockParam as BetaContainerUploadBlockParam
+from .beta_managed_agents_deleted_vault import BetaManagedAgentsDeletedVault as BetaManagedAgentsDeletedVault
+from .beta_managed_agents_session_agent import BetaManagedAgentsSessionAgent as BetaManagedAgentsSessionAgent
+from .beta_managed_agents_session_stats import BetaManagedAgentsSessionStats as BetaManagedAgentsSessionStats
+from .beta_managed_agents_session_usage import BetaManagedAgentsSessionUsage as BetaManagedAgentsSessionUsage
 from .beta_memory_tool_20250818_command import BetaMemoryTool20250818Command as BetaMemoryTool20250818Command
 from .beta_raw_content_block_stop_event import BetaRawContentBlockStopEvent as BetaRawContentBlockStopEvent
 from .beta_request_document_block_param import BetaRequestDocumentBlockParam as BetaRequestDocumentBlockParam
@@ -144,6 +183,11 @@ from .beta_web_fetch_tool_20260209_param import BetaWebFetchTool20260209Param as
 from .beta_web_fetch_tool_20260309_param import BetaWebFetchTool20260309Param as BetaWebFetchTool20260309Param
 from .beta_web_search_result_block_param import BetaWebSearchResultBlockParam as BetaWebSearchResultBlockParam
 from .beta_compaction_content_block_delta import BetaCompactionContentBlockDelta as BetaCompactionContentBlockDelta
+from .beta_managed_agents_anthropic_skill import BetaManagedAgentsAnthropicSkill as BetaManagedAgentsAnthropicSkill
+from .beta_managed_agents_branch_checkout import BetaManagedAgentsBranchCheckout as BetaManagedAgentsBranchCheckout
+from .beta_managed_agents_commit_checkout import BetaManagedAgentsCommitCheckout as BetaManagedAgentsCommitCheckout
+from .beta_managed_agents_deleted_session import BetaManagedAgentsDeletedSession as BetaManagedAgentsDeletedSession
+from .beta_managed_agents_mcp_tool_config import BetaManagedAgentsMCPToolConfig as BetaManagedAgentsMCPToolConfig
 from .beta_thinking_config_adaptive_param import BetaThinkingConfigAdaptiveParam as BetaThinkingConfigAdaptiveParam
 from .beta_thinking_config_disabled_param import BetaThinkingConfigDisabledParam as BetaThinkingConfigDisabledParam
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param as BetaWebSearchTool20250305Param
@@ -159,6 +203,8 @@ from .beta_bash_code_execution_output_block import BetaBashCodeExecutionOutputBl
 from .beta_bash_code_execution_result_block import BetaBashCodeExecutionResultBlock as BetaBashCodeExecutionResultBlock
 from .beta_code_execution_tool_result_block import BetaCodeExecutionToolResultBlock as BetaCodeExecutionToolResultBlock
 from .beta_code_execution_tool_result_error import BetaCodeExecutionToolResultError as BetaCodeExecutionToolResultError
+from .beta_managed_agents_agent_tool_config import BetaManagedAgentsAgentToolConfig as BetaManagedAgentsAgentToolConfig
+from .beta_managed_agents_always_ask_policy import BetaManagedAgentsAlwaysAskPolicy as BetaManagedAgentsAlwaysAskPolicy
 from .beta_tool_computer_use_20241022_param import BetaToolComputerUse20241022Param as BetaToolComputerUse20241022Param
 from .beta_tool_computer_use_20250124_param import BetaToolComputerUse20250124Param as BetaToolComputerUse20250124Param
 from .beta_tool_computer_use_20251124_param import BetaToolComputerUse20251124Param as BetaToolComputerUse20251124Param
@@ -170,6 +216,12 @@ from .beta_code_execution_result_block_param import (
     BetaCodeExecutionResultBlockParam as BetaCodeExecutionResultBlockParam,
 )
 from .beta_input_tokens_clear_at_least_param import BetaInputTokensClearAtLeastParam as BetaInputTokensClearAtLeastParam
+from .beta_managed_agents_custom_tool_params import (
+    BetaManagedAgentsCustomToolParams as BetaManagedAgentsCustomToolParams,
+)
+from .beta_managed_agents_mcp_toolset_params import (
+    BetaManagedAgentsMCPToolsetParams as BetaManagedAgentsMCPToolsetParams,
+)
 from .beta_memory_tool_20250818_view_command import (
     BetaMemoryTool20250818ViewCommand as BetaMemoryTool20250818ViewCommand,
 )
@@ -194,11 +246,26 @@ from .beta_code_execution_tool_20260120_param import (
 from .beta_content_block_source_content_param import (
     BetaContentBlockSourceContentParam as BetaContentBlockSourceContentParam,
 )
+from .beta_managed_agents_always_allow_policy import (
+    BetaManagedAgentsAlwaysAllowPolicy as BetaManagedAgentsAlwaysAllowPolicy,
+)
+from .beta_managed_agents_custom_skill_params import (
+    BetaManagedAgentsCustomSkillParams as BetaManagedAgentsCustomSkillParams,
+)
+from .beta_managed_agents_model_config_params import (
+    BetaManagedAgentsModelConfigParams as BetaManagedAgentsModelConfigParams,
+)
 from .beta_web_search_tool_result_block_param import (
     BetaWebSearchToolResultBlockParam as BetaWebSearchToolResultBlockParam,
 )
 from .beta_clear_tool_uses_20250919_edit_param import (
     BetaClearToolUses20250919EditParam as BetaClearToolUses20250919EditParam,
+)
+from .beta_managed_agents_cache_creation_usage import (
+    BetaManagedAgentsCacheCreationUsage as BetaManagedAgentsCacheCreationUsage,
+)
+from .beta_managed_agents_file_resource_params import (
+    BetaManagedAgentsFileResourceParams as BetaManagedAgentsFileResourceParams,
 )
 from .beta_memory_tool_20250818_create_command import (
     BetaMemoryTool20250818CreateCommand as BetaMemoryTool20250818CreateCommand,
@@ -226,6 +293,18 @@ from .beta_web_search_tool_request_error_param import (
 )
 from .beta_citations_web_search_result_location import (
     BetaCitationsWebSearchResultLocation as BetaCitationsWebSearchResultLocation,
+)
+from .beta_managed_agents_agent_toolset20260401 import (
+    BetaManagedAgentsAgentToolset20260401 as BetaManagedAgentsAgentToolset20260401,
+)
+from .beta_managed_agents_branch_checkout_param import (
+    BetaManagedAgentsBranchCheckoutParam as BetaManagedAgentsBranchCheckoutParam,
+)
+from .beta_managed_agents_commit_checkout_param import (
+    BetaManagedAgentsCommitCheckoutParam as BetaManagedAgentsCommitCheckoutParam,
+)
+from .beta_managed_agents_url_mcp_server_params import (
+    BetaManagedAgentsURLMCPServerParams as BetaManagedAgentsURLMCPServerParams,
 )
 from .beta_tool_search_tool_bm25_20251119_param import (
     BetaToolSearchToolBm25_20251119Param as BetaToolSearchToolBm25_20251119Param,
@@ -257,6 +336,12 @@ from .beta_code_execution_tool_result_error_code import (
 from .beta_encrypted_code_execution_result_block import (
     BetaEncryptedCodeExecutionResultBlock as BetaEncryptedCodeExecutionResultBlock,
 )
+from .beta_managed_agents_anthropic_skill_params import (
+    BetaManagedAgentsAnthropicSkillParams as BetaManagedAgentsAnthropicSkillParams,
+)
+from .beta_managed_agents_mcp_tool_config_params import (
+    BetaManagedAgentsMCPToolConfigParams as BetaManagedAgentsMCPToolConfigParams,
+)
 from .beta_tool_search_tool_regex_20251119_param import (
     BetaToolSearchToolRegex20251119Param as BetaToolSearchToolRegex20251119Param,
 )
@@ -275,6 +360,15 @@ from .beta_code_execution_tool_result_block_param import (
 from .beta_code_execution_tool_result_error_param import (
     BetaCodeExecutionToolResultErrorParam as BetaCodeExecutionToolResultErrorParam,
 )
+from .beta_managed_agents_always_ask_policy_param import (
+    BetaManagedAgentsAlwaysAskPolicyParam as BetaManagedAgentsAlwaysAskPolicyParam,
+)
+from .beta_managed_agents_agent_tool_config_params import (
+    BetaManagedAgentsAgentToolConfigParams as BetaManagedAgentsAgentToolConfigParams,
+)
+from .beta_managed_agents_custom_tool_input_schema import (
+    BetaManagedAgentsCustomToolInputSchema as BetaManagedAgentsCustomToolInputSchema,
+)
 from .beta_request_mcp_server_url_definition_param import (
     BetaRequestMCPServerURLDefinitionParam as BetaRequestMCPServerURLDefinitionParam,
 )
@@ -287,11 +381,20 @@ from .beta_code_execution_tool_result_block_content import (
 from .beta_count_tokens_context_management_response import (
     BetaCountTokensContextManagementResponse as BetaCountTokensContextManagementResponse,
 )
+from .beta_managed_agents_always_allow_policy_param import (
+    BetaManagedAgentsAlwaysAllowPolicyParam as BetaManagedAgentsAlwaysAllowPolicyParam,
+)
+from .beta_managed_agents_mcp_server_url_definition import (
+    BetaManagedAgentsMCPServerURLDefinition as BetaManagedAgentsMCPServerURLDefinition,
+)
 from .beta_memory_tool_20250818_str_replace_command import (
     BetaMemoryTool20250818StrReplaceCommand as BetaMemoryTool20250818StrReplaceCommand,
 )
 from .beta_citation_web_search_result_location_param import (
     BetaCitationWebSearchResultLocationParam as BetaCitationWebSearchResultLocationParam,
+)
+from .beta_managed_agents_mcp_toolset_default_config import (
+    BetaManagedAgentsMCPToolsetDefaultConfig as BetaManagedAgentsMCPToolsetDefaultConfig,
 )
 from .beta_tool_search_tool_search_result_block_param import (
     BetaToolSearchToolSearchResultBlockParam as BetaToolSearchToolSearchResultBlockParam,
@@ -305,6 +408,12 @@ from .beta_bash_code_execution_tool_result_error_param import (
 from .beta_encrypted_code_execution_result_block_param import (
     BetaEncryptedCodeExecutionResultBlockParam as BetaEncryptedCodeExecutionResultBlockParam,
 )
+from .beta_managed_agents_agent_toolset20260401_params import (
+    BetaManagedAgentsAgentToolset20260401Params as BetaManagedAgentsAgentToolset20260401Params,
+)
+from .beta_managed_agents_agent_toolset_default_config import (
+    BetaManagedAgentsAgentToolsetDefaultConfig as BetaManagedAgentsAgentToolsetDefaultConfig,
+)
 from .beta_request_mcp_server_tool_configuration_param import (
     BetaRequestMCPServerToolConfigurationParam as BetaRequestMCPServerToolConfigurationParam,
 )
@@ -317,11 +426,23 @@ from .beta_text_editor_code_execution_tool_result_error import (
 from .beta_text_editor_code_execution_view_result_block import (
     BetaTextEditorCodeExecutionViewResultBlock as BetaTextEditorCodeExecutionViewResultBlock,
 )
+from .beta_managed_agents_custom_tool_input_schema_param import (
+    BetaManagedAgentsCustomToolInputSchemaParam as BetaManagedAgentsCustomToolInputSchemaParam,
+)
 from .beta_text_editor_code_execution_create_result_block import (
     BetaTextEditorCodeExecutionCreateResultBlock as BetaTextEditorCodeExecutionCreateResultBlock,
 )
+from .beta_managed_agents_github_repository_resource_params import (
+    BetaManagedAgentsGitHubRepositoryResourceParams as BetaManagedAgentsGitHubRepositoryResourceParams,
+)
+from .beta_managed_agents_mcp_toolset_default_config_params import (
+    BetaManagedAgentsMCPToolsetDefaultConfigParams as BetaManagedAgentsMCPToolsetDefaultConfigParams,
+)
 from .beta_web_search_tool_result_block_param_content_param import (
     BetaWebSearchToolResultBlockParamContentParam as BetaWebSearchToolResultBlockParamContentParam,
+)
+from .beta_managed_agents_agent_toolset_default_config_params import (
+    BetaManagedAgentsAgentToolsetDefaultConfigParams as BetaManagedAgentsAgentToolsetDefaultConfigParams,
 )
 from .beta_text_editor_code_execution_tool_result_block_param import (
     BetaTextEditorCodeExecutionToolResultBlockParam as BetaTextEditorCodeExecutionToolResultBlockParam,

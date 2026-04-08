@@ -144,7 +144,6 @@ class AsyncTokenPage(BaseAsyncPage[_T], BasePage[_T], Generic[_T]):
 
 class SyncPageCursor(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
     data: List[_T]
-    has_more: Optional[bool] = None
     next_page: Optional[str] = None
 
     @override
@@ -153,14 +152,6 @@ class SyncPageCursor(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
         if not data:
             return []
         return data
-
-    @override
-    def has_next_page(self) -> bool:
-        has_more = self.has_more
-        if has_more is not None and has_more is False:
-            return False
-
-        return super().has_next_page()
 
     @override
     def next_page_info(self) -> Optional[PageInfo]:
@@ -173,7 +164,6 @@ class SyncPageCursor(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
 
 class AsyncPageCursor(BaseAsyncPage[_T], BasePage[_T], Generic[_T]):
     data: List[_T]
-    has_more: Optional[bool] = None
     next_page: Optional[str] = None
 
     @override
@@ -182,14 +172,6 @@ class AsyncPageCursor(BaseAsyncPage[_T], BasePage[_T], Generic[_T]):
         if not data:
             return []
         return data
-
-    @override
-    def has_next_page(self) -> bool:
-        has_more = self.has_more
-        if has_more is not None and has_more is False:
-            return False
-
-        return super().has_next_page()
 
     @override
     def next_page_info(self) -> Optional[PageInfo]:

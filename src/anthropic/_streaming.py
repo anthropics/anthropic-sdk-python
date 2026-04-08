@@ -92,6 +92,7 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
                     or sse.event == "content_block_start"
                     or sse.event == "content_block_delta"
                     or sse.event == "content_block_stop"
+                    or sse.event == "message"
                 ):
                     data = sse.json()
                     if is_dict(data) and "type" not in data:
@@ -212,6 +213,7 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
                     or sse.event == "content_block_start"
                     or sse.event == "content_block_delta"
                     or sse.event == "content_block_stop"
+                    or sse.event == "message"
                 ):
                     data = sse.json()
                     if is_dict(data) and "type" not in data:

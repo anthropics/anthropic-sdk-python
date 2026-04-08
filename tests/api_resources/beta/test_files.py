@@ -39,6 +39,7 @@ class TestFiles:
             after_id="after_id",
             before_id="before_id",
             limit=1,
+            scope_id="scope_id",
             betas=["string"],
         )
         assert_matches_type(SyncPage[FileMetadata], file, path=["response"])
@@ -282,6 +283,7 @@ class TestAsyncFiles:
             after_id="after_id",
             before_id="before_id",
             limit=1,
+            scope_id="scope_id",
             betas=["string"],
         )
         assert_matches_type(AsyncPage[FileMetadata], file, path=["response"])

@@ -20,6 +20,22 @@ from .models import (
 )
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
+from .environments import (
+    Environments,
+    AsyncEnvironments,
+    EnvironmentsWithRawResponse,
+    AsyncEnvironmentsWithRawResponse,
+    EnvironmentsWithStreamingResponse,
+    AsyncEnvironmentsWithStreamingResponse,
+)
+from .agents.agents import (
+    Agents,
+    AsyncAgents,
+    AgentsWithRawResponse,
+    AsyncAgentsWithRawResponse,
+    AgentsWithStreamingResponse,
+    AsyncAgentsWithStreamingResponse,
+)
 from .skills.skills import (
     Skills,
     AsyncSkills,
@@ -28,6 +44,14 @@ from .skills.skills import (
     SkillsWithStreamingResponse,
     AsyncSkillsWithStreamingResponse,
 )
+from .vaults.vaults import (
+    Vaults,
+    AsyncVaults,
+    VaultsWithRawResponse,
+    AsyncVaultsWithRawResponse,
+    VaultsWithStreamingResponse,
+    AsyncVaultsWithStreamingResponse,
+)
 from .messages.messages import (
     Messages,
     AsyncMessages,
@@ -35,6 +59,14 @@ from .messages.messages import (
     AsyncMessagesWithRawResponse,
     MessagesWithStreamingResponse,
     AsyncMessagesWithStreamingResponse,
+)
+from .sessions.sessions import (
+    Sessions,
+    AsyncSessions,
+    SessionsWithRawResponse,
+    AsyncSessionsWithRawResponse,
+    SessionsWithStreamingResponse,
+    AsyncSessionsWithStreamingResponse,
 )
 
 __all__ = ["Beta", "AsyncBeta"]
@@ -48,6 +80,22 @@ class Beta(SyncAPIResource):
     @cached_property
     def messages(self) -> Messages:
         return Messages(self._client)
+
+    @cached_property
+    def agents(self) -> Agents:
+        return Agents(self._client)
+
+    @cached_property
+    def environments(self) -> Environments:
+        return Environments(self._client)
+
+    @cached_property
+    def sessions(self) -> Sessions:
+        return Sessions(self._client)
+
+    @cached_property
+    def vaults(self) -> Vaults:
+        return Vaults(self._client)
 
     @cached_property
     def files(self) -> Files:
@@ -85,6 +133,22 @@ class AsyncBeta(AsyncAPIResource):
     @cached_property
     def messages(self) -> AsyncMessages:
         return AsyncMessages(self._client)
+
+    @cached_property
+    def agents(self) -> AsyncAgents:
+        return AsyncAgents(self._client)
+
+    @cached_property
+    def environments(self) -> AsyncEnvironments:
+        return AsyncEnvironments(self._client)
+
+    @cached_property
+    def sessions(self) -> AsyncSessions:
+        return AsyncSessions(self._client)
+
+    @cached_property
+    def vaults(self) -> AsyncVaults:
+        return AsyncVaults(self._client)
 
     @cached_property
     def files(self) -> AsyncFiles:
@@ -127,6 +191,22 @@ class BetaWithRawResponse:
         return MessagesWithRawResponse(self._beta.messages)
 
     @cached_property
+    def agents(self) -> AgentsWithRawResponse:
+        return AgentsWithRawResponse(self._beta.agents)
+
+    @cached_property
+    def environments(self) -> EnvironmentsWithRawResponse:
+        return EnvironmentsWithRawResponse(self._beta.environments)
+
+    @cached_property
+    def sessions(self) -> SessionsWithRawResponse:
+        return SessionsWithRawResponse(self._beta.sessions)
+
+    @cached_property
+    def vaults(self) -> VaultsWithRawResponse:
+        return VaultsWithRawResponse(self._beta.vaults)
+
+    @cached_property
     def files(self) -> FilesWithRawResponse:
         return FilesWithRawResponse(self._beta.files)
 
@@ -146,6 +226,22 @@ class AsyncBetaWithRawResponse:
     @cached_property
     def messages(self) -> AsyncMessagesWithRawResponse:
         return AsyncMessagesWithRawResponse(self._beta.messages)
+
+    @cached_property
+    def agents(self) -> AsyncAgentsWithRawResponse:
+        return AsyncAgentsWithRawResponse(self._beta.agents)
+
+    @cached_property
+    def environments(self) -> AsyncEnvironmentsWithRawResponse:
+        return AsyncEnvironmentsWithRawResponse(self._beta.environments)
+
+    @cached_property
+    def sessions(self) -> AsyncSessionsWithRawResponse:
+        return AsyncSessionsWithRawResponse(self._beta.sessions)
+
+    @cached_property
+    def vaults(self) -> AsyncVaultsWithRawResponse:
+        return AsyncVaultsWithRawResponse(self._beta.vaults)
 
     @cached_property
     def files(self) -> AsyncFilesWithRawResponse:
@@ -169,6 +265,22 @@ class BetaWithStreamingResponse:
         return MessagesWithStreamingResponse(self._beta.messages)
 
     @cached_property
+    def agents(self) -> AgentsWithStreamingResponse:
+        return AgentsWithStreamingResponse(self._beta.agents)
+
+    @cached_property
+    def environments(self) -> EnvironmentsWithStreamingResponse:
+        return EnvironmentsWithStreamingResponse(self._beta.environments)
+
+    @cached_property
+    def sessions(self) -> SessionsWithStreamingResponse:
+        return SessionsWithStreamingResponse(self._beta.sessions)
+
+    @cached_property
+    def vaults(self) -> VaultsWithStreamingResponse:
+        return VaultsWithStreamingResponse(self._beta.vaults)
+
+    @cached_property
     def files(self) -> FilesWithStreamingResponse:
         return FilesWithStreamingResponse(self._beta.files)
 
@@ -188,6 +300,22 @@ class AsyncBetaWithStreamingResponse:
     @cached_property
     def messages(self) -> AsyncMessagesWithStreamingResponse:
         return AsyncMessagesWithStreamingResponse(self._beta.messages)
+
+    @cached_property
+    def agents(self) -> AsyncAgentsWithStreamingResponse:
+        return AsyncAgentsWithStreamingResponse(self._beta.agents)
+
+    @cached_property
+    def environments(self) -> AsyncEnvironmentsWithStreamingResponse:
+        return AsyncEnvironmentsWithStreamingResponse(self._beta.environments)
+
+    @cached_property
+    def sessions(self) -> AsyncSessionsWithStreamingResponse:
+        return AsyncSessionsWithStreamingResponse(self._beta.sessions)
+
+    @cached_property
+    def vaults(self) -> AsyncVaultsWithStreamingResponse:
+        return AsyncVaultsWithStreamingResponse(self._beta.vaults)
 
     @cached_property
     def files(self) -> AsyncFilesWithStreamingResponse:

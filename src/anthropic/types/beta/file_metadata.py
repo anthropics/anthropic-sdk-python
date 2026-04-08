@@ -5,6 +5,7 @@ from datetime import datetime
 from typing_extensions import Literal
 
 from ..._models import BaseModel
+from .beta_file_scope import BetaFileScope
 
 __all__ = ["FileMetadata"]
 
@@ -36,3 +37,9 @@ class FileMetadata(BaseModel):
 
     downloadable: Optional[bool] = None
     """Whether the file can be downloaded."""
+
+    scope: Optional[BetaFileScope] = None
+    """
+    The scope of this file, indicating the context in which it was created (e.g., a
+    session).
+    """
