@@ -449,7 +449,8 @@ def accumulate_event(
 
     if current_snapshot is None:
         if event.type == "message_start":
-            return cast(ParsedMessage[ResponseFormatT], ParsedMessage.construct(**cast(Any, event.message.to_dict())))
+            message_data = event.message.to_dict() if hasattr(event.message, "to_dict") else dict(event.message)
+            return cast(ParsedMessage[ResponseFormatT], ParsedMessage.construct(**cast(Any, message_data)))
 
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
