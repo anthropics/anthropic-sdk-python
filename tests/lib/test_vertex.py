@@ -129,6 +129,11 @@ class TestAnthropicVertex:
         client = AnthropicVertex(region="us", project_id="test-project", access_token="fake-token")
         assert str(client.base_url).rstrip("/") == "https://aiplatform.us.rep.googleapis.com/v1"
 
+    def test_eu_region_base_url(self) -> None:
+        """Test that us region uses the correct base URL."""
+        client = AnthropicVertex(region="eu", project_id="test-project", access_token="fake-token")
+        assert str(client.base_url).rstrip("/") == "https://aiplatform.eu.rep.googleapis.com/v1"
+
     @pytest.mark.parametrize("region", ["us-central1", "europe-west1", "asia-southeast1"])
     def test_regional_base_url(self, region: str) -> None:
         """Test that regional endpoints use the correct base URL format."""
