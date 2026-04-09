@@ -22,6 +22,7 @@ class BetaServerToolUseBlock(BaseModel):
     input: Dict[str, object]
 
     name: Literal[
+        "advisor",
         "web_search",
         "web_fetch",
         "code_execution",
