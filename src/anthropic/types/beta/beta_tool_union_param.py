@@ -10,6 +10,7 @@ from .beta_mcp_toolset_param import BetaMCPToolsetParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
 from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
+from .beta_advisor_tool_20260301_param import BetaAdvisorTool20260301Param
 from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param
 from .beta_web_fetch_tool_20260209_param import BetaWebFetchTool20260209Param
 from .beta_web_fetch_tool_20260309_param import BetaWebFetchTool20260309Param
@@ -50,6 +51,7 @@ BetaToolUnionParam: TypeAlias = Union[
     BetaWebSearchTool20260209Param,
     BetaWebFetchTool20260209Param,
     BetaWebFetchTool20260309Param,
+    BetaAdvisorTool20260301Param,
     BetaToolSearchToolBm25_20251119Param,
     BetaToolSearchToolRegex20251119Param,
     BetaMCPToolsetParam,

@@ -13,6 +13,7 @@ from .beta_mcp_tool_result_block import BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock
 from .beta_container_upload_block import BetaContainerUploadBlock
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock
+from .beta_advisor_tool_result_block import BetaAdvisorToolResultBlock
 from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock
 from .beta_web_search_tool_result_block import BetaWebSearchToolResultBlock
 from .beta_tool_search_tool_result_block import BetaToolSearchToolResultBlock
@@ -31,6 +32,7 @@ BetaContentBlock: TypeAlias = Annotated[
         BetaServerToolUseBlock,
         BetaWebSearchToolResultBlock,
         BetaWebFetchToolResultBlock,
+        BetaAdvisorToolResultBlock,
         BetaCodeExecutionToolResultBlock,
         BetaBashCodeExecutionToolResultBlock,
         BetaTextEditorCodeExecutionToolResultBlock,
