@@ -291,6 +291,16 @@ Types:
 
 ```python
 from anthropic.types.beta import (
+    BetaAdvisorMessageIterationUsage,
+    BetaAdvisorRedactedResultBlock,
+    BetaAdvisorRedactedResultBlockParam,
+    BetaAdvisorResultBlock,
+    BetaAdvisorResultBlockParam,
+    BetaAdvisorTool20260301,
+    BetaAdvisorToolResultBlock,
+    BetaAdvisorToolResultBlockParam,
+    BetaAdvisorToolResultError,
+    BetaAdvisorToolResultErrorParam,
     BetaAllThinkingTurns,
     BetaBase64ImageSource,
     BetaBase64PDFSource,

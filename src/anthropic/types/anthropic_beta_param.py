@@ -31,5 +31,6 @@ AnthropicBetaParam: TypeAlias = Union[
         "skills-2025-10-02",
         "fast-mode-2026-02-01",
         "output-300k-2026-03-24",
+        "advisor-tool-2026-03-01",
     ],
 ]

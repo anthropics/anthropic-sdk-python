@@ -22,6 +22,7 @@ class BetaServerToolUseBlockParam(TypedDict, total=False):
 
     name: Required[
         Literal[
+            "advisor",
             "web_search",
             "web_fetch",
             "code_execution",
