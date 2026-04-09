@@ -3035,7 +3035,7 @@ class AsyncMessages(AsyncAPIResource):
 
         return await self._post(
             "/v1/messages?beta=true",
-            body=maybe_transform(
+            body=await async_maybe_transform(
                 {
                     "max_tokens": max_tokens,
                     "messages": messages,
@@ -3387,44 +3387,46 @@ class AsyncMessages(AsyncAPIResource):
 
         merged_output_config = _merge_output_configs(output_config, transformed_output_format)
 
-        request = self._post(
-            "/v1/messages?beta=true",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "output_format": omit,
-                    "container": container,
-                    "context_management": context_management,
-                    "inference_geo": inference_geo,
-                    "mcp_servers": mcp_servers,
-                    "service_tier": service_tier,
-                    "speed": speed,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "temperature": temperature,
-                    "thinking": thinking,
-                    "top_k": top_k,
-                    "top_p": top_p,
-                    "tools": tools,
-                    "tool_choice": tool_choice,
-                    "stream": True,
-                },
-                message_create_params.MessageCreateParams,
-            ),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=BetaMessage,
-            stream=True,
-            stream_cls=AsyncStream[BetaRawMessageStreamEvent],
-        )
+        async def make_request() -> AsyncStream[BetaRawMessageStreamEvent]:
+            return await self._post(
+                "/v1/messages?beta=true",
+                body=await async_maybe_transform(
+                    {
+                        "max_tokens": max_tokens,
+                        "messages": messages,
+                        "model": model,
+                        "cache_control": cache_control,
+                        "metadata": metadata,
+                        "output_config": merged_output_config,
+                        "output_format": omit,
+                        "container": container,
+                        "context_management": context_management,
+                        "inference_geo": inference_geo,
+                        "mcp_servers": mcp_servers,
+                        "service_tier": service_tier,
+                        "speed": speed,
+                        "stop_sequences": stop_sequences,
+                        "system": system,
+                        "temperature": temperature,
+                        "thinking": thinking,
+                        "top_k": top_k,
+                        "top_p": top_p,
+                        "tools": tools,
+                        "tool_choice": tool_choice,
+                        "stream": True,
+                    },
+                    message_create_params.MessageCreateParams,
+                ),
+                options=make_request_options(
+                    extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                ),
+                cast_to=BetaMessage,
+                stream=True,
+                stream_cls=AsyncStream[BetaRawMessageStreamEvent],
+            )
+
         return BetaAsyncMessageStreamManager(
-            request,
+            make_request(),
             output_format=NOT_GIVEN if is_dict(output_format) else cast(ResponseFormatT, output_format),
         )
 

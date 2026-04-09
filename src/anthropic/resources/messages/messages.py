@@ -2552,40 +2552,42 @@ class AsyncMessages(AsyncAPIResource):
         elif is_given(output_config):
             merged_output_config = output_config
 
-        request = self._post(
-            "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "inference_geo": inference_geo,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "container": container,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "temperature": temperature,
-                    "top_k": top_k,
-                    "top_p": top_p,
-                    "tools": tools,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "stream": True,
-                },
-                message_create_params.MessageCreateParams,
-            ),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=Message,
-            stream=True,
-            stream_cls=AsyncStream[RawMessageStreamEvent],
-        )
+        async def make_request() -> AsyncStream[RawMessageStreamEvent]:
+            return await self._post(
+                "/v1/messages",
+                body=await async_maybe_transform(
+                    {
+                        "max_tokens": max_tokens,
+                        "messages": messages,
+                        "model": model,
+                        "cache_control": cache_control,
+                        "inference_geo": inference_geo,
+                        "metadata": metadata,
+                        "output_config": merged_output_config,
+                        "container": container,
+                        "service_tier": service_tier,
+                        "stop_sequences": stop_sequences,
+                        "system": system,
+                        "temperature": temperature,
+                        "top_k": top_k,
+                        "top_p": top_p,
+                        "tools": tools,
+                        "thinking": thinking,
+                        "tool_choice": tool_choice,
+                        "stream": True,
+                    },
+                    message_create_params.MessageCreateParams,
+                ),
+                options=make_request_options(
+                    extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                ),
+                cast_to=Message,
+                stream=True,
+                stream_cls=AsyncStream[RawMessageStreamEvent],
+            )
+
         return AsyncMessageStreamManager(
-            request,
+            make_request(),
             output_format=NOT_GIVEN if is_dict(output_format) else cast(ResponseFormatT, output_format),
         )
 
