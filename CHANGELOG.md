@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.93.0 (2026-04-09)
+
+Full Changelog: [v0.92.0...v0.93.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.92.0...v0.93.0)
+
+### Features
+
+* **api:** Add beta advisor tool ([4297dca](https://github.com/anthropics/anthropic-sdk-python/commit/4297dca285441b185ea9e3d18b7f912102b54be2))
+
 ## 0.92.0 (2026-04-08)
 
 Full Changelog: [v0.91.0...v0.92.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.91.0...v0.92.0)
