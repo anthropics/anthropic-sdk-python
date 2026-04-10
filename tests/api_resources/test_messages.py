@@ -303,16 +303,11 @@ class TestMessages:
         message = client.messages.count_tokens(
             messages=[
                 {
-                    "content": [
-                        {
-                            "text": "What is a quaternion?",
-                            "type": "text",
-                        }
-                    ],
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -321,30 +316,11 @@ class TestMessages:
         message = client.messages.count_tokens(
             messages=[
                 {
-                    "content": [
-                        {
-                            "text": "What is a quaternion?",
-                            "type": "text",
-                            "cache_control": {
-                                "type": "ephemeral",
-                                "ttl": "5m",
-                            },
-                            "citations": [
-                                {
-                                    "cited_text": "cited_text",
-                                    "document_index": 0,
-                                    "document_title": "x",
-                                    "end_char_index": 0,
-                                    "start_char_index": 0,
-                                    "type": "char_location",
-                                }
-                            ],
-                        }
-                    ],
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -416,16 +392,11 @@ class TestMessages:
         response = client.messages.with_raw_response.count_tokens(
             messages=[
                 {
-                    "content": [
-                        {
-                            "text": "What is a quaternion?",
-                            "type": "text",
-                        }
-                    ],
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
 
         assert response.is_closed is True
@@ -438,16 +409,11 @@ class TestMessages:
         with client.messages.with_streaming_response.count_tokens(
             messages=[
                 {
-                    "content": [
-                        {
-                            "text": "What is a quaternion?",
-                            "type": "text",
-                        }
-                    ],
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -746,16 +712,11 @@ class TestAsyncMessages:
         message = await async_client.messages.count_tokens(
             messages=[
                 {
-                    "content": [
-                        {
-                            "text": "What is a quaternion?",
-                            "type": "text",
-                        }
-                    ],
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -764,30 +725,11 @@ class TestAsyncMessages:
         message = await async_client.messages.count_tokens(
             messages=[
                 {
-                    "content": [
-                        {
-                            "text": "What is a quaternion?",
-                            "type": "text",
-                            "cache_control": {
-                                "type": "ephemeral",
-                                "ttl": "5m",
-                            },
-                            "citations": [
-                                {
-                                    "cited_text": "cited_text",
-                                    "document_index": 0,
-                                    "document_title": "x",
-                                    "end_char_index": 0,
-                                    "start_char_index": 0,
-                                    "type": "char_location",
-                                }
-                            ],
-                        }
-                    ],
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -859,16 +801,11 @@ class TestAsyncMessages:
         response = await async_client.messages.with_raw_response.count_tokens(
             messages=[
                 {
-                    "content": [
-                        {
-                            "text": "What is a quaternion?",
-                            "type": "text",
-                        }
-                    ],
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
 
         assert response.is_closed is True
@@ -881,16 +818,11 @@ class TestAsyncMessages:
         async with async_client.messages.with_streaming_response.count_tokens(
             messages=[
                 {
-                    "content": [
-                        {
-                            "text": "What is a quaternion?",
-                            "type": "text",
-                        }
-                    ],
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
