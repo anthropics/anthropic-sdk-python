@@ -29,7 +29,7 @@ class TestModels:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         model = client.models.retrieve(
             model_id="model_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(ModelInfo, model, path=["response"])
 
@@ -75,7 +75,7 @@ class TestModels:
             after_id="after_id",
             before_id="before_id",
             limit=1,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPage[ModelInfo], model, path=["response"])
 
@@ -116,7 +116,7 @@ class TestAsyncModels:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         model = await async_client.models.retrieve(
             model_id="model_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(ModelInfo, model, path=["response"])
 
@@ -162,7 +162,7 @@ class TestAsyncModels:
             after_id="after_id",
             before_id="before_id",
             limit=1,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPage[ModelInfo], model, path=["response"])
 

@@ -40,7 +40,7 @@ class TestFiles:
             before_id="before_id",
             limit=1,
             scope_id="scope_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPage[FileMetadata], file, path=["response"])
 
@@ -75,7 +75,7 @@ class TestFiles:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         file = client.beta.files.delete(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(DeletedFile, file, path=["response"])
 
@@ -132,7 +132,7 @@ class TestFiles:
         )
         file = client.beta.files.download(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert file.is_closed
         assert file.json() == {"foo": "bar"}
@@ -192,7 +192,7 @@ class TestFiles:
     def test_method_retrieve_metadata_with_all_params(self, client: Anthropic) -> None:
         file = client.beta.files.retrieve_metadata(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(FileMetadata, file, path=["response"])
 
@@ -238,7 +238,7 @@ class TestFiles:
     def test_method_upload_with_all_params(self, client: Anthropic) -> None:
         file = client.beta.files.upload(
             file=b"Example data",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(FileMetadata, file, path=["response"])
 
@@ -284,7 +284,7 @@ class TestAsyncFiles:
             before_id="before_id",
             limit=1,
             scope_id="scope_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPage[FileMetadata], file, path=["response"])
 
@@ -319,7 +319,7 @@ class TestAsyncFiles:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         file = await async_client.beta.files.delete(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(DeletedFile, file, path=["response"])
 
@@ -376,7 +376,7 @@ class TestAsyncFiles:
         )
         file = await async_client.beta.files.download(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert file.is_closed
         assert await file.json() == {"foo": "bar"}
@@ -436,7 +436,7 @@ class TestAsyncFiles:
     async def test_method_retrieve_metadata_with_all_params(self, async_client: AsyncAnthropic) -> None:
         file = await async_client.beta.files.retrieve_metadata(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(FileMetadata, file, path=["response"])
 
@@ -482,7 +482,7 @@ class TestAsyncFiles:
     async def test_method_upload_with_all_params(self, async_client: AsyncAnthropic) -> None:
         file = await async_client.beta.files.upload(
             file=b"Example data",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(FileMetadata, file, path=["response"])
 

@@ -33,7 +33,7 @@ class TestSkills:
         skill = client.beta.skills.create(
             display_title="display_title",
             files=[b"Example data"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
@@ -68,7 +68,7 @@ class TestSkills:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         skill = client.beta.skills.retrieve(
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SkillRetrieveResponse, skill, path=["response"])
 
@@ -114,7 +114,7 @@ class TestSkills:
             limit=0,
             page="page",
             source="source",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPageCursor[SkillListResponse], skill, path=["response"])
 
@@ -149,7 +149,7 @@ class TestSkills:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         skill = client.beta.skills.delete(
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SkillDeleteResponse, skill, path=["response"])
 
@@ -200,7 +200,7 @@ class TestAsyncSkills:
         skill = await async_client.beta.skills.create(
             display_title="display_title",
             files=[b"Example data"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
@@ -235,7 +235,7 @@ class TestAsyncSkills:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.retrieve(
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SkillRetrieveResponse, skill, path=["response"])
 
@@ -281,7 +281,7 @@ class TestAsyncSkills:
             limit=0,
             page="page",
             source="source",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPageCursor[SkillListResponse], skill, path=["response"])
 
@@ -316,7 +316,7 @@ class TestAsyncSkills:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.delete(
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SkillDeleteResponse, skill, path=["response"])
 

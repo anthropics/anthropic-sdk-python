@@ -38,7 +38,7 @@ class TestCompletions:
             temperature=1,
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(Completion, completion, path=["response"])
 
@@ -92,7 +92,7 @@ class TestCompletions:
             temperature=1,
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         completion_stream.response.close()
 
@@ -152,7 +152,7 @@ class TestAsyncCompletions:
             temperature=1,
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(Completion, completion, path=["response"])
 
@@ -206,7 +206,7 @@ class TestAsyncCompletions:
             temperature=1,
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         await completion_stream.response.aclose()
 

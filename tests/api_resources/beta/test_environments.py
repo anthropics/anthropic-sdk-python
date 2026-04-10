@@ -52,7 +52,7 @@ class TestEnvironments:
             },
             description="Python environment with data-analysis packages.",
             metadata={"foo": "string"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -91,7 +91,7 @@ class TestEnvironments:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         environment = client.beta.environments.retrieve(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -158,7 +158,7 @@ class TestEnvironments:
             description="Python environment with data-analysis packages.",
             metadata={"foo": "string"},
             name="x",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -204,7 +204,7 @@ class TestEnvironments:
             include_archived=True,
             limit=1,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPageCursor[BetaEnvironment], environment, path=["response"])
 
@@ -239,7 +239,7 @@ class TestEnvironments:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         environment = client.beta.environments.delete(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaEnvironmentDeleteResponse, environment, path=["response"])
 
@@ -285,7 +285,7 @@ class TestEnvironments:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         environment = client.beta.environments.archive(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -357,7 +357,7 @@ class TestAsyncEnvironments:
             },
             description="Python environment with data-analysis packages.",
             metadata={"foo": "string"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -396,7 +396,7 @@ class TestAsyncEnvironments:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         environment = await async_client.beta.environments.retrieve(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -463,7 +463,7 @@ class TestAsyncEnvironments:
             description="Python environment with data-analysis packages.",
             metadata={"foo": "string"},
             name="x",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -509,7 +509,7 @@ class TestAsyncEnvironments:
             include_archived=True,
             limit=1,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPageCursor[BetaEnvironment], environment, path=["response"])
 
@@ -544,7 +544,7 @@ class TestAsyncEnvironments:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         environment = await async_client.beta.environments.delete(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaEnvironmentDeleteResponse, environment, path=["response"])
 
@@ -590,7 +590,7 @@ class TestAsyncEnvironments:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         environment = await async_client.beta.environments.archive(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 

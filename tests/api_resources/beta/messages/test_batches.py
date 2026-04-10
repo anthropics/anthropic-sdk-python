@@ -180,7 +180,7 @@ class TestBatches:
                     },
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -247,7 +247,7 @@ class TestBatches:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.retrieve(
             message_batch_id="message_batch_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -293,7 +293,7 @@ class TestBatches:
             after_id="after_id",
             before_id="before_id",
             limit=1,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPage[BetaMessageBatch], batch, path=["response"])
 
@@ -328,7 +328,7 @@ class TestBatches:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.delete(
             message_batch_id="message_batch_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaDeletedMessageBatch, batch, path=["response"])
 
@@ -374,7 +374,7 @@ class TestBatches:
     def test_method_cancel_with_all_params(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.cancel(
             message_batch_id="message_batch_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -421,7 +421,7 @@ class TestBatches:
     def test_method_results_with_all_params(self, client: Anthropic) -> None:
         batch_stream = client.beta.messages.batches.results(
             message_batch_id="message_batch_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         for item in batch_stream:
             assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["response"])
@@ -622,7 +622,7 @@ class TestAsyncBatches:
                     },
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -689,7 +689,7 @@ class TestAsyncBatches:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.retrieve(
             message_batch_id="message_batch_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -735,7 +735,7 @@ class TestAsyncBatches:
             after_id="after_id",
             before_id="before_id",
             limit=1,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPage[BetaMessageBatch], batch, path=["response"])
 
@@ -770,7 +770,7 @@ class TestAsyncBatches:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.delete(
             message_batch_id="message_batch_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaDeletedMessageBatch, batch, path=["response"])
 
@@ -816,7 +816,7 @@ class TestAsyncBatches:
     async def test_method_cancel_with_all_params(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.cancel(
             message_batch_id="message_batch_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -863,7 +863,7 @@ class TestAsyncBatches:
     async def test_method_results_with_all_params(self, async_client: AsyncAnthropic) -> None:
         batch_stream = await async_client.beta.messages.batches.results(
             message_batch_id="message_batch_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         async for item in batch_stream:
             assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["response"])

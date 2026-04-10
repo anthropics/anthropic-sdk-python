@@ -35,7 +35,7 @@ class TestVersions:
         version = client.beta.skills.versions.create(
             skill_id="skill_id",
             files=[b"Example data"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(VersionCreateResponse, version, path=["response"])
 
@@ -83,7 +83,7 @@ class TestVersions:
         version = client.beta.skills.versions.retrieve(
             version="version",
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(VersionRetrieveResponse, version, path=["response"])
 
@@ -140,7 +140,7 @@ class TestVersions:
             skill_id="skill_id",
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPageCursor[VersionListResponse], version, path=["response"])
 
@@ -188,7 +188,7 @@ class TestVersions:
         version = client.beta.skills.versions.delete(
             version="version",
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(VersionDeleteResponse, version, path=["response"])
 
@@ -250,7 +250,7 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.create(
             skill_id="skill_id",
             files=[b"Example data"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(VersionCreateResponse, version, path=["response"])
 
@@ -298,7 +298,7 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.retrieve(
             version="version",
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(VersionRetrieveResponse, version, path=["response"])
 
@@ -355,7 +355,7 @@ class TestAsyncVersions:
             skill_id="skill_id",
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPageCursor[VersionListResponse], version, path=["response"])
 
@@ -403,7 +403,7 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.delete(
             version="version",
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(VersionDeleteResponse, version, path=["response"])
 

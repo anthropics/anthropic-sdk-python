@@ -37,7 +37,7 @@ class TestEvents:
             limit=0,
             order="asc",
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -108,7 +108,7 @@ class TestEvents:
                     "type": "user.message",
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsSendSessionEvents, event, path=["response"])
 
@@ -187,7 +187,7 @@ class TestEvents:
     def test_method_stream_with_all_params(self, client: Anthropic) -> None:
         event_stream = client.beta.sessions.events.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         event_stream.response.close()
 
@@ -243,7 +243,7 @@ class TestAsyncEvents:
             limit=0,
             order="asc",
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -314,7 +314,7 @@ class TestAsyncEvents:
                     "type": "user.message",
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsSendSessionEvents, event, path=["response"])
 
@@ -393,7 +393,7 @@ class TestAsyncEvents:
     async def test_method_stream_with_all_params(self, async_client: AsyncAnthropic) -> None:
         event_stream = await async_client.beta.sessions.events.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         await event_stream.response.aclose()
 

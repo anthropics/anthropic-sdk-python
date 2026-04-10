@@ -164,7 +164,7 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -351,7 +351,7 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         message_stream.response.close()
 
@@ -399,7 +399,12 @@ class TestMessages:
         message = client.beta.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -412,7 +417,26 @@ class TestMessages:
         message = client.beta.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                            "cache_control": {
+                                "type": "ephemeral",
+                                "ttl": "5m",
+                            },
+                            "citations": [
+                                {
+                                    "cited_text": "cited_text",
+                                    "document_index": 0,
+                                    "document_title": "x",
+                                    "end_char_index": 0,
+                                    "start_char_index": 0,
+                                    "type": "char_location",
+                                }
+                            ],
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -518,7 +542,7 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -527,7 +551,12 @@ class TestMessages:
         response = client.beta.messages.with_raw_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -544,7 +573,12 @@ class TestMessages:
         with client.beta.messages.with_streaming_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -708,7 +742,7 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -895,7 +929,7 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         await message_stream.response.aclose()
 
@@ -943,7 +977,12 @@ class TestAsyncMessages:
         message = await async_client.beta.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -956,7 +995,26 @@ class TestAsyncMessages:
         message = await async_client.beta.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                            "cache_control": {
+                                "type": "ephemeral",
+                                "ttl": "5m",
+                            },
+                            "citations": [
+                                {
+                                    "cited_text": "cited_text",
+                                    "document_index": 0,
+                                    "document_title": "x",
+                                    "end_char_index": 0,
+                                    "start_char_index": 0,
+                                    "type": "char_location",
+                                }
+                            ],
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -1062,7 +1120,7 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -1071,7 +1129,12 @@ class TestAsyncMessages:
         response = await async_client.beta.messages.with_raw_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -1088,7 +1151,12 @@ class TestAsyncMessages:
         async with async_client.beta.messages.with_streaming_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],

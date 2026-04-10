@@ -303,7 +303,12 @@ class TestMessages:
         message = client.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -316,7 +321,26 @@ class TestMessages:
         message = client.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                            "cache_control": {
+                                "type": "ephemeral",
+                                "ttl": "5m",
+                            },
+                            "citations": [
+                                {
+                                    "cited_text": "cited_text",
+                                    "document_index": 0,
+                                    "document_title": "x",
+                                    "end_char_index": 0,
+                                    "start_char_index": 0,
+                                    "type": "char_location",
+                                }
+                            ],
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -392,7 +416,12 @@ class TestMessages:
         response = client.messages.with_raw_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -409,7 +438,12 @@ class TestMessages:
         with client.messages.with_streaming_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -712,7 +746,12 @@ class TestAsyncMessages:
         message = await async_client.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -725,7 +764,26 @@ class TestAsyncMessages:
         message = await async_client.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                            "cache_control": {
+                                "type": "ephemeral",
+                                "ttl": "5m",
+                            },
+                            "citations": [
+                                {
+                                    "cited_text": "cited_text",
+                                    "document_index": 0,
+                                    "document_title": "x",
+                                    "end_char_index": 0,
+                                    "start_char_index": 0,
+                                    "type": "char_location",
+                                }
+                            ],
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -801,7 +859,12 @@ class TestAsyncMessages:
         response = await async_client.messages.with_raw_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],
@@ -818,7 +881,12 @@ class TestAsyncMessages:
         async with async_client.messages.with_streaming_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": [
+                        {
+                            "text": "What is a quaternion?",
+                            "type": "text",
+                        }
+                    ],
                     "role": "user",
                 }
             ],

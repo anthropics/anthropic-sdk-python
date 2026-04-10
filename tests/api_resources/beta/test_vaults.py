@@ -33,7 +33,7 @@ class TestVaults:
         vault = client.beta.vaults.create(
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -72,7 +72,7 @@ class TestVaults:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -120,7 +120,7 @@ class TestVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -168,7 +168,7 @@ class TestVaults:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
@@ -205,7 +205,7 @@ class TestVaults:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeletedVault, vault, path=["response"])
 
@@ -251,7 +251,7 @@ class TestVaults:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -304,7 +304,7 @@ class TestAsyncVaults:
         vault = await async_client.beta.vaults.create(
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -343,7 +343,7 @@ class TestAsyncVaults:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -391,7 +391,7 @@ class TestAsyncVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -439,7 +439,7 @@ class TestAsyncVaults:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
@@ -476,7 +476,7 @@ class TestAsyncVaults:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeletedVault, vault, path=["response"])
 
@@ -522,7 +522,7 @@ class TestAsyncVaults:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 

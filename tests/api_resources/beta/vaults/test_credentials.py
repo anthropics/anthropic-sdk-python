@@ -45,7 +45,7 @@ class TestCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -108,7 +108,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -180,7 +180,7 @@ class TestCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -240,7 +240,7 @@ class TestCredentials:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
@@ -291,7 +291,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
@@ -348,7 +348,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -421,7 +421,7 @@ class TestAsyncCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -484,7 +484,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -556,7 +556,7 @@ class TestAsyncCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -616,7 +616,7 @@ class TestAsyncCredentials:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
@@ -667,7 +667,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
@@ -724,7 +724,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
