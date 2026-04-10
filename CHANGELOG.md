@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.94.0 (2026-04-10)
+
+Full Changelog: [v0.93.0...v0.94.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.93.0...v0.94.0)
+
+### Features
+
+* vertex eu region ([#1658](https://github.com/anthropics/anthropic-sdk-python/issues/1658)) ([b7e157d](https://github.com/anthropics/anthropic-sdk-python/commit/b7e157d85f50b2900ddf896e8e80882dd7311bfd))
+
+
+### Bug Fixes
+
+* ensure file data are only sent as 1 parameter ([837b25b](https://github.com/anthropics/anthropic-sdk-python/commit/837b25bb6262186a5bae92aa70eb73c3cf8c90af))
+
+
+### Documentation
+
+* improve examples ([48089fd](https://github.com/anthropics/anthropic-sdk-python/commit/48089fdb788500d00718b9d4ae24cd34e5e91beb))
+* update examples ([0f3c28b](https://github.com/anthropics/anthropic-sdk-python/commit/0f3c28b973026d135f91f38c4ad82ae2b1131522))
+
 ## 0.93.0 (2026-04-09)
 
 Full Changelog: [v0.92.0...v0.93.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.92.0...v0.93.0)
