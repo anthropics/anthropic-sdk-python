@@ -311,6 +311,42 @@ class TestAsyncMessages:
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
+    async def test_stream_uses_async_transform_only_on_context_entry(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        import anthropic.resources.beta.messages.messages as beta_messages_resource
+
+        transform_calls: list[object] = []
+        original_async_maybe_transform = beta_messages_resource.async_maybe_transform
+
+        async def fake_async_maybe_transform(data: Any, expected_type: object) -> Any:
+            transform_calls.append(expected_type)
+            return await original_async_maybe_transform(data, expected_type)
+
+        def fail_maybe_transform(*_args: Any, **_kwargs: Any) -> Any:
+            raise AssertionError("sync maybe_transform should not be used for async beta message streams")
+
+        monkeypatch.setattr(beta_messages_resource, "async_maybe_transform", fake_async_maybe_transform)
+        monkeypatch.setattr(beta_messages_resource, "maybe_transform", fail_maybe_transform)
+
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+        )
+
+        manager = async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-20250514",
+        )
+
+        assert transform_calls == []
+
+        async with manager as stream:
+            assert len(transform_calls) == 1
+            await stream.get_final_message()
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
     async def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
         for deprecated_model in DEPRECATED_MODELS:
             respx_mock.post("/v1/messages").mock(
