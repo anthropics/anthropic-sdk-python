@@ -85,7 +85,7 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
                 if sse.event == "completion":
                     yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
-                if (
+                elif (
                     sse.event == "message_start"
                     or sse.event == "message_delta"
                     or sse.event == "message_stop"
@@ -100,10 +100,10 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
 
                     yield process_data(data=data, cast_to=cast_to, response=response)
 
-                if sse.event == "ping":
+                elif sse.event == "ping":
                     continue
 
-                if sse.event == "error":
+                elif sse.event == "error":
                     body = sse.data
 
                     try:
@@ -206,7 +206,7 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
                 if sse.event == "completion":
                     yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
-                if (
+                elif (
                     sse.event == "message_start"
                     or sse.event == "message_delta"
                     or sse.event == "message_stop"
@@ -221,10 +221,10 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
 
                     yield process_data(data=data, cast_to=cast_to, response=response)
 
-                if sse.event == "ping":
+                elif sse.event == "ping":
                     continue
 
-                if sse.event == "error":
+                elif sse.event == "error":
                     body = sse.data
 
                     try:
