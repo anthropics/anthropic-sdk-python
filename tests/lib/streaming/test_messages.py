@@ -314,3 +314,84 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+# Regression tests for https://github.com/anthropics/anthropic-sdk-python/issues/1325
+#
+# ParsedContentBlock was missing 5 of 6 server tool result types. When blocks like
+# CodeExecutionToolResultBlock arrived as content_block_start events during streaming,
+# construct_type() failed discriminated union parsing and silently dropped them from
+# current_snapshot.content, so get_final_message().content was missing server tool results.
+
+
+class TestServerToolResultBlocks:
+    @pytest.mark.respx(base_url=base_url)
+    def test_server_tool_result_blocks_not_dropped(self, respx_mock: MockRouter) -> None:
+        """
+        Sync: server tool result blocks (web_search_tool_result, code_execution_tool_result)
+        must appear in get_final_message().content when streamed concurrently with client tools.
+        """
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("server_tool_result_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "search the web and run code"}],
+            model="claude-sonnet-4-20250514",
+        ) as stream:
+            events = [event for event in stream]
+            final_message = stream.get_final_message()
+
+        block_types = [b.type for b in final_message.content]
+
+        assert len(final_message.content) == 4, (
+            f"Expected 4 content blocks, got {len(final_message.content)}. "
+            f"Types present: {block_types}. "
+            f"server tool result blocks are being silently dropped."
+        )
+        assert final_message.content[0].type == "server_tool_use"
+        assert final_message.content[1].type == "tool_use"
+        assert final_message.content[2].type == "web_search_tool_result"
+        assert final_message.content[3].type == "code_execution_tool_result"
+
+        # All 4 content_block_start events must have been yielded to the caller
+        block_start_events = [e for e in events if e.type == "content_block_start"]
+        assert len(block_start_events) == 4, (
+            f"Expected 4 content_block_start events, got {len(block_start_events)}"
+        )
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_async_server_tool_result_blocks_not_dropped(self, respx_mock: MockRouter) -> None:
+        """
+        Async: same regression test as above for the async streaming path.
+        """
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("server_tool_result_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "search the web and run code"}],
+            model="claude-sonnet-4-20250514",
+        ) as stream:
+            events = [event async for event in stream]
+            final_message = await stream.get_final_message()
+
+        block_types = [b.type for b in final_message.content]
+
+        assert len(final_message.content) == 4, (
+            f"Expected 4 content blocks, got {len(final_message.content)}. "
+            f"Types present: {block_types}. "
+            f"server tool result blocks are being silently dropped."
+        )
+        assert final_message.content[0].type == "server_tool_use"
+        assert final_message.content[1].type == "tool_use"
+        assert final_message.content[2].type == "web_search_tool_result"
+        assert final_message.content[3].type == "code_execution_tool_result"
+
+        block_start_events = [e for e in events if e.type == "content_block_start"]
+        assert len(block_start_events) == 4, (
+            f"Expected 4 content_block_start events, got {len(block_start_events)}"
+        )
