@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.94.1 (2026-04-13)
+
+Full Changelog: [v0.94.0...v0.94.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.94.0...v0.94.1)
+
+### Bug Fixes
+
+* **streaming:** add missing events ([c6a06d8](https://github.com/anthropics/anthropic-sdk-python/commit/c6a06d80b7e87bc034bd6ade950c735da02a0be3))
+
 ## 0.94.0 (2026-04-10)
 
 Full Changelog: [v0.93.0...v0.94.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.93.0...v0.94.0)
