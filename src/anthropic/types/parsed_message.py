@@ -16,6 +16,7 @@ from .code_execution_tool_result_block import CodeExecutionToolResultBlock
 from .bash_code_execution_tool_result_block import BashCodeExecutionToolResultBlock
 from .text_editor_code_execution_tool_result_block import TextEditorCodeExecutionToolResultBlock
 from .tool_search_tool_result_block import ToolSearchToolResultBlock
+from .container_upload_block import ContainerUploadBlock
 
 ResponseFormatT = TypeVar("ResponseFormatT", default=None)
 
@@ -47,6 +48,7 @@ ParsedContentBlock: TypeAlias = Annotated[
         BashCodeExecutionToolResultBlock,
         TextEditorCodeExecutionToolResultBlock,
         ToolSearchToolResultBlock,
+        ContainerUploadBlock,
     ],
     PropertyInfo(discriminator="type"),
 ]
