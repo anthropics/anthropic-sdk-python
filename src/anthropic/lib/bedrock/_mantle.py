@@ -239,7 +239,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         api_key = self.api_key
         if api_key is None:
             return {}
-        return {"X-Api-Key": api_key}
+        return {"Authorization": f"Bearer {api_key}"}
 
     @property
     @override
@@ -417,7 +417,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         api_key = self.api_key
         if api_key is None:
             return {}
-        return {"X-Api-Key": api_key}
+        return {"Authorization": f"Bearer {api_key}"}
 
     @property
     @override

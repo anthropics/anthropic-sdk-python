@@ -170,12 +170,12 @@ class TestAuthPrecedence:
         assert client._use_sigv4 is True
         assert client.api_key is None
 
-    def test_api_key_mode_returns_x_api_key_header(self) -> None:
+    def test_api_key_mode_returns_bearer_auth_header(self) -> None:
         client = AnthropicBedrockMantle(
             api_key="my-key",
             aws_region="us-east-1",
         )
-        assert client.auth_headers == {"X-Api-Key": "my-key"}
+        assert client.auth_headers == {"Authorization": "Bearer my-key"}
 
     def test_sigv4_mode_returns_empty_auth_headers(self) -> None:
         client = AnthropicBedrockMantle(
