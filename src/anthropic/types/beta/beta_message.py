@@ -95,7 +95,9 @@ class BetaMessage(BaseModel):
     - `"stop_sequence"`: one of your provided custom `stop_sequences` was generated
     - `"tool_use"`: the model invoked one or more tools
     - `"pause_turn"`: we paused a long-running turn. You may provide the response
-      back as-is in a subsequent request to let the model continue.
+      back in a subsequent request to let the model continue. For server tool
+      flows, make sure any pending tool-use blocks are resumed in the shape the
+      API expects, including any required tool-result blocks.
     - `"refusal"`: when streaming classifiers intervene to handle potential policy
       violations
 
