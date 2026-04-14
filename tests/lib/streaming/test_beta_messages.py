@@ -221,7 +221,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
         ) as stream:
             assert isinstance(cast(Any, stream), BetaMessageStream)
 
@@ -281,7 +281,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-opus-4-0",
+            model="claude-opus-4-5",
         ) as stream:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
@@ -341,7 +341,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
         ) as stream:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
@@ -364,7 +364,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
         ) as stream:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 

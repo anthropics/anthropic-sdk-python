@@ -70,6 +70,10 @@ DEPRECATED_MODELS = {
     "claude-3-7-sonnet-20250219": "February 19th, 2026",
     "claude-3-5-haiku-latest": "February 19th, 2026",
     "claude-3-5-haiku-20241022": "February 19th, 2026",
+    "claude-opus-4-0": "June 15th, 2026",
+    "claude-opus-4-20250514": "June 15th, 2026",
+    "claude-sonnet-4-0": "June 15th, 2026",
+    "claude-sonnet-4-20250514": "June 15th, 2026",
 }
 
 MODELS_TO_WARN_WITH_THINKING_ENABLED = ["claude-opus-4-6"]

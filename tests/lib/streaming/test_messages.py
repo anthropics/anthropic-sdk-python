@@ -178,7 +178,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
         ) as stream:
             with pytest.warns(DeprecationWarning):
                 assert isinstance(cast(Any, stream), Stream)
@@ -263,7 +263,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
         ) as stream:
             with pytest.warns(DeprecationWarning):
                 assert isinstance(cast(Any, stream), AsyncStream)
