@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.95.0 (2026-04-14)
+
+Full Changelog: [v0.94.1...v0.95.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.94.1...v0.95.0)
+
+### Features
+
+* **api:** mark Sonnet and Opus 4 as deprecated ([0c1e773](https://github.com/anthropics/anthropic-sdk-python/commit/0c1e7736394585dd021b53c1f87383c4fae29a6b))
+* **bedrock:** use auth header for mantle client ([#1644](https://github.com/anthropics/anthropic-sdk-python/issues/1644)) ([3b93090](https://github.com/anthropics/anthropic-sdk-python/commit/3b93090e121861462f21a7621484cda66c139997))
+
 ## 0.94.1 (2026-04-13)
 
 Full Changelog: [v0.94.0...v0.94.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.94.0...v0.94.1)
