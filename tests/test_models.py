@@ -891,6 +891,38 @@ def test_discriminated_union_case() -> None:
     assert isinstance(m, ModelB)
 
 
+def test_tool_search_tool_result_construct_discriminates_loose_content() -> None:
+    from anthropic.types.tool_search_tool_result_block import ToolSearchToolResultBlock
+    from anthropic.types.tool_search_tool_search_result_block import ToolSearchToolSearchResultBlock
+
+    block = ToolSearchToolResultBlock.construct(
+        content={
+            "type": "tool_search_tool_search_result",
+            "tool_references": [{"type": "tool_reference"}],
+        },
+        tool_use_id="srvtoolu_test",
+        type="tool_search_tool_result",
+    )
+
+    assert isinstance(block.content, ToolSearchToolSearchResultBlock)
+
+
+def test_beta_tool_search_tool_result_construct_discriminates_loose_content() -> None:
+    from anthropic.types.beta.beta_tool_search_tool_result_block import BetaToolSearchToolResultBlock
+    from anthropic.types.beta.beta_tool_search_tool_search_result_block import BetaToolSearchToolSearchResultBlock
+
+    block = BetaToolSearchToolResultBlock.construct(
+        content={
+            "type": "tool_search_tool_search_result",
+            "tool_references": [{"type": "tool_reference"}],
+        },
+        tool_use_id="srvtoolu_test",
+        type="tool_search_tool_result",
+    )
+
+    assert isinstance(block.content, BetaToolSearchToolSearchResultBlock)
+
+
 def test_nested_discriminated_union() -> None:
     class InnerType1(BaseModel):
         type: Literal["type_1"]
