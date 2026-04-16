@@ -27,3 +27,6 @@ class BetaCompactionBlockParam(TypedDict, total=False):
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
+
+    encrypted_content: Optional[str]
+    """Opaque metadata from prior compaction, to be round-tripped verbatim"""
