@@ -314,3 +314,69 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="only applicable in pydantic v2")
+def test_parsed_content_block_type_aliases_are_up_to_date() -> None:
+    from typing import get_args
+
+    from anthropic.types.content_block import ContentBlock
+    from anthropic.types.text_block import TextBlock
+    from anthropic.types.parsed_message import ParsedContentBlock, ParsedTextBlock
+    from anthropic.types.beta.beta_content_block import BetaContentBlock
+    from anthropic.types.beta.beta_text_block import BetaTextBlock
+    from anthropic.types.beta.parsed_beta_message import ParsedBetaContentBlock, ParsedBetaTextBlock
+
+    def get_union_members(type_alias: Any) -> set[Any]:
+        return set(get_args(get_args(type_alias)[0]))
+
+    content_block_types = get_union_members(ContentBlock)
+    parsed_content_block_types = get_union_members(ParsedContentBlock)
+    assert parsed_content_block_types == (content_block_types - {TextBlock}) | {ParsedTextBlock}
+
+    beta_content_block_types = get_union_members(BetaContentBlock)
+    parsed_beta_content_block_types = get_union_members(ParsedBetaContentBlock)
+    assert parsed_beta_content_block_types == (beta_content_block_types - {BetaTextBlock}) | {ParsedBetaTextBlock}
+
+
+def test_accumulate_event_parses_tool_search_result_blocks() -> None:
+    from anthropic.lib.streaming._messages import accumulate_event
+    from anthropic.types.tool_search_tool_result_block import ToolSearchToolResultBlock
+    from anthropic.types.tool_search_tool_search_result_block import ToolSearchToolSearchResultBlock
+
+    snapshot = accumulate_event(
+        event={
+            "type": "message_start",
+            "message": {
+                "id": "msg_test",
+                "content": [],
+                "model": "claude-sonnet-4-20250514",
+                "role": "assistant",
+                "stop_reason": None,
+                "stop_sequence": None,
+                "type": "message",
+                "usage": {"input_tokens": 1, "output_tokens": 0},
+            },
+        },
+        current_snapshot=None,
+    )
+
+    snapshot = accumulate_event(
+        event={
+            "type": "content_block_start",
+            "index": 0,
+            "content_block": {
+                "type": "tool_search_tool_result",
+                "tool_use_id": "toolu_123",
+                "content": {
+                    "type": "tool_search_tool_search_result",
+                    "tool_references": [],
+                },
+            },
+        },
+        current_snapshot=snapshot,
+    )
+
+    block = snapshot.content[0]
+    assert isinstance(block, ToolSearchToolResultBlock)
+    assert isinstance(block.content, ToolSearchToolSearchResultBlock)
