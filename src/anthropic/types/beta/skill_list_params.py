@@ -18,11 +18,16 @@ class SkillListParams(TypedDict, total=False):
     Maximum value is 100. Defaults to 20.
     """
 
-    page: Optional[str]
-    """Pagination token for fetching a specific page of results.
+    after_id: Optional[str]
+    """ID of the object to use as the cursor for pagination.
 
-    Pass the value from a previous response's `next_page` field to get the next page
-    of results.
+    When provided, returns the page of results immediately after this object.
+    """
+
+    before_id: Optional[str]
+    """ID of the object to use as the cursor for pagination.
+
+    When provided, returns the page of results immediately before this object.
     """
 
     source: Optional[str]

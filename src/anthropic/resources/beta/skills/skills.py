@@ -32,7 +32,7 @@ from ...._utils import is_given, extract_files, path_template, maybe_transform, 
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
-from ....pagination import SyncPageCursor, AsyncPageCursor
+from ....pagination import SyncPage, AsyncPage
 from ....types.beta import skill_list_params, skill_create_params
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.anthropic_beta_param import AnthropicBetaParam
@@ -193,7 +193,8 @@ class Skills(SyncAPIResource):
         self,
         *,
         limit: int | Omit = omit,
-        page: Optional[str] | Omit = omit,
+        after_id: Optional[str] | Omit = omit,
+        before_id: Optional[str] | Omit = omit,
         source: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -202,7 +203,7 @@ class Skills(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> SyncPageCursor[SkillListResponse]:
+    ) -> SyncPage[SkillListResponse]:
         """
         List Skills
 
@@ -211,10 +212,11 @@ class Skills(SyncAPIResource):
 
               Maximum value is 100. Defaults to 20.
 
-          page: Pagination token for fetching a specific page of results.
+          after_id: ID of the object to use as the cursor for pagination.
+              When provided, returns the page of results immediately after this object.
 
-              Pass the value from a previous response's `next_page` field to get the next page
-              of results.
+          before_id: ID of the object to use as the cursor for pagination.
+              When provided, returns the page of results immediately before this object.
 
           source: Filter skills by source.
 
@@ -246,7 +248,7 @@ class Skills(SyncAPIResource):
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/skills?beta=true",
-            page=SyncPageCursor[SkillListResponse],
+            page=SyncPage[SkillListResponse],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -255,7 +257,8 @@ class Skills(SyncAPIResource):
                 query=maybe_transform(
                     {
                         "limit": limit,
-                        "page": page,
+                        "after_id": after_id,
+                        "before_id": before_id,
                         "source": source,
                     },
                     skill_list_params.SkillListParams,
@@ -465,7 +468,8 @@ class AsyncSkills(AsyncAPIResource):
         self,
         *,
         limit: int | Omit = omit,
-        page: Optional[str] | Omit = omit,
+        after_id: Optional[str] | Omit = omit,
+        before_id: Optional[str] | Omit = omit,
         source: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -474,7 +478,7 @@ class AsyncSkills(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[SkillListResponse, AsyncPageCursor[SkillListResponse]]:
+    ) -> AsyncPaginator[SkillListResponse, AsyncPage[SkillListResponse]]:
         """
         List Skills
 
@@ -483,10 +487,11 @@ class AsyncSkills(AsyncAPIResource):
 
               Maximum value is 100. Defaults to 20.
 
-          page: Pagination token for fetching a specific page of results.
+          after_id: ID of the object to use as the cursor for pagination.
+              When provided, returns the page of results immediately after this object.
 
-              Pass the value from a previous response's `next_page` field to get the next page
-              of results.
+          before_id: ID of the object to use as the cursor for pagination.
+              When provided, returns the page of results immediately before this object.
 
           source: Filter skills by source.
 
@@ -518,7 +523,7 @@ class AsyncSkills(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/skills?beta=true",
-            page=AsyncPageCursor[SkillListResponse],
+            page=AsyncPage[SkillListResponse],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -527,7 +532,8 @@ class AsyncSkills(AsyncAPIResource):
                 query=maybe_transform(
                     {
                         "limit": limit,
-                        "page": page,
+                        "after_id": after_id,
+                        "before_id": before_id,
                         "source": source,
                     },
                     skill_list_params.SkillListParams,

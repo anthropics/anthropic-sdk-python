@@ -9,7 +9,7 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
-from anthropic.pagination import SyncPageCursor, AsyncPageCursor
+from anthropic.pagination import SyncPage, AsyncPage
 from anthropic.types.beta import (
     SkillListResponse,
     SkillCreateResponse,
@@ -106,17 +106,18 @@ class TestSkills:
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         skill = client.beta.skills.list()
-        assert_matches_type(SyncPageCursor[SkillListResponse], skill, path=["response"])
+        assert_matches_type(SyncPage[SkillListResponse], skill, path=["response"])
 
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         skill = client.beta.skills.list(
             limit=0,
-            page="page",
+            after_id="after_id",
+            before_id="before_id",
             source="source",
             betas=["string"],
         )
-        assert_matches_type(SyncPageCursor[SkillListResponse], skill, path=["response"])
+        assert_matches_type(SyncPage[SkillListResponse], skill, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
@@ -125,7 +126,7 @@ class TestSkills:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         skill = response.parse()
-        assert_matches_type(SyncPageCursor[SkillListResponse], skill, path=["response"])
+        assert_matches_type(SyncPage[SkillListResponse], skill, path=["response"])
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
@@ -134,7 +135,7 @@ class TestSkills:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             skill = response.parse()
-            assert_matches_type(SyncPageCursor[SkillListResponse], skill, path=["response"])
+            assert_matches_type(SyncPage[SkillListResponse], skill, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -273,17 +274,18 @@ class TestAsyncSkills:
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.list()
-        assert_matches_type(AsyncPageCursor[SkillListResponse], skill, path=["response"])
+        assert_matches_type(AsyncPage[SkillListResponse], skill, path=["response"])
 
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.list(
             limit=0,
-            page="page",
+            after_id="after_id",
+            before_id="before_id",
             source="source",
             betas=["string"],
         )
-        assert_matches_type(AsyncPageCursor[SkillListResponse], skill, path=["response"])
+        assert_matches_type(AsyncPage[SkillListResponse], skill, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
@@ -292,7 +294,7 @@ class TestAsyncSkills:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         skill = response.parse()
-        assert_matches_type(AsyncPageCursor[SkillListResponse], skill, path=["response"])
+        assert_matches_type(AsyncPage[SkillListResponse], skill, path=["response"])
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
@@ -301,7 +303,7 @@ class TestAsyncSkills:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             skill = await response.parse()
-            assert_matches_type(AsyncPageCursor[SkillListResponse], skill, path=["response"])
+            assert_matches_type(AsyncPage[SkillListResponse], skill, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
