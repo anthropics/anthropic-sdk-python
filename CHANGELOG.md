@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.96.0 (2026-04-16)
+
+Full Changelog: [v0.95.0...v0.96.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.95.0...v0.96.0)
+
+### Features
+
+* **api:** add claude-opus-4-7, token budgets and user_profiles ([0aa2a0d](https://github.com/anthropics/anthropic-sdk-python/commit/0aa2a0d4388a39984134d1dfc2bcbd6b206f7184))
+
+
+### Chores
+
+* **ci:** remove release-doctor workflow ([1d9add3](https://github.com/anthropics/anthropic-sdk-python/commit/1d9add35d0bd4c71f2bca3b0d494d1d0a348817a))
+
 ## 0.95.0 (2026-04-14)
 
 Full Changelog: [v0.94.1...v0.95.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.94.1...v0.95.0)
