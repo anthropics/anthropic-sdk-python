@@ -131,6 +131,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -398,6 +399,9 @@ class Messages(SyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -436,6 +440,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -703,6 +708,9 @@ class Messages(SyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -741,6 +749,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -1008,6 +1017,9 @@ class Messages(SyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -1046,6 +1058,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -1110,6 +1123,7 @@ class Messages(SyncAPIResource):
                     "tools": tools,
                     "top_k": top_k,
                     "top_p": top_p,
+                    "user_profile_id": user_profile_id,
                 },
                 message_create_params.MessageCreateParamsStreaming
                 if stream
@@ -1148,6 +1162,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -1246,6 +1261,7 @@ class Messages(SyncAPIResource):
                     "tools": tools,
                     "top_k": top_k,
                     "top_p": top_p,
+                    "user_profile_id": user_profile_id,
                 },
                 message_create_params.MessageCreateParamsNonStreaming,
             ),
@@ -1288,6 +1304,7 @@ class Messages(SyncAPIResource):
         top_p: float | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -1325,6 +1342,7 @@ class Messages(SyncAPIResource):
         top_p: float | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -1362,6 +1380,7 @@ class Messages(SyncAPIResource):
         top_p: float | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -1398,6 +1417,7 @@ class Messages(SyncAPIResource):
         top_p: float | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -1471,6 +1491,7 @@ class Messages(SyncAPIResource):
                 "tools": [*[tool.to_dict() for tool in runnable_tools], *raw_tools],
                 "top_k": top_k,
                 "top_p": top_p,
+                "user_profile_id": user_profile_id,
             },
         )
 
@@ -1526,6 +1547,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -1608,6 +1630,7 @@ class Messages(SyncAPIResource):
                     "top_p": top_p,
                     "tools": tools,
                     "tool_choice": tool_choice,
+                    "user_profile_id": user_profile_id,
                     "stream": True,
                 },
                 message_create_params.MessageCreateParams,
@@ -1945,6 +1968,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -2212,6 +2236,9 @@ class AsyncMessages(AsyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -2250,6 +2277,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -2517,6 +2545,9 @@ class AsyncMessages(AsyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -2555,6 +2586,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -2822,6 +2854,9 @@ class AsyncMessages(AsyncAPIResource):
               Recommended for advanced use cases only. You usually only need to use
               `temperature`.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -2860,6 +2895,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -2924,6 +2960,7 @@ class AsyncMessages(AsyncAPIResource):
                     "tools": tools,
                     "top_k": top_k,
                     "top_p": top_p,
+                    "user_profile_id": user_profile_id,
                 },
                 message_create_params.MessageCreateParamsStreaming
                 if stream
@@ -2962,6 +2999,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -3059,6 +3097,7 @@ class AsyncMessages(AsyncAPIResource):
                     "tools": tools,
                     "top_k": top_k,
                     "top_p": top_p,
+                    "user_profile_id": user_profile_id,
                 },
                 message_create_params.MessageCreateParamsNonStreaming,
             ),
@@ -3101,6 +3140,7 @@ class AsyncMessages(AsyncAPIResource):
         top_p: float | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -3138,6 +3178,7 @@ class AsyncMessages(AsyncAPIResource):
         top_p: float | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -3175,6 +3216,7 @@ class AsyncMessages(AsyncAPIResource):
         top_p: float | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -3211,6 +3253,7 @@ class AsyncMessages(AsyncAPIResource):
         top_p: float | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -3277,6 +3320,7 @@ class AsyncMessages(AsyncAPIResource):
                 "tools": [*[tool.to_dict() for tool in runnable_tools], *raw_tools],
                 "top_k": top_k,
                 "top_p": top_p,
+                "user_profile_id": user_profile_id,
             },
         )
 
@@ -3332,6 +3376,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -3412,6 +3457,7 @@ class AsyncMessages(AsyncAPIResource):
                     "top_p": top_p,
                     "tools": tools,
                     "tool_choice": tool_choice,
+                    "user_profile_id": user_profile_id,
                     "stream": True,
                 },
                 message_create_params.MessageCreateParams,

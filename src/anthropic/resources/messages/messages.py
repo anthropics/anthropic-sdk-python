@@ -76,7 +76,7 @@ DEPRECATED_MODELS = {
     "claude-sonnet-4-20250514": "June 15th, 2026",
 }
 
-MODELS_TO_WARN_WITH_THINKING_ENABLED = ["claude-opus-4-6"]
+MODELS_TO_WARN_WITH_THINKING_ENABLED = ["claude-opus-4-6", "claude-mythos-preview"]
 
 
 class Messages(SyncAPIResource):
