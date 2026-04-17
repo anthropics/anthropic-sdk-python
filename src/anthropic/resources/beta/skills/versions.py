@@ -8,6 +8,7 @@ from itertools import chain
 import httpx
 
 from .... import _legacy_response
+from ...._files import deepcopy_with_paths
 from ...._types import (
     Body,
     Omit,
@@ -19,15 +20,7 @@ from ...._types import (
     omit,
     not_given,
 )
-from ...._utils import (
-    is_given,
-    extract_files,
-    path_template,
-    maybe_transform,
-    strip_not_given,
-    deepcopy_minimal,
-    async_maybe_transform,
-)
+from ...._utils import is_given, extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
@@ -112,7 +105,7 @@ class Versions(SyncAPIResource):
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
-        body = deepcopy_minimal({"files": files})
+        body = deepcopy_with_paths({"files": files}, [["files", "<array>"]])
         extracted_files = extract_files(cast(Mapping[str, object], body), paths=[["files", "<array>"]])
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
@@ -384,7 +377,7 @@ class AsyncVersions(AsyncAPIResource):
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
-        body = deepcopy_minimal({"files": files})
+        body = deepcopy_with_paths({"files": files}, [["files", "<array>"]])
         extracted_files = extract_files(cast(Mapping[str, object], body), paths=[["files", "<array>"]])
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
