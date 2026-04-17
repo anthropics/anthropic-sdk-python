@@ -315,6 +315,13 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
         tool_use_blocks = [block for block in content if block.type == "tool_use"]
         if not tool_use_blocks:
+            # When server-side tools (e.g. web_search, web_fetch) are present,
+            # the API responds with server_tool_use blocks and stop_reason="pause_turn".
+            # The runner should continue the loop so the server can return results.
+            has_server_tools = any(block.type == "server_tool_use" for block in content)
+            if has_server_tools:
+                log.debug("Server tool use detected, continuing runner loop.")
+                return {"role": "user", "content": []}
             return None
 
         results: list[BetaToolResultBlockParam] = []
@@ -616,6 +623,10 @@ class BaseAsyncToolRunner(
 
         tool_use_blocks = [block for block in content if block.type == "tool_use"]
         if not tool_use_blocks:
+            has_server_tools = any(block.type == "server_tool_use" for block in content)
+            if has_server_tools:
+                log.debug("Server tool use detected, continuing runner loop (async).")
+                return {"role": "user", "content": []}
             return None
 
         results: list[BetaToolResultBlockParam] = []
