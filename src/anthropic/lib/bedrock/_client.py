@@ -70,16 +70,22 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
 def _infer_region() -> str:
     """
     Infer the AWS region from the environment variables or
-    from the boto3 session if available.
+    from the boto3 client if available.
     """
     aws_region = os.environ.get("AWS_REGION")
     if aws_region is None:
         try:
             import boto3
+            import botocore.exceptions
 
-            session = boto3.Session()
-            if session.region_name:
-                aws_region = session.region_name
+            # Use boto3 client to properly detect region from config/profile
+            try:
+                aws_region = boto3.client("bedrock").meta.region_name
+            except botocore.exceptions.NoRegionError:
+                # Fall back to session-based detection
+                session = boto3.Session()
+                if session.region_name:
+                    aws_region = session.region_name
         except ImportError:
             pass
 
