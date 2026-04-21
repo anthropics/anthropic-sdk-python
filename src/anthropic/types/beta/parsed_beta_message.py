@@ -38,7 +38,9 @@ class ParsedBetaTextBlock(BetaTextBlock, Generic[ResponseFormatT]):
     __api_exclude__ = {"parsed_output"}
 
 
-# Note that generic unions are not valid for pydantic at runtime
+# Keep this in sync with BetaContentBlock; ParsedBetaTextBlock is the only
+# intentional difference so parsed_output survives in streamed text blocks.
+# Note that generic unions are not valid for pydantic at runtime.
 ParsedBetaContentBlock: TypeAlias = Annotated[
     Union[
         ParsedBetaTextBlock[ResponseFormatT],

@@ -165,7 +165,7 @@ EXPECTED_INCOMPLETE_EVENT_TYPES = [
     "message_delta",
 ]
 
-MISSING_PARSED_CONTENT_BLOCKS = [
+RESULT_CONTENT_BLOCKS = [
     pytest.param(
         {
             "type": "tool_search_tool_result",
@@ -174,7 +174,20 @@ MISSING_PARSED_CONTENT_BLOCKS = [
         },
         "tool_search_tool_result",
         "tool_search_tool_result_error",
-        id="tool-search",
+        id="tool-search-error",
+    ),
+    pytest.param(
+        {
+            "type": "tool_search_tool_result",
+            "tool_use_id": "toolu_search",
+            "content": {
+                "type": "tool_search_tool_search_result",
+                "tool_references": [{"type": "tool_reference", "tool_name": "web_search"}],
+            },
+        },
+        "tool_search_tool_result",
+        "tool_search_tool_search_result",
+        id="tool-search-success",
     ),
     pytest.param(
         {
@@ -185,7 +198,25 @@ MISSING_PARSED_CONTENT_BLOCKS = [
         },
         "web_fetch_tool_result",
         "web_fetch_tool_result_error",
-        id="web-fetch",
+        id="web-fetch-error",
+    ),
+    pytest.param(
+        {
+            "type": "web_fetch_tool_result",
+            "tool_use_id": "toolu_fetch",
+            "caller": {"type": "direct"},
+            "content": {
+                "type": "web_fetch_result",
+                "url": "https://example.com",
+                "content": {
+                    "type": "document",
+                    "source": {"type": "text", "media_type": "text/plain", "data": "example"},
+                },
+            },
+        },
+        "web_fetch_tool_result",
+        "web_fetch_result",
+        id="web-fetch-success",
     ),
     pytest.param(
         {
@@ -195,7 +226,17 @@ MISSING_PARSED_CONTENT_BLOCKS = [
         },
         "advisor_tool_result",
         "advisor_tool_result_error",
-        id="advisor",
+        id="advisor-error",
+    ),
+    pytest.param(
+        {
+            "type": "advisor_tool_result",
+            "tool_use_id": "toolu_advisor",
+            "content": {"type": "advisor_result", "text": "Looks good"},
+        },
+        "advisor_tool_result",
+        "advisor_result",
+        id="advisor-success",
     ),
 ]
 
@@ -242,7 +283,7 @@ def assert_incomplete_partial_input_response(events: list[ParsedBetaMessageStrea
 
 
 class TestSyncMessages:
-    @pytest.mark.parametrize(("content_block", "expected_type", "expected_content_type"), MISSING_PARSED_CONTENT_BLOCKS)
+    @pytest.mark.parametrize(("content_block", "expected_type", "expected_content_type"), RESULT_CONTENT_BLOCKS)
     def test_accumulate_event_keeps_non_text_result_blocks(
         self, content_block: Dict[str, Any], expected_type: str, expected_content_type: str
     ) -> None:
