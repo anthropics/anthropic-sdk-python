@@ -366,7 +366,9 @@ class Batches(SyncAPIResource):
 
         Each line in the file is a JSON object containing the result of a single request
         in the Message Batch. Results are not guaranteed to be in the same order as
-        requests. Use the `custom_id` field to match results to requests.
+        requests. Use the `custom_id` field to match results to requests. Each
+        `custom_id` must be unique within the batch and be at most 64 characters
+        long.
 
         Learn more about the Message Batches API in our
         [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
@@ -755,7 +757,9 @@ class AsyncBatches(AsyncAPIResource):
 
         Each line in the file is a JSON object containing the result of a single request
         in the Message Batch. Results are not guaranteed to be in the same order as
-        requests. Use the `custom_id` field to match results to requests.
+        requests. Use the `custom_id` field to match results to requests. Each
+        `custom_id` must be unique within the batch and be at most 64 characters
+        long.
 
         Learn more about the Message Batches API in our
         [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
