@@ -15,7 +15,12 @@ from anthropic._compat import PYDANTIC_V1
 from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_types import ParsedBetaMessageStreamEvent
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
-from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
+from anthropic.lib.streaming._beta_messages import (
+    TRACKS_TOOL_INPUT,
+    BetaMessageStream,
+    BetaAsyncMessageStream,
+    accumulate_event,
+)
 
 from .helpers import get_response, to_async_iter
 
@@ -160,6 +165,56 @@ EXPECTED_INCOMPLETE_EVENT_TYPES = [
     "message_delta",
 ]
 
+MISSING_PARSED_CONTENT_BLOCKS = [
+    pytest.param(
+        {
+            "type": "tool_search_tool_result",
+            "tool_use_id": "toolu_search",
+            "content": {"type": "tool_search_tool_result_error", "error_code": "unavailable"},
+        },
+        "tool_search_tool_result",
+        "tool_search_tool_result_error",
+        id="tool-search",
+    ),
+    pytest.param(
+        {
+            "type": "web_fetch_tool_result",
+            "tool_use_id": "toolu_fetch",
+            "caller": {"type": "direct"},
+            "content": {"type": "web_fetch_tool_result_error", "error_code": "unavailable"},
+        },
+        "web_fetch_tool_result",
+        "web_fetch_tool_result_error",
+        id="web-fetch",
+    ),
+    pytest.param(
+        {
+            "type": "advisor_tool_result",
+            "tool_use_id": "toolu_advisor",
+            "content": {"type": "advisor_tool_result_error", "error_code": "unavailable"},
+        },
+        "advisor_tool_result",
+        "advisor_tool_result_error",
+        id="advisor",
+    ),
+]
+
+
+def _message_start_event() -> Dict[str, Any]:
+    return {
+        "type": "message_start",
+        "message": {
+            "id": "msg_test",
+            "model": "claude-sonnet-4-5",
+            "role": "assistant",
+            "type": "message",
+            "content": [],
+            "stop_reason": None,
+            "stop_sequence": None,
+            "usage": {"input_tokens": 1, "output_tokens": 1},
+        },
+    }
+
 
 def assert_message_matches(message: BetaMessage, expected: Dict[str, Any]) -> None:
     actual_message_json = message.model_dump_json(
@@ -187,6 +242,25 @@ def assert_incomplete_partial_input_response(events: list[ParsedBetaMessageStrea
 
 
 class TestSyncMessages:
+    @pytest.mark.parametrize(("content_block", "expected_type", "expected_content_type"), MISSING_PARSED_CONTENT_BLOCKS)
+    def test_accumulate_event_keeps_non_text_result_blocks(
+        self, content_block: Dict[str, Any], expected_type: str, expected_content_type: str
+    ) -> None:
+        snapshot = accumulate_event(
+            event=_message_start_event(),
+            current_snapshot=None,
+            request_headers=httpx.Headers(),
+        )
+        snapshot = accumulate_event(
+            event={"type": "content_block_start", "index": 0, "content_block": content_block},
+            current_snapshot=snapshot,
+            request_headers=httpx.Headers(),
+        )
+
+        assert len(snapshot.content) == 1
+        assert snapshot.content[0].type == expected_type
+        assert snapshot.content[0].content.type == expected_content_type
+
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
