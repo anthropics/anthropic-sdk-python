@@ -72,13 +72,13 @@ from .environments import (
     EnvironmentsWithStreamingResponse,
     AsyncEnvironmentsWithStreamingResponse,
 )
-from .user_profiles import (
-    UserProfiles,
-    AsyncUserProfiles,
-    UserProfilesWithRawResponse,
-    AsyncUserProfilesWithRawResponse,
-    UserProfilesWithStreamingResponse,
-    AsyncUserProfilesWithStreamingResponse,
+from .memory_stores import (
+    MemoryStores,
+    AsyncMemoryStores,
+    MemoryStoresWithRawResponse,
+    AsyncMemoryStoresWithRawResponse,
+    MemoryStoresWithStreamingResponse,
+    AsyncMemoryStoresWithStreamingResponse,
 )
 
 __all__ = [
@@ -118,6 +118,12 @@ __all__ = [
     "AsyncVaultsWithRawResponse",
     "VaultsWithStreamingResponse",
     "AsyncVaultsWithStreamingResponse",
+    "MemoryStores",
+    "AsyncMemoryStores",
+    "MemoryStoresWithRawResponse",
+    "AsyncMemoryStoresWithRawResponse",
+    "MemoryStoresWithStreamingResponse",
+    "AsyncMemoryStoresWithStreamingResponse",
     "Files",
     "AsyncFiles",
     "FilesWithRawResponse",
@@ -130,12 +136,6 @@ __all__ = [
     "AsyncSkillsWithRawResponse",
     "SkillsWithStreamingResponse",
     "AsyncSkillsWithStreamingResponse",
-    "UserProfiles",
-    "AsyncUserProfiles",
-    "UserProfilesWithRawResponse",
-    "AsyncUserProfilesWithRawResponse",
-    "UserProfilesWithStreamingResponse",
-    "AsyncUserProfilesWithStreamingResponse",
     "Beta",
     "AsyncBeta",
     "BetaWithRawResponse",

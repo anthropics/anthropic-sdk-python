@@ -20,7 +20,6 @@ from .file_list_params import FileListParams as FileListParams
 from .agent_list_params import AgentListParams as AgentListParams
 from .beta_cloud_config import BetaCloudConfig as BetaCloudConfig
 from .beta_skill_params import BetaSkillParams as BetaSkillParams
-from .beta_user_profile import BetaUserProfile as BetaUserProfile
 from .model_list_params import ModelListParams as ModelListParams
 from .skill_list_params import SkillListParams as SkillListParams
 from .vault_list_params import VaultListParams as VaultListParams
@@ -82,7 +81,7 @@ from .beta_output_config_param import BetaOutputConfigParam as BetaOutputConfigP
 from .beta_text_citation_param import BetaTextCitationParam as BetaTextCitationParam
 from .beta_thinking_capability import BetaThinkingCapability as BetaThinkingCapability
 from .beta_user_location_param import BetaUserLocationParam as BetaUserLocationParam
-from .user_profile_list_params import UserProfileListParams as UserProfileListParams
+from .memory_store_list_params import MemoryStoreListParams as MemoryStoreListParams
 from .beta_advisor_result_block import BetaAdvisorResultBlock as BetaAdvisorResultBlock
 from .beta_managed_agents_agent import BetaManagedAgentsAgent as BetaManagedAgentsAgent
 from .beta_managed_agents_model import BetaManagedAgentsModel as BetaManagedAgentsModel
@@ -104,8 +103,8 @@ from .beta_server_tool_use_block import BetaServerToolUseBlock as BetaServerTool
 from .beta_thinking_config_param import BetaThinkingConfigParam as BetaThinkingConfigParam
 from .beta_tool_choice_any_param import BetaToolChoiceAnyParam as BetaToolChoiceAnyParam
 from .beta_web_fetch_block_param import BetaWebFetchBlockParam as BetaWebFetchBlockParam
-from .user_profile_create_params import UserProfileCreateParams as UserProfileCreateParams
-from .user_profile_update_params import UserProfileUpdateParams as UserProfileUpdateParams
+from .memory_store_create_params import MemoryStoreCreateParams as MemoryStoreCreateParams
+from .memory_store_update_params import MemoryStoreUpdateParams as MemoryStoreUpdateParams
 from .beta_base64_pdf_block_param import BetaBase64PDFBlockParam as BetaBase64PDFBlockParam
 from .beta_citation_char_location import BetaCitationCharLocation as BetaCitationCharLocation
 from .beta_citation_page_location import BetaCitationPageLocation as BetaCitationPageLocation
@@ -128,7 +127,6 @@ from .beta_raw_content_block_delta import BetaRawContentBlockDelta as BetaRawCon
 from .beta_raw_message_delta_event import BetaRawMessageDeltaEvent as BetaRawMessageDeltaEvent
 from .beta_raw_message_start_event import BetaRawMessageStartEvent as BetaRawMessageStartEvent
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock as BetaRedactedThinkingBlock
-from .beta_token_task_budget_param import BetaTokenTaskBudgetParam as BetaTokenTaskBudgetParam
 from .beta_tool_result_block_param import BetaToolResultBlockParam as BetaToolResultBlockParam
 from .beta_tool_uses_trigger_param import BetaToolUsesTriggerParam as BetaToolUsesTriggerParam
 from .beta_web_search_result_block import BetaWebSearchResultBlock as BetaWebSearchResultBlock
@@ -139,7 +137,6 @@ from .beta_raw_message_stream_event import BetaRawMessageStreamEvent as BetaRawM
 from .beta_server_tool_caller_param import BetaServerToolCallerParam as BetaServerToolCallerParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param as BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param as BetaToolBash20250124Param
-from .beta_user_profile_trust_grant import BetaUserProfileTrustGrant as BetaUserProfileTrustGrant
 from .beta_advisor_tool_result_block import BetaAdvisorToolResultBlock as BetaAdvisorToolResultBlock
 from .beta_advisor_tool_result_error import BetaAdvisorToolResultError as BetaAdvisorToolResultError
 from .beta_base64_image_source_param import BetaBase64ImageSourceParam as BetaBase64ImageSourceParam
@@ -163,11 +160,11 @@ from .beta_context_management_response import BetaContextManagementResponse as B
 from .beta_environment_delete_response import BetaEnvironmentDeleteResponse as BetaEnvironmentDeleteResponse
 from .beta_managed_agents_agent_params import BetaManagedAgentsAgentParams as BetaManagedAgentsAgentParams
 from .beta_managed_agents_custom_skill import BetaManagedAgentsCustomSkill as BetaManagedAgentsCustomSkill
+from .beta_managed_agents_memory_store import BetaManagedAgentsMemoryStore as BetaManagedAgentsMemoryStore
 from .beta_managed_agents_model_config import BetaManagedAgentsModelConfig as BetaManagedAgentsModelConfig
 from .beta_managed_agents_skill_params import BetaManagedAgentsSkillParams as BetaManagedAgentsSkillParams
 from .beta_server_tool_caller_20260120 import BetaServerToolCaller20260120 as BetaServerToolCaller20260120
 from .beta_server_tool_use_block_param import BetaServerToolUseBlockParam as BetaServerToolUseBlockParam
-from .beta_user_profile_enrollment_url import BetaUserProfileEnrollmentURL as BetaUserProfileEnrollmentURL
 from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock as BetaWebFetchToolResultBlock
 from .beta_citation_char_location_param import BetaCitationCharLocationParam as BetaCitationCharLocationParam
 from .beta_citation_page_location_param import BetaCitationPageLocationParam as BetaCitationPageLocationParam
@@ -282,6 +279,9 @@ from .beta_clear_tool_uses_20250919_edit_param import (
 )
 from .beta_managed_agents_cache_creation_usage import (
     BetaManagedAgentsCacheCreationUsage as BetaManagedAgentsCacheCreationUsage,
+)
+from .beta_managed_agents_deleted_memory_store import (
+    BetaManagedAgentsDeletedMemoryStore as BetaManagedAgentsDeletedMemoryStore,
 )
 from .beta_managed_agents_file_resource_params import (
     BetaManagedAgentsFileResourceParams as BetaManagedAgentsFileResourceParams,
@@ -414,6 +414,9 @@ from .beta_citation_web_search_result_location_param import (
 )
 from .beta_managed_agents_mcp_toolset_default_config import (
     BetaManagedAgentsMCPToolsetDefaultConfig as BetaManagedAgentsMCPToolsetDefaultConfig,
+)
+from .beta_managed_agents_memory_store_resource_param import (
+    BetaManagedAgentsMemoryStoreResourceParam as BetaManagedAgentsMemoryStoreResourceParam,
 )
 from .beta_tool_search_tool_search_result_block_param import (
     BetaToolSearchToolSearchResultBlockParam as BetaToolSearchToolSearchResultBlockParam,

@@ -10,6 +10,7 @@ from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_agent_params import BetaManagedAgentsAgentParams
 from .beta_managed_agents_file_resource_params import BetaManagedAgentsFileResourceParams
+from .beta_managed_agents_memory_store_resource_param import BetaManagedAgentsMemoryStoreResourceParam
 from .beta_managed_agents_github_repository_resource_params import BetaManagedAgentsGitHubRepositoryResourceParams
 
 __all__ = ["SessionCreateParams", "Agent", "Resource"]
@@ -47,4 +48,8 @@ class SessionCreateParams(TypedDict, total=False):
 
 Agent: TypeAlias = Union[str, BetaManagedAgentsAgentParams]
 
-Resource: TypeAlias = Union[BetaManagedAgentsGitHubRepositoryResourceParams, BetaManagedAgentsFileResourceParams]
+Resource: TypeAlias = Union[
+    BetaManagedAgentsGitHubRepositoryResourceParams,
+    BetaManagedAgentsFileResourceParams,
+    BetaManagedAgentsMemoryStoreResourceParam,
+]
