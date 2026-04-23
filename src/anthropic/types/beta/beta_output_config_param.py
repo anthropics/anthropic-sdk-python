@@ -12,7 +12,7 @@ __all__ = ["BetaOutputConfigParam"]
 
 
 class BetaOutputConfigParam(TypedDict, total=False):
-    effort: Optional[Literal["low", "medium", "high", "max"]]
+    effort: Optional[Literal["low", "medium", "high", "xhigh", "max"]]
     """All possible effort levels."""
 
     format: Optional[BetaJSONOutputFormatParam]
