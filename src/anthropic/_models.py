@@ -686,7 +686,11 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
         variant = strip_annotated_type(variant)
         if is_basemodel_type(variant):
             if PYDANTIC_V1:
-                field_info = cast("dict[str, FieldInfo]", variant.__fields__).get(discriminator_field_name)  # pyright: ignore[reportDeprecated, reportUnnecessaryCast]
+                # Use get_origin() to resolve subscripted generics (e.g.
+                # ParsedBetaTextBlock[ResponseFormatT]) to their origin class,
+                # since _GenericAlias objects don't have __fields__.
+                origin = get_origin(variant) or variant
+                field_info = cast("dict[str, FieldInfo]", origin.__fields__).get(discriminator_field_name)  # pyright: ignore[reportDeprecated, reportUnnecessaryCast]
                 if not field_info:
                     continue
 
