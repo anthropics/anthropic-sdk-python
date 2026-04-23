@@ -19,7 +19,4 @@ class BetaCompactionBlock(BaseModel):
     content: Optional[str] = None
     """Summary of compacted content, or null if compaction failed"""
 
-    encrypted_content: Optional[str] = None
-    """Opaque metadata from prior compaction, to be round-tripped verbatim"""
-
     type: Literal["compaction"]

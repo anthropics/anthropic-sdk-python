@@ -2,24 +2,21 @@
 
 from __future__ import annotations
 
-from typing import List
-from typing_extensions import Literal, Annotated, TypedDict
+from typing import Dict, List
+from typing_extensions import Required, Annotated, TypedDict
 
 from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 
-__all__ = ["UserProfileListParams"]
+__all__ = ["MemoryStoreCreateParams"]
 
 
-class UserProfileListParams(TypedDict, total=False):
-    limit: int
-    """Query parameter for limit"""
+class MemoryStoreCreateParams(TypedDict, total=False):
+    name: Required[str]
 
-    order: Literal["asc", "desc"]
-    """Query parameter for order"""
+    description: str
 
-    page: str
-    """Query parameter for page"""
+    metadata: Dict[str, str]
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""

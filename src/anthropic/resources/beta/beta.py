@@ -44,14 +44,6 @@ from .skills.skills import (
     SkillsWithStreamingResponse,
     AsyncSkillsWithStreamingResponse,
 )
-from .user_profiles import (
-    UserProfiles,
-    AsyncUserProfiles,
-    UserProfilesWithRawResponse,
-    AsyncUserProfilesWithRawResponse,
-    UserProfilesWithStreamingResponse,
-    AsyncUserProfilesWithStreamingResponse,
-)
 from .vaults.vaults import (
     Vaults,
     AsyncVaults,
@@ -75,6 +67,14 @@ from .sessions.sessions import (
     AsyncSessionsWithRawResponse,
     SessionsWithStreamingResponse,
     AsyncSessionsWithStreamingResponse,
+)
+from .memory_stores.memory_stores import (
+    MemoryStores,
+    AsyncMemoryStores,
+    MemoryStoresWithRawResponse,
+    AsyncMemoryStoresWithRawResponse,
+    MemoryStoresWithStreamingResponse,
+    AsyncMemoryStoresWithStreamingResponse,
 )
 
 __all__ = ["Beta", "AsyncBeta"]
@@ -106,16 +106,16 @@ class Beta(SyncAPIResource):
         return Vaults(self._client)
 
     @cached_property
+    def memory_stores(self) -> MemoryStores:
+        return MemoryStores(self._client)
+
+    @cached_property
     def files(self) -> Files:
         return Files(self._client)
 
     @cached_property
     def skills(self) -> Skills:
         return Skills(self._client)
-
-    @cached_property
-    def user_profiles(self) -> UserProfiles:
-        return UserProfiles(self._client)
 
     @cached_property
     def with_raw_response(self) -> BetaWithRawResponse:
@@ -163,16 +163,16 @@ class AsyncBeta(AsyncAPIResource):
         return AsyncVaults(self._client)
 
     @cached_property
+    def memory_stores(self) -> AsyncMemoryStores:
+        return AsyncMemoryStores(self._client)
+
+    @cached_property
     def files(self) -> AsyncFiles:
         return AsyncFiles(self._client)
 
     @cached_property
     def skills(self) -> AsyncSkills:
         return AsyncSkills(self._client)
-
-    @cached_property
-    def user_profiles(self) -> AsyncUserProfiles:
-        return AsyncUserProfiles(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncBetaWithRawResponse:
@@ -223,16 +223,16 @@ class BetaWithRawResponse:
         return VaultsWithRawResponse(self._beta.vaults)
 
     @cached_property
+    def memory_stores(self) -> MemoryStoresWithRawResponse:
+        return MemoryStoresWithRawResponse(self._beta.memory_stores)
+
+    @cached_property
     def files(self) -> FilesWithRawResponse:
         return FilesWithRawResponse(self._beta.files)
 
     @cached_property
     def skills(self) -> SkillsWithRawResponse:
         return SkillsWithRawResponse(self._beta.skills)
-
-    @cached_property
-    def user_profiles(self) -> UserProfilesWithRawResponse:
-        return UserProfilesWithRawResponse(self._beta.user_profiles)
 
 
 class AsyncBetaWithRawResponse:
@@ -264,16 +264,16 @@ class AsyncBetaWithRawResponse:
         return AsyncVaultsWithRawResponse(self._beta.vaults)
 
     @cached_property
+    def memory_stores(self) -> AsyncMemoryStoresWithRawResponse:
+        return AsyncMemoryStoresWithRawResponse(self._beta.memory_stores)
+
+    @cached_property
     def files(self) -> AsyncFilesWithRawResponse:
         return AsyncFilesWithRawResponse(self._beta.files)
 
     @cached_property
     def skills(self) -> AsyncSkillsWithRawResponse:
         return AsyncSkillsWithRawResponse(self._beta.skills)
-
-    @cached_property
-    def user_profiles(self) -> AsyncUserProfilesWithRawResponse:
-        return AsyncUserProfilesWithRawResponse(self._beta.user_profiles)
 
 
 class BetaWithStreamingResponse:
@@ -305,16 +305,16 @@ class BetaWithStreamingResponse:
         return VaultsWithStreamingResponse(self._beta.vaults)
 
     @cached_property
+    def memory_stores(self) -> MemoryStoresWithStreamingResponse:
+        return MemoryStoresWithStreamingResponse(self._beta.memory_stores)
+
+    @cached_property
     def files(self) -> FilesWithStreamingResponse:
         return FilesWithStreamingResponse(self._beta.files)
 
     @cached_property
     def skills(self) -> SkillsWithStreamingResponse:
         return SkillsWithStreamingResponse(self._beta.skills)
-
-    @cached_property
-    def user_profiles(self) -> UserProfilesWithStreamingResponse:
-        return UserProfilesWithStreamingResponse(self._beta.user_profiles)
 
 
 class AsyncBetaWithStreamingResponse:
@@ -346,13 +346,13 @@ class AsyncBetaWithStreamingResponse:
         return AsyncVaultsWithStreamingResponse(self._beta.vaults)
 
     @cached_property
+    def memory_stores(self) -> AsyncMemoryStoresWithStreamingResponse:
+        return AsyncMemoryStoresWithStreamingResponse(self._beta.memory_stores)
+
+    @cached_property
     def files(self) -> AsyncFilesWithStreamingResponse:
         return AsyncFilesWithStreamingResponse(self._beta.files)
 
     @cached_property
     def skills(self) -> AsyncSkillsWithStreamingResponse:
         return AsyncSkillsWithStreamingResponse(self._beta.skills)
-
-    @cached_property
-    def user_profiles(self) -> AsyncUserProfilesWithStreamingResponse:
-        return AsyncUserProfilesWithStreamingResponse(self._beta.user_profiles)

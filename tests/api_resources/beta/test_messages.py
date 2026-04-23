@@ -101,11 +101,6 @@ class TestMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
-                },
             },
             service_tier="auto",
             speed="standard",
@@ -161,6 +156,11 @@ class TestMessages:
                     "eager_input_streaming": True,
                     "input_examples": [{"foo": "bar"}],
                     "strict": True,
+                    "type": "custom",
+                }
+            ],
+            top_k=5,
+            top_p=0.7,
                     "type": "custom",
                 }
             ],
@@ -291,11 +291,6 @@ class TestMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
-                },
             },
             service_tier="auto",
             speed="standard",
@@ -350,6 +345,11 @@ class TestMessages:
                     "eager_input_streaming": True,
                     "input_examples": [{"foo": "bar"}],
                     "strict": True,
+                    "type": "custom",
+                }
+            ],
+            top_k=5,
+            top_p=0.7,
                     "type": "custom",
                 }
             ],
@@ -464,11 +464,6 @@ class TestMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
-                },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
                 },
             },
             speed="fast",
@@ -667,11 +662,6 @@ class TestAsyncMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
-                },
             },
             service_tier="auto",
             speed="standard",
@@ -722,6 +712,16 @@ class TestAsyncMessages:
                         "type": "ephemeral",
                         "ttl": "5m",
                     },
+                    "defer_loading": True,
+                    "description": "Get the current weather in a given location",
+                    "eager_input_streaming": True,
+                    "input_examples": [{"foo": "bar"}],
+                    "strict": True,
+                    "type": "custom",
+                }
+            ],
+            top_k=5,
+            top_p=0.7,
                     "defer_loading": True,
                     "description": "Get the current weather in a given location",
                     "eager_input_streaming": True,
@@ -857,11 +857,6 @@ class TestAsyncMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
-                },
             },
             service_tier="auto",
             speed="standard",
@@ -916,6 +911,11 @@ class TestAsyncMessages:
                     "eager_input_streaming": True,
                     "input_examples": [{"foo": "bar"}],
                     "strict": True,
+                    "type": "custom",
+                }
+            ],
+            top_k=5,
+            top_p=0.7,
                     "type": "custom",
                 }
             ],
@@ -1030,11 +1030,6 @@ class TestAsyncMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
-                },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
                 },
             },
             speed="fast",

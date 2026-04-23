@@ -11,7 +11,7 @@ __all__ = ["OutputConfigParam"]
 
 
 class OutputConfigParam(TypedDict, total=False):
-    effort: Optional[Literal["low", "medium", "high", "xhigh", "max"]]
+    effort: Optional[Literal["low", "medium", "high", "max"]]
     """All possible effort levels."""
 
     format: Optional[JSONOutputFormatParam]
