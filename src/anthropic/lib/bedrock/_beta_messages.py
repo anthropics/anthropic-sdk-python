@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from ... import _legacy_response
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
@@ -13,6 +15,14 @@ __all__ = ["Messages", "AsyncMessages"]
 
 class Messages(SyncAPIResource):
     create = FirstPartyMessagesAPI.create
+    tool_runner = FirstPartyMessagesAPI.tool_runner
+    stream = FirstPartyMessagesAPI.stream
+
+    if TYPE_CHECKING:
+        ...
+    else:
+        # parse is used by stream and tool_runner internally
+        parse = FirstPartyMessagesAPI.parse
 
     @cached_property
     def with_raw_response(self) -> MessagesWithRawResponse:
@@ -36,6 +46,14 @@ class Messages(SyncAPIResource):
 
 class AsyncMessages(AsyncAPIResource):
     create = FirstPartyAsyncMessagesAPI.create
+    tool_runner = FirstPartyAsyncMessagesAPI.tool_runner
+    stream = FirstPartyAsyncMessagesAPI.stream
+
+    if TYPE_CHECKING:
+        ...
+    else:
+        # parse is used by stream and tool_runner internally
+        parse = FirstPartyAsyncMessagesAPI.parse
 
     @cached_property
     def with_raw_response(self) -> AsyncMessagesWithRawResponse:
