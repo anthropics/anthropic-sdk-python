@@ -113,11 +113,6 @@ class TestBatches:
                                 "schema": {"foo": "bar"},
                                 "type": "json_schema",
                             },
-                            "task_budget": {
-                                "total": 1024,
-                                "type": "tokens",
-                                "remaining": 0,
-                            },
                         },
                         "output_format": {
                             "schema": {"foo": "bar"},
@@ -182,7 +177,6 @@ class TestBatches:
                         ],
                         "top_k": 5,
                         "top_p": 0.7,
-                        "user_profile_id": "user_profile_id",
                     },
                 }
             ],
@@ -561,11 +555,6 @@ class TestAsyncBatches:
                                 "schema": {"foo": "bar"},
                                 "type": "json_schema",
                             },
-                            "task_budget": {
-                                "total": 1024,
-                                "type": "tokens",
-                                "remaining": 0,
-                            },
                         },
                         "output_format": {
                             "schema": {"foo": "bar"},
@@ -630,7 +619,6 @@ class TestAsyncBatches:
                         ],
                         "top_k": 5,
                         "top_p": 0.7,
-                        "user_profile_id": "user_profile_id",
                     },
                 }
             ],

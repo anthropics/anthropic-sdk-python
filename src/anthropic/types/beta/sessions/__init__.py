@@ -57,6 +57,9 @@ from .beta_managed_agents_file_document_source import (
 from .beta_managed_agents_user_interrupt_event import (
     BetaManagedAgentsUserInterruptEvent as BetaManagedAgentsUserInterruptEvent,
 )
+from .beta_managed_agents_memory_store_resource import (
+    BetaManagedAgentsMemoryStoreResource as BetaManagedAgentsMemoryStoreResource,
+)
 from .beta_managed_agents_retry_status_retrying import (
     BetaManagedAgentsRetryStatusRetrying as BetaManagedAgentsRetryStatusRetrying,
 )

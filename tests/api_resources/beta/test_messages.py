@@ -100,11 +100,6 @@ class TestMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
-                },
             },
             output_format={
                 "schema": {"foo": "bar"},
@@ -169,7 +164,6 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
-            user_profile_id="user_profile_id",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessage, message, path=["response"])
@@ -294,11 +288,6 @@ class TestMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
-                },
             },
             output_format={
                 "schema": {"foo": "bar"},
@@ -362,7 +351,6 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
-            user_profile_id="user_profile_id",
             betas=["message-batches-2024-09-24"],
         )
         message_stream.response.close()
@@ -471,11 +459,6 @@ class TestMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
-                },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
                 },
             },
             output_format={
@@ -661,11 +644,6 @@ class TestAsyncMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
-                },
             },
             output_format={
                 "schema": {"foo": "bar"},
@@ -730,7 +708,6 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
-            user_profile_id="user_profile_id",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessage, message, path=["response"])
@@ -855,11 +832,6 @@ class TestAsyncMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
-                },
             },
             output_format={
                 "schema": {"foo": "bar"},
@@ -923,7 +895,6 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
-            user_profile_id="user_profile_id",
             betas=["message-batches-2024-09-24"],
         )
         await message_stream.response.aclose()
@@ -1032,11 +1003,6 @@ class TestAsyncMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
-                },
-                "task_budget": {
-                    "total": 1024,
-                    "type": "tokens",
-                    "remaining": 0,
                 },
             },
             output_format={

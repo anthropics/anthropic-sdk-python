@@ -8,22 +8,21 @@ from typing_extensions import Annotated, TypedDict
 from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 
-__all__ = ["UserProfileCreateParams"]
+__all__ = ["MemoryStoreUpdateParams"]
 
 
-class UserProfileCreateParams(TypedDict, total=False):
-    external_id: Optional[str]
-    """Platform's own identifier for this user.
+class MemoryStoreUpdateParams(TypedDict, total=False):
+    description: Optional[str]
 
-    Not enforced unique. Maximum 255 characters.
+    metadata: Optional[Dict[str, Optional[str]]]
+    """Metadata patch.
+
+    Set a key to a string to upsert it, or to null to delete it. Omit the field to
+    preserve. The stored bag is limited to 16 keys (up to 64 chars each) with values
+    up to 512 chars.
     """
 
-    metadata: Dict[str, str]
-    """Free-form key-value data to attach to this user profile.
-
-    Maximum 16 keys, with keys up to 64 characters and values up to 512 characters.
-    Values must be non-empty strings.
-    """
+    name: Optional[str]
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
