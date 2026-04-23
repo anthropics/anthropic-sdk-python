@@ -24,6 +24,12 @@ class BatchCreateParams(TypedDict, total=False):
 
 
 
+    user_profile_id: Optional[str]
+    """The user profile ID to attribute this request to.
+
+    Use when acting on behalf of a party other than your organization.
+    """
+
 
 class Request(TypedDict, total=False):
     custom_id: Required[str]
