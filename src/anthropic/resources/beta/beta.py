@@ -44,6 +44,14 @@ from .skills.skills import (
     SkillsWithStreamingResponse,
     AsyncSkillsWithStreamingResponse,
 )
+from .user_profiles import (
+    UserProfiles,
+    AsyncUserProfiles,
+    UserProfilesWithRawResponse,
+    AsyncUserProfilesWithRawResponse,
+    UserProfilesWithStreamingResponse,
+    AsyncUserProfilesWithStreamingResponse,
+)
 from .vaults.vaults import (
     Vaults,
     AsyncVaults,
@@ -118,6 +126,10 @@ class Beta(SyncAPIResource):
         return Skills(self._client)
 
     @cached_property
+    def user_profiles(self) -> UserProfiles:
+        return UserProfiles(self._client)
+
+    @cached_property
     def with_raw_response(self) -> BetaWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
@@ -173,6 +185,10 @@ class AsyncBeta(AsyncAPIResource):
     @cached_property
     def skills(self) -> AsyncSkills:
         return AsyncSkills(self._client)
+
+    @cached_property
+    def user_profiles(self) -> AsyncUserProfiles:
+        return AsyncUserProfiles(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncBetaWithRawResponse:
@@ -234,6 +250,10 @@ class BetaWithRawResponse:
     def skills(self) -> SkillsWithRawResponse:
         return SkillsWithRawResponse(self._beta.skills)
 
+    @cached_property
+    def user_profiles(self) -> UserProfilesWithRawResponse:
+        return UserProfilesWithRawResponse(self._beta.user_profiles)
+
 
 class AsyncBetaWithRawResponse:
     def __init__(self, beta: AsyncBeta) -> None:
@@ -274,6 +294,10 @@ class AsyncBetaWithRawResponse:
     @cached_property
     def skills(self) -> AsyncSkillsWithRawResponse:
         return AsyncSkillsWithRawResponse(self._beta.skills)
+
+    @cached_property
+    def user_profiles(self) -> AsyncUserProfilesWithRawResponse:
+        return AsyncUserProfilesWithRawResponse(self._beta.user_profiles)
 
 
 class BetaWithStreamingResponse:
@@ -316,6 +340,10 @@ class BetaWithStreamingResponse:
     def skills(self) -> SkillsWithStreamingResponse:
         return SkillsWithStreamingResponse(self._beta.skills)
 
+    @cached_property
+    def user_profiles(self) -> UserProfilesWithStreamingResponse:
+        return UserProfilesWithStreamingResponse(self._beta.user_profiles)
+
 
 class AsyncBetaWithStreamingResponse:
     def __init__(self, beta: AsyncBeta) -> None:
@@ -356,3 +384,7 @@ class AsyncBetaWithStreamingResponse:
     @cached_property
     def skills(self) -> AsyncSkillsWithStreamingResponse:
         return AsyncSkillsWithStreamingResponse(self._beta.skills)
+
+    @cached_property
+    def user_profiles(self) -> AsyncUserProfilesWithStreamingResponse:
+        return AsyncUserProfilesWithStreamingResponse(self._beta.user_profiles)

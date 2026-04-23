@@ -101,6 +101,11 @@ class TestMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
+                },
             },
             service_tier="auto",
             speed="standard",
@@ -161,13 +166,8 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
-                    "type": "custom",
-                }
-            ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="user_profile_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -291,6 +291,11 @@ class TestMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
+                },
             },
             service_tier="auto",
             speed="standard",
@@ -350,13 +355,8 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
-                    "type": "custom",
-                }
-            ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="user_profile_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         message_stream.response.close()
 
@@ -464,6 +464,11 @@ class TestMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
+                },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
                 },
             },
             speed="fast",
@@ -662,6 +667,11 @@ class TestAsyncMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
+                },
             },
             service_tier="auto",
             speed="standard",
@@ -722,18 +732,8 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
-                    "defer_loading": True,
-                    "description": "Get the current weather in a given location",
-                    "eager_input_streaming": True,
-                    "input_examples": [{"foo": "bar"}],
-                    "strict": True,
-                    "type": "custom",
-                }
-            ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="user_profile_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -857,6 +857,11 @@ class TestAsyncMessages:
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
                 },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
+                },
             },
             service_tier="auto",
             speed="standard",
@@ -916,13 +921,8 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
-                    "type": "custom",
-                }
-            ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="user_profile_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         await message_stream.response.aclose()
 
@@ -1030,6 +1030,11 @@ class TestAsyncMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
+                },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
                 },
             },
             speed="fast",

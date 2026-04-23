@@ -80,6 +80,14 @@ from .memory_stores import (
     MemoryStoresWithStreamingResponse,
     AsyncMemoryStoresWithStreamingResponse,
 )
+from .user_profiles import (
+    UserProfiles,
+    AsyncUserProfiles,
+    UserProfilesWithRawResponse,
+    AsyncUserProfilesWithRawResponse,
+    UserProfilesWithStreamingResponse,
+    AsyncUserProfilesWithStreamingResponse,
+)
 
 __all__ = [
     "Models",
@@ -136,6 +144,12 @@ __all__ = [
     "AsyncSkillsWithRawResponse",
     "SkillsWithStreamingResponse",
     "AsyncSkillsWithStreamingResponse",
+    "UserProfiles",
+    "AsyncUserProfiles",
+    "UserProfilesWithRawResponse",
+    "AsyncUserProfilesWithRawResponse",
+    "UserProfilesWithStreamingResponse",
+    "AsyncUserProfilesWithStreamingResponse",
     "Beta",
     "AsyncBeta",
     "BetaWithRawResponse",
