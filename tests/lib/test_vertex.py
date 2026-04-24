@@ -9,6 +9,20 @@ import pytest
 from respx import MockRouter
 
 from anthropic import AnthropicVertex, AsyncAnthropicVertex
+from anthropic._exceptions import (
+    BadRequestError,
+    AuthenticationError,
+    PermissionDeniedError,
+    NotFoundError,
+    ConflictError,
+    RequestTooLargeError,
+    UnprocessableEntityError,
+    RateLimitError,
+    ServiceUnavailableError,
+    DeadlineExceededError,
+    OverloadedError,
+    InternalServerError,
+)
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -286,3 +300,29 @@ class TestAsyncAnthropicVertex:
             base_url="https://test.googleapis.com/v1",
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
+
+
+vertex_client = AnthropicVertex(region="region", project_id="project", access_token="my-access-token")
+
+
+@pytest.mark.parametrize(
+    "status_code, expected_error",
+    [
+        (400, BadRequestError),
+        (401, AuthenticationError),
+        (403, PermissionDeniedError),
+        (404, NotFoundError),
+        (409, ConflictError),
+        (413, RequestTooLargeError),
+        (422, UnprocessableEntityError),
+        (429, RateLimitError),
+        (500, InternalServerError),
+        (503, ServiceUnavailableError),
+        (504, DeadlineExceededError),
+        (529, OverloadedError),
+    ],
+)
+def test_make_status_error(status_code: int, expected_error: type) -> None:
+    response = httpx.Response(status_code, request=httpx.Request("GET", "/"))
+    err = vertex_client._make_status_error("msg", body=None, response=response)
+    assert type(err) is expected_error
