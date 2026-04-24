@@ -396,6 +396,12 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
         if not is_dict(options.json_data):
             raise RuntimeError("Expected json data to be a dictionary for post /v1/messages")
 
+        if "output_config" in options.json_data:
+            raise AnthropicError(
+                "Structured outputs (output_config) is not supported in the Vertex AI client yet. "
+                "Use the standard Anthropic client instead, or parse the model's JSON response manually."
+            )
+
         model = options.json_data.pop("model")
         stream = options.json_data.get("stream", False)
         specifier = "streamRawPredict" if stream else "rawPredict"
