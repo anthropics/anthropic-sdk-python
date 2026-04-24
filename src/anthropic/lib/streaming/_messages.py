@@ -515,4 +515,8 @@ def accumulate_event(
         if event.usage.server_tool_use is not None:
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
 
+        # Propagate container from delta (needed for code_execution tool continuation)
+        if getattr(event.delta, "container", None) is not None:
+            current_snapshot.container = event.delta.container
+
     return current_snapshot
