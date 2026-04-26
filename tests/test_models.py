@@ -10,6 +10,9 @@ from pydantic import Field
 from anthropic._utils import PropertyInfo
 from anthropic._compat import PYDANTIC_V1, parse_obj, model_dump, model_json
 from anthropic._models import DISCRIMINATOR_CACHE, BaseModel, construct_type
+from anthropic.types.beta.parsed_beta_message import ParsedBetaContentBlock
+from anthropic.types.beta.beta_tool_search_tool_result_block import BetaToolSearchToolResultBlock
+from anthropic.types.beta.beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock
 
 
 class BasicModel(BaseModel):
@@ -685,6 +688,40 @@ def test_discriminated_unions_invalid_data() -> None:
         assert m.data == "100"
     else:
         assert m.data == 100  # type: ignore[comparison-overlap]
+
+
+def test_parsed_beta_content_block_accepts_tool_search_result_blocks() -> None:
+    block = construct_type(
+        value={
+            "type": "tool_search_tool_result",
+            "tool_use_id": "toolu_123",
+            "content": {
+                "type": "tool_search_results",
+                "tool_search_results": [],
+            },
+        },
+        type_=cast(Any, ParsedBetaContentBlock),
+    )
+
+    assert isinstance(block, BetaToolSearchToolResultBlock)
+
+
+def test_parsed_beta_content_block_accepts_web_fetch_result_blocks() -> None:
+    block = construct_type(
+        value={
+            "type": "web_fetch_tool_result",
+            "tool_use_id": "toolu_123",
+            "content": {
+                "type": "web_fetch",
+                "url": "https://example.com",
+                "title": "Example",
+                "content": "hello",
+            },
+        },
+        type_=cast(Any, ParsedBetaContentBlock),
+    )
+
+    assert isinstance(block, BetaWebFetchToolResultBlock)
 
 
 def test_discriminated_unions_unknown_variant() -> None:
