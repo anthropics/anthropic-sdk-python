@@ -108,11 +108,21 @@ def transform(
 
     It should be noted that the transformations that this function does are not represented in the type system.
     """
+    # Fast path: if the type tree has no PropertyInfo annotations (no aliases,
+    # no date formatting, no base64 fields), skip the expensive recursive walk.
+    # This is a significant optimization for types like MessageCreateParams where
+    # the transform produces an identical copy of the input.
+    # Return a shallow copy to preserve the old contract that callers may mutate
+    # the result without corrupting their original input.
+    if not _type_has_transforms(cast(type, expected_type)):
+        if isinstance(data, dict):
+            return cast(_T, dict(data))
+        return cast(_T, data)
     transformed = _transform_recursive(data, annotation=cast(type, expected_type))
     return cast(_T, transformed)
 
 
-@lru_cache(maxsize=8096)
+@lru_cache(maxsize=8192)
 def _get_annotated_type(type_: type) -> type | None:
     """If the given type is an `Annotated` type then it is returned, if not `None` is returned.
 
@@ -149,6 +159,78 @@ def _maybe_transform_key(key: str, type_: type) -> str:
 
 def _no_transform_needed(annotation: type) -> bool:
     return annotation == float or annotation == int
+
+
+@lru_cache(maxsize=8192)
+def _type_has_transforms(type_: type) -> bool:
+    """Check if a type (recursively) has any PropertyInfo annotations that would
+    require transformation. Returns False if the entire type tree is annotation-free,
+    meaning transform() would just copy the data unchanged.
+
+    This allows skipping the expensive recursive walk for types like
+    MessageCreateParams that have no aliases, date formatting, or base64 fields.
+    """
+    try:
+        # Handle Union types (e.g. MessageCreateParams = Union[Streaming, NonStreaming])
+        if is_union_type(type_):
+            return any(_type_has_transforms(arg) for arg in get_args(type_))
+
+        # Primitive types never have transforms - safe to skip
+        _PRIMITIVE_TYPES = {str, int, float, bool, bytes, type(None)}
+        if type_ in _PRIMITIVE_TYPES:
+            return False
+
+        # Check Annotated types for PropertyInfo transforms
+        annotated = _get_annotated_type(type_)
+        if annotated is not None:
+            for ann in get_args(annotated)[1:]:
+                if isinstance(ann, PropertyInfo):
+                    if ann.alias is not None or ann.format is not None:
+                        return True
+
+        # Recurse into container element types
+        stripped = strip_annotated_type(type_)
+
+        # Iterable[T] always needs transformation (iterator -> list materialization)
+        if is_iterable_type(stripped):
+            return True
+
+        # List[T] and Sequence[T] only need transformation if elements do
+        if is_list_type(stripped) or is_sequence_type(stripped):
+            args = get_args(stripped)
+            if args:
+                return _type_has_transforms(args[0])
+            return False
+
+        if not is_typeddict(stripped):
+            # For non-TypedDict, non-Union, non-primitive, non-container types,
+            # assume transforms may be needed (conservative)
+            return True
+
+        hints = _get_type_hints(stripped, include_extras=True)
+        for hint_type in hints.values():
+            annotated = _get_annotated_type(hint_type)
+            if annotated is not None:
+                # Check if any annotation is a PropertyInfo with actual transforms
+                for ann in get_args(annotated)[1:]:
+                    if isinstance(ann, PropertyInfo):
+                        if ann.alias is not None or ann.format is not None:
+                            return True
+
+            # Recurse into the inner type to check nested TypedDicts
+            inner_stripped = strip_annotated_type(hint_type)
+            if is_required_type(inner_stripped):
+                inner_stripped = get_args(inner_stripped)[0]
+                inner_stripped = strip_annotated_type(inner_stripped)
+
+            if _type_has_transforms(inner_stripped):
+                return True
+
+        return False
+    except Exception:
+        # If introspection fails for any reason, assume transforms are needed
+        pass
+    return True
 
 
 def _transform_recursive(
@@ -313,6 +395,11 @@ async def async_transform(
 
     It should be noted that the transformations that this function does are not represented in the type system.
     """
+    # Fast path: same optimization as sync transform()
+    if not _type_has_transforms(cast(type, expected_type)):
+        if isinstance(data, dict):
+            return cast(_T, dict(data))
+        return cast(_T, data)
     transformed = await _async_transform_recursive(data, annotation=cast(type, expected_type))
     return cast(_T, transformed)
 
@@ -447,7 +534,7 @@ async def _async_transform_typeddict(
     return result
 
 
-@lru_cache(maxsize=8096)
+@lru_cache(maxsize=8192)
 def get_type_hints(
     obj: Any,
     globalns: dict[str, Any] | None = None,
