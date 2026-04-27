@@ -17,6 +17,8 @@ class CitationPageLocationParam(TypedDict, total=False):
 
     end_page_number: Required[int]
 
+    file_id: Optional[str]
+
     start_page_number: Required[int]
 
     type: Required[Literal["page_location"]]
