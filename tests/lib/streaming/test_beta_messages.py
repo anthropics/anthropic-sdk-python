@@ -13,6 +13,7 @@ from anthropic import Anthropic, AsyncAnthropic
 from anthropic._utils import assert_overloads_in_sync, assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.types.beta.beta_message import BetaMessage
+from anthropic.types.beta.beta_compaction_block import BetaCompactionBlock
 from anthropic.lib.streaming._beta_types import ParsedBetaMessageStreamEvent
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
 from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
@@ -371,6 +372,61 @@ class TestAsyncMessages:
             assert_incomplete_partial_input_response(
                 [event async for event in stream], await stream.get_final_message()
             )
+
+
+class TestCompactionBlockTyping:
+    """Regression test for #1175: BetaCompactionBlock deserialized as ParsedBetaTextBlock."""
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_compaction_block_type_in_final_message(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("compaction_response.txt"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude-opus-4-20250514",
+        ) as stream:
+            message = stream.get_final_message()
+
+        # The first content block should be a BetaCompactionBlock, not ParsedBetaTextBlock
+        compaction_block = message.content[0]
+        assert compaction_block.type == "compaction"
+        assert isinstance(compaction_block, BetaCompactionBlock), (
+            f"Expected BetaCompactionBlock, got {type(compaction_block).__name__}"
+        )
+        assert compaction_block.content == "Summary of the previous conversation."
+
+        # The second content block should be a text block
+        text_block = message.content[1]
+        assert text_block.type == "text"
+        assert text_block.text == "Here is my response."
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_compaction_block_type_in_final_message_async(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("compaction_response.txt")))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude-opus-4-20250514",
+        ) as stream:
+            message = await stream.get_final_message()
+
+        compaction_block = message.content[0]
+        assert compaction_block.type == "compaction"
+        assert isinstance(compaction_block, BetaCompactionBlock), (
+            f"Expected BetaCompactionBlock, got {type(compaction_block).__name__}"
+        )
+        assert compaction_block.content == "Summary of the previous conversation."
+
+        text_block = message.content[1]
+        assert text_block.type == "text"
+        assert text_block.text == "Here is my response."
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
