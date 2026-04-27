@@ -38,7 +38,7 @@ DEFAULT_MEMORY_SYSTEM_PROMPT = """- ***DO NOT just store the conversation histor
         - Store facts about the user and their preferences
         - Before responding, check memory to adjust technical depth and response style appropriately
         - Keep memories up-to-date - remove outdated info, add new details as you learn them
-        - Use an xml format like <xml><name>John Doe</name></user></xml>"""
+        - Use an xml format like <xml><name>John Doe</name></xml>"""
 
 
 class Spinner:
