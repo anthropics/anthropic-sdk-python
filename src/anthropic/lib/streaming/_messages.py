@@ -462,6 +462,12 @@ def accumulate_event(
             ),
         )
     elif event.type == "content_block_delta":
+        if event.index >= len(current_snapshot.content):
+            raise RuntimeError(
+                f"Received content_block_delta for index {event.index}, "
+                f"but snapshot only has {len(current_snapshot.content)} content block(s). "
+                f"This may indicate a missing content_block_start event."
+            )
         content = current_snapshot.content[event.index]
         if event.delta.type == "text_delta":
             if content.type == "text":
