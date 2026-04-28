@@ -275,3 +275,30 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+@pytest.mark.parametrize(
+    "profiles, aws_profile",
+    [
+        pytest.param(
+            [{"name": "default", "region": "us-east-2"}, {"name": "custom", "region": "us-west-1"}],
+            "custom",
+            id="custom profile via constructor",
+        ),
+    ],
+)
+def test_region_infer_from_constructor_profile(
+    mock_aws_config: None,  # noqa: ARG001
+    profiles: t.List[AwsConfigProfile],
+    aws_profile: str,
+) -> None:
+    """Region should be inferred from the profile passed to the constructor.
+
+    Regression test for #892: previously ``_infer_region`` always created
+    ``boto3.Session()`` without a profile name, so passing ``aws_profile=`` to
+    ``AnthropicBedrock`` would still pick up the default profile's region.
+    """
+    client = AnthropicBedrock(aws_profile=aws_profile)
+
+    assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+    assert client.aws_profile == aws_profile
