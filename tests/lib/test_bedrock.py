@@ -8,7 +8,7 @@ import httpx
 import pytest
 from respx import MockRouter
 
-from anthropic import AnthropicBedrock, AsyncAnthropicBedrock
+from anthropic import BadRequestError, AnthropicBedrock, AsyncAnthropicBedrock
 
 sync_client = AnthropicBedrock(
     aws_region="us-east-1",
@@ -275,3 +275,94 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_retries_on_bedrock_throttling_error(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        side_effect=[
+            httpx.Response(
+                400,
+                json={"message": "Too many requests, please wait before trying again."},
+                headers={"x-amzn-errortype": "ThrottlingException", "retry-after-ms": "10"},
+            ),
+            httpx.Response(200, json={"foo": "bar"}),
+        ]
+    )
+
+    sync_client.messages.create(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+
+    assert len(calls) == 2
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_retries_on_bedrock_throttling_error_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        side_effect=[
+            httpx.Response(
+                400,
+                json={"message": "Too many requests, please wait before trying again."},
+                headers={"x-amzn-errortype": "ThrottlingException", "retry-after-ms": "10"},
+            ),
+            httpx.Response(200, json={"foo": "bar"}),
+        ]
+    )
+
+    await async_client.messages.create(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+
+    assert len(calls) == 2
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_no_retry_on_bedrock_validation_error(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        side_effect=[
+            httpx.Response(
+                400,
+                json={"message": "Invalid input"},
+                headers={"x-amzn-errortype": "ValidationException"},
+            ),
+        ]
+    )
+
+    with pytest.raises(BadRequestError):
+        sync_client.messages.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+
+    assert len(calls) == 1
