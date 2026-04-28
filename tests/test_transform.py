@@ -17,6 +17,7 @@ from anthropic._utils import (
 )
 from anthropic._compat import PYDANTIC_V1
 from anthropic._models import BaseModel
+from anthropic.types.beta import BetaCitationPageLocationParam
 
 _T = TypeVar("_T")
 
@@ -142,6 +143,32 @@ async def test_includes_unknown_keys(use_async: bool) -> None:
     assert await transform({"bar": "bar", "baz_": {"FOO": 1}}, Foo6, use_async) == {
         "Bar": "bar",
         "baz_": {"FOO": 1},
+    }
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_known_optional_none_field_is_preserved(use_async: bool) -> None:
+    assert await transform(
+        {
+            "type": "page_location",
+            "cited_text": "hello",
+            "document_index": 0,
+            "document_title": "Doc",
+            "start_page_number": 1,
+            "end_page_number": 2,
+            "file_id": None,
+        },
+        BetaCitationPageLocationParam,
+        use_async,
+    ) == {
+        "type": "page_location",
+        "cited_text": "hello",
+        "document_index": 0,
+        "document_title": "Doc",
+        "start_page_number": 1,
+        "end_page_number": 2,
+        "file_id": None,
     }
 
 
