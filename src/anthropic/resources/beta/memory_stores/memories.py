@@ -69,10 +69,19 @@ class Memories(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemory:
-        """
-        CreateMemory
+        """Create a memory
 
         Args:
+          content: UTF-8 text content for the new memory.
+
+        Maximum 100 kB (102,400 bytes). Required;
+              pass `""` explicitly to create an empty memory.
+
+          path: Hierarchical path for the new memory, e.g. `/projects/foo/notes.md`. Must start
+              with `/`, contain at least one non-empty segment, and be at most 1,024 bytes.
+              Must not contain empty segments, `.` or `..` segments, control or format
+              characters, and must be NFC-normalized. Paths are case-sensitive.
+
           view: Query parameter for view
 
           betas: Optional header to specify the beta version(s) you want to use.
@@ -132,7 +141,7 @@ class Memories(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemory:
         """
-        GetMemory
+        Retrieve a memory
 
         Args:
           view: Query parameter for view
@@ -196,10 +205,26 @@ class Memories(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemory:
         """
-        UpdateMemory
+        Update a memory
 
         Args:
           view: Query parameter for view
+
+          content: New UTF-8 text content for the memory. Maximum 100 kB (102,400 bytes). Omit to
+              leave the content unchanged (e.g., for a rename-only update).
+
+          path: New path for the memory (a rename). Must start with `/`, contain at least one
+              non-empty segment, and be at most 1,024 bytes. Must not contain empty segments,
+              `.` or `..` segments, control or format characters, and must be NFC-normalized.
+              Paths are case-sensitive. The memory's `id` is preserved across renames. Omit to
+              leave the path unchanged.
+
+          precondition: Optimistic-concurrency precondition: the update applies only if the memory's
+              stored `content_sha256` equals the supplied value. On mismatch, the request
+              returns `memory_precondition_failed_error` (HTTP 409); re-read the memory and
+              retry against the fresh state. If the precondition fails but the stored state
+              already exactly matches the requested `content` and `path`, the server returns
+              200 instead of 409.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -270,7 +295,7 @@ class Memories(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsMemoryListItem]:
         """
-        ListMemories
+        List memories
 
         Args:
           depth: Query parameter for depth
@@ -353,7 +378,7 @@ class Memories(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedMemory:
         """
-        DeleteMemory
+        Delete a memory
 
         Args:
           expected_content_sha256: Query parameter for expected_content_sha256
@@ -437,10 +462,19 @@ class AsyncMemories(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemory:
-        """
-        CreateMemory
+        """Create a memory
 
         Args:
+          content: UTF-8 text content for the new memory.
+
+        Maximum 100 kB (102,400 bytes). Required;
+              pass `""` explicitly to create an empty memory.
+
+          path: Hierarchical path for the new memory, e.g. `/projects/foo/notes.md`. Must start
+              with `/`, contain at least one non-empty segment, and be at most 1,024 bytes.
+              Must not contain empty segments, `.` or `..` segments, control or format
+              characters, and must be NFC-normalized. Paths are case-sensitive.
+
           view: Query parameter for view
 
           betas: Optional header to specify the beta version(s) you want to use.
@@ -500,7 +534,7 @@ class AsyncMemories(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemory:
         """
-        GetMemory
+        Retrieve a memory
 
         Args:
           view: Query parameter for view
@@ -564,10 +598,26 @@ class AsyncMemories(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemory:
         """
-        UpdateMemory
+        Update a memory
 
         Args:
           view: Query parameter for view
+
+          content: New UTF-8 text content for the memory. Maximum 100 kB (102,400 bytes). Omit to
+              leave the content unchanged (e.g., for a rename-only update).
+
+          path: New path for the memory (a rename). Must start with `/`, contain at least one
+              non-empty segment, and be at most 1,024 bytes. Must not contain empty segments,
+              `.` or `..` segments, control or format characters, and must be NFC-normalized.
+              Paths are case-sensitive. The memory's `id` is preserved across renames. Omit to
+              leave the path unchanged.
+
+          precondition: Optimistic-concurrency precondition: the update applies only if the memory's
+              stored `content_sha256` equals the supplied value. On mismatch, the request
+              returns `memory_precondition_failed_error` (HTTP 409); re-read the memory and
+              retry against the fresh state. If the precondition fails but the stored state
+              already exactly matches the requested `content` and `path`, the server returns
+              200 instead of 409.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -638,7 +688,7 @@ class AsyncMemories(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsMemoryListItem, AsyncPageCursor[BetaManagedAgentsMemoryListItem]]:
         """
-        ListMemories
+        List memories
 
         Args:
           depth: Query parameter for depth
@@ -721,7 +771,7 @@ class AsyncMemories(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedMemory:
         """
-        DeleteMemory
+        Delete a memory
 
         Args:
           expected_content_sha256: Query parameter for expected_content_sha256
