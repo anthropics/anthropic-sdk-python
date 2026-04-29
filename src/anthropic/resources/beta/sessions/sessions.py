@@ -270,6 +270,7 @@ class Sessions(SyncAPIResource):
         created_at_lte: Union[str, datetime] | Omit = omit,
         include_archived: bool | Omit = omit,
         limit: int | Omit = omit,
+        memory_store_id: str | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
         page: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -299,6 +300,9 @@ class Sessions(SyncAPIResource):
           include_archived: When true, includes archived sessions. Default: false (exclude archived).
 
           limit: Maximum number of results to return.
+
+          memory_store_id: Filter sessions whose resources contain a memory_store with this memory store
+              ID.
 
           order: Sort direction for results, ordered by created_at. Defaults to desc (newest
               first).
@@ -344,6 +348,7 @@ class Sessions(SyncAPIResource):
                         "created_at_lte": created_at_lte,
                         "include_archived": include_archived,
                         "limit": limit,
+                        "memory_store_id": memory_store_id,
                         "order": order,
                         "page": page,
                     },
@@ -677,6 +682,7 @@ class AsyncSessions(AsyncAPIResource):
         created_at_lte: Union[str, datetime] | Omit = omit,
         include_archived: bool | Omit = omit,
         limit: int | Omit = omit,
+        memory_store_id: str | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
         page: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -706,6 +712,9 @@ class AsyncSessions(AsyncAPIResource):
           include_archived: When true, includes archived sessions. Default: false (exclude archived).
 
           limit: Maximum number of results to return.
+
+          memory_store_id: Filter sessions whose resources contain a memory_store with this memory store
+              ID.
 
           order: Sort direction for results, ordered by created_at. Defaults to desc (newest
               first).
@@ -751,6 +760,7 @@ class AsyncSessions(AsyncAPIResource):
                         "created_at_lte": created_at_lte,
                         "include_archived": include_archived,
                         "limit": limit,
+                        "memory_store_id": memory_store_id,
                         "order": order,
                         "page": page,
                     },
