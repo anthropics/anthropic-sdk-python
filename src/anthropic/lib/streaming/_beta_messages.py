@@ -27,7 +27,7 @@ from ._beta_types import (
     ParsedBetaContentBlockStopEvent,
 )
 from ..._streaming import Stream, AsyncStream
-from ...types.beta import BetaRawMessageStreamEvent
+from ...types.beta import BetaRawMessageStreamEvent, BetaRawContentBlockDeltaEvent
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
 from ...types.beta.parsed_beta_message import ParsedBetaMessage, ParsedBetaContentBlock
@@ -460,6 +460,13 @@ def accumulate_event(
                 value=event,
             ),
         )
+        if not isinstance(cast(Any, event), BaseModel) and isinstance(cast(Any, event), dict):
+            if event.get("type") == "content_block_delta":
+                event = cast(
+                    BetaRawMessageStreamEvent,
+                    construct_type_unchecked(type_=BetaRawContentBlockDeltaEvent, value=event),
+                )
+
         if not isinstance(cast(Any, event), BaseModel):
             raise TypeError(
                 f"Unexpected event runtime type, after deserialising twice - {event} - {builtins.type(event)}"

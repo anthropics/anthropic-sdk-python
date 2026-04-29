@@ -10,10 +10,11 @@ from respx import MockRouter
 from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
+from anthropic.types.usage import Usage
 from anthropic.lib.streaming import ParsedMessageStreamEvent
 from anthropic.types.message import Message
 from anthropic.resources.messages import DEPRECATED_MODELS
-from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
+from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT, accumulate_event
 
 from .helpers import get_response, to_async_iter
 
@@ -106,6 +107,33 @@ def assert_tool_use_response(events: list[ParsedMessageStreamEvent[None]], messa
 
 
 class TestSyncMessages:
+    def test_accumulate_dict_content_block_delta_event(self) -> None:
+        message = Message(
+            id="msg_123",
+            type="message",
+            role="assistant",
+            content=[{"type": "text", "text": ""}],
+            model="claude-3-opus-latest",
+            stop_reason=None,
+            stop_sequence=None,
+            usage=Usage(input_tokens=10, output_tokens=10),
+        )
+
+        updated = cast(
+            Message,
+            accumulate_event(
+                event={
+                    "type": "content_block_delta",
+                    "index": 0,
+                    "delta": {"type": "text_delta", "text": "hello"},
+                },
+                current_snapshot=message,
+            ),
+        )
+
+        assert updated.content[0].type == "text"
+        assert updated.content[0].text == "hello"
+
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(

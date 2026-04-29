@@ -11,6 +11,31 @@ from anthropic.types.beta.parsed_beta_message import ParsedBetaMessage
 
 
 class TestPartialJson:
+    def test_accumulate_dict_content_block_delta_event(self) -> None:
+        message = ParsedBetaMessage(
+            id="msg_123",
+            type="message",
+            role="assistant",
+            content=[{"type": "text", "text": ""}],
+            model="claude-sonnet-4-5",
+            stop_reason=None,
+            stop_sequence=None,
+            usage=BetaUsage(input_tokens=10, output_tokens=10),
+        )
+
+        updated = accumulate_event(
+            event={
+                "type": "content_block_delta",
+                "index": 0,
+                "delta": {"type": "text_delta", "text": "hello"},
+            },
+            current_snapshot=message,
+            request_headers=httpx.Headers(),
+        )
+
+        assert updated.content[0].type == "text"
+        assert updated.content[0].text == "hello"
+
     def test_trailing_strings_mode_header(self) -> None:
         """Test behavior differences with and without the beta header for JSON parsing."""
         message = ParsedBetaMessage(
