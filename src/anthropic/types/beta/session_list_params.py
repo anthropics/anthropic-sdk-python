@@ -37,6 +37,12 @@ class SessionListParams(TypedDict, total=False):
     limit: int
     """Maximum number of results to return."""
 
+    memory_store_id: str
+    """
+    Filter sessions whose resources contain a memory_store with this memory store
+    ID.
+    """
+
     order: Literal["asc", "desc"]
     """Sort direction for results, ordered by created_at.
 

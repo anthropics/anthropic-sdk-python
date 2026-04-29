@@ -105,6 +105,14 @@ def assert_tool_use_response(events: list[ParsedMessageStreamEvent[None]], messa
     ]
 
 
+def assert_refusal_response(message: Message) -> None:
+    assert message.stop_reason == "refusal"
+    assert message.stop_details is not None
+    assert message.stop_details.type == "refusal"
+    assert message.stop_details.category == "cyber"
+    assert message.stop_details.explanation == "This request was refused due to policy."
+
+
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
@@ -184,6 +192,19 @@ class TestSyncMessages:
                 assert isinstance(cast(Any, stream), Stream)
 
             assert_tool_use_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("refusal_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            assert_refusal_response(stream.get_final_message())
 
 
 class TestAsyncMessages:
@@ -269,6 +290,20 @@ class TestAsyncMessages:
                 assert isinstance(cast(Any, stream), AsyncStream)
 
             assert_tool_use_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("refusal_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            assert_refusal_response(await stream.get_final_message())
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])

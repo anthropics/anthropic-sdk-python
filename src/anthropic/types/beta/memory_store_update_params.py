@@ -13,6 +13,10 @@ __all__ = ["MemoryStoreUpdateParams"]
 
 class MemoryStoreUpdateParams(TypedDict, total=False):
     description: Optional[str]
+    """New description for the store, up to 1024 characters.
+
+    Pass an empty string to clear it.
+    """
 
     metadata: Optional[Dict[str, Optional[str]]]
     """Metadata patch.
@@ -23,6 +27,11 @@ class MemoryStoreUpdateParams(TypedDict, total=False):
     """
 
     name: Optional[str]
+    """New human-readable name for the store.
+
+    1–255 characters; no control characters. Renaming changes the slug used for the
+    store's `mount_path` in sessions created after the update.
+    """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
