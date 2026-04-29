@@ -438,3 +438,51 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+def test_beta_message_delta_propagates_stop_details_to_snapshot() -> None:
+    import httpx as _httpx
+
+    from anthropic.types.beta.beta_usage import BetaUsage
+    from anthropic.lib.streaming._beta_messages import accumulate_event
+    from anthropic.types.beta.beta_message_delta_usage import BetaMessageDeltaUsage
+    from anthropic.types.beta.beta_refusal_stop_details import BetaRefusalStopDetails
+    from anthropic.types.beta.beta_raw_message_delta_event import Delta, BetaRawMessageDeltaEvent
+
+    snapshot = BetaMessage(
+        id="msg_test",
+        type="message",
+        role="assistant",
+        model="claude-sonnet-4-6",
+        content=[],
+        stop_reason=None,
+        stop_sequence=None,
+        usage=BetaUsage(
+            input_tokens=10,
+            output_tokens=0,
+            cache_creation_input_tokens=None,
+            cache_read_input_tokens=None,
+            server_tool_use=None,
+            service_tier=None,
+        ),
+        stop_details=None,
+    )
+
+    stop_details = BetaRefusalStopDetails(type="refusal", category="bio", explanation="Content policy")
+    event = BetaRawMessageDeltaEvent(
+        type="message_delta",
+        delta=Delta(stop_reason="end_turn", stop_sequence=None, stop_details=stop_details),
+        usage=BetaMessageDeltaUsage(output_tokens=10),
+    )
+
+    updated = accumulate_event(
+        event=event,
+        current_snapshot=snapshot,
+        request_headers=_httpx.Headers({}),
+    )
+
+    assert updated.stop_details is not None
+    assert updated.stop_details.type == "refusal"
+    assert updated.stop_details.category == "bio"
+    assert updated.stop_details.explanation == "Content policy"
+    assert updated.stop_reason == "end_turn"

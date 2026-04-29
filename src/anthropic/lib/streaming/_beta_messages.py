@@ -535,6 +535,7 @@ def accumulate_event(
             content_block.parsed_output = parse_text(content_block.text, output_format)
     elif event.type == "message_delta":
         current_snapshot.container = event.delta.container
+        current_snapshot.stop_details = event.delta.stop_details
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
         current_snapshot.usage.output_tokens = event.usage.output_tokens
