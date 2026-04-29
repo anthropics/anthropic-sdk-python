@@ -537,6 +537,8 @@ def accumulate_event(
         current_snapshot.container = event.delta.container
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
+        if event.delta.stop_details is not None:
+            current_snapshot.stop_details = event.delta.stop_details
         current_snapshot.usage.output_tokens = event.usage.output_tokens
         current_snapshot.context_management = event.context_management
 
