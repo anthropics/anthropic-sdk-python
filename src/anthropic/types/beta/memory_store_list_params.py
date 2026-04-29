@@ -14,19 +14,35 @@ __all__ = ["MemoryStoreListParams"]
 
 class MemoryStoreListParams(TypedDict, total=False):
     created_at_gte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gte]", format="iso8601")]
-    """Return stores created at or after this time (inclusive)."""
+    """Return only stores whose `created_at` is at or after this time (inclusive).
+
+    Sent on the wire as `created_at[gte]`.
+    """
 
     created_at_lte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lte]", format="iso8601")]
-    """Return stores created at or before this time (inclusive)."""
+    """Return only stores whose `created_at` is at or before this time (inclusive).
+
+    Sent on the wire as `created_at[lte]`.
+    """
 
     include_archived: bool
-    """Query parameter for include_archived"""
+    """When `true`, archived stores are included in the results.
+
+    Defaults to `false` (archived stores are excluded).
+    """
 
     limit: int
-    """Query parameter for limit"""
+    """Maximum number of stores to return per page.
+
+    Must be between 1 and 100. Defaults to 20 when omitted.
+    """
 
     page: str
-    """Query parameter for page"""
+    """Opaque pagination cursor (a `page_...` value).
+
+    Pass the `next_page` value from a previous response to fetch the next page; omit
+    for the first page.
+    """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
