@@ -268,6 +268,10 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
             if base_url is None:
                 if region == "global":
                     base_url = "https://aiplatform.googleapis.com/v1"
+                elif region == "us":
+                    base_url = "https://aiplatform.us.rep.googleapis.com/v1"
+                elif region == "eu":
+                    base_url = "https://aiplatform.eu.rep.googleapis.com/v1"
                 else:
                     base_url = f"https://{region}-aiplatform.googleapis.com/v1"
 
