@@ -192,7 +192,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         return BetaFoundry(self)
 
     @override
-    def copy(
+    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — subclass intentionally drops `credentials`
         self,
         *,
         api_key: str | None = None,
@@ -228,7 +228,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
             },
         )
 
-    with_options = copy
+    with_options = copy  # type: ignore[assignment]
 
     def _get_azure_ad_token(self) -> str | None:
         provider = self._azure_ad_token_provider
@@ -369,7 +369,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         return AsyncBetaFoundry(client=self)
 
     @override
-    def copy(
+    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — subclass intentionally drops `credentials`
         self,
         *,
         api_key: str | None = None,
@@ -405,7 +405,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
             },
         )
 
-    with_options = copy
+    with_options = copy  # type: ignore[assignment]
 
     async def _get_azure_ad_token(self) -> str | None:
         provider = self._azure_ad_token_provider

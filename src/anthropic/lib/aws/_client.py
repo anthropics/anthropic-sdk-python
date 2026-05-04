@@ -159,7 +159,7 @@ class AnthropicAWS(Anthropic):
         request.headers.update(headers)
 
     @override
-    def copy(
+    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — subclass intentionally drops `credentials`
         self,
         *,
         api_key: str | None = None,
@@ -207,7 +207,7 @@ class AnthropicAWS(Anthropic):
             },
         )
 
-    with_options = copy
+    with_options = copy  # type: ignore[assignment]
 
 
 class AsyncAnthropicAWS(AsyncAnthropic):
@@ -350,7 +350,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         request.headers.update(headers)
 
     @override
-    def copy(
+    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — subclass intentionally drops `credentials`
         self,
         *,
         api_key: str | None = None,
@@ -398,4 +398,4 @@ class AsyncAnthropicAWS(AsyncAnthropic):
             },
         )
 
-    with_options = copy
+    with_options = copy  # type: ignore[assignment]
