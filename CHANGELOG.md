@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.98.1 (2026-05-04)
+
+Full Changelog: [v0.98.0...v0.98.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.98.0...v0.98.1)
+
+### Chores
+
+* fix typo in example ([#1754](https://github.com/anthropics/anthropic-sdk-python/issues/1754)) ([de8ba13](https://github.com/anthropics/anthropic-sdk-python/commit/de8ba13769837f92ff00be8a1b1e9ad0749eae2f))
+
 ## 0.98.0 (2026-05-04)
 
 Full Changelog: [v0.97.0...v0.98.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.97.0...v0.98.0)
