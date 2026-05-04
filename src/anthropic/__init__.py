@@ -104,6 +104,7 @@ from .lib.vertex import *
 from .lib.bedrock import *
 from .lib.foundry import AnthropicFoundry as AnthropicFoundry, AsyncAnthropicFoundry as AsyncAnthropicFoundry
 from .lib.streaming import *
+from .lib.credentials import *
 
 _setup_logging()
 

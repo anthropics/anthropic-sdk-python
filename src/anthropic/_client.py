@@ -35,6 +35,81 @@ from ._base_client import (
     AsyncAPIClient,
 )
 
+# --- credentials support (hand-written, upstream to Stainless) ---
+from .lib.credentials import (
+    TokenCache,
+    InMemoryConfig,
+    AccessTokenAuth,
+    CredentialsFile,
+    AccessTokenProvider,
+    default_credentials,
+)
+from .lib.credentials._auth import (
+    warn_env_static_shadows_auto_discovery,
+    warn_explicit_static_shadows_credentials,
+)
+from .lib.credentials._constants import _has_auto_discoverable_credentials
+
+
+def _is_base_client(client: object) -> bool:
+    """True only for the base ``Anthropic`` / ``AsyncAnthropic`` classes, not subclasses.
+
+    Subclasses (``AnthropicAWS``, ``AnthropicFoundry``) have their own auth paths
+    and must not run the credential chain or forward ``credentials`` through their
+    ``__init__`` (which doesn't accept the kwarg).
+    """
+    return type(client) in (Anthropic, AsyncAnthropic)
+
+
+def _close_credentials(credentials: object) -> None:
+    """Release any resources owned by a credential provider, if it exposes ``close()``."""
+    close = getattr(credentials, "close", None)
+    if close is not None:
+        close()
+
+
+def _bind_credentials_base_url(credentials: AccessTokenProvider | None, base_url: str) -> None:
+    """If the credential provider supports ``bind_base_url``, pass it the
+    client's resolved ``base_url`` so the token exchange and API calls hit
+    the same deployment without the caller passing the URL twice.
+
+    Providers without the hook (plain callables, custom impls) are left
+    untouched and MUST resolve their own token-exchange ``base_url`` — the
+    client does not second-guess them.
+    """
+    bind = getattr(credentials, "bind_base_url", None)
+    if callable(bind):
+        bind(base_url)
+
+
+def _warn_explicit_shadow(*, api_key: str | None, auth_token: str | None, credentials: object) -> None:
+    """Warn when an explicit ``api_key=`` / ``auth_token=`` argument shadows
+    an explicit ``credentials=`` provider. Call *after* any copy-inheritance
+    merging so the params reflect the resolved values."""
+    if credentials is None:
+        return
+    if api_key is not None:
+        warn_explicit_static_shadows_credentials("api_key")
+    if auth_token is not None:
+        warn_explicit_static_shadows_credentials("auth_token")
+
+
+def _warn_env_shadow(*, api_key: str | None, auth_token: str | None) -> None:
+    """Warn when an ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` from the
+    environment is set alongside signals that would normally drive profile /
+    federation auto-discovery (``ANTHROPIC_PROFILE``, a ``configs/`` directory,
+    or the workload-identity env trio). Per the credential-precedence spec,
+    the static credential wins and auto-discovery is silently skipped."""
+    if not _has_auto_discoverable_credentials():
+        return
+    if api_key is not None and os.environ.get("ANTHROPIC_API_KEY"):
+        warn_env_static_shadows_auto_discovery("ANTHROPIC_API_KEY")
+    if auth_token is not None and os.environ.get("ANTHROPIC_AUTH_TOKEN"):
+        warn_env_static_shadows_auto_discovery("ANTHROPIC_AUTH_TOKEN")
+
+
+# --- end credentials support ---
+
 if TYPE_CHECKING:
     from .resources import beta, models, messages, completions
     from .resources.models import Models, AsyncModels
@@ -58,6 +133,9 @@ class Anthropic(SyncAPIClient):
     # client options
     api_key: str | None
     auth_token: str | None
+    credentials: AccessTokenProvider | None
+    _token_cache: TokenCache | None
+    _custom_auth: AccessTokenAuth | None
 
     # constants
     HUMAN_PROMPT = _constants.HUMAN_PROMPT
@@ -68,6 +146,9 @@ class Anthropic(SyncAPIClient):
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
+        credentials: AccessTokenProvider | None = None,
+        config: Mapping[str, Any] | None = None,
+        profile: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -86,23 +167,58 @@ class Anthropic(SyncAPIClient):
         # outlining your use-case to help us decide if it should be
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
+        _token_cache: TokenCache | None | NotGiven = not_given,
     ) -> None:
         """Construct a new synchronous Anthropic client instance.
 
-        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
-        - `api_key` from `ANTHROPIC_API_KEY`
-        - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
-        """
-        if api_key is None:
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-        self.api_key = api_key
+        Credentials are resolved in the following order (first match wins):
 
-        if auth_token is None:
+        1. Explicit constructor arguments — ``api_key=``, ``auth_token=``,
+           ``credentials=``, ``config=``, or ``profile=``. When any of these
+           is passed, environment variables are not consulted for credentials.
+        2. ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` environment
+           variables.
+        3. ``ANTHROPIC_PROFILE`` environment variable — loads the named
+           profile from ``<config_dir>/configs/<profile>.json``.
+        4. Workload identity federation environment variables —
+           ``ANTHROPIC_IDENTITY_TOKEN[_FILE]`` +
+           ``ANTHROPIC_FEDERATION_RULE_ID`` + ``ANTHROPIC_ORGANIZATION_ID``.
+        5. The active profile on disk — the profile named by
+           ``<config_dir>/active_config``, or ``default``.
+
+        ``credentials=``, ``config=``, and ``profile=`` are mutually exclusive.
+
+        If a static credential is supplied alongside a credentials provider
+        (``credentials=`` / ``config=`` / ``profile=``), or if
+        ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` is set alongside a
+        profile or federation configuration, the static credential takes
+        precedence and a one-shot warning is logged on the ``anthropic``
+        logger.
+        """
+        # --- credentials support (hand-written, upstream to Stainless) ---
+        # Explicit ctor args are total. If the caller passed any explicit
+        # credential argument, do NOT read credential env vars.
+        has_explicit_credential = (
+            api_key is not None
+            or auth_token is not None
+            or credentials is not None
+            or config is not None
+            or profile is not None
+        )
+        if not has_explicit_credential:
+            api_key = os.environ.get("ANTHROPIC_API_KEY")
             auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+        self.api_key = api_key
         self.auth_token = auth_token
+        # --- end credentials support ---
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BASE_URL")
+        # base_url precedence: kwarg > ANTHROPIC_BASE_URL > profile config
+        # (filled in below from default_credentials) > hardcoded default.
+        # Track whether the user supplied one so the profile only fills the
+        # gap, never overrides.
+        base_url_is_explicit = base_url is not None
         if base_url is None:
             base_url = f"https://api.anthropic.com"
 
@@ -114,6 +230,44 @@ class Anthropic(SyncAPIClient):
                 if colon >= 0:
                     parsed[line[:colon].strip()] = line[colon + 1 :].strip()
             default_headers = {**parsed, **(default_headers if is_mapping_t(default_headers) else {})}
+
+        # --- credentials support (hand-written, upstream to Stainless) ---
+        credential_headers: dict[str, str] = {}
+        if config is not None:
+            if credentials is not None or profile is not None:
+                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
+            in_memory = InMemoryConfig(dict(config))
+            credentials = in_memory
+            credential_headers = in_memory.extra_headers()
+            if not base_url_is_explicit and in_memory.resolved_base_url:
+                base_url = in_memory.resolved_base_url
+        elif profile is not None:
+            if credentials is not None:
+                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
+            creds_file = CredentialsFile(profile=profile)
+            credentials = creds_file
+            credential_headers = creds_file.extra_headers()
+            if not base_url_is_explicit and creds_file.resolved_base_url:
+                base_url = creds_file.resolved_base_url
+        if credentials is None and api_key is None and auth_token is None and _is_base_client(self):
+            result = default_credentials(base_url=str(base_url) if base_url else "https://api.anthropic.com")
+            if result is not None:
+                credentials = result.provider
+                credential_headers = result.extra_headers
+                if not base_url_is_explicit and result.base_url:
+                    base_url = result.base_url
+        _bind_credentials_base_url(credentials, str(base_url))
+        self.credentials = credentials
+        _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
+        _warn_env_shadow(api_key=api_key, auth_token=auth_token)
+        if not isinstance(_token_cache, NotGiven):
+            self._token_cache = _token_cache
+        else:
+            self._token_cache = TokenCache(credentials) if credentials is not None else None
+        self._custom_auth = AccessTokenAuth(self._token_cache) if self._token_cache is not None else None
+        if credential_headers:
+            default_headers = {**credential_headers, **(default_headers or {})}
+        # --- end credentials support ---
 
         super().__init__(
             version=__version__,
@@ -179,6 +333,12 @@ class Anthropic(SyncAPIClient):
 
     @property
     def _bearer_auth(self) -> dict[str, str]:
+        # Symmetric with _api_key_auth: always emit if self.auth_token is set,
+        # regardless of whether a TokenCache is also installed. When both a
+        # static auth_token and a credentials provider are present, the static
+        # credential wins per the documented precedence — AccessTokenAuth
+        # short-circuits on a pre-set Authorization header and no token
+        # exchange runs.
         auth_token = self.auth_token
         if auth_token is None:
             return {}
@@ -196,6 +356,16 @@ class Anthropic(SyncAPIClient):
 
     @override
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
+        # --- credentials support (hand-written, upstream to Stainless) ---
+        # The token cache *may* inject an Authorization header per-request via
+        # custom_auth, so validation that checks only default_headers would
+        # false-negative when credentials are the only auth source. Defer to
+        # the static-header check below — if a static api_key or auth_token
+        # is set it will already be on default_headers; otherwise custom_auth
+        # will fill in Authorization at request time.
+        if self._token_cache is not None and not headers.get("X-Api-Key") and not headers.get("Authorization"):
+            return
+        # --- end credentials support ---
         if headers.get("Authorization") or headers.get("X-Api-Key"):
             # valid
             return
@@ -207,14 +377,45 @@ class Anthropic(SyncAPIClient):
             return
 
         raise TypeError(
-            '"Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"'
+            '"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"'
         )
+
+    # --- credentials support (hand-written, upstream to Stainless) ---
+    @property
+    @override
+    def custom_auth(self) -> httpx.Auth | None:
+        return self._custom_auth
+
+    @override
+    def _should_retry(self, response: httpx.Response) -> bool:
+        # On 401 with a token cache, invalidate and retry once so the request
+        # is re-sent with a freshly minted Bearer token. The base-client retry
+        # loop rebuilds the request from FinalRequestOptions on each attempt,
+        # so body replay is handled for us. The single-shot guard relies on
+        # ``x-stainless-retry-count`` being ``"0"`` on the first attempt
+        # (see _base_client.py); if a caller Omit()s that header the guard
+        # silently no-ops, which fails safe (no retry, surface the 401).
+        if response.status_code == 401 and self._token_cache is not None:
+            self._token_cache.invalidate()
+            if response.request.headers.get("x-stainless-retry-count") == "0":
+                return True
+        return super()._should_retry(response)
+
+    @override
+    def close(self) -> None:
+        super().close()
+        _close_credentials(self.credentials)
+
+    # --- end credentials support ---
 
     def copy(
         self,
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
+        credentials: AccessTokenProvider | None | NotGiven = not_given,
+        config: Mapping[str, Any] | None = None,
+        profile: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
@@ -247,6 +448,25 @@ class Anthropic(SyncAPIClient):
             params = set_default_query
 
         http_client = http_client or self._client
+        # --- credentials support (hand-written, upstream to Stainless) ---
+        if config is not None:
+            if not isinstance(credentials, NotGiven) or profile is not None:
+                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
+            _extra_kwargs = {"config": config, **_extra_kwargs}
+        elif profile is not None:
+            if not isinstance(credentials, NotGiven):
+                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
+            _extra_kwargs = {"profile": profile, **_extra_kwargs}
+        else:
+            resolved_credentials = self.credentials if isinstance(credentials, NotGiven) else credentials
+            if resolved_credentials is not None and _is_base_client(self):
+                _extra_kwargs = {"credentials": resolved_credentials, **_extra_kwargs}
+                # Reuse the parent's TokenCache when the credentials provider is
+                # unchanged so with_options() copies don't trigger an independent
+                # token exchange. A new credentials= gets a fresh cache.
+                if isinstance(credentials, NotGiven):
+                    _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
+        # --- end credentials support ---
         return self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
@@ -307,6 +527,9 @@ class AsyncAnthropic(AsyncAPIClient):
     # client options
     api_key: str | None
     auth_token: str | None
+    credentials: AccessTokenProvider | None
+    _token_cache: TokenCache | None
+    _custom_auth: AccessTokenAuth | None
 
     # constants
     HUMAN_PROMPT = _constants.HUMAN_PROMPT
@@ -317,6 +540,9 @@ class AsyncAnthropic(AsyncAPIClient):
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
+        credentials: AccessTokenProvider | None = None,
+        config: Mapping[str, Any] | None = None,
+        profile: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -335,23 +561,58 @@ class AsyncAnthropic(AsyncAPIClient):
         # outlining your use-case to help us decide if it should be
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
+        _token_cache: TokenCache | None | NotGiven = not_given,
     ) -> None:
         """Construct a new async AsyncAnthropic client instance.
 
-        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
-        - `api_key` from `ANTHROPIC_API_KEY`
-        - `auth_token` from `ANTHROPIC_AUTH_TOKEN`
-        """
-        if api_key is None:
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-        self.api_key = api_key
+        Credentials are resolved in the following order (first match wins):
 
-        if auth_token is None:
+        1. Explicit constructor arguments — ``api_key=``, ``auth_token=``,
+           ``credentials=``, ``config=``, or ``profile=``. When any of these
+           is passed, environment variables are not consulted for credentials.
+        2. ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` environment
+           variables.
+        3. ``ANTHROPIC_PROFILE`` environment variable — loads the named
+           profile from ``<config_dir>/configs/<profile>.json``.
+        4. Workload identity federation environment variables —
+           ``ANTHROPIC_IDENTITY_TOKEN[_FILE]`` +
+           ``ANTHROPIC_FEDERATION_RULE_ID`` + ``ANTHROPIC_ORGANIZATION_ID``.
+        5. The active profile on disk — the profile named by
+           ``<config_dir>/active_config``, or ``default``.
+
+        ``credentials=``, ``config=``, and ``profile=`` are mutually exclusive.
+
+        If a static credential is supplied alongside a credentials provider
+        (``credentials=`` / ``config=`` / ``profile=``), or if
+        ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` is set alongside a
+        profile or federation configuration, the static credential takes
+        precedence and a one-shot warning is logged on the ``anthropic``
+        logger.
+        """
+        # --- credentials support (hand-written, upstream to Stainless) ---
+        # Explicit ctor args are total. If the caller passed any explicit
+        # credential argument, do NOT read credential env vars.
+        has_explicit_credential = (
+            api_key is not None
+            or auth_token is not None
+            or credentials is not None
+            or config is not None
+            or profile is not None
+        )
+        if not has_explicit_credential:
+            api_key = os.environ.get("ANTHROPIC_API_KEY")
             auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+        self.api_key = api_key
         self.auth_token = auth_token
+        # --- end credentials support ---
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BASE_URL")
+        # base_url precedence: kwarg > ANTHROPIC_BASE_URL > profile config
+        # (filled in below from default_credentials) > hardcoded default.
+        # Track whether the user supplied one so the profile only fills the
+        # gap, never overrides.
+        base_url_is_explicit = base_url is not None
         if base_url is None:
             base_url = f"https://api.anthropic.com"
 
@@ -363,6 +624,44 @@ class AsyncAnthropic(AsyncAPIClient):
                 if colon >= 0:
                     parsed[line[:colon].strip()] = line[colon + 1 :].strip()
             default_headers = {**parsed, **(default_headers if is_mapping_t(default_headers) else {})}
+
+        # --- credentials support (hand-written, upstream to Stainless) ---
+        credential_headers: dict[str, str] = {}
+        if config is not None:
+            if credentials is not None or profile is not None:
+                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
+            in_memory = InMemoryConfig(dict(config))
+            credentials = in_memory
+            credential_headers = in_memory.extra_headers()
+            if not base_url_is_explicit and in_memory.resolved_base_url:
+                base_url = in_memory.resolved_base_url
+        elif profile is not None:
+            if credentials is not None:
+                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
+            creds_file = CredentialsFile(profile=profile)
+            credentials = creds_file
+            credential_headers = creds_file.extra_headers()
+            if not base_url_is_explicit and creds_file.resolved_base_url:
+                base_url = creds_file.resolved_base_url
+        if credentials is None and api_key is None and auth_token is None and _is_base_client(self):
+            result = default_credentials(base_url=str(base_url) if base_url else "https://api.anthropic.com")
+            if result is not None:
+                credentials = result.provider
+                credential_headers = result.extra_headers
+                if not base_url_is_explicit and result.base_url:
+                    base_url = result.base_url
+        _bind_credentials_base_url(credentials, str(base_url))
+        self.credentials = credentials
+        _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
+        _warn_env_shadow(api_key=api_key, auth_token=auth_token)
+        if not isinstance(_token_cache, NotGiven):
+            self._token_cache = _token_cache
+        else:
+            self._token_cache = TokenCache(credentials) if credentials is not None else None
+        self._custom_auth = AccessTokenAuth(self._token_cache) if self._token_cache is not None else None
+        if credential_headers:
+            default_headers = {**credential_headers, **(default_headers or {})}
+        # --- end credentials support ---
 
         super().__init__(
             version=__version__,
@@ -428,6 +727,12 @@ class AsyncAnthropic(AsyncAPIClient):
 
     @property
     def _bearer_auth(self) -> dict[str, str]:
+        # Symmetric with _api_key_auth: always emit if self.auth_token is set,
+        # regardless of whether a TokenCache is also installed. When both a
+        # static auth_token and a credentials provider are present, the static
+        # credential wins per the documented precedence — AccessTokenAuth
+        # short-circuits on a pre-set Authorization header and no token
+        # exchange runs.
         auth_token = self.auth_token
         if auth_token is None:
             return {}
@@ -445,6 +750,10 @@ class AsyncAnthropic(AsyncAPIClient):
 
     @override
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
+        # --- credentials support (hand-written, upstream to Stainless) ---
+        if self._token_cache is not None and not headers.get("X-Api-Key") and not headers.get("Authorization"):
+            return
+        # --- end credentials support ---
         if headers.get("Authorization") or headers.get("X-Api-Key"):
             # valid
             return
@@ -456,14 +765,47 @@ class AsyncAnthropic(AsyncAPIClient):
             return
 
         raise TypeError(
-            '"Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"'
+            '"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"'
         )
+
+    # --- credentials support (hand-written, upstream to Stainless) ---
+    @property
+    @override
+    def custom_auth(self) -> httpx.Auth | None:
+        return self._custom_auth
+
+    @override
+    def _should_retry(self, response: httpx.Response) -> bool:
+        # On 401 with a token cache, invalidate and retry once so the request
+        # is re-sent with a freshly minted Bearer token. The base-client retry
+        # loop rebuilds the request from FinalRequestOptions on each attempt,
+        # so body replay is handled for us. The single-shot guard relies on
+        # ``x-stainless-retry-count`` being ``"0"`` on the first attempt
+        # (see _base_client.py); if a caller Omit()s that header the guard
+        # silently no-ops, which fails safe (no retry, surface the 401).
+        if response.status_code == 401 and self._token_cache is not None:
+            self._token_cache.invalidate()
+            if response.request.headers.get("x-stainless-retry-count") == "0":
+                return True
+        return super()._should_retry(response)
+
+    @override
+    async def close(self) -> None:
+        await super().close()
+        # Credential providers expose a sync close() even from the async client —
+        # they own a sync httpx.Client for the token-exchange POST.
+        _close_credentials(self.credentials)
+
+    # --- end credentials support ---
 
     def copy(
         self,
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
+        credentials: AccessTokenProvider | None | NotGiven = not_given,
+        config: Mapping[str, Any] | None = None,
+        profile: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
@@ -496,6 +838,25 @@ class AsyncAnthropic(AsyncAPIClient):
             params = set_default_query
 
         http_client = http_client or self._client
+        # --- credentials support (hand-written, upstream to Stainless) ---
+        if config is not None:
+            if not isinstance(credentials, NotGiven) or profile is not None:
+                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
+            _extra_kwargs = {"config": config, **_extra_kwargs}
+        elif profile is not None:
+            if not isinstance(credentials, NotGiven):
+                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
+            _extra_kwargs = {"profile": profile, **_extra_kwargs}
+        else:
+            resolved_credentials = self.credentials if isinstance(credentials, NotGiven) else credentials
+            if resolved_credentials is not None and _is_base_client(self):
+                _extra_kwargs = {"credentials": resolved_credentials, **_extra_kwargs}
+                # Reuse the parent's TokenCache when the credentials provider is
+                # unchanged so with_options() copies don't trigger an independent
+                # token exchange. A new credentials= gets a fresh cache.
+                if isinstance(credentials, NotGiven):
+                    _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
+        # --- end credentials support ---
         return self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,

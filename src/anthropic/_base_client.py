@@ -84,6 +84,7 @@ from ._constants import (
 )
 from ._streaming import Stream, SSEDecoder, AsyncStream, SSEBytesDecoder
 from ._exceptions import (
+    AnthropicError,
     APIStatusError,
     APITimeoutError,
     APIConnectionError,
@@ -1093,6 +1094,10 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
                 log.debug("Raising timeout error")
                 raise APITimeoutError(request=request) from err
             except Exception as err:
+                if isinstance(err, AnthropicError):
+                    # SDK-originated errors already carry their own type; don't wrap or retry.
+                    raise
+
                 log.debug("Encountered Exception", exc_info=True)
 
                 if remaining_retries > 0:
@@ -1733,6 +1738,10 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
                 log.debug("Raising timeout error")
                 raise APITimeoutError(request=request) from err
             except Exception as err:
+                if isinstance(err, AnthropicError):
+                    # SDK-originated errors already carry their own type; don't wrap or retry.
+                    raise
+
                 log.debug("Encountered Exception", exc_info=True)
 
                 if remaining_retries > 0:
