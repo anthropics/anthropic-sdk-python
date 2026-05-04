@@ -30,7 +30,7 @@ from anthropic import (
 #
 # For Kubernetes / GitHub Actions / etc., set these env vars on the workload:
 #   ANTHROPIC_IDENTITY_TOKEN_FILE=/var/run/secrets/kubernetes.io/serviceaccount/token
-#   ANTHROPIC_FEDERATION_RULE=fdrl_01...
+#   ANTHROPIC_FEDERATION_RULE_ID=fdrl_01...
 #   ANTHROPIC_ORGANIZATION_ID=00000000-0000-0000-0000-000000000000
 #   ANTHROPIC_SERVICE_ACCOUNT_ID=svac_01...   (optional)
 #
