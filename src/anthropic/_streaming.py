@@ -90,6 +90,20 @@ class Stream(Generic[_T]):
                     or sse.event == "session.deleted"
                     or sse.event == "span.model_request_start"
                     or sse.event == "span.model_request_end"
+                    or sse.event == "span.outcome_evaluation_start"
+                    or sse.event == "span.outcome_evaluation_ongoing"
+                    or sse.event == "span.outcome_evaluation_end"
+                    or sse.event == "user.define_outcome"
+                    or sse.event == "agent.thread_message_received"
+                    or sse.event == "agent.thread_message_sent"
+                    or sse.event == "agent.session_thread_message_received"
+                    or sse.event == "agent.session_thread_message_sent"
+                    or sse.event == "session.thread_created"
+                    or sse.event == "session.thread_status_created"
+                    or sse.event == "session.thread_status_running"
+                    or sse.event == "session.thread_status_idle"
+                    or sse.event == "session.thread_status_rescheduled"
+                    or sse.event == "session.thread_status_terminated"
                 ):
                     yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 
@@ -206,6 +220,20 @@ class AsyncStream(Generic[_T]):
                     or sse.event == "session.deleted"
                     or sse.event == "span.model_request_start"
                     or sse.event == "span.model_request_end"
+                    or sse.event == "span.outcome_evaluation_start"
+                    or sse.event == "span.outcome_evaluation_ongoing"
+                    or sse.event == "span.outcome_evaluation_end"
+                    or sse.event == "user.define_outcome"
+                    or sse.event == "agent.thread_message_received"
+                    or sse.event == "agent.thread_message_sent"
+                    or sse.event == "agent.session_thread_message_received"
+                    or sse.event == "agent.session_thread_message_sent"
+                    or sse.event == "session.thread_created"
+                    or sse.event == "session.thread_status_created"
+                    or sse.event == "session.thread_status_running"
+                    or sse.event == "session.thread_status_idle"
+                    or sse.event == "session.thread_status_rescheduled"
+                    or sse.event == "session.thread_status_terminated"
                 ):
                     yield process_data(data=sse.json(), cast_to=cast_to, response=response)
 

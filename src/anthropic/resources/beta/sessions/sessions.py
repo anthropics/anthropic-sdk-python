@@ -34,6 +34,14 @@ from ...._response import to_streamed_response_wrapper, async_to_streamed_respon
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ....types.beta import session_list_params, session_create_params, session_update_params
 from ...._base_client import AsyncPaginator, make_request_options
+from .threads.threads import (
+    Threads,
+    AsyncThreads,
+    ThreadsWithRawResponse,
+    AsyncThreadsWithRawResponse,
+    ThreadsWithStreamingResponse,
+    AsyncThreadsWithStreamingResponse,
+)
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_managed_agents_session import BetaManagedAgentsSession
 from ....types.beta.beta_managed_agents_deleted_session import BetaManagedAgentsDeletedSession
@@ -49,6 +57,10 @@ class Sessions(SyncAPIResource):
     @cached_property
     def resources(self) -> Resources:
         return Resources(self._client)
+
+    @cached_property
+    def threads(self) -> Threads:
+        return Threads(self._client)
 
     @cached_property
     def with_raw_response(self) -> SessionsWithRawResponse:
@@ -273,6 +285,7 @@ class Sessions(SyncAPIResource):
         memory_store_id: str | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
         page: str | Omit = omit,
+        statuses: List[Literal["rescheduling", "running", "idle", "terminated"]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -308,6 +321,9 @@ class Sessions(SyncAPIResource):
               first).
 
           page: Opaque pagination cursor from a previous response's next_page.
+
+          statuses: Filter by session status. Repeat the parameter to match any of multiple
+              statuses.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -351,6 +367,7 @@ class Sessions(SyncAPIResource):
                         "memory_store_id": memory_store_id,
                         "order": order,
                         "page": page,
+                        "statuses": statuses,
                     },
                     session_list_params.SessionListParams,
                 ),
@@ -461,6 +478,10 @@ class AsyncSessions(AsyncAPIResource):
     @cached_property
     def resources(self) -> AsyncResources:
         return AsyncResources(self._client)
+
+    @cached_property
+    def threads(self) -> AsyncThreads:
+        return AsyncThreads(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncSessionsWithRawResponse:
@@ -685,6 +706,7 @@ class AsyncSessions(AsyncAPIResource):
         memory_store_id: str | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
         page: str | Omit = omit,
+        statuses: List[Literal["rescheduling", "running", "idle", "terminated"]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -720,6 +742,9 @@ class AsyncSessions(AsyncAPIResource):
               first).
 
           page: Opaque pagination cursor from a previous response's next_page.
+
+          statuses: Filter by session status. Repeat the parameter to match any of multiple
+              statuses.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -763,6 +788,7 @@ class AsyncSessions(AsyncAPIResource):
                         "memory_store_id": memory_store_id,
                         "order": order,
                         "page": page,
+                        "statuses": statuses,
                     },
                     session_list_params.SessionListParams,
                 ),
@@ -896,6 +922,10 @@ class SessionsWithRawResponse:
     def resources(self) -> ResourcesWithRawResponse:
         return ResourcesWithRawResponse(self._sessions.resources)
 
+    @cached_property
+    def threads(self) -> ThreadsWithRawResponse:
+        return ThreadsWithRawResponse(self._sessions.threads)
+
 
 class AsyncSessionsWithRawResponse:
     def __init__(self, sessions: AsyncSessions) -> None:
@@ -927,6 +957,10 @@ class AsyncSessionsWithRawResponse:
     @cached_property
     def resources(self) -> AsyncResourcesWithRawResponse:
         return AsyncResourcesWithRawResponse(self._sessions.resources)
+
+    @cached_property
+    def threads(self) -> AsyncThreadsWithRawResponse:
+        return AsyncThreadsWithRawResponse(self._sessions.threads)
 
 
 class SessionsWithStreamingResponse:
@@ -960,6 +994,10 @@ class SessionsWithStreamingResponse:
     def resources(self) -> ResourcesWithStreamingResponse:
         return ResourcesWithStreamingResponse(self._sessions.resources)
 
+    @cached_property
+    def threads(self) -> ThreadsWithStreamingResponse:
+        return ThreadsWithStreamingResponse(self._sessions.threads)
+
 
 class AsyncSessionsWithStreamingResponse:
     def __init__(self, sessions: AsyncSessions) -> None:
@@ -991,3 +1029,7 @@ class AsyncSessionsWithStreamingResponse:
     @cached_property
     def resources(self) -> AsyncResourcesWithStreamingResponse:
         return AsyncResourcesWithStreamingResponse(self._sessions.resources)
+
+    @cached_property
+    def threads(self) -> AsyncThreadsWithStreamingResponse:
+        return AsyncThreadsWithStreamingResponse(self._sessions.threads)

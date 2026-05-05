@@ -191,6 +191,7 @@ class TestSessions:
             memory_store_id="memory_store_id",
             order="asc",
             page="page",
+            statuses=["rescheduling"],
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSession], session, path=["response"])
@@ -484,6 +485,7 @@ class TestAsyncSessions:
             memory_store_id="memory_store_id",
             order="asc",
             page="page",
+            statuses=["rescheduling"],
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSession], session, path=["response"])

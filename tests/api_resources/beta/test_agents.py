@@ -43,6 +43,10 @@ class TestAgents:
                 }
             ],
             metadata={"foo": "bar"},
+            multiagent={
+                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
+                "type": "coordinator",
+            },
             skills=[
                 {
                     "skill_id": "xlsx",
@@ -174,6 +178,10 @@ class TestAgents:
             model={
                 "id": "claude-opus-4-6",
                 "speed": "standard",
+            },
+            multiagent={
+                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
+                "type": "coordinator",
             },
             name="name",
             skills=[
@@ -353,6 +361,10 @@ class TestAsyncAgents:
                 }
             ],
             metadata={"foo": "bar"},
+            multiagent={
+                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
+                "type": "coordinator",
+            },
             skills=[
                 {
                     "skill_id": "xlsx",
@@ -484,6 +496,10 @@ class TestAsyncAgents:
             model={
                 "id": "claude-opus-4-6",
                 "speed": "standard",
+            },
+            multiagent={
+                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
+                "type": "coordinator",
             },
             name="name",
             skills=[

@@ -54,6 +54,10 @@ class APIResponseValidationError(APIError):
         self.status_code = response.status_code
 
 
+class APIWebhookValidationError(APIError):
+    pass
+
+
 class APIStatusError(APIError):
     """Raised when an API response has a status code of 4xx or 5xx."""
 

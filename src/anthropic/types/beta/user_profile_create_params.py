@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Dict, List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import Literal, Annotated, TypedDict
 
 from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
@@ -23,6 +23,20 @@ class UserProfileCreateParams(TypedDict, total=False):
 
     Maximum 16 keys, with keys up to 64 characters and values up to 512 characters.
     Values must be non-empty strings.
+    """
+
+    name: Optional[str]
+    """Display name of the entity this profile represents.
+
+    Required when relationship is `resold` (the resold-to company's name); optional
+    otherwise. Maximum 255 characters.
+    """
+
+    relationship: Literal["external", "resold", "internal"]
+    """
+    How the entity behind a user profile relates to the platform that owns the API
+    key. `external`: an individual end-user of the platform. `resold`: a company the
+    platform resells Claude access to. `internal`: the platform's own usage.
     """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
