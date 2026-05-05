@@ -9,6 +9,7 @@ from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_model_param import BetaManagedAgentsModelParam
 from .beta_managed_agents_skill_params import BetaManagedAgentsSkillParams
+from .beta_managed_agents_multiagent_params import BetaManagedAgentsMultiagentParams
 from .beta_managed_agents_custom_tool_params import BetaManagedAgentsCustomToolParams
 from .beta_managed_agents_mcp_toolset_params import BetaManagedAgentsMCPToolsetParams
 from .beta_managed_agents_model_config_params import BetaManagedAgentsModelConfigParams
@@ -54,6 +55,12 @@ class AgentUpdateParams(TypedDict, total=False):
     [model string](https://platform.claude.com/docs/en/about-claude/models/overview#latest-models-comparison),
     e.g. `claude-opus-4-6`, or a `model_config` object for additional configuration
     control. Omit to preserve. Cannot be cleared.
+    """
+
+    multiagent: Optional[BetaManagedAgentsMultiagentParams]
+    """
+    A coordinator topology: the session's primary thread orchestrates work by
+    spawning session threads, each running an agent drawn from the `agents` roster.
     """
 
     name: str

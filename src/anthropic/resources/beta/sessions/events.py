@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any, List, Iterable, cast
+from typing import Any, List, Union, Iterable, cast
+from datetime import datetime
 from itertools import chain
 from typing_extensions import Literal
 
 import httpx
 
 from .... import _legacy_response
-from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
+from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
@@ -51,9 +52,14 @@ class Events(SyncAPIResource):
         self,
         session_id: str,
         *,
+        created_at_gt: Union[str, datetime] | Omit = omit,
+        created_at_gte: Union[str, datetime] | Omit = omit,
+        created_at_lt: Union[str, datetime] | Omit = omit,
+        created_at_lte: Union[str, datetime] | Omit = omit,
         limit: int | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
         page: str | Omit = omit,
+        types: SequenceNotStr[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -66,12 +72,23 @@ class Events(SyncAPIResource):
         List Events
 
         Args:
+          created_at_gt: Return events created after this time (exclusive).
+
+          created_at_gte: Return events created at or after this time (inclusive).
+
+          created_at_lt: Return events created before this time (exclusive).
+
+          created_at_lte: Return events created at or before this time (inclusive).
+
           limit: Query parameter for limit
 
           order: Sort direction for results, ordered by created_at. Defaults to asc
               (chronological).
 
           page: Opaque pagination cursor from a previous response's next_page.
+
+          types: Filter by event type. Values match the `type` field on returned events (for
+              example, `user.message` or `agent.tool_use`). Omit to return all event types.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -106,9 +123,14 @@ class Events(SyncAPIResource):
                 timeout=timeout,
                 query=maybe_transform(
                     {
+                        "created_at_gt": created_at_gt,
+                        "created_at_gte": created_at_gte,
+                        "created_at_lt": created_at_lt,
+                        "created_at_lte": created_at_lte,
                         "limit": limit,
                         "order": order,
                         "page": page,
+                        "types": types,
                     },
                     event_list_params.EventListParams,
                 ),
@@ -245,9 +267,14 @@ class AsyncEvents(AsyncAPIResource):
         self,
         session_id: str,
         *,
+        created_at_gt: Union[str, datetime] | Omit = omit,
+        created_at_gte: Union[str, datetime] | Omit = omit,
+        created_at_lt: Union[str, datetime] | Omit = omit,
+        created_at_lte: Union[str, datetime] | Omit = omit,
         limit: int | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
         page: str | Omit = omit,
+        types: SequenceNotStr[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -260,12 +287,23 @@ class AsyncEvents(AsyncAPIResource):
         List Events
 
         Args:
+          created_at_gt: Return events created after this time (exclusive).
+
+          created_at_gte: Return events created at or after this time (inclusive).
+
+          created_at_lt: Return events created before this time (exclusive).
+
+          created_at_lte: Return events created at or before this time (inclusive).
+
           limit: Query parameter for limit
 
           order: Sort direction for results, ordered by created_at. Defaults to asc
               (chronological).
 
           page: Opaque pagination cursor from a previous response's next_page.
+
+          types: Filter by event type. Values match the `type` field on returned events (for
+              example, `user.message` or `agent.tool_use`). Omit to return all event types.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -300,9 +338,14 @@ class AsyncEvents(AsyncAPIResource):
                 timeout=timeout,
                 query=maybe_transform(
                     {
+                        "created_at_gt": created_at_gt,
+                        "created_at_gte": created_at_gte,
+                        "created_at_lt": created_at_lt,
+                        "created_at_lte": created_at_lte,
                         "limit": limit,
                         "order": order,
                         "page": page,
+                        "types": types,
                     },
                     event_list_params.EventListParams,
                 ),

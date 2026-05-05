@@ -52,5 +52,11 @@ class SessionListParams(TypedDict, total=False):
     page: str
     """Opaque pagination cursor from a previous response's next_page."""
 
+    statuses: List[Literal["rescheduling", "running", "idle", "terminated"]]
+    """Filter by session status.
+
+    Repeat the parameter to match any of multiple statuses.
+    """
+
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""

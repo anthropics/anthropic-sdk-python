@@ -9,6 +9,7 @@ from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_model_param import BetaManagedAgentsModelParam
 from .beta_managed_agents_skill_params import BetaManagedAgentsSkillParams
+from .beta_managed_agents_multiagent_params import BetaManagedAgentsMultiagentParams
 from .beta_managed_agents_custom_tool_params import BetaManagedAgentsCustomToolParams
 from .beta_managed_agents_mcp_toolset_params import BetaManagedAgentsMCPToolsetParams
 from .beta_managed_agents_model_config_params import BetaManagedAgentsModelConfigParams
@@ -44,6 +45,12 @@ class AgentCreateParams(TypedDict, total=False):
     """Arbitrary key-value metadata.
 
     Maximum 16 pairs, keys up to 64 chars, values up to 512 chars.
+    """
+
+    multiagent: Optional[BetaManagedAgentsMultiagentParams]
+    """
+    A coordinator topology: the session's primary thread orchestrates work by
+    spawning session threads, each running an agent drawn from the `agents` roster.
     """
 
     skills: Iterable[BetaManagedAgentsSkillParams]

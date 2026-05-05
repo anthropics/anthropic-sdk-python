@@ -9,6 +9,7 @@ from .beta_managed_agents_session_agent import BetaManagedAgentsSessionAgent
 from .beta_managed_agents_session_stats import BetaManagedAgentsSessionStats
 from .beta_managed_agents_session_usage import BetaManagedAgentsSessionUsage
 from .sessions.beta_managed_agents_session_resource import BetaManagedAgentsSessionResource
+from .beta_managed_agents_outcome_evaluation_resource import BetaManagedAgentsOutcomeEvaluationResource
 
 __all__ = ["BetaManagedAgentsSession"]
 
@@ -33,6 +34,12 @@ class BetaManagedAgentsSession(BaseModel):
     environment_id: str
 
     metadata: Dict[str, str]
+
+    outcome_evaluations: List[BetaManagedAgentsOutcomeEvaluationResource]
+    """Per-outcome evaluation state.
+
+    One entry per define_outcome event sent to the session.
+    """
 
     resources: List[BetaManagedAgentsSessionResource]
 

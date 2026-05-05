@@ -133,6 +133,7 @@ class Anthropic(SyncAPIClient):
     # client options
     api_key: str | None
     auth_token: str | None
+    webhook_key: str | None
     credentials: AccessTokenProvider | None
     _token_cache: TokenCache | None
     _custom_auth: AccessTokenAuth | None
@@ -149,6 +150,7 @@ class Anthropic(SyncAPIClient):
         credentials: AccessTokenProvider | None = None,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
+        webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -170,7 +172,7 @@ class Anthropic(SyncAPIClient):
         _token_cache: TokenCache | None | NotGiven = not_given,
     ) -> None:
         """Construct a new synchronous Anthropic client instance.
-
+        
         Credentials are resolved in the following order (first match wins):
 
         1. Explicit constructor arguments — ``api_key=``, ``auth_token=``,
@@ -211,6 +213,10 @@ class Anthropic(SyncAPIClient):
         self.api_key = api_key
         self.auth_token = auth_token
         # --- end credentials support ---
+
+        if webhook_key is None:
+            webhook_key = os.environ.get("ANTHROPIC_WEBHOOK_SIGNING_KEY")
+        self.webhook_key = webhook_key
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BASE_URL")
@@ -317,7 +323,7 @@ class Anthropic(SyncAPIClient):
     @property
     @override
     def qs(self) -> Querystring:
-        return Querystring(array_format="comma")
+        return Querystring(array_format="brackets")
 
     @property
     @override
@@ -416,6 +422,7 @@ class Anthropic(SyncAPIClient):
         credentials: AccessTokenProvider | None | NotGiven = not_given,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
+        webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
@@ -470,6 +477,7 @@ class Anthropic(SyncAPIClient):
         return self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
+            webhook_key=webhook_key or self.webhook_key,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
@@ -527,6 +535,7 @@ class AsyncAnthropic(AsyncAPIClient):
     # client options
     api_key: str | None
     auth_token: str | None
+    webhook_key: str | None
     credentials: AccessTokenProvider | None
     _token_cache: TokenCache | None
     _custom_auth: AccessTokenAuth | None
@@ -543,6 +552,7 @@ class AsyncAnthropic(AsyncAPIClient):
         credentials: AccessTokenProvider | None = None,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
+        webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -605,6 +615,10 @@ class AsyncAnthropic(AsyncAPIClient):
         self.api_key = api_key
         self.auth_token = auth_token
         # --- end credentials support ---
+
+        if webhook_key is None:
+            webhook_key = os.environ.get("ANTHROPIC_WEBHOOK_SIGNING_KEY")
+        self.webhook_key = webhook_key
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BASE_URL")
@@ -711,7 +725,7 @@ class AsyncAnthropic(AsyncAPIClient):
     @property
     @override
     def qs(self) -> Querystring:
-        return Querystring(array_format="comma")
+        return Querystring(array_format="brackets")
 
     @property
     @override
@@ -806,6 +820,7 @@ class AsyncAnthropic(AsyncAPIClient):
         credentials: AccessTokenProvider | None | NotGiven = not_given,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
+        webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
@@ -860,6 +875,7 @@ class AsyncAnthropic(AsyncAPIClient):
         return self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
+            webhook_key=webhook_key or self.webhook_key,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
