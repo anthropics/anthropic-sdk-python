@@ -43,6 +43,10 @@ class TestAgents:
                 }
             ],
             metadata={"foo": "bar"},
+            multiagent={
+                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
+                "type": "coordinator",
+            },
             skills=[
                 {
                     "skill_id": "xlsx",
@@ -67,7 +71,7 @@ class TestAgents:
                     },
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -111,7 +115,7 @@ class TestAgents:
         agent = client.beta.agents.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             version=0,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -171,7 +175,14 @@ class TestAgents:
                 }
             ],
             metadata={"foo": "string"},
-            model="claude-opus-4-6",
+            model={
+                "id": "claude-opus-4-6",
+                "speed": "standard",
+            },
+            multiagent={
+                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
+                "type": "coordinator",
+            },
             name="name",
             skills=[
                 {
@@ -197,7 +208,7 @@ class TestAgents:
                     },
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -250,7 +261,7 @@ class TestAgents:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsAgent], agent, path=["response"])
 
@@ -287,7 +298,7 @@ class TestAgents:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         agent = client.beta.agents.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -350,6 +361,10 @@ class TestAsyncAgents:
                 }
             ],
             metadata={"foo": "bar"},
+            multiagent={
+                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
+                "type": "coordinator",
+            },
             skills=[
                 {
                     "skill_id": "xlsx",
@@ -374,7 +389,7 @@ class TestAsyncAgents:
                     },
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -418,7 +433,7 @@ class TestAsyncAgents:
         agent = await async_client.beta.agents.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             version=0,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -478,7 +493,14 @@ class TestAsyncAgents:
                 }
             ],
             metadata={"foo": "string"},
-            model="claude-opus-4-6",
+            model={
+                "id": "claude-opus-4-6",
+                "speed": "standard",
+            },
+            multiagent={
+                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
+                "type": "coordinator",
+            },
             name="name",
             skills=[
                 {
@@ -504,7 +526,7 @@ class TestAsyncAgents:
                     },
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -557,7 +579,7 @@ class TestAsyncAgents:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsAgent], agent, path=["response"])
 
@@ -594,7 +616,7 @@ class TestAsyncAgents:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         agent = await async_client.beta.agents.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 

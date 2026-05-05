@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Dict, List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import Literal, Annotated, TypedDict
 
 from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
@@ -24,6 +24,19 @@ class UserProfileUpdateParams(TypedDict, total=False):
     Keys provided overwrite existing values. To remove a key, set its value to an
     empty string. Keys not provided are left unchanged. Maximum 16 keys, with keys
     up to 64 characters and values up to 512 characters.
+    """
+
+    name: Optional[str]
+    """If present, replaces the stored name.
+
+    Omit to leave unchanged. Maximum 255 characters.
+    """
+
+    relationship: Optional[Literal["external", "resold", "internal"]]
+    """
+    How the entity behind a user profile relates to the platform that owns the API
+    key. `external`: an individual end-user of the platform. `resold`: a company the
+    platform resells Claude access to. `internal`: the platform's own usage.
     """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]

@@ -49,6 +49,7 @@ class AnthropicAWS(Anthropic):
         _strict_response_validation: bool = False,
         # Passed through to parent but not used for AWS auth
         auth_token: str | None = None,
+        webhook_key: str | None = None,
     ) -> None:
         self._skip_auth = skip_auth
 
@@ -105,6 +106,7 @@ class AnthropicAWS(Anthropic):
         super().__init__(
             api_key=resolved_api_key,
             auth_token=auth_token,
+            webhook_key=webhook_key,
             base_url=base_url,  # type: ignore[arg-type]
             timeout=timeout,
             max_retries=max_retries,
@@ -171,6 +173,7 @@ class AnthropicAWS(Anthropic):
         workspace_id: str | None = None,
         skip_auth: bool | None = None,
         auth_token: str | None = None,
+        webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.Client | None = None,
@@ -187,6 +190,7 @@ class AnthropicAWS(Anthropic):
         return super().copy(
             api_key=api_key or self.api_key,
             auth_token=auth_token,
+            webhook_key=webhook_key,
             base_url=resolved_base_url,
             timeout=timeout,
             http_client=http_client,
@@ -240,6 +244,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         _strict_response_validation: bool = False,
         # Accepted for compatibility with AsyncAnthropic.copy() but not used
         auth_token: str | None = None,
+        webhook_key: str | None = None,
     ) -> None:
         self._skip_auth = skip_auth
 
@@ -296,6 +301,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         super().__init__(
             api_key=resolved_api_key,
             auth_token=auth_token,
+            webhook_key=webhook_key,
             base_url=base_url,  # type: ignore[arg-type]
             timeout=timeout,
             max_retries=max_retries,
@@ -362,6 +368,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         workspace_id: str | None = None,
         skip_auth: bool | None = None,
         auth_token: str | None = None,
+        webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.AsyncClient | None = None,
@@ -378,6 +385,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         return super().copy(
             api_key=api_key or self.api_key,
             auth_token=auth_token,
+            webhook_key=webhook_key,
             base_url=resolved_base_url,
             timeout=timeout,
             http_client=http_client,

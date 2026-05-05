@@ -11,16 +11,17 @@ asttokens==3.0.1
     # via inline-snapshot
 backports-asyncio-runner==1.2.0 ; python_full_version < '3.11'
     # via pytest-asyncio
-boto3-stubs==1.42.44
+boto3-stubs==1.42.69
 botocore-stubs==1.42.41
     # via boto3-stubs
-certifi==2026.1.4
+certifi==2026.2.25
     # via
     #   httpcore
     #   httpx
 colorama==0.4.6
     # via
     #   griffe
+    #   griffecli
     #   pytest
 dirty-equals==0.11
 distro==1.9.0
@@ -36,14 +37,22 @@ execnet==2.1.2
 executing==2.2.1
     # via inline-snapshot
 griffe==1.14.0 ; python_full_version < '3.10'
-griffe==1.15.0 ; python_full_version >= '3.10'
+griffe==2.0.0 ; python_full_version >= '3.10'
+griffecli==2.0.0 ; python_full_version >= '3.10'
+    # via griffe
+griffelib==2.0.0 ; python_full_version >= '3.10'
+    # via
+    #   griffe
+    #   griffecli
 h11==0.16.0
     # via httpcore
+http-snapshot==0.1.8
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
     # via
     #   anthropic
+    #   http-snapshot
     #   respx
 idna==3.11
     # via
@@ -54,7 +63,8 @@ iniconfig==2.1.0 ; python_full_version < '3.10'
     # via pytest
 iniconfig==2.3.0 ; python_full_version >= '3.10'
     # via pytest
-inline-snapshot==0.31.1
+inline-snapshot==0.32.5
+    # via http-snapshot
 jiter==0.13.0
     # via anthropic
 markdown-it-py==3.0.0 ; python_full_version < '3.10'
@@ -68,9 +78,9 @@ mypy-extensions==1.1.0
     # via mypy
 nodeenv==1.10.0
     # via pyright
-packaging==25.0
+packaging==26.0
     # via pytest
-pathspec==1.0.3
+pathspec==1.0.4
     # via mypy
 pluggy==1.6.0
     # via pytest
@@ -99,9 +109,9 @@ pytest-xdist==3.8.0
 python-dateutil==2.9.0.post0 ; python_full_version < '3.10'
     # via time-machine
 respx==0.22.0
-rich==14.2.0
+rich==14.3.3
     # via inline-snapshot
-ruff==0.14.13
+ruff==0.15.6
 six==1.17.0 ; python_full_version < '3.10'
     # via python-dateutil
 sniffio==1.3.1
@@ -113,7 +123,7 @@ tomli==2.4.0 ; python_full_version < '3.11'
     #   inline-snapshot
     #   mypy
     #   pytest
-types-awscrt==0.31.1
+types-awscrt==0.31.3
     # via botocore-stubs
 types-s3transfer==0.16.0
     # via boto3-stubs
@@ -123,6 +133,7 @@ typing-extensions==4.15.0
     #   anyio
     #   boto3-stubs
     #   exceptiongroup
+    #   inline-snapshot
     #   mypy
     #   pydantic
     #   pydantic-core

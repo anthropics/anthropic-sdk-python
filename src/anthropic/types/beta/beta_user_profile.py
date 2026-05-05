@@ -23,6 +23,13 @@ class BetaUserProfile(BaseModel):
     Maximum 16 pairs, keys up to 64 chars, values up to 512 chars.
     """
 
+    relationship: Literal["external", "resold", "internal"]
+    """
+    How the entity behind a user profile relates to the platform that owns the API
+    key. `external`: an individual end-user of the platform. `resold`: a company the
+    platform resells Claude access to. `internal`: the platform's own usage.
+    """
+
     trust_grants: Dict[str, BetaUserProfileTrustGrant]
     """Trust grants for this profile, keyed by grant name.
 
@@ -37,3 +44,9 @@ class BetaUserProfile(BaseModel):
 
     external_id: Optional[str] = None
     """Platform's own identifier for this user. Not enforced unique."""
+
+    name: Optional[str] = None
+    """Display name of the entity this profile represents.
+
+    For `resold` this is the resold-to company's name.
+    """

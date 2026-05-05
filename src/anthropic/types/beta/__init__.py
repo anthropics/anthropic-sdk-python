@@ -49,6 +49,7 @@ from .beta_limited_network import BetaLimitedNetwork as BetaLimitedNetwork
 from .beta_packages_params import BetaPackagesParams as BetaPackagesParams
 from .beta_signature_delta import BetaSignatureDelta as BetaSignatureDelta
 from .beta_web_fetch_block import BetaWebFetchBlock as BetaWebFetchBlock
+from .unwrap_webhook_event import UnwrapWebhookEvent as UnwrapWebhookEvent
 from .agent_retrieve_params import AgentRetrieveParams as AgentRetrieveParams
 from .beta_compaction_block import BetaCompactionBlock as BetaCompactionBlock
 from .beta_container_params import BetaContainerParams as BetaContainerParams
@@ -72,6 +73,7 @@ from .beta_capability_support import BetaCapabilitySupport as BetaCapabilitySupp
 from .beta_mcp_tool_use_block import BetaMCPToolUseBlock as BetaMCPToolUseBlock
 from .beta_model_capabilities import BetaModelCapabilities as BetaModelCapabilities
 from .beta_server_tool_caller import BetaServerToolCaller as BetaServerToolCaller
+from .beta_webhook_event_data import BetaWebhookEventData as BetaWebhookEventData
 from .environment_list_params import EnvironmentListParams as EnvironmentListParams
 from .skill_retrieve_response import SkillRetrieveResponse as SkillRetrieveResponse
 from .beta_cloud_config_params import BetaCloudConfigParams as BetaCloudConfigParams
@@ -146,6 +148,7 @@ from .beta_user_profile_trust_grant import BetaUserProfileTrustGrant as BetaUser
 from .beta_advisor_tool_result_block import BetaAdvisorToolResultBlock as BetaAdvisorToolResultBlock
 from .beta_advisor_tool_result_error import BetaAdvisorToolResultError as BetaAdvisorToolResultError
 from .beta_base64_image_source_param import BetaBase64ImageSourceParam as BetaBase64ImageSourceParam
+from .beta_managed_agents_multiagent import BetaManagedAgentsMultiagent as BetaManagedAgentsMultiagent
 from .beta_search_result_block_param import BetaSearchResultBlockParam as BetaSearchResultBlockParam
 from .beta_advisor_result_block_param import BetaAdvisorResultBlockParam as BetaAdvisorResultBlockParam
 from .beta_compaction_iteration_usage import BetaCompactionIterationUsage as BetaCompactionIterationUsage
@@ -200,6 +203,7 @@ from .beta_web_fetch_tool_20260209_param import BetaWebFetchTool20260209Param as
 from .beta_web_fetch_tool_20260309_param import BetaWebFetchTool20260309Param as BetaWebFetchTool20260309Param
 from .beta_web_search_result_block_param import BetaWebSearchResultBlockParam as BetaWebSearchResultBlockParam
 from .beta_compaction_content_block_delta import BetaCompactionContentBlockDelta as BetaCompactionContentBlockDelta
+from .beta_managed_agents_agent_reference import BetaManagedAgentsAgentReference as BetaManagedAgentsAgentReference
 from .beta_managed_agents_anthropic_skill import BetaManagedAgentsAnthropicSkill as BetaManagedAgentsAnthropicSkill
 from .beta_managed_agents_branch_checkout import BetaManagedAgentsBranchCheckout as BetaManagedAgentsBranchCheckout
 from .beta_managed_agents_commit_checkout import BetaManagedAgentsCommitCheckout as BetaManagedAgentsCommitCheckout
@@ -225,10 +229,16 @@ from .beta_code_execution_tool_result_block import BetaCodeExecutionToolResultBl
 from .beta_code_execution_tool_result_error import BetaCodeExecutionToolResultError as BetaCodeExecutionToolResultError
 from .beta_managed_agents_agent_tool_config import BetaManagedAgentsAgentToolConfig as BetaManagedAgentsAgentToolConfig
 from .beta_managed_agents_always_ask_policy import BetaManagedAgentsAlwaysAskPolicy as BetaManagedAgentsAlwaysAskPolicy
+from .beta_managed_agents_multiagent_params import (
+    BetaManagedAgentsMultiagentParams as BetaManagedAgentsMultiagentParams,
+)
 from .beta_tool_computer_use_20241022_param import BetaToolComputerUse20241022Param as BetaToolComputerUse20241022Param
 from .beta_tool_computer_use_20250124_param import BetaToolComputerUse20250124Param as BetaToolComputerUse20250124Param
 from .beta_tool_computer_use_20251124_param import BetaToolComputerUse20251124Param as BetaToolComputerUse20251124Param
 from .beta_web_fetch_tool_result_error_code import BetaWebFetchToolResultErrorCode as BetaWebFetchToolResultErrorCode
+from .beta_webhook_session_idled_event_data import BetaWebhookSessionIdledEventData as BetaWebhookSessionIdledEventData
+from .beta_webhook_vault_created_event_data import BetaWebhookVaultCreatedEventData as BetaWebhookVaultCreatedEventData
+from .beta_webhook_vault_deleted_event_data import BetaWebhookVaultDeletedEventData as BetaWebhookVaultDeletedEventData
 from .beta_code_execution_output_block_param import (
     BetaCodeExecutionOutputBlockParam as BetaCodeExecutionOutputBlockParam,
 )
@@ -251,6 +261,9 @@ from .beta_server_tool_caller_20260120_param import (
 from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam as BetaWebFetchToolResultBlockParam
 from .beta_web_fetch_tool_result_error_block import BetaWebFetchToolResultErrorBlock as BetaWebFetchToolResultErrorBlock
 from .beta_web_search_tool_result_error_code import BetaWebSearchToolResultErrorCode as BetaWebSearchToolResultErrorCode
+from .beta_webhook_vault_archived_event_data import (
+    BetaWebhookVaultArchivedEventData as BetaWebhookVaultArchivedEventData,
+)
 from .beta_clear_thinking_20251015_edit_param import (
     BetaClearThinking20251015EditParam as BetaClearThinking20251015EditParam,
 )
@@ -277,6 +290,18 @@ from .beta_managed_agents_model_config_params import (
 )
 from .beta_web_search_tool_result_block_param import (
     BetaWebSearchToolResultBlockParam as BetaWebSearchToolResultBlockParam,
+)
+from .beta_webhook_session_created_event_data import (
+    BetaWebhookSessionCreatedEventData as BetaWebhookSessionCreatedEventData,
+)
+from .beta_webhook_session_deleted_event_data import (
+    BetaWebhookSessionDeletedEventData as BetaWebhookSessionDeletedEventData,
+)
+from .beta_webhook_session_pending_event_data import (
+    BetaWebhookSessionPendingEventData as BetaWebhookSessionPendingEventData,
+)
+from .beta_webhook_session_running_event_data import (
+    BetaWebhookSessionRunningEventData as BetaWebhookSessionRunningEventData,
 )
 from .beta_advisor_redacted_result_block_param import (
     BetaAdvisorRedactedResultBlockParam as BetaAdvisorRedactedResultBlockParam,
@@ -316,6 +341,9 @@ from .beta_tool_search_tool_result_error_param import (
 )
 from .beta_web_search_tool_request_error_param import (
     BetaWebSearchToolRequestErrorParam as BetaWebSearchToolRequestErrorParam,
+)
+from .beta_webhook_session_archived_event_data import (
+    BetaWebhookSessionArchivedEventData as BetaWebhookSessionArchivedEventData,
 )
 from .beta_citations_web_search_result_location import (
     BetaCitationsWebSearchResultLocation as BetaCitationsWebSearchResultLocation,
@@ -368,6 +396,9 @@ from .beta_managed_agents_anthropic_skill_params import (
 from .beta_managed_agents_mcp_tool_config_params import (
     BetaManagedAgentsMCPToolConfigParams as BetaManagedAgentsMCPToolConfigParams,
 )
+from .beta_managed_agents_multiagent_self_params import (
+    BetaManagedAgentsMultiagentSelfParams as BetaManagedAgentsMultiagentSelfParams,
+)
 from .beta_tool_search_tool_regex_20251119_param import (
     BetaToolSearchToolRegex20251119Param as BetaToolSearchToolRegex20251119Param,
 )
@@ -401,6 +432,12 @@ from .beta_request_mcp_server_url_definition_param import (
 from .beta_web_fetch_tool_result_error_block_param import (
     BetaWebFetchToolResultErrorBlockParam as BetaWebFetchToolResultErrorBlockParam,
 )
+from .beta_webhook_session_status_idled_event_data import (
+    BetaWebhookSessionStatusIdledEventData as BetaWebhookSessionStatusIdledEventData,
+)
+from .beta_webhook_session_thread_idled_event_data import (
+    BetaWebhookSessionThreadIdledEventData as BetaWebhookSessionThreadIdledEventData,
+)
 from .beta_code_execution_tool_result_block_content import (
     BetaCodeExecutionToolResultBlockContent as BetaCodeExecutionToolResultBlockContent,
 )
@@ -422,11 +459,20 @@ from .beta_citation_web_search_result_location_param import (
 from .beta_managed_agents_mcp_toolset_default_config import (
     BetaManagedAgentsMCPToolsetDefaultConfig as BetaManagedAgentsMCPToolsetDefaultConfig,
 )
+from .beta_webhook_session_thread_created_event_data import (
+    BetaWebhookSessionThreadCreatedEventData as BetaWebhookSessionThreadCreatedEventData,
+)
 from .beta_managed_agents_memory_store_resource_param import (
     BetaManagedAgentsMemoryStoreResourceParam as BetaManagedAgentsMemoryStoreResourceParam,
 )
+from .beta_managed_agents_outcome_evaluation_resource import (
+    BetaManagedAgentsOutcomeEvaluationResource as BetaManagedAgentsOutcomeEvaluationResource,
+)
 from .beta_tool_search_tool_search_result_block_param import (
     BetaToolSearchToolSearchResultBlockParam as BetaToolSearchToolSearchResultBlockParam,
+)
+from .beta_webhook_session_requires_action_event_data import (
+    BetaWebhookSessionRequiresActionEventData as BetaWebhookSessionRequiresActionEventData,
 )
 from .beta_bash_code_execution_tool_result_block_param import (
     BetaBashCodeExecutionToolResultBlockParam as BetaBashCodeExecutionToolResultBlockParam,
@@ -446,6 +492,15 @@ from .beta_managed_agents_agent_toolset_default_config import (
 from .beta_request_mcp_server_tool_configuration_param import (
     BetaRequestMCPServerToolConfigurationParam as BetaRequestMCPServerToolConfigurationParam,
 )
+from .beta_webhook_session_status_scheduled_event_data import (
+    BetaWebhookSessionStatusScheduledEventData as BetaWebhookSessionStatusScheduledEventData,
+)
+from .beta_webhook_vault_credential_created_event_data import (
+    BetaWebhookVaultCredentialCreatedEventData as BetaWebhookVaultCredentialCreatedEventData,
+)
+from .beta_webhook_vault_credential_deleted_event_data import (
+    BetaWebhookVaultCredentialDeletedEventData as BetaWebhookVaultCredentialDeletedEventData,
+)
 from .beta_text_editor_code_execution_tool_result_block import (
     BetaTextEditorCodeExecutionToolResultBlock as BetaTextEditorCodeExecutionToolResultBlock,
 )
@@ -455,8 +510,26 @@ from .beta_text_editor_code_execution_tool_result_error import (
 from .beta_text_editor_code_execution_view_result_block import (
     BetaTextEditorCodeExecutionViewResultBlock as BetaTextEditorCodeExecutionViewResultBlock,
 )
+from .beta_webhook_session_status_terminated_event_data import (
+    BetaWebhookSessionStatusTerminatedEventData as BetaWebhookSessionStatusTerminatedEventData,
+)
+from .beta_webhook_session_thread_terminated_event_data import (
+    BetaWebhookSessionThreadTerminatedEventData as BetaWebhookSessionThreadTerminatedEventData,
+)
+from .beta_webhook_vault_credential_archived_event_data import (
+    BetaWebhookVaultCredentialArchivedEventData as BetaWebhookVaultCredentialArchivedEventData,
+)
 from .beta_managed_agents_custom_tool_input_schema_param import (
     BetaManagedAgentsCustomToolInputSchemaParam as BetaManagedAgentsCustomToolInputSchemaParam,
+)
+from .beta_managed_agents_multiagent_roster_entry_params import (
+    BetaManagedAgentsMultiagentRosterEntryParams as BetaManagedAgentsMultiagentRosterEntryParams,
+)
+from .beta_managed_agents_session_multiagent_coordinator import (
+    BetaManagedAgentsSessionMultiagentCoordinator as BetaManagedAgentsSessionMultiagentCoordinator,
+)
+from .beta_webhook_session_status_run_started_event_data import (
+    BetaWebhookSessionStatusRunStartedEventData as BetaWebhookSessionStatusRunStartedEventData,
 )
 from .beta_text_editor_code_execution_create_result_block import (
     BetaTextEditorCodeExecutionCreateResultBlock as BetaTextEditorCodeExecutionCreateResultBlock,
@@ -482,8 +555,14 @@ from .beta_text_editor_code_execution_tool_result_error_param import (
 from .beta_text_editor_code_execution_view_result_block_param import (
     BetaTextEditorCodeExecutionViewResultBlockParam as BetaTextEditorCodeExecutionViewResultBlockParam,
 )
+from .beta_webhook_vault_credential_refresh_failed_event_data import (
+    BetaWebhookVaultCredentialRefreshFailedEventData as BetaWebhookVaultCredentialRefreshFailedEventData,
+)
 from .beta_text_editor_code_execution_str_replace_result_block import (
     BetaTextEditorCodeExecutionStrReplaceResultBlock as BetaTextEditorCodeExecutionStrReplaceResultBlock,
+)
+from .beta_webhook_session_outcome_evaluation_ended_event_data import (
+    BetaWebhookSessionOutcomeEvaluationEndedEventData as BetaWebhookSessionOutcomeEvaluationEndedEventData,
 )
 from .beta_code_execution_tool_result_block_param_content_param import (
     BetaCodeExecutionToolResultBlockParamContentParam as BetaCodeExecutionToolResultBlockParamContentParam,
