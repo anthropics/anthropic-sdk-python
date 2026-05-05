@@ -29,6 +29,20 @@ from ...resources.completions import Completions, AsyncCompletions
 
 log: logging.Logger = logging.getLogger(__name__)
 
+
+# Keys are values of `anthropic.types.shared.error_type.ErrorType`. `timeout_error`
+# and `billing_error` have no dedicated subclass and fall through to the
+# HTTP status-code chain below.
+_BODY_ERROR_TYPE_TO_EXCEPTION: Mapping[str, type[APIStatusError]] = {
+    "rate_limit_error": _exceptions.RateLimitError,
+    "overloaded_error": _exceptions.OverloadedError,
+    "authentication_error": _exceptions.AuthenticationError,
+    "permission_error": _exceptions.PermissionDeniedError,
+    "not_found_error": _exceptions.NotFoundError,
+    "invalid_request_error": _exceptions.BadRequestError,
+    "api_error": _exceptions.InternalServerError,
+}
+
 DEFAULT_VERSION = "bedrock-2023-05-31"
 
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncClient])
@@ -99,6 +113,12 @@ class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         body: object,
         response: httpx.Response,
     ) -> APIStatusError:
+        # In-band stream errors come on HTTP 200, so status-code dispatch alone
+        # misclassifies them as success. Route on `body.error.type` first.
+        cls = _BODY_ERROR_TYPE_TO_EXCEPTION.get(_extract_error_type(body) or "")
+        if cls is not None:
+            return cls(err_msg, response=response, body=body)
+
         if response.status_code == 400:
             return _exceptions.BadRequestError(err_msg, response=response, body=body)
 
@@ -123,9 +143,22 @@ class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         if response.status_code == 503:
             return _exceptions.ServiceUnavailableError(err_msg, response=response, body=body)
 
+        if response.status_code == 529:
+            return _exceptions.OverloadedError(err_msg, response=response, body=body)
+
         if response.status_code >= 500:
             return _exceptions.InternalServerError(err_msg, response=response, body=body)
         return APIStatusError(err_msg, response=response, body=body)
+
+
+def _extract_error_type(body: object) -> str | None:
+    if not is_dict(body):
+        return None
+    inner = body.get("error")
+    if not is_dict(inner):
+        return None
+    inner_type = inner.get("type")
+    return inner_type if isinstance(inner_type, str) else None
 
 
 class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClient):
