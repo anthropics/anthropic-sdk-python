@@ -64,19 +64,26 @@ def _redact_body(body: Any) -> Any:
     return None
 
 
-def _raise_token_endpoint_error(resp: httpx.Response, *, message_prefix: str) -> None:
+def _raise_token_endpoint_error(resp: httpx.Response, *, message_prefix: str, hint: Optional[str] = None) -> None:
     """Raise a redacted :class:`WorkloadIdentityError` from a non-200 token-endpoint response.
 
     Shared between the jwt-bearer exchange path in this module and the
     refresh_token grant path in :mod:`_providers`.
+
+    ``hint`` is an optional caller-supplied diagnostic appended verbatim to the
+    error message (after the redacted body). Callers gate it on the response
+    status and their own state — this helper does not inspect ``resp`` for it.
     """
     try:
         payload: Any = resp.json()
     except ValueError:
         payload = resp.text
     redacted = _redact_body(payload)
+    message = f"{message_prefix} (HTTP {resp.status_code}): {redacted}"
+    if hint:
+        message = f"{message} {hint}"
     raise WorkloadIdentityError(
-        f"{message_prefix} (HTTP {resp.status_code}): {redacted}",
+        message,
         status_code=resp.status_code,
         body=redacted,
         request_id=_request_id(resp),
@@ -128,6 +135,16 @@ class WorkloadIdentityCredentials:
     Args:
         organization_id: The organization's raw UUID string (organizations do
             not use tagged IDs).
+        workspace_id: Optional ``wrkspc_*`` tagged ID, or the literal
+            ``"default"`` to scope the token to the organization's default
+            workspace. When omitted the server picks the rule's sole enabled
+            workspace, else the org default if the rule covers it. Required
+            when the rule enables more than one non-default workspace, or to
+            target a specific workspace other than the one the server would
+            pick. The minted token is workspace-scoped: per-request workspace
+            selection (the ``anthropic-workspace-id`` header) is not supported
+            for federation tokens — switching workspaces requires a new token
+            exchange with a different ``workspace_id``.
     """
 
     def __init__(
@@ -137,6 +154,7 @@ class WorkloadIdentityCredentials:
         federation_rule_id: str,
         organization_id: str,
         service_account_id: Optional[str] = None,
+        workspace_id: Optional[str] = None,
         scope: Optional[str] = None,
         http_client: Optional[httpx.Client] = None,
     ) -> None:
@@ -144,6 +162,7 @@ class WorkloadIdentityCredentials:
         self._federation_rule_id = federation_rule_id
         self._organization_id = organization_id
         self._service_account_id = service_account_id
+        self._workspace_id = workspace_id
         # Scope is informational only for federation: the server derives the
         # effective scope from the matching federation rule and the gateway
         # transform drops unknown body fields, so it is intentionally NOT sent
@@ -220,6 +239,8 @@ class WorkloadIdentityCredentials:
         }
         if self._service_account_id is not None:
             body["service_account_id"] = self._service_account_id
+        if self._workspace_id is not None:
+            body["workspace_id"] = self._workspace_id
 
         url = f"{self._base_url}{TOKEN_ENDPOINT}"
         try:
@@ -246,7 +267,21 @@ class WorkloadIdentityCredentials:
             )
 
         if resp.status_code >= 400:
-            _raise_token_endpoint_error(resp, message_prefix="Token exchange failed")
+            # A 401 is almost always a federation-rule mismatch. Point at the
+            # rule and the Console auth-event log; when the caller hasn't pinned
+            # a workspace, also surface the multi-workspace fix rather than
+            # making them dig through docs.
+            hint: Optional[str] = None
+            if resp.status_code == 401:
+                hint = "Ensure your federation rule matches your identity token. "
+                if self._workspace_id is None:
+                    hint += (
+                        "If your federation rule is scoped to multiple workspaces, set the "
+                        "ANTHROPIC_WORKSPACE_ID environment variable, the 'workspace_id' "
+                        "config key, or the workspace_id= argument. "
+                    )
+                hint += "View your authentication events in the Workload identity page of Claude Console for more details."
+            _raise_token_endpoint_error(resp, message_prefix="Token exchange failed", hint=hint)
 
         try:
             data = resp.json()
@@ -289,6 +324,7 @@ def exchange_federation_assertion(
     federation_rule_id: str,
     organization_id: str,
     service_account_id: Optional[str] = None,
+    workspace_id: Optional[str] = None,
     base_url: Optional[str] = None,
     http_client: Optional[httpx.Client] = None,
 ) -> AccessToken:
@@ -304,6 +340,7 @@ def exchange_federation_assertion(
         federation_rule_id=federation_rule_id,
         organization_id=organization_id,
         service_account_id=service_account_id,
+        workspace_id=workspace_id,
         http_client=http_client,
     )
     if base_url is not None:

@@ -11,6 +11,7 @@ from ._constants import (
     ENV_PROFILE,
     ENV_AUTH_TOKEN,
     ENV_CONFIG_DIR,
+    ENV_WORKSPACE_ID,
     ENV_IDENTITY_TOKEN,
     ENV_ORGANIZATION_ID,
     ENV_FEDERATION_RULE_ID,
@@ -62,6 +63,10 @@ def _build_federation_result(*, base_url: str) -> Optional[CredentialResult]:
         federation_rule_id=federation_rule_id,
         organization_id=organization_id,
         service_account_id=os.environ.get(ENV_SERVICE_ACCOUNT_ID),
+        # Coerce empty string to None so a defaulted-but-empty CI variable
+        # doesn't put ``"workspace_id": ""`` on the wire — matches the falsy
+        # skip in :func:`._providers._fill_missing_from_env`.
+        workspace_id=os.environ.get(ENV_WORKSPACE_ID) or None,
         scope=os.environ.get(ENV_SCOPE),
     )
     provider.bind_base_url(base_url)

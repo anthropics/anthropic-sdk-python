@@ -51,6 +51,7 @@ _ALL_ENV = [
     "ANTHROPIC_FEDERATION_RULE_ID",
     "ANTHROPIC_ORGANIZATION_ID",
     "ANTHROPIC_SERVICE_ACCOUNT_ID",
+    "ANTHROPIC_WORKSPACE_ID",
     "ANTHROPIC_SCOPE",
 ]
 
@@ -333,6 +334,7 @@ class TestCredentialsFile:
         assert body["federation_rule_id"] == "fdrl_file"
         assert body["organization_id"] == "org-from-file"
         assert body["service_account_id"] == "svac_file"
+        assert "workspace_id" not in body
         assert "scope" not in body
 
         # Disk cache: the exchange wrote credentials/<profile>.json with 0600
@@ -929,6 +931,7 @@ class TestWorkloadIdentityCredentials:
         assert body["federation_rule_id"] == "fdrl_01abc"
         assert body["organization_id"] == "00000000-0000-0000-0000-000000000000"
         assert "service_account_id" not in body
+        assert "workspace_id" not in body
         assert "scope" not in body
 
     @pytest.mark.respx()
@@ -944,6 +947,32 @@ class TestWorkloadIdentityCredentials:
         body = json.loads(cast("list[MockRequestCall]", respx_mock.calls)[0].request.content)
         assert body["service_account_id"] == "svac_01xyz"
         assert "scope" not in body
+
+    @pytest.mark.respx()
+    def test_workspace_id_included(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        creds = WorkloadIdentityCredentials(
+            identity_token_provider=lambda: "j",
+            federation_rule_id="fdrl_01abc",
+            organization_id="org",
+            workspace_id="wrkspc_01abc",
+        )
+        creds()
+        body = json.loads(cast("list[MockRequestCall]", respx_mock.calls)[0].request.content)
+        assert body["workspace_id"] == "wrkspc_01abc"
+
+    @pytest.mark.respx()
+    def test_workspace_id_default_sentinel(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        creds = WorkloadIdentityCredentials(
+            identity_token_provider=lambda: "j",
+            federation_rule_id="fdrl_01abc",
+            organization_id="org",
+            workspace_id="default",
+        )
+        creds()
+        body = json.loads(cast("list[MockRequestCall]", respx_mock.calls)[0].request.content)
+        assert body["workspace_id"] == "default"
 
     @pytest.mark.respx()
     def test_scope_is_display_only(self, respx_mock: MockRouter) -> None:
@@ -970,12 +999,14 @@ class TestWorkloadIdentityCredentials:
             assertion="ext.jwt.value",
             federation_rule_id="fdrl_x",
             organization_id="org_x",
+            workspace_id="wrkspc_x",
         )
         assert token.token == "sk-ant-oat01-one"
         req = cast("list[MockRequestCall]", respx_mock.calls)[0].request
         body = json.loads(req.content)
         assert body["assertion"] == "ext.jwt.value"
         assert body["federation_rule_id"] == "fdrl_x"
+        assert body["workspace_id"] == "wrkspc_x"
 
     @pytest.mark.respx()
     def test_bind_base_url(self, respx_mock: MockRouter) -> None:
@@ -1077,6 +1108,61 @@ class TestWorkloadIdentityCredentials:
         assert exc_info.value.request_id == "req_abc123"
         assert "[request_id=req_abc123]" in str(exc_info.value)
 
+    @pytest.mark.respx()
+    def test_401_without_workspace_id_includes_hint(self, respx_mock: MockRouter) -> None:
+        """A failed exchange with no workspace_id should surface all three hint
+        parts: the federation-rule lead-in, the multi-workspace fix, and the
+        Console auth-events pointer."""
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(401, json={"error": "unauthorized"}))
+        creds = WorkloadIdentityCredentials(
+            identity_token_provider=lambda: "j",
+            federation_rule_id="f",
+            organization_id="o",
+        )
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            creds()
+        message = str(exc_info.value)
+        assert "Ensure your federation rule matches your identity token" in message
+        assert "ANTHROPIC_WORKSPACE_ID" in message
+        assert "scoped to multiple workspaces" in message
+        assert "workspace_id" in message
+        assert "View your authentication events" in message
+
+    @pytest.mark.respx()
+    def test_401_with_workspace_id_set_omits_workspace_hint(self, respx_mock: MockRouter) -> None:
+        """When workspace_id is already set the multi-workspace fix is noise,
+        but the federation-rule lead-in and Console pointer still apply."""
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(401, json={"error": "unauthorized"}))
+        creds = WorkloadIdentityCredentials(
+            identity_token_provider=lambda: "j",
+            federation_rule_id="f",
+            organization_id="o",
+            workspace_id="wrkspc_x",
+        )
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            creds()
+        message = str(exc_info.value)
+        assert "Ensure your federation rule matches your identity token" in message
+        assert "View your authentication events" in message
+        assert "ANTHROPIC_WORKSPACE_ID" not in message
+        assert "scoped to multiple workspaces" not in message
+
+    @pytest.mark.respx()
+    def test_non_401_omits_hint(self, respx_mock: MockRouter) -> None:
+        """The hint is 401-specific; a 5xx or 400 shouldn't suggest a config change."""
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(500, json={"error": "server_error"}))
+        creds = WorkloadIdentityCredentials(
+            identity_token_provider=lambda: "j",
+            federation_rule_id="f",
+            organization_id="o",
+        )
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            creds()
+        message = str(exc_info.value)
+        assert "Ensure your federation rule" not in message
+        assert "ANTHROPIC_WORKSPACE_ID" not in message
+        assert "View your authentication events" not in message
+
     def test_oversized_assertion_rejected(self) -> None:
         big_jwt = "x" * (16 * 1024 + 1)
         creds = WorkloadIdentityCredentials(
@@ -1161,6 +1247,7 @@ class TestProfileEnvFill:
 
     def test_profile_value_wins_over_env(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("ANTHROPIC_ORGANIZATION_ID", "org_from_env")
+        monkeypatch.setenv("ANTHROPIC_WORKSPACE_ID", "wrkspc_env")
         monkeypatch.setenv("ANTHROPIC_IDENTITY_TOKEN_FILE", str(tmp_path / "tok"))
         (tmp_path / "tok").write_text("jwt")
         _write_profile(
@@ -1168,6 +1255,7 @@ class TestProfileEnvFill:
             "default",
             config={
                 "organization_id": "org_from_file",
+                "workspace_id": "wrkspc_file",
                 "authentication": {
                     "type": "oidc_federation",
                     "federation_rule_id": "fdrl_01abc",
@@ -1177,6 +1265,49 @@ class TestProfileEnvFill:
         provider = CredentialsFile()
         delegate = provider._build_workload_delegate(provider._auth_block())  # pyright: ignore[reportPrivateUsage]
         assert delegate._organization_id == "org_from_file"  # pyright: ignore[reportPrivateUsage]
+        assert delegate._workspace_id == "wrkspc_file"  # pyright: ignore[reportPrivateUsage]
+
+    def test_env_fills_missing_workspace_id(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("ANTHROPIC_ORGANIZATION_ID", "org_x")
+        monkeypatch.setenv("ANTHROPIC_WORKSPACE_ID", "wrkspc_from_env")
+        monkeypatch.setenv("ANTHROPIC_IDENTITY_TOKEN_FILE", str(tmp_path / "tok"))
+        (tmp_path / "tok").write_text("jwt")
+        _write_profile(
+            tmp_path,
+            "default",
+            config={
+                "authentication": {
+                    "type": "oidc_federation",
+                    "federation_rule_id": "fdrl_01abc",
+                }
+            },
+        )
+        provider = CredentialsFile()
+        delegate = provider._build_workload_delegate(provider._auth_block())  # pyright: ignore[reportPrivateUsage]
+        assert delegate._workspace_id == "wrkspc_from_env"  # pyright: ignore[reportPrivateUsage]
+
+    def test_env_workspace_id_fills_user_oauth(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """``ANTHROPIC_WORKSPACE_ID`` fills ``workspace_id`` uniformly across
+        profile types — not just federation. This pins the precedence model:
+        ctor override > env var > profile, regardless of ``auth.type``. For
+        ``user_oauth`` the filled value surfaces as the ``anthropic-workspace-id``
+        request header (federation routes it into the exchange body instead)."""
+        monkeypatch.setenv("ANTHROPIC_WORKSPACE_ID", "wrkspc_env")
+        creds_path = tmp_path / "creds.json"
+        creds_path.write_text(json.dumps({"type": "oauth_token", "access_token": "tok", "expires_at": None}))
+        _write_profile(
+            tmp_path,
+            "default",
+            config={
+                "authentication": {
+                    "type": "user_oauth",
+                    "client_id": "cid",
+                    "credentials_path": str(creds_path),
+                }
+            },
+        )
+        provider = CredentialsFile()
+        assert provider.extra_headers() == {"anthropic-workspace-id": "wrkspc_env"}
 
 
 class TestIdentityTokenValidation:
@@ -1622,6 +1753,37 @@ class TestDefaultCredentials:
         assert result is not None
         assert isinstance(result.provider, WorkloadIdentityCredentials)
         assert result.provider.scope == "api:read api:write"
+
+    def test_workload_identity_workspace_id_env(self, clean_env: pytest.MonkeyPatch) -> None:
+        clean_env.setenv("ANTHROPIC_IDENTITY_TOKEN", "literal-jwt")
+        clean_env.setenv("ANTHROPIC_FEDERATION_RULE_ID", "fdrl_01abc")
+        clean_env.setenv("ANTHROPIC_ORGANIZATION_ID", "org-uuid")
+        clean_env.setenv("ANTHROPIC_WORKSPACE_ID", "wrkspc_01abc")
+        result = default_credentials()
+        assert result is not None
+        provider = result.provider
+        assert isinstance(provider, WorkloadIdentityCredentials)
+        assert provider._workspace_id == "wrkspc_01abc"  # pyright: ignore[reportPrivateUsage]
+
+    @pytest.mark.respx()
+    def test_workload_identity_workspace_id_env_empty_treated_unset(
+        self, clean_env: pytest.MonkeyPatch, respx_mock: MockRouter
+    ) -> None:
+        """``ANTHROPIC_WORKSPACE_ID=""`` (a defaulted-but-empty CI variable) is
+        treated as unset — never put ``"workspace_id": ""`` on the wire."""
+        clean_env.setenv("ANTHROPIC_IDENTITY_TOKEN", "literal-jwt")
+        clean_env.setenv("ANTHROPIC_FEDERATION_RULE_ID", "fdrl_01abc")
+        clean_env.setenv("ANTHROPIC_ORGANIZATION_ID", "org-uuid")
+        clean_env.setenv("ANTHROPIC_WORKSPACE_ID", "")
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        result = default_credentials()
+        assert result is not None
+        provider = result.provider
+        assert isinstance(provider, WorkloadIdentityCredentials)
+        assert provider._workspace_id is None  # pyright: ignore[reportPrivateUsage]
+        provider()
+        body = json.loads(cast("list[MockRequestCall]", respx_mock.calls)[0].request.content)
+        assert "workspace_id" not in body
 
     def test_workload_identity_literal_token_reads_fresh(self, clean_env: pytest.MonkeyPatch) -> None:
         """Fix 4: ANTHROPIC_IDENTITY_TOKEN must be re-read on every provider
@@ -2115,8 +2277,10 @@ class TestAnthropicCredentials:
         _send_message(client)
         msg_req = cast("list[MockRequestCall]", respx_mock.calls)[-1].request
         assert msg_req.headers["Authorization"] == "Bearer sk-ant-oat01-test"
-        # Federation tokens are workspace-scoped server-side; header is suppressed.
+        # Federation profiles send workspace_id in the exchange body, not as a header.
         assert "anthropic-workspace-id" not in msg_req.headers
+        token_req = cast("list[MockRequestCall]", respx_mock.calls)[0].request
+        assert json.loads(token_req.content)["workspace_id"] == "wrkspc_x"
 
     def test_config_and_credentials_mutually_exclusive(self) -> None:
         with pytest.raises(TypeError, match="at most one of"):
@@ -2244,12 +2408,13 @@ class TestInMemoryConfig:
         )
         token = provider()
         assert token.token == "tok"
-        # Federation tokens are workspace-scoped server-side; header suppressed.
+        # Federation profiles send workspace_id in the exchange body, not as a header.
         assert provider.extra_headers() == {}
         body = json.loads(cast("list[MockRequestCall]", respx_mock.calls)[0].request.content)
         assert body["federation_rule_id"] == "fdrl_x"
         assert body["organization_id"] == "org_x"
         assert body["service_account_id"] == "svac_x"
+        assert body["workspace_id"] == "wrkspc_x"
 
     def test_identity_token_provider_override(self, respx_mock: MockRouter) -> None:
         respx_mock.post(TOKEN_URL).mock(
@@ -2258,6 +2423,7 @@ class TestInMemoryConfig:
         provider = InMemoryConfig(
             {
                 "organization_id": "org_x",
+                "workspace_id": "wrkspc_x",
                 "authentication": {"type": "oidc_federation", "federation_rule_id": "fdrl_x"},
             },
             identity_token_provider=lambda: "programmatic-jwt",
@@ -2265,6 +2431,10 @@ class TestInMemoryConfig:
         provider()
         body = json.loads(cast("list[MockRequestCall]", respx_mock.calls)[0].request.content)
         assert body["assertion"] == "programmatic-jwt"
+        # workspace_id flows through InMemoryConfig._build_workload_delegate
+        # even when identity_token_provider is overridden — that branch builds
+        # the delegate independently of the file-backed CredentialsFile path.
+        assert body["workspace_id"] == "wrkspc_x"
 
     @pytest.mark.respx()
     def test_oidc_federation_no_credentials_path_no_disk_cache(
