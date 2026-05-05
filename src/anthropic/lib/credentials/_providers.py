@@ -21,6 +21,7 @@ from ._constants import (
     ENV_CONFIG_DIR,
     TOKEN_ENDPOINT,
     DEFAULT_BASE_URL,
+    ENV_WORKSPACE_ID,
     ENV_ORGANIZATION_ID,
     OAUTH_API_BETA_HEADER,
     ENV_FEDERATION_RULE_ID,
@@ -90,6 +91,7 @@ def _fill_missing_from_env(config: Dict[str, Any], auth: Dict[str, Any]) -> None
 
     fill(config, "base_url", ENV_BASE_URL)
     fill(config, "organization_id", ENV_ORGANIZATION_ID)
+    fill(config, "workspace_id", ENV_WORKSPACE_ID)
 
     auth_type = auth.get("type")
     if auth_type == AUTH_TYPE_OIDC_FEDERATION:
@@ -254,8 +256,9 @@ class CredentialsFile:
         """
         config = self._load_config()
         headers: Dict[str, str] = {}
-        # Federation tokens are workspace-scoped server-side; the header is
-        # only meaningful for non-federation (user_oauth, external) profiles.
+        # For federation profiles workspace_id is sent in the jwt-bearer
+        # exchange body, not as a request header (the minted token is already
+        # workspace-scoped, so the header would be ignored).
         if self._auth_block().get("type") != AUTH_TYPE_OIDC_FEDERATION:
             workspace_id = config.get("workspace_id")
             if workspace_id:
@@ -656,6 +659,7 @@ class CredentialsFile:
             federation_rule_id=federation_rule_id,
             organization_id=organization_id,
             service_account_id=auth.get("service_account_id"),
+            workspace_id=self._config.get("workspace_id"),
             scope=auth.get("scope"),
             http_client=self._get_http_client(),
         )
@@ -813,6 +817,7 @@ class InMemoryConfig(CredentialsFile):
             federation_rule_id=federation_rule_id,
             organization_id=organization_id,
             service_account_id=auth.get("service_account_id"),
+            workspace_id=self._config.get("workspace_id"),
             scope=auth.get("scope"),
             http_client=self._get_http_client(),
         )
