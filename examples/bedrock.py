@@ -1,4 +1,4 @@
-#!/usr/bin/env -S poetry run python
+#!/usr/bin/env -S uv run python
 
 # Note: you must have installed `anthropic` with the `bedrock` extra
 # e.g. `pip install -U anthropic[bedrock]`
