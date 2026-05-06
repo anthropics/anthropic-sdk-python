@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import logging
 import urllib.parse
-from typing import Any, Union, Mapping, TypeVar
+from typing import Any, Dict, Union, Mapping, TypeVar, cast
 from typing_extensions import Self, override
 
 import httpx
@@ -35,6 +35,23 @@ _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncCl
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
+def _strip_none_values(data: Dict[str, object]) -> Dict[str, object]:
+    result: Dict[str, object] = {}
+    for k, v in data.items():
+        if v is None:
+            continue
+        if isinstance(v, dict):
+            result[k] = _strip_none_values(cast(Dict[str, object], v))
+        elif isinstance(v, list):
+            result[k] = [
+                _strip_none_values(cast(Dict[str, object], item)) if isinstance(item, dict) else item
+                for item in cast("list[object]", v)
+            ]
+        else:
+            result[k] = v
+    return result
+
+
 def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
     options = model_copy(input_options, deep=True)
 
@@ -45,6 +62,17 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
             betas = options.headers.get("anthropic-beta")
             if betas:
                 options.json_data.setdefault("anthropic_beta", betas.split(","))
+
+        messages = options.json_data.get("messages")
+        if isinstance(messages, list):
+            for message in cast("list[object]", messages):
+                if is_dict(message):
+                    content = message.get("content")
+                    if isinstance(content, list):
+                        message["content"] = [
+                            _strip_none_values(cast(Dict[str, object], block)) if is_dict(block) else block
+                            for block in cast("list[object]", content)
+                        ]
 
     if options.url in {"/v1/complete", "/v1/messages", "/v1/messages?beta=true"} and options.method == "post":
         if not is_dict(options.json_data):
