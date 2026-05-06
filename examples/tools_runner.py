@@ -44,7 +44,7 @@ def get_weather(location: str, units: Literal["c", "f"]) -> str:
 def main() -> None:
     runner = client.beta.messages.tool_runner(
         max_tokens=1024,
-        model="claude-3-5-sonnet-latest",
+        model="claude-sonnet-4-5-20250929",
         # alternatively, you can use `tools=[anthropic.beta_tool(get_weather)]`
         tools=[get_weather],
         messages=[{"role": "user", "content": "What is the weather in SF?"}],
