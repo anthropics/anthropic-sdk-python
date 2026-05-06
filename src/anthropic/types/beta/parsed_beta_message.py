@@ -14,6 +14,8 @@ from .beta_mcp_tool_result_block import BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock
 from .beta_container_upload_block import BetaContainerUploadBlock
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock
+from .beta_tool_search_tool_result_block import BetaToolSearchToolResultBlock
+from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock
 from .beta_web_search_tool_result_block import BetaWebSearchToolResultBlock
 from .beta_code_execution_tool_result_block import BetaCodeExecutionToolResultBlock
 from .beta_bash_code_execution_tool_result_block import BetaBashCodeExecutionToolResultBlock
@@ -43,6 +45,8 @@ ParsedBetaContentBlock: TypeAlias = Annotated[
         BetaRedactedThinkingBlock,
         BetaToolUseBlock,
         BetaServerToolUseBlock,
+        BetaToolSearchToolResultBlock,
+        BetaWebFetchToolResultBlock,
         BetaWebSearchToolResultBlock,
         BetaCodeExecutionToolResultBlock,
         BetaBashCodeExecutionToolResultBlock,
