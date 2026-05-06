@@ -492,9 +492,6 @@ from .beta_managed_agents_agent_toolset_default_config import (
 from .beta_request_mcp_server_tool_configuration_param import (
     BetaRequestMCPServerToolConfigurationParam as BetaRequestMCPServerToolConfigurationParam,
 )
-from .beta_webhook_session_status_scheduled_event_data import (
-    BetaWebhookSessionStatusScheduledEventData as BetaWebhookSessionStatusScheduledEventData,
-)
 from .beta_webhook_vault_credential_created_event_data import (
     BetaWebhookVaultCredentialCreatedEventData as BetaWebhookVaultCredentialCreatedEventData,
 )
@@ -527,6 +524,9 @@ from .beta_managed_agents_multiagent_roster_entry_params import (
 )
 from .beta_managed_agents_session_multiagent_coordinator import (
     BetaManagedAgentsSessionMultiagentCoordinator as BetaManagedAgentsSessionMultiagentCoordinator,
+)
+from .beta_webhook_session_status_rescheduled_event_data import (
+    BetaWebhookSessionStatusRescheduledEventData as BetaWebhookSessionStatusRescheduledEventData,
 )
 from .beta_webhook_session_status_run_started_event_data import (
     BetaWebhookSessionStatusRunStartedEventData as BetaWebhookSessionStatusRunStartedEventData,
