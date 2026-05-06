@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.100.0 (2026-05-06)
+
+Full Changelog: [v0.99.0...v0.100.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.99.0...v0.100.0)
+
+### Features
+
+* **api:** add support for Managed Agents multiagents and outcomes, webhooks, vault validation ([3b3deee](https://github.com/anthropics/anthropic-sdk-python/commit/3b3deee9c479ce5b54411a8572b66c5a90f1d50f))
+
+
+### Bug Fixes
+
+* **api:** Adjust webhook configuration ([8c3339e](https://github.com/anthropics/anthropic-sdk-python/commit/8c3339e532458e93585f2faf4f284ccbb5829717))
+
 ## 0.99.0 (2026-05-05)
 
 Full Changelog: [v0.98.1...v0.99.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.98.1...v0.99.0)
