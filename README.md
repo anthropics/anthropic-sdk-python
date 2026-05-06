@@ -37,6 +37,43 @@ message = client.messages.create(
 print(message.content)
 ```
 
+## Structured outputs
+
+For JSON or schema-constrained responses, use `client.messages.parse()` with an `output_format`.
+This keeps structured output separate from normal tool-use transcripts, so you do not need to
+serialize a schema-only `tool_use` block or fabricate a `tool_result` when continuing a chat.
+
+```python
+import pydantic
+from anthropic import Anthropic
+
+
+class Order(pydantic.BaseModel):
+    product_name: str
+    price: float
+    quantity: int
+
+
+client = Anthropic()
+
+parsed_message = client.messages.parse(
+    model="claude-sonnet-4-5",
+    messages=[
+        {
+            "role": "user",
+            "content": "Extract the order from: 2 packs of Green Tea for 5.50 dollars each.",
+        }
+    ],
+    max_tokens=1024,
+    output_format=Order,
+)
+
+print(parsed_message.parsed_output)
+```
+
+See the runnable examples in [`examples/structured_outputs.py`](./examples/structured_outputs.py)
+and [`examples/structured_outputs_streaming.py`](./examples/structured_outputs_streaming.py).
+
 ## Requirements
 
 Python 3.9+

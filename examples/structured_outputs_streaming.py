@@ -11,6 +11,8 @@ class Order(pydantic.BaseModel):
 
 client = anthropic.Anthropic()
 
+# `messages.stream()` accepts `output_format` too, so streaming structured output
+# can stay separate from normal tool-use transcripts.
 prompt = """
 Extract the product name, price, and quantity from this customer message:
 "Hi, I'd like to order 2 packs of Green Tea for 5.50 dollars each."

@@ -11,6 +11,8 @@ class Order(pydantic.BaseModel):
 
 client = anthropic.Anthropic()
 
+# `messages.parse()` is the structured-output path for JSON/schema extraction.
+# It avoids treating a schema-only response as a tool call in later messages.
 prompt = """
 Extract the product name, price, and quantity from this customer message:
 "Hi, I’d like to order 2 packs of Green Tea for 5.50 dollars each."
