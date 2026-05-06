@@ -8,6 +8,7 @@ from typing_extensions import Required, Annotated, TypedDict
 
 import pytest
 
+from anthropic.types import ServerToolUseBlock
 from anthropic._types import Base64FileInput, omit, not_given
 from anthropic._utils import (
     PropertyInfo,
@@ -17,6 +18,7 @@ from anthropic._utils import (
 )
 from anthropic._compat import PYDANTIC_V1
 from anthropic._models import BaseModel
+from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
 
 _T = TypeVar("_T")
 
@@ -101,6 +103,48 @@ async def test_union_of_typeddict(use_async: bool) -> None:
     assert await transform({"foo": {"foo_baz": "baz"}}, Foo4, use_async) == {"foo": {"fooBaz": "baz"}}
     assert await transform({"foo": {"foo_baz": "baz", "foo_bar": "bar"}}, Foo4, use_async) == {
         "foo": {"fooBaz": "baz", "fooBar": "bar"}
+    }
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_message_params_preserve_server_tool_use_blocks(use_async: bool) -> None:
+    server_tool_use = ServerToolUseBlock(
+        id="srvtoolu_123",
+        input={"query": "latest Claude docs"},
+        name="web_search",
+        type="server_tool_use",
+    )
+
+    assert await transform(
+        {
+            "max_tokens": 1024,
+            "model": "claude-sonnet-4-5-20250929",
+            "messages": [
+                {
+                    "role": "assistant",
+                    "content": [server_tool_use],
+                }
+            ],
+        },
+        MessageCreateParamsNonStreaming,
+        use_async,
+    ) == {
+        "max_tokens": 1024,
+        "model": "claude-sonnet-4-5-20250929",
+        "messages": [
+            {
+                "role": "assistant",
+                "content": [
+                    {
+                        "id": "srvtoolu_123",
+                        "input": {"query": "latest Claude docs"},
+                        "name": "web_search",
+                        "type": "server_tool_use",
+                    }
+                ],
+            }
+        ],
     }
 
 
