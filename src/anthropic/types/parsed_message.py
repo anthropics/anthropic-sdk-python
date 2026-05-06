@@ -11,6 +11,12 @@ from .tool_use_block import ToolUseBlock
 from .server_tool_use_block import ServerToolUseBlock
 from .redacted_thinking_block import RedactedThinkingBlock
 from .web_search_tool_result_block import WebSearchToolResultBlock
+from .web_fetch_tool_result_block import WebFetchToolResultBlock
+from .code_execution_tool_result_block import CodeExecutionToolResultBlock
+from .bash_code_execution_tool_result_block import BashCodeExecutionToolResultBlock
+from .text_editor_code_execution_tool_result_block import TextEditorCodeExecutionToolResultBlock
+from .tool_search_tool_result_block import ToolSearchToolResultBlock
+from .container_upload_block import ContainerUploadBlock
 
 ResponseFormatT = TypeVar("ResponseFormatT", default=None)
 
@@ -37,6 +43,12 @@ ParsedContentBlock: TypeAlias = Annotated[
         ToolUseBlock,
         ServerToolUseBlock,
         WebSearchToolResultBlock,
+        WebFetchToolResultBlock,
+        CodeExecutionToolResultBlock,
+        BashCodeExecutionToolResultBlock,
+        TextEditorCodeExecutionToolResultBlock,
+        ToolSearchToolResultBlock,
+        ContainerUploadBlock,
     ],
     PropertyInfo(discriminator="type"),
 ]
