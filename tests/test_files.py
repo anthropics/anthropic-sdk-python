@@ -52,6 +52,17 @@ def test_string_not_allowed() -> None:
         )
 
 
+def test_invalid_files_type_error_message() -> None:
+    with pytest.raises(TypeError, match="<class 'int'>"):
+        to_httpx_files(42)  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_async_invalid_files_type_error_message() -> None:
+    with pytest.raises(TypeError, match="<class 'int'>"):
+        await async_to_httpx_files(42)  # type: ignore
+
+
 def assert_different_identities(obj1: object, obj2: object) -> None:
     assert obj1 == obj2
     assert obj1 is not obj2
