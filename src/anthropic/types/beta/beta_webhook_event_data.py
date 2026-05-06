@@ -17,12 +17,12 @@ from .beta_webhook_session_status_idled_event_data import BetaWebhookSessionStat
 from .beta_webhook_session_thread_idled_event_data import BetaWebhookSessionThreadIdledEventData
 from .beta_webhook_session_thread_created_event_data import BetaWebhookSessionThreadCreatedEventData
 from .beta_webhook_session_requires_action_event_data import BetaWebhookSessionRequiresActionEventData
-from .beta_webhook_session_status_scheduled_event_data import BetaWebhookSessionStatusScheduledEventData
 from .beta_webhook_vault_credential_created_event_data import BetaWebhookVaultCredentialCreatedEventData
 from .beta_webhook_vault_credential_deleted_event_data import BetaWebhookVaultCredentialDeletedEventData
 from .beta_webhook_session_status_terminated_event_data import BetaWebhookSessionStatusTerminatedEventData
 from .beta_webhook_session_thread_terminated_event_data import BetaWebhookSessionThreadTerminatedEventData
 from .beta_webhook_vault_credential_archived_event_data import BetaWebhookVaultCredentialArchivedEventData
+from .beta_webhook_session_status_rescheduled_event_data import BetaWebhookSessionStatusRescheduledEventData
 from .beta_webhook_session_status_run_started_event_data import BetaWebhookSessionStatusRunStartedEventData
 from .beta_webhook_vault_credential_refresh_failed_event_data import BetaWebhookVaultCredentialRefreshFailedEventData
 from .beta_webhook_session_outcome_evaluation_ended_event_data import BetaWebhookSessionOutcomeEvaluationEndedEventData
@@ -38,7 +38,7 @@ BetaWebhookEventData: TypeAlias = Annotated[
         BetaWebhookSessionRequiresActionEventData,
         BetaWebhookSessionArchivedEventData,
         BetaWebhookSessionDeletedEventData,
-        BetaWebhookSessionStatusScheduledEventData,
+        BetaWebhookSessionStatusRescheduledEventData,
         BetaWebhookSessionStatusRunStartedEventData,
         BetaWebhookSessionStatusIdledEventData,
         BetaWebhookSessionStatusTerminatedEventData,

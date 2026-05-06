@@ -4,15 +4,15 @@ from typing_extensions import Literal
 
 from ..._models import BaseModel
 
-__all__ = ["BetaWebhookSessionStatusScheduledEventData"]
+__all__ = ["BetaWebhookSessionStatusRescheduledEventData"]
 
 
-class BetaWebhookSessionStatusScheduledEventData(BaseModel):
+class BetaWebhookSessionStatusRescheduledEventData(BaseModel):
     id: str
     """ID of the resource that triggered the event."""
 
     organization_id: str
 
-    type: Literal["session.status_scheduled"]
+    type: Literal["session.status_rescheduled"]
 
     workspace_id: str
