@@ -365,7 +365,14 @@ def build_events(
                     )
                 )
         elif event.delta.type == "input_json_delta":
-            if content_block.type == "tool_use" or content_block.type == "mcp_tool_use":
+            # Server-side tools (server_tool_use) stream input_json_delta the
+            # same way client-side tool_use blocks do, and the accumulator's
+            # TRACKS_TOOL_INPUT tuple (see below) already includes
+            # BetaServerToolUseBlock — so the SDK accumulates `content_block.input`
+            # correctly. We just weren't firing the parsed event for them, which
+            # forced consumers to bypass BetaInputJsonEvent and match on the raw
+            # delta. Fire it for server_tool_use too. (closes #1421)
+            if content_block.type in ("tool_use", "mcp_tool_use", "server_tool_use"):
                 events_to_fire.append(
                     build(
                         BetaInputJsonEvent,
