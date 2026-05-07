@@ -105,6 +105,67 @@ def assert_tool_use_response(events: list[ParsedMessageStreamEvent[None]], messa
     ]
 
 
+def assert_incomplete_partial_input_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
+    assert message.id == "msg_01UdjYBBipA9omjYhicnevgq"
+    assert message.model == "claude-3-7-sonnet-20250219"
+    assert message.role == "assistant"
+    assert message.stop_reason == "max_tokens"
+    assert message.stop_sequence is None
+    assert message.type == "message"
+    assert len(message.content) == 2
+
+    content = message.content[0]
+    assert content.type == "text"
+    assert (
+        content.text
+        == "I'll create a comprehensive tax guide for someone with multiple W2s and save it in a file called taxes.txt. Let me do that for you now."
+    )
+
+    tool_use = message.content[1]
+    assert tool_use.type == "tool_use"
+    assert tool_use.id == "toolu_01EKqbqmZrGRXy18eN7m9kvY"
+    assert tool_use.name == "make_file"
+    assert tool_use.input == {
+        "filename": "taxes.txt",
+        "lines_of_text": [
+            "# COMPREHENSIVE TAX GUIDE FOR INDIVIDUALS WITH MULTIPLE W-2s",
+            "",
+            "## INTRODUCTION",
+            "",
+        ],
+    }
+
+    input_json_events = [event for event in events if event.type == "input_json"]
+    assert "".join(event.partial_json for event in input_json_events).endswith('\n"Filing taxes')
+    assert input_json_events[-1].snapshot == tool_use.input
+
+    assert [e.type for e in events] == [
+        "message_start",
+        "content_block_start",
+        "content_block_delta",
+        "text",
+        "content_block_delta",
+        "text",
+        "content_block_delta",
+        "text",
+        "content_block_delta",
+        "text",
+        "content_block_delta",
+        "text",
+        "content_block_stop",
+        "content_block_start",
+        "content_block_delta",
+        "input_json",
+        "content_block_delta",
+        "input_json",
+        "content_block_delta",
+        "input_json",
+        "content_block_delta",
+        "input_json",
+        "message_delta",
+    ]
+
+
 def assert_refusal_response(message: Message) -> None:
     assert message.stop_reason == "refusal"
     assert message.stop_details is not None
@@ -206,6 +267,19 @@ class TestSyncMessages:
         ) as stream:
             assert_refusal_response(stream.get_final_message())
 
+    @pytest.mark.respx(base_url=base_url)
+    def test_incomplete_partial_json_max_tokens_response(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("incomplete_partial_json_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_incomplete_partial_input_response([event for event in stream], stream.get_final_message())
+
 
 class TestAsyncMessages:
     @pytest.mark.asyncio
@@ -304,6 +378,24 @@ class TestAsyncMessages:
             model="claude-opus-4-7",
         ) as stream:
             assert_refusal_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_incomplete_partial_json_max_tokens_response(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(
+                200, content=to_async_iter(get_response("incomplete_partial_json_response.txt"))
+            )
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_incomplete_partial_input_response(
+                [event async for event in stream], await stream.get_final_message()
+            )
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
