@@ -37,6 +37,18 @@ message = client.messages.create(
 print(message.content)
 ```
 
+## Authentication
+
+The client reads `ANTHROPIC_API_KEY` by default. To use a short-lived bearer
+token, pass `auth_token` as either a string or a callable that returns the
+current token. Callable tokens are read for each request.
+
+```python
+from anthropic import Anthropic
+
+client = Anthropic(auth_token=lambda: get_current_token())
+```
+
 ## Requirements
 
 Python 3.9+

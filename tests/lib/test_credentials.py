@@ -3023,6 +3023,23 @@ class TestCredentialPrecedence:
         assert req.headers.get("X-Api-Key") is None
         assert any("`auth_token=`" in r.message for r in caplog.records)
 
+    def test_explicit_auth_token_callable_shadows_explicit_credentials_with_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        calls: list[str] = []
+
+        def token_provider() -> str:
+            calls.append("provider-bearer")
+            return "provider-bearer"
+
+        with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
+            client = Anthropic(auth_token=token_provider, credentials=StaticToken("bearer-from-creds"))
+        req = self._walk_sync_auth(client)
+        assert req.headers.get("Authorization") == "Bearer provider-bearer"
+        assert req.headers.get("X-Api-Key") is None
+        assert calls == ["provider-bearer"]
+        assert any("`auth_token=`" in r.message for r in caplog.records)
+
     def test_async_explicit_api_key_shadows_explicit_credentials(self, caplog: pytest.LogCaptureFixture) -> None:
         with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
             client = AsyncAnthropic(api_key="sk-explicit", credentials=StaticToken("bearer-from-creds"))

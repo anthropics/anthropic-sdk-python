@@ -434,6 +434,56 @@ class TestAnthropic:
         request2 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"X-Api-Key": Omit()}))
         assert request2.headers.get("X-Api-Key") is None
 
+    def test_auth_token_callable_is_called_per_request(self) -> None:
+        calls: list[str] = []
+
+        def token_provider() -> str:
+            token = f"token-{len(calls) + 1}"
+            calls.append(token)
+            return token
+
+        client = Anthropic(base_url=base_url, auth_token=token_provider, _strict_response_validation=True)
+
+        request1 = client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        request2 = client._build_request(FinalRequestOptions(method="get", url="/foo"))
+
+        assert request1.headers.get("Authorization") == "Bearer token-1"
+        assert request2.headers.get("Authorization") == "Bearer token-2"
+        assert calls == ["token-1", "token-2"]
+
+        client.close()
+
+    def test_auth_token_callable_copy_inherits_and_overrides(self) -> None:
+        def token_provider() -> str:
+            return "from-provider"
+
+        client = Anthropic(base_url=base_url, auth_token=token_provider, _strict_response_validation=True)
+
+        copied = client.copy()
+        copied_request = copied._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert copied.auth_token is token_provider
+        assert copied_request.headers.get("Authorization") == "Bearer from-provider"
+
+        overridden = client.copy(auth_token="static-token")
+        overridden_request = overridden._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert overridden.auth_token == "static-token"
+        assert overridden_request.headers.get("Authorization") == "Bearer static-token"
+
+        client.close()
+
+    def test_auth_token_callable_takes_precedence_over_env_auth_token(self) -> None:
+        with update_env(ANTHROPIC_AUTH_TOKEN="env-token"):
+            client = Anthropic(
+                base_url=base_url,
+                auth_token=lambda: "callable-token",
+                _strict_response_validation=True,
+            )
+
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert request.headers.get("Authorization") == "Bearer callable-token"
+
+        client.close()
+
     def test_default_query_option(self) -> None:
         client = Anthropic(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"query_param": "bar"}
@@ -1545,6 +1595,43 @@ class TestAsyncAnthropic:
 
         request2 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"X-Api-Key": Omit()}))
         assert request2.headers.get("X-Api-Key") is None
+
+    async def test_auth_token_callable_is_called_per_request(self) -> None:
+        calls: list[str] = []
+
+        def token_provider() -> str:
+            token = f"async-token-{len(calls) + 1}"
+            calls.append(token)
+            return token
+
+        client = AsyncAnthropic(base_url=base_url, auth_token=token_provider, _strict_response_validation=True)
+
+        request1 = client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        request2 = client._build_request(FinalRequestOptions(method="get", url="/foo"))
+
+        assert request1.headers.get("Authorization") == "Bearer async-token-1"
+        assert request2.headers.get("Authorization") == "Bearer async-token-2"
+        assert calls == ["async-token-1", "async-token-2"]
+
+        await client.close()
+
+    async def test_auth_token_callable_copy_inherits_and_overrides(self) -> None:
+        def token_provider() -> str:
+            return "async-from-provider"
+
+        client = AsyncAnthropic(base_url=base_url, auth_token=token_provider, _strict_response_validation=True)
+
+        copied = client.copy()
+        copied_request = copied._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert copied.auth_token is token_provider
+        assert copied_request.headers.get("Authorization") == "Bearer async-from-provider"
+
+        overridden = client.copy(auth_token="async-static-token")
+        overridden_request = overridden._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert overridden.auth_token == "async-static-token"
+        assert overridden_request.headers.get("Authorization") == "Bearer async-static-token"
+
+        await client.close()
 
     async def test_default_query_option(self) -> None:
         client = AsyncAnthropic(
