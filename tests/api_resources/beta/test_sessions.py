@@ -188,8 +188,10 @@ class TestSessions:
             created_at_lte=parse_datetime("2019-12-27T18:11:19.117Z"),
             include_archived=True,
             limit=0,
+            memory_store_id="memory_store_id",
             order="asc",
             page="page",
+            statuses=["rescheduling"],
             betas=["string"],
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSession], session, path=["response"])
@@ -480,8 +482,10 @@ class TestAsyncSessions:
             created_at_lte=parse_datetime("2019-12-27T18:11:19.117Z"),
             include_archived=True,
             limit=0,
+            memory_store_id="memory_store_id",
             order="asc",
             page="page",
+            statuses=["rescheduling"],
             betas=["string"],
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSession], session, path=["response"])

@@ -42,3 +42,9 @@ class BetaManagedAgentsUserCustomToolResultEvent(BaseModel):
 
     processed_at: Optional[datetime] = None
     """A timestamp in RFC 3339 format"""
+
+    session_thread_id: Optional[str] = None
+    """Routes this result to a subagent thread.
+
+    Copy from the `agent.custom_tool_use` event's `session_thread_id`.
+    """

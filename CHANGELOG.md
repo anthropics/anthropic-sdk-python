@@ -1,5 +1,56 @@
 # Changelog
 
+## 0.100.0 (2026-05-06)
+
+Full Changelog: [v0.99.0...v0.100.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.99.0...v0.100.0)
+
+### Features
+
+* **api:** add support for Managed Agents multiagents and outcomes, webhooks, vault validation ([3b3deee](https://github.com/anthropics/anthropic-sdk-python/commit/3b3deee9c479ce5b54411a8572b66c5a90f1d50f))
+
+
+### Bug Fixes
+
+* **api:** Adjust webhook configuration ([8c3339e](https://github.com/anthropics/anthropic-sdk-python/commit/8c3339e532458e93585f2faf4f284ccbb5829717))
+
+## 0.99.0 (2026-05-05)
+
+Full Changelog: [v0.98.1...v0.99.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.98.1...v0.99.0)
+
+### Features
+
+* **client:** allow targeting a workspace for OIDC federation token exchange ([4ba8067](https://github.com/anthropics/anthropic-sdk-python/commit/4ba8067daa634691ea8c8a3b970d42bdaf5f04eb))
+
+## 0.98.1 (2026-05-04)
+
+Full Changelog: [v0.98.0...v0.98.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.98.0...v0.98.1)
+
+### Chores
+
+* fix typo in example ([#1754](https://github.com/anthropics/anthropic-sdk-python/issues/1754)) ([de8ba13](https://github.com/anthropics/anthropic-sdk-python/commit/de8ba13769837f92ff00be8a1b1e9ad0749eae2f))
+
+## 0.98.0 (2026-05-04)
+
+Full Changelog: [v0.97.0...v0.98.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.97.0...v0.98.0)
+
+### Features
+
+* **api:** improve Managed Agents APIs ([7faf393](https://github.com/anthropics/anthropic-sdk-python/commit/7faf3939a803420e7efd85cc18b67b97b429c172))
+* **client:** add Workload Identity Federation, interactive OAuth, and auth profiles ([6458bcc](https://github.com/anthropics/anthropic-sdk-python/commit/6458bcc28e83adcd96cd084ed19ec113d5462c80))
+* support setting headers via env ([52eb8cd](https://github.com/anthropics/anthropic-sdk-python/commit/52eb8cdd6e9a899519010d7e6ebc4a74a88f82cd))
+
+
+### Bug Fixes
+
+* **streaming:** propagate stop_details from message_delta onto accumulated Message ([#1725](https://github.com/anthropics/anthropic-sdk-python/issues/1725)) ([900dd9b](https://github.com/anthropics/anthropic-sdk-python/commit/900dd9b4376fd7a32d6e59d028b143558340d619))
+* use correct field name format for multipart file arrays ([8350bdc](https://github.com/anthropics/anthropic-sdk-python/commit/8350bdced9599d023565c0cca93ff2d05560f991))
+* **vertex:** async client missing us/eu multi-region base_url branches ([#1734](https://github.com/anthropics/anthropic-sdk-python/issues/1734)) ([3e78f71](https://github.com/anthropics/anthropic-sdk-python/commit/3e78f71c0ab3f3ff0e5402477cff06771c94864c))
+
+
+### Chores
+
+* **internal:** reformat pyproject.toml ([5a9d5fd](https://github.com/anthropics/anthropic-sdk-python/commit/5a9d5fd106c52643b87881d341b27dc7b12d5975))
+
 ## 0.97.0 (2026-04-23)
 
 Full Changelog: [v0.96.0...v0.97.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.96.0...v0.97.0)

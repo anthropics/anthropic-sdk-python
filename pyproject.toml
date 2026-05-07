@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "0.97.0"
+version = "0.100.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "MIT"
@@ -44,10 +44,12 @@ vertex = ["google-auth[requests] >=2, <3"]
 aws = ["boto3 >= 1.28.57", "botocore >= 1.31.57"]
 bedrock = ["boto3 >= 1.28.57", "botocore >= 1.31.57"]
 mcp = ["mcp>=1.0; python_version >= '3.10'"]
+webhooks = ["standardwebhooks >= 1.0.1, < 2"]
 
 [project.urls]
 Homepage = "https://github.com/anthropics/anthropic-sdk-python"
 Repository = "https://github.com/anthropics/anthropic-sdk-python"
+
 
 [tool.uv]
 managed = true
@@ -174,7 +176,7 @@ show_error_codes = true
 #
 # We also exclude our `tests` as mypy doesn't always infer
 # types correctly and Pyright will still catch any type errors.
-exclude = ['src/anthropic/_files.py', '_dev/.*.py', 'tests/.*', 'examples/mcp_server_weather.py', 'examples/mcp_tool_runner.py', 'examples/tools_with_mcp.py', 'examples/memory/basic.py', 'src/anthropic/lib/_parse/_transform.py', 'src/anthropic/lib/tools/_beta_functions.py']
+exclude = ["src/anthropic/_files.py", "_dev/.*.py", "tests/.*", "examples/mcp_server_weather.py", "examples/mcp_tool_runner.py", "examples/tools_with_mcp.py", "examples/memory/basic.py", "src/anthropic/lib/_parse/_transform.py", "src/anthropic/lib/tools/_beta_functions.py"]
 
 strict_equality = true
 implicit_reexport = true

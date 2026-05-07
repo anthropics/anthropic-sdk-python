@@ -67,7 +67,7 @@ class MemoryVersions(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        GetMemoryVersion
+        Retrieve a memory version
 
         Args:
           view: Query parameter for view
@@ -135,7 +135,7 @@ class MemoryVersions(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsMemoryVersion]:
         """
-        ListMemoryVersions
+        List memory versions
 
         Args:
           api_key_id: Query parameter for api_key_id
@@ -221,7 +221,7 @@ class MemoryVersions(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        RedactMemoryVersion
+        Redact a memory version
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
@@ -297,7 +297,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        GetMemoryVersion
+        Retrieve a memory version
 
         Args:
           view: Query parameter for view
@@ -367,7 +367,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsMemoryVersion, AsyncPageCursor[BetaManagedAgentsMemoryVersion]]:
         """
-        ListMemoryVersions
+        List memory versions
 
         Args:
           api_key_id: Query parameter for api_key_id
@@ -453,7 +453,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        RedactMemoryVersion
+        Redact a memory version
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.

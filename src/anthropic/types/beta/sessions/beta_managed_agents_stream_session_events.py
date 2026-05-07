@@ -14,16 +14,33 @@ from .beta_managed_agents_session_deleted_event import BetaManagedAgentsSessionD
 from .beta_managed_agents_agent_tool_result_event import BetaManagedAgentsAgentToolResultEvent
 from .beta_managed_agents_agent_mcp_tool_use_event import BetaManagedAgentsAgentMCPToolUseEvent
 from .beta_managed_agents_session_status_idle_event import BetaManagedAgentsSessionStatusIdleEvent
+from .beta_managed_agents_user_define_outcome_event import BetaManagedAgentsUserDefineOutcomeEvent
 from .beta_managed_agents_agent_custom_tool_use_event import BetaManagedAgentsAgentCustomToolUseEvent
 from .beta_managed_agents_agent_mcp_tool_result_event import BetaManagedAgentsAgentMCPToolResultEvent
 from .beta_managed_agents_session_status_running_event import BetaManagedAgentsSessionStatusRunningEvent
+from .beta_managed_agents_session_thread_created_event import BetaManagedAgentsSessionThreadCreatedEvent
 from .beta_managed_agents_span_model_request_end_event import BetaManagedAgentsSpanModelRequestEndEvent
 from .beta_managed_agents_user_tool_confirmation_event import BetaManagedAgentsUserToolConfirmationEvent
 from .beta_managed_agents_user_custom_tool_result_event import BetaManagedAgentsUserCustomToolResultEvent
 from .beta_managed_agents_span_model_request_start_event import BetaManagedAgentsSpanModelRequestStartEvent
+from .beta_managed_agents_agent_thread_message_sent_event import BetaManagedAgentsAgentThreadMessageSentEvent
 from .beta_managed_agents_session_status_terminated_event import BetaManagedAgentsSessionStatusTerminatedEvent
 from .beta_managed_agents_session_status_rescheduled_event import BetaManagedAgentsSessionStatusRescheduledEvent
+from .beta_managed_agents_session_thread_status_idle_event import BetaManagedAgentsSessionThreadStatusIdleEvent
+from .beta_managed_agents_span_outcome_evaluation_end_event import BetaManagedAgentsSpanOutcomeEvaluationEndEvent
+from .beta_managed_agents_agent_thread_message_received_event import BetaManagedAgentsAgentThreadMessageReceivedEvent
+from .beta_managed_agents_session_thread_status_running_event import BetaManagedAgentsSessionThreadStatusRunningEvent
+from .beta_managed_agents_span_outcome_evaluation_start_event import BetaManagedAgentsSpanOutcomeEvaluationStartEvent
 from .beta_managed_agents_agent_thread_context_compacted_event import BetaManagedAgentsAgentThreadContextCompactedEvent
+from .beta_managed_agents_span_outcome_evaluation_ongoing_event import (
+    BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent,
+)
+from .beta_managed_agents_session_thread_status_terminated_event import (
+    BetaManagedAgentsSessionThreadStatusTerminatedEvent,
+)
+from .beta_managed_agents_session_thread_status_rescheduled_event import (
+    BetaManagedAgentsSessionThreadStatusRescheduledEvent,
+)
 
 __all__ = ["BetaManagedAgentsStreamSessionEvents"]
 
@@ -40,15 +57,26 @@ BetaManagedAgentsStreamSessionEvents: TypeAlias = Annotated[
         BetaManagedAgentsAgentMCPToolResultEvent,
         BetaManagedAgentsAgentToolUseEvent,
         BetaManagedAgentsAgentToolResultEvent,
+        BetaManagedAgentsAgentThreadMessageReceivedEvent,
+        BetaManagedAgentsAgentThreadMessageSentEvent,
         BetaManagedAgentsAgentThreadContextCompactedEvent,
         BetaManagedAgentsSessionErrorEvent,
         BetaManagedAgentsSessionStatusRescheduledEvent,
         BetaManagedAgentsSessionStatusRunningEvent,
         BetaManagedAgentsSessionStatusIdleEvent,
         BetaManagedAgentsSessionStatusTerminatedEvent,
+        BetaManagedAgentsSessionThreadCreatedEvent,
+        BetaManagedAgentsSpanOutcomeEvaluationStartEvent,
+        BetaManagedAgentsSpanOutcomeEvaluationEndEvent,
         BetaManagedAgentsSpanModelRequestStartEvent,
         BetaManagedAgentsSpanModelRequestEndEvent,
+        BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent,
+        BetaManagedAgentsUserDefineOutcomeEvent,
         BetaManagedAgentsSessionDeletedEvent,
+        BetaManagedAgentsSessionThreadStatusRunningEvent,
+        BetaManagedAgentsSessionThreadStatusIdleEvent,
+        BetaManagedAgentsSessionThreadStatusTerminatedEvent,
+        BetaManagedAgentsSessionThreadStatusRescheduledEvent,
     ],
     PropertyInfo(discriminator="type"),
 ]

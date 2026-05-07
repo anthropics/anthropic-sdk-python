@@ -253,7 +253,7 @@ class TestAnthropic:
             client.__init__,  # type: ignore[misc]
         )
         copy_signature = inspect.signature(client.copy)
-        exclude_params = {"transport", "proxies", "_strict_response_validation"}
+        exclude_params = {"transport", "proxies", "_strict_response_validation", "_token_cache"}
 
         for name in init_signature.parameters.keys():
             if name in exclude_params:
@@ -421,12 +421,13 @@ class TestAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
-            client2 = Anthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
+        with mock.patch("anthropic._client.default_credentials", return_value=None):
+            with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
+                client2 = Anthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 
@@ -1280,7 +1281,7 @@ class TestAsyncAnthropic:
             async_client.__init__,  # type: ignore[misc]
         )
         copy_signature = inspect.signature(async_client.copy)
-        exclude_params = {"transport", "proxies", "_strict_response_validation"}
+        exclude_params = {"transport", "proxies", "_strict_response_validation", "_token_cache"}
 
         for name in init_signature.parameters.keys():
             if name in exclude_params:
@@ -1450,12 +1451,13 @@ class TestAsyncAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
-            client2 = AsyncAnthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
+        with mock.patch("anthropic._client.default_credentials", return_value=None):
+            with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
+                client2 = AsyncAnthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 

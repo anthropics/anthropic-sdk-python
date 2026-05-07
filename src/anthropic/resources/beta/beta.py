@@ -18,6 +18,7 @@ from .models import (
     ModelsWithStreamingResponse,
     AsyncModelsWithStreamingResponse,
 )
+from .webhooks import Webhooks, AsyncWebhooks
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from .environments import (
@@ -126,6 +127,10 @@ class Beta(SyncAPIResource):
         return Skills(self._client)
 
     @cached_property
+    def webhooks(self) -> Webhooks:
+        return Webhooks(self._client)
+
+    @cached_property
     def user_profiles(self) -> UserProfiles:
         return UserProfiles(self._client)
 
@@ -185,6 +190,10 @@ class AsyncBeta(AsyncAPIResource):
     @cached_property
     def skills(self) -> AsyncSkills:
         return AsyncSkills(self._client)
+
+    @cached_property
+    def webhooks(self) -> AsyncWebhooks:
+        return AsyncWebhooks(self._client)
 
     @cached_property
     def user_profiles(self) -> AsyncUserProfiles:

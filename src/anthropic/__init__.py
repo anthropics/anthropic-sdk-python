@@ -40,6 +40,7 @@ from ._exceptions import (
     InternalServerError,
     PermissionDeniedError,
     UnprocessableEntityError,
+    APIWebhookValidationError,
     APIResponseValidationError,
 )
 from ._base_client import DefaultHttpxClient, DefaultAioHttpClient, DefaultAsyncHttpxClient
@@ -64,6 +65,7 @@ __all__ = [
     "APITimeoutError",
     "APIConnectionError",
     "APIResponseValidationError",
+    "APIWebhookValidationError",
     "BadRequestError",
     "AuthenticationError",
     "PermissionDeniedError",
@@ -104,6 +106,7 @@ from .lib.vertex import *
 from .lib.bedrock import *
 from .lib.foundry import AnthropicFoundry as AnthropicFoundry, AsyncAnthropicFoundry as AsyncAnthropicFoundry
 from .lib.streaming import *
+from .lib.credentials import *
 
 _setup_logging()
 

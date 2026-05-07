@@ -64,6 +64,7 @@ from .sessions import (
     SessionsWithStreamingResponse,
     AsyncSessionsWithStreamingResponse,
 )
+from .webhooks import Webhooks, AsyncWebhooks
 from .environments import (
     Environments,
     AsyncEnvironments,
@@ -144,6 +145,8 @@ __all__ = [
     "AsyncSkillsWithRawResponse",
     "SkillsWithStreamingResponse",
     "AsyncSkillsWithStreamingResponse",
+    "Webhooks",
+    "AsyncWebhooks",
     "UserProfiles",
     "AsyncUserProfiles",
     "UserProfilesWithRawResponse",

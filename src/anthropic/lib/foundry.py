@@ -95,6 +95,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         resource: str | None = None,
         api_key: str | None = None,
         azure_ad_token_provider: AzureADTokenProvider | None = None,
+        webhook_key: str | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -110,6 +111,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         base_url: str,
         api_key: str | None = None,
         azure_ad_token_provider: AzureADTokenProvider | None = None,
+        webhook_key: str | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -124,6 +126,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         resource: str | None = None,
         api_key: str | None = None,
         azure_ad_token_provider: AzureADTokenProvider | None = None,
+        webhook_key: str | None = None,
         base_url: str | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -163,6 +166,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
 
         super().__init__(
             api_key=api_key,
+            webhook_key=webhook_key,
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
@@ -192,12 +196,13 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         return BetaFoundry(self)
 
     @override
-    def copy(
+    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — subclass intentionally drops `credentials`
         self,
         *,
         api_key: str | None = None,
         azure_ad_token_provider: AzureADTokenProvider | None = None,
         auth_token: str | None = None,
+        webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.Client | None = None,
@@ -214,6 +219,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         return super().copy(
             api_key=api_key,
             auth_token=auth_token,
+            webhook_key=webhook_key,
             base_url=base_url,
             timeout=timeout,
             http_client=http_client,
@@ -228,7 +234,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
             },
         )
 
-    with_options = copy
+    with_options = copy  # type: ignore[assignment]
 
     def _get_azure_ad_token(self) -> str | None:
         provider = self._azure_ad_token_provider
@@ -272,6 +278,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         resource: str | None = None,
         api_key: str | None = None,
         azure_ad_token_provider: AsyncAzureADTokenProvider | None = None,
+        webhook_key: str | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -287,6 +294,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         base_url: str,
         api_key: str | None = None,
         azure_ad_token_provider: AsyncAzureADTokenProvider | None = None,
+        webhook_key: str | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -301,6 +309,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         resource: str | None = None,
         api_key: str | None = None,
         azure_ad_token_provider: AsyncAzureADTokenProvider | None = None,
+        webhook_key: str | None = None,
         base_url: str | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -340,6 +349,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
 
         super().__init__(
             api_key=api_key,
+            webhook_key=webhook_key,
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
@@ -369,12 +379,13 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         return AsyncBetaFoundry(client=self)
 
     @override
-    def copy(
+    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — subclass intentionally drops `credentials`
         self,
         *,
         api_key: str | None = None,
         azure_ad_token_provider: AsyncAzureADTokenProvider | None = None,
         auth_token: str | None = None,
+        webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.AsyncClient | None = None,
@@ -391,6 +402,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         return super().copy(
             api_key=api_key,
             auth_token=auth_token,
+            webhook_key=webhook_key,
             base_url=base_url,
             timeout=timeout,
             http_client=http_client,
@@ -405,7 +417,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
             },
         )
 
-    with_options = copy
+    with_options = copy  # type: ignore[assignment]
 
     async def _get_azure_ad_token(self) -> str | None:
         provider = self._azure_ad_token_provider

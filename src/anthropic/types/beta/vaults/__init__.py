@@ -5,9 +5,17 @@ from __future__ import annotations
 from .credential_list_params import CredentialListParams as CredentialListParams
 from .credential_create_params import CredentialCreateParams as CredentialCreateParams
 from .credential_update_params import CredentialUpdateParams as CredentialUpdateParams
+from .beta_managed_agents_mcp_probe import BetaManagedAgentsMCPProbe as BetaManagedAgentsMCPProbe
 from .beta_managed_agents_credential import BetaManagedAgentsCredential as BetaManagedAgentsCredential
+from .beta_managed_agents_refresh_object import BetaManagedAgentsRefreshObject as BetaManagedAgentsRefreshObject
 from .beta_managed_agents_deleted_credential import (
     BetaManagedAgentsDeletedCredential as BetaManagedAgentsDeletedCredential,
+)
+from .beta_managed_agents_credential_validation import (
+    BetaManagedAgentsCredentialValidation as BetaManagedAgentsCredentialValidation,
+)
+from .beta_managed_agents_refresh_http_response import (
+    BetaManagedAgentsRefreshHTTPResponse as BetaManagedAgentsRefreshHTTPResponse,
 )
 from .beta_managed_agents_mcp_oauth_auth_response import (
     BetaManagedAgentsMCPOAuthAuthResponse as BetaManagedAgentsMCPOAuthAuthResponse,
@@ -32,6 +40,9 @@ from .beta_managed_agents_static_bearer_create_params import (
 )
 from .beta_managed_agents_static_bearer_update_params import (
     BetaManagedAgentsStaticBearerUpdateParams as BetaManagedAgentsStaticBearerUpdateParams,
+)
+from .beta_managed_agents_credential_validation_status import (
+    BetaManagedAgentsCredentialValidationStatus as BetaManagedAgentsCredentialValidationStatus,
 )
 from .beta_managed_agents_token_endpoint_auth_none_param import (
     BetaManagedAgentsTokenEndpointAuthNoneParam as BetaManagedAgentsTokenEndpointAuthNoneParam,

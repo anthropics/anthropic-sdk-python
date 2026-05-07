@@ -503,6 +503,8 @@ def accumulate_event(
     elif event.type == "message_delta":
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
+        if event.delta.stop_details is not None:
+            current_snapshot.stop_details = event.delta.stop_details
         current_snapshot.usage.output_tokens = event.usage.output_tokens
 
         # Update other usage fields if they exist in the event

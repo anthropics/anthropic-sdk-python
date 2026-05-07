@@ -82,10 +82,24 @@ class MemoryStores(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
-        """
-        CreateMemoryStore
+        """Create a memory store
 
         Args:
+          name: Human-readable name for the store.
+
+        Required; 1–255 characters; no control
+              characters. The mount-path slug under `/mnt/memory/` is derived from this name
+              (lowercased, non-alphanumeric runs collapsed to a hyphen). Names need not be
+              unique within a workspace.
+
+          description: Free-text description of what the store contains, up to 1024 characters.
+              Included in the agent's system prompt when the store is attached, so word it to
+              be useful to the agent.
+
+          metadata: Arbitrary key-value tags for your own bookkeeping (such as the end user a store
+              belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
+              Not visible to the agent.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -136,7 +150,7 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        GetMemoryStore
+        Retrieve a memory store
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
@@ -185,14 +199,20 @@ class MemoryStores(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
-        """UpdateMemoryStore
+        """
+        Update a memory store
 
         Args:
-          metadata: Metadata patch.
+          description: New description for the store, up to 1024 characters. Pass an empty string to
+              clear it.
 
-        Set a key to a string to upsert it, or to null to delete it.
+          metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars
               each) with values up to 512 chars.
+
+          name: New human-readable name for the store. 1–255 characters; no control characters.
+              Renaming changes the slug used for the store's `mount_path` in sessions created
+              after the update.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -250,18 +270,23 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsMemoryStore]:
         """
-        ListMemoryStores
+        List memory stores
 
         Args:
-          created_at_gte: Return stores created at or after this time (inclusive).
+          created_at_gte: Return only stores whose `created_at` is at or after this time (inclusive). Sent
+              on the wire as `created_at[gte]`.
 
-          created_at_lte: Return stores created at or before this time (inclusive).
+          created_at_lte: Return only stores whose `created_at` is at or before this time (inclusive).
+              Sent on the wire as `created_at[lte]`.
 
-          include_archived: Query parameter for include_archived
+          include_archived: When `true`, archived stores are included in the results. Defaults to `false`
+              (archived stores are excluded).
 
-          limit: Query parameter for limit
+          limit: Maximum number of stores to return per page. Must be between 1 and 100. Defaults
+              to 20 when omitted.
 
-          page: Query parameter for page
+          page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
+              previous response to fetch the next page; omit for the first page.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -319,7 +344,7 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedMemoryStore:
         """
-        DeleteMemoryStore
+        Delete a memory store
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
@@ -366,7 +391,7 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        ArchiveMemoryStore
+        Archive a memory store
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
@@ -443,10 +468,24 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
-        """
-        CreateMemoryStore
+        """Create a memory store
 
         Args:
+          name: Human-readable name for the store.
+
+        Required; 1–255 characters; no control
+              characters. The mount-path slug under `/mnt/memory/` is derived from this name
+              (lowercased, non-alphanumeric runs collapsed to a hyphen). Names need not be
+              unique within a workspace.
+
+          description: Free-text description of what the store contains, up to 1024 characters.
+              Included in the agent's system prompt when the store is attached, so word it to
+              be useful to the agent.
+
+          metadata: Arbitrary key-value tags for your own bookkeeping (such as the end user a store
+              belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
+              Not visible to the agent.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -497,7 +536,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        GetMemoryStore
+        Retrieve a memory store
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
@@ -546,14 +585,20 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
-        """UpdateMemoryStore
+        """
+        Update a memory store
 
         Args:
-          metadata: Metadata patch.
+          description: New description for the store, up to 1024 characters. Pass an empty string to
+              clear it.
 
-        Set a key to a string to upsert it, or to null to delete it.
+          metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars
               each) with values up to 512 chars.
+
+          name: New human-readable name for the store. 1–255 characters; no control characters.
+              Renaming changes the slug used for the store's `mount_path` in sessions created
+              after the update.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -611,18 +656,23 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsMemoryStore, AsyncPageCursor[BetaManagedAgentsMemoryStore]]:
         """
-        ListMemoryStores
+        List memory stores
 
         Args:
-          created_at_gte: Return stores created at or after this time (inclusive).
+          created_at_gte: Return only stores whose `created_at` is at or after this time (inclusive). Sent
+              on the wire as `created_at[gte]`.
 
-          created_at_lte: Return stores created at or before this time (inclusive).
+          created_at_lte: Return only stores whose `created_at` is at or before this time (inclusive).
+              Sent on the wire as `created_at[lte]`.
 
-          include_archived: Query parameter for include_archived
+          include_archived: When `true`, archived stores are included in the results. Defaults to `false`
+              (archived stores are excluded).
 
-          limit: Query parameter for limit
+          limit: Maximum number of stores to return per page. Must be between 1 and 100. Defaults
+              to 20 when omitted.
 
-          page: Query parameter for page
+          page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
+              previous response to fetch the next page; omit for the first page.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -680,7 +730,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedMemoryStore:
         """
-        DeleteMemoryStore
+        Delete a memory store
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
@@ -727,7 +777,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        ArchiveMemoryStore
+        Archive a memory store
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.

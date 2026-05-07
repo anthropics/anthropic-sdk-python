@@ -19,3 +19,10 @@ class BetaManagedAgentsUserInterruptEvent(BaseModel):
 
     processed_at: Optional[datetime] = None
     """A timestamp in RFC 3339 format"""
+
+    session_thread_id: Optional[str] = None
+    """
+    If absent, interrupts every non-archived thread in a multiagent session (or the
+    primary alone in a single-agent session). If present, interrupts only the named
+    thread.
+    """
