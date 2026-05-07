@@ -10,6 +10,18 @@ from anthropic import AnthropicBedrock
 # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
 client = AnthropicBedrock()
 
+# Some Amazon Bedrock models must be invoked with an inference profile ID or
+# inference profile ARN for on-demand throughput. If a direct model ID returns
+# an error like "on-demand throughput isn't supported", use the ID from Bedrock
+# Cross-region inference, for example:
+#
+# model = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+#
+# Inference profile ARNs can also be used, for example:
+#
+# model = "arn:aws:bedrock:us-east-1:123456789012:inference-profile/us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+MODEL = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+
 print("------ standard response ------")
 message = client.messages.create(
     max_tokens=1024,
@@ -19,7 +31,7 @@ message = client.messages.create(
             "content": "Hello!",
         }
     ],
-    model="anthropic.claude-sonnet-4-5-20250929-v1:0",
+    model=MODEL,
 )
 print(message.model_dump_json(indent=2))
 
@@ -33,7 +45,7 @@ with client.messages.stream(
             "content": "Say hello there!",
         }
     ],
-    model="anthropic.claude-sonnet-4-5-20250929-v1:0",
+    model=MODEL,
 ) as stream:
     for text in stream.text_stream:
         print(text, end="", flush=True)
