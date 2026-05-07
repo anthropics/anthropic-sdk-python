@@ -4,7 +4,7 @@ import os
 import logging
 import urllib.parse
 from typing import Any, Union, Mapping, TypeVar
-from typing_extensions import Self, override
+from typing_extensions import Self, Literal, TypeAlias, override
 
 import httpx
 
@@ -30,12 +30,38 @@ from ...resources.completions import Completions, AsyncCompletions
 log: logging.Logger = logging.getLogger(__name__)
 
 DEFAULT_VERSION = "bedrock-2023-05-31"
+BEDROCK_PERFORMANCE_CONFIG_LATENCY_HEADER = "X-Amzn-Bedrock-PerformanceConfig-Latency"
+BedrockPerformanceConfigLatency: TypeAlias = Literal["standard", "optimized"]
 
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
-def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
+def _apply_performance_config_latency_header(
+    options: FinalRequestOptions,
+    performance_config_latency: BedrockPerformanceConfigLatency | None,
+) -> None:
+    if performance_config_latency is None:
+        return
+
+    if not is_given(options.headers):
+        headers = {}
+    else:
+        headers = {**options.headers}
+
+    for header in headers:
+        if header.lower() == BEDROCK_PERFORMANCE_CONFIG_LATENCY_HEADER.lower():
+            return
+
+    headers[BEDROCK_PERFORMANCE_CONFIG_LATENCY_HEADER] = performance_config_latency
+    options.headers = headers
+
+
+def _prepare_options(
+    input_options: FinalRequestOptions,
+    *,
+    performance_config_latency: BedrockPerformanceConfigLatency | None = None,
+) -> FinalRequestOptions:
     options = model_copy(input_options, deep=True)
 
     if is_dict(options.json_data):
@@ -57,6 +83,7 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
             options.url = f"/model/{model}/invoke-with-response-stream"
         else:
             options.url = f"/model/{model}/invoke"
+        _apply_performance_config_latency_header(options, performance_config_latency)
 
     if options.url.startswith("/v1/messages/batches"):
         raise AnthropicError("The Batch API is not supported in Bedrock yet")
@@ -146,6 +173,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        performance_config_latency: BedrockPerformanceConfigLatency | None = None,
         # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
         http_client: httpx.Client | None = None,
         # Enable or disable schema validation for data returned by the API.
@@ -182,6 +210,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         self.aws_profile = aws_profile
 
         self.aws_session_token = aws_session_token
+        self.performance_config_latency: BedrockPerformanceConfigLatency | None = performance_config_latency
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
@@ -209,7 +238,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
 
     @override
     def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        return _prepare_options(options)
+        return _prepare_options(options, performance_config_latency=self.performance_config_latency)
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
@@ -250,6 +279,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        performance_config_latency: BedrockPerformanceConfigLatency | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -285,6 +315,9 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            performance_config_latency=self.performance_config_latency
+            if isinstance(performance_config_latency, NotGiven)
+            else performance_config_latency,
             **_extra_kwargs,
         )
 
@@ -311,6 +344,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        performance_config_latency: BedrockPerformanceConfigLatency | None = None,
         # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
         http_client: httpx.AsyncClient | None = None,
         # Enable or disable schema validation for data returned by the API.
@@ -347,6 +381,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         self.aws_profile = aws_profile
 
         self.aws_session_token = aws_session_token
+        self.performance_config_latency: BedrockPerformanceConfigLatency | None = performance_config_latency
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
@@ -374,7 +409,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
 
     @override
     async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        return _prepare_options(options)
+        return _prepare_options(options, performance_config_latency=self.performance_config_latency)
 
     @override
     async def _prepare_request(self, request: httpx.Request) -> None:
@@ -415,6 +450,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        performance_config_latency: BedrockPerformanceConfigLatency | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -450,6 +486,9 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            performance_config_latency=self.performance_config_latency
+            if isinstance(performance_config_latency, NotGiven)
+            else performance_config_latency,
             **_extra_kwargs,
         )
 
