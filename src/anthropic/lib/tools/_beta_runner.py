@@ -273,13 +273,21 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
             # If the compaction was performed, skip tool call generation this iteration
             if not self._check_and_compact():
-                response = self.generate_tool_call_response()
-                if response is None:
-                    log.debug("Tool call was not requested, exiting from tool runner loop.")
-                    return
+                # When the last API response has stop_reason="pause_turn" and
+                # contains server_tool_use blocks (e.g. web_search, web_fetch),
+                # the server is still processing.  Skip tool-call generation
+                # entirely and re-invoke the API without appending any new
+                # user turn — the server will resume on the next call.
+                if self._has_pause_turn_server_tools():
+                    log.debug("Received pause_turn with server_tool_use blocks; continuing without client tool response.")
+                else:
+                    response = self.generate_tool_call_response()
+                    if response is None:
+                        log.debug("Tool call was not requested, exiting from tool runner loop.")
+                        return
 
-                if not self._messages_modified:
-                    self.append_messages(message, response)
+                    if not self._messages_modified:
+                        self.append_messages(message, response)
 
             self._messages_modified = False
             self._cached_tool_call_response = None
@@ -383,6 +391,19 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             return None
 
         return last_assistant_message.content
+
+    def _has_pause_turn_server_tools(self) -> bool:
+        """Return True when the last message has stop_reason='pause_turn' and
+        contains server_tool_use blocks (web_search, web_fetch, etc.).
+
+        In this case the server is still processing the request; the runner
+        must continue the loop without adding a client-side tool_result message.
+        """
+        last_message = self._get_last_message()
+        if last_message is None or last_message.stop_reason != "pause_turn":
+            return False
+        content = last_message.content or []
+        return any(getattr(block, "type", None) == "server_tool_use" for block in content)
 
 
 class BetaToolRunner(BaseSyncToolRunner[ParsedBetaMessage[ResponseFormatT], ResponseFormatT]):
@@ -554,13 +575,21 @@ class BaseAsyncToolRunner(
 
             # If the compaction was performed, skip tool call generation this iteration
             if not await self._check_and_compact():
-                response = await self.generate_tool_call_response()
-                if response is None:
-                    log.debug("Tool call was not requested, exiting from tool runner loop.")
-                    return
+                # When the last API response has stop_reason="pause_turn" and
+                # contains server_tool_use blocks (e.g. web_search, web_fetch),
+                # the server is still processing.  Skip tool-call generation
+                # entirely and re-invoke the API without appending any new
+                # user turn — the server will resume on the next call.
+                if await self._has_pause_turn_server_tools():
+                    log.debug("Received pause_turn with server_tool_use blocks; continuing without client tool response.")
+                else:
+                    response = await self.generate_tool_call_response()
+                    if response is None:
+                        log.debug("Tool call was not requested, exiting from tool runner loop.")
+                        return
 
-                if not self._messages_modified:
-                    self.append_messages(message, response)
+                    if not self._messages_modified:
+                        self.append_messages(message, response)
 
             self._messages_modified = False
             self._cached_tool_call_response = None
@@ -608,6 +637,18 @@ class BaseAsyncToolRunner(
             return None
 
         return last_assistant_message.content
+
+    async def _has_pause_turn_server_tools(self) -> bool:
+        """Async variant of the same helper in BaseSyncToolRunner.
+
+        Return True when the last message has stop_reason='pause_turn' and
+        contains server_tool_use blocks (web_search, web_fetch, etc.).
+        """
+        last_message = await self._get_last_message()
+        if last_message is None or last_message.stop_reason != "pause_turn":
+            return False
+        content = last_message.content or []
+        return any(getattr(block, "type", None) == "server_tool_use" for block in content)
 
     async def _generate_tool_call_response(self) -> BetaMessageParam | None:
         content = await self._get_last_assistant_message_content()
