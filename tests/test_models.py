@@ -10,6 +10,8 @@ from pydantic import Field
 from anthropic._utils import PropertyInfo
 from anthropic._compat import PYDANTIC_V1, parse_obj, model_dump, model_json
 from anthropic._models import DISCRIMINATOR_CACHE, BaseModel, construct_type
+from anthropic.types import ToolSearchToolResultBlock
+from anthropic.types.beta import BetaToolSearchToolResultBlock
 
 
 class BasicModel(BaseModel):
@@ -961,3 +963,30 @@ def test_extra_properties() -> None:
     assert model.a.prop == 1
     assert isinstance(model.a, Item)
     assert model.other == "foo"
+
+
+
+def test_tool_search_tool_result_block_content_is_discriminated() -> None:
+    block = ToolSearchToolResultBlock.model_validate({
+        "type": "tool_search_tool_result",
+        "tool_use_id": "toolu_123",
+        "content": {
+            "type": "tool_search_tool_search_result",
+            "tool_references": [{"type": "tool_reference", "tool_name": "web_search", "url": "https://example.com", "title": "Example"}],
+        },
+    })
+
+    assert block.content.type == "tool_search_tool_search_result"
+
+
+def test_beta_tool_search_tool_result_block_content_is_discriminated() -> None:
+    block = BetaToolSearchToolResultBlock.model_validate({
+        "type": "tool_search_tool_result",
+        "tool_use_id": "toolu_123",
+        "content": {
+            "type": "tool_search_tool_search_result",
+            "tool_references": [{"type": "tool_reference", "tool_name": "web_search", "url": "https://example.com", "title": "Example"}],
+        },
+    })
+
+    assert block.content.type == "tool_search_tool_search_result"
