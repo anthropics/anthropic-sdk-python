@@ -72,7 +72,18 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         max_iterations: int | None = None,
         compaction_control: CompactionControl | None = None,
     ) -> None:
-        self._tools_by_name = {tool.name: tool for tool in tools}
+        tools_list = list(tools)
+        seen: dict[str, int] = {}
+        for tool in tools_list:
+            seen[tool.name] = seen.get(tool.name, 0) + 1
+        duplicates = sorted(name for name, count in seen.items() if count > 1)
+        if duplicates:
+            raise ValueError(
+                "Duplicate tool name(s) passed to tool_runner: "
+                + ", ".join(repr(name) for name in duplicates)
+                + ". Tool names must be unique within a single tool_runner call."
+            )
+        self._tools_by_name = {tool.name: tool for tool in tools_list}
         self._params: ParseMessageCreateParamsBase[ResponseFormatT] = {
             **params,
             "messages": [message for message in params["messages"]],

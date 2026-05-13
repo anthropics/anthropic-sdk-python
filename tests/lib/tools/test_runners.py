@@ -695,3 +695,85 @@ def test_tool_runner_method_in_sync(sync: bool, client: Anthropic, async_client:
             "stream",
         },
     )
+
+
+def test_tool_runner_rejects_duplicate_tool_names_sync(client: Anthropic) -> None:
+    @beta_tool
+    def get_weather(location: str) -> BetaFunctionToolResultType:
+        """Look up the weather for a location."""
+        return location
+
+    @beta_tool(name="get_weather")
+    def other_weather(city: str) -> BetaFunctionToolResultType:
+        """A second tool that happens to use the same name."""
+        return city
+
+    with pytest.raises(ValueError) as excinfo:
+        client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather, other_weather],
+            messages=[{"role": "user", "content": "hi"}],
+        )
+
+    msg = str(excinfo.value)
+    assert "Duplicate tool name" in msg
+    assert "'get_weather'" in msg
+
+
+async def test_tool_runner_rejects_duplicate_tool_names_async(async_client: AsyncAnthropic) -> None:
+    @beta_async_tool
+    async def get_weather(location: str) -> BetaFunctionToolResultType:
+        """Look up the weather for a location."""
+        return location
+
+    @beta_async_tool(name="get_weather")
+    async def other_weather(city: str) -> BetaFunctionToolResultType:
+        """A second tool that happens to use the same name."""
+        return city
+
+    with pytest.raises(ValueError) as excinfo:
+        async_client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather, other_weather],
+            messages=[{"role": "user", "content": "hi"}],
+        )
+
+    msg = str(excinfo.value)
+    assert "Duplicate tool name" in msg
+    assert "'get_weather'" in msg
+
+
+def test_tool_runner_lists_all_duplicate_names(client: Anthropic) -> None:
+    @beta_tool
+    def get_weather(location: str) -> BetaFunctionToolResultType:
+        """get weather"""
+        return location
+
+    @beta_tool(name="get_weather")
+    def get_weather_dup(city: str) -> BetaFunctionToolResultType:
+        """duplicate of get_weather"""
+        return city
+
+    @beta_tool
+    def lookup(query: str) -> BetaFunctionToolResultType:
+        """lookup a thing"""
+        return query
+
+    @beta_tool(name="lookup")
+    def lookup_dup(q: str) -> BetaFunctionToolResultType:
+        """duplicate of lookup"""
+        return q
+
+    with pytest.raises(ValueError) as excinfo:
+        client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather, get_weather_dup, lookup, lookup_dup],
+            messages=[{"role": "user", "content": "hi"}],
+        )
+
+    msg = str(excinfo.value)
+    assert "'get_weather'" in msg
+    assert "'lookup'" in msg
