@@ -14,6 +14,7 @@ from .beta_model_info import BetaModelInfo as BetaModelInfo
 from .beta_text_block import BetaTextBlock as BetaTextBlock
 from .beta_text_delta import BetaTextDelta as BetaTextDelta
 from .beta_tool_param import BetaToolParam as BetaToolParam
+from .beta_diagnostics import BetaDiagnostics as BetaDiagnostics
 from .beta_environment import BetaEnvironment as BetaEnvironment
 from .beta_stop_reason import BetaStopReason as BetaStopReason
 from .file_list_params import FileListParams as FileListParams
@@ -63,6 +64,7 @@ from .session_update_params import SessionUpdateParams as SessionUpdateParams
 from .skill_create_response import SkillCreateResponse as SkillCreateResponse
 from .skill_delete_response import SkillDeleteResponse as SkillDeleteResponse
 from .beta_base64_pdf_source import BetaBase64PDFSource as BetaBase64PDFSource
+from .beta_diagnostics_param import BetaDiagnosticsParam as BetaDiagnosticsParam
 from .beta_effort_capability import BetaEffortCapability as BetaEffortCapability
 from .beta_image_block_param import BetaImageBlockParam as BetaImageBlockParam
 from .beta_mcp_toolset_param import BetaMCPToolsetParam as BetaMCPToolsetParam
@@ -112,6 +114,7 @@ from .memory_store_update_params import MemoryStoreUpdateParams as MemoryStoreUp
 from .user_profile_create_params import UserProfileCreateParams as UserProfileCreateParams
 from .user_profile_update_params import UserProfileUpdateParams as UserProfileUpdateParams
 from .beta_base64_pdf_block_param import BetaBase64PDFBlockParam as BetaBase64PDFBlockParam
+from .beta_cache_miss_unavailable import BetaCacheMissUnavailable as BetaCacheMissUnavailable
 from .beta_citation_char_location import BetaCitationCharLocation as BetaCitationCharLocation
 from .beta_citation_page_location import BetaCitationPageLocation as BetaCitationPageLocation
 from .beta_citations_config_param import BetaCitationsConfigParam as BetaCitationsConfigParam
@@ -138,6 +141,8 @@ from .beta_tool_result_block_param import BetaToolResultBlockParam as BetaToolRe
 from .beta_tool_uses_trigger_param import BetaToolUsesTriggerParam as BetaToolUsesTriggerParam
 from .beta_web_search_result_block import BetaWebSearchResultBlock as BetaWebSearchResultBlock
 from .beta_all_thinking_turns_param import BetaAllThinkingTurnsParam as BetaAllThinkingTurnsParam
+from .beta_cache_miss_model_changed import BetaCacheMissModelChanged as BetaCacheMissModelChanged
+from .beta_cache_miss_tools_changed import BetaCacheMissToolsChanged as BetaCacheMissToolsChanged
 from .beta_json_output_format_param import BetaJSONOutputFormatParam as BetaJSONOutputFormatParam
 from .beta_mcp_tool_use_block_param import BetaMCPToolUseBlockParam as BetaMCPToolUseBlockParam
 from .beta_raw_message_stream_event import BetaRawMessageStreamEvent as BetaRawMessageStreamEvent
@@ -148,6 +153,7 @@ from .beta_user_profile_trust_grant import BetaUserProfileTrustGrant as BetaUser
 from .beta_advisor_tool_result_block import BetaAdvisorToolResultBlock as BetaAdvisorToolResultBlock
 from .beta_advisor_tool_result_error import BetaAdvisorToolResultError as BetaAdvisorToolResultError
 from .beta_base64_image_source_param import BetaBase64ImageSourceParam as BetaBase64ImageSourceParam
+from .beta_cache_miss_system_changed import BetaCacheMissSystemChanged as BetaCacheMissSystemChanged
 from .beta_managed_agents_multiagent import BetaManagedAgentsMultiagent as BetaManagedAgentsMultiagent
 from .beta_search_result_block_param import BetaSearchResultBlockParam as BetaSearchResultBlockParam
 from .beta_advisor_result_block_param import BetaAdvisorResultBlockParam as BetaAdvisorResultBlockParam
@@ -162,6 +168,7 @@ from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param as Beta
 from .beta_tool_reference_block_param import BetaToolReferenceBlockParam as BetaToolReferenceBlockParam
 from .beta_unrestricted_network_param import BetaUnrestrictedNetworkParam as BetaUnrestrictedNetworkParam
 from .beta_advisor_tool_20260301_param import BetaAdvisorTool20260301Param as BetaAdvisorTool20260301Param
+from .beta_cache_miss_messages_changed import BetaCacheMissMessagesChanged as BetaCacheMissMessagesChanged
 from .beta_code_execution_output_block import BetaCodeExecutionOutputBlock as BetaCodeExecutionOutputBlock
 from .beta_code_execution_result_block import BetaCodeExecutionResultBlock as BetaCodeExecutionResultBlock
 from .beta_compact_20260112_edit_param import BetaCompact20260112EditParam as BetaCompact20260112EditParam
@@ -374,6 +381,9 @@ from .beta_bash_code_execution_tool_result_block import (
 )
 from .beta_bash_code_execution_tool_result_error import (
     BetaBashCodeExecutionToolResultError as BetaBashCodeExecutionToolResultError,
+)
+from .beta_cache_miss_previous_message_not_found import (
+    BetaCacheMissPreviousMessageNotFound as BetaCacheMissPreviousMessageNotFound,
 )
 from .beta_citation_content_block_location_param import (
     BetaCitationContentBlockLocationParam as BetaCitationContentBlockLocationParam,

@@ -80,6 +80,7 @@ class TestMessages:
                     }
                 ]
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
             inference_geo="inference_geo",
             mcp_servers=[
                 {
@@ -274,6 +275,7 @@ class TestMessages:
                     }
                 ]
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
             inference_geo="inference_geo",
             mcp_servers=[
                 {
@@ -641,6 +643,7 @@ class TestAsyncMessages:
                     }
                 ]
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
             inference_geo="inference_geo",
             mcp_servers=[
                 {
@@ -835,6 +838,7 @@ class TestAsyncMessages:
                     }
                 ]
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
             inference_geo="inference_geo",
             mcp_servers=[
                 {

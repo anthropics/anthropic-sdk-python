@@ -14,6 +14,7 @@ from ...anthropic_beta_param import AnthropicBetaParam
 from ..beta_container_params import BetaContainerParams
 from ..beta_text_block_param import BetaTextBlockParam
 from ..beta_tool_union_param import BetaToolUnionParam
+from ..beta_diagnostics_param import BetaDiagnosticsParam
 from ..beta_tool_choice_param import BetaToolChoiceParam
 from ..beta_output_config_param import BetaOutputConfigParam
 from ..beta_thinking_config_param import BetaThinkingConfigParam
@@ -148,6 +149,13 @@ class RequestParams(TypedDict, total=False):
 
     This allows you to control how Claude manages context across multiple requests,
     such as whether to clear function results or not.
+    """
+
+    diagnostics: Optional[BetaDiagnosticsParam]
+    """Request-level diagnostics.
+
+    Currently carries the previous response id for prompt-cache divergence
+    reporting.
     """
 
     inference_geo: Optional[str]

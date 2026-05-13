@@ -24,6 +24,7 @@ from ...._response import to_streamed_response_wrapper, async_to_streamed_respon
 from ...._constants import DEFAULT_TIMEOUT
 from ...._streaming import Stream, AsyncStream
 from ....types.beta import (
+    BetaDiagnosticsParam,
     BetaThinkingConfigParam,
     message_create_params,
     message_count_tokens_params,
@@ -36,6 +37,7 @@ from ....types.beta.beta_message_param import BetaMessageParam
 from ....types.beta.beta_metadata_param import BetaMetadataParam
 from ....types.beta.beta_text_block_param import BetaTextBlockParam
 from ....types.beta.beta_tool_union_param import BetaToolUnionParam
+from ....types.beta.beta_diagnostics_param import BetaDiagnosticsParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_output_config_param import BetaOutputConfigParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
@@ -83,6 +85,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -210,6 +213,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -394,6 +400,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -524,6 +531,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -704,6 +714,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -834,6 +845,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1013,6 +1027,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1054,6 +1069,7 @@ class Messages(SyncAPIResource):
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -1377,6 +1393,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1504,6 +1521,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1688,6 +1708,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1818,6 +1839,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1998,6 +2022,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2128,6 +2153,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2307,6 +2335,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2348,6 +2377,7 @@ class AsyncMessages(AsyncAPIResource):
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
