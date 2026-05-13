@@ -26,7 +26,4 @@ class BetaManagedAgentsSearchResultBlockParam(TypedDict, total=False):
     title: Required[str]
     """The title of the search result."""
 
-    tool_use_id: Required[str]
-    """The ID of the tool use that produced this search result."""
-
     type: Required[Literal["search_result"]]

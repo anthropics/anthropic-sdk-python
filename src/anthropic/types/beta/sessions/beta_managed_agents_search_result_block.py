@@ -25,7 +25,4 @@ class BetaManagedAgentsSearchResultBlock(BaseModel):
     title: str
     """The title of the search result."""
 
-    tool_use_id: str
-    """The ID of the tool use that produced this search result."""
-
     type: Literal["search_result"]
