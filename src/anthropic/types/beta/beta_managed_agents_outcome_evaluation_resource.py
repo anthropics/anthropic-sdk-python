@@ -34,9 +34,9 @@ class BetaManagedAgentsOutcomeEvaluationResource(BaseModel):
     result: str
     """Current evaluation state.
 
-    'pending' before the agent begins work; 'running' while producing or revising;
-    'evaluating' while the grader scores;
-    'satisfied'/'max_iterations_reached'/'failed'/'interrupted' are terminal.
+    `pending` before the agent begins work; `running` while producing or revising;
+    `evaluating` while the grader scores;
+    `satisfied`/`max_iterations_reached`/`failed`/`interrupted` are terminal.
     """
 
     type: Literal["outcome_evaluation"]
