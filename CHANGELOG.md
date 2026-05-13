@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.101.0 (2026-05-11)
+
+Full Changelog: [v0.100.0...v0.101.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.100.0...v0.101.0)
+
+### Features
+
+* **aws:** Add AWS client for Claude Platform on AWS ([1e70e3a](https://github.com/anthropics/anthropic-sdk-python/commit/1e70e3a21d57a96721685c1eca9cedd10cdd5b63))
+
+
+### Bug Fixes
+
+* **client:** add missing f-string prefix in file type error message ([06d109a](https://github.com/anthropics/anthropic-sdk-python/commit/06d109aaf36629ec15c8fb076c96aed722933600))
+
+
+### Chores
+
+* **examples:** bump tools_runner.py to claude-sonnet-4-5-20250929 ([#1473](https://github.com/anthropics/anthropic-sdk-python/issues/1473)) ([1aa8e41](https://github.com/anthropics/anthropic-sdk-python/commit/1aa8e410fd34d4c4971234a3ae7c7b11a5fadaf9))
+* **examples:** update shebang from poetry to uv ([#1497](https://github.com/anthropics/anthropic-sdk-python/issues/1497)) ([ace8f38](https://github.com/anthropics/anthropic-sdk-python/commit/ace8f38dccd587efc0528aba14ec09b50480b514))
+
 ## 0.100.0 (2026-05-06)
 
 Full Changelog: [v0.99.0...v0.100.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.99.0...v0.100.0)
