@@ -43,6 +43,9 @@ from .beta_managed_agents_agent_message_event import (
 from .beta_managed_agents_base64_image_source import (
     BetaManagedAgentsBase64ImageSource as BetaManagedAgentsBase64ImageSource,
 )
+from .beta_managed_agents_search_result_block import (
+    BetaManagedAgentsSearchResultBlock as BetaManagedAgentsSearchResultBlock,
+)
 from .beta_managed_agents_send_session_events import (
     BetaManagedAgentsSendSessionEvents as BetaManagedAgentsSendSessionEvents,
 )
@@ -85,6 +88,9 @@ from .beta_managed_agents_retry_status_retrying import (
 from .beta_managed_agents_retry_status_terminal import (
     BetaManagedAgentsRetryStatusTerminal as BetaManagedAgentsRetryStatusTerminal,
 )
+from .beta_managed_agents_search_result_content import (
+    BetaManagedAgentsSearchResultContent as BetaManagedAgentsSearchResultContent,
+)
 from .beta_managed_agents_session_deleted_event import (
     BetaManagedAgentsSessionDeletedEvent as BetaManagedAgentsSessionDeletedEvent,
 )
@@ -115,6 +121,9 @@ from .beta_managed_agents_delete_session_resource import (
 from .beta_managed_agents_file_image_source_param import (
     BetaManagedAgentsFileImageSourceParam as BetaManagedAgentsFileImageSourceParam,
 )
+from .beta_managed_agents_search_result_citations import (
+    BetaManagedAgentsSearchResultCitations as BetaManagedAgentsSearchResultCitations,
+)
 from .beta_managed_agents_session_requires_action import (
     BetaManagedAgentsSessionRequiresAction as BetaManagedAgentsSessionRequiresAction,
 )
@@ -126,6 +135,9 @@ from .beta_managed_agents_model_rate_limited_error import (
 )
 from .beta_managed_agents_base64_image_source_param import (
     BetaManagedAgentsBase64ImageSourceParam as BetaManagedAgentsBase64ImageSourceParam,
+)
+from .beta_managed_agents_search_result_block_param import (
+    BetaManagedAgentsSearchResultBlockParam as BetaManagedAgentsSearchResultBlockParam,
 )
 from .beta_managed_agents_session_retries_exhausted import (
     BetaManagedAgentsSessionRetriesExhausted as BetaManagedAgentsSessionRetriesExhausted,
@@ -163,6 +175,9 @@ from .beta_managed_agents_agent_mcp_tool_result_event import (
 from .beta_managed_agents_mcp_connection_failed_error import (
     BetaManagedAgentsMCPConnectionFailedError as BetaManagedAgentsMCPConnectionFailedError,
 )
+from .beta_managed_agents_search_result_content_param import (
+    BetaManagedAgentsSearchResultContentParam as BetaManagedAgentsSearchResultContentParam,
+)
 from .beta_managed_agents_user_interrupt_event_params import (
     BetaManagedAgentsUserInterruptEventParams as BetaManagedAgentsUserInterruptEventParams,
 )
@@ -183,6 +198,9 @@ from .beta_managed_agents_stream_session_thread_events import (
 )
 from .beta_managed_agents_user_tool_confirmation_event import (
     BetaManagedAgentsUserToolConfirmationEvent as BetaManagedAgentsUserToolConfirmationEvent,
+)
+from .beta_managed_agents_search_result_citations_param import (
+    BetaManagedAgentsSearchResultCitationsParam as BetaManagedAgentsSearchResultCitationsParam,
 )
 from .beta_managed_agents_user_custom_tool_result_event import (
     BetaManagedAgentsUserCustomToolResultEvent as BetaManagedAgentsUserCustomToolResultEvent,
