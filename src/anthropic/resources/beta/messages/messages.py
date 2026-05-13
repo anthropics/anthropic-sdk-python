@@ -36,6 +36,7 @@ from ....lib.tools import (
 from ...._constants import DEFAULT_TIMEOUT, MODEL_NONSTREAMING_TOKENS
 from ...._streaming import Stream, AsyncStream
 from ....types.beta import (
+    BetaDiagnosticsParam,
     BetaThinkingConfigParam,
     message_create_params,
     message_count_tokens_params,
@@ -64,6 +65,7 @@ from ....types.beta.beta_metadata_param import BetaMetadataParam
 from ....types.beta.parsed_beta_message import ParsedBetaMessage
 from ....types.beta.beta_text_block_param import BetaTextBlockParam
 from ....types.beta.beta_tool_union_param import BetaToolUnionParam
+from ....types.beta.beta_diagnostics_param import BetaDiagnosticsParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....lib.tools._beta_compaction_control import CompactionControl
 from ....types.beta.beta_output_config_param import BetaOutputConfigParam
@@ -115,6 +117,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -242,6 +245,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -426,6 +432,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -556,6 +563,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -736,6 +746,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -866,6 +877,9 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1045,6 +1059,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1110,6 +1125,7 @@ class Messages(SyncAPIResource):
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -1149,6 +1165,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1248,6 +1265,7 @@ class Messages(SyncAPIResource):
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -1291,6 +1309,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         max_iterations: int | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
@@ -1331,6 +1350,7 @@ class Messages(SyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1369,6 +1389,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1405,6 +1426,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1479,6 +1501,7 @@ class Messages(SyncAPIResource):
                 "cache_control": cache_control,
                 "container": container,
                 "context_management": context_management,
+                "diagnostics": diagnostics,
                 "inference_geo": inference_geo,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
@@ -1535,6 +1558,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1621,6 +1645,7 @@ class Messages(SyncAPIResource):
                     "output_format": omit,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "service_tier": service_tier,
@@ -1955,6 +1980,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2082,6 +2108,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2266,6 +2295,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2396,6 +2426,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2576,6 +2609,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2706,6 +2740,9 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2885,6 +2922,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2950,6 +2988,7 @@ class AsyncMessages(AsyncAPIResource):
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -2989,6 +3028,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3087,6 +3127,7 @@ class AsyncMessages(AsyncAPIResource):
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "output_config": merged_output_config,
@@ -3131,6 +3172,7 @@ class AsyncMessages(AsyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3170,6 +3212,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3208,6 +3251,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3244,6 +3288,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3311,6 +3356,7 @@ class AsyncMessages(AsyncAPIResource):
                 "cache_control": cache_control,
                 "container": container,
                 "context_management": context_management,
+                "diagnostics": diagnostics,
                 "inference_geo": inference_geo,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
@@ -3370,6 +3416,7 @@ class AsyncMessages(AsyncAPIResource):
         output_format: None | type[ResponseFormatT] | BetaJSONOutputFormatParam | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -3451,6 +3498,7 @@ class AsyncMessages(AsyncAPIResource):
                     "output_format": omit,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "service_tier": service_tier,

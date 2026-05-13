@@ -42,6 +42,7 @@ ParsedBetaMessage(
         )
     ],
     context_management=None,
+    diagnostics=None,
     id='msg_01BZsMQjer9AFLgmdRKJ8NcA',
     model='claude-haiku-4-5-20251001',
     role='assistant',
@@ -90,6 +91,7 @@ ParsedBetaMessage(
         )
     ],
     context_management=None,
+    diagnostics=None,
     id='msg_0158JyopQTFaomteeJoDpS5q',
     model='claude-haiku-4-5-20251001',
     role='assistant',
