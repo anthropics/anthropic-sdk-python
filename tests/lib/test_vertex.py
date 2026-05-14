@@ -296,3 +296,42 @@ class TestAsyncAnthropicVertex:
             base_url="https://test.googleapis.com/v1",
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
+
+
+# Module-level fixtures for the status-error parity test
+_vertex_sync = AnthropicVertex(region="us-central1", project_id="proj", access_token="tok")
+_vertex_async = AsyncAnthropicVertex(region="us-central1", project_id="proj", access_token="tok")
+
+
+@pytest.mark.parametrize(
+    "status_code,expected_type",
+    [
+        (400, "BadRequestError"),
+        (401, "AuthenticationError"),
+        (403, "PermissionDeniedError"),
+        (404, "NotFoundError"),
+        (409, "ConflictError"),
+        (413, "RequestTooLargeError"),
+        (422, "UnprocessableEntityError"),
+        (429, "RateLimitError"),
+        (500, "InternalServerError"),
+        (503, "ServiceUnavailableError"),
+        (504, "DeadlineExceededError"),
+        (529, "OverloadedError"),
+    ],
+)
+def test_vertex_make_status_error_maps_codes_to_typed_exceptions(
+    status_code: int, expected_type: str
+) -> None:
+    # Pins the Vertex status-error mapping to match the canonical client
+    # plus its own 504 (Google-frontend deadline-exceeded) and 503 mappings.
+    # 413 and 529 had been missing — users got a generic APIStatusError /
+    # InternalServerError for request-too-large and overloaded responses.
+    response = httpx.Response(status_code, request=httpx.Request("GET", "/"))
+
+    for client in (_vertex_sync, _vertex_async):
+        err = client._make_status_error("msg", body=None, response=response)
+        assert type(err).__name__ == expected_type, (
+            f"status {status_code} on {type(client).__name__}: "
+            f"got {type(err).__name__}, expected {expected_type}"
+        )
