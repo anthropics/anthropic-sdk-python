@@ -683,6 +683,63 @@ def _get_weather(location: str, units: Literal["c", "f"]) -> Dict[str, Any]:
         }
 
 
+def test_tool_response_already_appended_detects_matching_tool_result(client: Anthropic) -> None:
+    """Regression test for #1536.
+
+    The runner's auto-append of (assistant, tool_result) should only be skipped when
+    the caller already supplied a matching tool_result. If the caller appended an
+    unrelated message (e.g. an extra user instruction), the tool flow must still be
+    threaded through.
+    """
+
+    @beta_tool
+    def noop() -> BetaFunctionToolResultType:
+        """A no-op tool used for type plumbing only."""
+        return "ok"
+
+    runner = client.beta.messages.tool_runner(
+        model="claude-haiku-4-5",
+        messages=[{"role": "user", "content": "hi"}],
+        tools=[noop],
+        max_tokens=64,
+    )
+
+    matching_response: BetaMessageParam = {
+        "role": "user",
+        "content": [
+            BetaToolResultBlockParam(
+                tool_use_id="toolu_TEST",
+                content="result",
+                type="tool_result",
+            )
+        ],
+    }
+
+    # Empty history: nothing to match against
+    assert runner._tool_response_already_appended(matching_response) is False
+
+    # History contains a user message with no tool_result blocks: still no match
+    runner.append_messages({"role": "user", "content": "be concise in your response"})
+    assert runner._tool_response_already_appended(matching_response) is False
+
+    # History now contains a matching tool_result (caller pre-supplied it): match
+    runner.append_messages(matching_response)
+    assert runner._tool_response_already_appended(matching_response) is True
+
+    # Response with a different tool_use_id should not match the existing one
+    different_response: BetaMessageParam = {
+        "role": "user",
+        "content": [
+            BetaToolResultBlockParam(
+                tool_use_id="toolu_OTHER",
+                content="result",
+                type="tool_result",
+            )
+        ],
+    }
+    assert runner._tool_response_already_appended(different_response) is False
+
+
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
 def test_tool_runner_method_in_sync(sync: bool, client: Anthropic, async_client: AsyncAnthropic) -> None:
     checking_client: "Anthropic | AsyncAnthropic" = client if sync else async_client
