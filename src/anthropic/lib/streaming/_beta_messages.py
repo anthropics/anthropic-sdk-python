@@ -14,6 +14,7 @@ from anthropic.types.beta.beta_server_tool_use_block import BetaServerToolUseBlo
 
 from ..._types import NOT_GIVEN, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
+from ..._compat import parse_obj
 from ..._models import build, construct_type, construct_type_unchecked
 from ._beta_types import (
     BetaCitationEvent,
@@ -28,9 +29,24 @@ from ._beta_types import (
 )
 from ..._streaming import Stream, AsyncStream
 from ...types.beta import BetaRawMessageStreamEvent
+from ...types.beta.beta_raw_message_start_event import BetaRawMessageStartEvent
+from ...types.beta.beta_raw_message_delta_event import BetaRawMessageDeltaEvent
+from ...types.beta.beta_raw_message_stop_event import BetaRawMessageStopEvent
+from ...types.beta.beta_raw_content_block_start_event import BetaRawContentBlockStartEvent
+from ...types.beta.beta_raw_content_block_delta_event import BetaRawContentBlockDeltaEvent
+from ...types.beta.beta_raw_content_block_stop_event import BetaRawContentBlockStopEvent
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
 from ...types.beta.parsed_beta_message import ParsedBetaMessage, ParsedBetaContentBlock
+
+_BETA_RAW_EVENT_TYPE_MAP: dict[str, type[BaseModel]] = {
+    "message_start": BetaRawMessageStartEvent,
+    "message_delta": BetaRawMessageDeltaEvent,
+    "message_stop": BetaRawMessageStopEvent,
+    "content_block_start": BetaRawContentBlockStartEvent,
+    "content_block_delta": BetaRawContentBlockDeltaEvent,
+    "content_block_stop": BetaRawContentBlockStopEvent,
+}
 
 
 class BetaMessageStream(Generic[ResponseFormatT]):
@@ -460,6 +476,21 @@ def accumulate_event(
                 value=event,
             ),
         )
+        if not isinstance(cast(Any, event), BaseModel):
+            # construct_type_unchecked can silently return the raw dict when Pydantic's
+            # union discriminator fails (e.g. certain Pydantic versions or TypeAlias
+            # nesting). Fall back to parse_obj on the concrete class so that nested
+            # fields (e.g. delta inside content_block_delta) are also validated and
+            # typed, not left as raw dicts. See https://github.com/anthropics/anthropic-sdk-python/issues/941
+            raw = cast(Any, event)
+            if isinstance(raw, dict):
+                event_type = raw.get("type")
+                target_cls = _BETA_RAW_EVENT_TYPE_MAP.get(event_type) if isinstance(event_type, str) else None
+                if target_cls is not None:
+                    try:
+                        event = cast(BetaRawMessageStreamEvent, parse_obj(target_cls, raw))
+                    except Exception:
+                        pass
         if not isinstance(cast(Any, event), BaseModel):
             raise TypeError(
                 f"Unexpected event runtime type, after deserialising twice - {event} - {builtins.type(event)}"
