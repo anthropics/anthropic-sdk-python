@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 import base64
 from typing import Any, Iterable
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 from typing_extensions import Literal
 
 try:
@@ -289,9 +289,13 @@ def mcp_resource_to_file(
     resource = result.contents[0]
     uri_str = str(resource.uri)
 
-    # Extract filename from URI
+    # Extract filename from URI. urlparse() does NOT percent-decode the path,
+    # so we unquote here — otherwise a URI like file:///docs/my%20notes.txt
+    # would yield "my%20notes.txt" rather than "my notes.txt", which most
+    # downstream file-upload paths would reject or display wrong.
     path = urlparse(uri_str).path
-    name = path.rsplit("/", 1)[-1] if path else None
+    last_segment = path.rsplit("/", 1)[-1] if path else ""
+    name = unquote(last_segment) if last_segment else None
 
     # Get bytes
     if isinstance(resource, BlobResourceContents):

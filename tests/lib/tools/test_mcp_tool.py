@@ -273,6 +273,35 @@ class TestMCPResourceToFile:
         with pytest.raises(UnsupportedMCPValueError):
             mcp_resource_to_file(ReadResourceResult(contents=[]))
 
+    def test_percent_encoded_filename_is_decoded(self) -> None:
+        # urlparse() does not percent-decode the path, so without explicit
+        # unquoting a URI like file:///docs/my%20notes.txt would yield
+        # "my%20notes.txt" instead of "my notes.txt".
+        name, _, _ = mcp_resource_to_file(
+            _read_result(
+                [_text_resource(uri="file:///docs/my%20notes.txt", text="hi").model_dump()]
+            )
+        )
+        assert name == "my notes.txt"
+
+    def test_percent_encoded_unicode_filename_is_decoded(self) -> None:
+        # %E6%97%A5 is the UTF-8 percent-encoding for "日" (U+65E5).
+        name, _, _ = mcp_resource_to_file(
+            _read_result(
+                [_text_resource(uri="file:///%E6%97%A5%E8%A8%98.txt", text="x").model_dump()]
+            )
+        )
+        assert name == "日記.txt"
+
+    def test_uri_with_trailing_slash_yields_no_filename(self) -> None:
+        # Previously this returned "" (empty string), which downstream file-
+        # upload code would treat as a filename and likely reject. None is the
+        # documented signal for "no filename".
+        name, _, _ = mcp_resource_to_file(
+            _read_result([_text_resource(uri="file:///some/dir/", text="hi").model_dump()])
+        )
+        assert name is None
+
 
 # -----------------------------------------------------------------------
 # Tests: tool wrappers
