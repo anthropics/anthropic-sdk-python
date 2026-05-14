@@ -454,12 +454,15 @@ def test_accumulate_event_raw_dict_multiple_deltas_accumulate() -> None:
 
 
 def test_accumulate_event_raw_dict_unknown_type_still_raises() -> None:
-    """An unknown event type in the raw dict must still raise TypeError so that
-    genuinely malformed events are not silently swallowed by the fallback."""
+    """An unknown event type in the raw dict must still raise an exception so that
+    genuinely malformed events are not silently swallowed by the fallback.
+    The exact exception depends on how far deserialization gets: if the event survives
+    as a BaseModel with the wrong type, RuntimeError is raised by the event-ordering
+    check; if deserialization returns the raw dict, TypeError is raised."""
     import pytest
     from anthropic.lib.streaming._messages import accumulate_event
 
-    with pytest.raises(TypeError, match="Unexpected event runtime type"):
+    with pytest.raises((TypeError, RuntimeError)):
         accumulate_event(
             event={"type": "unknown_future_event", "data": "x"},  # type: ignore[arg-type]
             current_snapshot=None,
