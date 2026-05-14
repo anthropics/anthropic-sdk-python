@@ -111,12 +111,32 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
 
         This invalidates the cached tool response, i.e. if tools were already called, then they will
         be called again on the next loop iteration.
+
+        If any of the appended messages contain a ``tool_result`` content block, the runner treats
+        this as the caller manually handling the tool response and will skip its own auto-append of
+        the assistant message and tool result for that iteration.  Appending messages that do *not*
+        contain tool results (e.g. an extra user instruction) leaves the auto-append behaviour
+        unchanged so the loop continues correctly.
         """
         message_params: List[BetaMessageParam] = [
             {"role": message.role, "content": message.content} if isinstance(message, BetaMessage) else message
             for message in messages
         ]
-        self._messages_modified = True
+        # Only suppress the runner's auto-append when the caller is explicitly providing a tool
+        # result.  Previously this flag was always set, which caused an infinite loop when callers
+        # appended non-tool-result messages (e.g. extra instructions) inside the loop because the
+        # tool result was never added to the conversation history.
+        has_tool_result = any(
+            isinstance(msg, dict)
+            and isinstance(msg.get("content"), list)
+            and any(
+                isinstance(block, dict) and block.get("type") == "tool_result"
+                for block in msg.get("content", [])
+            )
+            for msg in message_params
+        )
+        if has_tool_result:
+            self._messages_modified = True
         self.set_messages_params(lambda params: {**params, "messages": [*params["messages"], *message_params]})
         self._cached_tool_call_response = None
 

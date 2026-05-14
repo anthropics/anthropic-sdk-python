@@ -235,6 +235,56 @@ class TestSyncRunTools:
 """
         )
 
+    def test_append_messages_non_tool_result_does_not_suppress_auto_append(self) -> None:
+        """Appending a plain user message must not suppress the runner's auto-append of tool results.
+
+        Regression test for https://github.com/anthropics/anthropic-sdk-python/issues/1536
+
+        Before the fix, *any* call to append_messages() set _messages_modified=True, which caused
+        the runner to skip auto-appending the assistant message + tool result.  The next iteration
+        therefore sent a request with no tool result in history, Claude saw the original question
+        unanswered, made the same tool call again, and the loop never terminated.
+        """
+        from unittest.mock import MagicMock
+
+        from anthropic.lib.tools._beta_runner import BetaToolRunner
+
+        mock_client = MagicMock(spec=Anthropic)
+        runner: BetaToolRunner[None] = BetaToolRunner(
+            params={
+                "model": "claude-haiku-4-5",
+                "max_tokens": 1024,
+                "messages": [{"role": "user", "content": "What's the weather in SF?"}],
+            },
+            options={},
+            tools=[],
+            client=mock_client,
+        )
+
+        assert runner._messages_modified is False
+
+        # A plain user instruction must NOT flip the flag — the runner still needs to
+        # auto-append the tool result for the loop to terminate.
+        runner.append_messages({"role": "user", "content": "Please be concise."})
+        assert runner._messages_modified is False, (
+            "append_messages() with a non-tool-result message set _messages_modified=True, "
+            "which would suppress the runner's auto-append and cause an infinite loop (issue #1536)"
+        )
+
+        # Manually providing a tool result MUST flip the flag so the runner skips its own
+        # auto-append (the caller is handling the tool result themselves).
+        runner._messages_modified = False  # reset for this sub-check
+        runner.append_messages(
+            {
+                "role": "user",
+                "content": [{"type": "tool_result", "tool_use_id": "fake_id", "content": "sunny"}],
+            }
+        )
+        assert runner._messages_modified is True, (
+            "append_messages() with a tool_result message must set _messages_modified=True "
+            "so the runner skips its own auto-append"
+        )
+
     @pytest.mark.parametrize(
         "http_snapshot",
         [
