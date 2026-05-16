@@ -12,6 +12,7 @@ from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, r
 import httpx
 
 from ._utils import is_dict, extract_type_var_from_base
+from ._exceptions import APIConnectionError
 
 if TYPE_CHECKING:
     from ._client import Anthropic, AsyncAnthropic
@@ -72,7 +73,12 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
             yield item
 
     def _iter_events(self) -> Iterator[ServerSentEvent]:
-        yield from self._decoder.iter_bytes(self.response.iter_bytes())
+        try:
+            yield from self._decoder.iter_bytes(self.response.iter_bytes())
+        except httpx.TimeoutException:
+            raise
+        except httpx.TransportError as err:
+            raise APIConnectionError(request=self.response.request) from err
 
     def __stream__(self) -> Iterator[_T]:
         cast_to = cast(Any, self._cast_to)
@@ -226,8 +232,13 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
             yield item
 
     async def _iter_events(self) -> AsyncIterator[ServerSentEvent]:
-        async for sse in self._decoder.aiter_bytes(self.response.aiter_bytes()):
-            yield sse
+        try:
+            async for sse in self._decoder.aiter_bytes(self.response.aiter_bytes()):
+                yield sse
+        except httpx.TimeoutException:
+            raise
+        except httpx.TransportError as err:
+            raise APIConnectionError(request=self.response.request) from err
 
     async def __stream__(self) -> AsyncIterator[_T]:
         cast_to = cast(Any, self._cast_to)

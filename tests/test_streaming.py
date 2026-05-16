@@ -7,7 +7,7 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._streaming import Stream, AsyncStream, ServerSentEvent
-from anthropic._exceptions import APIStatusError
+from anthropic._exceptions import APIStatusError, APIConnectionError
 
 _T = TypeVar("_T")
 
@@ -238,6 +238,60 @@ async def test_error_type(
     assert "Overloaded" in str(exc_info.value)
 
 
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_mid_stream_transport_error_wrapped(sync: bool, client: Anthropic, async_client: AsyncAnthropic) -> None:
+    """Mid-stream httpx.RemoteProtocolError is wrapped as APIConnectionError with __cause__ preserved."""
+
+    def body() -> Iterator[bytes]:
+        yield b"event: completion\n"
+        yield b'data: {"type":"message","content":[]}\n'
+        yield b"\n"
+        raise httpx.RemoteProtocolError("peer closed connection without sending complete message body")
+
+    request = httpx.Request("GET", "https://api.anthropic.com/v1/messages/stream")
+    iterator = make_event_iterator_with_request(
+        content=body(), sync=sync, client=client, async_client=async_client, request=request
+    )
+
+    # First event should succeed
+    sse = await iter_next(iterator)
+    assert sse.event == "completion"
+
+    # Second read should raise APIConnectionError, not the bare httpx error
+    with pytest.raises(APIConnectionError) as exc_info:
+        await iter_next(iterator)
+
+    assert isinstance(exc_info.value.__cause__, httpx.RemoteProtocolError)
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_mid_stream_read_timeout_passes_through(
+    sync: bool,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+) -> None:
+    """Mid-stream httpx.ReadTimeout passes through unchanged (not double-wrapped)."""
+
+    def body() -> Iterator[bytes]:
+        yield b"event: completion\n"
+        yield b'data: {"type":"message","content":[]}\n'
+        yield b"\n"
+        raise httpx.ReadTimeout("read timeout")
+
+    request = httpx.Request("GET", "https://api.anthropic.com/v1/messages/stream")
+    iterator = make_event_iterator_with_request(
+        content=body(), sync=sync, client=client, async_client=async_client, request=request
+    )
+
+    # First event should succeed
+    sse = await iter_next(iterator)
+    assert sse.event == "completion"
+
+    # ReadTimeout should pass through unchanged
+    with pytest.raises(httpx.ReadTimeout):
+        await iter_next(iterator)
+
+
 def test_isinstance_check(client: Anthropic, async_client: AsyncAnthropic) -> None:
     async_stream = AsyncStream(cast_to=object, client=async_client, response=httpx.Response(200, content=b"foo"))
     assert isinstance(async_stream, AsyncStream)
@@ -270,11 +324,26 @@ def make_event_iterator(
     client: Anthropic,
     async_client: AsyncAnthropic,
 ) -> Iterator[ServerSentEvent] | AsyncIterator[ServerSentEvent]:
+    return make_event_iterator_with_request(
+        content=content, sync=sync, client=client, async_client=async_client, request=None
+    )
+
+
+def make_event_iterator_with_request(
+    content: Iterator[bytes],
+    *,
+    sync: bool,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+    request: httpx.Request | None,
+) -> Iterator[ServerSentEvent] | AsyncIterator[ServerSentEvent]:
     if sync:
-        return Stream(cast_to=object, client=client, response=httpx.Response(200, content=content))._iter_events()
+        return Stream(
+            cast_to=object, client=client, response=httpx.Response(200, content=content, request=request)
+        )._iter_events()
 
     return AsyncStream(
-        cast_to=object, client=async_client, response=httpx.Response(200, content=to_aiter(content))
+        cast_to=object, client=async_client, response=httpx.Response(200, content=to_aiter(content), request=request)
     )._iter_events()
 
 
