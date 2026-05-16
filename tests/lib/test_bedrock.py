@@ -275,3 +275,32 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+def test_copy_preserves_aws_profile(monkeypatch: t.Any) -> None:
+    monkeypatch.delenv("AWS_BEARER_TOKEN_BEDROCK", raising=False)
+
+    client = AnthropicBedrock(aws_region="us-east-1", aws_profile="my-profile")
+    copied = client.copy()
+
+    assert copied.aws_region == "us-east-1"
+    assert copied.aws_profile == "my-profile"
+
+
+def test_copy_overrides_aws_profile(monkeypatch: t.Any) -> None:
+    monkeypatch.delenv("AWS_BEARER_TOKEN_BEDROCK", raising=False)
+
+    client = AnthropicBedrock(aws_region="us-east-1", aws_profile="my-profile")
+    copied = client.copy(aws_profile="other-profile")
+
+    assert copied.aws_profile == "other-profile"
+
+
+def test_copy_preserves_aws_profile_async(monkeypatch: t.Any) -> None:
+    monkeypatch.delenv("AWS_BEARER_TOKEN_BEDROCK", raising=False)
+
+    client = AsyncAnthropicBedrock(aws_region="us-east-1", aws_profile="my-profile")
+    copied = client.copy()
+
+    assert copied.aws_region == "us-east-1"
+    assert copied.aws_profile == "my-profile"
