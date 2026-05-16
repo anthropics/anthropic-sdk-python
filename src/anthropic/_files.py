@@ -71,9 +71,22 @@ def _transform_file(file: FileTypes) -> HttpxFileTypes:
         return file
 
     if is_tuple_t(file):
-        return (file[0], read_file_content(file[1]), *file[2:])
+        return cast(HttpxFileTypes, _transform_file_tuple(file))
 
     raise TypeError(f"Expected file types input to be a FileContent type or to be a tuple")
+
+
+def _transform_file_tuple(file: tuple[object, ...]) -> tuple[object, ...]:
+    # Copy mutable entries in file tuples to prevent shared state.
+    # File tuples can be: (filename, content), (filename, content, content_type),
+    # or (filename, content, content_type, headers) where headers is a mutable Mapping.
+    result: list[object] = [file[0], read_file_content(file[1])]
+    for item in file[2:]:
+        if isinstance(item, dict):
+            result.append(dict(item))
+        else:
+            result.append(item)
+    return tuple(result)
 
 
 def read_file_content(file: FileContent) -> HttpxFileContent:
@@ -113,7 +126,7 @@ async def _async_transform_file(file: FileTypes) -> HttpxFileTypes:
         return file
 
     if is_tuple_t(file):
-        return (file[0], await async_read_file_content(file[1]), *file[2:])
+        return cast(HttpxFileTypes, _transform_file_tuple((file[0], await async_read_file_content(file[1]), *file[2:])))
 
     raise TypeError(f"Expected file types input to be a FileContent type or to be a tuple")
 
