@@ -246,6 +246,13 @@ def test_api_key_env_mutual_exclusion(monkeypatch: t.Any) -> None:
         )
 
 
+def test_region_infer_from_aws_default_region_env(monkeypatch: t.Any) -> None:
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "ap-southeast-1")
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    client = AnthropicBedrock()
+    assert client.aws_region == "ap-southeast-1"
+
+
 def test_region_infer_from_profile(
     mock_aws_config: None,  # noqa: ARG001
     profiles: t.List[AwsConfigProfile],
@@ -273,5 +280,25 @@ def test_region_infer_from_specified_profile(
 ) -> None:
     monkeypatch.setenv("AWS_PROFILE", aws_profile)
     client = AnthropicBedrock()
+
+    assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+@pytest.mark.parametrize(
+    "profiles, aws_profile",
+    [
+        pytest.param(
+            [{"name": "default", "region": "us-east-2"}, {"name": "custom", "region": "us-west-1"}],
+            "custom",
+            id="custom profile via aws_profile arg",
+        ),
+    ],
+)
+def test_region_infer_from_aws_profile_arg(
+    mock_aws_config: None,  # noqa: ARG001
+    profiles: t.List[AwsConfigProfile],
+    aws_profile: str,
+) -> None:
+    client = AnthropicBedrock(aws_profile=aws_profile)
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
