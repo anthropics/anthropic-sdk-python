@@ -1,4 +1,4 @@
-# Claude SDK for Python
+# Claude SDK for Python V3
 
 [![PyPI version](https://img.shields.io/pypi/v/anthropic.svg)](https://pypi.org/project/anthropic/)
 
