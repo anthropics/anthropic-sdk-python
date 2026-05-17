@@ -10,10 +10,15 @@ from respx import MockRouter
 from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
+from anthropic.types.usage import Usage
 from anthropic.lib.streaming import ParsedMessageStreamEvent
 from anthropic.types.message import Message
 from anthropic.resources.messages import DEPRECATED_MODELS
-from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
+from anthropic.types.parsed_message import ParsedMessage
+from anthropic.types.input_json_delta import InputJSONDelta
+from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT, build_events
+from anthropic.types.server_tool_use_block import ServerToolUseBlock
+from anthropic.types.raw_content_block_delta_event import RawContentBlockDeltaEvent
 
 from .helpers import get_response, to_async_iter
 
@@ -349,3 +354,36 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+def test_server_tool_use_emits_input_json_event() -> None:
+    message = ParsedMessage(
+        id="msg_123",
+        type="message",
+        role="assistant",
+        content=[
+            ServerToolUseBlock(
+                id="srvtoolu_123",
+                type="server_tool_use",
+                name="web_search",
+                input={"query": "Paris weather"},
+            )
+        ],
+        model="claude-sonnet-4-5",
+        stop_reason=None,
+        stop_sequence=None,
+        usage=Usage(input_tokens=10, output_tokens=1),
+    )
+    event = RawContentBlockDeltaEvent(
+        type="content_block_delta",
+        index=0,
+        delta=InputJSONDelta(type="input_json_delta", partial_json='{"query":"Paris weather"}'),
+    )
+
+    events = build_events(event=event, message_snapshot=message)
+
+    assert [stream_event.type for stream_event in events] == ["content_block_delta", "input_json"]
+    input_json_event = events[1]
+    assert input_json_event.type == "input_json"
+    assert input_json_event.partial_json == '{"query":"Paris weather"}'
+    assert input_json_event.snapshot == {"query": "Paris weather"}
