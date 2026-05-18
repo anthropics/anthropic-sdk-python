@@ -66,34 +66,41 @@ class BaseMantleClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         body: object,
         response: httpx.Response,
     ) -> APIStatusError:
-        if response.status_code == 400:
+        # Bedrock streaming errors arrive inside 200 OK event frames.
+        # The decoder embeds the real status code in the body so we map
+        # to the correct exception subclass here.
+        status_code = response.status_code
+        if isinstance(body, dict) and body.get("_bedrock_status") is not None:
+            status_code = int(body["_bedrock_status"])
+
+        if status_code == 400:
             return _exceptions.BadRequestError(err_msg, response=response, body=body)
 
-        if response.status_code == 401:
+        if status_code == 401:
             return _exceptions.AuthenticationError(err_msg, response=response, body=body)
 
-        if response.status_code == 403:
+        if status_code == 403:
             return _exceptions.PermissionDeniedError(err_msg, response=response, body=body)
 
-        if response.status_code == 404:
+        if status_code == 404:
             return _exceptions.NotFoundError(err_msg, response=response, body=body)
 
-        if response.status_code == 409:
+        if status_code == 409:
             return _exceptions.ConflictError(err_msg, response=response, body=body)
 
-        if response.status_code == 413:
+        if status_code == 413:
             return _exceptions.RequestTooLargeError(err_msg, response=response, body=body)
 
-        if response.status_code == 422:
+        if status_code == 422:
             return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
 
-        if response.status_code == 429:
+        if status_code == 429:
             return _exceptions.RateLimitError(err_msg, response=response, body=body)
 
-        if response.status_code == 529:
+        if status_code == 529:
             return _exceptions.OverloadedError(err_msg, response=response, body=body)
 
-        if response.status_code >= 500:
+        if status_code >= 500:
             return _exceptions.InternalServerError(err_msg, response=response, body=body)
         return APIStatusError(err_msg, response=response, body=body)
 

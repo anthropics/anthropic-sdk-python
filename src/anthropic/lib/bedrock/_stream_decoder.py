@@ -70,7 +70,7 @@ class AWSEventStreamDecoder:
                 body_data = json.loads(body_str)
                 err_message = body_data.get("message", body_str)
             except Exception:
-                err_message = str(raw_body)
+                err_message = raw_body.decode(errors="replace") if isinstance(raw_body, bytes) else str(raw_body or "")
 
             error_body = json.dumps(
                 {
@@ -79,6 +79,7 @@ class AWSEventStreamDecoder:
                         "type": exception_type,
                         "message": err_message,
                     },
+                    "_bedrock_status": response_dict["status_code"],
                 }
             )
             return ServerSentEvent(data=error_body, event="error")
