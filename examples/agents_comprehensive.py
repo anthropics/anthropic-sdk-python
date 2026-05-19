@@ -110,6 +110,8 @@ def main() -> None:
     with anthropic.beta.sessions.events.stream(session.id) as stream:
         for event in stream:
             print(event.to_json(indent=2))
+            # `get_weather` is a custom (non-builtin) tool, so the agent emits an
+            # `agent.custom_tool_use` event and expects a `user.custom_tool_result`.
             if event.type == "agent.custom_tool_use" and event.name == "get_weather":
                 anthropic.beta.sessions.events.send(
                     session.id,
@@ -117,9 +119,7 @@ def main() -> None:
                         {
                             "type": "user.custom_tool_result",
                             "custom_tool_use_id": event.id,
-                            "content": [
-                                {"type": "text", "text": '{"temperature_c": 14}'}
-                            ],
+                            "content": [{"type": "text", "text": '{"temperature_c": 14}'}],
                         }
                     ],
                 )

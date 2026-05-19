@@ -21,14 +21,6 @@ from .models import (
 from .webhooks import Webhooks, AsyncWebhooks
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from .environments import (
-    Environments,
-    AsyncEnvironments,
-    EnvironmentsWithRawResponse,
-    AsyncEnvironmentsWithRawResponse,
-    EnvironmentsWithStreamingResponse,
-    AsyncEnvironmentsWithStreamingResponse,
-)
 from .agents.agents import (
     Agents,
     AsyncAgents,
@@ -76,6 +68,14 @@ from .sessions.sessions import (
     AsyncSessionsWithRawResponse,
     SessionsWithStreamingResponse,
     AsyncSessionsWithStreamingResponse,
+)
+from .environments.environments import (
+    Environments,
+    AsyncEnvironments,
+    EnvironmentsWithRawResponse,
+    AsyncEnvironmentsWithRawResponse,
+    EnvironmentsWithStreamingResponse,
+    AsyncEnvironmentsWithStreamingResponse,
 )
 from .memory_stores.memory_stores import (
     MemoryStores,

@@ -172,9 +172,7 @@ def _resolve_under(base: pathlib.Path, candidate: pathlib.Path) -> pathlib.Path:
     try:
         candidate_resolved.relative_to(base_resolved)
     except ValueError as err:
-        raise AnthropicError(
-            f"Resolved path {candidate_resolved} escapes config directory {base_resolved}."
-        ) from err
+        raise AnthropicError(f"Resolved path {candidate_resolved} escapes config directory {base_resolved}.") from err
     return candidate
 
 

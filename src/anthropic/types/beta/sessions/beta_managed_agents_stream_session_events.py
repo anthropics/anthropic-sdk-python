@@ -11,6 +11,8 @@ from .beta_managed_agents_agent_thinking_event import BetaManagedAgentsAgentThin
 from .beta_managed_agents_agent_tool_use_event import BetaManagedAgentsAgentToolUseEvent
 from .beta_managed_agents_user_interrupt_event import BetaManagedAgentsUserInterruptEvent
 from .beta_managed_agents_session_deleted_event import BetaManagedAgentsSessionDeletedEvent
+from ..beta_managed_agents_session_updated_event import BetaManagedAgentsSessionUpdatedEvent
+from ..beta_managed_agents_user_tool_result_event import BetaManagedAgentsUserToolResultEvent
 from .beta_managed_agents_agent_tool_result_event import BetaManagedAgentsAgentToolResultEvent
 from .beta_managed_agents_agent_mcp_tool_use_event import BetaManagedAgentsAgentMCPToolUseEvent
 from .beta_managed_agents_session_status_idle_event import BetaManagedAgentsSessionStatusIdleEvent
@@ -76,7 +78,9 @@ BetaManagedAgentsStreamSessionEvents: TypeAlias = Annotated[
         BetaManagedAgentsSessionThreadStatusRunningEvent,
         BetaManagedAgentsSessionThreadStatusIdleEvent,
         BetaManagedAgentsSessionThreadStatusTerminatedEvent,
+        BetaManagedAgentsUserToolResultEvent,
         BetaManagedAgentsSessionThreadStatusRescheduledEvent,
+        BetaManagedAgentsSessionUpdatedEvent,
     ],
     PropertyInfo(discriminator="type"),
 ]

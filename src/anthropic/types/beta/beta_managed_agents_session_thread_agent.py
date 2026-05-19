@@ -3,15 +3,15 @@
 from typing import List, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
-from ..beta_managed_agents_custom_tool import BetaManagedAgentsCustomTool
-from ..beta_managed_agents_mcp_toolset import BetaManagedAgentsMCPToolset
-from ..beta_managed_agents_custom_skill import BetaManagedAgentsCustomSkill
-from ..beta_managed_agents_model_config import BetaManagedAgentsModelConfig
-from ..beta_managed_agents_anthropic_skill import BetaManagedAgentsAnthropicSkill
-from ..beta_managed_agents_agent_toolset20260401 import BetaManagedAgentsAgentToolset20260401
-from ..beta_managed_agents_mcp_server_url_definition import BetaManagedAgentsMCPServerURLDefinition
+from ..._utils import PropertyInfo
+from ..._models import BaseModel
+from .beta_managed_agents_custom_tool import BetaManagedAgentsCustomTool
+from .beta_managed_agents_mcp_toolset import BetaManagedAgentsMCPToolset
+from .beta_managed_agents_custom_skill import BetaManagedAgentsCustomSkill
+from .beta_managed_agents_model_config import BetaManagedAgentsModelConfig
+from .beta_managed_agents_anthropic_skill import BetaManagedAgentsAnthropicSkill
+from .beta_managed_agents_agent_toolset20260401 import BetaManagedAgentsAgentToolset20260401
+from .beta_managed_agents_mcp_server_url_definition import BetaManagedAgentsMCPServerURLDefinition
 
 __all__ = ["BetaManagedAgentsSessionThreadAgent", "Skill", "Tool"]
 
