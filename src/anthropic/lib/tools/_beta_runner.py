@@ -24,6 +24,7 @@ import httpx
 from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ...types.beta import BetaMessage, BetaMessageParam
+from ._tool_dispatch import tool_registry, tool_error_content
 from ._beta_functions import (
     ToolError,
     BetaFunctionTool,
@@ -72,7 +73,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         max_iterations: int | None = None,
         compaction_control: CompactionControl | None = None,
     ) -> None:
-        self._tools_by_name = {tool.name: tool for tool in tools}
+        self._tools_by_name = tool_registry(tools)
         self._params: ParseMessageCreateParamsBase[ResponseFormatT] = {
             **params,
             "messages": [message for message in params["messages"]],
@@ -348,7 +349,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": exc.content,
+                        "content": tool_error_content(exc),
                         "is_error": True,
                     }
                 )
@@ -358,7 +359,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": repr(exc),
+                        "content": tool_error_content(exc),
                         "is_error": True,
                     }
                 )
@@ -649,7 +650,7 @@ class BaseAsyncToolRunner(
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": exc.content,
+                        "content": tool_error_content(exc),
                         "is_error": True,
                     }
                 )
@@ -659,7 +660,7 @@ class BaseAsyncToolRunner(
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": repr(exc),
+                        "content": tool_error_content(exc),
                         "is_error": True,
                     }
                 )

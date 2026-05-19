@@ -4,32 +4,39 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 from itertools import chain
+from typing_extensions import Literal
 
 import httpx
 
-from ... import _legacy_response
-from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
-from ..._compat import cached_property
-from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
-from ...pagination import SyncPageCursor, AsyncPageCursor
-from ...types.beta import (
-    BetaCloudConfigParams,
-    environment_list_params,
-    environment_create_params,
-    environment_update_params,
+from .... import _legacy_response
+from .work import (
+    Work,
+    AsyncWork,
+    WorkWithRawResponse,
+    AsyncWorkWithRawResponse,
+    WorkWithStreamingResponse,
+    AsyncWorkWithStreamingResponse,
 )
-from ..._base_client import AsyncPaginator, make_request_options
-from ...types.anthropic_beta_param import AnthropicBetaParam
-from ...types.beta.beta_environment import BetaEnvironment
-from ...types.beta.beta_cloud_config_params import BetaCloudConfigParams
-from ...types.beta.beta_environment_delete_response import BetaEnvironmentDeleteResponse
+from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
+from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._compat import cached_property
+from ...._resource import SyncAPIResource, AsyncAPIResource
+from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ....pagination import SyncPageCursor, AsyncPageCursor
+from ....types.beta import environment_list_params, environment_create_params, environment_update_params
+from ...._base_client import AsyncPaginator, make_request_options
+from ....types.anthropic_beta_param import AnthropicBetaParam
+from ....types.beta.beta_environment import BetaEnvironment
+from ....types.beta.beta_environment_delete_response import BetaEnvironmentDeleteResponse
 
 __all__ = ["Environments", "AsyncEnvironments"]
 
 
 class Environments(SyncAPIResource):
+    @cached_property
+    def work(self) -> Work:
+        return Work(self._client)
+
     @cached_property
     def with_raw_response(self) -> EnvironmentsWithRawResponse:
         """
@@ -53,9 +60,10 @@ class Environments(SyncAPIResource):
         self,
         *,
         name: str,
-        config: Optional[BetaCloudConfigParams] | Omit = omit,
+        config: Optional[environment_create_params.Config] | Omit = omit,
         description: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
+        scope: Optional[Literal["organization", "account"]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -70,13 +78,16 @@ class Environments(SyncAPIResource):
         Args:
           name: Human-readable name for the environment
 
-          config: Request params for `cloud` environment configuration.
-
-              Fields default to null; on update, omitted fields preserve the existing value.
+          config: Environment configuration
 
           description: Optional description of the environment
 
           metadata: User-provided metadata key-value pairs
+
+          scope: The visibility scope for this environment. 'organization' makes the environment
+              visible to all accounts. 'account' restricts visibility to the owning account
+              only. Only applicable for self-hosted environments. If not specified, defaults
+              based on organization type.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -107,6 +118,7 @@ class Environments(SyncAPIResource):
                     "config": config,
                     "description": description,
                     "metadata": metadata,
+                    "scope": scope,
                 },
                 environment_create_params.EnvironmentCreateParams,
             ),
@@ -167,10 +179,11 @@ class Environments(SyncAPIResource):
         self,
         environment_id: str,
         *,
-        config: Optional[BetaCloudConfigParams] | Omit = omit,
+        config: Optional[environment_update_params.Config] | Omit = omit,
         description: Optional[str] | Omit = omit,
         metadata: Dict[str, Optional[str]] | Omit = omit,
         name: Optional[str] | Omit = omit,
+        scope: Optional[Literal["organization", "account"]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -183,9 +196,7 @@ class Environments(SyncAPIResource):
         Update an existing environment's configuration.
 
         Args:
-          config: Request params for `cloud` environment configuration.
-
-              Fields default to null; on update, omitted fields preserve the existing value.
+          config: Updated environment configuration
 
           description: Updated description of the environment
 
@@ -193,6 +204,10 @@ class Environments(SyncAPIResource):
               delete the key.
 
           name: Updated name for the environment
+
+          scope: The visibility scope for this environment. 'organization' makes the environment
+              visible to all accounts. 'account' restricts visibility to the owning account
+              only.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -225,6 +240,7 @@ class Environments(SyncAPIResource):
                     "description": description,
                     "metadata": metadata,
                     "name": name,
+                    "scope": scope,
                 },
                 environment_update_params.EnvironmentUpdateParams,
             ),
@@ -400,6 +416,10 @@ class Environments(SyncAPIResource):
 
 class AsyncEnvironments(AsyncAPIResource):
     @cached_property
+    def work(self) -> AsyncWork:
+        return AsyncWork(self._client)
+
+    @cached_property
     def with_raw_response(self) -> AsyncEnvironmentsWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
@@ -422,9 +442,10 @@ class AsyncEnvironments(AsyncAPIResource):
         self,
         *,
         name: str,
-        config: Optional[BetaCloudConfigParams] | Omit = omit,
+        config: Optional[environment_create_params.Config] | Omit = omit,
         description: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
+        scope: Optional[Literal["organization", "account"]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -439,13 +460,16 @@ class AsyncEnvironments(AsyncAPIResource):
         Args:
           name: Human-readable name for the environment
 
-          config: Request params for `cloud` environment configuration.
-
-              Fields default to null; on update, omitted fields preserve the existing value.
+          config: Environment configuration
 
           description: Optional description of the environment
 
           metadata: User-provided metadata key-value pairs
+
+          scope: The visibility scope for this environment. 'organization' makes the environment
+              visible to all accounts. 'account' restricts visibility to the owning account
+              only. Only applicable for self-hosted environments. If not specified, defaults
+              based on organization type.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -476,6 +500,7 @@ class AsyncEnvironments(AsyncAPIResource):
                     "config": config,
                     "description": description,
                     "metadata": metadata,
+                    "scope": scope,
                 },
                 environment_create_params.EnvironmentCreateParams,
             ),
@@ -536,10 +561,11 @@ class AsyncEnvironments(AsyncAPIResource):
         self,
         environment_id: str,
         *,
-        config: Optional[BetaCloudConfigParams] | Omit = omit,
+        config: Optional[environment_update_params.Config] | Omit = omit,
         description: Optional[str] | Omit = omit,
         metadata: Dict[str, Optional[str]] | Omit = omit,
         name: Optional[str] | Omit = omit,
+        scope: Optional[Literal["organization", "account"]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -552,9 +578,7 @@ class AsyncEnvironments(AsyncAPIResource):
         Update an existing environment's configuration.
 
         Args:
-          config: Request params for `cloud` environment configuration.
-
-              Fields default to null; on update, omitted fields preserve the existing value.
+          config: Updated environment configuration
 
           description: Updated description of the environment
 
@@ -562,6 +586,10 @@ class AsyncEnvironments(AsyncAPIResource):
               delete the key.
 
           name: Updated name for the environment
+
+          scope: The visibility scope for this environment. 'organization' makes the environment
+              visible to all accounts. 'account' restricts visibility to the owning account
+              only.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -594,6 +622,7 @@ class AsyncEnvironments(AsyncAPIResource):
                     "description": description,
                     "metadata": metadata,
                     "name": name,
+                    "scope": scope,
                 },
                 environment_update_params.EnvironmentUpdateParams,
             ),
@@ -790,6 +819,10 @@ class EnvironmentsWithRawResponse:
             environments.archive,
         )
 
+    @cached_property
+    def work(self) -> WorkWithRawResponse:
+        return WorkWithRawResponse(self._environments.work)
+
 
 class AsyncEnvironmentsWithRawResponse:
     def __init__(self, environments: AsyncEnvironments) -> None:
@@ -813,6 +846,10 @@ class AsyncEnvironmentsWithRawResponse:
         self.archive = _legacy_response.async_to_raw_response_wrapper(
             environments.archive,
         )
+
+    @cached_property
+    def work(self) -> AsyncWorkWithRawResponse:
+        return AsyncWorkWithRawResponse(self._environments.work)
 
 
 class EnvironmentsWithStreamingResponse:
@@ -838,6 +875,10 @@ class EnvironmentsWithStreamingResponse:
             environments.archive,
         )
 
+    @cached_property
+    def work(self) -> WorkWithStreamingResponse:
+        return WorkWithStreamingResponse(self._environments.work)
+
 
 class AsyncEnvironmentsWithStreamingResponse:
     def __init__(self, environments: AsyncEnvironments) -> None:
@@ -861,3 +902,7 @@ class AsyncEnvironmentsWithStreamingResponse:
         self.archive = async_to_streamed_response_wrapper(
             environments.archive,
         )
+
+    @cached_property
+    def work(self) -> AsyncWorkWithStreamingResponse:
+        return AsyncWorkWithStreamingResponse(self._environments.work)

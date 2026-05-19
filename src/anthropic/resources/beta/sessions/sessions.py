@@ -32,7 +32,11 @@ from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
 from ....pagination import SyncPageCursor, AsyncPageCursor
-from ....types.beta import session_list_params, session_create_params, session_update_params
+from ....types.beta import (
+    session_list_params,
+    session_create_params,
+    session_update_params,
+)
 from ...._base_client import AsyncPaginator, make_request_options
 from .threads.threads import (
     Threads,
@@ -45,6 +49,7 @@ from .threads.threads import (
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_managed_agents_session import BetaManagedAgentsSession
 from ....types.beta.beta_managed_agents_deleted_session import BetaManagedAgentsDeletedSession
+from ....types.beta.beta_managed_agents_session_agent_update_param import BetaManagedAgentsSessionAgentUpdateParam
 
 __all__ = ["Sessions", "AsyncSessions"]
 
@@ -208,6 +213,7 @@ class Sessions(SyncAPIResource):
         self,
         session_id: str,
         *,
+        agent: BetaManagedAgentsSessionAgentUpdateParam | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         title: Optional[str] | Omit = omit,
         vault_ids: SequenceNotStr[str] | Omit = omit,
@@ -222,9 +228,13 @@ class Sessions(SyncAPIResource):
         """Update Session
 
         Args:
-          metadata: Metadata patch.
+          agent: Mid-session agent configuration update.
 
-        Set a key to a string to upsert it, or to null to delete it.
+        Only `tools` and `mcp_servers` are
+              updatable. Full replacement: the provided array becomes the new value. To
+              preserve existing entries, GET the session, modify the array, and POST it back.
+
+          metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omit the field to preserve.
 
           title: Human-readable session title.
@@ -259,6 +269,7 @@ class Sessions(SyncAPIResource):
             path_template("/v1/sessions/{session_id}?beta=true", session_id=session_id),
             body=maybe_transform(
                 {
+                    "agent": agent,
                     "metadata": metadata,
                     "title": title,
                     "vault_ids": vault_ids,
@@ -629,6 +640,7 @@ class AsyncSessions(AsyncAPIResource):
         self,
         session_id: str,
         *,
+        agent: BetaManagedAgentsSessionAgentUpdateParam | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         title: Optional[str] | Omit = omit,
         vault_ids: SequenceNotStr[str] | Omit = omit,
@@ -643,9 +655,13 @@ class AsyncSessions(AsyncAPIResource):
         """Update Session
 
         Args:
-          metadata: Metadata patch.
+          agent: Mid-session agent configuration update.
 
-        Set a key to a string to upsert it, or to null to delete it.
+        Only `tools` and `mcp_servers` are
+              updatable. Full replacement: the provided array becomes the new value. To
+              preserve existing entries, GET the session, modify the array, and POST it back.
+
+          metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omit the field to preserve.
 
           title: Human-readable session title.
@@ -680,6 +696,7 @@ class AsyncSessions(AsyncAPIResource):
             path_template("/v1/sessions/{session_id}?beta=true", session_id=session_id),
             body=await async_maybe_transform(
                 {
+                    "agent": agent,
                     "metadata": metadata,
                     "title": title,
                     "vault_ids": vault_ids,

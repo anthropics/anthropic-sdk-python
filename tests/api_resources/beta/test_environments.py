@@ -52,6 +52,7 @@ class TestEnvironments:
             },
             description="Python environment with data-analysis packages.",
             metadata={"foo": "string"},
+            scope="organization",
             betas=["string"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
@@ -158,6 +159,7 @@ class TestEnvironments:
             description="Python environment with data-analysis packages.",
             metadata={"foo": "string"},
             name="x",
+            scope="organization",
             betas=["string"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
@@ -357,6 +359,7 @@ class TestAsyncEnvironments:
             },
             description="Python environment with data-analysis packages.",
             metadata={"foo": "string"},
+            scope="organization",
             betas=["string"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
@@ -463,6 +466,7 @@ class TestAsyncEnvironments:
             description="Python environment with data-analysis packages.",
             metadata={"foo": "string"},
             name="x",
+            scope="organization",
             betas=["string"],
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
