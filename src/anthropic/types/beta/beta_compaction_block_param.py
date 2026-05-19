@@ -20,13 +20,13 @@ class BetaCompactionBlockParam(TypedDict, total=False):
     treats these as no-ops. Empty string content is not allowed.
     """
 
-    content: Required[Optional[str]]
-    """Summary of previously compacted content, or null if compaction failed"""
-
     type: Required[Literal["compaction"]]
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
+
+    content: Optional[str]
+    """Summary of previously compacted content, or null if compaction failed"""
 
     encrypted_content: Optional[str]
     """Opaque metadata from prior compaction, to be round-tripped verbatim"""
