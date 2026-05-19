@@ -183,6 +183,11 @@ def assert_tool_use_response(events: list[ParsedBetaMessageStreamEvent], message
 
 def assert_incomplete_partial_input_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
     assert_message_matches(message, EXPECTED_INCOMPLETE_MESSAGE)
+    input_json_events = [event for event in events if event.type == "input_json"]
+    tool_use = message.content[1]
+    assert tool_use.type == "tool_use"
+    assert "".join(event.partial_json for event in input_json_events).endswith('\n"Filing taxes')
+    assert input_json_events[-1].snapshot == tool_use.input
     assert [e.type for e in events] == EXPECTED_INCOMPLETE_EVENT_TYPES
 
 
@@ -284,6 +289,21 @@ class TestSyncMessages:
             model="claude-opus-4-7",
         ) as stream:
             assert_refusal_response(stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_incomplete_response(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("incomplete_partial_json_response.txt"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaMessageStream)
+
+            assert_incomplete_partial_input_response([event for event in stream], stream.get_final_message())
 
 
 class TestAsyncMessages:
