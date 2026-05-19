@@ -30,7 +30,7 @@ from ..._streaming import Stream, AsyncStream
 from ...types.beta import BetaRawMessageStreamEvent
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
-from ...types.beta.parsed_beta_message import ParsedBetaMessage, ParsedBetaContentBlock
+from ...types.beta.parsed_beta_message import ParsedBetaMessage, ParsedBetaContentBlock, ParsedBetaTextBlock
 
 
 class BetaMessageStream(Generic[ResponseFormatT]):
@@ -475,12 +475,22 @@ def accumulate_event(
 
     if event.type == "content_block_start":
         # TODO: check index
-        current_snapshot.content.append(
-            cast(
-                Any,  # Pydantic does not support generic unions at runtime
-                construct_type(type_=ParsedBetaContentBlock, value=event.content_block.to_dict()),
-            ),
-        )
+        content_block = event.content_block
+        if content_block.type == "text":
+            # Text blocks need to be reconstructed as ParsedBetaTextBlock
+            # to add the parsed_output field
+            parsed_block = cast(
+                Any,
+                construct_type(type_=ParsedBetaTextBlock, value=content_block.to_dict()),
+            )
+        else:
+            # Non-text blocks (tool_use, thinking, compaction, etc.) are already
+            # the correct type from the event and don't need reconstruction.
+            # Reconstructing through the ParsedBetaContentBlock union can fail
+            # on some Python versions due to the generic ParsedBetaTextBlock[T]
+            # variant breaking Pydantic's discriminator resolution.
+            parsed_block = content_block
+        current_snapshot.content.append(parsed_block)
     elif event.type == "content_block_delta":
         content = current_snapshot.content[event.index]
         if event.delta.type == "text_delta":
