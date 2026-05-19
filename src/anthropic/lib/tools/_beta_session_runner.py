@@ -175,11 +175,15 @@ class DispatchedToolCall:
     """The full ``agent.tool_use`` / ``agent.custom_tool_use`` event the agent
     emitted. The tool input is ``event.input``."""
 
-    result: DispatchedToolResultParams
+    result: DispatchedToolResultParams | None
     """The result event the runner computed and attempted to post back to the
     session — ``user.tool_result`` for an ``agent.tool_use`` call,
     ``user.custom_tool_result`` for an ``agent.custom_tool_use`` call. The
-    computed content is ``result["content"]``."""
+    computed content is ``result["content"]``.
+
+    ``None`` when the runner deliberately posted nothing: the tool name is not
+    one this runner owns, so the ``tool_use_id`` was left pending for its
+    owner. ``posted`` is ``False`` in that case."""
 
     tool_use_id: str
     """Convenience: the id of the originating tool-call event — the same value
@@ -190,13 +194,18 @@ class DispatchedToolCall:
 
     is_error: bool
     """Convenience: whether the result is an error — the same value as
-    ``result["is_error"]``."""
+    ``result["is_error"]``. Always ``False`` for a skipped unowned call (the
+    runner reaches no verdict on a tool it does not own; ``result`` is
+    ``None``)."""
 
     posted: bool = True
-    """``True`` if the result event made it to the session, ``False`` if all
+    """``True`` if the result event made it to the session. ``False`` if all
     retries were exhausted or the server returned a permanent 4xx — in which
     case the session-side agent will *not* see this result and the consumer may
-    want to surface that or retry at a higher level."""
+    want to surface that or retry at a higher level — and also ``False``, with
+    ``result`` left ``None``, when the tool name is not one this runner owns and
+    it deliberately posted nothing, leaving the ``tool_use_id`` pending for its
+    owner (the split-client partial-fulfilment behavior)."""
 
 
 _HELPER: HelperTag = "session-tool-runner"
@@ -295,6 +304,19 @@ class SessionToolRunner:
     calls with the self-hosted environment key (bearered, with the client's
     default ``x-api-key`` dropped); leave it unset to use the client's own
     credentials.
+
+    A self-hosted session is commonly serviced by **two** clients at once: this
+    runner inside the customer's sandbox (registered with the file/shell sandbox
+    tools) and the customer's app backend (handling the agent's ``custom``
+    function tools). The Sessions API has a partial-fulfilment contract: when a
+    session pauses on ``requires_action`` the pending tool-call ids can mix both
+    kinds, and each client must post results **only** for the ids it owns and
+    leave the rest pending for the other client. A tool-call event whose name is
+    not in ``tools`` is therefore assumed to belong to the other client: the
+    runner posts no result for it, does not mark it answered, and leaves the
+    ``tool_use_id`` pending — but still yields a :class:`DispatchedToolCall`
+    (``posted=False``, ``is_error=False``, ``result=None``) so the caller can
+    observe the unowned dispatch.
 
     Usage::
 
@@ -557,13 +579,33 @@ class SessionToolRunner:
     async def _execute(self, ev: DispatchedToolUseEvent) -> None:
         log.info("executing tool tool=%s tool_use_id=%s", ev.name, ev.id)
         tool = self._tools_by_name.get(ev.name)
-        content: BetaFunctionToolResultType
-        is_error = False
-        input_ = dict(ev.input)
+        tool_result: DispatchedToolResultParams | None
         if tool is None:
-            content = f"tool {ev.name!r} not implemented"
-            is_error = True
+            # Skip unowned (split-client partial fulfilment): a name this
+            # runner is not registered for belongs to the other client
+            # servicing this session (typically the customer's app backend
+            # handling custom tools). Post NO result, do not mark it answered,
+            # and leave the tool_use_id pending for its owner — claiming it
+            # would corrupt the conversation (the model would read "not
+            # implemented" as the tool output while the real result from the
+            # other client arrives afterwards). Still yield the call so the
+            # caller can observe the unowned dispatch; nothing was sent, so
+            # ``posted`` and ``is_error`` stay False and ``result`` is None.
+            # The id stays unanswered, so reconcile keeps it out of the
+            # idle/end-turn accounting and re-surfaces it after a reconnect
+            # until its owner answers it.
+            log.info(
+                "tool %r not owned by this runner; leaving tool_use_id=%s pending for its owner",
+                ev.name,
+                ev.id,
+            )
+            tool_result = None
+            is_error = False
+            sent = False
         else:
+            content: BetaFunctionToolResultType
+            is_error = False
+            input_ = dict(ev.input)
             try:
                 with anyio.fail_after(TOOL_TIMEOUT):
                     content = await run_runnable_tool(tool, input_)
@@ -577,8 +619,8 @@ class SessionToolRunner:
                 log.exception("tool %s raised", ev.name)
                 content = tool_error_content(e)
                 is_error = True
-        tool_result = _build_result_event(ev, content, is_error)
-        sent = await self._send_result(tool_result, ev.id)
+            tool_result = _build_result_event(ev, content, is_error)
+            sent = await self._send_result(tool_result, ev.id)
         try:
             await self._send_results.send(
                 DispatchedToolCall(

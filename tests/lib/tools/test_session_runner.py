@@ -283,6 +283,7 @@ async def test_yields_completed_tool_call() -> None:
     # The reshaped DispatchedToolCall embeds the originating event and the
     # posted-back result block, alongside the flat convenience fields.
     assert item.event.id == "tu_1"
+    assert item.result is not None
     assert item.result["type"] == "user.tool_result"
     assert item.result["tool_use_id"] == "tu_1"
     assert item.result.get("is_error") is False
@@ -311,14 +312,20 @@ async def test_yields_error_for_failing_tool() -> None:
 
 
 @pytest.mark.asyncio()
-async def test_yields_error_for_unknown_tool() -> None:
+async def test_unknown_tool_skipped_by_default() -> None:
+    """An unregistered tool name is assumed to belong to the other client
+    servicing the session, so it is skipped — not answered in place. The call
+    is still yielded (``posted=False`` / ``is_error=False`` / ``result=None``)
+    and nothing is posted."""
     events = FakeAsyncEvents(stream_events=[_tool_use("tu_1", "missing", {}), _terminated()])
 
     items = [item async for item in _run_with_fakes(events=events, tools=[])]
 
     assert len(items) == 1
-    assert items[0].is_error is True
-    assert "not implemented" in _result_text(items[0])
+    assert items[0].is_error is False
+    assert items[0].posted is False
+    assert items[0].result is None
+    assert events.send_calls == []
 
 
 @pytest.mark.asyncio()
@@ -412,10 +419,13 @@ async def test_dispatches_builtin_and_custom_tools_in_one_stream() -> None:
 
     by_id = {it.tool_use_id: it for it in items}
     assert set(by_id) == {"tu_1", "ctu_1"}
+    builtin_result = by_id["tu_1"].result
+    custom_result = by_id["ctu_1"].result
+    assert builtin_result is not None and custom_result is not None
     assert by_id["tu_1"].event.type == "agent.tool_use"
-    assert by_id["tu_1"].result["type"] == "user.tool_result"
+    assert builtin_result["type"] == "user.tool_result"
     assert by_id["ctu_1"].event.type == "agent.custom_tool_use"
-    assert by_id["ctu_1"].result["type"] == "user.custom_tool_result"
+    assert custom_result["type"] == "user.custom_tool_result"
     # Both result events were posted, each with the matching type.
     posted = {call["events"][0]["type"] for call in events.send_calls}
     assert posted == {"user.tool_result", "user.custom_tool_result"}
@@ -441,6 +451,101 @@ async def test_skips_already_answered_custom_tool() -> None:
 
     assert counter["calls"] == 0
     assert items == []
+
+
+# ---------- skip unowned tools (split-client partial fulfilment) -----------
+
+
+@pytest.mark.asyncio()
+async def test_skips_unowned_builtin_and_custom_tools_by_default() -> None:
+    """Default split-client behavior: a tool-call event whose name is not in
+    the runner's registry belongs to the other client servicing the session
+    (e.g. the customer's app backend handling custom tools). The runner must
+    post NO result for it, claim nothing, and leave the ``tool_use_id``
+    pending — while still yielding the ``DispatchedToolCall`` so the caller can
+    observe the unowned dispatch (``posted=False``, ``is_error=False``,
+    ``result=None``). A registered tool in the same stream still runs, and the
+    registry miss must not raise."""
+    ran = {"echo": 0}
+
+    async def echo(_input: dict[str, Any]) -> str:
+        ran["echo"] += 1
+        return "ok"
+
+    events = FakeAsyncEvents(
+        stream_events=[
+            _tool_use("evt_99", "not_ours", {}),
+            _custom_tool_use("cevt_99", "app_backend_tool", {}),
+            _tool_use("tu_ok", "echo", {}),
+            _terminated(),
+        ]
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[_FakeTool("echo", echo)])]
+
+    by_id = {it.tool_use_id: it for it in items}
+    assert set(by_id) == {"evt_99", "cevt_99", "tu_ok"}
+
+    builtin = by_id["evt_99"]
+    assert builtin.name == "not_ours"
+    assert builtin.event.type == "agent.tool_use"
+    assert builtin.is_error is False, "a skipped call is not an error"
+    assert builtin.posted is False, "nothing was sent for an unowned tool"
+    assert builtin.result is None, "no user.tool_result was ever built"
+
+    custom = by_id["cevt_99"]
+    assert custom.name == "app_backend_tool"
+    assert custom.event.type == "agent.custom_tool_use"
+    assert custom.is_error is False, "a skipped call is not an error"
+    assert custom.posted is False, "nothing was sent for an unowned custom tool"
+    assert custom.result is None, "no user.custom_tool_result was ever built"
+
+    owned = by_id["tu_ok"]
+    assert owned.is_error is False
+    assert owned.posted is True
+    assert owned.result is not None and owned.result["type"] == "user.tool_result"
+
+    assert ran["echo"] == 1, "the registered tool should still have run"
+    # Only the owned tool's result reached the session; nothing for the unowned.
+    assert len(events.send_calls) == 1
+    assert events.send_calls[0]["events"][0]["tool_use_id"] == "tu_ok"
+
+
+@pytest.mark.asyncio()
+async def test_skipped_unowned_tool_does_not_trip_idle() -> None:
+    """A skipped (unanswered) unowned tool_use stays OUT of the end-turn
+    accounting: reconcile sees history ending on an ``end_turn`` idle but with
+    the unowned tool_use still unanswered, so it must NOT arm the idle
+    countdown — the runner has not handled that call, its owner still has to.
+
+    A correct runner therefore stays alive past ``max_idle`` (the iterator
+    never completes); a buggy one would idle-stop almost immediately.
+    """
+    events = FakeAsyncEvents(
+        # No live events — the reconcile pass drives the test. History ends on
+        # an end_turn idle with the unowned tool_use still unanswered.
+        list_events=[_tool_use("evt_pending", "not_ours", {}), _idle_end_turn()],
+        stream_events=[],
+    )
+    seen: list[DispatchedToolCall] = []
+
+    async def drive() -> None:
+        async for call in _run_with_fakes(events=events, tools=[], max_idle=0.1):
+            seen.append(call)
+
+    # If the unowned tool wrongly armed the idle clock the runner would stop
+    # ~0.1s in and ``drive()`` would return; a correct runner blocks until the
+    # (never-arriving) owner answers, so ``wait_for`` must time out instead.
+    with pytest.raises((asyncio.TimeoutError, TimeoutError)):
+        await asyncio.wait_for(drive(), timeout=1.0)
+
+    assert len(seen) >= 1, "reconcile must still surface the unowned call"
+    call = seen[0]
+    assert call.tool_use_id == "evt_pending"
+    assert call.posted is False
+    assert call.is_error is False
+    assert call.result is None, "no result was built for the skipped call"
+    assert events.send_calls == [], "runner must not post a result it does not own"
 
 
 @pytest.mark.asyncio()
