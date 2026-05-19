@@ -5,9 +5,9 @@ from datetime import datetime
 from typing_extensions import Literal
 
 from ...._models import BaseModel
-from .beta_managed_agents_session_thread_agent import BetaManagedAgentsSessionThreadAgent
 from .beta_managed_agents_session_thread_stats import BetaManagedAgentsSessionThreadStats
 from .beta_managed_agents_session_thread_usage import BetaManagedAgentsSessionThreadUsage
+from ..beta_managed_agents_session_thread_agent import BetaManagedAgentsSessionThreadAgent
 from .beta_managed_agents_session_thread_status import BetaManagedAgentsSessionThreadStatus
 
 __all__ = ["BetaManagedAgentsSessionThread"]

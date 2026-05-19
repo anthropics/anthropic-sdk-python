@@ -219,3 +219,137 @@ uploaded = await client.beta.files.upload(file=mcp_resource_to_file(resource))
 ### Error handling
 
 The conversion functions raise `UnsupportedMCPValueError` if an MCP value cannot be converted to a format supported by the Claude API (e.g., unsupported content type like audio, unsupported MIME type).
+
+# Self-Hosted Environment Runner
+
+For running a managed agent's tools locally against a self-hosted environment, the SDK exposes three pieces:
+
+- `client.beta.environments.work.worker(...)` — the full worker (an `EnvironmentWorker`; also
+  constructible directly as `EnvironmentWorker(client, ...)` from `anthropic.lib.environments`):
+  polls the environment for work, and for each claimed session sets up the workdir + downloads the
+  session agent's skills, runs your tools against the session's `agent.tool_use` /
+  `agent.custom_tool_use` events while heartbeating the work-item lease, force-stops the work on
+  exit, and loops. `worker.handle_item(...)`
+  runs that same per-item flow for a single work item you've already claimed; with no arguments it
+  reads the work id / environment id / session id from `ANTHROPIC_WORK_ID` /
+  `ANTHROPIC_ENVIRONMENT_ID` / `ANTHROPIC_SESSION_ID` and the environment key from
+  `ANTHROPIC_ENVIRONMENT_KEY` (the env vars `ant worker poll --on-work` sets). `environment_id`
+  passed to `worker()` is only needed by `run()`'s poll loop; `environment_key` is the worker's
+  single credential — `handle_item()` falls back to the value passed to `worker()` and then to
+  `ANTHROPIC_ENVIRONMENT_KEY`. Async only; built on `anyio`, so it works under either `asyncio` or
+  `trio`.
+- `client.beta.sessions.events.tool_runner(...)` — the sessions-side counterpart to
+  `client.beta.messages.tool_runner`: a `SessionToolRunner`, an async iterable that attaches to a
+  session's event stream, runs the matching tool for each tool-call event — `agent.tool_use`
+  (built-in tools) answered with `user.tool_result`, and `agent.custom_tool_use` (custom tools)
+  answered with `user.custom_tool_result` — posts the result back, and yields one
+  `DispatchedToolCall` per completed call. Use it directly when you want to observe each dispatch
+  (the worker drives one internally). Async only.
+- `client.beta.environments.work.poller(...)` — the control-plane only piece: claims work items,
+  ack's each one, and yields each claimed work item. Async only — available on `AsyncAnthropic`
+  (its `worker(...)` companion is async too, so the sync client does not expose either).
+
+The standard `agent_toolset_20260401` implementations (`bash`, `read`, `write`, `edit`, `glob`,
+`grep`) plus the workdir/skills `AgentToolContext` live in `anthropic.lib.tools.agent_toolset`.
+
+The high-level worker is one object:
+
+```python
+import os, asyncio
+from anthropic import AsyncAnthropic
+from anthropic.lib.tools import beta_async_tool
+from anthropic.lib.tools.agent_toolset import beta_agent_toolset_20260401
+
+client = AsyncAnthropic()
+
+
+@beta_async_tool
+async def deploy(target: str) -> str:
+    ...
+
+
+# `client.beta.environments.work.worker(...)` builds an `EnvironmentWorker`; you can also construct
+# one directly with `EnvironmentWorker(client, ...)` from `anthropic.lib.environments`.
+await client.beta.environments.work.worker(
+    environment_id=os.environ["ANTHROPIC_ENVIRONMENT_ID"],
+    environment_key=os.environ["ANTHROPIC_ENVIRONMENT_KEY"],
+    workdir="/workspace",
+    # `tools` is a fixed list or a factory invoked per session with that session's `AgentToolContext`
+    # (use the factory form to bind `beta_agent_toolset_20260401` to the right session). Defaults to
+    # `beta_agent_toolset_20260401(env)`.
+    tools=lambda env: [*beta_agent_toolset_20260401(env), deploy],
+).run()  # loops forever; cancel the task / wrap in asyncio.wait_for to bound it
+```
+
+If you already hold a claimed work item — e.g. an `ant worker poll --on-work` script handed one to a
+fresh process — call `handle_item` to run just the per-item flow (build the workdir + skills, run the
+session's tools while heartbeating the lease, force-stop on exit). Inside that command the work id /
+environment id / session id / environment key are already in the environment, so the sandbox case is
+just:
+
+```python
+await client.beta.environments.work.worker(workdir="/workspace", tools=tools).handle_item()
+```
+
+Pass the values explicitly when you have the objects in hand (e.g. you iterate the poller yourself):
+
+```python
+await client.beta.environments.work.worker(workdir="/workspace", tools=tools).handle_item(
+    work_id=work.id,
+    environment_id=work.environment_id,
+    session_id=work.data.id,
+    environment_key=environment_key,
+)
+```
+
+If you want to observe each tool call (or wire up the workdir / poller yourself), use the
+session tool runner directly:
+
+```python
+from anthropic import AsyncAnthropic
+from anthropic.lib.tools.agent_toolset import AgentToolContext, beta_agent_toolset_20260401
+
+client = AsyncAnthropic()
+
+async for work in client.beta.environments.work.poller(
+    environment_id=..., environment_key=environment_key,
+):
+    if work.data.type != "session":
+        continue
+    # Passing `client` and `session_id` makes `AgentToolContext` fetch the session's resolved agent
+    # on enter and download each of its skills into `{workdir}/skills/<name>/`.
+    async with AgentToolContext(workdir="/workspace", client=client, session_id=work.data.id) as env:
+        async for call in client.beta.sessions.events.tool_runner(
+            work.data.id,
+            tools=beta_agent_toolset_20260401(env),
+            environment_key=environment_key,
+        ):
+            print(f"{call.name} -> {'error' if call.is_error else 'ok'}")
+```
+
+`beta_agent_toolset_20260401(env)` returns a plain `list[BetaAsyncFunctionTool]`. Filter or extend
+it directly:
+
+```python
+from anthropic.lib.tools import beta_async_tool
+from anthropic.lib.tools.agent_toolset import beta_read_tool, beta_agent_toolset_20260401
+
+tools = [*beta_agent_toolset_20260401(env), deploy]
+tools = [t for t in beta_agent_toolset_20260401(env) if t.name != "bash"]
+```
+
+> **Run stateful tools under the session tool runner, not the Messages tool runner.** The `bash`
+> tool owns a persistent `/bin/bash` subprocess that is only torn down by its `close` cleanup hook.
+> Only `client.beta.sessions.events.tool_runner(...)` (the `SessionToolRunner`) and the
+> `EnvironmentWorker` built on it call that hook. `client.beta.messages.tool_runner(...)` does
+> **not** call `close`, so handing it this toolset leaks one orphaned shell per run. Use the
+> session tool runner / environment worker for the agent toolset, or drop `bash` (as in the second
+> line above) before passing the toolset to the Messages tool runner.
+
+The `bash` tool runs an unrestricted `/bin/bash` and executes file operations and shell commands
+directly on the host. Run the worker inside a container or other isolation boundary you control.
+(The file tools — `read`/`write`/`edit`/`glob`/`grep` — confine to the workdir with a symlink-aware
+check, so they are safe without a sandbox; `bash` is not.) `bash` does not inherit the runner's
+`ANTHROPIC_*` credentials; pass `AgentToolContext(env=...)` to control the subprocess environment.
+
+See [`examples/managed-agents-private-sandbox-worker.py`](examples/managed-agents-private-sandbox-worker.py) for a complete example.

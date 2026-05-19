@@ -2,22 +2,20 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing import Dict, List, Union, Optional
+from typing_extensions import Literal, Annotated, TypeAlias, TypedDict
 
 from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_cloud_config_params import BetaCloudConfigParams
+from .beta_self_hosted_config_params import BetaSelfHostedConfigParams
 
-__all__ = ["EnvironmentUpdateParams"]
+__all__ = ["EnvironmentUpdateParams", "Config"]
 
 
 class EnvironmentUpdateParams(TypedDict, total=False):
-    config: Optional[BetaCloudConfigParams]
-    """Request params for `cloud` environment configuration.
-
-    Fields default to null; on update, omitted fields preserve the existing value.
-    """
+    config: Optional[Config]
+    """Updated environment configuration"""
 
     description: Optional[str]
     """Updated description of the environment"""
@@ -31,5 +29,15 @@ class EnvironmentUpdateParams(TypedDict, total=False):
     name: Optional[str]
     """Updated name for the environment"""
 
+    scope: Optional[Literal["organization", "account"]]
+    """The visibility scope for this environment.
+
+    'organization' makes the environment visible to all accounts. 'account'
+    restricts visibility to the owning account only.
+    """
+
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
+
+
+Config: TypeAlias = Union[BetaCloudConfigParams, BetaSelfHostedConfigParams]

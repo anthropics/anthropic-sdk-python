@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from typing import Any, cast
+from contextlib import contextmanager, asynccontextmanager
+from collections.abc import Callable, Iterator, Awaitable, AsyncIterator
 
 import pytest
 from pydantic import BaseModel
@@ -445,3 +447,119 @@ def _get_parameters_info(fn: BaseFunctionTool[Any]) -> dict[str, str]:
         if param.description:
             param_info[param.arg_name] = param.description.strip()
     return param_info
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool functions need pydantic v2")
+class TestContextManagerTool:
+    """``@beta_tool`` / ``@beta_async_tool`` over an (async) context manager that
+    yields the tool callable: the decorator enters it to obtain the callable and
+    drives its ``__exit__`` / ``__aexit__`` on the cleanup path.
+
+    The ``cast(Any, ...)`` call form mirrors how the SDK's own ``beta_bash_tool``
+    adopts this; bare decorator syntax works the same at runtime.
+    """
+
+    def test_sync_context_manager_tool(self) -> None:
+        import anyio
+
+        from anthropic.lib.tools._beta_functions import aclose_runnable_tool
+
+        seen: list[str] = []
+
+        @contextmanager
+        def adder_cm() -> Iterator[Callable[[int, int], str]]:
+            seen.append("enter")
+
+            def add(a: int, b: int) -> str:
+                """Add two numbers."""
+                return str(a + b)
+
+            try:
+                yield add
+            finally:
+                seen.append("exit")
+
+        adder = beta_tool(cast(Any, adder_cm))
+
+        # Entered eagerly; schema/description inferred from the yielded callable.
+        assert seen == ["enter"]
+        assert adder.name == "add"
+        assert adder.description == "Add two numbers."
+        assert adder.input_schema == {
+            "additionalProperties": False,
+            "type": "object",
+            "properties": {"a": {"title": "A", "type": "integer"}, "b": {"title": "B", "type": "integer"}},
+            "required": ["a", "b"],
+        }
+        assert adder.call({"a": 2, "b": 3}) == "5"
+
+        anyio.run(aclose_runnable_tool, adder)
+        assert seen == ["enter", "exit"]
+
+    async def test_async_context_manager_tool_lazy_enter_and_cleanup(self) -> None:
+        from anthropic.lib.tools._beta_functions import beta_async_tool, aclose_runnable_tool
+
+        seen: list[str] = []
+        schema: InputSchema = {
+            "type": "object",
+            "properties": {"value": {"type": "string"}},
+            "required": ["value"],
+        }
+
+        @asynccontextmanager
+        async def echo_cm() -> AsyncIterator[Callable[[str], Awaitable[str]]]:
+            """Echo the value."""
+            seen.append("enter")
+
+            async def echo(value: str) -> str:
+                return f"echo:{value}"
+
+            try:
+                yield echo
+            finally:
+                seen.append("exit")
+
+        echo_tool = beta_async_tool(name="echo", input_schema=schema)(cast(Any, echo_cm))
+
+        # Name/description/schema are available without entering (the runner
+        # reads them before any tool call).
+        assert echo_tool.name == "echo"
+        assert echo_tool.description == "Echo the value."
+        assert echo_tool.to_dict()["input_schema"] == schema
+        assert seen == []
+
+        assert await echo_tool.call({"value": "hi"}) == "echo:hi"
+        assert seen == ["enter"]
+
+        await aclose_runnable_tool(echo_tool)
+        assert seen == ["enter", "exit"]
+
+    def test_wrong_decorator_raises(self) -> None:
+        from anthropic.lib.tools._beta_functions import beta_async_tool
+
+        @asynccontextmanager
+        async def an_async_cm() -> AsyncIterator[Callable[[], str]]:
+            yield lambda: "x"
+
+        @contextmanager
+        def a_sync_cm() -> Iterator[Callable[[], str]]:
+            yield lambda: "x"
+
+        with pytest.raises(TypeError, match="use @beta_async_tool"):
+            beta_tool(cast(Any, an_async_cm))
+
+        with pytest.raises(TypeError, match="use @beta_tool"):
+            beta_async_tool(name="bad2")(cast(Any, a_sync_cm))
+
+    def test_async_context_manager_requires_input_schema(self) -> None:
+        from anthropic.lib.tools._beta_functions import beta_async_tool
+
+        @asynccontextmanager
+        async def noschema_cm() -> AsyncIterator[Callable[[int], Awaitable[str]]]:
+            async def fn(x: int) -> str:
+                return str(x)
+
+            yield fn
+
+        with pytest.raises(TypeError, match="needs an explicit input_schema"):
+            beta_async_tool(name="noschema")(cast(Any, noschema_cm))

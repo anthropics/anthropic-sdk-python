@@ -67,9 +67,6 @@ from .beta_managed_agents_document_block_param import (
 from .beta_managed_agents_file_document_source import (
     BetaManagedAgentsFileDocumentSource as BetaManagedAgentsFileDocumentSource,
 )
-from .beta_managed_agents_session_thread_agent import (
-    BetaManagedAgentsSessionThreadAgent as BetaManagedAgentsSessionThreadAgent,
-)
 from .beta_managed_agents_session_thread_stats import (
     BetaManagedAgentsSessionThreadStats as BetaManagedAgentsSessionThreadStats,
 )
@@ -204,6 +201,9 @@ from .beta_managed_agents_search_result_citations_param import (
 )
 from .beta_managed_agents_user_custom_tool_result_event import (
     BetaManagedAgentsUserCustomToolResultEvent as BetaManagedAgentsUserCustomToolResultEvent,
+)
+from .beta_managed_agents_user_tool_result_event_params import (
+    BetaManagedAgentsUserToolResultEventParams as BetaManagedAgentsUserToolResultEventParams,
 )
 from .beta_managed_agents_span_model_request_start_event import (
     BetaManagedAgentsSpanModelRequestStartEvent as BetaManagedAgentsSpanModelRequestStartEvent,

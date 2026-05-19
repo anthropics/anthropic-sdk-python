@@ -8,11 +8,20 @@ from typing_extensions import Annotated, TypedDict
 from ..._types import SequenceNotStr
 from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
+from .beta_managed_agents_session_agent_update_param import BetaManagedAgentsSessionAgentUpdateParam
 
 __all__ = ["SessionUpdateParams"]
 
 
 class SessionUpdateParams(TypedDict, total=False):
+    agent: BetaManagedAgentsSessionAgentUpdateParam
+    """Mid-session agent configuration update.
+
+    Only `tools` and `mcp_servers` are updatable. Full replacement: the provided
+    array becomes the new value. To preserve existing entries, GET the session,
+    modify the array, and POST it back.
+    """
+
     metadata: Optional[Dict[str, Optional[str]]]
     """Metadata patch.
 
