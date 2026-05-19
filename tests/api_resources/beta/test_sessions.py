@@ -132,6 +132,31 @@ class TestSessions:
     def test_method_update_with_all_params(self, client: Anthropic) -> None:
         session = client.beta.sessions.update(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            agent={
+                "mcp_servers": [
+                    {
+                        "name": "example-mcp",
+                        "type": "url",
+                        "url": "https://example-server.modelcontextprotocol.io/sse",
+                    }
+                ],
+                "tools": [
+                    {
+                        "type": "agent_toolset_20260401",
+                        "configs": [
+                            {
+                                "name": "bash",
+                                "enabled": True,
+                                "permission_policy": {"type": "always_allow"},
+                            }
+                        ],
+                        "default_config": {
+                            "enabled": True,
+                            "permission_policy": {"type": "always_allow"},
+                        },
+                    }
+                ],
+            },
             metadata={"foo": "string"},
             title="Order #1234 inquiry",
             vault_ids=["string"],
@@ -426,6 +451,31 @@ class TestAsyncSessions:
     async def test_method_update_with_all_params(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.update(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            agent={
+                "mcp_servers": [
+                    {
+                        "name": "example-mcp",
+                        "type": "url",
+                        "url": "https://example-server.modelcontextprotocol.io/sse",
+                    }
+                ],
+                "tools": [
+                    {
+                        "type": "agent_toolset_20260401",
+                        "configs": [
+                            {
+                                "name": "bash",
+                                "enabled": True,
+                                "permission_policy": {"type": "always_allow"},
+                            }
+                        ],
+                        "default_config": {
+                            "enabled": True,
+                            "permission_policy": {"type": "always_allow"},
+                        },
+                    }
+                ],
+            },
             metadata={"foo": "string"},
             title="Order #1234 inquiry",
             vault_ids=["string"],
