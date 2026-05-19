@@ -23,7 +23,18 @@ from ...._types import (
 from ...._utils import is_given, extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
-from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ...._response import (
+    BinaryAPIResponse,
+    AsyncBinaryAPIResponse,
+    StreamedBinaryAPIResponse,
+    AsyncStreamedBinaryAPIResponse,
+    to_streamed_response_wrapper,
+    to_custom_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+    to_custom_streamed_response_wrapper,
+    async_to_custom_raw_response_wrapper,
+    async_to_custom_streamed_response_wrapper,
+)
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.beta.skills import version_list_params, version_create_params
@@ -307,6 +318,67 @@ class Versions(SyncAPIResource):
             cast_to=VersionDeleteResponse,
         )
 
+    def download(
+        self,
+        version: str,
+        *,
+        skill_id: str,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> BinaryAPIResponse:
+        """
+        Download a skill version's content as a zip archive.
+
+        Args:
+          skill_id: Unique identifier for the skill.
+
+              The format and length of IDs may change over time.
+
+          version: Version identifier for the skill.
+
+              Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+
+          betas: Optional header to specify the beta version(s) you want to use.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not skill_id:
+            raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
+        if not version:
+            raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
+        extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
+                    if is_given(betas)
+                    else not_given
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
+        return self._get(
+            path_template(
+                "/v1/skills/{skill_id}/versions/{version}/content?beta=true", skill_id=skill_id, version=version
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=BinaryAPIResponse,
+        )
+
 
 class AsyncVersions(AsyncAPIResource):
     @cached_property
@@ -579,6 +651,67 @@ class AsyncVersions(AsyncAPIResource):
             cast_to=VersionDeleteResponse,
         )
 
+    async def download(
+        self,
+        version: str,
+        *,
+        skill_id: str,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> AsyncBinaryAPIResponse:
+        """
+        Download a skill version's content as a zip archive.
+
+        Args:
+          skill_id: Unique identifier for the skill.
+
+              The format and length of IDs may change over time.
+
+          version: Version identifier for the skill.
+
+              Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+
+          betas: Optional header to specify the beta version(s) you want to use.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not skill_id:
+            raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
+        if not version:
+            raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
+        extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
+                    if is_given(betas)
+                    else not_given
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
+        return await self._get(
+            path_template(
+                "/v1/skills/{skill_id}/versions/{version}/content?beta=true", skill_id=skill_id, version=version
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=AsyncBinaryAPIResponse,
+        )
+
 
 class VersionsWithRawResponse:
     def __init__(self, versions: Versions) -> None:
@@ -595,6 +728,10 @@ class VersionsWithRawResponse:
         )
         self.delete = _legacy_response.to_raw_response_wrapper(
             versions.delete,
+        )
+        self.download = to_custom_raw_response_wrapper(
+            versions.download,
+            BinaryAPIResponse,
         )
 
 
@@ -614,6 +751,10 @@ class AsyncVersionsWithRawResponse:
         self.delete = _legacy_response.async_to_raw_response_wrapper(
             versions.delete,
         )
+        self.download = async_to_custom_raw_response_wrapper(
+            versions.download,
+            AsyncBinaryAPIResponse,
+        )
 
 
 class VersionsWithStreamingResponse:
@@ -632,6 +773,10 @@ class VersionsWithStreamingResponse:
         self.delete = to_streamed_response_wrapper(
             versions.delete,
         )
+        self.download = to_custom_streamed_response_wrapper(
+            versions.download,
+            StreamedBinaryAPIResponse,
+        )
 
 
 class AsyncVersionsWithStreamingResponse:
@@ -649,4 +794,8 @@ class AsyncVersionsWithStreamingResponse:
         )
         self.delete = async_to_streamed_response_wrapper(
             versions.delete,
+        )
+        self.download = async_to_custom_streamed_response_wrapper(
+            versions.download,
+            AsyncStreamedBinaryAPIResponse,
         )

@@ -74,6 +74,7 @@ from .beta_tool_choice_param import BetaToolChoiceParam as BetaToolChoiceParam
 from .beta_capability_support import BetaCapabilitySupport as BetaCapabilitySupport
 from .beta_mcp_tool_use_block import BetaMCPToolUseBlock as BetaMCPToolUseBlock
 from .beta_model_capabilities import BetaModelCapabilities as BetaModelCapabilities
+from .beta_self_hosted_config import BetaSelfHostedConfig as BetaSelfHostedConfig
 from .beta_server_tool_caller import BetaServerToolCaller as BetaServerToolCaller
 from .beta_webhook_event_data import BetaWebhookEventData as BetaWebhookEventData
 from .environment_list_params import EnvironmentListParams as EnvironmentListParams
@@ -156,6 +157,7 @@ from .beta_base64_image_source_param import BetaBase64ImageSourceParam as BetaBa
 from .beta_cache_miss_system_changed import BetaCacheMissSystemChanged as BetaCacheMissSystemChanged
 from .beta_managed_agents_multiagent import BetaManagedAgentsMultiagent as BetaManagedAgentsMultiagent
 from .beta_search_result_block_param import BetaSearchResultBlockParam as BetaSearchResultBlockParam
+from .beta_self_hosted_config_params import BetaSelfHostedConfigParams as BetaSelfHostedConfigParams
 from .beta_advisor_result_block_param import BetaAdvisorResultBlockParam as BetaAdvisorResultBlockParam
 from .beta_compaction_iteration_usage import BetaCompactionIterationUsage as BetaCompactionIterationUsage
 from .beta_content_block_source_param import BetaContentBlockSourceParam as BetaContentBlockSourceParam
@@ -325,6 +327,9 @@ from .beta_managed_agents_deleted_memory_store import (
 from .beta_managed_agents_file_resource_params import (
     BetaManagedAgentsFileResourceParams as BetaManagedAgentsFileResourceParams,
 )
+from .beta_managed_agents_session_thread_agent import (
+    BetaManagedAgentsSessionThreadAgent as BetaManagedAgentsSessionThreadAgent,
+)
 from .beta_memory_tool_20250818_create_command import (
     BetaMemoryTool20250818CreateCommand as BetaMemoryTool20250818CreateCommand,
 )
@@ -363,6 +368,9 @@ from .beta_managed_agents_branch_checkout_param import (
 )
 from .beta_managed_agents_commit_checkout_param import (
     BetaManagedAgentsCommitCheckoutParam as BetaManagedAgentsCommitCheckoutParam,
+)
+from .beta_managed_agents_session_updated_event import (
+    BetaManagedAgentsSessionUpdatedEvent as BetaManagedAgentsSessionUpdatedEvent,
 )
 from .beta_managed_agents_url_mcp_server_params import (
     BetaManagedAgentsURLMCPServerParams as BetaManagedAgentsURLMCPServerParams,
@@ -408,6 +416,9 @@ from .beta_managed_agents_mcp_tool_config_params import (
 )
 from .beta_managed_agents_multiagent_self_params import (
     BetaManagedAgentsMultiagentSelfParams as BetaManagedAgentsMultiagentSelfParams,
+)
+from .beta_managed_agents_user_tool_result_event import (
+    BetaManagedAgentsUserToolResultEvent as BetaManagedAgentsUserToolResultEvent,
 )
 from .beta_tool_search_tool_regex_20251119_param import (
     BetaToolSearchToolRegex20251119Param as BetaToolSearchToolRegex20251119Param,
@@ -468,6 +479,9 @@ from .beta_citation_web_search_result_location_param import (
 )
 from .beta_managed_agents_mcp_toolset_default_config import (
     BetaManagedAgentsMCPToolsetDefaultConfig as BetaManagedAgentsMCPToolsetDefaultConfig,
+)
+from .beta_managed_agents_session_agent_update_param import (
+    BetaManagedAgentsSessionAgentUpdateParam as BetaManagedAgentsSessionAgentUpdateParam,
 )
 from .beta_webhook_session_thread_created_event_data import (
     BetaWebhookSessionThreadCreatedEventData as BetaWebhookSessionThreadCreatedEventData,
@@ -543,6 +557,24 @@ from .beta_webhook_session_status_run_started_event_data import (
 )
 from .beta_text_editor_code_execution_create_result_block import (
     BetaTextEditorCodeExecutionCreateResultBlock as BetaTextEditorCodeExecutionCreateResultBlock,
+)
+from .beta_managed_agents_agent_toolset20260401_bash_input import (
+    BetaManagedAgentsAgentToolset20260401BashInput as BetaManagedAgentsAgentToolset20260401BashInput,
+)
+from .beta_managed_agents_agent_toolset20260401_edit_input import (
+    BetaManagedAgentsAgentToolset20260401EditInput as BetaManagedAgentsAgentToolset20260401EditInput,
+)
+from .beta_managed_agents_agent_toolset20260401_glob_input import (
+    BetaManagedAgentsAgentToolset20260401GlobInput as BetaManagedAgentsAgentToolset20260401GlobInput,
+)
+from .beta_managed_agents_agent_toolset20260401_grep_input import (
+    BetaManagedAgentsAgentToolset20260401GrepInput as BetaManagedAgentsAgentToolset20260401GrepInput,
+)
+from .beta_managed_agents_agent_toolset20260401_read_input import (
+    BetaManagedAgentsAgentToolset20260401ReadInput as BetaManagedAgentsAgentToolset20260401ReadInput,
+)
+from .beta_managed_agents_agent_toolset20260401_write_input import (
+    BetaManagedAgentsAgentToolset20260401WriteInput as BetaManagedAgentsAgentToolset20260401WriteInput,
 )
 from .beta_managed_agents_github_repository_resource_params import (
     BetaManagedAgentsGitHubRepositoryResourceParams as BetaManagedAgentsGitHubRepositoryResourceParams,

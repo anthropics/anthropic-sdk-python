@@ -7,6 +7,7 @@ from ...._utils import PropertyInfo
 from ...._models import BaseModel
 from .beta_managed_agents_user_message_event import BetaManagedAgentsUserMessageEvent
 from .beta_managed_agents_user_interrupt_event import BetaManagedAgentsUserInterruptEvent
+from ..beta_managed_agents_user_tool_result_event import BetaManagedAgentsUserToolResultEvent
 from .beta_managed_agents_user_define_outcome_event import BetaManagedAgentsUserDefineOutcomeEvent
 from .beta_managed_agents_user_tool_confirmation_event import BetaManagedAgentsUserToolConfirmationEvent
 from .beta_managed_agents_user_custom_tool_result_event import BetaManagedAgentsUserCustomToolResultEvent
@@ -20,6 +21,7 @@ Data: TypeAlias = Annotated[
         BetaManagedAgentsUserToolConfirmationEvent,
         BetaManagedAgentsUserCustomToolResultEvent,
         BetaManagedAgentsUserDefineOutcomeEvent,
+        BetaManagedAgentsUserToolResultEvent,
     ],
     PropertyInfo(discriminator="type"),
 ]

@@ -4,7 +4,7 @@ from typing import List
 from typing_extensions import Literal
 
 from ..._models import BaseModel
-from .sessions.beta_managed_agents_session_thread_agent import BetaManagedAgentsSessionThreadAgent
+from .beta_managed_agents_session_thread_agent import BetaManagedAgentsSessionThreadAgent
 
 __all__ = ["BetaManagedAgentsSessionMultiagentCoordinator"]
 
