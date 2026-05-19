@@ -280,7 +280,9 @@ class WorkloadIdentityCredentials:
                         "ANTHROPIC_WORKSPACE_ID environment variable, the 'workspace_id' "
                         "config key, or the workspace_id= argument. "
                     )
-                hint += "View your authentication events in the Workload identity page of Claude Console for more details."
+                hint += (
+                    "View your authentication events in the Workload identity page of Claude Console for more details."
+                )
             _raise_token_endpoint_error(resp, message_prefix="Token exchange failed", hint=hint)
 
         try:
