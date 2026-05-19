@@ -35,6 +35,30 @@ _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncCl
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
+def _strip_null_caller_from_tool_use(json_data: dict[object, object]) -> None:
+    # Bedrock rejects `"caller": null` in tool_use / server_tool_use content blocks
+    # with HTTP 400.  ToolUseBlock (response) has `caller: Optional[Caller]`, so
+    # `.to_dict()` includes the key when the value is None.  ToolUseBlockParam
+    # (request) treats `caller` as absent-or-valid, never null, so drop the key
+    # before the payload reaches the Bedrock endpoint.
+    messages = json_data.get("messages")
+    if not isinstance(messages, list):
+        return
+    for message in messages:
+        if not isinstance(message, dict):
+            continue
+        content = message.get("content")
+        if not isinstance(content, list):
+            continue
+        for block in content:
+            if (
+                isinstance(block, dict)
+                and block.get("type") in {"tool_use", "server_tool_use"}
+                and block.get("caller") is None
+            ):
+                block.pop("caller", None)
+
+
 def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
     options = model_copy(input_options, deep=True)
 
@@ -57,6 +81,8 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
             options.url = f"/model/{model}/invoke-with-response-stream"
         else:
             options.url = f"/model/{model}/invoke"
+
+        _strip_null_caller_from_tool_use(options.json_data)
 
     if options.url.startswith("/v1/messages/batches"):
         raise AnthropicError("The Batch API is not supported in Bedrock yet")
