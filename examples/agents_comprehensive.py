@@ -19,9 +19,7 @@ def main() -> None:
 
     github_token = os.environ.get("GITHUB_TOKEN")
     if not github_token:
-        raise RuntimeError(
-            "GITHUB_TOKEN is required (use a fine-grained PAT with public-repo read only)"
-        )
+        raise RuntimeError("GITHUB_TOKEN is required (use a fine-grained PAT with public-repo read only)")
 
     # Create an environment
     environment = anthropic.beta.environments.create(
@@ -44,7 +42,8 @@ def main() -> None:
     )
     print("Created credential:", credential.id)
 
-    # Upload a custom skill
+    # Upload a custom skill. Skill file paths must be rooted in a directory whose
+    # name matches the `name` field in SKILL.md (`greeting` in this example).
     skill_md_path = os.path.join(os.path.dirname(__file__), "greeting-SKILL.md")
     with open(skill_md_path, "rb") as skill_file:
         skill = anthropic.beta.skills.create(
@@ -102,9 +101,7 @@ def main() -> None:
     print("Streaming events:")
     anthropic.beta.sessions.events.send(
         session.id,
-        events=[
-            {"type": "user.message", "content": [{"type": "text", "text": PROMPT}]}
-        ],
+        events=[{"type": "user.message", "content": [{"type": "text", "text": PROMPT}]}],
     )
 
     with anthropic.beta.sessions.events.stream(session.id) as stream:
@@ -123,11 +120,7 @@ def main() -> None:
                         }
                     ],
                 )
-            if (
-                event.type == "session.status_idle"
-                and event.stop_reason
-                and event.stop_reason.type == "end_turn"
-            ):
+            if event.type == "session.status_idle" and event.stop_reason and event.stop_reason.type == "end_turn":
                 break
 
 
