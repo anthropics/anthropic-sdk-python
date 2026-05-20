@@ -42,7 +42,8 @@ def main() -> None:
     )
     print("Created credential:", credential.id)
 
-    # Upload a custom skill
+    # Upload a custom skill. Skill file paths must be rooted in a directory whose
+    # name matches the `name` field in SKILL.md (`greeting` in this example).
     skill_md_path = os.path.join(os.path.dirname(__file__), "greeting-SKILL.md")
     with open(skill_md_path, "rb") as skill_file:
         skill = anthropic.beta.skills.create(
