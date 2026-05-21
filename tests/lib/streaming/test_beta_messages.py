@@ -13,7 +13,7 @@ from anthropic import Anthropic, AsyncAnthropic
 from anthropic._utils import assert_overloads_in_sync, assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.types.beta.beta_message import BetaMessage
-from anthropic.lib.streaming._beta_types import ParsedBetaMessageStreamEvent
+from anthropic.lib.streaming._beta_types import BetaCompactionEvent, ParsedBetaMessageStreamEvent
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
 from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
 
@@ -160,6 +160,36 @@ EXPECTED_INCOMPLETE_EVENT_TYPES = [
     "message_delta",
 ]
 
+EXPECTED_COMPACTION_MESSAGE = {
+    "id": "msg_01CompactionEncryptedContent01",
+    "model": "claude-opus-4-7",
+    "role": "assistant",
+    "stop_reason": "end_turn",
+    "type": "message",
+    "content": [
+        {
+            "type": "compaction",
+            "content": "Earlier conversation summarized.",
+            "encrypted_content": "EpwBCioIDxgCEAEYASJALd_opaque_compaction_payload",
+        },
+        {"type": "text", "text": "Hello there!"},
+    ],
+    "usage": {"input_tokens": 30, "output_tokens": 8},
+}
+
+EXPECTED_COMPACTION_EVENT_TYPES = [
+    "message_start",
+    "content_block_start",
+    "content_block_delta",
+    "compaction",
+    "content_block_stop",
+    "content_block_start",
+    "content_block_delta",
+    "text",
+    "content_block_stop",
+    "message_delta",
+]
+
 
 def assert_message_matches(message: BetaMessage, expected: Dict[str, Any]) -> None:
     actual_message_json = message.model_dump_json(
@@ -184,6 +214,16 @@ def assert_tool_use_response(events: list[ParsedBetaMessageStreamEvent], message
 def assert_incomplete_partial_input_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
     assert_message_matches(message, EXPECTED_INCOMPLETE_MESSAGE)
     assert [e.type for e in events] == EXPECTED_INCOMPLETE_EVENT_TYPES
+
+
+def assert_compaction_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
+    assert_message_matches(message, EXPECTED_COMPACTION_MESSAGE)
+    assert [e.type for e in events] == EXPECTED_COMPACTION_EVENT_TYPES
+
+    # the emitted compaction event must carry encrypted_content, not just the accumulated block
+    compaction_events = [e for e in events if isinstance(e, BetaCompactionEvent)]
+    assert len(compaction_events) == 1
+    assert compaction_events[0].encrypted_content == "EpwBCioIDxgCEAEYASJALd_opaque_compaction_payload"
 
 
 def assert_refusal_response(message: BetaMessage) -> None:
@@ -284,6 +324,21 @@ class TestSyncMessages:
             model="claude-opus-4-7",
         ) as stream:
             assert_refusal_response(stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_compaction(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("compaction_response.txt"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaMessageStream)
+
+            assert_compaction_response([event for event in stream], stream.get_final_message())
 
 
 class TestAsyncMessages:
@@ -406,6 +461,22 @@ class TestAsyncMessages:
             model="claude-opus-4-7",
         ) as stream:
             assert_refusal_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_compaction(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("compaction_response.txt")))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
+
+            assert_compaction_response([event async for event in stream], await stream.get_final_message())
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
