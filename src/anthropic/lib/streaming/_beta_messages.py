@@ -411,6 +411,7 @@ def build_events(
                         BetaCompactionEvent,
                         type="compaction",
                         content=content_block.content,
+                        encrypted_content=content_block.encrypted_content,
                     )
                 )
         else:
@@ -525,6 +526,7 @@ def accumulate_event(
         elif event.delta.type == "compaction_delta":
             if content.type == "compaction":
                 content.content = event.delta.content
+                content.encrypted_content = event.delta.encrypted_content
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]

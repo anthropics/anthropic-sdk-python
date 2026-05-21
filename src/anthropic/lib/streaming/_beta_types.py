@@ -81,6 +81,9 @@ class BetaCompactionEvent(BaseModel):
     content: Union[str, None]
     """The compaction content"""
 
+    encrypted_content: Union[str, None]
+    """Opaque metadata from prior compaction, to be round-tripped verbatim"""
+
 
 class ParsedBetaMessageStopEvent(BetaRawMessageStopEvent, GenericModel, Generic[ResponseFormatT]):
     type: Literal["message_stop"]
