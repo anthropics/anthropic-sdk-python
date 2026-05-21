@@ -35,5 +35,6 @@ AnthropicBetaParam: TypeAlias = Union[
         "advisor-tool-2026-03-01",
         "managed-agents-2026-04-01",
         "cache-diagnosis-2026-04-07",
+        "thinking-token-count-2026-05-13",
     ],
 ]
