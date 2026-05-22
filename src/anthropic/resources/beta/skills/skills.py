@@ -92,8 +92,18 @@ class Skills(SyncAPIResource):
 
           files: Files to upload for the skill.
 
-              All files must be in the same top-level directory and must include a SKILL.md
-              file at the root of that directory.
+              All files must be organized under a **single top-level directory
+              whose name exactly matches the ``name:`` field in the ``SKILL.md``
+              frontmatter**.  For example, if ``SKILL.md`` contains
+              ``name: my-skill``, every path must start with ``my-skill/``::
+
+                  files=[
+                      ("my-skill/SKILL.md",        skill_md_bytes, "text/markdown"),
+                      ("my-skill/scripts/tool.py", script_bytes,   "text/plain"),
+                  ]
+
+              Use :func:`anthropic.lib.tools.normalize_skill_files` to apply the
+              correct prefix automatically.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -364,8 +374,18 @@ class AsyncSkills(AsyncAPIResource):
 
           files: Files to upload for the skill.
 
-              All files must be in the same top-level directory and must include a SKILL.md
-              file at the root of that directory.
+              All files must be organized under a **single top-level directory
+              whose name exactly matches the ``name:`` field in the ``SKILL.md``
+              frontmatter**.  For example, if ``SKILL.md`` contains
+              ``name: my-skill``, every path must start with ``my-skill/``::
+
+                  files=[
+                      ("my-skill/SKILL.md",        skill_md_bytes, "text/markdown"),
+                      ("my-skill/scripts/tool.py", script_bytes,   "text/plain"),
+                  ]
+
+              Use :func:`anthropic.lib.tools.normalize_skill_files` to apply the
+              correct prefix automatically.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

@@ -23,7 +23,7 @@ ArchiveModeMaker = Callable[[Path, "dict[str, tuple[bytes, int]]"], None]
 
 import pytest
 
-from anthropic.lib.tools._skills import _strip_top, _archive_top_dir, _extract_skill_archive
+from anthropic.lib.tools._skills import _strip_top, _archive_top_dir, normalize_skill_files, _extract_skill_archive
 
 
 def _make_zip(path: Path, entries: dict[str, bytes]) -> None:
@@ -194,3 +194,73 @@ def test_extract_drops_setuid_setgid_sticky(make: ArchiveModeMaker, tmp_path: Pa
     # A non-executable member with setuid set must also drop the bit.
     assert doc & 0o7000 == 0
     assert doc == 0o644
+
+
+# ---------------------------------------------------------------------------
+# normalize_skill_files
+# ---------------------------------------------------------------------------
+
+_SKILL_MD = b"---\nname: my-skill\ndescription: Test skill.\n---\n\nSkill content."
+
+
+def test_normalize_skill_files_adds_prefix_to_bare_names() -> None:
+    files = [
+        ("SKILL.md", _SKILL_MD, "text/markdown"),
+        ("scripts/tool.py", b"print(1)", "text/plain"),
+    ]
+    result = normalize_skill_files(files)
+    assert result[0][0] == "my-skill/SKILL.md"
+    assert result[1][0] == "my-skill/scripts/tool.py"
+
+
+def test_normalize_skill_files_replaces_wrong_prefix() -> None:
+    files = [
+        ("wrong-dir/SKILL.md", _SKILL_MD, "text/markdown"),
+        ("wrong-dir/scripts/tool.py", b"x", "text/plain"),
+    ]
+    result = normalize_skill_files(files)
+    assert result[0][0] == "my-skill/SKILL.md"
+    assert result[1][0] == "my-skill/scripts/tool.py"
+
+
+def test_normalize_skill_files_leaves_correct_prefix_unchanged() -> None:
+    files = [
+        ("my-skill/SKILL.md", _SKILL_MD, "text/markdown"),
+        ("my-skill/scripts/tool.py", b"x", "text/plain"),
+    ]
+    result = normalize_skill_files(files)
+    assert result[0][0] == "my-skill/SKILL.md"
+    assert result[1][0] == "my-skill/scripts/tool.py"
+
+
+def test_normalize_skill_files_preserves_extra_tuple_fields() -> None:
+    headers: dict[str, str] = {"X-Custom": "val"}
+    files = [
+        ("SKILL.md", _SKILL_MD, "text/markdown", headers),
+    ]
+    result = normalize_skill_files(files)
+    assert result[0] == ("my-skill/SKILL.md", _SKILL_MD, "text/markdown", headers)
+
+
+def test_normalize_skill_files_raises_without_skill_md() -> None:
+    files = [("other.py", b"x", "text/plain")]
+    with pytest.raises(ValueError, match="SKILL.md"):
+        normalize_skill_files(files)
+
+
+def test_normalize_skill_files_raises_on_missing_name_field() -> None:
+    no_name_md = b"---\ndescription: No name.\n---\n\ncontent."
+    files = [("SKILL.md", no_name_md, "text/markdown")]
+    with pytest.raises(ValueError, match="name"):
+        normalize_skill_files(files)
+
+
+def test_normalize_skill_files_accepts_bytes_io_content() -> None:
+    import io
+
+    skill_md_io = io.BytesIO(_SKILL_MD)
+    files = [("SKILL.md", skill_md_io, "text/markdown")]
+    result = normalize_skill_files(files)
+    assert result[0][0] == "my-skill/SKILL.md"
+    # BytesIO should be seeked back to the start after reading.
+    assert skill_md_io.read() == _SKILL_MD
