@@ -22,12 +22,11 @@ import sys
 import asyncio
 import logging
 import contextlib
-from typing import Any, cast
+from typing import Any
 from datetime import datetime
 
 from anthropic import AsyncAnthropic
 from anthropic.lib.tools import beta_async_tool
-from anthropic.types.beta import BetaManagedAgentsCustomToolParams
 from anthropic.lib.environments import MANAGED_AGENTS_BETA
 from anthropic.lib.tools.agent_toolset import beta_agent_toolset_20260401
 
@@ -35,10 +34,8 @@ POLL_TIMEOUT_S = 60
 MODEL_ID = "claude-haiku-4-5"
 
 
-# A custom tool. Because @beta_async_tool produces the same type that
-# client.beta.messages.tool_runner accepts, the worker can run it alongside the
-# built-in agent_toolset tools with no extra wiring.
-@beta_async_tool
+# A custom tool. `custom=True` makes the tool compatible with the managed agents API
+@beta_async_tool(custom=True)
 async def current_time() -> str:
     """Return the host's current local time as an ISO-8601 string."""
     return datetime.now().isoformat()
@@ -60,20 +57,11 @@ async def main() -> None:
     workdir = os.environ.get("ANTHROPIC_WORKDIR", ".")
 
     # 1. Create an agent that has both the built-in toolset and our custom tool.
-    #    The Agents API uses its own custom-tool TypedDict and rejects
-    #    `additionalProperties` (which pydantic emits), so derive a clean schema.
-    schema = {k: v for k, v in dict(current_time.input_schema).items() if k != "additionalProperties"}
-    custom_tool_param: BetaManagedAgentsCustomToolParams = {
-        "type": "custom",
-        "name": current_time.name,
-        "description": current_time.description or "Return the host's current local time.",
-        "input_schema": cast("Any", schema),
-    }
     agent = await client.beta.agents.create(
         name="self-hosted-runner-example",
         model={"id": MODEL_ID},
         system="You are a test agent running in a self-hosted sandbox. Use the available tools.",
-        tools=[{"type": "agent_toolset_20260401"}, custom_tool_param],
+        tools=[{"type": "agent_toolset_20260401"}, current_time.to_dict()],
     )
     print(f"created agent {agent.id}")
 
