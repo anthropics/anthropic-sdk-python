@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Type, Generic, Callable, cast
 from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
@@ -445,7 +446,9 @@ def accumulate_event(
             ),
         )
         if not isinstance(cast(Any, event), BaseModel):
-            raise TypeError(f"Unexpected event runtime type, after deserialising twice - {event} - {type(event)}")
+            raise TypeError(
+                f"Unexpected event runtime type, after deserialising twice - {event} - {builtins.type(event)}"
+            )
 
     if current_snapshot is None:
         if event.type == "message_start":
@@ -458,7 +461,7 @@ def accumulate_event(
         current_snapshot.content.append(
             cast(
                 Any,  # Pydantic does not support generic unions at runtime
-                construct_type(type_=ParsedContentBlock, value=event.content_block.model_dump()),
+                construct_type(type_=ParsedContentBlock, value=event.content_block.to_dict()),
             ),
         )
     elif event.type == "content_block_delta":
