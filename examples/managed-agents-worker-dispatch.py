@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Service one already-claimed work item — the self-hosted "sandbox process" shape.
 
-Unlike ``managed-agents-private-sandbox-worker.py`` (which creates an agent +
+Unlike ``managed-agents-self-hosted-sandbox-worker.py`` (which creates an agent +
 session and runs ``EnvironmentWorker.run()`` as a long-running poll loop), this
 process does *not* create anything and does *not* poll. Something upstream — an
 ``ant worker poll --on-work`` script, or your own orchestrator that spawns a
@@ -36,7 +36,7 @@ from anthropic.lib.tools import beta_async_tool
 from anthropic.lib.tools.agent_toolset import beta_agent_toolset_20260401
 
 
-# A custom tool, same pattern as managed-agents-private-sandbox-worker.py:
+# A custom tool, same pattern as managed-agents-self-hosted-sandbox-worker.py:
 # @beta_async_tool produces the same type the worker's tool runner accepts, so it
 # runs alongside the built-in agent_toolset tools with no extra wiring.
 @beta_async_tool

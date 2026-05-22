@@ -352,4 +352,4 @@ directly on the host. Run the worker inside a container or other isolation bound
 check, so they are safe without a sandbox; `bash` is not.) `bash` does not inherit the runner's
 `ANTHROPIC_*` credentials; pass `AgentToolContext(env=...)` to control the subprocess environment.
 
-See [`examples/managed-agents-private-sandbox-worker.py`](examples/managed-agents-private-sandbox-worker.py) for a complete example.
+See [`examples/managed-agents-self-hosted-sandbox-worker.py`](examples/managed-agents-self-hosted-sandbox-worker.py) for a complete example.
