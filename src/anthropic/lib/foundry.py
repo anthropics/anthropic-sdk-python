@@ -363,7 +363,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
     @cached_property
     @override
     def models(self) -> None:  # type: ignore[override]
-        """Models endpoint is not supported for Azure Anthropic client."""
+        """Models endpoint is not supported for Anthropic Foundry client."""
         return None
 
     @cached_property
