@@ -1,14 +1,20 @@
-# workflow for re-running publishing to PyPI in case it fails for some reason
-# you can run this workflow by navigating to https://www.github.com/anthropics/anthropic-sdk-python/actions/workflows/publish-pypi.yml
+# workflow for publishing to PyPI using Trusted Publishing
+# replaces the manual PYPI_TOKEN approach with OIDC-based authentication
+# see: https://docs.pypi.org/trusted-publishers/
 name: Publish PyPI
+
 on:
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
     environment: production-release
+
+    permissions:
+      id-token: write
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -18,8 +24,8 @@ jobs:
         with:
           version: '0.9.13'
 
+      - name: Build
+        run: uv build
+
       - name: Publish to PyPI
-        run: |
-          bash ./bin/publish-pypi
-        env:
-          PYPI_TOKEN: ${{ secrets.ANTHROPIC_PYPI_TOKEN || secrets.PYPI_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@release/v1
