@@ -279,8 +279,15 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     return
 
-                if not self._messages_modified:
-                    self.append_messages(message, response)
+                # If user has called append_messages() to add additional messages but also
+                # called generate_tool_call_response() (e.g., to log the tool result), we need
+                # to clear the cache so the auto-append happens. Otherwise the tool result
+                # is never added to history and the model re-calls the tool forever.
+                if self._messages_modified:
+                    self._cached_tool_call_response = None
+                    self._messages_modified = False
+
+                self.append_messages(message, response)
 
             self._messages_modified = False
             self._cached_tool_call_response = None
@@ -560,8 +567,15 @@ class BaseAsyncToolRunner(
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     return
 
-                if not self._messages_modified:
-                    self.append_messages(message, response)
+                # If user has called append_messages() to add additional messages but also
+                # called generate_tool_call_response() (e.g., to log the tool result), we need
+                # to clear the cache so the auto-append happens. Otherwise the tool result
+                # is never added to history and the model re-calls the tool forever.
+                if self._messages_modified:
+                    self._cached_tool_call_response = None
+                    self._messages_modified = False
+
+                self.append_messages(message, response)
 
             self._messages_modified = False
             self._cached_tool_call_response = None
