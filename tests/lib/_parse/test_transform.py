@@ -117,6 +117,38 @@ A list of strings
     )
 
 
+def test_array_schema_min_items_zero():
+    schema = {
+        "type": "array",
+        "items": {"type": "string"},
+        "minItems": 0,
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 0,
+        }
+    )
+
+
+def test_array_schema_min_items_one():
+    schema = {
+        "type": "array",
+        "items": {"type": "string"},
+        "minItems": 1,
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+        }
+    )
+
+
 def test_string_schema_with_format_and_default():
     schema = {
         "type": "string",
