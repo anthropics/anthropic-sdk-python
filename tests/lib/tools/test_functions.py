@@ -9,14 +9,7 @@ from pydantic import BaseModel
 
 from anthropic import beta_tool
 from anthropic._compat import PYDANTIC_V1
-from anthropic.lib.tools._beta_functions import (
-    BaseFunctionTool,
-    BetaFunctionTool,
-    BetaAsyncFunctionTool,
-    BetaCustomFunctionTool,
-    BetaAsyncCustomFunctionTool,
-    beta_async_tool,
-)
+from anthropic.lib.tools._beta_functions import BaseFunctionTool
 from anthropic.types.beta.beta_tool_param import InputSchema
 
 
@@ -196,70 +189,6 @@ class TestFunctionTool:
                 "required": ["message"],
             },
         }
-
-    def test_custom_tool_to_dict(self) -> None:
-        """``custom=True`` serializes as a managed-agents custom tool."""
-
-        @beta_tool(custom=True)
-        def get_weather(location: str) -> str:
-            """Get the weather for a location."""
-            return location
-
-        assert isinstance(get_weather, BetaCustomFunctionTool)
-        # still a BetaFunctionTool — same call / schema behavior
-        assert isinstance(get_weather, BetaFunctionTool)
-        assert get_weather.call({"location": "SF"}) == "SF"
-
-        tool_param = get_weather.to_dict()
-        assert tool_param == {
-            "type": "custom",
-            "name": "get_weather",
-            "description": "Get the weather for a location.",
-            "input_schema": {
-                "type": "object",
-                "properties": {"location": {"title": "Location", "type": "string"}},
-                "required": ["location"],
-            },
-        }
-        # the Agents API rejects `additionalProperties`; the custom variant drops it
-        assert "additionalProperties" not in tool_param["input_schema"]
-
-    def test_non_custom_tool_to_dict_unchanged(self) -> None:
-        """The default (``custom=False``) still emits a plain BetaToolParam."""
-
-        @beta_tool
-        def get_weather(location: str) -> str:
-            """Get the weather for a location."""
-            return location
-
-        assert isinstance(get_weather, BetaFunctionTool)
-        assert not isinstance(get_weather, BetaCustomFunctionTool)
-        assert "type" not in get_weather.to_dict()
-
-    async def test_async_custom_tool_to_dict(self) -> None:
-        """``custom=True`` works for the async decorator too."""
-
-        @beta_async_tool(custom=True)
-        async def get_weather(location: str) -> str:
-            """Get the weather for a location."""
-            return location
-
-        assert isinstance(get_weather, BetaAsyncCustomFunctionTool)
-        assert isinstance(get_weather, BetaAsyncFunctionTool)
-        assert await get_weather.call({"location": "SF"}) == "SF"
-
-        tool_param = get_weather.to_dict()
-        assert tool_param == {
-            "type": "custom",
-            "name": "get_weather",
-            "description": "Get the weather for a location.",
-            "input_schema": {
-                "type": "object",
-                "properties": {"location": {"title": "Location", "type": "string"}},
-                "required": ["location"],
-            },
-        }
-        assert "additionalProperties" not in tool_param["input_schema"]
 
     def test_function_without_docstring(self) -> None:
         def no_docs(x: int) -> str:  # noqa: ARG001

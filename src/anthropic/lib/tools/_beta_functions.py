@@ -17,18 +17,10 @@ from ... import _compat
 from ..._utils import is_dict
 from ..._compat import cached_property
 from ..._models import TypeAdapter
-from ...types.beta import (
-    BetaToolParam,
-    BetaToolUnionParam,
-    BetaCacheControlEphemeralParam,
-    BetaManagedAgentsCustomToolParams,
-)
+from ...types.beta import BetaToolParam, BetaToolUnionParam, BetaCacheControlEphemeralParam
 from ..._utils._utils import CallableT
 from ...types.tool_param import InputSchema
 from ...types.beta.beta_tool_result_block_param import Content as BetaContent
-from ...types.beta.beta_managed_agents_custom_tool_input_schema_param import (
-    BetaManagedAgentsCustomToolInputSchemaParam,
-)
 
 log = logging.getLogger(__name__)
 
@@ -205,18 +197,6 @@ class BaseFunctionTool(Generic[CallableT]):
             defn["strict"] = self._strict
         return defn
 
-    def _to_custom_dict(self) -> BetaManagedAgentsCustomToolParams:
-        """Build a managed-agents custom tool param (``type: "custom"``)."""
-        input_schema = cast(BetaManagedAgentsCustomToolInputSchemaParam, dict(self.input_schema))
-        input_schema["type"] = "object"
-        input_schema.pop("additionalProperties", None)
-        return {
-            "type": "custom",
-            "name": self.name,
-            "description": self.description,
-            "input_schema": input_schema,
-        }
-
     @cached_property
     def _parsed_docstring(self) -> docstring_parser.Docstring:
         return docstring_parser.parse(self.func.__doc__ or "")
@@ -307,35 +287,6 @@ class BetaAsyncFunctionTool(BaseFunctionTool[AsyncFunctionT]):
             raise ValueError(f"Invalid arguments for function {self.name}") from e
 
 
-class BetaCustomFunctionTool(BetaFunctionTool[FunctionT]):
-    """A :class:`BetaFunctionTool` that serializes as a managed-agents custom tool.
-
-    Produced by ``beta_tool(..., custom=True)``. Behaves exactly like
-    :class:`BetaFunctionTool` (same ``call`` / schema inference) except that
-    :meth:`to_dict` returns a :class:`BetaManagedAgentsCustomToolParams`
-    (``type: "custom"``) so the tool can be passed in a managed-agents
-    ``tools=[...]`` list rather than the Messages tools array.
-    """
-
-    # `BetaManagedAgentsCustomToolParams` is deliberately not assignable to the
-    # base `BetaToolParam` return type — this is a distinct serialization, so the
-    # incompatible override is intentional.
-    @override
-    def to_dict(self) -> BetaManagedAgentsCustomToolParams:  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride]
-        return self._to_custom_dict()
-
-
-class BetaAsyncCustomFunctionTool(BetaAsyncFunctionTool[AsyncFunctionT]):
-    """Async counterpart of :class:`BetaCustomFunctionTool`.
-
-    Produced by ``beta_async_tool(..., custom=True)``; see that class for details.
-    """
-
-    @override
-    def to_dict(self) -> BetaManagedAgentsCustomToolParams:  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride]
-        return self._to_custom_dict()
-
-
 def _is_sync_cm_factory(fn: object) -> bool:
     """True when ``fn`` is a function produced by :func:`contextlib.contextmanager`.
 
@@ -393,7 +344,6 @@ def beta_tool(func: FunctionT) -> BetaFunctionTool[FunctionT]: ...
 def beta_tool(
     func: FunctionT,
     *,
-    custom: Literal[False] = False,
     name: str | None = None,
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
@@ -408,19 +358,7 @@ def beta_tool(
 
 @overload
 def beta_tool(
-    func: FunctionT,
     *,
-    custom: Literal[True],
-    name: str | None = None,
-    description: str | None = None,
-    input_schema: InputSchema | type[BaseModel] | None = None,
-) -> BetaCustomFunctionTool[FunctionT]: ...
-
-
-@overload
-def beta_tool(
-    *,
-    custom: Literal[False] = False,
     name: str | None = None,
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
@@ -433,20 +371,9 @@ def beta_tool(
 ) -> Callable[[FunctionT], BetaFunctionTool[FunctionT]]: ...
 
 
-@overload
-def beta_tool(
-    *,
-    custom: Literal[True],
-    name: str | None = None,
-    description: str | None = None,
-    input_schema: InputSchema | type[BaseModel] | None = None,
-) -> Callable[[FunctionT], BetaCustomFunctionTool[FunctionT]]: ...
-
-
 def beta_tool(
     func: FunctionT | None = None,
     *,
-    custom: bool = False,
     name: str | None = None,
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
@@ -469,39 +396,9 @@ def beta_tool(
 
     @function_tool(name="custom_name")
     def my_func(x: int) -> str: ...
-
-    Pass ``custom=True`` to produce a :class:`BetaCustomFunctionTool` if you need to use
-    this for the Managed Agents API.
     """
     if _compat.PYDANTIC_V1:
         raise RuntimeError("Tool functions are only supported with Pydantic v2")
-
-    def _construct(inner: FunctionT) -> BetaFunctionTool[FunctionT]:
-        if custom:
-            return BetaCustomFunctionTool(
-                inner,
-                name=name,
-                description=description,
-                input_schema=input_schema,
-                defer_loading=defer_loading,
-                cache_control=cache_control,
-                allowed_callers=allowed_callers,
-                eager_input_streaming=eager_input_streaming,
-                input_examples=input_examples,
-                strict=strict,
-            )
-        return BetaFunctionTool(
-            inner,
-            name=name,
-            description=description,
-            input_schema=input_schema,
-            defer_loading=defer_loading,
-            cache_control=cache_control,
-            allowed_callers=allowed_callers,
-            eager_input_streaming=eager_input_streaming,
-            input_examples=input_examples,
-            strict=strict,
-        )
 
     def _make(fn: FunctionT) -> BetaFunctionTool[FunctionT]:
         if _is_async_cm_factory(fn):
@@ -517,7 +414,18 @@ def beta_tool(
             cm = cast(Any, fn)()
             inner = cm.__enter__()
             try:
-                tool = _construct(cast(FunctionT, inner))
+                tool = BetaFunctionTool(
+                    cast(FunctionT, inner),
+                    name=name,
+                    description=description,
+                    input_schema=input_schema,
+                    defer_loading=defer_loading,
+                    cache_control=cache_control,
+                    allowed_callers=allowed_callers,
+                    eager_input_streaming=eager_input_streaming,
+                    input_examples=input_examples,
+                    strict=strict,
+                )
             except BaseException:
                 # Construction failed after we entered the context manager —
                 # unwind it so its resource isn't leaked.
@@ -525,7 +433,18 @@ def beta_tool(
                 raise
             tool._context_manager = cm
             return tool
-        return _construct(fn)
+        return BetaFunctionTool(
+            fn,
+            name=name,
+            description=description,
+            input_schema=input_schema,
+            defer_loading=defer_loading,
+            cache_control=cache_control,
+            allowed_callers=allowed_callers,
+            eager_input_streaming=eager_input_streaming,
+            input_examples=input_examples,
+            strict=strict,
+        )
 
     if func is not None:
         return _make(func)
@@ -541,7 +460,6 @@ def beta_async_tool(func: AsyncFunctionT) -> BetaAsyncFunctionTool[AsyncFunction
 def beta_async_tool(
     func: AsyncFunctionT,
     *,
-    custom: Literal[False] = False,
     name: str | None = None,
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
@@ -556,19 +474,7 @@ def beta_async_tool(
 
 @overload
 def beta_async_tool(
-    func: AsyncFunctionT,
     *,
-    custom: Literal[True],
-    name: str | None = None,
-    description: str | None = None,
-    input_schema: InputSchema | type[BaseModel] | None = None,
-) -> BetaAsyncCustomFunctionTool[AsyncFunctionT]: ...
-
-
-@overload
-def beta_async_tool(
-    *,
-    custom: Literal[False] = False,
     name: str | None = None,
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
@@ -581,20 +487,9 @@ def beta_async_tool(
 ) -> Callable[[AsyncFunctionT], BetaAsyncFunctionTool[AsyncFunctionT]]: ...
 
 
-@overload
-def beta_async_tool(
-    *,
-    custom: Literal[True],
-    name: str | None = None,
-    description: str | None = None,
-    input_schema: InputSchema | type[BaseModel] | None = None,
-) -> Callable[[AsyncFunctionT], BetaAsyncCustomFunctionTool[AsyncFunctionT]]: ...
-
-
 def beta_async_tool(
     func: AsyncFunctionT | None = None,
     *,
-    custom: bool = False,
     name: str | None = None,
     description: str | None = None,
     input_schema: InputSchema | type[BaseModel] | None = None,
@@ -617,39 +512,9 @@ def beta_async_tool(
 
     @async_tool(name="custom_name")
     async def my_func(x: int) -> str: ...
-
-    Pass ``custom=True`` to produce a :class:`BetaAsyncCustomFunctionTool` if you need to use
-    this for the Managed Agents API.
     """
     if _compat.PYDANTIC_V1:
         raise RuntimeError("Tool functions are only supported with Pydantic v2")
-
-    def _construct(inner: AsyncFunctionT) -> BetaAsyncFunctionTool[AsyncFunctionT]:
-        if custom:
-            return BetaAsyncCustomFunctionTool(
-                inner,
-                name=name,
-                description=description,
-                input_schema=input_schema,
-                defer_loading=defer_loading,
-                cache_control=cache_control,
-                allowed_callers=allowed_callers,
-                eager_input_streaming=eager_input_streaming,
-                input_examples=input_examples,
-                strict=strict,
-            )
-        return BetaAsyncFunctionTool(
-            inner,
-            name=name,
-            description=description,
-            input_schema=input_schema,
-            defer_loading=defer_loading,
-            cache_control=cache_control,
-            allowed_callers=allowed_callers,
-            eager_input_streaming=eager_input_streaming,
-            input_examples=input_examples,
-            strict=strict,
-        )
 
     def _make(fn: AsyncFunctionT) -> BetaAsyncFunctionTool[AsyncFunctionT]:
         if _is_sync_cm_factory(fn):
@@ -690,10 +555,32 @@ def beta_async_tool(
 
             _lazy.__name__ = name or getattr(fn, "__name__", "tool")
             _lazy.__doc__ = description if description is not None else getattr(fn, "__doc__", None)
-            tool = _construct(cast(AsyncFunctionT, _lazy))
+            tool = BetaAsyncFunctionTool(
+                cast(AsyncFunctionT, _lazy),
+                name=name,
+                description=description,
+                input_schema=input_schema,
+                defer_loading=defer_loading,
+                cache_control=cache_control,
+                allowed_callers=allowed_callers,
+                eager_input_streaming=eager_input_streaming,
+                input_examples=input_examples,
+                strict=strict,
+            )
             tool_box.append(tool)
             return tool
-        return _construct(fn)
+        return BetaAsyncFunctionTool(
+            fn,
+            name=name,
+            description=description,
+            input_schema=input_schema,
+            defer_loading=defer_loading,
+            cache_control=cache_control,
+            allowed_callers=allowed_callers,
+            eager_input_streaming=eager_input_streaming,
+            input_examples=input_examples,
+            strict=strict,
+        )
 
     if func is not None:
         return _make(func)
