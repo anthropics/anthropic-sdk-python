@@ -1,11 +1,9 @@
 #!/usr/bin/env -S uv run python
 
 import os
-import json
 import time
 
 from anthropic import Anthropic
-from anthropic.lib.tools import beta_tool
 
 MCP_SERVER_NAME = "github"
 MCP_SERVER_URL = "https://api.githubcopilot.com/mcp/"
@@ -14,16 +12,6 @@ PROMPT = (
     "Hi! List every tool and skill you have access to, grouped by where they "
     "came from (built-in toolset, custom tool, MCP server, skills)."
 )
-
-
-# A custom tool — executed by this client rather than the agent. `custom=True`
-# makes `to_dict()` emit the managed-agents custom-tool param for
-# `agents.create(...)`, while the decorated function stays runnable so we can
-# answer the `agent.custom_tool_use` event below by calling it directly.
-@beta_tool(custom=True)
-def get_weather(city: str) -> str:  # noqa: ARG001
-    """Look up the current weather for a city."""
-    return json.dumps({"temperature_c": 14})
 
 
 def main() -> None:
@@ -74,7 +62,16 @@ def main() -> None:
         tools=[
             {"type": "agent_toolset_20260401"},
             {"type": "mcp_toolset", "mcp_server_name": MCP_SERVER_NAME},
-            get_weather.to_dict(),
+            {
+                "type": "custom",
+                "name": "get_weather",
+                "description": "Look up the current weather for a city.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {"city": {"type": "string"}},
+                    "required": ["city"],
+                },
+            },
         ],
     )
     print("Created agent v1:", agent_v1.id)
@@ -115,17 +112,14 @@ def main() -> None:
             print(event.to_json(indent=2))
             # `get_weather` is a custom (non-builtin) tool, so the agent emits an
             # `agent.custom_tool_use` event and expects a `user.custom_tool_result`.
-            if event.type == "agent.custom_tool_use" and event.name == get_weather.name:
-                # Answer the custom tool by running our local implementation.
-                result = get_weather.call(event.input)
-                assert isinstance(result, str)
+            if event.type == "agent.custom_tool_use" and event.name == "get_weather":
                 anthropic.beta.sessions.events.send(
                     session.id,
                     events=[
                         {
                             "type": "user.custom_tool_result",
                             "custom_tool_use_id": event.id,
-                            "content": [{"type": "text", "text": result}],
+                            "content": [{"type": "text", "text": '{"temperature_c": 14}'}],
                         }
                     ],
                 )
