@@ -7,13 +7,15 @@ tool implementations themselves.
 
 from __future__ import annotations
 
+import io
 import os
+import re
 import shutil
 import logging
 import tarfile
 import zipfile
 import tempfile
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 from pathlib import Path, PurePosixPath
 from functools import partial
 
@@ -21,9 +23,110 @@ import anyio
 from anyio.to_thread import run_sync
 
 if TYPE_CHECKING:
+    from ..._types import FileTypes
     from ..._client import AsyncAnthropic
 
-__all__ = ["download_session_skills"]
+__all__ = ["download_session_skills", "normalize_skill_upload_paths"]
+
+# Matches ``name: <value>`` inside SKILL.md YAML front-matter.
+_SKILL_NAME_RE = re.compile(r"^\s*name:\s*(.+?)\s*$", re.MULTILINE)
+
+
+def _parse_skill_name_from_frontmatter(content: bytes) -> str | None:
+    """Return the ``name:`` value from a SKILL.md YAML front-matter block.
+
+    Looks for the first ``name: <value>`` line in the file; front-matter
+    delimiters (``---``) are not required. Returns ``None`` when no ``name:``
+    line is found.
+    """
+    text = content.decode("utf-8", errors="replace")
+    m = _SKILL_NAME_RE.search(text)
+    return m.group(1) if m else None
+
+
+def _read_file_entry_bytes(content: object) -> bytes:
+    """Read raw bytes from a ``FileContent`` value.
+
+    If *content* is an IO stream the stream is seeked back to position 0
+    after reading so downstream consumers still see the full content.
+    """
+    if isinstance(content, bytes):
+        return content
+    if isinstance(content, os.PathLike):
+        return Path(content).read_bytes()
+    if isinstance(content, io.IOBase):
+        data = content.read()
+        if hasattr(content, "seek"):
+            content.seek(0)
+        return data if isinstance(data, bytes) else data.encode("utf-8")
+    return b""
+
+
+def normalize_skill_upload_paths(
+    files: Sequence[FileTypes],
+    *,
+    display_title: str | None = None,
+) -> list[FileTypes]:
+    """Ensure every upload path is prefixed with the skill-name directory.
+
+    ``beta.skills.create`` requires every file path to be under a top-level
+    directory whose name matches the ``name:`` field in ``SKILL.md`` — for
+    example ``my-skill/SKILL.md`` and ``my-skill/scripts/run.py``.  Callers
+    who pass bare names (``"SKILL.md"``) hit a cryptic 400 error.  This
+    function adds the prefix automatically, making the upload layout symmetric
+    with the download extraction in :func:`_archive_top_dir`.
+
+    The skill name is taken from:
+
+    1. The ``name:`` front-matter field in the supplied ``SKILL.md`` bytes.
+    2. The first path component if any file is already prefixed (the caller
+       already has the right layout; nothing is rewritten).
+    3. *display_title* normalised to ``lowercase-with-hyphens`` as a fallback.
+
+    Returns the (possibly rewritten) file list.  If the name cannot be
+    determined the original sequence is returned unchanged — the API will
+    surface a descriptive error.
+    """
+    skill_name: str | None = None
+
+    # Phase 1: resolve the canonical skill name from the supplied files.
+    for entry in files:
+        if not isinstance(entry, tuple) or not entry:
+            continue
+        filename = entry[0]
+        if not isinstance(filename, str):
+            continue
+        basename = filename.rsplit("/", 1)[-1]
+        if basename.upper() != "SKILL.MD":
+            continue
+        if "/" in filename:
+            # Already prefixed — the caller is using the correct layout.
+            skill_name = filename.split("/", 1)[0]
+        else:
+            # Bare "SKILL.md" — read the content and parse ``name:``.
+            try:
+                skill_name = _parse_skill_name_from_frontmatter(
+                    _read_file_entry_bytes(entry[1] if len(entry) > 1 else b"")
+                )
+            except Exception:
+                pass
+        break  # SKILL.md found; stop searching.
+
+    if not skill_name and display_title:
+        skill_name = re.sub(r"[^a-z0-9-]+", "-", display_title.lower().strip()).strip("-")
+
+    if not skill_name:
+        return list(files)
+
+    # Phase 2: prefix any path that is not already under ``{skill_name}/``.
+    prefix = f"{skill_name}/"
+    result: list[FileTypes] = []
+    for entry in files:
+        if isinstance(entry, tuple) and entry and isinstance(entry[0], str) and not entry[0].startswith(prefix):
+            entry = (f"{prefix}{entry[0]}",) + entry[1:]  # type: ignore[assignment]
+        result.append(entry)
+    return result
+
 
 # Skill dirs hold downloaded, possibly third-party content — keep them
 # owner-only rather than inheriting whatever the process umask happens to be.
