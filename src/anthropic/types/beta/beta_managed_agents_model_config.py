@@ -13,9 +13,9 @@ class BetaManagedAgentsModelConfig(BaseModel):
     """Model identifier and configuration."""
 
     id: BetaManagedAgentsModel
-    """
-    The model that will power your agent.\n\nSee
-    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    """The model that will power your agent.
+
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
 
