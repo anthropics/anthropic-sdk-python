@@ -188,8 +188,9 @@ class Messages(SyncAPIResource):
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
@@ -471,8 +472,9 @@ class Messages(SyncAPIResource):
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -754,8 +756,9 @@ class Messages(SyncAPIResource):
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -1079,8 +1082,9 @@ class Messages(SyncAPIResource):
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
@@ -1355,8 +1359,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
@@ -1638,8 +1643,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -1921,8 +1927,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
@@ -2246,8 +2253,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
