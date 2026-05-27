@@ -43,31 +43,31 @@ def _read_file_entry_content(content: object) -> bytes | None:
         return None
 
 
-def _parse_skill_name_from_frontmatter(skill_md: bytes) -> str:
-    """Extract the ``name:`` field from SKILL.md YAML frontmatter.
-
-    Raises :exc:`ValueError` if the frontmatter block is absent or contains no
-    ``name:`` key.
-    """
+def _parse_skill_name_from_frontmatter(skill_md: bytes) -> str | None:
+    """Extract the ``name:`` field from SKILL.md YAML frontmatter, or ``None``."""
     text = skill_md.decode("utf-8", errors="replace")
     fm = re.search(r"^---\s*\n(.*?)\n---", text, re.DOTALL)
     if fm:
         name_match = re.search(r"^name:\s*(\S+)", fm.group(1), re.MULTILINE)
         if name_match:
             return name_match.group(1).strip()
-    raise ValueError("SKILL.md must contain a 'name:' field in its YAML frontmatter, e.g.:\n---\nname: my-skill\n---")
+    return None
 
 
-def normalize_skill_files(files: Sequence["FileTypes"]) -> list["FileTypes"]:
+def normalize_skill_files(
+    files: Sequence["FileTypes"],
+    *,
+    display_title: str | None = None,
+) -> list["FileTypes"]:
     """Normalize file paths for :meth:`~anthropic.resources.beta.Skills.create`.
 
-    The ``beta.skills.create()`` API requires every file path to be prefixed
-    with a top-level directory whose name exactly matches the ``name:`` field in
-    the ``SKILL.md`` frontmatter.  This helper reads that name from the supplied
-    ``SKILL.md`` entry and rewrites any path that is missing the prefix (or has
-    a wrong prefix) to ``<name>/<basename>``.
+    ``beta.skills.create()`` requires every file path to be prefixed with a
+    top-level directory whose name **exactly matches** the ``name:`` field in
+    the ``SKILL.md`` frontmatter.  This function is called automatically inside
+    ``skills.create()`` — you do not need to call it yourself.
 
-    Usage::
+    It can also be called explicitly if you want to inspect or log the
+    normalized paths before uploading::
 
         skill_md = b"---\\nname: my-skill\\n---\\n\\nSkill content."
         files = normalize_skill_files(
@@ -76,72 +76,92 @@ def normalize_skill_files(files: Sequence["FileTypes"]) -> list["FileTypes"]:
                 ("scripts/tool.py", script_bytes, "text/plain"),
             ]
         )
-        # files is now:
         # [
-        #   ("my-skill/SKILL.md",         skill_md,     "text/markdown"),
-        #   ("my-skill/scripts/tool.py",  script_bytes, "text/plain"),
+        #   ("my-skill/SKILL.md",        skill_md,     "text/markdown"),
+        #   ("my-skill/scripts/tool.py", script_bytes, "text/plain"),
         # ]
-        client.beta.skills.create(files=files)
+
+    The skill name is resolved in order:
+
+    1. The ``name:`` field in the ``SKILL.md`` YAML frontmatter.
+    2. *display_title* normalised to ``lowercase-with-hyphens`` as a fallback
+       (useful when ``SKILL.md`` omits the field).
+
+    Paths that are already under the correct top-level directory are left
+    unchanged (idempotent).  A wrong top-level prefix is stripped and replaced
+    rather than prepended, so re-uploading a skill that was created with the
+    wrong prefix is safe.
 
     Args:
         files: The sequence of file entries to normalize.  Each entry must be a
             tuple whose first element is the file path string.
+        display_title: Fallback skill name used when the ``SKILL.md``
+            frontmatter does not contain a ``name:`` field.  Special characters
+            are replaced with hyphens and the value is lower-cased.
 
     Returns:
         A new list with every file path prefixed by the skill name.
 
     Raises:
-        ValueError: If no ``SKILL.md`` entry is found, or if its frontmatter
-            does not contain a ``name:`` field.
+        ValueError: If no ``SKILL.md`` entry is found, or if neither the
+            frontmatter nor *display_title* supplies a skill name.
     """
-    # First pass: locate SKILL.md, extract the skill name, and determine the
-    # current top-level prefix being used (if any).
+    # Pass 1: locate SKILL.md, parse the skill name, note the current prefix.
     skill_name: str | None = None
     skill_md_prefix: str = ""  # top-level dir of the SKILL.md entry, or ""
+    found_skill_md = False
+
     for entry in files:
         if not isinstance(entry, tuple) or len(entry) < 2:
             continue
         filename = entry[0]
         if not isinstance(filename, str):
             continue
-        basename = filename.rsplit("/", 1)[-1]
-        if basename != "SKILL.md":
+        if filename.rsplit("/", 1)[-1] != "SKILL.md":
             continue
+        found_skill_md = True
         content = _read_file_entry_content(entry[1])
         if content is not None:
             skill_name = _parse_skill_name_from_frontmatter(content)
-            # Record the top-level directory of this SKILL.md entry so we can
-            # strip it uniformly from all other file paths.
-            parts = filename.split("/", 1)
-            skill_md_prefix = parts[0] if len(parts) == 2 else ""
-            break
+        parts = filename.split("/", 1)
+        skill_md_prefix = parts[0] if len(parts) == 2 else ""
+        break
+
+    if not found_skill_md:
+        raise ValueError(
+            "No SKILL.md entry found in the files list. "
+            "Each entry must be a tuple (path, content, ...) where path is a str "
+            "and one path must be 'SKILL.md' or '<dir>/SKILL.md'."
+        )
+
+    # Fallback: derive name from display_title.
+    if skill_name is None and display_title:
+        skill_name = re.sub(r"[^a-z0-9]+", "-", display_title.lower().strip()).strip("-")
 
     if skill_name is None:
         raise ValueError(
-            "No readable SKILL.md entry found in the files list. "
-            "Each entry must be a tuple (path, content, ...) where path is a str."
+            "Could not determine skill name: SKILL.md frontmatter has no 'name:' field "
+            "and no display_title was provided as a fallback.\n"
+            "Add 'name: <your-skill-name>' to the SKILL.md frontmatter, or pass "
+            "display_title='<your-skill-name>' to normalize_skill_files()."
         )
 
-    # Second pass: rewrite paths so they are all under `{skill_name}/`.
+    # Pass 2: rewrite paths so every entry is under ``{skill_name}/``.
     #
-    # Strategy: strip the current wrong prefix (if any) from every path that
-    # carries it, then prepend `{skill_name}/`.  Paths that already start with
-    # `{skill_name}/` are left unchanged.
+    # • Already-correct prefix → unchanged (idempotent).
+    # • Wrong top-level prefix → stripped then replaced (not double-prefixed).
+    # • No prefix → skill name prepended.
     prefix = f"{skill_name}/"
     result: list[FileTypes] = []
     for entry in files:
         if isinstance(entry, tuple) and entry and isinstance(entry[0], str):
             path = entry[0]
             if path.startswith(prefix):
-                # Already correctly prefixed — leave unchanged.
                 result.append(entry)
             elif skill_md_prefix and path.startswith(f"{skill_md_prefix}/"):
-                # Strip the wrong top-level prefix, then add the correct one.
                 relative = path[len(skill_md_prefix) + 1 :]
                 result.append((prefix + relative,) + entry[1:])  # type: ignore[arg-type]
             else:
-                # No top-level prefix at all (or an unrecognised one) — just
-                # prepend the skill name.
                 result.append((prefix + path,) + entry[1:])  # type: ignore[arg-type]
         else:
             result.append(entry)

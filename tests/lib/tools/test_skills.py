@@ -23,7 +23,13 @@ ArchiveModeMaker = Callable[[Path, "dict[str, tuple[bytes, int]]"], None]
 
 import pytest
 
-from anthropic.lib.tools._skills import _strip_top, _archive_top_dir, normalize_skill_files, _extract_skill_archive
+from anthropic.lib.tools._skills import (
+    _strip_top,
+    _archive_top_dir,
+    normalize_skill_files,
+    _extract_skill_archive,
+    _parse_skill_name_from_frontmatter,
+)
 
 
 def _make_zip(path: Path, entries: dict[str, bytes]) -> None:
@@ -197,6 +203,24 @@ def test_extract_drops_setuid_setgid_sticky(make: ArchiveModeMaker, tmp_path: Pa
 
 
 # ---------------------------------------------------------------------------
+# _parse_skill_name_from_frontmatter
+# ---------------------------------------------------------------------------
+
+
+def test_parse_frontmatter_returns_name() -> None:
+    md = b"---\nname: my-skill\ndescription: x\n---\n"
+    assert _parse_skill_name_from_frontmatter(md) == "my-skill"
+
+
+def test_parse_frontmatter_returns_none_when_missing() -> None:
+    assert _parse_skill_name_from_frontmatter(b"---\ndescription: no name\n---\n") is None
+
+
+def test_parse_frontmatter_returns_none_no_block() -> None:
+    assert _parse_skill_name_from_frontmatter(b"just content, no front matter") is None
+
+
+# ---------------------------------------------------------------------------
 # normalize_skill_files
 # ---------------------------------------------------------------------------
 
@@ -214,6 +238,7 @@ def test_normalize_skill_files_adds_prefix_to_bare_names() -> None:
 
 
 def test_normalize_skill_files_replaces_wrong_prefix() -> None:
+    """Wrong top-level prefix is stripped and replaced — not double-prefixed."""
     files = [
         ("wrong-dir/SKILL.md", _SKILL_MD, "text/markdown"),
         ("wrong-dir/scripts/tool.py", b"x", "text/plain"),
@@ -233,6 +258,17 @@ def test_normalize_skill_files_leaves_correct_prefix_unchanged() -> None:
     assert result[1][0] == "my-skill/scripts/tool.py"
 
 
+def test_normalize_skill_files_is_idempotent() -> None:
+    """Applying normalization twice must produce the same result."""
+    files = [
+        ("SKILL.md", _SKILL_MD, "text/markdown"),
+        ("scripts/tool.py", b"x", "text/plain"),
+    ]
+    once = normalize_skill_files(files)
+    twice = normalize_skill_files(once)
+    assert once == twice
+
+
 def test_normalize_skill_files_preserves_extra_tuple_fields() -> None:
     headers: dict[str, str] = {"X-Custom": "val"}
     files = [
@@ -242,13 +278,40 @@ def test_normalize_skill_files_preserves_extra_tuple_fields() -> None:
     assert result[0] == ("my-skill/SKILL.md", _SKILL_MD, "text/markdown", headers)
 
 
+def test_normalize_skill_files_two_tuple_entries() -> None:
+    """2-tuples (no MIME type) are handled correctly."""
+    files = [
+        ("SKILL.md", _SKILL_MD),
+        ("README.md", b"# readme"),
+    ]
+    result = normalize_skill_files(files)  # type: ignore[arg-type]
+    assert result[0][0] == "my-skill/SKILL.md"
+    assert result[1][0] == "my-skill/README.md"
+
+
+def test_normalize_skill_files_display_title_fallback() -> None:
+    """When SKILL.md has no name: field, display_title is used as fallback."""
+    no_name_md = b"---\ndescription: No name.\n---\n\ncontent."
+    files = [("SKILL.md", no_name_md, "text/markdown")]
+    result = normalize_skill_files(files, display_title="My Skill")
+    assert result[0][0] == "my-skill/SKILL.md"
+
+
+def test_normalize_skill_files_display_title_special_chars() -> None:
+    no_name_md = b"---\ndescription: x\n---\n"
+    files = [("SKILL.md", no_name_md, "text/markdown")]
+    result = normalize_skill_files(files, display_title="My Skill v2!")
+    assert result[0][0] == "my-skill-v2/SKILL.md"
+
+
 def test_normalize_skill_files_raises_without_skill_md() -> None:
     files = [("other.py", b"x", "text/plain")]
     with pytest.raises(ValueError, match="SKILL.md"):
         normalize_skill_files(files)
 
 
-def test_normalize_skill_files_raises_on_missing_name_field() -> None:
+def test_normalize_skill_files_raises_on_missing_name_no_fallback() -> None:
+    """ValueError is raised when frontmatter has no name: and no display_title."""
     no_name_md = b"---\ndescription: No name.\n---\n\ncontent."
     files = [("SKILL.md", no_name_md, "text/markdown")]
     with pytest.raises(ValueError, match="name"):
@@ -256,11 +319,18 @@ def test_normalize_skill_files_raises_on_missing_name_field() -> None:
 
 
 def test_normalize_skill_files_accepts_bytes_io_content() -> None:
-    import io
-
     skill_md_io = io.BytesIO(_SKILL_MD)
     files = [("SKILL.md", skill_md_io, "text/markdown")]
     result = normalize_skill_files(files)
     assert result[0][0] == "my-skill/SKILL.md"
-    # BytesIO should be seeked back to the start after reading.
+    # BytesIO must be seeked back so the SDK can still send the bytes.
     assert skill_md_io.read() == _SKILL_MD
+
+
+def test_normalize_skill_files_accepts_path_content(tmp_path: Path) -> None:
+    """PathLike file content is read and the stream left intact for upload."""
+    skill_md_path = tmp_path / "SKILL.md"
+    skill_md_path.write_bytes(_SKILL_MD)
+    files = [("SKILL.md", skill_md_path, "text/markdown")]
+    result = normalize_skill_files(files)  # type: ignore[arg-type]
+    assert result[0][0] == "my-skill/SKILL.md"
