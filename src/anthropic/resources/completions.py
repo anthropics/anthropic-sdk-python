@@ -83,8 +83,9 @@ class Completions(SyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -186,8 +187,9 @@ class Completions(SyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -289,8 +291,9 @@ class Completions(SyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -466,8 +469,9 @@ class AsyncCompletions(AsyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -569,8 +573,9 @@ class AsyncCompletions(AsyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
@@ -672,8 +677,9 @@ class AsyncCompletions(AsyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           prompt: The prompt that you want Claude to complete.
