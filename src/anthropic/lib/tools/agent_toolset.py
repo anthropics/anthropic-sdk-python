@@ -53,6 +53,8 @@ import anyio.abc
 from anyio.to_thread import run_sync
 
 from ._skills import _within, download_session_skills
+from ..._types import NotGiven, not_given
+from ..._utils import is_given
 from ...types.beta import (
     BetaManagedAgentsAgentToolset20260401BashInput,
     BetaManagedAgentsAgentToolset20260401EditInput,
@@ -82,12 +84,24 @@ __all__ = [
 
 BASH_OUTPUT_LIMIT = 100 * 1024
 BASH_DEFAULT_TIMEOUT = 120.0
-READ_MAX_BYTES = 256 * 1024
+DEFAULT_MAX_FILE_BYTES = 256 * 1024
+READ_MAX_BYTES = DEFAULT_MAX_FILE_BYTES  # For backwards compat only.
 GREP_OUTPUT_LIMIT = 100 * 1024
 GREP_MAX_LINE_LENGTH = 2000
 GLOB_RESULT_LIMIT = 200
 WALK_MAX_ENTRIES = 50_000
 _ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]")
+
+
+def _resolve_max_bytes(configured: int | None | NotGiven) -> int | None:
+    """Resolve a configured cap to an effective size limit.
+
+    ``not_given`` selects ``DEFAULT_MAX_FILE_BYTES``; ``None`` disables the size
+    check (uncapped); a positive int is the cap. Governs only the size guard —
+    callers still reject non-regular files.
+    """
+    return configured if is_given(configured) else DEFAULT_MAX_FILE_BYTES
+
 
 log = logging.getLogger("anthropic.lib.tools.agent_toolset")
 
@@ -169,6 +183,13 @@ class AgentToolContext:
             and is NOT merged with or added to the scrubbed process
             environment. To keep the defaults plus extra vars, build the
             combined mapping yourself before passing it.
+        max_file_bytes: Size cap for the ``read`` and ``edit`` tools, which both
+            load the whole file into memory. ``not_given`` (default) uses the
+            built-in 256 KiB cap; a positive int sets a custom cap; ``None``
+            disables the cap entirely. Disabling it reintroduces the OOM risk on
+            a model-controlled path, so pass ``None`` only when the sandbox can
+            absorb arbitrarily large files. The non-regular-file (FIFO/device)
+            guard always applies regardless of this value.
     """
 
     # ``default_factory`` (not a literal "." ) so the cwd is snapshotted at
@@ -182,6 +203,7 @@ class AgentToolContext:
     client: AsyncAnthropic | None = None
     session_id: str | None = None
     env: Optional[Mapping[str, str]] = None
+    max_file_bytes: int | None | NotGiven = not_given
     _bash: BashSession | None = field(default=None, init=False, repr=False)
     # Skill directories downloaded by ``setup_skills``; removed again on
     # ``__aexit__`` so a context doesn't leave downloaded skills behind.
@@ -485,9 +507,10 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             st = target.stat()
             if not S_ISREG(st.st_mode):
                 raise ToolError(f"read: {file_path}: not a regular file")
-            if st.st_size > READ_MAX_BYTES:
+            limit = _resolve_max_bytes(ctx.max_file_bytes)
+            if limit is not None and st.st_size > limit:
                 raise ToolError(
-                    f"read: {file_path} is {st.st_size} bytes, exceeds {READ_MAX_BYTES}-byte limit. "
+                    f"read: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
                     "Use bash (head/tail/sed) to read a slice."
                 )
             text = target.read_text()
@@ -542,9 +565,10 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             st = target.stat()
             if not S_ISREG(st.st_mode):
                 raise ToolError(f"edit: {file_path}: not a regular file")
-            if st.st_size > READ_MAX_BYTES:
+            limit = _resolve_max_bytes(ctx.max_file_bytes)
+            if limit is not None and st.st_size > limit:
                 raise ToolError(
-                    f"edit: {file_path} is {st.st_size} bytes, exceeds {READ_MAX_BYTES}-byte limit. "
+                    f"edit: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
                     "Use bash (sed/awk) to edit a large file."
                 )
             text = target.read_text()
