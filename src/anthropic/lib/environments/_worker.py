@@ -38,7 +38,7 @@ import anyio
 
 from .._retry import TRANSIENT_ERRORS
 from ._poller import _is_status, aiter_work, _is_fatal_4xx
-from ..._types import Headers
+from ..._types import Headers, NotGiven, not_given
 from .._scoped_client import _copy_client_with_bearer_auth
 from ...types.beta.environments import BetaSelfHostedWork, BetaSessionWorkData
 from ..tools._beta_session_runner import (
@@ -259,6 +259,7 @@ class EnvironmentWorker:
         tools: EnvironmentWorkerTools | None = None,
         workdir: str | os.PathLike[str] | None = None,
         unrestricted_paths: bool = False,
+        max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None = DEFAULT_MAX_IDLE,
         worker_id: str | None = None,
         extra_headers: Headers | None = None,
@@ -272,6 +273,7 @@ class EnvironmentWorker:
         # lazily at first tool use would instead pick up any intervening chdir.
         self._workdir: str | os.PathLike[str] = os.getcwd() if workdir is None else workdir
         self._unrestricted_paths = unrestricted_paths
+        self._max_file_bytes = max_file_bytes
         self._max_idle = max_idle
         self._worker_id = worker_id
         self._extra_headers = extra_headers
@@ -437,6 +439,7 @@ class EnvironmentWorker:
                 env = AgentToolContext(
                     workdir=self._workdir,
                     unrestricted_paths=self._unrestricted_paths,
+                    max_file_bytes=self._max_file_bytes,
                     client=worker_client,
                     session_id=session_id,
                 )

@@ -1197,6 +1197,7 @@ class AsyncWork(AsyncAPIResource):
         tools: EnvironmentWorkerTools | None = None,
         workdir: str | os.PathLike[str] | None = None,
         unrestricted_paths: bool = False,
+        max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None | NotGiven = not_given,
         worker_id: str | None = None,
         extra_headers: Headers | None = None,
@@ -1230,6 +1231,10 @@ class AsyncWork(AsyncAPIResource):
             Defaults to ``os.getcwd()`` captured when the worker is constructed
             (TS parity: ``process.cwd()`` at construction).
           unrestricted_paths: Forwarded to the per-session ``AgentToolContext``.
+          max_file_bytes: Forwarded to the per-session ``AgentToolContext`` — the
+            size cap (bytes) for the ``read``/``edit`` tools. ``not_given``
+            (default) uses the built-in 256 KiB cap; a positive int sets a custom
+            cap; ``None`` disables the cap.
           max_idle: Seconds to keep running after the session goes idle with
             ``stop_reason`` ``end_turn``. Defaults to ``DEFAULT_MAX_IDLE`` (60s)
             when not given. ``None`` disables it.
@@ -1262,6 +1267,7 @@ class AsyncWork(AsyncAPIResource):
             tools=tools,
             workdir=workdir,
             unrestricted_paths=unrestricted_paths,
+            max_file_bytes=max_file_bytes,
             max_idle=max_idle,
             worker_id=worker_id,
             extra_headers=extra_headers,

@@ -132,6 +132,60 @@ async def test_edit_normal_within_limit(tmp_path: Path) -> None:
     assert (tmp_path / "f.txt").read_text() == "hello there"
 
 
+@needs_pydantic_v2
+async def test_edit_custom_max_bytes_rejects_below_cap(tmp_path: Path) -> None:
+    (tmp_path / "f.txt").write_bytes(b"OLD" + b"\x00" * 2000)
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=1024)
+    with pytest.raises(ToolError, match="exceeds"):
+        await beta_edit_tool(env).call({"file_path": "f.txt", "old_string": "OLD", "new_string": "NEW"})
+
+
+@needs_pydantic_v2
+async def test_edit_custom_max_bytes_allows_above_default(tmp_path: Path) -> None:
+    (tmp_path / "f.txt").write_bytes(b"OLD" + b"\x00" * (257 * 1024))
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=512 * 1024)
+    await beta_edit_tool(env).call({"file_path": "f.txt", "old_string": "OLD", "new_string": "NEW"})
+    assert (tmp_path / "f.txt").read_bytes()[:3] == b"NEW"
+
+
+@needs_pydantic_v2
+async def test_edit_uncapped_allows_oversized(tmp_path: Path) -> None:
+    (tmp_path / "f.txt").write_bytes(b"OLD" + b"\x00" * (257 * 1024))
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=None)
+    await beta_edit_tool(env).call({"file_path": "f.txt", "old_string": "OLD", "new_string": "NEW"})
+
+
+@needs_pydantic_v2
+async def test_edit_rejects_directory_even_when_uncapped(tmp_path: Path) -> None:
+    (tmp_path / "sub").mkdir()
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=None)
+    with pytest.raises(ToolError, match="not a regular file"):
+        await beta_edit_tool(env).call({"file_path": "sub", "old_string": "a", "new_string": "b"})
+
+
+@needs_pydantic_v2
+async def test_read_custom_max_bytes_rejects_below_cap(tmp_path: Path) -> None:
+    (tmp_path / "f.txt").write_bytes(b"a" * 2000)
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=1024)
+    with pytest.raises(ToolError, match="exceeds"):
+        await beta_read_tool(env).call({"file_path": "f.txt"})
+
+
+@needs_pydantic_v2
+async def test_read_uncapped_allows_oversized(tmp_path: Path) -> None:
+    (tmp_path / "big.txt").write_bytes(b"a" * (257 * 1024))
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=None)
+    await beta_read_tool(env).call({"file_path": "big.txt"})
+
+
+@needs_pydantic_v2
+async def test_read_rejects_directory_even_when_uncapped(tmp_path: Path) -> None:
+    (tmp_path / "sub").mkdir()
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=None)
+    with pytest.raises(ToolError, match="not a regular file"):
+        await beta_read_tool(env).call({"file_path": "sub"})
+
+
 @pytest.mark.parametrize(
     ("description", "args", "want_error"),
     [
