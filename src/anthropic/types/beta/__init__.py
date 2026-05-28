@@ -106,6 +106,7 @@ from .environment_create_params import EnvironmentCreateParams as EnvironmentCre
 from .environment_update_params import EnvironmentUpdateParams as EnvironmentUpdateParams
 from .beta_mcp_tool_config_param import BetaMCPToolConfigParam as BetaMCPToolConfigParam
 from .beta_mcp_tool_result_block import BetaMCPToolResultBlock as BetaMCPToolResultBlock
+from .beta_output_tokens_details import BetaOutputTokensDetails as BetaOutputTokensDetails
 from .beta_server_tool_use_block import BetaServerToolUseBlock as BetaServerToolUseBlock
 from .beta_thinking_config_param import BetaThinkingConfigParam as BetaThinkingConfigParam
 from .beta_tool_choice_any_param import BetaToolChoiceAnyParam as BetaToolChoiceAnyParam
@@ -341,6 +342,9 @@ from .beta_memory_tool_20250818_insert_command import (
 )
 from .beta_memory_tool_20250818_rename_command import (
     BetaMemoryTool20250818RenameCommand as BetaMemoryTool20250818RenameCommand,
+)
+from .beta_mid_conversation_system_block_param import (
+    BetaMidConversationSystemBlockParam as BetaMidConversationSystemBlockParam,
 )
 from .beta_request_mcp_tool_result_block_param import (
     BetaRequestMCPToolResultBlockParam as BetaRequestMCPToolResultBlockParam,

@@ -7,6 +7,7 @@ __all__ = ["Model"]
 
 Model: TypeAlias = Union[
     Literal[
+        "claude-opus-4-8",
         "claude-opus-4-7",
         "claude-mythos-preview",
         "claude-opus-4-6",
