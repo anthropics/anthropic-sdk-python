@@ -13,4 +13,4 @@ __all__ = ["BetaMessageParam"]
 class BetaMessageParam(TypedDict, total=False):
     content: Required[Union[str, Iterable[BetaContentBlockParam]]]
 
-    role: Required[Literal["user", "assistant"]]
+    role: Required[Literal["user", "assistant", "system"]]
