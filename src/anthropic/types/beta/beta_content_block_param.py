@@ -21,6 +21,7 @@ from .beta_redacted_thinking_block_param import BetaRedactedThinkingBlockParam
 from .beta_advisor_tool_result_block_param import BetaAdvisorToolResultBlockParam
 from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam
 from .beta_web_search_tool_result_block_param import BetaWebSearchToolResultBlockParam
+from .beta_mid_conversation_system_block_param import BetaMidConversationSystemBlockParam
 from .beta_request_mcp_tool_result_block_param import BetaRequestMCPToolResultBlockParam
 from .beta_tool_search_tool_result_block_param import BetaToolSearchToolResultBlockParam
 from .beta_code_execution_tool_result_block_param import BetaCodeExecutionToolResultBlockParam
@@ -50,5 +51,6 @@ BetaContentBlockParam: TypeAlias = Union[
     BetaRequestMCPToolResultBlockParam,
     BetaContainerUploadBlockParam,
     BetaCompactionBlockParam,
+    BetaMidConversationSystemBlockParam,
     BetaContentBlock,
 ]

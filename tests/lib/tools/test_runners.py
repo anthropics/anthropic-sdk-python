@@ -58,6 +58,7 @@ ParsedBetaMessage(
         input_tokens=770,
         iterations=None,
         output_tokens=25,
+        output_tokens_details=None,
         server_tool_use=None,
         service_tier='standard',
         speed=None
@@ -107,6 +108,7 @@ ParsedBetaMessage(
         input_tokens=770,
         iterations=None,
         output_tokens=27,
+        output_tokens_details=None,
         server_tool_use=None,
         service_tier='standard',
         speed=None

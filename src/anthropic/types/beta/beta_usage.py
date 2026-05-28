@@ -7,6 +7,7 @@ from ..._models import BaseModel
 from .beta_cache_creation import BetaCacheCreation
 from .beta_iterations_usage import BetaIterationsUsage
 from .beta_server_tool_usage import BetaServerToolUsage
+from .beta_output_tokens_details import BetaOutputTokensDetails
 
 __all__ = ["BetaUsage"]
 
@@ -40,6 +41,15 @@ class BetaUsage(BaseModel):
 
     output_tokens: int
     """The number of output tokens which were used."""
+
+    output_tokens_details: Optional[BetaOutputTokensDetails] = None
+    """Breakdown of output tokens by category.
+
+    `output_tokens` remains the inclusive, authoritative total used for billing.
+    This object provides a read-only decomposition for observability — for example,
+    how many of the billed output tokens were spent on internal reasoning that may
+    have been summarized before being returned to you.
+    """
 
     server_tool_use: Optional[BetaServerToolUsage] = None
     """The number of server tool requests."""
