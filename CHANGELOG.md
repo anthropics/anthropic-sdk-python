@@ -8,7 +8,6 @@ Full Changelog: [v0.104.1...v0.105.0](https://github.com/anthropics/anthropic-sd
 
 * **api:** Add support for claude-opus-4-8, mid-conversation system blocks, and usage.output_tokens_details ([f18b014](https://github.com/anthropics/anthropic-sdk-python/commit/f18b01414b21b49943a6ba2cdaa30ff7dd6a3025))
 * support custom file size caps ([#1825](https://github.com/anthropics/anthropic-sdk-python/issues/1825)) ([7e5f944](https://github.com/anthropics/anthropic-sdk-python/commit/7e5f944ad85bd99526d9df30dc034f657472adaa))
-* **tools:** add beta_tool(custom=True) for managed agents usage ([#1824](https://github.com/anthropics/anthropic-sdk-python/issues/1824)) ([afe597f](https://github.com/anthropics/anthropic-sdk-python/commit/afe597f9d8866573437a2e1cb7ddb7f73d4e4ec1))
 
 
 ### Chores
