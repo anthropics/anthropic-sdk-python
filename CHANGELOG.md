@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.105.2 (2026-05-29)
+
+Full Changelog: [v0.105.1...v0.105.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.105.1...v0.105.2)
+
 ## 0.105.1 (2026-05-29)
 
 Full Changelog: [v0.105.0...v0.105.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.105.0...v0.105.1)
