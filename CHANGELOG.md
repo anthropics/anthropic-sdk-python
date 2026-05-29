@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.105.1 (2026-05-29)
+
+Full Changelog: [v0.105.0...v0.105.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.105.0...v0.105.1)
+
+### Chores
+
+* **internal:** use Trusted Publishing for PyPI releases ([1d04fc5](https://github.com/anthropics/anthropic-sdk-python/commit/1d04fc52d2dd1f88e22808de2c53b0d66913631f))
+
 ## 0.105.0 (2026-05-28)
 
 Full Changelog: [v0.104.1...v0.105.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.104.1...v0.105.0)
