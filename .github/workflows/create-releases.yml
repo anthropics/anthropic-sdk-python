@@ -32,5 +32,3 @@ jobs:
         if: ${{ steps.release.outputs.releases_created }}
         run: |
           bash ./bin/publish-pypi
-        env:
-          PYPI_TOKEN: ${{ secrets.ANTHROPIC_PYPI_TOKEN || secrets.PYPI_TOKEN }}
