@@ -16,7 +16,7 @@ class BetaManagedAgentsBase64ImageSourceParam(TypedDict, total=False):
     media_type: Required[str]
     """
     MIME type of the image (e.g., "image/png", "image/jpeg", "image/gif",
-    "image/webp").
+    "image/webp", "image/heic", "image/heif").
     """
 
     type: Required[Literal["base64"]]

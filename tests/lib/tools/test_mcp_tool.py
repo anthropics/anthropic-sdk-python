@@ -101,6 +101,16 @@ class TestMCPContent:
         result = mcp_content(ImageContent(type="image", data="abc", mimeType="image/webp"))
         assert result["type"] == "image"
 
+    def test_image_content_heic(self) -> None:
+        result = mcp_content(ImageContent(type="image", data="heicdata", mimeType="image/heic"))
+        assert result["type"] == "image"
+        assert result["source"]["media_type"] == "image/heic"
+
+    def test_image_content_heif(self) -> None:
+        result = mcp_content(ImageContent(type="image", data="heifdata", mimeType="image/heif"))
+        assert result["type"] == "image"
+        assert result["source"]["media_type"] == "image/heif"
+
     def test_image_unsupported_mime_type(self) -> None:
         with pytest.raises(UnsupportedMCPValueError, match="image/bmp"):
             mcp_content(ImageContent(type="image", data="abc", mimeType="image/bmp"))
