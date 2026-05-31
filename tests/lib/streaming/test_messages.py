@@ -349,3 +349,83 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+def test_message_delta_propagates_stop_details_to_snapshot() -> None:
+    from anthropic.types.usage import Usage
+    from anthropic.lib.streaming._messages import accumulate_event
+    from anthropic.types.message_delta_usage import MessageDeltaUsage
+    from anthropic.types.refusal_stop_details import RefusalStopDetails
+    from anthropic.types.raw_message_delta_event import Delta, RawMessageDeltaEvent
+
+    snapshot = Message(
+        id="msg_test",
+        type="message",
+        role="assistant",
+        model="claude-sonnet-4-6",
+        content=[],
+        stop_reason=None,
+        stop_sequence=None,
+        usage=Usage(
+            input_tokens=10,
+            output_tokens=0,
+            cache_creation_input_tokens=None,
+            cache_read_input_tokens=None,
+            server_tool_use=None,
+            service_tier=None,
+        ),
+        stop_details=None,
+    )
+
+    stop_details = RefusalStopDetails(type="refusal", category="cyber", explanation="Blocked by safety filter")
+    event = RawMessageDeltaEvent(
+        type="message_delta",
+        delta=Delta(stop_reason="end_turn", stop_sequence=None, stop_details=stop_details),
+        usage=MessageDeltaUsage(output_tokens=42),
+    )
+
+    updated = accumulate_event(event=event, current_snapshot=snapshot)
+
+    assert updated.stop_details is not None
+    assert updated.stop_details.type == "refusal"
+    assert updated.stop_details.category == "cyber"
+    assert updated.stop_details.explanation == "Blocked by safety filter"
+    assert updated.stop_reason == "end_turn"
+    assert updated.usage.output_tokens == 42
+
+
+def test_message_delta_without_stop_details_leaves_none() -> None:
+    from anthropic.types.usage import Usage
+    from anthropic.lib.streaming._messages import accumulate_event
+    from anthropic.types.message_delta_usage import MessageDeltaUsage
+    from anthropic.types.raw_message_delta_event import Delta, RawMessageDeltaEvent
+
+    snapshot = Message(
+        id="msg_test",
+        type="message",
+        role="assistant",
+        model="claude-sonnet-4-6",
+        content=[],
+        stop_reason=None,
+        stop_sequence=None,
+        usage=Usage(
+            input_tokens=10,
+            output_tokens=0,
+            cache_creation_input_tokens=None,
+            cache_read_input_tokens=None,
+            server_tool_use=None,
+            service_tier=None,
+        ),
+        stop_details=None,
+    )
+
+    event = RawMessageDeltaEvent(
+        type="message_delta",
+        delta=Delta(stop_reason="end_turn", stop_sequence=None),
+        usage=MessageDeltaUsage(output_tokens=42),
+    )
+
+    updated = accumulate_event(event=event, current_snapshot=snapshot)
+
+    assert updated.stop_details is None
+    assert updated.stop_reason == "end_turn"
