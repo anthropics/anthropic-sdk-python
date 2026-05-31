@@ -275,3 +275,52 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_none_values_stripped_from_content_blocks(respx_mock: MockRouter) -> None:
+    """ToolUseBlock.caller is Optional[Caller] = None in responses but
+    ToolUseBlockParam.caller expects a valid Caller dict when present.
+    Bedrock rejects {"caller": null}, so _prepare_options must strip it."""
+    import json
+
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx.Response(200, json={"foo": "bar"}),
+    )
+
+    sync_client.messages.create(
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "tool_use",
+                        "id": "toolu_01A",
+                        "name": "get_weather",
+                        "input": {"location": "Paris"},
+                        "caller": None,
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": "toolu_01A",
+                        "content": "Sunny, 22°C",
+                    }
+                ],
+            },
+        ],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+
+    body = json.loads(calls[0].request.content)
+    tool_use_block = body["messages"][0]["content"][0]
+    assert "caller" not in tool_use_block
