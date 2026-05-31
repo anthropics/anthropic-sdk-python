@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Union, cast
+from typing import TYPE_CHECKING, Union, cast
 from typing_extensions import Literal
 
 import httpx
 
 from ._utils import is_dict
-from .types.shared.error_type import ErrorType
+
+if TYPE_CHECKING:
+    from .types.shared.error_type import ErrorType
+else:
+    ErrorType = str
 
 __all__ = [
     "BadRequestError",
