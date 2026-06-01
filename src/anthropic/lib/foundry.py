@@ -126,6 +126,10 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         resource: str | None = None,
         api_key: str | None = None,
         azure_ad_token_provider: AzureADTokenProvider | None = None,
+        # Passed through to parent but not used for Foundry auth; accepted so
+        # the parent's `copy()` (which forwards `auth_token=self.auth_token`)
+        # doesn't raise TypeError when called on a Foundry client.
+        auth_token: str | None = None,
         webhook_key: str | None = None,
         base_url: str | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
@@ -166,6 +170,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
 
         super().__init__(
             api_key=api_key,
+            auth_token=auth_token,
             webhook_key=webhook_key,
             base_url=base_url,
             timeout=timeout,
@@ -309,6 +314,10 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         resource: str | None = None,
         api_key: str | None = None,
         azure_ad_token_provider: AsyncAzureADTokenProvider | None = None,
+        # Passed through to parent but not used for Foundry auth; accepted so
+        # the parent's `copy()` (which forwards `auth_token=self.auth_token`)
+        # doesn't raise TypeError when called on a Foundry client.
+        auth_token: str | None = None,
         webhook_key: str | None = None,
         base_url: str | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
@@ -349,6 +358,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
 
         super().__init__(
             api_key=api_key,
+            auth_token=auth_token,
             webhook_key=webhook_key,
             base_url=base_url,
             timeout=timeout,

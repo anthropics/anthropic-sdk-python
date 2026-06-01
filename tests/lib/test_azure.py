@@ -65,6 +65,20 @@ class TestAnthropicFoundry:
                 api_key="test-key",
             )
 
+    def test_copy_does_not_crash(self) -> None:
+        """Regression: ``copy()`` forwards ``auth_token`` via the parent client,
+        so ``AnthropicFoundry.__init__`` must accept it (passed through but
+        unused), mirroring ``AnthropicAWS``. Previously raised
+        ``TypeError: ... got an unexpected keyword argument 'auth_token'``.
+        """
+        client = AnthropicFoundry(api_key="test-key", resource="example-resource")
+        copied = client.copy()
+        assert isinstance(copied, AnthropicFoundry)
+        assert copied.api_key == "test-key"
+
+        copied_with_override = client.copy(timeout=30)
+        assert copied_with_override.timeout == 30
+
 
 class TestAsyncAnthropicFoundry:
     @pytest.mark.asyncio
@@ -104,3 +118,17 @@ class TestAsyncAnthropicFoundry:
 
         assert client.api_key == "env-key"
         assert "env-resource.services.ai.azure.com" in str(client.base_url)
+
+    def test_copy_does_not_crash(self) -> None:
+        """Regression: ``copy()`` forwards ``auth_token`` via the parent client,
+        so ``AsyncAnthropicFoundry.__init__`` must accept it (passed through
+        but unused), mirroring ``AsyncAnthropicAWS``. Previously raised
+        ``TypeError: ... got an unexpected keyword argument 'auth_token'``.
+        """
+        client = AsyncAnthropicFoundry(api_key="test-key", resource="example-resource")
+        copied = client.copy()
+        assert isinstance(copied, AsyncAnthropicFoundry)
+        assert copied.api_key == "test-key"
+
+        copied_with_override = client.copy(timeout=30)
+        assert copied_with_override.timeout == 30
