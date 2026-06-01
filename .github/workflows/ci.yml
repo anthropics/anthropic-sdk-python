@@ -58,7 +58,7 @@ jobs:
 
       - name: Get GitHub OIDC Token
         if: |-
-          github.repository == 'github.com/anthropics/anthropic-sdk-python-private' &&
+          github.repository == 'anthropics/anthropic-sdk-python-private' &&
           !startsWith(github.ref, 'refs/heads/stl/')
         id: github-oidc
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload tarball
         if: |-
-          github.repository == 'github.com/anthropics/anthropic-sdk-python-private' &&
+          github.repository == 'anthropics/anthropic-sdk-python-private' &&
           !startsWith(github.ref, 'refs/heads/stl/')
         env:
           URL: https://pkg.stainless.com/s
