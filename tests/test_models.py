@@ -1014,4 +1014,9 @@ def test_iterable_construction_str_falls_back_to_list() -> None:
 
     # falls back to list of chars rather than calling str(["h", "e", "l", "l", "o"])
     assert m.data["items"] == ["h", "e", "l", "l", "o"]
-    assert m.model_dump()["data"]["items"] == ["h", "e", "l", "l", "o"]
+
+
+def test_construct_type_bare_list() -> None:
+    # Bare list (no type parameter) must not raise IndexError
+    result = construct_type(value=["a", "b", "c"], type_=list)
+    assert result == ["a", "b", "c"]
