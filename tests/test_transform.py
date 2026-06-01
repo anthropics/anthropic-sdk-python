@@ -458,3 +458,12 @@ async def test_strips_notgiven(use_async: bool) -> None:
 async def test_strips_omit(use_async: bool) -> None:
     assert await transform({"foo_bar": "bar"}, Foo1, use_async) == {"fooBar": "bar"}
     assert await transform({"foo_bar": omit}, Foo1, use_async) == {}
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_transform_recursive_bare_dict_no_index_error(use_async: bool) -> None:
+    # A bare (unparameterized) `dict` annotation must not raise IndexError when
+    # get_args(dict) returns () and the code tries to index position [1].
+    result = await transform({"key": "value"}, dict, use_async)
+    assert result == {"key": "value"}
