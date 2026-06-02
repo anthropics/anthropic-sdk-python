@@ -536,6 +536,8 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             text = target.read_text()
         except ToolError:
             raise
+        except UnicodeDecodeError as e:
+            raise ToolError(f"read: {file_path}: file is not valid UTF-8 text; use bash to inspect binary files") from e
         except OSError as e:
             raise _fs_error("read", file_path, e) from e
         if not view_range:
