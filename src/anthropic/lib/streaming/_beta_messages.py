@@ -148,7 +148,7 @@ class BetaMessageStream(Generic[ResponseFormatT]):
 
 
 class BetaMessageStreamManager(Generic[ResponseFormatT]):
-    """Wrapper over MessageStream that is returned by `.stream()`.
+    """Wrapper over BetaMessageStream that is returned by `.stream()`.
 
     ```py
     with client.beta.messages.stream(...) as stream:
