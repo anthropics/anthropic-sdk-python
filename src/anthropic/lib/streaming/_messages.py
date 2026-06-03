@@ -360,7 +360,7 @@ def build_events(
                     )
                 )
         elif event.delta.type == "input_json_delta":
-            if content_block.type == "tool_use":
+            if content_block.type == "tool_use" or content_block.type == "server_tool_use":
                 events_to_fire.append(
                     build(
                         InputJsonEvent,
