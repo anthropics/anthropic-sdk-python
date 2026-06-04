@@ -80,11 +80,9 @@ def transform_schema(
     strict_schema: dict[str, Any] = {}
     json_schema = {**json_schema}
 
-    ref = json_schema.pop("$ref", None)
-    if ref is not None:
-        strict_schema["$ref"] = ref
-        return strict_schema
-
+    # $defs must be processed before the $ref early-return below, so that a
+    # root-level `{"$ref": "#/$defs/X", "$defs": {...}}` (valid JSON Schema,
+    # and what pydantic RootModel emits) keeps its definitions.
     defs = json_schema.pop("$defs", None)
     if defs is not None:
         strict_defs: dict[str, Any] = {}
@@ -92,6 +90,11 @@ def transform_schema(
 
         for name, schema in defs.items():
             strict_defs[name] = transform_schema(schema)
+
+    ref = json_schema.pop("$ref", None)
+    if ref is not None:
+        strict_schema["$ref"] = ref
+        return strict_schema
 
     type_: Optional[SupportedTypes] = json_schema.pop("type", None)
     any_of = json_schema.pop("anyOf", None)
