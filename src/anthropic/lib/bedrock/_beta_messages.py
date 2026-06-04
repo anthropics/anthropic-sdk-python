@@ -66,9 +66,6 @@ class MessagesWithRawResponse:
         self.create = _legacy_response.to_raw_response_wrapper(
             messages.create,
         )
-        self.count_tokens = _legacy_response.to_raw_response_wrapper(
-            messages.count_tokens,
-        )
 
 
 class AsyncMessagesWithRawResponse:
@@ -77,9 +74,6 @@ class AsyncMessagesWithRawResponse:
 
         self.create = _legacy_response.async_to_raw_response_wrapper(
             messages.create,
-        )
-        self.count_tokens = _legacy_response.async_to_raw_response_wrapper(
-            messages.count_tokens,
         )
 
 
@@ -90,9 +84,6 @@ class MessagesWithStreamingResponse:
         self.create = to_streamed_response_wrapper(
             messages.create,
         )
-        self.count_tokens = to_streamed_response_wrapper(
-            messages.count_tokens,
-        )
 
 
 class AsyncMessagesWithStreamingResponse:
@@ -101,7 +92,4 @@ class AsyncMessagesWithStreamingResponse:
 
         self.create = async_to_streamed_response_wrapper(
             messages.create,
-        )
-        self.count_tokens = async_to_streamed_response_wrapper(
-            messages.count_tokens,
         )
