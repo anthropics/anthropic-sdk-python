@@ -276,10 +276,18 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             if not self._check_and_compact():
                 response = self.generate_tool_call_response()
                 if response is None:
-                    log.debug("Tool call was not requested, exiting from tool runner loop.")
-                    return
-
-                if not self._messages_modified:
+                    # A `pause_turn` stop reason means the model paused a long-running
+                    # turn (e.g. while a server-side tool such as web_search or web_fetch
+                    # is still running). There are no client-side tool calls to satisfy,
+                    # but the turn isn't finished, so we resume it by sending the paused
+                    # assistant message back unchanged instead of exiting the loop.
+                    if message.stop_reason == "pause_turn":
+                        if not self._messages_modified:
+                            self.append_messages(message)
+                    else:
+                        log.debug("Tool call was not requested, exiting from tool runner loop.")
+                        return
+                elif not self._messages_modified:
                     self.append_messages(message, response)
 
             self._messages_modified = False
@@ -557,10 +565,18 @@ class BaseAsyncToolRunner(
             if not await self._check_and_compact():
                 response = await self.generate_tool_call_response()
                 if response is None:
-                    log.debug("Tool call was not requested, exiting from tool runner loop.")
-                    return
-
-                if not self._messages_modified:
+                    # A `pause_turn` stop reason means the model paused a long-running
+                    # turn (e.g. while a server-side tool such as web_search or web_fetch
+                    # is still running). There are no client-side tool calls to satisfy,
+                    # but the turn isn't finished, so we resume it by sending the paused
+                    # assistant message back unchanged instead of exiting the loop.
+                    if message.stop_reason == "pause_turn":
+                        if not self._messages_modified:
+                            self.append_messages(message)
+                    else:
+                        log.debug("Tool call was not requested, exiting from tool runner loop.")
+                        return
+                elif not self._messages_modified:
                     self.append_messages(message, response)
 
             self._messages_modified = False
