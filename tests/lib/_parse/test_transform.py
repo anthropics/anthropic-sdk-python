@@ -12,6 +12,34 @@ def test_ref_schema():
     assert result == snapshot({"$ref": "#/components/schemas/SomeSchema"})
 
 
+def test_ref_schema_with_defs():
+    # Pydantic v2 emits this shape for `RootModel` types: a root-level
+    # `$ref` with sibling `$defs` holding the referenced schema.
+    schema = {
+        "$ref": "#/$defs/Tier",
+        "$defs": {
+            "Tier": {
+                "type": "string",
+                "enum": ["free", "pro", "enterprise"],
+                "title": "Tier",
+            }
+        },
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "$defs": {
+                "Tier": {
+                    "type": "string",
+                    "enum": ["free", "pro", "enterprise"],
+                    "title": "Tier",
+                }
+            },
+            "$ref": "#/$defs/Tier",
+        }
+    )
+
+
 def test_anyof_schema():
     schema = {
         "anyOf": [
