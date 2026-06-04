@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from anthropic._models import FinalRequestOptions
 from anthropic._exceptions import AnthropicError
 from anthropic.lib.foundry import AnthropicFoundry, AsyncAnthropicFoundry
 
@@ -157,3 +158,43 @@ class TestAsyncAnthropicFoundry:
         assert copied._azure_ad_token_provider is async_token_provider
         assert copied.max_retries == 5
         assert copied.timeout == 10
+
+
+class TestFoundryDoesNotLeakAnthropicAPIKey:
+    """A stray ANTHROPIC_API_KEY in the environment must never be sent to the
+    Foundry endpoint as X-Api-Key, regardless of which auth mode is in use."""
+
+    def test_no_x_api_key_with_azure_ad_token_provider(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-should-not-leak")
+        client = AnthropicFoundry(resource="example-resource", azure_ad_token_provider=lambda: "azure-token")
+
+        options = client._prepare_options(FinalRequestOptions(method="post", url="/v1/messages"))
+        headers = client._build_request(options).headers
+
+        assert headers.get("x-api-key") is None
+        assert headers.get("authorization") == "Bearer azure-token"
+
+    def test_api_key_mode_sends_only_lowercase_api_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-should-not-leak")
+        client = AnthropicFoundry(api_key="foundry-key", resource="example-resource")
+
+        options = client._prepare_options(FinalRequestOptions(method="post", url="/v1/messages"))
+        headers = client._build_request(options).headers
+
+        assert headers.get("x-api-key") is None
+        assert headers.get("api-key") == "foundry-key"
+
+    @pytest.mark.asyncio
+    async def test_async_no_x_api_key_with_azure_ad_token_provider(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-should-not-leak")
+
+        async def token_provider() -> str:
+            return "azure-token"
+
+        client = AsyncAnthropicFoundry(resource="example-resource", azure_ad_token_provider=token_provider)
+
+        options = await client._prepare_options(FinalRequestOptions(method="post", url="/v1/messages"))
+        headers = client._build_request(options).headers
+
+        assert headers.get("x-api-key") is None
+        assert headers.get("authorization") == "Bearer azure-token"
