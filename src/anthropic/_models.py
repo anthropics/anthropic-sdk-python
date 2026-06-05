@@ -601,6 +601,14 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
     else:
         meta = tuple()
 
+    # Ensure type_ is always unwrapped from Annotated, even when metadata
+    # was explicitly passed (e.g. by _construct_field). Without this, a
+    # type like Annotated[Union[...], PropertyInfo(...)] would have
+    # get_origin() return Annotated instead of Union, causing the union
+    # branch to be skipped and the raw dict returned as-is.
+    if is_annotated_type(type_):
+        type_ = extract_type_arg(type_, 0)
+
     # we need to use the origin class for any types that are subscripted generics
     # e.g. Dict[str, object]
     origin = get_origin(type_) or type_
@@ -745,6 +753,11 @@ class DiscriminatorDetails:
 
 
 def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any, ...]) -> DiscriminatorDetails | None:
+    # Strip Annotated wrapper from the union type so that get_args(union)
+    # yields the individual union variants rather than (UnionType, metadata).
+    if is_annotated_type(union):
+        union = extract_type_arg(union, 0)
+
     cached = DISCRIMINATOR_CACHE.get(union)
     if cached is not None:
         return cached
