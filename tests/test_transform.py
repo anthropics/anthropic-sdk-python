@@ -397,6 +397,14 @@ async def test_dictionary_items(use_async: bool) -> None:
     assert await transform({"foo": {"foo_baz": "bar"}}, Dict[str, DictItems], use_async) == {"foo": {"fooBaz": "bar"}}
 
 
+@parametrize
+@pytest.mark.asyncio
+async def test_bare_dict_type(use_async: bool) -> None:
+    data = {"foo_bar": {"baz_qux": "value"}}
+
+    assert await transform(data, dict, use_async) is data
+
+
 class TypedDictIterableUnionStr(TypedDict):
     foo: Annotated[Union[str, Iterable[Baz8]], PropertyInfo(alias="FOO")]
 
