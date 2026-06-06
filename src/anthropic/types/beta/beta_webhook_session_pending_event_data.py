@@ -9,7 +9,7 @@ __all__ = ["BetaWebhookSessionPendingEventData"]
 
 class BetaWebhookSessionPendingEventData(BaseModel):
     id: str
-    """ID of the resource that triggered the event."""
+    """ID of the session that triggered the event."""
 
     organization_id: str
 

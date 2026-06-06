@@ -16,6 +16,7 @@ class BetaAdvisorToolResultErrorParam(TypedDict, total=False):
             "overloaded",
             "unavailable",
             "execution_time_exceeded",
+            "model_not_found",
         ]
     ]
 

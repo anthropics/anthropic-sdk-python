@@ -94,9 +94,9 @@ class Agents(SyncAPIResource):
               e.g. `claude-opus-4-6`, or a `model_config` object for additional configuration
               control
 
-          name: Human-readable name for the agent. 1-256 characters.
+          name: Human-readable name for the agent.
 
-          description: Description of what the agent does. Up to 2048 characters.
+          description: Description of what the agent does.
 
           mcp_servers: MCP servers this agent connects to. Maximum 20. Names must be unique within the
               array.
@@ -107,9 +107,9 @@ class Agents(SyncAPIResource):
           multiagent: A coordinator topology: the session's primary thread orchestrates work by
               spawning session threads, each running an agent drawn from the `agents` roster.
 
-          skills: Skills available to the agent. Maximum 20.
+          skills: Skills available to the agent.
 
-          system: System prompt for the agent. Up to 100,000 characters.
+          system: System prompt for the agent.
 
           tools: Tool configurations available to the agent. Maximum of 128 tools across all
               toolsets allowed.
@@ -243,8 +243,7 @@ class Agents(SyncAPIResource):
               value from a create or retrieve response. The request fails if this does not
               match the server's current version.
 
-          description: Description. Up to 2048 characters. Omit to preserve; send empty string or null
-              to clear.
+          description: Description. Omit to preserve; send empty string or null to clear.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or null to
               clear. Names must be unique. Maximum 20.
@@ -261,13 +260,11 @@ class Agents(SyncAPIResource):
           multiagent: A coordinator topology: the session's primary thread orchestrates work by
               spawning session threads, each running an agent drawn from the `agents` roster.
 
-          name: Human-readable name. 1-256 characters. Omit to preserve. Cannot be cleared.
+          name: Human-readable name. Must be non-empty. Omit to preserve. Cannot be cleared.
 
           skills: Skills. Full replacement. Omit to preserve; send empty array or null to clear.
-              Maximum 20.
 
-          system: System prompt. Up to 100,000 characters. Omit to preserve; send empty string or
-              null to clear.
+          system: System prompt. Omit to preserve; send empty string or null to clear.
 
           tools: Tool configurations available to the agent. Full replacement. Omit to preserve;
               send empty array or null to clear. Maximum of 128 tools across all toolsets
@@ -494,9 +491,9 @@ class AsyncAgents(AsyncAPIResource):
               e.g. `claude-opus-4-6`, or a `model_config` object for additional configuration
               control
 
-          name: Human-readable name for the agent. 1-256 characters.
+          name: Human-readable name for the agent.
 
-          description: Description of what the agent does. Up to 2048 characters.
+          description: Description of what the agent does.
 
           mcp_servers: MCP servers this agent connects to. Maximum 20. Names must be unique within the
               array.
@@ -507,9 +504,9 @@ class AsyncAgents(AsyncAPIResource):
           multiagent: A coordinator topology: the session's primary thread orchestrates work by
               spawning session threads, each running an agent drawn from the `agents` roster.
 
-          skills: Skills available to the agent. Maximum 20.
+          skills: Skills available to the agent.
 
-          system: System prompt for the agent. Up to 100,000 characters.
+          system: System prompt for the agent.
 
           tools: Tool configurations available to the agent. Maximum of 128 tools across all
               toolsets allowed.
@@ -643,8 +640,7 @@ class AsyncAgents(AsyncAPIResource):
               value from a create or retrieve response. The request fails if this does not
               match the server's current version.
 
-          description: Description. Up to 2048 characters. Omit to preserve; send empty string or null
-              to clear.
+          description: Description. Omit to preserve; send empty string or null to clear.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or null to
               clear. Names must be unique. Maximum 20.
@@ -661,13 +657,11 @@ class AsyncAgents(AsyncAPIResource):
           multiagent: A coordinator topology: the session's primary thread orchestrates work by
               spawning session threads, each running an agent drawn from the `agents` roster.
 
-          name: Human-readable name. 1-256 characters. Omit to preserve. Cannot be cleared.
+          name: Human-readable name. Must be non-empty. Omit to preserve. Cannot be cleared.
 
           skills: Skills. Full replacement. Omit to preserve; send empty array or null to clear.
-              Maximum 20.
 
-          system: System prompt. Up to 100,000 characters. Omit to preserve; send empty string or
-              null to clear.
+          system: System prompt. Omit to preserve; send empty string or null to clear.
 
           tools: Tool configurations available to the agent. Full replacement. Omit to preserve;
               send empty array or null to clear. Maximum of 128 tools across all toolsets

@@ -15,6 +15,7 @@ class BetaAdvisorToolResultError(BaseModel):
         "overloaded",
         "unavailable",
         "execution_time_exceeded",
+        "model_not_found",
     ]
 
     type: Literal["advisor_tool_result_error"]
