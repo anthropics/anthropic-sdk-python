@@ -172,7 +172,7 @@ class Anthropic(SyncAPIClient):
         _token_cache: TokenCache | None | NotGiven = not_given,
     ) -> None:
         """Construct a new synchronous Anthropic client instance.
-        
+
         Credentials are resolved in the following order (first match wins):
 
         1. Explicit constructor arguments — ``api_key=``, ``auth_token=``,
@@ -208,8 +208,8 @@ class Anthropic(SyncAPIClient):
             or profile is not None
         )
         if not has_explicit_credential:
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
+            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
         self.api_key = api_key
         self.auth_token = auth_token
         # --- end credentials support ---
@@ -610,8 +610,8 @@ class AsyncAnthropic(AsyncAPIClient):
             or profile is not None
         )
         if not has_explicit_credential:
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
+            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
         self.api_key = api_key
         self.auth_token = auth_token
         # --- end credentials support ---
