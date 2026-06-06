@@ -9,7 +9,7 @@ __all__ = ["BetaWebhookVaultCredentialRefreshFailedEventData"]
 
 class BetaWebhookVaultCredentialRefreshFailedEventData(BaseModel):
     id: str
-    """ID of the resource that triggered the event."""
+    """ID of the vault credential that triggered the event."""
 
     organization_id: str
 

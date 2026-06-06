@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from .tool_search_tool_result_error_code import ToolSearchToolResultErrorCode
@@ -13,3 +14,5 @@ class ToolSearchToolResultErrorParam(TypedDict, total=False):
     error_code: Required[ToolSearchToolResultErrorCode]
 
     type: Required[Literal["tool_search_tool_result_error"]]
+
+    error_message: Optional[str]
