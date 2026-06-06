@@ -30,10 +30,10 @@ class AgentCreateParams(TypedDict, total=False):
     """
 
     name: Required[str]
-    """Human-readable name for the agent. 1-256 characters."""
+    """Human-readable name for the agent."""
 
     description: Optional[str]
-    """Description of what the agent does. Up to 2048 characters."""
+    """Description of what the agent does."""
 
     mcp_servers: Iterable[BetaManagedAgentsURLMCPServerParams]
     """MCP servers this agent connects to.
@@ -54,10 +54,10 @@ class AgentCreateParams(TypedDict, total=False):
     """
 
     skills: Iterable[BetaManagedAgentsSkillParams]
-    """Skills available to the agent. Maximum 20."""
+    """Skills available to the agent."""
 
     system: Optional[str]
-    """System prompt for the agent. Up to 100,000 characters."""
+    """System prompt for the agent."""
 
     tools: Iterable[Tool]
     """Tool configurations available to the agent.

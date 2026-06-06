@@ -50,7 +50,7 @@ class SessionListParams(TypedDict, total=False):
     """
 
     page: str
-    """Opaque pagination cursor from a previous response's next_page."""
+    """Opaque pagination cursor from a previous response."""
 
     statuses: List[Literal["rescheduling", "running", "idle", "terminated"]]
     """Filter by session status.
