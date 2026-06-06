@@ -3111,6 +3111,35 @@ class TestCredentialPrecedence:
         shadow_records = [r for r in caplog.records if "takes precedence" in r.message]
         assert len(shadow_records) == 1
 
+    def test_empty_api_key_env_treated_as_unset(
+        self, clean_env: pytest.MonkeyPatch
+    ) -> None:
+        """``ANTHROPIC_API_KEY=""`` (a defaulted-but-empty CI variable) is
+        treated as unset, not as a real credential."""
+        clean_env.setenv("ANTHROPIC_API_KEY", "")
+        client = Anthropic()
+        assert client.api_key is None
+
+    def test_empty_auth_token_env_treated_as_unset(
+        self, clean_env: pytest.MonkeyPatch
+    ) -> None:
+        """``ANTHROPIC_AUTH_TOKEN=""`` (a defaulted-but-empty CI variable) is
+        treated as unset, not as a real credential."""
+        clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
+        client = Anthropic()
+        assert client.auth_token is None
+
+    def test_empty_api_key_and_auth_token_env_treated_as_unset(
+        self, clean_env: pytest.MonkeyPatch
+    ) -> None:
+        """Both ``ANTHROPIC_API_KEY=""`` and ``ANTHROPIC_AUTH_TOKEN=""`` are
+        treated as unset, so no static credential shadows auto-discovery."""
+        clean_env.setenv("ANTHROPIC_API_KEY", "")
+        clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
+        client = Anthropic()
+        assert client.api_key is None
+        assert client.auth_token is None
+
 
 @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
 class TestDanglingActiveConfig:
