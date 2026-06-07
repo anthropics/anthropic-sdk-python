@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.107.1 (2026-06-07)
+
+Full Changelog: [v0.107.0...v0.107.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.107.0...v0.107.1)
+
+### Bug Fixes
+
+* **foundry:** send x-api-key header for API-key auth ([#62](https://github.com/anthropics/anthropic-sdk-python/issues/62)) ([1338141](https://github.com/anthropics/anthropic-sdk-python/commit/13381413d22ad14d85e66836c67cc8a13bd2b7bd)), closes [#1661](https://github.com/anthropics/anthropic-sdk-python/issues/1661)
+
 ## 0.107.0 (2026-06-06)
 
 Full Changelog: [v0.106.0...v0.107.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.106.0...v0.107.0)
