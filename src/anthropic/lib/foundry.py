@@ -272,8 +272,14 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
             if headers.get("Authorization") is None:
                 headers["Authorization"] = f"Bearer {azure_ad_token}"
         elif self.api_key is not None:
+            # In this branch `self.api_key` is always the Foundry key (explicit or
+            # ANTHROPIC_FOUNDRY_API_KEY) — with an Azure AD token provider configured
+            # the branch above wins, so an environment `ANTHROPIC_API_KEY` can never
+            # be sent here. The endpoint authenticates with `x-api-key`; `api-key` is
+            # also sent for backwards compatibility.
+            if headers.get("x-api-key") is None:
+                headers["x-api-key"] = self.api_key
             if headers.get("api-key") is None:
-                assert self.api_key is not None
                 headers["api-key"] = self.api_key
         else:
             # should never be hit
@@ -284,9 +290,9 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        # Auth is attached per-request in `_prepare_options` (an `api-key` header for
-        # API-key auth, or a bearer `Authorization` header for the Azure AD token
-        # provider). Emitting nothing here stops the base client from sending an
+        # Auth is attached per-request in `_prepare_options` (`x-api-key`/`api-key`
+        # headers for API-key auth, or a bearer `Authorization` header for the Azure AD
+        # token provider). Emitting nothing here stops the base client from sending an
         # `X-Api-Key` derived from `self.api_key`: when only an Azure AD token
         # provider is configured, `self.api_key` can be populated from an
         # `ANTHROPIC_API_KEY` in the environment, which must not be sent to the
@@ -487,7 +493,10 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
             if headers.get("Authorization") is None:
                 headers["Authorization"] = f"Bearer {azure_ad_token}"
         elif self.api_key is not None:
-            assert self.api_key is not None
+            # See AnthropicFoundry._prepare_options: `self.api_key` here is always the
+            # Foundry key, never an environment `ANTHROPIC_API_KEY`.
+            if headers.get("x-api-key") is None:
+                headers["x-api-key"] = self.api_key
             if headers.get("api-key") is None:
                 headers["api-key"] = self.api_key
         else:
