@@ -174,15 +174,16 @@ class TestFoundryDoesNotLeakAnthropicAPIKey:
         assert headers.get("x-api-key") is None
         assert headers.get("authorization") == "Bearer azure-token"
 
-    def test_api_key_mode_sends_only_lowercase_api_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_api_key_mode_sends_foundry_key_as_x_api_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-should-not-leak")
         client = AnthropicFoundry(api_key="foundry-key", resource="example-resource")
 
         options = client._prepare_options(FinalRequestOptions(method="post", url="/v1/messages"))
         headers = client._build_request(options).headers
 
-        assert headers.get("x-api-key") is None
+        assert headers.get("x-api-key") == "foundry-key"
         assert headers.get("api-key") == "foundry-key"
+        assert "sk-ant-should-not-leak" not in headers.values()
 
     @pytest.mark.asyncio
     async def test_async_no_x_api_key_with_azure_ad_token_provider(self, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -198,3 +199,15 @@ class TestFoundryDoesNotLeakAnthropicAPIKey:
 
         assert headers.get("x-api-key") is None
         assert headers.get("authorization") == "Bearer azure-token"
+
+    @pytest.mark.asyncio
+    async def test_async_api_key_mode_sends_foundry_key_as_x_api_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-should-not-leak")
+        client = AsyncAnthropicFoundry(api_key="foundry-key", resource="example-resource")
+
+        options = await client._prepare_options(FinalRequestOptions(method="post", url="/v1/messages"))
+        headers = client._build_request(options).headers
+
+        assert headers.get("x-api-key") == "foundry-key"
+        assert headers.get("api-key") == "foundry-key"
+        assert "sk-ant-should-not-leak" not in headers.values()
