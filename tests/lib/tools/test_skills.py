@@ -231,6 +231,19 @@ def test_parse_skill_name_from_frontmatter_missing() -> None:
     assert _parse_skill_name_from_frontmatter(b"no front matter here") is None
 
 
+def test_parse_skill_name_ignores_name_in_body_without_frontmatter() -> None:
+    # A ``name:`` line in the body (e.g. a code example) must not be picked up
+    # when there is no front-matter block. Regression for PR #1604 review.
+    content = b"# Heading\n\nExample config:\n\n    name: not-the-skill\n"
+    assert _parse_skill_name_from_frontmatter(content) is None
+
+
+def test_parse_skill_name_only_reads_within_frontmatter_block() -> None:
+    # ``name:`` inside the front-matter wins; a later body occurrence is ignored.
+    content = b"---\nname: real-skill\n---\n\nSee `name: decoy` in this example.\n"
+    assert _parse_skill_name_from_frontmatter(content) == "real-skill"
+
+
 def test_normalize_bare_paths_prefixed_from_skill_md() -> None:
     files = [
         ("SKILL.md", _SKILL_MD_BYTES, "text/markdown"),

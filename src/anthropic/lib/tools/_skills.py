@@ -28,19 +28,29 @@ if TYPE_CHECKING:
 
 __all__ = ["download_session_skills", "normalize_skill_upload_paths"]
 
-# Matches ``name: <value>`` inside SKILL.md YAML front-matter.
-_SKILL_NAME_RE = re.compile(r"^\s*name:\s*(.+?)\s*$", re.MULTILINE)
+# Matches the leading ``---`` ... ``---`` YAML front-matter block. An optional
+# UTF-8 BOM and surrounding whitespace are tolerated before the opening fence.
+_FRONTMATTER_RE = re.compile(
+    r"\A﻿?[ \t]*\r?\n?---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|\Z)",
+    re.DOTALL,
+)
+# Matches ``name: <value>`` within the front-matter block only.
+_SKILL_NAME_RE = re.compile(r"^[ \t]*name:[ \t]*(.+?)[ \t]*$", re.MULTILINE)
 
 
 def _parse_skill_name_from_frontmatter(content: bytes) -> str | None:
     """Return the ``name:`` value from a SKILL.md YAML front-matter block.
 
-    Looks for the first ``name: <value>`` line in the file; front-matter
-    delimiters (``---``) are not required. Returns ``None`` when no ``name:``
-    line is found.
+    The match is scoped to the leading ``---`` ... ``---`` front-matter block
+    so that a ``name:`` line appearing elsewhere in the document (e.g. inside a
+    code example or prose body) is never mistaken for the skill name. Returns
+    ``None`` when there is no front-matter block or it has no ``name:`` line.
     """
     text = content.decode("utf-8", errors="replace")
-    m = _SKILL_NAME_RE.search(text)
+    block = _FRONTMATTER_RE.match(text)
+    if block is None:
+        return None
+    m = _SKILL_NAME_RE.search(block.group(1))
     return m.group(1) if m else None
 
 
