@@ -20,6 +20,20 @@ async_client = AsyncAnthropicBedrock(
     aws_access_key="example-access-key",
     aws_secret_key="example-secret-key",
 )
+optimized_sync_client = AnthropicBedrock(
+    aws_region="us-east-1",
+    aws_access_key="example-access-key",
+    aws_secret_key="example-secret-key",
+    performance_config_latency="optimized",
+)
+optimized_async_client = AsyncAnthropicBedrock(
+    aws_region="us-east-1",
+    aws_access_key="example-access-key",
+    aws_secret_key="example-secret-key",
+    performance_config_latency="optimized",
+)
+
+BEDROCK_PERFORMANCE_CONFIG_LATENCY_HEADER = "X-Amzn-Bedrock-PerformanceConfig-Latency"
 
 
 class MockRequestCall(Protocol):
@@ -164,6 +178,95 @@ def test_application_inference_profile(respx_mock: MockRouter) -> None:
         calls[1].request.url
         == "https://bedrock-runtime.us-east-1.amazonaws.com/model/arn:aws:bedrock:us-east-1:123456789012:application-inference-profile%2Fjf2sje1c0jnb/invoke"
     )
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_performance_config_latency_unset_by_default(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx.Response(200, json={"foo": "bar"}),
+    )
+
+    sync_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert BEDROCK_PERFORMANCE_CONFIG_LATENCY_HEADER not in calls[0].request.headers
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_performance_config_latency_optimized(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx.Response(200, json={"foo": "bar"}),
+    )
+
+    optimized_sync_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert calls[0].request.headers[BEDROCK_PERFORMANCE_CONFIG_LATENCY_HEADER] == "optimized"
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_performance_config_latency_optimized_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx.Response(200, json={"foo": "bar"}),
+    )
+
+    await optimized_async_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert calls[0].request.headers[BEDROCK_PERFORMANCE_CONFIG_LATENCY_HEADER] == "optimized"
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_performance_config_latency_optimized_streaming(respx_mock: MockRouter) -> None:
+    respx_mock.post(
+        re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke-with-response-stream")
+    ).mock(
+        return_value=httpx.Response(200, content=b""),
+    )
+
+    stream = optimized_sync_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        stream=True,
+    )
+    stream.response.close()
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert (
+        calls[0].request.url
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke-with-response-stream"
+    )
+    assert calls[0].request.headers[BEDROCK_PERFORMANCE_CONFIG_LATENCY_HEADER] == "optimized"
+
+
+def test_copy_preserves_performance_config_latency() -> None:
+    copied = optimized_sync_client.copy()
+    assert copied.performance_config_latency == "optimized"
+
+    cleared = optimized_sync_client.copy(performance_config_latency=None)
+    assert cleared.performance_config_latency is None
 
 
 sync_api_key_client = AnthropicBedrock(
