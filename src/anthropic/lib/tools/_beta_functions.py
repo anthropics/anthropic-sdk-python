@@ -145,7 +145,10 @@ class BaseFunctionTool(Generic[CallableT]):
         input_schema: InputSchema | type[BaseModel] | None = None,
         defer_loading: bool | None = None,
         cache_control: BetaCacheControlEphemeralParam | None = None,
-        allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+        allowed_callers: list[
+            Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+        ]
+        | None = None,
         eager_input_streaming: bool | None = None,
         input_examples: Iterable[dict[str, object]] | None = None,
         strict: bool | None = None,
@@ -349,7 +352,10 @@ def beta_tool(
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
-    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    allowed_callers: list[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+    ]
+    | None = None,
     eager_input_streaming: bool | None = None,
     input_examples: Iterable[dict[str, object]] | None = None,
     strict: bool | None = None,
@@ -364,7 +370,10 @@ def beta_tool(
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
-    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    allowed_callers: list[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+    ]
+    | None = None,
     eager_input_streaming: bool | None = None,
     input_examples: Iterable[dict[str, object]] | None = None,
     strict: bool | None = None,
@@ -379,7 +388,10 @@ def beta_tool(
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
-    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    allowed_callers: list[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+    ]
+    | None = None,
     eager_input_streaming: bool | None = None,
     input_examples: Iterable[dict[str, object]] | None = None,
     strict: bool | None = None,
@@ -465,7 +477,10 @@ def beta_async_tool(
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
-    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    allowed_callers: list[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+    ]
+    | None = None,
     eager_input_streaming: bool | None = None,
     input_examples: Iterable[dict[str, object]] | None = None,
     strict: bool | None = None,
@@ -480,7 +495,10 @@ def beta_async_tool(
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
-    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    allowed_callers: list[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+    ]
+    | None = None,
     eager_input_streaming: bool | None = None,
     input_examples: Iterable[dict[str, object]] | None = None,
     strict: bool | None = None,
@@ -495,7 +513,10 @@ def beta_async_tool(
     input_schema: InputSchema | type[BaseModel] | None = None,
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
-    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    allowed_callers: list[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+    ]
+    | None = None,
     eager_input_streaming: bool | None = None,
     input_examples: Iterable[dict[str, object]] | None = None,
     strict: bool | None = None,

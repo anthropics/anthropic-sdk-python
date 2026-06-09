@@ -332,7 +332,10 @@ def mcp_tool(
     *,
     cache_control: BetaCacheControlEphemeralParam | None = None,
     defer_loading: bool | None = None,
-    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    allowed_callers: list[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+    ]
+    | None = None,
     eager_input_streaming: bool | None = None,
     input_examples: Iterable[dict[str, object]] | None = None,
     strict: bool | None = None,
@@ -391,7 +394,10 @@ def async_mcp_tool(
     *,
     cache_control: BetaCacheControlEphemeralParam | None = None,
     defer_loading: bool | None = None,
-    allowed_callers: list[Literal["direct", "code_execution_20250825", "code_execution_20260120"]] | None = None,
+    allowed_callers: list[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+    ]
+    | None = None,
     eager_input_streaming: bool | None = None,
     input_examples: Iterable[dict[str, object]] | None = None,
     strict: bool | None = None,

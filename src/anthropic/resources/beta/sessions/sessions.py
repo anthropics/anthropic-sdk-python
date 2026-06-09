@@ -291,6 +291,7 @@ class Sessions(SyncAPIResource):
         created_at_gte: Union[str, datetime] | Omit = omit,
         created_at_lt: Union[str, datetime] | Omit = omit,
         created_at_lte: Union[str, datetime] | Omit = omit,
+        deployment_id: str | Omit = omit,
         include_archived: bool | Omit = omit,
         limit: int | Omit = omit,
         memory_store_id: str | Omit = omit,
@@ -320,6 +321,8 @@ class Sessions(SyncAPIResource):
           created_at_lt: Return sessions created before this time (exclusive).
 
           created_at_lte: Return sessions created at or before this time (inclusive).
+
+          deployment_id: Filter sessions created by this deployment ID.
 
           include_archived: When true, includes archived sessions. Default: false (exclude archived).
 
@@ -373,6 +376,7 @@ class Sessions(SyncAPIResource):
                         "created_at_gte": created_at_gte,
                         "created_at_lt": created_at_lt,
                         "created_at_lte": created_at_lte,
+                        "deployment_id": deployment_id,
                         "include_archived": include_archived,
                         "limit": limit,
                         "memory_store_id": memory_store_id,
@@ -718,6 +722,7 @@ class AsyncSessions(AsyncAPIResource):
         created_at_gte: Union[str, datetime] | Omit = omit,
         created_at_lt: Union[str, datetime] | Omit = omit,
         created_at_lte: Union[str, datetime] | Omit = omit,
+        deployment_id: str | Omit = omit,
         include_archived: bool | Omit = omit,
         limit: int | Omit = omit,
         memory_store_id: str | Omit = omit,
@@ -747,6 +752,8 @@ class AsyncSessions(AsyncAPIResource):
           created_at_lt: Return sessions created before this time (exclusive).
 
           created_at_lte: Return sessions created at or before this time (inclusive).
+
+          deployment_id: Filter sessions created by this deployment ID.
 
           include_archived: When true, includes archived sessions. Default: false (exclude archived).
 
@@ -800,6 +807,7 @@ class AsyncSessions(AsyncAPIResource):
                         "created_at_gte": created_at_gte,
                         "created_at_lt": created_at_lt,
                         "created_at_lte": created_at_lte,
+                        "deployment_id": deployment_id,
                         "include_archived": include_archived,
                         "limit": limit,
                         "memory_store_id": memory_store_id,

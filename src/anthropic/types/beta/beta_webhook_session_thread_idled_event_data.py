@@ -13,6 +13,9 @@ class BetaWebhookSessionThreadIdledEventData(BaseModel):
 
     organization_id: str
 
+    session_thread_id: str
+    """ID of the session thread this event refers to."""
+
     type: Literal["session.thread_idled"]
 
     workspace_id: str
