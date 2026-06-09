@@ -41,6 +41,9 @@ from .beta_managed_agents_static_bearer_create_params import (
 from .beta_managed_agents_static_bearer_update_params import (
     BetaManagedAgentsStaticBearerUpdateParams as BetaManagedAgentsStaticBearerUpdateParams,
 )
+from .beta_managed_agents_credential_networking_params import (
+    BetaManagedAgentsCredentialNetworkingParams as BetaManagedAgentsCredentialNetworkingParams,
+)
 from .beta_managed_agents_credential_validation_status import (
     BetaManagedAgentsCredentialValidationStatus as BetaManagedAgentsCredentialValidationStatus,
 )
@@ -62,12 +65,33 @@ from .beta_managed_agents_token_endpoint_auth_none_response import (
 from .beta_managed_agents_token_endpoint_auth_post_response import (
     BetaManagedAgentsTokenEndpointAuthPostResponse as BetaManagedAgentsTokenEndpointAuthPostResponse,
 )
+from .beta_managed_agents_environment_variable_auth_response import (
+    BetaManagedAgentsEnvironmentVariableAuthResponse as BetaManagedAgentsEnvironmentVariableAuthResponse,
+)
+from .beta_managed_agents_environment_variable_create_params import (
+    BetaManagedAgentsEnvironmentVariableCreateParams as BetaManagedAgentsEnvironmentVariableCreateParams,
+)
+from .beta_managed_agents_environment_variable_update_params import (
+    BetaManagedAgentsEnvironmentVariableUpdateParams as BetaManagedAgentsEnvironmentVariableUpdateParams,
+)
 from .beta_managed_agents_token_endpoint_auth_basic_response import (
     BetaManagedAgentsTokenEndpointAuthBasicResponse as BetaManagedAgentsTokenEndpointAuthBasicResponse,
+)
+from .beta_managed_agents_limited_credential_networking_params import (
+    BetaManagedAgentsLimitedCredentialNetworkingParams as BetaManagedAgentsLimitedCredentialNetworkingParams,
 )
 from .beta_managed_agents_token_endpoint_auth_post_update_param import (
     BetaManagedAgentsTokenEndpointAuthPostUpdateParam as BetaManagedAgentsTokenEndpointAuthPostUpdateParam,
 )
+from .beta_managed_agents_limited_credential_networking_response import (
+    BetaManagedAgentsLimitedCredentialNetworkingResponse as BetaManagedAgentsLimitedCredentialNetworkingResponse,
+)
 from .beta_managed_agents_token_endpoint_auth_basic_update_param import (
     BetaManagedAgentsTokenEndpointAuthBasicUpdateParam as BetaManagedAgentsTokenEndpointAuthBasicUpdateParam,
+)
+from .beta_managed_agents_unrestricted_credential_networking_params import (
+    BetaManagedAgentsUnrestrictedCredentialNetworkingParams as BetaManagedAgentsUnrestrictedCredentialNetworkingParams,
+)
+from .beta_managed_agents_unrestricted_credential_networking_response import (
+    BetaManagedAgentsUnrestrictedCredentialNetworkingResponse as BetaManagedAgentsUnrestrictedCredentialNetworkingResponse,
 )

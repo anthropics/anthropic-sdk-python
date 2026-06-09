@@ -64,3 +64,9 @@ class BetaManagedAgentsSession(BaseModel):
 
     Empty when no vaults were supplied.
     """
+
+    deployment_id: Optional[str] = None
+    """Deployment ID when the session was created from a deployment reference.
+
+    Null otherwise.
+    """

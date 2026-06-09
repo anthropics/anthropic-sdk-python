@@ -21,6 +21,14 @@ from .models import (
 from .webhooks import Webhooks, AsyncWebhooks
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
+from .deployments import (
+    Deployments,
+    AsyncDeployments,
+    DeploymentsWithRawResponse,
+    AsyncDeploymentsWithRawResponse,
+    DeploymentsWithStreamingResponse,
+    AsyncDeploymentsWithStreamingResponse,
+)
 from .agents.agents import (
     Agents,
     AsyncAgents,
@@ -52,6 +60,14 @@ from .vaults.vaults import (
     AsyncVaultsWithRawResponse,
     VaultsWithStreamingResponse,
     AsyncVaultsWithStreamingResponse,
+)
+from .deployment_runs import (
+    DeploymentRuns,
+    AsyncDeploymentRuns,
+    DeploymentRunsWithRawResponse,
+    AsyncDeploymentRunsWithRawResponse,
+    DeploymentRunsWithStreamingResponse,
+    AsyncDeploymentRunsWithStreamingResponse,
 )
 from .messages.messages import (
     Messages,
@@ -109,6 +125,14 @@ class Beta(SyncAPIResource):
     @cached_property
     def sessions(self) -> Sessions:
         return Sessions(self._client)
+
+    @cached_property
+    def deployments(self) -> Deployments:
+        return Deployments(self._client)
+
+    @cached_property
+    def deployment_runs(self) -> DeploymentRuns:
+        return DeploymentRuns(self._client)
 
     @cached_property
     def vaults(self) -> Vaults:
@@ -174,6 +198,14 @@ class AsyncBeta(AsyncAPIResource):
     @cached_property
     def sessions(self) -> AsyncSessions:
         return AsyncSessions(self._client)
+
+    @cached_property
+    def deployments(self) -> AsyncDeployments:
+        return AsyncDeployments(self._client)
+
+    @cached_property
+    def deployment_runs(self) -> AsyncDeploymentRuns:
+        return AsyncDeploymentRuns(self._client)
 
     @cached_property
     def vaults(self) -> AsyncVaults:
@@ -244,6 +276,14 @@ class BetaWithRawResponse:
         return SessionsWithRawResponse(self._beta.sessions)
 
     @cached_property
+    def deployments(self) -> DeploymentsWithRawResponse:
+        return DeploymentsWithRawResponse(self._beta.deployments)
+
+    @cached_property
+    def deployment_runs(self) -> DeploymentRunsWithRawResponse:
+        return DeploymentRunsWithRawResponse(self._beta.deployment_runs)
+
+    @cached_property
     def vaults(self) -> VaultsWithRawResponse:
         return VaultsWithRawResponse(self._beta.vaults)
 
@@ -287,6 +327,14 @@ class AsyncBetaWithRawResponse:
     @cached_property
     def sessions(self) -> AsyncSessionsWithRawResponse:
         return AsyncSessionsWithRawResponse(self._beta.sessions)
+
+    @cached_property
+    def deployments(self) -> AsyncDeploymentsWithRawResponse:
+        return AsyncDeploymentsWithRawResponse(self._beta.deployments)
+
+    @cached_property
+    def deployment_runs(self) -> AsyncDeploymentRunsWithRawResponse:
+        return AsyncDeploymentRunsWithRawResponse(self._beta.deployment_runs)
 
     @cached_property
     def vaults(self) -> AsyncVaultsWithRawResponse:
@@ -334,6 +382,14 @@ class BetaWithStreamingResponse:
         return SessionsWithStreamingResponse(self._beta.sessions)
 
     @cached_property
+    def deployments(self) -> DeploymentsWithStreamingResponse:
+        return DeploymentsWithStreamingResponse(self._beta.deployments)
+
+    @cached_property
+    def deployment_runs(self) -> DeploymentRunsWithStreamingResponse:
+        return DeploymentRunsWithStreamingResponse(self._beta.deployment_runs)
+
+    @cached_property
     def vaults(self) -> VaultsWithStreamingResponse:
         return VaultsWithStreamingResponse(self._beta.vaults)
 
@@ -377,6 +433,14 @@ class AsyncBetaWithStreamingResponse:
     @cached_property
     def sessions(self) -> AsyncSessionsWithStreamingResponse:
         return AsyncSessionsWithStreamingResponse(self._beta.sessions)
+
+    @cached_property
+    def deployments(self) -> AsyncDeploymentsWithStreamingResponse:
+        return AsyncDeploymentsWithStreamingResponse(self._beta.deployments)
+
+    @cached_property
+    def deployment_runs(self) -> AsyncDeploymentRunsWithStreamingResponse:
+        return AsyncDeploymentRunsWithStreamingResponse(self._beta.deployment_runs)
 
     @cached_property
     def vaults(self) -> AsyncVaultsWithStreamingResponse:

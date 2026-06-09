@@ -6,6 +6,7 @@ from typing import Union
 from typing_extensions import TypeAlias
 
 from .beta_managed_agents_user_message_event_params import BetaManagedAgentsUserMessageEventParams
+from .beta_managed_agents_system_message_event_params import BetaManagedAgentsSystemMessageEventParams
 from .beta_managed_agents_user_interrupt_event_params import BetaManagedAgentsUserInterruptEventParams
 from .beta_managed_agents_user_tool_result_event_params import BetaManagedAgentsUserToolResultEventParams
 from .beta_managed_agents_user_define_outcome_event_params import BetaManagedAgentsUserDefineOutcomeEventParams
@@ -21,4 +22,5 @@ BetaManagedAgentsEventParams: TypeAlias = Union[
     BetaManagedAgentsUserCustomToolResultEventParams,
     BetaManagedAgentsUserDefineOutcomeEventParams,
     BetaManagedAgentsUserToolResultEventParams,
+    BetaManagedAgentsSystemMessageEventParams,
 ]

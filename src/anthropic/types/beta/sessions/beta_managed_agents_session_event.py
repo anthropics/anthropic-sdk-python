@@ -10,6 +10,7 @@ from .beta_managed_agents_session_error_event import BetaManagedAgentsSessionErr
 from .beta_managed_agents_agent_thinking_event import BetaManagedAgentsAgentThinkingEvent
 from .beta_managed_agents_agent_tool_use_event import BetaManagedAgentsAgentToolUseEvent
 from .beta_managed_agents_user_interrupt_event import BetaManagedAgentsUserInterruptEvent
+from ..beta_managed_agents_system_message_event import BetaManagedAgentsSystemMessageEvent
 from .beta_managed_agents_session_deleted_event import BetaManagedAgentsSessionDeletedEvent
 from ..beta_managed_agents_session_updated_event import BetaManagedAgentsSessionUpdatedEvent
 from ..beta_managed_agents_user_tool_result_event import BetaManagedAgentsUserToolResultEvent
@@ -81,6 +82,7 @@ BetaManagedAgentsSessionEvent: TypeAlias = Annotated[
         BetaManagedAgentsUserToolResultEvent,
         BetaManagedAgentsSessionThreadStatusRescheduledEvent,
         BetaManagedAgentsSessionUpdatedEvent,
+        BetaManagedAgentsSystemMessageEvent,
     ],
     PropertyInfo(discriminator="type"),
 ]
