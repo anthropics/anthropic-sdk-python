@@ -1,9 +1,12 @@
+import os
 import json
 import logging
 from typing import Any, Dict, List, Union, cast
 from typing_extensions import Literal
 
+import httpx
 import pytest
+from respx import MockRouter
 from inline_snapshot import external, snapshot
 
 from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
@@ -14,6 +17,8 @@ from anthropic.types.beta.beta_message_param import BetaMessageParam
 from anthropic.types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
 
 from ..utils import print_obj
+
+base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 # all the snapshots in this file are auto-generated from the live API
 #
@@ -665,6 +670,135 @@ async def test_basic_call_async(async_snapshot_client: AsyncAnthropic) -> None:
         tools=[get_weather],
         messages=[{"role": "user", "content": "What is the weather in SF?"}],
     ).until_done()
+
+
+# Regression fixtures for #1170: a `pause_turn` stop reason carrying only a
+# server tool use block (e.g. web_search/web_fetch), followed by the final answer.
+_PAUSE_TURN_RESPONSE: Dict[str, Any] = {
+    "id": "msg_pause_turn_01",
+    "type": "message",
+    "role": "assistant",
+    "model": "claude-haiku-4-5-20251001",
+    "content": [
+        {
+            "type": "server_tool_use",
+            "id": "srvtoolu_01",
+            "name": "web_search",
+            "input": {"query": "brownie recipe"},
+        }
+    ],
+    "stop_reason": "pause_turn",
+    "stop_sequence": None,
+    "usage": {
+        "input_tokens": 100,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "service_tier": "standard",
+    },
+}
+
+_FINAL_TEXT_RESPONSE: Dict[str, Any] = {
+    "id": "msg_final_01",
+    "type": "message",
+    "role": "assistant",
+    "model": "claude-haiku-4-5-20251001",
+    "content": [{"type": "text", "text": "Here is a brownie recipe you can try."}],
+    "stop_reason": "end_turn",
+    "stop_sequence": None,
+    "usage": {
+        "input_tokens": 120,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "service_tier": "standard",
+    },
+}
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_pause_turn_resumes_loop_sync(client: Anthropic, respx_mock: MockRouter) -> None:
+    # Regression test for #1170: a `pause_turn` stop reason with only server tool
+    # use blocks (e.g. web_search) must not exit the tool runner loop early. The
+    # runner should resume the paused turn until the server produces a final answer.
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            httpx.Response(200, json=_PAUSE_TURN_RESPONSE),
+            httpx.Response(200, json=_FINAL_TEXT_RESPONSE),
+        ]
+    )
+
+    message = client.beta.messages.tool_runner(
+        max_tokens=1024,
+        model="claude-haiku-4-5",
+        tools=[{"type": "web_search_20250305", "name": "web_search"}],
+        messages=[{"role": "user", "content": "Find a brownie recipe"}],
+    ).until_done()
+
+    # The runner must make a second request to resume the paused turn rather than
+    # returning the intermediate `server_tool_use` block as the final message.
+    assert respx_mock.calls.call_count == 2
+    assert message.stop_reason == "end_turn"
+    assert [block.type for block in message.content] == ["text"]
+
+    # The paused turn must be resumed by sending the assistant message back, so the
+    # second request carries it (with the server tool use block) as the last message.
+    second_request = json.loads(respx_mock.calls[1].request.content)
+    assert second_request["messages"][-1]["role"] == "assistant"
+    assert any(block["type"] == "server_tool_use" for block in second_request["messages"][-1]["content"])
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_pause_turn_chained_sync(client: Anthropic, respx_mock: MockRouter) -> None:
+    # A long-running server tool may pause more than once before finishing; the
+    # runner must keep resuming until a terminal stop reason is reached.
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            httpx.Response(200, json=_PAUSE_TURN_RESPONSE),
+            httpx.Response(200, json=_PAUSE_TURN_RESPONSE),
+            httpx.Response(200, json=_FINAL_TEXT_RESPONSE),
+        ]
+    )
+
+    message = client.beta.messages.tool_runner(
+        max_tokens=1024,
+        model="claude-haiku-4-5",
+        tools=[{"type": "web_search_20250305", "name": "web_search"}],
+        messages=[{"role": "user", "content": "Find a brownie recipe"}],
+    ).until_done()
+
+    assert respx_mock.calls.call_count == 3
+    assert message.stop_reason == "end_turn"
+    assert [block.type for block in message.content] == ["text"]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+async def test_pause_turn_resumes_loop_async(async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+    # Async counterpart of the #1170 regression test.
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            httpx.Response(200, json=_PAUSE_TURN_RESPONSE),
+            httpx.Response(200, json=_FINAL_TEXT_RESPONSE),
+        ]
+    )
+
+    message = await async_client.beta.messages.tool_runner(
+        max_tokens=1024,
+        model="claude-haiku-4-5",
+        tools=[{"type": "web_search_20250305", "name": "web_search"}],
+        messages=[{"role": "user", "content": "Find a brownie recipe"}],
+    ).until_done()
+
+    assert respx_mock.calls.call_count == 2
+    assert message.stop_reason == "end_turn"
+    assert [block.type for block in message.content] == ["text"]
+
+    second_request = json.loads(respx_mock.calls[1].request.content)
+    assert second_request["messages"][-1]["role"] == "assistant"
+    assert any(block["type"] == "server_tool_use" for block in second_request["messages"][-1]["content"])
 
 
 def _get_weather(location: str, units: Literal["c", "f"]) -> Dict[str, Any]:
