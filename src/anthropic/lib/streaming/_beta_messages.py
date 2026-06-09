@@ -482,6 +482,10 @@ def accumulate_event(
                 construct_type(type_=ParsedBetaContentBlock, value=event.content_block.to_dict()),
             ),
         )
+        if event.content_block.type == "fallback":
+            # the final hop's fallback block names the model that served the response —
+            # keeps the snapshot consistent with the relabeled non-streaming message
+            current_snapshot.model = event.content_block.to.model
     elif event.type == "content_block_delta":
         content = current_snapshot.content[event.index]
         if event.delta.type == "text_delta":

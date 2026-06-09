@@ -7,11 +7,17 @@ from ..model import Model
 from ..._models import BaseModel
 from .beta_cache_creation import BetaCacheCreation
 
-__all__ = ["BetaMessageIterationUsage"]
+__all__ = ["BetaFallbackMessageIterationUsage"]
 
 
-class BetaMessageIterationUsage(BaseModel):
-    """Token usage for a sampling iteration."""
+class BetaFallbackMessageIterationUsage(BaseModel):
+    """Token usage for the fallback-model attempt of a server-side fallback request.
+
+    Produced in place of a `message` entry for whichever hop served the
+    response. A declined hop produces the existing `message` entry. Whether
+    a fallback model served the response is signalled by the presence of this
+    entry in `usage.iterations`.
+    """
 
     cache_creation: Optional[BetaCacheCreation] = None
     """Breakdown of cached tokens by TTL"""
@@ -35,5 +41,5 @@ class BetaMessageIterationUsage(BaseModel):
     output_tokens: int
     """The number of output tokens which were used."""
 
-    type: Literal["message"]
-    """Usage for a sampling iteration"""
+    type: Literal["fallback_message"]
+    """Usage for the fallback-model attempt that served the response"""

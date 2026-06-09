@@ -74,6 +74,15 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
     def _iter_events(self) -> Iterator[ServerSentEvent]:
         yield from self._decoder.iter_bytes(self.response.iter_bytes())
 
+    @staticmethod
+    def raw_events(response: httpx.Response) -> Iterator[ServerSentEvent]:
+        """Iterate the raw Server-Sent Events from `response`, before any JSON
+        parsing or event-name filtering.
+
+        This reads the response body directly, so the response is consumed.
+        """
+        return SSEDecoder().iter_bytes(response.iter_bytes())
+
     def __stream__(self) -> Iterator[_T]:
         cast_to = cast(Any, self._cast_to)
         response = self.response
@@ -231,6 +240,15 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
         async for sse in self._decoder.aiter_bytes(self.response.aiter_bytes()):
             yield sse
 
+    @staticmethod
+    def raw_events(response: httpx.Response) -> AsyncIterator[ServerSentEvent]:
+        """Iterate the raw Server-Sent Events from `response`, before any JSON
+        parsing or event-name filtering.
+
+        This reads the response body directly, so the response is consumed.
+        """
+        return SSEDecoder().aiter_bytes(response.aiter_bytes())
+
     async def __stream__(self) -> AsyncIterator[_T]:
         cast_to = cast(Any, self._cast_to)
         response = self.response
@@ -342,6 +360,7 @@ class ServerSentEvent:
         data: str | None = None,
         id: str | None = None,
         retry: int | None = None,
+        raw: list[str] | None = None,
     ) -> None:
         if data is None:
             data = ""
@@ -350,6 +369,7 @@ class ServerSentEvent:
         self._data = data
         self._event = event or None
         self._retry = retry
+        self._raw = raw if raw is not None else []
 
     @property
     def event(self) -> str | None:
@@ -367,6 +387,15 @@ class ServerSentEvent:
     def data(self) -> str:
         return self._data
 
+    @property
+    def raw(self) -> list[str]:
+        """The original wire lines this event was decoded from, without trailing newlines.
+
+        Includes SSE fields the decoder does not otherwise model (comment lines,
+        unknown fields). Empty for events that were constructed rather than decoded.
+        """
+        return self._raw
+
     def json(self) -> Any:
         return json.loads(self.data)
 
@@ -380,12 +409,14 @@ class SSEDecoder:
     _event: str | None
     _retry: int | None
     _last_event_id: str | None
+    _raw: list[str]
 
     def __init__(self) -> None:
         self._event = None
         self._data = []
         self._last_event_id = None
         self._retry = None
+        self._raw = []
 
     def iter_bytes(self, iterator: Iterator[bytes]) -> Iterator[ServerSentEvent]:
         """Given an iterator that yields raw binary data, iterate over it & yield every event encountered"""
@@ -436,6 +467,7 @@ class SSEDecoder:
 
         if not line:
             if not self._event and not self._data and not self._last_event_id and self._retry is None:
+                self._raw = []
                 return None
 
             sse = ServerSentEvent(
@@ -443,14 +475,18 @@ class SSEDecoder:
                 data="\n".join(self._data),
                 id=self._last_event_id,
                 retry=self._retry,
+                raw=self._raw,
             )
 
             # NOTE: as per the SSE spec, do not reset last_event_id.
             self._event = None
             self._data = []
             self._retry = None
+            self._raw = []
 
             return sse
+
+        self._raw.append(line)
 
         if line.startswith(":"):
             return None

@@ -22,9 +22,6 @@ class BatchCreateParams(TypedDict, total=False):
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
 
-
-
-
     user_profile_id: Optional[str]
     """The user profile ID to attribute this request to.
 

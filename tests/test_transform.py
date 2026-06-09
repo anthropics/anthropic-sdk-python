@@ -7,6 +7,7 @@ from datetime import date, datetime
 from typing_extensions import Required, Annotated, TypedDict
 
 import pytest
+import pydantic
 
 from anthropic._types import Base64FileInput, omit, not_given
 from anthropic._utils import (
@@ -15,7 +16,7 @@ from anthropic._utils import (
     parse_datetime,
     async_transform as _async_transform,
 )
-from anthropic._compat import PYDANTIC_V1
+from anthropic._compat import PYDANTIC_V1, model_parse
 from anthropic._models import BaseModel
 
 _T = TypeVar("_T")
@@ -355,6 +356,43 @@ async def test_pydantic_default_field(use_async: bool) -> None:
     assert model.with_none_default == "bar"
     assert model.with_str_default == "baz"
     assert cast(Any, await transform(model, Any, use_async)) == {"with_none_default": "bar", "with_str_default": "baz"}
+
+
+class ModelWithAliasedField(BaseModel):
+    from_: str = pydantic.Field(alias="from")
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_pydantic_aliased_field(use_async: bool) -> None:
+    model = model_parse(ModelWithAliasedField, {"from": "bar"})
+    assert model.from_ == "bar"
+    assert cast(Any, await transform(model, Any, use_async)) == {"from": "bar"}
+
+    model = ModelWithAliasedField.construct(**cast("dict[str, Any]", {"from": "bar"}))
+    assert model.from_ == "bar"
+    assert cast(Any, await transform(model, Any, use_async)) == {"from": "bar"}
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_pydantic_aliased_field_round_trip(use_async: bool) -> None:
+    from anthropic.types.beta import BetaMessageParam, BetaFallbackBlock
+
+    block = model_parse(
+        BetaFallbackBlock,
+        {
+            "from": {"model": "model-a"},
+            "to": {"model": "model-b"},
+            "type": "fallback",
+        },
+    )
+    assert block.from_.model == "model-a"
+
+    message = cast("BetaMessageParam", {"role": "assistant", "content": [block]})
+    params = cast(Any, await transform(message, BetaMessageParam, use_async))
+    assert params["content"][0] == {"from": {"model": "model-a"}, "to": {"model": "model-b"}, "type": "fallback"}
+    assert "from_" not in params["content"][0]
 
 
 class TypedDictIterableUnion(TypedDict):

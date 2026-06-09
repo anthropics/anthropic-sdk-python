@@ -7,11 +7,17 @@ from ..._utils import PropertyInfo
 from .beta_message_iteration_usage import BetaMessageIterationUsage
 from .beta_compaction_iteration_usage import BetaCompactionIterationUsage
 from .beta_advisor_message_iteration_usage import BetaAdvisorMessageIterationUsage
+from .beta_fallback_message_iteration_usage import BetaFallbackMessageIterationUsage
 
 __all__ = ["BetaIterationsUsage", "BetaIterationsUsageItem"]
 
 BetaIterationsUsageItem: TypeAlias = Annotated[
-    Union[BetaMessageIterationUsage, BetaCompactionIterationUsage, BetaAdvisorMessageIterationUsage],
+    Union[
+        BetaMessageIterationUsage,
+        BetaCompactionIterationUsage,
+        BetaAdvisorMessageIterationUsage,
+        BetaFallbackMessageIterationUsage,
+    ],
     PropertyInfo(discriminator="type"),
 ]
 

@@ -98,9 +98,7 @@ def _install_scoped_client(
     calls: list[dict[str, Any]] = []
     if sessions is None:
         sessions = _FakeSessions()
-    fake_scoped = SimpleNamespace(
-        beta=SimpleNamespace(sessions=sessions, environments=SimpleNamespace(work=work))
-    )
+    fake_scoped = SimpleNamespace(beta=SimpleNamespace(sessions=sessions, environments=SimpleNamespace(work=work)))
 
     def fake_factory(client: Any, *, auth_token: str, helper: str) -> Any:  # noqa: ARG001
         calls.append({"auth_token": auth_token, "helper": helper})

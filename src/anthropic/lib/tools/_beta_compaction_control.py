@@ -36,6 +36,7 @@ class CompactionControl(TypedDict, total=False):
         ``edits=[{"type": "compact_20260112"}]`` in the params passed to ``tool_runner()``.
         See https://platform.claude.com/docs/en/build-with-claude/compaction
     """
+
     context_token_threshold: int
     """The context token threshold at which to trigger compaction.
 

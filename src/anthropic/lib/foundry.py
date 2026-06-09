@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import inspect
-from typing import Any, Union, Mapping, TypeVar, Callable, Awaitable, cast, overload
+from typing import Any, Union, Mapping, TypeVar, Callable, Sequence, Awaitable, cast, overload
 from functools import cached_property
 from typing_extensions import Self, override
 
@@ -15,6 +15,7 @@ from .._compat import model_copy
 from .._models import FinalRequestOptions
 from .._streaming import Stream, AsyncStream
 from .._exceptions import AnthropicError
+from .._middleware import MiddlewareInput
 from .._base_client import DEFAULT_MAX_RETRIES, BaseClient
 from ..resources.beta import Beta, AsyncBeta
 from ..resources.messages import Messages, AsyncMessages
@@ -101,6 +102,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         http_client: httpx.Client | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None: ...
 
@@ -117,6 +119,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         http_client: httpx.Client | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None: ...
 
@@ -133,6 +136,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         http_client: httpx.Client | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         """Construct a new synchronous Anthropic Foundry client instance.
@@ -173,6 +177,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
+            middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
         self._azure_ad_token_provider = azure_ad_token_provider
@@ -210,6 +215,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -243,6 +249,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
 
@@ -320,6 +327,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         http_client: httpx.AsyncClient | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None: ...
 
@@ -336,6 +344,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         http_client: httpx.AsyncClient | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None: ...
 
@@ -352,6 +361,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         http_client: httpx.AsyncClient | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         """Construct a new asynchronous Anthropic Foundry client instance.
@@ -392,6 +402,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
+            middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
         self._azure_ad_token_provider = azure_ad_token_provider
@@ -429,6 +440,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -462,6 +474,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
 

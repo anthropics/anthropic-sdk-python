@@ -6,6 +6,7 @@ from typing_extensions import TypeVar, Annotated, TypeAlias
 from ..._utils import PropertyInfo
 from .beta_message import BetaMessage
 from .beta_text_block import BetaTextBlock
+from .beta_fallback_block import BetaFallbackBlock
 from .beta_thinking_block import BetaThinkingBlock
 from .beta_tool_use_block import BetaToolUseBlock
 from .beta_compaction_block import BetaCompactionBlock
@@ -14,7 +15,10 @@ from .beta_mcp_tool_result_block import BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock
 from .beta_container_upload_block import BetaContainerUploadBlock
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock
+from .beta_advisor_tool_result_block import BetaAdvisorToolResultBlock
+from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock
 from .beta_web_search_tool_result_block import BetaWebSearchToolResultBlock
+from .beta_tool_search_tool_result_block import BetaToolSearchToolResultBlock
 from .beta_code_execution_tool_result_block import BetaCodeExecutionToolResultBlock
 from .beta_bash_code_execution_tool_result_block import BetaBashCodeExecutionToolResultBlock
 from .beta_text_editor_code_execution_tool_result_block import BetaTextEditorCodeExecutionToolResultBlock
@@ -44,13 +48,17 @@ ParsedBetaContentBlock: TypeAlias = Annotated[
         BetaToolUseBlock,
         BetaServerToolUseBlock,
         BetaWebSearchToolResultBlock,
+        BetaWebFetchToolResultBlock,
+        BetaAdvisorToolResultBlock,
         BetaCodeExecutionToolResultBlock,
         BetaBashCodeExecutionToolResultBlock,
         BetaTextEditorCodeExecutionToolResultBlock,
+        BetaToolSearchToolResultBlock,
         BetaMCPToolUseBlock,
         BetaMCPToolResultBlock,
         BetaContainerUploadBlock,
         BetaCompactionBlock,
+        BetaFallbackBlock,
     ],
     PropertyInfo(discriminator="type"),
 ]
