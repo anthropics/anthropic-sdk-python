@@ -36,5 +36,7 @@ AnthropicBetaParam: TypeAlias = Union[
         "managed-agents-2026-04-01",
         "cache-diagnosis-2026-04-07",
         "thinking-token-count-2026-05-13",
+        "server-side-fallback-2026-06-01",
+        "fallback-credit-2026-06-01",
     ],
 ]

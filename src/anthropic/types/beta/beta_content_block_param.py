@@ -7,6 +7,7 @@ from typing_extensions import TypeAlias
 
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_image_block_param import BetaImageBlockParam
+from .beta_fallback_block_param import BetaFallbackBlockParam
 from .beta_thinking_block_param import BetaThinkingBlockParam
 from .beta_tool_use_block_param import BetaToolUseBlockParam
 from .beta_compaction_block_param import BetaCompactionBlockParam
@@ -51,4 +52,5 @@ BetaContentBlockParam: TypeAlias = Union[
     BetaContainerUploadBlockParam,
     BetaCompactionBlockParam,
     BetaMidConversationSystemBlockParam,
+    BetaFallbackBlockParam,
 ]
