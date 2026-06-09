@@ -65,6 +65,14 @@ from .sessions import (
     AsyncSessionsWithStreamingResponse,
 )
 from .webhooks import Webhooks, AsyncWebhooks
+from .deployments import (
+    Deployments,
+    AsyncDeployments,
+    DeploymentsWithRawResponse,
+    AsyncDeploymentsWithRawResponse,
+    DeploymentsWithStreamingResponse,
+    AsyncDeploymentsWithStreamingResponse,
+)
 from .environments import (
     Environments,
     AsyncEnvironments,
@@ -88,6 +96,14 @@ from .user_profiles import (
     AsyncUserProfilesWithRawResponse,
     UserProfilesWithStreamingResponse,
     AsyncUserProfilesWithStreamingResponse,
+)
+from .deployment_runs import (
+    DeploymentRuns,
+    AsyncDeploymentRuns,
+    DeploymentRunsWithRawResponse,
+    AsyncDeploymentRunsWithRawResponse,
+    DeploymentRunsWithStreamingResponse,
+    AsyncDeploymentRunsWithStreamingResponse,
 )
 
 __all__ = [
@@ -121,6 +137,18 @@ __all__ = [
     "AsyncSessionsWithRawResponse",
     "SessionsWithStreamingResponse",
     "AsyncSessionsWithStreamingResponse",
+    "Deployments",
+    "AsyncDeployments",
+    "DeploymentsWithRawResponse",
+    "AsyncDeploymentsWithRawResponse",
+    "DeploymentsWithStreamingResponse",
+    "AsyncDeploymentsWithStreamingResponse",
+    "DeploymentRuns",
+    "AsyncDeploymentRuns",
+    "DeploymentRunsWithRawResponse",
+    "AsyncDeploymentRunsWithRawResponse",
+    "DeploymentRunsWithStreamingResponse",
+    "AsyncDeploymentRunsWithStreamingResponse",
     "Vaults",
     "AsyncVaults",
     "VaultsWithRawResponse",

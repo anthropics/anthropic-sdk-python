@@ -9,6 +9,7 @@ from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_mcp_oauth_create_params import BetaManagedAgentsMCPOAuthCreateParams
 from .beta_managed_agents_static_bearer_create_params import BetaManagedAgentsStaticBearerCreateParams
+from .beta_managed_agents_environment_variable_create_params import BetaManagedAgentsEnvironmentVariableCreateParams
 
 __all__ = ["CredentialCreateParams", "Auth"]
 
@@ -30,4 +31,8 @@ class CredentialCreateParams(TypedDict, total=False):
     """Optional header to specify the beta version(s) you want to use."""
 
 
-Auth: TypeAlias = Union[BetaManagedAgentsMCPOAuthCreateParams, BetaManagedAgentsStaticBearerCreateParams]
+Auth: TypeAlias = Union[
+    BetaManagedAgentsMCPOAuthCreateParams,
+    BetaManagedAgentsStaticBearerCreateParams,
+    BetaManagedAgentsEnvironmentVariableCreateParams,
+]

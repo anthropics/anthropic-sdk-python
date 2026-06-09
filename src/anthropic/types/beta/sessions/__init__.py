@@ -175,6 +175,9 @@ from .beta_managed_agents_mcp_connection_failed_error import (
 from .beta_managed_agents_search_result_content_param import (
     BetaManagedAgentsSearchResultContentParam as BetaManagedAgentsSearchResultContentParam,
 )
+from .beta_managed_agents_system_message_event_params import (
+    BetaManagedAgentsSystemMessageEventParams as BetaManagedAgentsSystemMessageEventParams,
+)
 from .beta_managed_agents_user_interrupt_event_params import (
     BetaManagedAgentsUserInterruptEventParams as BetaManagedAgentsUserInterruptEventParams,
 )
@@ -228,6 +231,9 @@ from .beta_managed_agents_session_thread_status_idle_event import (
 )
 from .beta_managed_agents_user_define_outcome_event_params import (
     BetaManagedAgentsUserDefineOutcomeEventParams as BetaManagedAgentsUserDefineOutcomeEventParams,
+)
+from .beta_managed_agents_credential_host_unreachable_error import (
+    BetaManagedAgentsCredentialHostUnreachableError as BetaManagedAgentsCredentialHostUnreachableError,
 )
 from .beta_managed_agents_span_outcome_evaluation_end_event import (
     BetaManagedAgentsSpanOutcomeEvaluationEndEvent as BetaManagedAgentsSpanOutcomeEvaluationEndEvent,
