@@ -11,7 +11,7 @@ __all__ = ["BetaRefusalStopDetails"]
 class BetaRefusalStopDetails(BaseModel):
     """Structured information about a refusal."""
 
-    category: Optional[Literal["cyber", "bio", "reasoning_extraction"]] = None
+    category: Optional[Literal["cyber", "bio", "frontier_llm", "reasoning_extraction"]] = None
     """The policy category that triggered the refusal.
 
     `null` when the refusal doesn't map to a named category.
