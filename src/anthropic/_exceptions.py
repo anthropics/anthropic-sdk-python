@@ -96,6 +96,15 @@ class APITimeoutError(APIConnectionError):
         )
 
 
+class RetryableError(AnthropicError):
+    """An error that opts into the SDK's retry policy: raise it (e.g. from
+    middleware) to have the request attempt retried.
+
+    The request is only retried while `max_retries` has not been exhausted;
+    once exhausted the error propagates to the caller as-is.
+    """
+
+
 class BadRequestError(APIStatusError):
     status_code: Literal[400] = 400  # pyright: ignore[reportIncompatibleVariableOverride]
 

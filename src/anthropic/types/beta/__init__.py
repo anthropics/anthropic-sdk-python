@@ -27,6 +27,7 @@ from .skill_list_params import SkillListParams as SkillListParams
 from .vault_list_params import VaultListParams as VaultListParams
 from .beta_content_block import BetaContentBlock as BetaContentBlock
 from .beta_direct_caller import BetaDirectCaller as BetaDirectCaller
+from .beta_fallback_info import BetaFallbackInfo as BetaFallbackInfo
 from .beta_message_param import BetaMessageParam as BetaMessageParam
 from .beta_text_citation import BetaTextCitation as BetaTextCitation
 from .file_upload_params import FileUploadParams as FileUploadParams
@@ -34,6 +35,8 @@ from .agent_create_params import AgentCreateParams as AgentCreateParams
 from .agent_update_params import AgentUpdateParams as AgentUpdateParams
 from .beta_cache_creation import BetaCacheCreation as BetaCacheCreation
 from .beta_document_block import BetaDocumentBlock as BetaDocumentBlock
+from .beta_fallback_block import BetaFallbackBlock as BetaFallbackBlock
+from .beta_fallback_param import BetaFallbackParam as BetaFallbackParam
 from .beta_metadata_param import BetaMetadataParam as BetaMetadataParam
 from .beta_thinking_block import BetaThinkingBlock as BetaThinkingBlock
 from .beta_thinking_delta import BetaThinkingDelta as BetaThinkingDelta
@@ -82,6 +85,7 @@ from .skill_retrieve_response import SkillRetrieveResponse as SkillRetrieveRespo
 from .beta_cloud_config_params import BetaCloudConfigParams as BetaCloudConfigParams
 from .beta_content_block_param import BetaContentBlockParam as BetaContentBlockParam
 from .beta_direct_caller_param import BetaDirectCallerParam as BetaDirectCallerParam
+from .beta_fallback_info_param import BetaFallbackInfoParam as BetaFallbackInfoParam
 from .beta_message_delta_usage import BetaMessageDeltaUsage as BetaMessageDeltaUsage
 from .beta_output_config_param import BetaOutputConfigParam as BetaOutputConfigParam
 from .beta_text_citation_param import BetaTextCitationParam as BetaTextCitationParam
@@ -90,6 +94,7 @@ from .beta_user_location_param import BetaUserLocationParam as BetaUserLocationP
 from .memory_store_list_params import MemoryStoreListParams as MemoryStoreListParams
 from .user_profile_list_params import UserProfileListParams as UserProfileListParams
 from .beta_advisor_result_block import BetaAdvisorResultBlock as BetaAdvisorResultBlock
+from .beta_fallback_block_param import BetaFallbackBlockParam as BetaFallbackBlockParam
 from .beta_managed_agents_agent import BetaManagedAgentsAgent as BetaManagedAgentsAgent
 from .beta_managed_agents_model import BetaManagedAgentsModel as BetaManagedAgentsModel
 from .beta_managed_agents_vault import BetaManagedAgentsVault as BetaManagedAgentsVault
@@ -237,6 +242,9 @@ from .beta_bash_code_execution_output_block import BetaBashCodeExecutionOutputBl
 from .beta_bash_code_execution_result_block import BetaBashCodeExecutionResultBlock as BetaBashCodeExecutionResultBlock
 from .beta_code_execution_tool_result_block import BetaCodeExecutionToolResultBlock as BetaCodeExecutionToolResultBlock
 from .beta_code_execution_tool_result_error import BetaCodeExecutionToolResultError as BetaCodeExecutionToolResultError
+from .beta_fallback_message_iteration_usage import (
+    BetaFallbackMessageIterationUsage as BetaFallbackMessageIterationUsage,
+)
 from .beta_managed_agents_agent_tool_config import BetaManagedAgentsAgentToolConfig as BetaManagedAgentsAgentToolConfig
 from .beta_managed_agents_always_ask_policy import BetaManagedAgentsAlwaysAskPolicy as BetaManagedAgentsAlwaysAskPolicy
 from .beta_managed_agents_multiagent_params import (

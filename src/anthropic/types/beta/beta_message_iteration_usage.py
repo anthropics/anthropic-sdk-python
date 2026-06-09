@@ -3,6 +3,7 @@
 from typing import Optional
 from typing_extensions import Literal
 
+from ..model import Model
 from ..._models import BaseModel
 from .beta_cache_creation import BetaCacheCreation
 
@@ -23,6 +24,13 @@ class BetaMessageIterationUsage(BaseModel):
 
     input_tokens: int
     """The number of input tokens which were used."""
+
+    model: Model
+    """The model that will complete your prompt.
+
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    details and options.
+    """
 
     output_tokens: int
     """The number of output tokens which were used."""

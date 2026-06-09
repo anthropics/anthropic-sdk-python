@@ -218,7 +218,9 @@ def _transform_recursive(
         return data
 
     if isinstance(data, pydantic.BaseModel):
-        return model_dump(data, exclude_unset=True, mode="json", exclude=getattr(data, "__api_exclude__", None))
+        return model_dump(
+            data, exclude_unset=True, mode="json", by_alias=True, exclude=getattr(data, "__api_exclude__", None)
+        )
 
     annotated_type = _get_annotated_type(annotation)
     if annotated_type is None:
@@ -384,7 +386,9 @@ async def _async_transform_recursive(
         return data
 
     if isinstance(data, pydantic.BaseModel):
-        return model_dump(data, exclude_unset=True, mode="json", exclude=getattr(data, "__api_exclude__", None))
+        return model_dump(
+            data, exclude_unset=True, mode="json", by_alias=True, exclude=getattr(data, "__api_exclude__", None)
+        )
 
     annotated_type = _get_annotated_type(annotation)
     if annotated_type is None:

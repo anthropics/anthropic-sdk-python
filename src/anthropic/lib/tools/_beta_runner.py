@@ -272,6 +272,13 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
             self._iteration_count += 1
 
+            # Refusal-terminated turns are terminal: executing their tool_use blocks would
+            # fire side effects the model never confirmed, and the resulting tool_results
+            # cannot be replayed coherently. Surface the refusal as the final message.
+            if message.stop_reason == "refusal":
+                log.debug("Turn ended with a refusal, exiting from tool runner loop.")
+                return
+
             # If the compaction was performed, skip tool call generation this iteration
             if not self._check_and_compact():
                 response = self.generate_tool_call_response()
@@ -552,6 +559,13 @@ class BaseAsyncToolRunner(
                     self._params["container"] = last_assistant_message.container.id
 
             self._iteration_count += 1
+
+            # Refusal-terminated turns are terminal: executing their tool_use blocks would
+            # fire side effects the model never confirmed, and the resulting tool_results
+            # cannot be replayed coherently. Surface the refusal as the final message.
+            if message.stop_reason == "refusal":
+                log.debug("Turn ended with a refusal, exiting from tool runner loop.")
+                return
 
             # If the compaction was performed, skip tool call generation this iteration
             if not await self._check_and_compact():

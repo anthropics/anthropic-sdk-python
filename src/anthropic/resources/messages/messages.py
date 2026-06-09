@@ -76,6 +76,7 @@ DEPRECATED_MODELS = {
     "claude-sonnet-4-20250514": "June 15th, 2026",
     "claude-opus-4-1": "August 5th, 2026",
     "claude-opus-4-1-20250805": "August 5th, 2026",
+    "claude-mythos-preview": "June 30th, 2026",
 }
 
 MODELS_TO_WARN_WITH_THINKING_ENABLED = ["claude-opus-4-6", "claude-mythos-preview"]

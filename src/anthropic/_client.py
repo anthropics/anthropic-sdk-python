@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping, Sequence
 from typing_extensions import Self, override
 
 import httpx
@@ -29,6 +29,7 @@ from ._compat import cached_property
 from ._version import __version__
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
+from ._middleware import MiddlewareInput
 from ._base_client import (
     DEFAULT_MAX_RETRIES,
     SyncAPIClient,
@@ -160,6 +161,7 @@ class Anthropic(SyncAPIClient):
         # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
         http_client: httpx.Client | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         # Enable or disable schema validation for data returned by the API.
         # When enabled an error APIResponseValidationError is raised
         # if the API responds with invalid data for the expected schema.
@@ -172,7 +174,7 @@ class Anthropic(SyncAPIClient):
         _token_cache: TokenCache | None | NotGiven = not_given,
     ) -> None:
         """Construct a new synchronous Anthropic client instance.
-        
+
         Credentials are resolved in the following order (first match wins):
 
         1. Explicit constructor arguments — ``api_key=``, ``auth_token=``,
@@ -283,6 +285,7 @@ class Anthropic(SyncAPIClient):
             http_client=http_client,
             custom_headers=default_headers,
             custom_query=default_query,
+            middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
 
@@ -431,6 +434,7 @@ class Anthropic(SyncAPIClient):
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -484,12 +488,24 @@ class Anthropic(SyncAPIClient):
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
 
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)
     with_options = copy
+
+    def with_middleware(self, *middleware: MiddlewareInput) -> Self:
+        """A new client with the given middleware appended after this client's middleware.
+
+        Convenience for applying extra middleware to a single request:
+
+        ```py
+        client.with_middleware(my_middleware).messages.create(...)
+        ```
+        """
+        return self.copy(middleware=[*self._middleware, *middleware])
 
     @override
     def _make_status_error(
@@ -562,6 +578,7 @@ class AsyncAnthropic(AsyncAPIClient):
         # We provide a `DefaultAsyncHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx documentation](https://www.python-httpx.org/api/#asyncclient) for more details.
         http_client: httpx.AsyncClient | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         # Enable or disable schema validation for data returned by the API.
         # When enabled an error APIResponseValidationError is raised
         # if the API responds with invalid data for the expected schema.
@@ -685,6 +702,7 @@ class AsyncAnthropic(AsyncAPIClient):
             http_client=http_client,
             custom_headers=default_headers,
             custom_query=default_query,
+            middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
 
@@ -829,6 +847,7 @@ class AsyncAnthropic(AsyncAPIClient):
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -882,12 +901,24 @@ class AsyncAnthropic(AsyncAPIClient):
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
 
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)
     with_options = copy
+
+    def with_middleware(self, *middleware: MiddlewareInput) -> Self:
+        """A new client with the given middleware appended after this client's middleware.
+
+        Convenience for applying extra middleware to a single request:
+
+        ```py
+        client.with_middleware(my_middleware).messages.create(...)
+        ```
+        """
+        return self.copy(middleware=[*self._middleware, *middleware])
 
     @override
     def _make_status_error(

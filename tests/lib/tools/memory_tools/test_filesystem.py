@@ -973,9 +973,7 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
 
         # The returned path should point to the resolved location (under legit/),
         # not through the symlink
-        assert "link" not in result_str, (
-            f"_validate_path returned unresolved symlink path: {result_str}"
-        )
+        assert "link" not in result_str, f"_validate_path returned unresolved symlink path: {result_str}"
         assert str(legit_dir.resolve()) in result_str
 
     async def test_symlink_validation_reject_symlink_pointing_outside_memories(

@@ -5,6 +5,7 @@ from typing_extensions import Annotated, TypeAlias
 
 from ..._utils import PropertyInfo
 from .beta_text_block import BetaTextBlock
+from .beta_fallback_block import BetaFallbackBlock
 from .beta_thinking_block import BetaThinkingBlock
 from .beta_tool_use_block import BetaToolUseBlock
 from .beta_compaction_block import BetaCompactionBlock
@@ -41,6 +42,7 @@ BetaContentBlock: TypeAlias = Annotated[
         BetaMCPToolResultBlock,
         BetaContainerUploadBlock,
         BetaCompactionBlock,
+        BetaFallbackBlock,
     ],
     PropertyInfo(discriminator="type"),
 ]

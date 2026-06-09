@@ -28,6 +28,7 @@ from typing import (
     Iterable,
     Iterator,
     Optional,
+    Sequence,
     Generator,
     AsyncIterator,
     cast,
@@ -67,6 +68,7 @@ from ._types import (
 from ._utils import is_dict, is_list, asyncify, is_given, lru_cache, is_mapping
 from ._compat import PYDANTIC_V1, model_copy, model_dump
 from ._models import GenericModel, FinalRequestOptions, validate_type, construct_type
+from ._request import APIRequest
 from ._response import (
     APIResponse,
     BaseAPIResponse,
@@ -86,9 +88,20 @@ from ._streaming import Stream, SSEDecoder, AsyncStream, SSEBytesDecoder
 from ._exceptions import (
     AnthropicError,
     APIStatusError,
+    RetryableError,
     APITimeoutError,
     APIConnectionError,
     APIResponseValidationError,
+)
+from ._middleware import (
+    CallNext,
+    Middleware,
+    AsyncCallNext,
+    MiddlewareInput,
+    MiddlewareCallable,
+    AsyncMiddlewareCallable,
+    validate_sync_middleware,
+    validate_async_middleware,
 )
 from ._utils._json import openapi_dumps
 from ._utils._httpx import get_environment_proxies
@@ -375,6 +388,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     _strict_response_validation: bool
     _idempotency_header: str | None
     _default_stream_cls: type[_DefaultStreamT] | None = None
+    _middleware: tuple[MiddlewareInput, ...]
 
     def __init__(
         self,
@@ -386,6 +400,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
     ) -> None:
         self._version = version
         self._base_url = self._enforce_trailing_slash(URL(base_url))
@@ -396,6 +411,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         self._strict_response_validation = _strict_response_validation
         self._idempotency_header = None
         self._platform: Platform | None = None
+        self._middleware = tuple(middleware or ())
 
         if max_retries is None:  # pyright: ignore[reportUnnecessaryComparison]
             raise TypeError(
@@ -643,6 +659,18 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
         return cast_to
 
+    def _convert_to_legacy_response(self, source: BaseAPIResponse[Any]) -> LegacyAPIResponse[Any]:
+        """Convert an `APIResponse` / `AsyncAPIResponse` into the equivalent `LegacyAPIResponse`."""
+        return LegacyAPIResponse(
+            raw=source.http_response,
+            cast_to=source._cast_to,
+            client=self,
+            stream=source._is_sse_stream,
+            stream_cls=source._stream_cls,
+            options=source._options,
+            retries_taken=source.retries_taken,
+        )
+
     def _should_stream_response_body(self, request: httpx.Request) -> bool:
         return request.headers.get(RAW_RESPONSE_HEADER) == "stream"  # type: ignore[no-any-return]
 
@@ -721,6 +749,15 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     @base_url.setter
     def base_url(self, url: URL | str) -> None:
         self._base_url = self._enforce_trailing_slash(url if isinstance(url, URL) else URL(url))
+
+    @property
+    def middleware(self) -> tuple[MiddlewareInput, ...]:
+        """The client-level middleware, outermost first.
+
+        To run extra middleware for specific calls, derive a client with
+        `client.with_options(middleware=[*client.middleware, extra])`.
+        """
+        return self._middleware
 
     def platform_headers(self) -> Dict[str, str]:
         # the actual implementation is in a separate `lru_cache` decorated
@@ -836,6 +873,31 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         log.debug("Not retrying")
         return False
 
+    def _should_retry_exception(self, err: BaseException) -> tuple[bool, httpx.Response | None]:
+        """Whether an exception raised by a request attempt should be retried.
+
+        Also returns the HTTP response behind the failure, when there is one, so
+        retry timing can honor `retry-after` headers.
+
+        Exceptions raised by middleware propagate to the caller as-is, except the
+        ones that opt into the retry policy by type: `APIStatusError` (subject to
+        the usual status-code policy), `APIConnectionError` / `APITimeoutError`,
+        and `RetryableError`. The check walks each error's `__cause__` chain, so
+        wrapping a retryable failure via `raise ... from err` preserves retries.
+        """
+        seen: set[int] = set()
+        current: BaseException | None = err
+        while current is not None and id(current) not in seen:
+            seen.add(id(current))
+            if isinstance(current, RetryableError):
+                return True, None
+            if isinstance(current, APIStatusError):
+                return self._should_retry(current.response), current.response
+            if isinstance(current, APIConnectionError):
+                return True, None
+            current = current.__cause__
+        return False, None
+
     def _idempotency_key(self) -> str:
         return f"stainless-python-retry-{uuid.uuid4()}"
 
@@ -915,6 +977,7 @@ class SyncHttpxClientWrapper(DefaultHttpxClient):
 class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
     _client: httpx.Client
     _default_stream_cls: type[Stream[Any]] | None = None
+    _middleware_chain: CallNext | None = None
     webhook_key: str | None = None
 
     def __init__(
@@ -927,6 +990,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
         http_client: httpx.Client | None = None,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool,
     ) -> None:
         if not is_given(timeout):
@@ -947,6 +1011,13 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
                 f"Invalid `http_client` argument; Expected an instance of `httpx.Client` but got {type(http_client)}"
             )
 
+        # materialize the middleware before validating it so that passing an
+        # iterator/generator doesn't result in validation consuming it and the
+        # middleware silently never running
+        middleware = tuple(middleware or ())
+        if middleware:
+            validate_sync_middleware(middleware)
+
         super().__init__(
             version=version,
             # cast to a valid type because mypy doesn't understand our type narrowing
@@ -955,8 +1026,10 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
             max_retries=max_retries,
             custom_query=custom_query,
             custom_headers=custom_headers,
+            middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
+        self._middleware_chain = self._build_middleware_chain()
         self._client = http_client or SyncHttpxClientWrapper(
             base_url=base_url,
             # cast to a valid type because mypy doesn't understand our type narrowing
@@ -1052,111 +1125,199 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
             # ensure the idempotency key is reused between requests
             input_options.idempotency_key = self._idempotency_key()
 
-        response: httpx.Response | None = None
+        chain = self._middleware_chain
         max_retries = input_options.get_max_retries(self.max_retries)
 
-        retries_taken = 0
         for retries_taken in range(max_retries + 1):
-            options = model_copy(input_options)
-            options = self._prepare_options(options)
-
             remaining_retries = max_retries - retries_taken
-            request = self._build_request(options, retries_taken=retries_taken)
-            self._prepare_request(request)
 
-            kwargs: HttpxSendArgs = {}
-            if self.custom_auth is not None:
-                kwargs["auth"] = self.custom_auth
-
-            if options.follow_redirects is not None:
-                kwargs["follow_redirects"] = options.follow_redirects
-
-            log.debug("Sending HTTP Request: %s %s", request.method, request.url)
-
-            response = None
             try:
-                response = self._client.send(
-                    request,
-                    stream=stream or self._should_stream_response_body(request=request),
-                    **kwargs,
-                )
-            except httpx.TimeoutException as err:
-                log.debug("Encountered httpx.TimeoutException", exc_info=True)
-
-                if remaining_retries > 0:
-                    self._sleep_for_retry(
-                        retries_taken=retries_taken,
-                        max_retries=max_retries,
-                        options=input_options,
-                        response=None,
+                if chain is None:
+                    response, prepared = self._attempt_request(
+                        model_copy(input_options), stream=stream, retries_taken=retries_taken
                     )
-                    continue
-
-                log.debug("Raising timeout error")
-                raise APITimeoutError(request=request) from err
+                    if response.is_success:
+                        return self._process_response(
+                            cast_to=cast_to,
+                            options=prepared,
+                            response=response,
+                            stream=stream,
+                            stream_cls=stream_cls,
+                            retries_taken=retries_taken,
+                        )
+                else:
+                    request = APIRequest(
+                        options=model_copy(input_options),
+                        cast_to=cast_to,
+                        stream=stream,
+                        stream_cls=stream_cls,
+                        retries_taken=retries_taken,
+                    )
+                    result: Any = chain(request)
+                    if not isinstance(result, BaseAPIResponse) or result.http_response.is_success:
+                        return cast(Union[ResponseT, _StreamT], self._finalize_middleware_result(result, request))
+                    response = result.http_response
             except Exception as err:
-                if isinstance(err, AnthropicError):
-                    # SDK-originated errors already carry their own type; don't wrap or retry.
+                should_retry, failed_response = self._should_retry_exception(err)
+                if remaining_retries <= 0 or not should_retry:
                     raise
 
-                log.debug("Encountered Exception", exc_info=True)
+                if failed_response is not None and not failed_response.is_closed:
+                    failed_response.close()
 
-                if remaining_retries > 0:
-                    self._sleep_for_retry(
-                        retries_taken=retries_taken,
-                        max_retries=max_retries,
-                        options=input_options,
-                        response=None,
-                    )
-                    continue
+                self._sleep_for_retry(
+                    retries_taken=retries_taken,
+                    max_retries=max_retries,
+                    options=input_options,
+                    response=failed_response,
+                )
+                continue
 
-                log.debug("Raising connection error")
-                raise APIConnectionError(request=request) from err
+            # the attempt produced an error-status response — possibly inspected,
+            # replaced or passed through by middleware
+            if remaining_retries > 0 and self._should_retry(response):
+                if not response.is_closed:
+                    response.close()
+                self._sleep_for_retry(
+                    retries_taken=retries_taken,
+                    max_retries=max_retries,
+                    options=input_options,
+                    response=response,
+                )
+                continue
 
-            log.debug(
-                'HTTP Response: %s %s "%i %s" %s',
-                request.method,
-                request.url,
-                response.status_code,
-                response.reason_phrase,
-                response.headers,
+            # If the response is streamed then we need to explicitly read the response
+            # to completion before attempting to access the response text.
+            if not response.is_closed:
+                response.read()
+
+            raise self._make_status_error_from_response(response) from None
+
+        raise RuntimeError("could not resolve response (should never happen)")
+
+    def _build_middleware_chain(self) -> CallNext | None:
+        """Build the middleware invocation chain.
+
+        The chain only depends on the immutable `self._middleware` tuple so it is built
+        once at construction time. It is invoked once per HTTP attempt, inside the
+        SDK's retry loop, with that attempt's `APIRequest`.
+        """
+        if not self._middleware:
+            return None
+
+        def base_handler(req: APIRequest) -> APIResponse[Any]:
+            options = _prepare_middleware_options(req)
+            response, prepared = self._attempt_request(options, stream=req.stream, retries_taken=req.retries_taken)
+            return cast(
+                "APIResponse[Any]",
+                self._process_response(
+                    cast_to=req.cast_to,
+                    options=prepared,
+                    response=response,
+                    stream=req.stream,
+                    stream_cls=req.stream_cls,
+                    retries_taken=req.retries_taken,
+                ),
             )
-            log.debug("request_id: %s", response.headers.get("request-id"))
 
-            try:
-                response.raise_for_status()
-            except httpx.HTTPStatusError as err:  # thrown on 4xx and 5xx status code
-                log.debug("Encountered httpx.HTTPStatusError", exc_info=True)
+        def wrap(middleware: MiddlewareInput, call_next: CallNext) -> CallNext:
+            handler = middleware.handle if isinstance(middleware, Middleware) else cast(MiddlewareCallable, middleware)
 
-                if remaining_retries > 0 and self._should_retry(err.response):
-                    err.response.close()
-                    self._sleep_for_retry(
-                        retries_taken=retries_taken,
-                        max_retries=max_retries,
-                        options=input_options,
-                        response=response,
-                    )
-                    continue
+            def handle(req: APIRequest) -> APIResponse[Any]:
+                return handler(req, call_next)
 
-                # If the response is streamed then we need to explicitly read the response
-                # to completion before attempting to access the response text.
-                if not err.response.is_closed:
-                    err.response.read()
+            return handle
 
-                log.debug("Re-raising status error")
-                raise self._make_status_error_from_response(err.response) from None
+        chain: CallNext = base_handler
+        for entry in reversed(self._middleware):
+            chain = wrap(entry, chain)
+        return chain
 
-            break
+    def _finalize_middleware_result(self, result: Any, request: APIRequest) -> Any:
+        """Convert the `APIResponse` returned by the middleware chain into the value the original caller expects.
 
-        assert response is not None, "could not resolve response (should never happen)"
-        return self._process_response(
-            cast_to=cast_to,
-            options=options,
-            response=response,
-            stream=stream,
-            stream_cls=stream_cls,
-            retries_taken=retries_taken,
+        The middleware chain operates on `APIResponse` objects; the original caller may
+        have asked for a parsed model (the default), a `LegacyAPIResponse`
+        (`.with_raw_response`) or the `APIResponse` wrapper itself
+        (`.with_streaming_response` / a `cast_to` that is itself a response class).
+        """
+        if not isinstance(result, BaseAPIResponse):
+            # the middleware short-circuited with an already materialized value
+            # (e.g. a cached model); hand it back verbatim
+            return result
+        response = cast("APIResponse[Any]", result)
+
+        entry_mode = _middleware_entry_mode(request)
+        if entry_mode == "raw" or entry_mode == "stream":
+            # the original caller expects the `APIResponse` wrapper itself
+            return response
+
+        if entry_mode == "true":
+            # `.with_raw_response` callers expect a `LegacyAPIResponse`
+            return self._convert_to_legacy_response(response)
+
+        if _expects_response_wrapper(request.cast_to):
+            return response
+
+        return response.parse()
+
+    def _attempt_request(
+        self,
+        options: FinalRequestOptions,
+        *,
+        stream: bool = False,
+        retries_taken: int = 0,
+    ) -> tuple[httpx.Response, FinalRequestOptions]:
+        """Prepare, build and send a single HTTP attempt.
+
+        Returns the response regardless of its status code, along with the prepared
+        options it was sent with — status handling (the retry policy, raising typed
+        errors for the caller) happens above, where middleware can inspect error
+        responses first. Connection failures raise typed errors (`APITimeoutError`,
+        `APIConnectionError`).
+        """
+        options = self._prepare_options(options)
+
+        request = self._build_request(options, retries_taken=retries_taken)
+        self._prepare_request(request)
+
+        kwargs: HttpxSendArgs = {}
+        if self.custom_auth is not None:
+            kwargs["auth"] = self.custom_auth
+
+        if options.follow_redirects is not None:
+            kwargs["follow_redirects"] = options.follow_redirects
+
+        log.debug("Sending HTTP Request: %s %s", request.method, request.url)
+
+        try:
+            response = self._client.send(
+                request,
+                stream=stream or self._should_stream_response_body(request=request),
+                **kwargs,
+            )
+        except httpx.TimeoutException as err:
+            log.debug("Encountered httpx.TimeoutException", exc_info=True)
+            raise APITimeoutError(request=request) from err
+        except Exception as err:
+            if isinstance(err, AnthropicError):
+                # SDK-originated errors already carry their own type; don't wrap.
+                raise
+
+            log.debug("Encountered Exception", exc_info=True)
+            raise APIConnectionError(request=request) from err
+
+        log.debug(
+            'HTTP Response: %s %s "%i %s" %s',
+            request.method,
+            request.url,
+            response.status_code,
+            response.reason_phrase,
+            response.headers,
         )
+        log.debug("request_id: %s", response.headers.get("request-id"))
+
+        return response, options
 
     def _sleep_for_retry(
         self, *, retries_taken: int, max_retries: int, options: FinalRequestOptions, response: httpx.Response | None
@@ -1558,6 +1719,7 @@ class AsyncHttpxClientWrapper(DefaultAsyncHttpxClient):
 class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
     _client: httpx.AsyncClient
     _default_stream_cls: type[AsyncStream[Any]] | None = None
+    _middleware_chain: AsyncCallNext | None = None
     webhook_key: str | None = None
 
     def __init__(
@@ -1571,6 +1733,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
         http_client: httpx.AsyncClient | None = None,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
     ) -> None:
         if not is_given(timeout):
             # if the user passed in a custom http client with a non-default
@@ -1590,6 +1753,13 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
                 f"Invalid `http_client` argument; Expected an instance of `httpx.AsyncClient` but got {type(http_client)}"
             )
 
+        # materialize the middleware before validating it so that passing an
+        # iterator/generator doesn't result in validation consuming it and the
+        # middleware silently never running
+        middleware = tuple(middleware or ())
+        if middleware:
+            validate_async_middleware(middleware)
+
         super().__init__(
             version=version,
             base_url=base_url,
@@ -1598,8 +1768,10 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
             max_retries=max_retries,
             custom_query=custom_query,
             custom_headers=custom_headers,
+            middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
+        self._middleware_chain = self._build_middleware_chain()
         self._client = http_client or AsyncHttpxClientWrapper(
             base_url=base_url,
             # cast to a valid type because mypy doesn't understand our type narrowing
@@ -1697,111 +1869,207 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
             # ensure the idempotency key is reused between requests
             input_options.idempotency_key = self._idempotency_key()
 
-        response: httpx.Response | None = None
+        chain = self._middleware_chain
         max_retries = input_options.get_max_retries(self.max_retries)
 
-        retries_taken = 0
         for retries_taken in range(max_retries + 1):
-            options = model_copy(input_options)
-            options = await self._prepare_options(options)
-
             remaining_retries = max_retries - retries_taken
-            request = self._build_request(options, retries_taken=retries_taken)
-            await self._prepare_request(request)
 
-            kwargs: HttpxSendArgs = {}
-            if self.custom_auth is not None:
-                kwargs["auth"] = self.custom_auth
-
-            if options.follow_redirects is not None:
-                kwargs["follow_redirects"] = options.follow_redirects
-
-            log.debug("Sending HTTP Request: %s %s", request.method, request.url)
-
-            response = None
             try:
-                response = await self._client.send(
-                    request,
-                    stream=stream or self._should_stream_response_body(request=request),
-                    **kwargs,
-                )
-            except httpx.TimeoutException as err:
-                log.debug("Encountered httpx.TimeoutException", exc_info=True)
-
-                if remaining_retries > 0:
-                    await self._sleep_for_retry(
-                        retries_taken=retries_taken,
-                        max_retries=max_retries,
-                        options=input_options,
-                        response=None,
+                if chain is None:
+                    response, prepared = await self._attempt_request(
+                        model_copy(input_options), stream=stream, retries_taken=retries_taken
                     )
-                    continue
-
-                log.debug("Raising timeout error")
-                raise APITimeoutError(request=request) from err
+                    if response.is_success:
+                        return await self._process_response(
+                            cast_to=cast_to,
+                            options=prepared,
+                            response=response,
+                            stream=stream,
+                            stream_cls=stream_cls,
+                            retries_taken=retries_taken,
+                        )
+                else:
+                    request = APIRequest(
+                        options=model_copy(input_options),
+                        cast_to=cast_to,
+                        stream=stream,
+                        stream_cls=stream_cls,
+                        retries_taken=retries_taken,
+                    )
+                    result: Any = await chain(request)
+                    if not isinstance(result, BaseAPIResponse) or result.http_response.is_success:
+                        return cast(
+                            Union[ResponseT, _AsyncStreamT], await self._finalize_middleware_result(result, request)
+                        )
+                    response = result.http_response
             except Exception as err:
-                if isinstance(err, AnthropicError):
-                    # SDK-originated errors already carry their own type; don't wrap or retry.
+                should_retry, failed_response = self._should_retry_exception(err)
+                if remaining_retries <= 0 or not should_retry:
                     raise
 
-                log.debug("Encountered Exception", exc_info=True)
+                if failed_response is not None and not failed_response.is_closed:
+                    await failed_response.aclose()
 
-                if remaining_retries > 0:
-                    await self._sleep_for_retry(
-                        retries_taken=retries_taken,
-                        max_retries=max_retries,
-                        options=input_options,
-                        response=None,
-                    )
-                    continue
+                await self._sleep_for_retry(
+                    retries_taken=retries_taken,
+                    max_retries=max_retries,
+                    options=input_options,
+                    response=failed_response,
+                )
+                continue
 
-                log.debug("Raising connection error")
-                raise APIConnectionError(request=request) from err
+            # the attempt produced an error-status response — possibly inspected,
+            # replaced or passed through by middleware
+            if remaining_retries > 0 and self._should_retry(response):
+                if not response.is_closed:
+                    await response.aclose()
+                await self._sleep_for_retry(
+                    retries_taken=retries_taken,
+                    max_retries=max_retries,
+                    options=input_options,
+                    response=response,
+                )
+                continue
 
-            log.debug(
-                'HTTP Response: %s %s "%i %s" %s',
-                request.method,
-                request.url,
-                response.status_code,
-                response.reason_phrase,
-                response.headers,
+            # If the response is streamed then we need to explicitly read the response
+            # to completion before attempting to access the response text.
+            if not response.is_closed:
+                await response.aread()
+
+            raise self._make_status_error_from_response(response) from None
+
+        raise RuntimeError("could not resolve response (should never happen)")
+
+    def _build_middleware_chain(self) -> AsyncCallNext | None:
+        """Build the middleware invocation chain.
+
+        The chain only depends on the immutable `self._middleware` tuple so it is built
+        once at construction time. It is invoked once per HTTP attempt, inside the
+        SDK's retry loop, with that attempt's `APIRequest`.
+        """
+        if not self._middleware:
+            return None
+
+        async def base_handler(req: APIRequest) -> AsyncAPIResponse[Any]:
+            options = _prepare_middleware_options(req)
+            response, prepared = await self._attempt_request(
+                options, stream=req.stream, retries_taken=req.retries_taken
             )
-            log.debug("request_id: %s", response.headers.get("request-id"))
+            return cast(
+                "AsyncAPIResponse[Any]",
+                await self._process_response(
+                    cast_to=req.cast_to,
+                    options=prepared,
+                    response=response,
+                    stream=req.stream,
+                    stream_cls=req.stream_cls,
+                    retries_taken=req.retries_taken,
+                ),
+            )
 
-            try:
-                response.raise_for_status()
-            except httpx.HTTPStatusError as err:  # thrown on 4xx and 5xx status code
-                log.debug("Encountered httpx.HTTPStatusError", exc_info=True)
+        def wrap(middleware: MiddlewareInput, call_next: AsyncCallNext) -> AsyncCallNext:
+            handler = (
+                middleware.handle_async
+                if isinstance(middleware, Middleware)
+                else cast(AsyncMiddlewareCallable, middleware)
+            )
 
-                if remaining_retries > 0 and self._should_retry(err.response):
-                    await err.response.aclose()
-                    await self._sleep_for_retry(
-                        retries_taken=retries_taken,
-                        max_retries=max_retries,
-                        options=input_options,
-                        response=response,
-                    )
-                    continue
+            async def handle(req: APIRequest) -> AsyncAPIResponse[Any]:
+                return await handler(req, call_next)
 
-                # If the response is streamed then we need to explicitly read the response
-                # to completion before attempting to access the response text.
-                if not err.response.is_closed:
-                    await err.response.aread()
+            return handle
 
-                log.debug("Re-raising status error")
-                raise self._make_status_error_from_response(err.response) from None
+        chain: AsyncCallNext = base_handler
+        for entry in reversed(self._middleware):
+            chain = wrap(entry, chain)
+        return chain
 
-            break
+    async def _finalize_middleware_result(self, result: Any, request: APIRequest) -> Any:
+        """Convert the `AsyncAPIResponse` returned by the middleware chain into the value the original caller expects.
 
-        assert response is not None, "could not resolve response (should never happen)"
-        return await self._process_response(
-            cast_to=cast_to,
-            options=options,
-            response=response,
-            stream=stream,
-            stream_cls=stream_cls,
-            retries_taken=retries_taken,
+        The middleware chain operates on `AsyncAPIResponse` objects; the original caller
+        may have asked for a parsed model (the default), a `LegacyAPIResponse`
+        (`.with_raw_response`) or the `AsyncAPIResponse` wrapper itself
+        (`.with_streaming_response` / a `cast_to` that is itself a response class).
+        """
+        if not isinstance(result, BaseAPIResponse):
+            # the middleware short-circuited with an already materialized value
+            # (e.g. a cached model); hand it back verbatim
+            return result
+        response = cast("AsyncAPIResponse[Any]", result)
+
+        entry_mode = _middleware_entry_mode(request)
+        if entry_mode == "raw" or entry_mode == "stream":
+            # the original caller expects the `AsyncAPIResponse` wrapper itself
+            return response
+
+        if entry_mode == "true":
+            # `.with_raw_response` callers expect a `LegacyAPIResponse`
+            return self._convert_to_legacy_response(response)
+
+        if _expects_response_wrapper(request.cast_to):
+            return response
+
+        return await response.parse()
+
+    async def _attempt_request(
+        self,
+        options: FinalRequestOptions,
+        *,
+        stream: bool = False,
+        retries_taken: int = 0,
+    ) -> tuple[httpx.Response, FinalRequestOptions]:
+        """Prepare, build and send a single HTTP attempt.
+
+        Returns the response regardless of its status code, along with the prepared
+        options it was sent with — status handling (the retry policy, raising typed
+        errors for the caller) happens above, where middleware can inspect error
+        responses first. Connection failures raise typed errors (`APITimeoutError`,
+        `APIConnectionError`).
+        """
+        options = await self._prepare_options(options)
+
+        request = self._build_request(options, retries_taken=retries_taken)
+        await self._prepare_request(request)
+
+        kwargs: HttpxSendArgs = {}
+        if self.custom_auth is not None:
+            kwargs["auth"] = self.custom_auth
+
+        if options.follow_redirects is not None:
+            kwargs["follow_redirects"] = options.follow_redirects
+
+        log.debug("Sending HTTP Request: %s %s", request.method, request.url)
+
+        try:
+            response = await self._client.send(
+                request,
+                stream=stream or self._should_stream_response_body(request=request),
+                **kwargs,
+            )
+        except httpx.TimeoutException as err:
+            log.debug("Encountered httpx.TimeoutException", exc_info=True)
+            raise APITimeoutError(request=request) from err
+        except Exception as err:
+            if isinstance(err, AnthropicError):
+                # SDK-originated errors already carry their own type; don't wrap.
+                raise
+
+            log.debug("Encountered Exception", exc_info=True)
+            raise APIConnectionError(request=request) from err
+
+        log.debug(
+            'HTTP Response: %s %s "%i %s" %s',
+            request.method,
+            request.url,
+            response.status_code,
+            response.reason_phrase,
+            response.headers,
         )
+        log.debug("request_id: %s", response.headers.get("request-id"))
+
+        return response, options
 
     async def _sleep_for_retry(
         self, *, retries_taken: int, max_retries: int, options: FinalRequestOptions, response: httpx.Response | None
@@ -2280,3 +2548,41 @@ def _merge_mappings(
     """
     merged = {**obj1, **obj2}
     return {key: value for key, value in merged.items() if not isinstance(value, Omit)}
+
+
+def _middleware_entry_mode(request: APIRequest) -> Literal["raw", "stream", "true"] | None:
+    """The raw-response mode the original caller entered the middleware chain with."""
+    headers = request.options.headers
+    mode = headers.get(RAW_RESPONSE_HEADER) if is_given(headers) else None
+    if isinstance(mode, str) and mode in ("raw", "stream", "true"):
+        # mypy for some reason cannot narrow the type
+        return mode  # type: ignore
+    return None
+
+
+def _prepare_middleware_options(request: APIRequest) -> FinalRequestOptions:
+    """Build the options the base middleware handler hands to `_attempt_request()`.
+
+    Returns a copy so that mutations made by the request pipeline never leak back
+    into the `APIRequest` between separate `call_next(...)` invocations, with the
+    raw-response header set so that the pipeline produces an `APIResponse` /
+    `AsyncAPIResponse` for the middleware chain.
+    """
+    options = model_copy(request.options)
+    headers = dict(options.headers) if is_given(options.headers) else {}
+    if headers.get(RAW_RESPONSE_HEADER) not in ("raw", "stream"):
+        # Note: this intentionally *replaces* the `LegacyAPIResponse` mode set by
+        # `.with_raw_response` wrappers so that the middleware chain always operates
+        # on a true `APIResponse` / `AsyncAPIResponse`. The "stream" mode set by
+        # `.with_streaming_response` already produces one and is left as-is so that
+        # the response body is not eagerly read. `_finalize_middleware_result()`
+        # restores the value the original caller expects.
+        headers[RAW_RESPONSE_HEADER] = "raw"
+    options.headers = headers
+    return options
+
+
+def _expects_response_wrapper(cast_to: Any) -> bool:
+    """Whether the given `cast_to` asks for the `APIResponse` wrapper itself."""
+    origin = get_origin(cast_to) or cast_to
+    return inspect.isclass(origin) and issubclass(origin, BaseAPIResponse)

@@ -1,9 +1,12 @@
+import os
 import json
 import logging
 from typing import Any, Dict, List, Union, cast
 from typing_extensions import Literal
 
+import httpx
 import pytest
+from respx import MockRouter
 from inline_snapshot import external, snapshot
 
 from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
@@ -14,6 +17,8 @@ from anthropic.types.beta.beta_message_param import BetaMessageParam
 from anthropic.types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
 
 from ..utils import print_obj
+
+base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 # all the snapshots in this file are auto-generated from the live API
 #
@@ -665,6 +670,103 @@ async def test_basic_call_async(async_snapshot_client: AsyncAnthropic) -> None:
         tools=[get_weather],
         messages=[{"role": "user", "content": "What is the weather in SF?"}],
     ).until_done()
+
+
+def _refusal_with_tool_use() -> httpx.Response:
+    return httpx.Response(
+        200,
+        json={
+            "id": "msg_refusal",
+            "type": "message",
+            "role": "assistant",
+            "model": "claude-haiku-4-5",
+            "content": [
+                {
+                    "type": "tool_use",
+                    "id": "toolu_refusal",
+                    "name": "get_weather",
+                    "input": {"location": "San Francisco, CA", "units": "f"},
+                }
+            ],
+            "stop_reason": "refusal",
+            "stop_sequence": None,
+            "usage": {"input_tokens": 1, "output_tokens": 1},
+        },
+    )
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_refusal_ends_runner_without_executing_tools_sync(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(side_effect=[_refusal_with_tool_use()])
+
+    called = False
+
+    @beta_tool
+    def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        """Lookup the weather for a given city in either celsius or fahrenheit
+
+        Args:
+            location: The city and state, e.g. San Francisco, CA
+            units: Unit for the output, either 'c' for celsius or 'f' for fahrenheit
+        Returns:
+            A dictionary containing the location, temperature, and weather condition.
+        """
+        nonlocal called
+        called = True
+        return json.dumps(_get_weather(location, units))
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
+        message = runner.until_done()
+
+    assert message.stop_reason == "refusal"
+    assert called is False
+    assert len(respx_mock.calls) == 1
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+async def test_refusal_ends_runner_without_executing_tools_async(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(side_effect=[_refusal_with_tool_use()])
+
+    called = False
+
+    @beta_async_tool
+    async def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        """Lookup the weather for a given city in either celsius or fahrenheit
+
+        Args:
+            location: The city and state, e.g. San Francisco, CA
+            units: Unit for the output, either 'c' for celsius or 'f' for fahrenheit
+        Returns:
+            A dictionary containing the location, temperature, and weather condition.
+        """
+        nonlocal called
+        called = True
+        return json.dumps(_get_weather(location, units))
+
+    async with AsyncAnthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
+        message = await runner.until_done()
+
+    assert message.stop_reason == "refusal"
+    assert called is False
+    assert len(respx_mock.calls) == 1
 
 
 def _get_weather(location: str, units: Literal["c", "f"]) -> Dict[str, Any]:

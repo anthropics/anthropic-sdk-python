@@ -61,6 +61,7 @@ from ....lib.tools._beta_functions import (
 )
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_message_param import BetaMessageParam
+from ....types.beta.beta_fallback_param import BetaFallbackParam
 from ....types.beta.beta_metadata_param import BetaMetadataParam
 from ....types.beta.parsed_beta_message import ParsedBetaMessage
 from ....types.beta.beta_text_block_param import BetaTextBlockParam
@@ -118,6 +119,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -249,6 +252,30 @@ class Messages(SyncAPIResource):
 
           diagnostics: Request-level diagnostics. Currently carries the previous response id for
               prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -434,6 +461,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -568,6 +597,30 @@ class Messages(SyncAPIResource):
 
           diagnostics: Request-level diagnostics. Currently carries the previous response id for
               prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -749,6 +802,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -883,6 +938,30 @@ class Messages(SyncAPIResource):
 
           diagnostics: Request-level diagnostics. Currently carries the previous response id for
               prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1063,6 +1142,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1129,6 +1210,8 @@ class Messages(SyncAPIResource):
                     "container": container,
                     "context_management": context_management,
                     "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -1169,6 +1252,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1269,6 +1354,8 @@ class Messages(SyncAPIResource):
                     "container": container,
                     "context_management": context_management,
                     "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -1313,6 +1400,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         max_iterations: int | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
@@ -1354,6 +1443,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1393,6 +1484,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1430,6 +1523,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1505,6 +1600,8 @@ class Messages(SyncAPIResource):
                 "container": container,
                 "context_management": context_management,
                 "diagnostics": diagnostics,
+                "fallback_credit_token": fallback_credit_token,
+                "fallbacks": fallbacks,
                 "inference_geo": inference_geo,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
@@ -1562,6 +1659,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1649,6 +1748,8 @@ class Messages(SyncAPIResource):
                     "container": container,
                     "context_management": context_management,
                     "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "service_tier": service_tier,
@@ -1985,6 +2086,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2116,6 +2219,30 @@ class AsyncMessages(AsyncAPIResource):
 
           diagnostics: Request-level diagnostics. Currently carries the previous response id for
               prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2301,6 +2428,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2435,6 +2564,30 @@ class AsyncMessages(AsyncAPIResource):
 
           diagnostics: Request-level diagnostics. Currently carries the previous response id for
               prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2616,6 +2769,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2750,6 +2905,30 @@ class AsyncMessages(AsyncAPIResource):
 
           diagnostics: Request-level diagnostics. Currently carries the previous response id for
               prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2930,6 +3109,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2996,6 +3177,8 @@ class AsyncMessages(AsyncAPIResource):
                     "container": container,
                     "context_management": context_management,
                     "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -3036,6 +3219,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3135,6 +3320,8 @@ class AsyncMessages(AsyncAPIResource):
                     "container": container,
                     "context_management": context_management,
                     "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "output_config": merged_output_config,
@@ -3180,6 +3367,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3220,6 +3409,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3259,6 +3450,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3296,6 +3489,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3364,6 +3559,8 @@ class AsyncMessages(AsyncAPIResource):
                 "container": container,
                 "context_management": context_management,
                 "diagnostics": diagnostics,
+                "fallback_credit_token": fallback_credit_token,
+                "fallbacks": fallbacks,
                 "inference_geo": inference_geo,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
@@ -3424,6 +3621,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -3506,6 +3705,8 @@ class AsyncMessages(AsyncAPIResource):
                     "container": container,
                     "context_management": context_management,
                     "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "service_tier": service_tier,

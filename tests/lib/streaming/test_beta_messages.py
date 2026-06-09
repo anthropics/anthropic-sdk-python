@@ -234,6 +234,32 @@ def assert_refusal_response(message: BetaMessage) -> None:
     assert message.stop_details.explanation == "This request was refused due to policy."
 
 
+EXPECTED_FALLBACK_EVENT_TYPES = [
+    "message_start",
+    "content_block_start",
+    "content_block_stop",
+    "content_block_start",
+    "content_block_delta",
+    "text",
+    "content_block_stop",
+    "message_delta",
+]
+
+
+def assert_fallback_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
+    assert [e.type for e in events] == EXPECTED_FALLBACK_EVENT_TYPES
+
+    # `message_start` carried the declined model; the accumulated message must
+    # be relabeled to the serving model from the fallback block
+    assert message.model == "claude-sonnet-4-5"
+
+    assert message.content[0].type == "fallback"
+
+    text_block = message.content[1]
+    assert text_block.type == "text"
+    assert text_block.text == "Hello there!"
+
+
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
@@ -339,6 +365,21 @@ class TestSyncMessages:
             assert isinstance(cast(Any, stream), BetaMessageStream)
 
             assert_compaction_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_fallback_relabels_model(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("fallback_response.txt"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaMessageStream)
+
+            assert_fallback_response([event for event in stream], stream.get_final_message())
 
 
 class TestAsyncMessages:
@@ -477,6 +518,22 @@ class TestAsyncMessages:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_compaction_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_fallback_relabels_model(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("fallback_response.txt")))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
+
+            assert_fallback_response([event async for event in stream], await stream.get_final_message())
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
