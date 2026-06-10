@@ -275,3 +275,58 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+class TestAWSEventStreamDecoder:
+    def _make_event(self, response_dict: dict) -> t.Any:
+        """Create a mock EventStreamMessage that returns the given response_dict."""
+
+        class MockEvent:
+            def __init__(self, resp: dict) -> None:
+                self._resp = resp
+
+            def to_response_dict(self) -> dict:
+                return self._resp
+
+        return MockEvent(response_dict)
+
+    def test_non_200_status_emits_error_sse(self) -> None:
+        from anthropic.lib.bedrock._stream_decoder import AWSEventStreamDecoder
+
+        decoder = AWSEventStreamDecoder()
+
+        error_body = b'{"message":"The system encountered an unexpected error during processing. Try your request again."}'
+        event = self._make_event(
+            {
+                "status_code": 400,
+                "headers": {
+                    ":exception-type": "internalServerException",
+                    ":content-type": "application/json",
+                    ":message-type": "exception",
+                },
+                "body": error_body,
+            }
+        )
+
+        sse = decoder._parse_message_from_event(event)
+        assert sse is not None
+        assert sse.event == "error"
+        assert sse.data == error_body.decode("utf-8")
+
+    def test_non_200_status_no_body(self) -> None:
+        from anthropic.lib.bedrock._stream_decoder import AWSEventStreamDecoder
+
+        decoder = AWSEventStreamDecoder()
+
+        event = self._make_event(
+            {
+                "status_code": 500,
+                "headers": {":message-type": "exception"},
+                "body": b"",
+            }
+        )
+
+        sse = decoder._parse_message_from_event(event)
+        assert sse is not None
+        assert sse.event == "error"
+        assert sse.data == ""

@@ -35,9 +35,9 @@ class AWSEventStreamDecoder:
         for chunk in iterator:
             event_stream_buffer.add_data(chunk)
             for event in event_stream_buffer:
-                message = self._parse_message_from_event(event)
-                if message:
-                    yield ServerSentEvent(data=message, event="completion")
+                sse = self._parse_message_from_event(event)
+                if sse is not None:
+                    yield sse
 
     async def aiter_bytes(self, iterator: AsyncIterator[bytes]) -> AsyncIterator[ServerSentEvent]:
         """Given an async iterator that yields lines, iterate over it & yield every event encountered"""
@@ -47,18 +47,21 @@ class AWSEventStreamDecoder:
         async for chunk in iterator:
             event_stream_buffer.add_data(chunk)
             for event in event_stream_buffer:
-                message = self._parse_message_from_event(event)
-                if message:
-                    yield ServerSentEvent(data=message, event="completion")
+                sse = self._parse_message_from_event(event)
+                if sse is not None:
+                    yield sse
 
-    def _parse_message_from_event(self, event: EventStreamMessage) -> str | None:
+    def _parse_message_from_event(self, event: EventStreamMessage) -> ServerSentEvent | None:
         response_dict = event.to_response_dict()
         parsed_response = self.parser.parse(response_dict, get_response_stream_shape())
         if response_dict["status_code"] != 200:
-            raise ValueError(f"Bad response code, expected 200: {response_dict}")
+            error_body = response_dict.get("body", b"")
+            if isinstance(error_body, bytes):
+                error_body = error_body.decode("utf-8", errors="replace")
+            return ServerSentEvent(data=error_body, event="error")
 
         chunk = parsed_response.get("chunk")
         if not chunk:
             return None
 
-        return chunk.get("bytes").decode()  # type: ignore[no-any-return]
+        return ServerSentEvent(data=chunk.get("bytes").decode(), event="completion")  # type: ignore[arg-type]
