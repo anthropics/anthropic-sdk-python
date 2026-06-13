@@ -434,6 +434,15 @@ class TestAnthropic:
         request2 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"X-Api-Key": Omit()}))
         assert request2.headers.get("X-Api-Key") is None
 
+    def test_empty_env_credentials_treated_as_unset(self) -> None:
+        with mock.patch("anthropic._client.default_credentials", return_value=None):
+            with update_env(ANTHROPIC_API_KEY="", ANTHROPIC_AUTH_TOKEN=""):
+                client = Anthropic(base_url=base_url, _strict_response_validation=True)
+
+        assert client.api_key is None
+        assert client.auth_token is None
+        assert client.auth_headers == {}
+
     def test_default_query_option(self) -> None:
         client = Anthropic(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"query_param": "bar"}
@@ -1463,6 +1472,15 @@ class TestAsyncAnthropic:
 
         request2 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"X-Api-Key": Omit()}))
         assert request2.headers.get("X-Api-Key") is None
+
+    def test_empty_env_credentials_treated_as_unset(self) -> None:
+        with mock.patch("anthropic._client.default_credentials", return_value=None):
+            with update_env(ANTHROPIC_API_KEY="", ANTHROPIC_AUTH_TOKEN=""):
+                client = AsyncAnthropic(base_url=base_url, _strict_response_validation=True)
+
+        assert client.api_key is None
+        assert client.auth_token is None
+        assert client.auth_headers == {}
 
     async def test_default_query_option(self) -> None:
         client = AsyncAnthropic(
