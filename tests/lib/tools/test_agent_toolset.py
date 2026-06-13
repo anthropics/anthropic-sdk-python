@@ -109,6 +109,54 @@ async def test_read_rejects_directory(tmp_path: Path) -> None:
 
 
 @needs_pydantic_v2
+@pytest.mark.parametrize(
+    ("name", "payload", "expected_type", "expected_media_type"),
+    [
+        ("slide.jpg", b"\xff\xd8\xff\xe0\x00\x10JFIF" + b"\x00" * 8, "image", "image/jpeg"),
+        ("logo.png", b"\x89PNG\r\n\x1a\n" + b"\x00" * 8, "image", "image/png"),
+        ("anim.gif", b"GIF89a" + b"\x00" * 10, "image", "image/gif"),
+        ("pic.webp", b"RIFF\x00\x00\x00\x00WEBPVP8 ", "image", "image/webp"),
+        ("doc.pdf", b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n", "document", "application/pdf"),
+    ],
+)
+async def test_read_returns_content_block_for_binary(
+    tmp_path: Path, name: str, payload: bytes, expected_type: str, expected_media_type: str
+) -> None:
+    import base64
+
+    (tmp_path / name).write_bytes(payload)
+    env = AgentToolContext(workdir=str(tmp_path))
+    out = await beta_read_tool(env).call({"file_path": name})
+
+    assert isinstance(out, list)
+    assert len(out) == 1
+    block = out[0]
+    assert block["type"] == expected_type
+    source = block["source"]
+    assert source["type"] == "base64"
+    assert source["media_type"] == expected_media_type
+    assert base64.standard_b64decode(source["data"]) == payload
+
+
+@needs_pydantic_v2
+async def test_read_rejects_view_range_on_binary(tmp_path: Path) -> None:
+    (tmp_path / "pic.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 8)
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError, match="view_range is not supported"):
+        await beta_read_tool(env).call({"file_path": "pic.png", "view_range": [1, 2]})
+
+
+@needs_pydantic_v2
+async def test_read_rejects_non_text_non_binary(tmp_path: Path) -> None:
+    # Arbitrary non-UTF-8 bytes that aren't a recognised image/PDF used to raise
+    # an uncaught UnicodeDecodeError; now a clean ToolError.
+    (tmp_path / "blob.bin").write_bytes(b"\x00\x01\x02\xff\xfe garbage \x80\x81")
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError, match="not a UTF-8 text file"):
+        await beta_read_tool(env).call({"file_path": "blob.bin"})
+
+
+@needs_pydantic_v2
 async def test_edit_rejects_oversized_file(tmp_path: Path) -> None:
     (tmp_path / "big.txt").write_bytes(b"a" * (257 * 1024))
     env = AgentToolContext(workdir=str(tmp_path))
