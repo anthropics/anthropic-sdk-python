@@ -456,11 +456,17 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
     def _build_headers(self, options: FinalRequestOptions, *, retries_taken: int = 0) -> httpx.Headers:
         custom_headers = options.headers or {}
+        req_timeout = self.timeout if isinstance(options.timeout, NotGiven) else options.timeout
+        if isinstance(req_timeout, Timeout):
+            stainless_timeout = str(req_timeout.read)
+        elif req_timeout is not None:
+            stainless_timeout = str(req_timeout)
+        else:
+            default_timeout = self.timeout
+            stainless_timeout = str(default_timeout.read if isinstance(default_timeout, Timeout) else default_timeout)
         headers_dict = _merge_mappings(
             {
-                "x-stainless-timeout": str(options.timeout.read)
-                if isinstance(options.timeout, Timeout)
-                else str(options.timeout),
+                "x-stainless-timeout": stainless_timeout,
                 **self.default_headers,
             },
             custom_headers,
