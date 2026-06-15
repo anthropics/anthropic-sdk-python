@@ -275,3 +275,37 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+@pytest.mark.parametrize(
+    "status_code,expected_type",
+    [
+        (400, "BadRequestError"),
+        (401, "AuthenticationError"),
+        (403, "PermissionDeniedError"),
+        (404, "NotFoundError"),
+        (409, "ConflictError"),
+        (413, "RequestTooLargeError"),
+        (422, "UnprocessableEntityError"),
+        (429, "RateLimitError"),
+        (500, "InternalServerError"),
+        (503, "ServiceUnavailableError"),
+        (529, "OverloadedError"),
+    ],
+)
+def test_bedrock_make_status_error_maps_codes_to_typed_exceptions(
+    status_code: int, expected_type: str
+) -> None:
+    # Bedrock surfaces Anthropic-API status codes; this test pins the mapping
+    # to match the canonical client (see tests/test_client.py) so the two
+    # don't drift. 413 and 529 had been missing on Bedrock — users got a
+    # generic APIStatusError / InternalServerError for request-too-large and
+    # overloaded responses.
+    response = httpx.Response(status_code, request=httpx.Request("GET", "/"))
+
+    for client in (sync_client, async_client):
+        err = client._make_status_error("msg", body=None, response=response)
+        assert type(err).__name__ == expected_type, (
+            f"status {status_code} on {type(client).__name__}: "
+            f"got {type(err).__name__}, expected {expected_type}"
+        )
