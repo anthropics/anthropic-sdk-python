@@ -416,6 +416,13 @@ class TestAnthropic:
         test_client.close()
         test_client2.close()
 
+    def test_default_timeout_header_is_not_not_given(self) -> None:
+        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert request.headers.get("x-stainless-timeout") != "NOT_GIVEN"
+        assert request.headers.get("x-stainless-timeout") == request.headers.get("x-stainless-read-timeout")
+        client.close()
+
     def test_validate_headers(self) -> None:
         client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
