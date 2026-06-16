@@ -9,6 +9,7 @@ import pytest
 from respx import MockRouter
 
 from anthropic import AnthropicBedrock, AsyncAnthropicBedrock
+from anthropic.lib.bedrock._stream_decoder import _chunk_bytes_to_sse
 
 sync_client = AnthropicBedrock(
     aws_region="us-east-1",
@@ -275,3 +276,40 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+def test_chunk_bytes_to_sse_typed_event() -> None:
+    raw = (
+        b'{"type":"message_start","message":{"id":"msg_123","type":"message","role":"assistant",'
+        b'"content":[],"model":"claude-x","stop_reason":null,"stop_sequence":null,'
+        b'"usage":{"input_tokens":1,"output_tokens":1}}}'
+    )
+    sse = _chunk_bytes_to_sse(raw)
+    assert sse is not None
+    assert sse.event == "message_start"
+    assert sse.data == raw.decode()
+
+
+def test_chunk_bytes_to_sse_drops_invocation_metrics() -> None:
+    raw = (
+        b'{"amazon-bedrock-invocationMetrics":{"inputTokenCount":1,"outputTokenCount":1,'
+        b'"invocationLatency":100,"firstByteLatency":50}}'
+    )
+    assert _chunk_bytes_to_sse(raw) is None
+
+
+def test_chunk_bytes_to_sse_legacy_completion() -> None:
+    raw = b'{"completion":" Hello","stop_reason":null,"model":"claude-2"}'
+    sse = _chunk_bytes_to_sse(raw)
+    assert sse is not None
+    assert sse.event == "completion"
+
+
+def test_chunk_bytes_to_sse_legacy_completion_with_metrics() -> None:
+    raw = (
+        b'{"completion":" Hello","stop_reason":"stop_sequence","model":"claude-2",'
+        b'"amazon-bedrock-invocationMetrics":{"inputTokenCount":1,"outputTokenCount":1}}'
+    )
+    sse = _chunk_bytes_to_sse(raw)
+    assert sse is not None
+    assert sse.event == "completion"
