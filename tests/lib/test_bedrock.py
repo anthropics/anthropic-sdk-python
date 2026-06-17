@@ -290,14 +290,6 @@ def test_chunk_bytes_to_sse_typed_event() -> None:
     assert sse.data == raw.decode()
 
 
-def test_chunk_bytes_to_sse_drops_invocation_metrics() -> None:
-    raw = (
-        b'{"amazon-bedrock-invocationMetrics":{"inputTokenCount":1,"outputTokenCount":1,'
-        b'"invocationLatency":100,"firstByteLatency":50}}'
-    )
-    assert _chunk_bytes_to_sse(raw) is None
-
-
 def test_chunk_bytes_to_sse_legacy_completion() -> None:
     raw = b'{"completion":" Hello","stop_reason":null,"model":"claude-2"}'
     sse = _chunk_bytes_to_sse(raw)

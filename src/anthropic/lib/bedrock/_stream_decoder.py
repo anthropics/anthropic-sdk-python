@@ -79,11 +79,6 @@ def _chunk_bytes_to_sse(raw: bytes) -> ServerSentEvent | None:
     payload = cast("Dict[str, Any]", data)
     event_type = payload.get("type")
     if not isinstance(event_type, str):
-        # Bedrock appends a trailing chunk that only carries invocation
-        # metrics; it is not a model stream event, so drop it rather than
-        # let it be mis-constructed against the stream-event union.
-        if "amazon-bedrock-invocationMetrics" in payload and "completion" not in payload:
-            return None
         event_type = "completion"
 
     return ServerSentEvent(data=decoded, event=event_type)
