@@ -34,6 +34,7 @@ from ._base_client import (
     DEFAULT_MAX_RETRIES,
     SyncAPIClient,
     AsyncAPIClient,
+    merge_headers,
 )
 
 # --- credentials support (hand-written, upstream to Stainless) ---
@@ -448,7 +449,7 @@ class Anthropic(SyncAPIClient):
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 
@@ -861,7 +862,7 @@ class AsyncAnthropic(AsyncAPIClient):
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 

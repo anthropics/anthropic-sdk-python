@@ -23,6 +23,7 @@ from ..._base_client import (
     SyncAPIClient,
     AsyncAPIClient,
     FinalRequestOptions,
+    merge_headers,
 )
 from ._stream_decoder import AWSEventStreamDecoder
 from ...resources.messages import Messages, AsyncMessages
@@ -267,7 +268,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 
@@ -447,7 +448,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 

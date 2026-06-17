@@ -42,7 +42,10 @@ from ....types.beta import (
     message_count_tokens_params,
 )
 from ...._exceptions import AnthropicError
-from ...._base_client import make_request_options
+from ...._base_client import (
+    merge_headers,
+    make_request_options,
+)
 from ...._utils._utils import is_dict
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
@@ -1194,11 +1197,11 @@ class Messages(SyncAPIResource):
 
         merged_output_config = _merge_output_configs(output_config, output_format)
 
-        extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
         return self._post(
             "/v1/messages?beta=true",
             body=maybe_transform(
@@ -1307,12 +1310,12 @@ class Messages(SyncAPIResource):
             # Ensure structured outputs beta is included for parse method
             betas.append("structured-outputs-2025-12-15")
 
-        extra_headers = {
-            "X-Stainless-Helper": "beta.messages.parse",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            {"X-Stainless-Helper": "beta.messages.parse"},
+            strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         if is_given(output_format) and output_format is not None:
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
@@ -1574,12 +1577,12 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
-        extra_headers = {
-            "X-Stainless-Helper": "BetaToolRunner",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            {"X-Stainless-Helper": "BetaToolRunner"},
+            strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         runnable_tools: list[BetaRunnableTool] = []
         raw_tools: list[BetaToolUnionParam] = []
@@ -1703,13 +1706,15 @@ class Messages(SyncAPIResource):
             )
 
         """Create a Message stream"""
-        extra_headers = {
-            "X-Stainless-Helper-Method": "stream",
-            "X-Stainless-Stream-Helper": "beta.messages",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            {
+                "X-Stainless-Helper-Method": "stream",
+                "X-Stainless-Stream-Helper": "beta.messages",
+            },
+            strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         transformed_output_format: BetaJSONOutputFormatParam | Omit = omit
 
@@ -3161,11 +3166,11 @@ class AsyncMessages(AsyncAPIResource):
 
         merged_output_config = _merge_output_configs(output_config, output_format)
 
-        extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
         return await self._post(
             "/v1/messages?beta=true",
             body=await async_maybe_transform(
@@ -3273,12 +3278,12 @@ class AsyncMessages(AsyncAPIResource):
             # Ensure structured outputs beta is included for parse method
             betas.append("structured-outputs-2025-12-15")
 
-        extra_headers = {
-            "X-Stainless-Helper": "beta.messages.parse",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            {"X-Stainless-Helper": "beta.messages.parse"},
+            strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         if is_given(output_format) and output_format is not None:
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
@@ -3533,12 +3538,12 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
-        extra_headers = {
-            "X-Stainless-Helper": "BetaToolRunner",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            {"X-Stainless-Helper": "BetaToolRunner"},
+            strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         runnable_tools: list[BetaAsyncRunnableTool] = []
         raw_tools: list[BetaToolUnionParam] = []
@@ -3661,13 +3666,15 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
-        extra_headers = {
-            "X-Stainless-Helper-Method": "stream",
-            "X-Stainless-Stream-Helper": "beta.messages",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            {
+                "X-Stainless-Helper-Method": "stream",
+                "X-Stainless-Stream-Helper": "beta.messages",
+            },
+            strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         transformed_output_format: BetaJSONOutputFormatParam | Omit = omit
 

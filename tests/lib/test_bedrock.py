@@ -305,3 +305,17 @@ def test_chunk_bytes_to_sse_legacy_completion_with_metrics() -> None:
     sse = _chunk_bytes_to_sse(raw)
     assert sse is not None
     assert sse.event == "completion"
+
+
+def test_copy_x_stainless_helper_header_appends() -> None:
+    # `x-stainless-helper` accumulates across copies instead of being clobbered
+    client = sync_client.with_options(default_headers={"x-stainless-helper": "parent"})
+    copied = client.with_options(default_headers={"x-stainless-helper": "child"})
+    assert copied.default_headers["x-stainless-helper"] == "parent, child"
+
+
+def test_async_copy_x_stainless_helper_header_appends() -> None:
+    # `x-stainless-helper` accumulates across copies instead of being clobbered
+    client = async_client.with_options(default_headers={"x-stainless-helper": "parent"})
+    copied = client.with_options(default_headers={"x-stainless-helper": "child"})
+    assert copied.default_headers["x-stainless-helper"] == "parent, child"

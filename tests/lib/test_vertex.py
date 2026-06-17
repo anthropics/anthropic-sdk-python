@@ -119,6 +119,18 @@ class TestAnthropicVertex:
         ):
             client.copy(set_default_headers={}, default_headers={"X-Foo": "Bar"})
 
+    def test_copy_x_stainless_helper_header_appends(self) -> None:
+        # `x-stainless-helper` accumulates across copies instead of being clobbered
+        client = AnthropicVertex(
+            base_url=base_url,
+            region="region",
+            project_id="project",
+            _strict_response_validation=True,
+            default_headers={"x-stainless-helper": "parent"},
+        )
+        copied = client.copy(default_headers={"x-stainless-helper": "child"})
+        assert copied.default_headers["x-stainless-helper"] == "parent, child"
+
     def test_global_region_base_url(self) -> None:
         """Test that global region uses the correct base URL."""
         client = AnthropicVertex(region="global", project_id="test-project", access_token="fake-token")
@@ -258,6 +270,18 @@ class TestAsyncAnthropicVertex:
             match="`default_headers` and `set_default_headers` arguments are mutually exclusive",
         ):
             client.copy(set_default_headers={}, default_headers={"X-Foo": "Bar"})
+
+    def test_copy_x_stainless_helper_header_appends(self) -> None:
+        # `x-stainless-helper` accumulates across copies instead of being clobbered
+        client = AsyncAnthropicVertex(
+            base_url=base_url,
+            region="region",
+            project_id="project",
+            _strict_response_validation=True,
+            default_headers={"x-stainless-helper": "parent"},
+        )
+        copied = client.copy(default_headers={"x-stainless-helper": "child"})
+        assert copied.default_headers["x-stainless-helper"] == "parent, child"
 
     def test_global_region_base_url(self) -> None:
         """Test that global region uses the correct base URL."""

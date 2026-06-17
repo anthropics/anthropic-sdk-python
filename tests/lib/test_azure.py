@@ -101,6 +101,17 @@ class TestAnthropicFoundry:
         assert derived.default_headers.get("x-app") == "1"
         assert derived.default_headers.get("x-extra") == "2"
 
+    def test_copy_x_stainless_helper_header_appends(self) -> None:
+        """x-stainless-helper accumulates across copies instead of being clobbered."""
+        client = AnthropicFoundry(
+            api_key="test-key",
+            resource="example-resource",
+            default_headers={"x-stainless-helper": "parent"},
+        )
+
+        copied = client.with_options(default_headers={"x-stainless-helper": "child"})
+        assert copied.default_headers.get("x-stainless-helper") == "parent, child"
+
 
 class TestAsyncAnthropicFoundry:
     @pytest.mark.asyncio
@@ -158,6 +169,17 @@ class TestAsyncAnthropicFoundry:
         assert copied._azure_ad_token_provider is async_token_provider
         assert copied.max_retries == 5
         assert copied.timeout == 10
+
+    def test_copy_x_stainless_helper_header_appends(self) -> None:
+        """x-stainless-helper accumulates across copies instead of being clobbered."""
+        client = AsyncAnthropicFoundry(
+            api_key="test-key",
+            resource="example-resource",
+            default_headers={"x-stainless-helper": "parent"},
+        )
+
+        copied = client.with_options(default_headers={"x-stainless-helper": "child"})
+        assert copied.default_headers.get("x-stainless-helper") == "parent, child"
 
 
 class TestFoundryDoesNotLeakAnthropicAPIKey:
