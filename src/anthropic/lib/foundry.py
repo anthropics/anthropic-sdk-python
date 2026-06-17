@@ -16,7 +16,11 @@ from .._models import FinalRequestOptions
 from .._streaming import Stream, AsyncStream
 from .._exceptions import AnthropicError
 from .._middleware import MiddlewareInput
-from .._base_client import DEFAULT_MAX_RETRIES, BaseClient
+from .._base_client import (
+    DEFAULT_MAX_RETRIES,
+    BaseClient,
+    merge_headers,
+)
 from ..resources.beta import Beta, AsyncBeta
 from ..resources.messages import Messages, AsyncMessages
 from ..resources.beta.messages import Messages as BetaMessages, AsyncMessages as AsyncBetaMessages
@@ -229,7 +233,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 
@@ -454,7 +458,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 

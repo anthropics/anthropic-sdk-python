@@ -22,6 +22,7 @@ from ..._base_client import (
     BaseClient,
     SyncAPIClient,
     AsyncAPIClient,
+    merge_headers,
 )
 from ...resources.messages import Messages, AsyncMessages
 
@@ -209,7 +210,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 
@@ -373,7 +374,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 

@@ -354,8 +354,9 @@ class SessionToolRunner:
         # the parent client's ``default_headers`` propagate via its
         # ``client.copy()``; per the SDK's standard ``extra_headers``
         # precedence a caller header overrides the scoped client's same-named
-        # default for that request, so this is for caller passthrough (trace
-        # ids etc.), not auth.
+        # default for that request (``x-stainless-helper`` is the exception —
+        # a caller value appends to the runner's tag rather than replacing it),
+        # so this is for caller passthrough (trace ids etc.), not auth.
         self.extra_headers = extra_headers
 
     async def __aiter__(self) -> AsyncIterator[DispatchedToolCall]:

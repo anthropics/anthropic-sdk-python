@@ -262,3 +262,23 @@ class TestCopy:
         )
         copied = client.copy(aws_region="us-west-2")
         assert copied.aws_region == "us-west-2"
+
+    def test_copy_x_stainless_helper_header_appends(self) -> None:
+        # `x-stainless-helper` accumulates across copies instead of being clobbered
+        client = AnthropicBedrockMantle(
+            api_key="test-key",
+            aws_region="us-east-1",
+            default_headers={"x-stainless-helper": "parent"},
+        )
+        copied = client.copy(default_headers={"x-stainless-helper": "child"})
+        assert copied.default_headers["x-stainless-helper"] == "parent, child"
+
+    def test_async_copy_x_stainless_helper_header_appends(self) -> None:
+        # `x-stainless-helper` accumulates across copies instead of being clobbered
+        client = AsyncAnthropicBedrockMantle(
+            api_key="test-key",
+            aws_region="us-east-1",
+            default_headers={"x-stainless-helper": "parent"},
+        )
+        copied = client.copy(default_headers={"x-stainless-helper": "child"})
+        assert copied.default_headers["x-stainless-helper"] == "parent, child"

@@ -22,6 +22,7 @@ from ..._base_client import (
     BaseClient,
     SyncAPIClient,
     AsyncAPIClient,
+    merge_headers,
 )
 from ..aws._credentials import (
     resolve_region,
@@ -311,7 +312,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 
@@ -507,7 +508,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 

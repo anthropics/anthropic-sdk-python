@@ -456,7 +456,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
     def _build_headers(self, options: FinalRequestOptions, *, retries_taken: int = 0) -> httpx.Headers:
         custom_headers = options.headers or {}
-        headers_dict = _merge_mappings(
+        merged_headers = merge_headers(
             {
                 "x-stainless-timeout": str(options.timeout.read)
                 if isinstance(options.timeout, Timeout)
@@ -465,6 +465,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
             },
             custom_headers,
         )
+        headers_dict = _strip_omit(merged_headers)
         self._validate_headers(headers_dict, custom_headers)
 
         # headers are case-insensitive while dictionaries are not.
@@ -2538,6 +2539,11 @@ def get_architecture() -> Arch:
     return "unknown"
 
 
+def _strip_omit(mapping: Mapping[_T_co, Union[_T, Omit]]) -> Dict[_T_co, _T]:
+    """Drop entries whose value is an `Omit` removal marker."""
+    return {key: value for key, value in mapping.items() if not isinstance(value, Omit)}
+
+
 def _merge_mappings(
     obj1: Mapping[_T_co, Union[_T, Omit]],
     obj2: Mapping[_T_co, Union[_T, Omit]],
@@ -2546,8 +2552,65 @@ def _merge_mappings(
 
     In cases with duplicate keys the second mapping takes precedence.
     """
-    merged = {**obj1, **obj2}
-    return {key: value for key, value in merged.items() if not isinstance(value, Omit)}
+    return _strip_omit({**obj1, **obj2})
+
+
+# Append-on-merge header support (hand-written, upstream to Stainless).
+#
+# Headers whose values accumulate across a merge instead of the later mapping's
+# value replacing the earlier one. When multiple mappings set one of these, the
+# values are concatenated into a single comma-separated value (order-preserving,
+# deduplicated) rather than clobbered.
+_APPEND_HEADERS = frozenset({"x-stainless-helper"})
+
+
+def _append_header_value(existing: str, addition: str) -> str:
+    """Append `addition` to a comma-separated header value, skipping tokens that
+    are already present so the same helper isn't recorded twice.
+
+    Values are joined with `", "`, the same format `lib._stainless_helpers` uses
+    when it builds the `x-stainless-helper` header.
+    """
+    tokens = [token for token in (raw.strip() for raw in existing.split(",")) if token]
+    for token in (raw.strip() for raw in addition.split(",")):
+        if token and token not in tokens:
+            tokens.append(token)
+    return ", ".join(tokens)
+
+
+def merge_headers(*mappings: Mapping[str, Union[str, Omit]]) -> Dict[str, str]:
+    """Merge header mappings, with later mappings taking precedence on a key
+    clash, exactly like `_merge_mappings`.
+
+    The exception is the headers in `_APPEND_HEADERS`: those keys are matched
+    case-insensitively (and stored under their lowercase form) and their string
+    values accumulate into a single comma-separated, deduplicated value instead
+    of the later one overriding the earlier one.
+
+    `Omit` values are preserved (they mark a header for removal and are only
+    dropped at request-build time, e.g. with `_strip_omit`); the
+    `Dict[str, str]` return type is the same fudge the rest of the header
+    plumbing already uses for `Omit`-bearing header mappings.
+    """
+    merged: Dict[str, Union[str, Omit]] = {}
+    for mapping in mappings:
+        for key, value in mapping.items():
+            lower = key.lower()
+            if lower not in _APPEND_HEADERS:
+                merged[key] = value
+                continue
+
+            # Append headers are stored under their lowercase key so every
+            # case-variant lands on (and appends to) the same entry.
+            existing = merged.get(lower)
+            if isinstance(existing, str) and isinstance(value, str):
+                merged[lower] = _append_header_value(existing, value)
+            else:
+                # `Omit` (removal) can't take part in an append; the later
+                # value overrides, as it does for any other header.
+                merged[lower] = value
+
+    return cast("Dict[str, str]", merged)
 
 
 def _middleware_entry_mode(request: APIRequest) -> Literal["raw", "stream", "true"] | None:
