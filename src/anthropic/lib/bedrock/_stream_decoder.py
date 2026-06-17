@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterator, AsyncIterator
+import json
+from typing import TYPE_CHECKING, Any, Dict, Iterator, AsyncIterator, cast
 
 from ..._utils import lru_cache
 from ..._streaming import ServerSentEvent
@@ -35,9 +36,9 @@ class AWSEventStreamDecoder:
         for chunk in iterator:
             event_stream_buffer.add_data(chunk)
             for event in event_stream_buffer:
-                message = self._parse_message_from_event(event)
-                if message:
-                    yield ServerSentEvent(data=message, event="completion")
+                sse = self._parse_message_from_event(event)
+                if sse:
+                    yield sse
 
     async def aiter_bytes(self, iterator: AsyncIterator[bytes]) -> AsyncIterator[ServerSentEvent]:
         """Given an async iterator that yields lines, iterate over it & yield every event encountered"""
@@ -47,11 +48,11 @@ class AWSEventStreamDecoder:
         async for chunk in iterator:
             event_stream_buffer.add_data(chunk)
             for event in event_stream_buffer:
-                message = self._parse_message_from_event(event)
-                if message:
-                    yield ServerSentEvent(data=message, event="completion")
+                sse = self._parse_message_from_event(event)
+                if sse:
+                    yield sse
 
-    def _parse_message_from_event(self, event: EventStreamMessage) -> str | None:
+    def _parse_message_from_event(self, event: EventStreamMessage) -> ServerSentEvent | None:
         response_dict = event.to_response_dict()
         parsed_response = self.parser.parse(response_dict, get_response_stream_shape())
         if response_dict["status_code"] != 200:
@@ -61,4 +62,23 @@ class AWSEventStreamDecoder:
         if not chunk:
             return None
 
-        return chunk.get("bytes").decode()  # type: ignore[no-any-return]
+        return _chunk_bytes_to_sse(chunk.get("bytes"))
+
+
+def _chunk_bytes_to_sse(raw: bytes) -> ServerSentEvent | None:
+    decoded = raw.decode()
+    data: Any
+    try:
+        data = json.loads(decoded)
+    except Exception:
+        data = None
+
+    if not isinstance(data, dict):
+        return ServerSentEvent(data=decoded, event="completion")
+
+    payload = cast("Dict[str, Any]", data)
+    event_type = payload.get("type")
+    if not isinstance(event_type, str):
+        event_type = "completion"
+
+    return ServerSentEvent(data=decoded, event=event_type)
