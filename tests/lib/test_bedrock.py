@@ -275,3 +275,68 @@ def test_region_infer_from_specified_profile(
     client = AnthropicBedrock()
 
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
+
+
+def test_region_infer_from_aws_default_region(monkeypatch: t.Any) -> None:
+    """AWS_DEFAULT_REGION should be respected when AWS_REGION is not set."""
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-1")
+    client = AnthropicBedrock(
+        aws_access_key="example-access-key",
+        aws_secret_key="example-secret-key",
+    )
+    assert client.aws_region == "eu-west-1"
+
+
+def test_aws_region_takes_precedence_over_aws_default_region(monkeypatch: t.Any) -> None:
+    """AWS_REGION should take precedence over AWS_DEFAULT_REGION."""
+    monkeypatch.setenv("AWS_REGION", "us-west-2")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-1")
+    client = AnthropicBedrock(
+        aws_access_key="example-access-key",
+        aws_secret_key="example-secret-key",
+    )
+    assert client.aws_region == "us-west-2"
+
+
+@pytest.mark.parametrize(
+    "profiles",
+    [
+        pytest.param(
+            [{"name": "default", "region": "us-east-2"}, {"name": "custom", "region": "ap-southeast-1"}],
+            id="custom profile via constructor",
+        ),
+    ],
+)
+def test_region_infer_from_explicit_aws_profile_param(
+    mock_aws_config: None,  # noqa: ARG001
+    monkeypatch: t.Any,
+) -> None:
+    """When aws_profile is passed to the constructor, its region should be used
+    even without setting the AWS_PROFILE env var."""
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+    client = AnthropicBedrock(aws_profile="custom")
+    assert client.aws_region == "ap-southeast-1"
+
+
+@pytest.mark.parametrize(
+    "profiles",
+    [
+        pytest.param(
+            [{"name": "default", "region": "us-east-2"}, {"name": "custom", "region": "ap-southeast-1"}],
+            id="async custom profile via constructor",
+        ),
+    ],
+)
+def test_region_infer_from_explicit_aws_profile_param_async(
+    mock_aws_config: None,  # noqa: ARG001
+    monkeypatch: t.Any,
+) -> None:
+    """AsyncAnthropicBedrock should also respect the aws_profile parameter for region inference."""
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+    client = AsyncAnthropicBedrock(aws_profile="custom")
+    assert client.aws_region == "ap-southeast-1"
