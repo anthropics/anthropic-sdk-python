@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.111.0 (2026-06-18)
+
+Full Changelog: [v0.110.0...v0.111.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.110.0...v0.111.0)
+
+### Features
+
+* **helpers:** tag refusal-fallback middleware requests with fallback-refusal-middleware ([#96](https://github.com/anthropics/anthropic-sdk-python/issues/96)) ([2f8ac78](https://github.com/anthropics/anthropic-sdk-python/commit/2f8ac789506efc0719b06f1f646c9a98bb25ce7b))
+
 ## 0.110.0 (2026-06-18)
 
 Full Changelog: [v0.109.2...v0.110.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.109.2...v0.110.0)
