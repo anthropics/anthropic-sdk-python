@@ -6,6 +6,7 @@ from pydantic import Field as FieldInfo
 
 from ..._models import BaseModel
 from .beta_fallback_info import BetaFallbackInfo
+from .beta_fallback_refusal_trigger import BetaFallbackRefusalTrigger
 
 __all__ = ["BetaFallbackBlock"]
 
@@ -14,9 +15,9 @@ class BetaFallbackBlock(BaseModel):
     """Marks the point in `content` where one model's output gives way to the next.
 
     One block appears per hop where a preceding model actually ran this turn and
-    declined. A turn routed directly by the sticky decision has no such boundary
-    and carries no block — the signal for whether a fallback model served the
-    response is the presence of a `fallback_message` entry in
+    declined. A turn where no preceding model ran and declined has no such
+    boundary and carries no block — the signal for whether a fallback model
+    served the response is the presence of a `fallback_message` entry in
     `usage.iterations`, not this block.
 
     The block is treated like a server-tool content block for streaming: it
@@ -37,5 +38,8 @@ class BetaFallbackBlock(BaseModel):
 
     Its `model` is always the canonical id.
     """
+
+    trigger: BetaFallbackRefusalTrigger
+    """What caused the `from` model to hand over at this hop."""
 
     type: Literal["fallback"]

@@ -2,22 +2,24 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Iterable, Optional
+from typing import List, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
-__all__ = ["BetaToolTextEditor20250429Param"]
+__all__ = ["BetaCodeExecutionTool20260521Param"]
 
 
-class BetaToolTextEditor20250429Param(TypedDict, total=False):
-    name: Required[Literal["str_replace_based_edit_tool"]]
+class BetaCodeExecutionTool20260521Param(TypedDict, total=False):
+    """Code execution tool with REPL state persistence."""
+
+    name: Required[Literal["code_execution"]]
     """Name of the tool.
 
     This is how the tool will be called by the model and in `tool_use` blocks.
     """
 
-    type: Required[Literal["text_editor_20250429"]]
+    type: Required[Literal["code_execution_20260521"]]
 
     allowed_callers: List[
         Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
@@ -31,8 +33,6 @@ class BetaToolTextEditor20250429Param(TypedDict, total=False):
 
     Only loaded when returned via tool_reference from tool search.
     """
-
-    input_examples: Iterable[Dict[str, object]]
 
     strict: bool
     """When true, guarantees schema validation on tool names and inputs"""
