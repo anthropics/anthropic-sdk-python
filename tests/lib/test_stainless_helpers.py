@@ -15,8 +15,7 @@ from anthropic.lib._stainless_helpers import (
     helper_header,
 )
 
-sync_client = Anthropic(base_url="http://127.0.0.1:4010", api_key="my-anthropic-api-key")
-async_client = AsyncAnthropic(base_url="http://127.0.0.1:4010", api_key="my-anthropic-api-key")
+from ..conftest import base_url
 
 
 class _TaggedDict(dict):  # type: ignore[type-arg]
@@ -45,14 +44,14 @@ def _message_json() -> dict[str, object]:
     }
 
 
-@pytest.mark.respx(base_url="http://127.0.0.1:4010")
+@pytest.mark.respx(base_url=base_url)
 class TestSyncWireHeaders:
-    def test_caller_tag_is_appended_not_clobbered(self, respx_mock: respx.MockRouter) -> None:
+    def test_caller_tag_is_appended_not_clobbered(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
 
         tool = cast("BetaToolParam", _TaggedDict({"name": "t", "description": "d", "input_schema": {"type": "object"}}))
         tag_helper(tool, "mcp_tool")
-        sync_client.beta.messages.create(
+        client.beta.messages.create(
             model="claude-sonnet-4-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
@@ -65,12 +64,12 @@ class TestSyncWireHeaders:
         assert values == ["mcp_tool, caller-tag"]
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
-    def test_parse_sends_single_header_line(self, respx_mock: respx.MockRouter) -> None:
+    def test_parse_sends_single_header_line(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
         # regression: the literal tag and the collected tags used to land under
         # two casings of the key, producing two header lines on the wire
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
 
-        sync_client.beta.messages.parse(
+        client.beta.messages.parse(
             model="claude-sonnet-4-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
@@ -81,9 +80,11 @@ class TestSyncWireHeaders:
         assert values == ["beta.messages.parse"]
 
 
-@pytest.mark.respx(base_url="http://127.0.0.1:4010")
+@pytest.mark.respx(base_url=base_url)
 class TestAsyncWireHeaders:
-    async def test_caller_tag_is_appended_not_clobbered(self, respx_mock: respx.MockRouter) -> None:
+    async def test_caller_tag_is_appended_not_clobbered(
+        self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
+    ) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
 
         tool = cast("BetaToolParam", _TaggedDict({"name": "t", "description": "d", "input_schema": {"type": "object"}}))
@@ -101,7 +102,9 @@ class TestAsyncWireHeaders:
         assert values == ["mcp_tool, caller-tag"]
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
-    async def test_parse_sends_single_header_line(self, respx_mock: respx.MockRouter) -> None:
+    async def test_parse_sends_single_header_line(
+        self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
+    ) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
 
         await async_client.beta.messages.parse(

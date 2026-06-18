@@ -8,7 +8,7 @@ we only carry the constants and the per-object tagging machinery.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, cast
 from typing_extensions import Literal
 
 __all__ = [
@@ -50,6 +50,7 @@ StainlessHelperHeaderValue = Literal[
     "compaction",
     "environments-work-poller",
     "environments-worker",
+    "fallback-refusal-middleware",
     "mcp_content",
     "mcp_message",
     "mcp_resource_to_content",
@@ -68,7 +69,7 @@ using them.
 """
 
 
-def helper_header(value: StainlessHelperHeaderValue) -> Dict[str, str]:
+def helper_header(value: StainlessHelperHeaderValue) -> dict[str, str]:
     """The ``x-stainless-helper: <value>`` header dict, for passing into a
     ``merge_headers`` call or as ``extra_headers``/``default_headers``.
 
@@ -88,7 +89,7 @@ def tag_helper(obj: Any, name: StainlessHelperHeaderValue) -> None:
         pass
 
 
-def get_helper_tag(obj: object) -> Optional[str]:
+def get_helper_tag(obj: object) -> str | None:
     """Get the helper name from an object, if any."""
     return getattr(obj, _HELPER_ATTR, None)  # type: ignore[return-value]
 
@@ -96,11 +97,11 @@ def get_helper_tag(obj: object) -> Optional[str]:
 def collect_helpers(
     tools: Any = None,
     messages: Any = None,
-) -> List[str]:
+) -> list[str]:
     """Collect deduplicated helper names from tools and messages."""
-    helpers: List[str] = []
+    helpers: list[str] = []
 
-    def _add(tag: Optional[str]) -> None:
+    def _add(tag: str | None) -> None:
         if tag is not None and tag not in helpers:
             helpers.append(tag)
 
@@ -114,11 +115,11 @@ def collect_helpers(
 
             # Check content blocks within messages
             if isinstance(message, dict):
-                blocks: Any = cast(Dict[str, Any], message).get("content")
+                blocks: Any = cast(dict[str, Any], message).get("content")
             else:
                 blocks = getattr(message, "content", None)
             if isinstance(blocks, list):
-                for block in cast(List[object], blocks):
+                for block in cast(list[object], blocks):
                     _add(get_helper_tag(block))
 
     return helpers
@@ -127,7 +128,7 @@ def collect_helpers(
 def stainless_helper_header(
     tools: Any = None,
     messages: Any = None,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Build x-stainless-helper header dict from tools and messages.
 
     Returns an empty dict if no helpers are found.
@@ -138,7 +139,7 @@ def stainless_helper_header(
     return {STAINLESS_HELPER_HEADER: ", ".join(helpers)}
 
 
-def stainless_helper_header_from_file(file: object) -> Dict[str, str]:
+def stainless_helper_header_from_file(file: object) -> dict[str, str]:
     """Build x-stainless-helper header dict from a file object."""
     tag = get_helper_tag(file)
     if tag is None:
