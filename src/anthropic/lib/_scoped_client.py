@@ -13,25 +13,21 @@ with their own ``x-stainless-helper`` value.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Literal, TypeVar, cast
+from typing import TYPE_CHECKING, Dict, TypeVar, cast
+
+from ._stainless_helpers import STAINLESS_HELPER_HEADER, StainlessHelperHeaderValue
 
 if TYPE_CHECKING:
     from .._client import Anthropic, AsyncAnthropic
 
 
-__all__ = ["HelperTag", "_copy_client_with_bearer_auth"]
-
-
-# The closed set of ``x-stainless-helper`` telemetry tags the runner helpers
-# stamp on outgoing requests. Constrained via ``Literal`` so a typo at any
-# call site is a type error rather than silently mistagged telemetry.
-HelperTag = Literal["environments-work-poller", "environments-worker", "session-tool-runner"]
+__all__ = ["_copy_client_with_bearer_auth"]
 
 
 ClientT = TypeVar("ClientT", "Anthropic", "AsyncAnthropic")
 
 
-def _copy_client_with_bearer_auth(client: ClientT, *, auth_token: str, helper: HelperTag) -> ClientT:
+def _copy_client_with_bearer_auth(client: ClientT, *, auth_token: str, helper: StainlessHelperHeaderValue) -> ClientT:
     """Return a copy of ``client`` authenticated with ``auth_token`` as Bearer.
 
     The returned sub-client inherits the parent's full configuration via
@@ -61,7 +57,7 @@ def _copy_client_with_bearer_auth(client: ClientT, *, auth_token: str, helper: H
     scoped = client.copy(
         auth_token=auth_token,
         credentials=None,
-        default_headers={"x-stainless-helper": helper},
+        default_headers={STAINLESS_HELPER_HEADER: helper},
     )
     scoped.api_key = None
     # ``_custom_headers`` is typed as ``Mapping[str, str]`` (immutable
