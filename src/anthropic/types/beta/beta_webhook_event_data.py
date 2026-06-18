@@ -12,6 +12,7 @@ from .beta_webhook_session_created_event_data import BetaWebhookSessionCreatedEv
 from .beta_webhook_session_deleted_event_data import BetaWebhookSessionDeletedEventData
 from .beta_webhook_session_pending_event_data import BetaWebhookSessionPendingEventData
 from .beta_webhook_session_running_event_data import BetaWebhookSessionRunningEventData
+from .beta_webhook_session_updated_event_data import BetaWebhookSessionUpdatedEventData
 from .beta_webhook_session_archived_event_data import BetaWebhookSessionArchivedEventData
 from .beta_webhook_session_status_idled_event_data import BetaWebhookSessionStatusIdledEventData
 from .beta_webhook_session_thread_idled_event_data import BetaWebhookSessionThreadIdledEventData
@@ -53,6 +54,7 @@ BetaWebhookEventData: TypeAlias = Annotated[
         BetaWebhookVaultCredentialArchivedEventData,
         BetaWebhookVaultCredentialDeletedEventData,
         BetaWebhookVaultCredentialRefreshFailedEventData,
+        BetaWebhookSessionUpdatedEventData,
     ],
     PropertyInfo(discriminator="type"),
 ]

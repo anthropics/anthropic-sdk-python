@@ -2,7 +2,7 @@ event: message_start
 data: {"type":"message_start","message":{"id":"msg_01FallbackModelRelabel000001","type":"message","role":"assistant","content":[],"model":"claude-opus-4-7","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":25,"output_tokens":1}}}
 
 event: content_block_start
-data: {"type":"content_block_start","index":0,"content_block":{"type":"fallback","from":{"model":"claude-opus-4-7"},"to":{"model":"claude-sonnet-4-5"}}}
+data: {"type":"content_block_start","index":0,"content_block":{"type":"fallback","from":{"model":"claude-opus-4-7"},"to":{"model":"claude-sonnet-4-5"},"trigger":{"type":"refusal","category":null}}}
 
 event: content_block_stop
 data: {"type":"content_block_stop","index":0}

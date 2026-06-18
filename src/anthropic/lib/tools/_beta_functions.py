@@ -146,7 +146,7 @@ class BaseFunctionTool(Generic[CallableT]):
         defer_loading: bool | None = None,
         cache_control: BetaCacheControlEphemeralParam | None = None,
         allowed_callers: list[
-            Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+            Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
         ]
         | None = None,
         eager_input_streaming: bool | None = None,
@@ -353,7 +353,7 @@ def beta_tool(
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
     allowed_callers: list[
-        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+        Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
     ]
     | None = None,
     eager_input_streaming: bool | None = None,
@@ -371,7 +371,7 @@ def beta_tool(
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
     allowed_callers: list[
-        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+        Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
     ]
     | None = None,
     eager_input_streaming: bool | None = None,
@@ -389,7 +389,7 @@ def beta_tool(
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
     allowed_callers: list[
-        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+        Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
     ]
     | None = None,
     eager_input_streaming: bool | None = None,
@@ -478,7 +478,7 @@ def beta_async_tool(
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
     allowed_callers: list[
-        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+        Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
     ]
     | None = None,
     eager_input_streaming: bool | None = None,
@@ -496,7 +496,7 @@ def beta_async_tool(
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
     allowed_callers: list[
-        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+        Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
     ]
     | None = None,
     eager_input_streaming: bool | None = None,
@@ -514,7 +514,7 @@ def beta_async_tool(
     defer_loading: bool | None = None,
     cache_control: BetaCacheControlEphemeralParam | None = None,
     allowed_callers: list[
-        Literal["direct", "code_execution_20250825", "code_execution_20260120"]
+        Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
     ]
     | None = None,
     eager_input_streaming: bool | None = None,

@@ -155,6 +155,7 @@ from .beta_web_search_result_block import BetaWebSearchResultBlock as BetaWebSea
 from .beta_all_thinking_turns_param import BetaAllThinkingTurnsParam as BetaAllThinkingTurnsParam
 from .beta_cache_miss_model_changed import BetaCacheMissModelChanged as BetaCacheMissModelChanged
 from .beta_cache_miss_tools_changed import BetaCacheMissToolsChanged as BetaCacheMissToolsChanged
+from .beta_fallback_refusal_trigger import BetaFallbackRefusalTrigger as BetaFallbackRefusalTrigger
 from .beta_json_output_format_param import BetaJSONOutputFormatParam as BetaJSONOutputFormatParam
 from .beta_mcp_tool_use_block_param import BetaMCPToolUseBlockParam as BetaMCPToolUseBlockParam
 from .beta_raw_message_stream_event import BetaRawMessageStreamEvent as BetaRawMessageStreamEvent
@@ -308,6 +309,9 @@ from .beta_code_execution_tool_20250825_param import (
 from .beta_code_execution_tool_20260120_param import (
     BetaCodeExecutionTool20260120Param as BetaCodeExecutionTool20260120Param,
 )
+from .beta_code_execution_tool_20260521_param import (
+    BetaCodeExecutionTool20260521Param as BetaCodeExecutionTool20260521Param,
+)
 from .beta_content_block_source_content_param import (
     BetaContentBlockSourceContentParam as BetaContentBlockSourceContentParam,
 )
@@ -334,6 +338,9 @@ from .beta_webhook_session_pending_event_data import (
 )
 from .beta_webhook_session_running_event_data import (
     BetaWebhookSessionRunningEventData as BetaWebhookSessionRunningEventData,
+)
+from .beta_webhook_session_updated_event_data import (
+    BetaWebhookSessionUpdatedEventData as BetaWebhookSessionUpdatedEventData,
 )
 from .beta_advisor_redacted_result_block_param import (
     BetaAdvisorRedactedResultBlockParam as BetaAdvisorRedactedResultBlockParam,

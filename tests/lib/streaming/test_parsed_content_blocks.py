@@ -79,6 +79,7 @@ def test_streamed_fallback_block_is_constructed_as_fallback_block() -> None:
             "type": "fallback",
             "from": {"model": "claude-sonnet-4-5"},
             "to": {"model": "claude-haiku-4-5"},
+            "trigger": {"type": "refusal", "category": None},
         },
     }
     message = accumulate_event(

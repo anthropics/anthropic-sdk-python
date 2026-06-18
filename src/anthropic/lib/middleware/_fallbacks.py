@@ -219,10 +219,11 @@ class BetaRefusalFallbackMiddleware(Middleware):
             index += 1
             pin(index)
             token = _credit_token(message)
+            category = _refusal_category(message)
             res = call_next(request.copy(body=_merged_body(body, self._fallbacks[index], token)))
             if res.http_response.is_success:
                 to_model = str(self._fallbacks[index]["model"])
-                seams.append(_seam_block(from_model, to_model))
+                seams.append(_seam_block(from_model, to_model, category))
                 from_model = to_model
 
         if seams and res.http_response.is_success:
@@ -285,10 +286,11 @@ class BetaRefusalFallbackMiddleware(Middleware):
             index += 1
             pin(index)
             token = _credit_token(message)
+            category = _refusal_category(message)
             res = await call_next(request.copy(body=_merged_body(body, self._fallbacks[index], token)))
             if res.http_response.is_success:
                 to_model = str(self._fallbacks[index]["model"])
-                seams.append(_seam_block(from_model, to_model))
+                seams.append(_seam_block(from_model, to_model, category))
                 from_model = to_model
 
         if seams and res.http_response.is_success:
@@ -694,6 +696,9 @@ class _Refusal(BaseModel):
     token: Optional[str]
     """The minted credit token; `None` for a token-less start-of-stream refusal."""
 
+    category: Optional[str]
+    """The policy category that triggered the refusal; `None` when not surfaced."""
+
     has_prefill_claim: bool
     usage: Dict[str, Any]
     event: Dict[str, Any]
@@ -865,6 +870,7 @@ class _HopReader:
                     self.outcome = _HopOutcome(
                         refused=_Refusal(
                             token=token,
+                            category=details.get("category") if details is not None else None,
                             has_prefill_claim=details is not None and details.get("fallback_has_prefill_claim") is True,
                             usage=usage,
                             event=event,
@@ -1062,7 +1068,7 @@ class _ChainState:
                     {
                         "type": "content_block_start",
                         "index": seam_index,
-                        "content_block": _seam_block(self.from_model, to_model),
+                        "content_block": _seam_block(self.from_model, to_model, self.last_refusal.category),
                     },
                 ),
                 _emit("content_block_stop", {"type": "content_block_stop", "index": seam_index}),
@@ -1348,9 +1354,21 @@ def _credit_token(message: Message | BetaMessage) -> str | None:
     return None
 
 
-def _seam_block(from_model: str, to_model: str) -> dict[str, Any]:
+def _refusal_category(message: Message | BetaMessage) -> str | None:
+    """The policy category that caused the refusal; only the beta surface carries one."""
+    if isinstance(message, BetaMessage) and message.stop_details is not None:
+        return message.stop_details.category
+    return None
+
+
+def _seam_block(from_model: str, to_model: str, category: str | None) -> dict[str, Any]:
     """The synthetic `fallback` content block marking one model boundary."""
-    return {"type": "fallback", "from": {"model": from_model}, "to": {"model": to_model}}
+    return {
+        "type": "fallback",
+        "from": {"model": from_model},
+        "to": {"model": to_model},
+        "trigger": {"type": "refusal", "category": category},
+    }
 
 
 def _seamed_http_response(original: httpx.Response, seams: list[dict[str, Any]]) -> httpx.Response | None:

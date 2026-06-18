@@ -27,7 +27,9 @@ class BetaAdvisorTool20260301Param(TypedDict, total=False):
 
     type: Required[Literal["advisor_20260301"]]
 
-    allowed_callers: List[Literal["direct", "code_execution_20250825", "code_execution_20260120"]]
+    allowed_callers: List[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
+    ]
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""

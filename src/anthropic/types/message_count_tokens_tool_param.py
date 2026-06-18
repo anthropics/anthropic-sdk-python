@@ -19,6 +19,7 @@ from .tool_text_editor_20250728_param import ToolTextEditor20250728Param
 from .code_execution_tool_20250522_param import CodeExecutionTool20250522Param
 from .code_execution_tool_20250825_param import CodeExecutionTool20250825Param
 from .code_execution_tool_20260120_param import CodeExecutionTool20260120Param
+from .code_execution_tool_20260521_param import CodeExecutionTool20260521Param
 from .tool_search_tool_bm25_20251119_param import ToolSearchToolBm25_20251119Param
 from .tool_search_tool_regex_20251119_param import ToolSearchToolRegex20251119Param
 
@@ -30,6 +31,7 @@ MessageCountTokensToolParam: TypeAlias = Union[
     CodeExecutionTool20250522Param,
     CodeExecutionTool20250825Param,
     CodeExecutionTool20260120Param,
+    CodeExecutionTool20260521Param,
     MemoryTool20250818Param,
     ToolTextEditor20250124Param,
     ToolTextEditor20250429Param,
