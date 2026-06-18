@@ -37,6 +37,7 @@ from .beta_tool_computer_use_20251124_param import BetaToolComputerUse20251124Pa
 from .beta_code_execution_tool_20250522_param import BetaCodeExecutionTool20250522Param
 from .beta_code_execution_tool_20250825_param import BetaCodeExecutionTool20250825Param
 from .beta_code_execution_tool_20260120_param import BetaCodeExecutionTool20260120Param
+from .beta_code_execution_tool_20260521_param import BetaCodeExecutionTool20260521Param
 from .beta_tool_search_tool_bm25_20251119_param import BetaToolSearchToolBm25_20251119Param
 from .beta_tool_search_tool_regex_20251119_param import BetaToolSearchToolRegex20251119Param
 from .beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
@@ -271,6 +272,7 @@ Tool: TypeAlias = Union[
     BetaCodeExecutionTool20250522Param,
     BetaCodeExecutionTool20250825Param,
     BetaCodeExecutionTool20260120Param,
+    BetaCodeExecutionTool20260521Param,
     BetaToolComputerUse20241022Param,
     BetaMemoryTool20250818Param,
     BetaToolComputerUse20250124Param,

@@ -384,6 +384,7 @@ async def test_pydantic_aliased_field_round_trip(use_async: bool) -> None:
         {
             "from": {"model": "model-a"},
             "to": {"model": "model-b"},
+            "trigger": {"type": "refusal", "category": None},
             "type": "fallback",
         },
     )
@@ -391,7 +392,12 @@ async def test_pydantic_aliased_field_round_trip(use_async: bool) -> None:
 
     message = cast("BetaMessageParam", {"role": "assistant", "content": [block]})
     params = cast(Any, await transform(message, BetaMessageParam, use_async))
-    assert params["content"][0] == {"from": {"model": "model-a"}, "to": {"model": "model-b"}, "type": "fallback"}
+    assert params["content"][0] == {
+        "from": {"model": "model-a"},
+        "to": {"model": "model-b"},
+        "trigger": {"type": "refusal", "category": None},
+        "type": "fallback",
+    }
     assert "from_" not in params["content"][0]
 
 

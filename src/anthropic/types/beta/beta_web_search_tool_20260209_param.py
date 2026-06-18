@@ -21,7 +21,9 @@ class BetaWebSearchTool20260209Param(TypedDict, total=False):
 
     type: Required[Literal["web_search_20260209"]]
 
-    allowed_callers: List[Literal["direct", "code_execution_20250825", "code_execution_20260120"]]
+    allowed_callers: List[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
+    ]
 
     allowed_domains: Optional[SequenceNotStr[str]]
     """If provided, only these domains will be included in results.
