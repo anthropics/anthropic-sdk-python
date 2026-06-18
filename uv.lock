@@ -185,7 +185,7 @@ wheels = [
 
 [[package]]
 name = "anthropic"
-version = "0.109.2"
+version = "0.110.0"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },
