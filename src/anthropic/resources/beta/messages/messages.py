@@ -52,7 +52,13 @@ from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING
 from ....types.model_param import ModelParam
 from ....lib._parse._response import ResponseFormatT, parse_beta_response
 from ....lib._parse._transform import transform_schema
-from ....lib._stainless_helpers import stainless_helper_header as _stainless_helper_header
+from ....lib._stainless_helpers import (
+    HELPER_METHOD_STREAM as _HELPER_METHOD_STREAM,
+    STAINLESS_HELPER_METHOD_HEADER as _STAINLESS_HELPER_METHOD_HEADER,
+    STAINLESS_STREAM_HELPER_HEADER as _STAINLESS_STREAM_HELPER_HEADER,
+    helper_header as _helper_header,
+    stainless_helper_header as _stainless_helper_header,
+)
 from ....types.beta.beta_message import BetaMessage
 from ....lib.tools._beta_functions import (
     BetaFunctionTool,
@@ -1311,7 +1317,7 @@ class Messages(SyncAPIResource):
             betas.append("structured-outputs-2025-12-15")
 
         extra_headers = merge_headers(
-            {"X-Stainless-Helper": "beta.messages.parse"},
+            _helper_header("beta.messages.parse"),
             strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             _stainless_helper_header(tools, messages),
             extra_headers or {},
@@ -1578,7 +1584,7 @@ class Messages(SyncAPIResource):
             )
 
         extra_headers = merge_headers(
-            {"X-Stainless-Helper": "BetaToolRunner"},
+            _helper_header("BetaToolRunner"),
             strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             _stainless_helper_header(tools, messages),
             extra_headers or {},
@@ -1708,8 +1714,8 @@ class Messages(SyncAPIResource):
         """Create a Message stream"""
         extra_headers = merge_headers(
             {
-                "X-Stainless-Helper-Method": "stream",
-                "X-Stainless-Stream-Helper": "beta.messages",
+                _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
+                _STAINLESS_STREAM_HELPER_HEADER: "beta.messages",
             },
             strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             _stainless_helper_header(tools, messages),
@@ -3279,7 +3285,7 @@ class AsyncMessages(AsyncAPIResource):
             betas.append("structured-outputs-2025-12-15")
 
         extra_headers = merge_headers(
-            {"X-Stainless-Helper": "beta.messages.parse"},
+            _helper_header("beta.messages.parse"),
             strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             _stainless_helper_header(tools, messages),
             extra_headers or {},
@@ -3539,7 +3545,7 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         extra_headers = merge_headers(
-            {"X-Stainless-Helper": "BetaToolRunner"},
+            _helper_header("BetaToolRunner"),
             strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             _stainless_helper_header(tools, messages),
             extra_headers or {},
@@ -3668,8 +3674,8 @@ class AsyncMessages(AsyncAPIResource):
 
         extra_headers = merge_headers(
             {
-                "X-Stainless-Helper-Method": "stream",
-                "X-Stainless-Stream-Helper": "beta.messages",
+                _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
+                _STAINLESS_STREAM_HELPER_HEADER: "beta.messages",
             },
             strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
             _stainless_helper_header(tools, messages),

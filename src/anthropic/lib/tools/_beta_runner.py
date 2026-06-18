@@ -35,7 +35,7 @@ from ._beta_functions import (
     BetaBuiltinFunctionTool,
     BetaAsyncBuiltinFunctionTool,
 )
-from .._stainless_helpers import stainless_helper_header
+from .._stainless_helpers import helper_header, stainless_helper_header
 from ._beta_compaction_control import DEFAULT_THRESHOLD, DEFAULT_SUMMARY_PROMPT, CompactionControl
 from ..streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 from ...types.beta.parsed_beta_message import ResponseFormatT, ParsedBetaMessage, ParsedBetaContentBlock
@@ -231,7 +231,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             model=model,
             messages=messages,
             max_tokens=self._params["max_tokens"],
-            extra_headers={"X-Stainless-Helper": "compaction"},
+            extra_headers=helper_header("compaction"),
         )
 
         log.info(f"Compaction complete. New token usage: {response.usage.output_tokens}")
@@ -519,7 +519,7 @@ class BaseAsyncToolRunner(
             model=model,
             messages=messages,
             max_tokens=self._params["max_tokens"],
-            extra_headers={"X-Stainless-Helper": "compaction"},
+            extra_headers=helper_header("compaction"),
         )
 
         log.info(f"Compaction complete. New token usage: {response.usage.output_tokens}")
