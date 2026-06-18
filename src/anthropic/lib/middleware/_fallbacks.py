@@ -28,7 +28,9 @@ from ..._response import APIResponse, AsyncAPIResponse
 from ..._streaming import Stream, AsyncStream, ServerSentEvent
 from ..._exceptions import AnthropicError
 from ..._middleware import CallNext, Middleware, AsyncCallNext
+from ..._base_client import merge_headers
 from ...types.message import Message
+from .._stainless_helpers import helper_header
 from ...types.beta.beta_message import BetaMessage
 from ...types.anthropic_beta_param import AnthropicBetaParam
 from ...types.beta.beta_fallback_param import BetaFallbackParam
@@ -178,8 +180,9 @@ class BetaRefusalFallbackMiddleware(Middleware):
         start_index = self._start_index(state)
         pin = self._make_pin(state)
 
-        # Send the configured betas on this and every hop request derived from it.
-        request = _append_betas(request, self._betas)
+        # Send the configured betas on this and every hop request derived from it,
+        # and tag this and every hop with the middleware's helper telemetry.
+        request = _with_middleware_headers(request, self._betas)
 
         # The seam blocks this middleware splices into streams are client-side
         # markers — the server rejects them as unknown tags — so a history that
@@ -245,8 +248,9 @@ class BetaRefusalFallbackMiddleware(Middleware):
         start_index = self._start_index(state)
         pin = self._make_pin(state)
 
-        # Send the configured betas on this and every hop request derived from it.
-        request = _append_betas(request, self._betas)
+        # Send the configured betas on this and every hop request derived from it,
+        # and tag this and every hop with the middleware's helper telemetry.
+        request = _with_middleware_headers(request, self._betas)
 
         # The seam blocks this middleware splices into streams are client-side
         # markers — the server rejects them as unknown tags — so a history that
@@ -1331,20 +1335,20 @@ def _strip_seam_blocks(body: dict[str, Any]) -> dict[str, Any]:
     return {**body, "messages": stripped_messages}
 
 
-def _append_betas(request: APIRequest, betas: tuple[AnthropicBetaParam, ...]) -> APIRequest:
-    """A copy of `request` with `betas` appended to its `anthropic-beta` header,
-    skipping values already present (set by the caller or another middleware).
+def _with_middleware_headers(request: APIRequest, betas: tuple[AnthropicBetaParam, ...]) -> APIRequest:
+    """A copy of `request` with `betas` appended to its `anthropic-beta` header
+    (skipping values already present) and the middleware's helper-telemetry tag
+    appended to `x-stainless-helper`. Single `request.copy()` for both.
     """
     # httpx.Headers for the case-insensitive read; Omit-valued entries can't be
     # the beta header's value and are carried over untouched below.
     current = httpx.Headers({k: v for k, v in request.headers.items() if isinstance(v, str)}).get("anthropic-beta", "")
     existing = {value.strip() for value in current.split(",")}
     additions = dict.fromkeys(str(beta) for beta in betas if str(beta) not in existing)
-    if not additions:
-        return request
     headers = {k: v for k, v in request.headers.items() if k.lower() != "anthropic-beta"}
-    headers["anthropic-beta"] = ", ".join(filter(None, [current, *additions]))
-    return request.copy(headers=headers)
+    if current or additions:
+        headers["anthropic-beta"] = ", ".join(filter(None, [current, *additions]))
+    return request.copy(headers=merge_headers(headers, helper_header("fallback-refusal-middleware")))
 
 
 def _credit_token(message: Message | BetaMessage) -> str | None:
