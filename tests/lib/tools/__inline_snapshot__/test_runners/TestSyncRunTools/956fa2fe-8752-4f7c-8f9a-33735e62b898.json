@@ -1,0 +1,187 @@
+[
+  {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.82.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.82.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.9.18",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "BetaToolRunner",
+        "anthropic-beta": "structured-outputs-2025-12-15",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "530"
+      },
+      "body": {
+        "max_tokens": 4000,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a detailed 500 word essay about dogs, cats, and birds. Call the tool submit_analysis with the information about all three animals. Note that you should call it only once at the end of your essay."
+          }
+        ],
+        "model": "claude-sonnet-4-5",
+        "tools": [
+          {
+            "name": "submit_analysis",
+            "description": "Call this LAST with your final analysis.",
+            "input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "summary": {
+                  "title": "Summary",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "summary"
+              ],
+              "type": "object"
+            }
+          }
+        ]
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "x-robots-tag": "none",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "server": "cloudflare",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "body": {
+        "model": "claude-sonnet-4-5-20250929",
+        "id": "msg_01JQ78eECNHtwV1L2uGKLHAf",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "# The Wonderful World of Companion Animals: Dogs, Cats, and Birds\n\nThroughout human history, animals have played an integral role in our lives, providing companionship, entertainment, and emotional support. Among the most popular pets worldwide are dogs, cats, and birds, each offering unique characteristics and benefits that have endeared them to millions of households globally.\n\n## Dogs: Mankind's Best Friend\n\nDogs have rightfully earned their title as \"man's best friend\" through thousands of years of domestication and selective breeding. These loyal canines come in an astounding variety of breeds, from tiny Chihuahuas to massive Great Danes, each with distinct personalities and purposes. What sets dogs apart is their unwavering devotion and their ability to form deep emotional bonds with their human families. They are highly social animals that thrive on interaction and attention, making them ideal companions for active individuals and families.\n\nDogs require significant commitment, including regular exercise, training, and socialization. Their intelligence allows them to learn commands, perform tasks, and even assist people with disabilities as service animals. Whether it's a morning jog, a game of fetch, or simply relaxing on the couch, dogs eagerly participate in their owners' daily activities. Their protective instincts also make them excellent guardians of the home, alerting families to potential dangers while providing a sense of security.\n\n## Cats: Independent Companions\n\nCats offer a different kind of companionship, appealing to those who appreciate a more independent pet. These graceful felines are known for their self-sufficient nature, requiring less hands-on attention than dogs while still providing affection and entertainment. Cats are natural hunters with remarkable agility and reflexes, often displaying their instincts through play and exploration.\n\nDespite their reputation for aloofness, cats form strong bonds with their owners, showing affection through purring, head-butting, and kneading. They are relatively low-maintenance pets, naturally inclined to groom themselves and use litter boxes with minimal training. Cats are perfect for apartment living and busy lifestyles, as they don't require outdoor exercise and are content spending time alone during work hours. Their playful antics and curious nature provide endless entertainment, while their calming purrs have been shown to reduce stress and anxiety in their human companions.\n\n## Birds: Colorful and Intelligent\n\nBirds bring vibrant colors, beautiful songs, and surprising intelligence to the world of pet ownership. From small budgies and canaries to larger parrots and cockatoos, birds offer diverse options for different living situations and experience levels. Many bird species are remarkably intelligent, capable of learning tricks, mimicking speech, and solving puzzles.\n\nSocial by nature, birds thrive on interaction and mental stimulation. They require specialized care, including proper diet, spacious cages, and regular out-of-cage time for exercise and bonding. Their melodious songs and calls can brighten any home, though potential owners should consider noise levels, especially with larger parrot species. Birds can live for many years, with some parrots surviving for decades, making them long-term companions that become integral family members.\n\n## Conclusion\n\nWhether you prefer the loyal enthusiasm of dogs, the independent grace of cats, or the colorful intelligence of birds, each of these animals offers unique rewards to those who welcome them into their homes. The choice ultimately depends on lifestyle, living situation, and personal preferences, but all three have proven themselves as beloved companions throughout human history."
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01KiHQYXfTgCmpgRfmqgvUL2",
+            "name": "submit_analysis",
+            "input": {
+              "summary": "This comprehensive essay explores three popular companion animals: dogs, cats, and birds. Dogs are highlighted as loyal, social animals requiring significant commitment but offering unwavering devotion, protection, and the ability to participate actively in human activities. They come in various breeds and can serve as service animals due to their intelligence. Cats are presented as independent, low-maintenance companions perfect for apartment living and busy lifestyles. They are self-sufficient, naturally clean, and provide affection while reducing stress through their calming presence. Birds are described as colorful, intelligent pets ranging from small budgies to large parrots, capable of mimicking speech and learning tricks. They require specialized care, thrive on social interaction, and can live for many years, becoming long-term family members. The essay concludes that each animal offers unique benefits, and the choice depends on individual lifestyle, living situation, and personal preferences, with all three having proven themselves as beloved companions throughout human history."
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ],
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 617,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 995,
+          "service_tier": "standard",
+          "inference_geo": "not_available"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages?beta=true",
+      "headers": {
+        "host": "api.anthropic.com",
+        "accept-encoding": "gzip, deflate",
+        "connection": "keep-alive",
+        "x-stainless-timeout": "600",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "user-agent": "Anthropic/Python 0.82.0",
+        "x-stainless-lang": "python",
+        "x-stainless-package-version": "0.82.0",
+        "x-stainless-os": "MacOS",
+        "x-stainless-arch": "arm64",
+        "x-stainless-runtime": "CPython",
+        "x-stainless-runtime-version": "3.9.18",
+        "x-stainless-async": "false",
+        "anthropic-version": "2023-06-01",
+        "x-stainless-helper": "compaction",
+        "x-stainless-retry-count": "0",
+        "x-stainless-read-timeout": "600",
+        "content-length": "1666"
+      },
+      "body": {
+        "max_tokens": 4000,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a detailed 500 word essay about dogs, cats, and birds. Call the tool submit_analysis with the information about all three animals. Note that you should call it only once at the end of your essay."
+          },
+          {
+            "role": "user",
+            "content": "You have been working on the task described above but have not yet completed it. Write a continuation summary that will allow you (or another instance of yourself) to resume work efficiently in a future context window where the conversation history will be replaced with this summary. Your summary should be structured, concise, and actionable. Include:\n1. Task Overview\nThe user's core request and success criteria\nAny clarifications or constraints they specified\n2. Current State\nWhat has been completed so far\nFiles created, modified, or analyzed (with paths if relevant)\nKey outputs or artifacts produced\n3. Important Discoveries\nTechnical constraints or requirements uncovered\nDecisions made and their rationale\nErrors encountered and how they were resolved\nWhat approaches were tried that didn't work (and why)\n4. Next Steps\nSpecific actions needed to complete the task\nAny blockers or open questions to resolve\nPriority order if multiple steps remain\n5. Context to Preserve\nUser preferences or style requirements\nDomain-specific details that aren't obvious\nAny promises made to the user\nBe concise but complete—err on the side of including information that would prevent duplicate work or repeated mistakes. Write in a way that enables immediate resumption of the task.\nWrap your summary in <summary></summary> tags."
+          }
+        ],
+        "model": "claude-sonnet-4-5"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "headers": {
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "x-robots-tag": "none",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "server": "cloudflare",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "body": {
+        "model": "claude-sonnet-4-5-20250929",
+        "id": "msg_019bVBTjMoXMbUV6LJyiDAmM",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "<summary>\n## Task Overview\nThe user requests a detailed 500-word essay about dogs, cats, and birds, followed by a single call to the `submit_analysis` tool at the end containing information about all three animals. \n\n**Key Requirements:**\n- Essay must be 500 words in length\n- Cover dogs, cats, and birds\n- Call `submit_analysis` tool only once at the completion\n- The tool call should contain information about all three animals\n\n## Current State\n**Status:** Not started - no work has been completed yet.\n\n**Completed:**\n- None\n\n**Artifacts Produced:**\n- None\n\n## Important Discoveries\n**Unknown Information:**\n- The exact structure/parameters expected by the `submit_analysis` tool (need to determine what format the tool accepts)\n- Whether the tool requires specific data fields for each animal or free-form text\n- The level of detail expected in the analysis (scientific, casual, comparative, etc.)\n\n**Assumptions to Verify:**\n- The essay should likely compare/contrast the three animals as pets or discuss their characteristics\n- The `submit_analysis` tool probably accepts structured data about the animals\n\n## Next Steps\n1. **Write the 500-word essay** covering:\n   - Dogs (characteristics, behavior, role as pets)\n   - Cats (characteristics, behavior, role as pets)\n   - Birds (characteristics, behavior, role as pets)\n   - Potentially comparative elements between the three\n\n2. **Determine the `submit_analysis` tool structure** - check what parameters it accepts\n\n3. **Call `submit_analysis` once** with comprehensive information about all three animals in the appropriate format\n\n4. **Verify word count** is approximately 500 words before submitting\n\n## Context to Preserve\n- User emphasized calling the tool \"only once at the end\" - this is a specific constraint to respect\n- The tool should contain information about \"all three animals\" - comprehensive coverage required\n- Essay should be \"detailed\" - suggests substantive content rather than superficial treatment\n\n## Priority\nHigh priority on understanding the `submit_analysis` tool parameters before writing the essay, as the content may need to be structured to align with tool requirements.\n</summary>"
+          }
+        ],
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "usage": {
+          "input_tokens": 324,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 486,
+          "service_tier": "standard",
+          "inference_geo": "not_available"
+        }
+      }
+    }
+  }
+]

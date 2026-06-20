@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Running ruff"
+uv run ruff format
+uv run ruff check --fix .
+# run formatting again to fix any inconsistencies when imports are stripped
+uv run ruff format
+
+echo "==> Formatting docs"
+uv run python scripts/utils/ruffen-docs.py README.md $(find . -type f -name api.md)

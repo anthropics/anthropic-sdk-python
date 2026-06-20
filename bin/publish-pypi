@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -eux
+rm -rf dist
+mkdir -p dist
+uv build
+if [ -n "${PYPI_TOKEN:-}" ]; then
+  uv publish --token=$PYPI_TOKEN
+else
+  uv publish
+fi

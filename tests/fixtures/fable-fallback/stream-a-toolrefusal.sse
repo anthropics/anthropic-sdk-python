@@ -1,0 +1,54 @@
+event: message_start
+data: {"type":"message_start","message":{"model":"claude-fable-5","id":"msg_fixture_atool_0001","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"stop_details":null,"usage":{"input_tokens":612,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":63,"service_tier":"standard","inference_geo":"global"}}           }
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"server_tool_use","id":"srvtoolu_fixture_a_0001","name":"web_search","input":{}}      }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""} }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"query\": \"s"}          }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"olar eclips"}          }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"e viewing s"}          }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"af"}           }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ety news"}              }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":" 2026"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"}"} }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0           }
+
+event: content_block_start
+data: {"type":"content_block_start","index":1,"content_block":{"type":"web_search_tool_result","tool_use_id":"srvtoolu_fixture_a_0001","content":[{"type":"web_search_result","title":"How to Watch a Solar Eclipse Safely | Example Observatory","url":"https://www.example.com/eclipse-viewing-safety","encrypted_content":"Looking directly at the Sun without certified eye protection is never safe, even during a partial eclipse. Certified eclipse glasses block enough light to make direct viewing safe; ordinary sunglasses do not. A pinhole projector is an easy, safe alternative that projects an image of the Sun onto a flat surface. During the brief window of totality — and only then — it is safe to look with the naked eye, and observers can see the Sun's corona.","page_age":"April 30, 2026"},{"type":"web_search_result","title":"Upcoming Solar Eclipses in 2026 | Example Astronomy News","url":"https://www.example.com/eclipses-2026","encrypted_content":"Skywatchers have two solar eclipses to look forward to in 2026. An annular eclipse in February will be visible from parts of the southern hemisphere, and a total eclipse in August will trace a narrow path of totality across parts of the Arctic and western Europe. Outside the path of totality, observers across a much wider region will see a partial eclipse. Local astronomy clubs are organising public viewing events with certified equipment along the route.","page_age":"1 week ago"}],"caller":{"type":"direct"}}             }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":1               }
+
+event: content_block_start
+data: {"type":"content_block_start","index":2,"content_block":{"type":"text","text":""}             }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":"Here's a summary of this year's solar eclipses and how"}              }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":2}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"refusal","stop_sequence":null,"stop_details":{"type":"refusal","category":null,"explanation":null,"fallback_credit_token":"tok_synthetic_fixture_a","fallback_has_prefill_claim":true}},"usage":{"input_tokens":28,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":106,"output_tokens_details":{"thinking_tokens":67},"iterations":[{"input_tokens":28,"output_tokens":106,"cache_read_input_tokens":0,"cache_creation_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"type":"message"}]}    }
+
+event: message_stop
+data: {"type":"message_stop"      }
+

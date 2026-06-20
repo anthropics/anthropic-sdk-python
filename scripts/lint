@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+if [ "$1" = "--fix" ]; then
+  echo "==> Running ruff with --fix"
+  uv run ruff check . --fix
+else
+  echo "==> Running ruff"
+  uv run ruff check .
+fi
+
+echo "==> Running pyright"
+uv run pyright
+
+echo "==> Running mypy"
+uv run mypy .
+
+echo "==> Making sure it imports"
+uv run python -c 'import anthropic'
