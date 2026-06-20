@@ -834,6 +834,123 @@ def test_discriminated_unions_invalid_data_uses_cache() -> None:
     assert DISCRIMINATOR_CACHE.get(UnionType) is discriminator
 
 
+def test_discriminated_union_fast_path_validates_single_variant(monkeypatch: pytest.MonkeyPatch) -> None:
+    # valid data for a discriminated union should validate only the matched variant,
+    # never the whole union (the union decode is materially more expensive). See #1649.
+    from anthropic import _models
+
+    class A(BaseModel):
+        type: Literal["a"]
+
+        data: str
+
+    class B(BaseModel):
+        type: Literal["b"]
+
+        data: int
+
+    validated: list[object] = []
+    real_validate = _models.validate_type
+
+    def spy(*, type_: Any, value: object) -> object:
+        validated.append(type_)
+        return real_validate(type_=type_, value=value)
+
+    monkeypatch.setattr(_models, "validate_type", spy)
+
+    m = construct_type(
+        value={"type": "b", "data": 7},
+        type_=cast(Any, Annotated[Union[A, B], PropertyInfo(discriminator="type")]),
+    )
+    assert isinstance(m, B)
+    assert m.data == 7
+    # only variant B was validated -- the whole Union[A, B] was never handed to validate_type
+    assert validated == [B]
+
+
+def test_discriminated_union_fast_path_matches_full_union(monkeypatch: pytest.MonkeyPatch) -> None:
+    # the fast path must return an object identical to validating the whole union,
+    # for both clean data and data that only validates after discriminator selection.
+    from anthropic import _models
+
+    class A(BaseModel):
+        type: Literal["a"]
+
+        data: str
+
+    class B(BaseModel):
+        type: Literal["b"]
+
+        data: int
+
+    union = cast(Any, Annotated[Union[A, B], PropertyInfo(discriminator="type")])
+
+    for value in [{"type": "a", "data": "x"}, {"type": "b", "data": 100}]:
+        fast = construct_type(value=value, type_=union)
+
+        # force the old whole-union path by stubbing the discriminator lookup to None
+        monkeypatch.setattr(_models, "_build_discriminated_union_meta", lambda **_: None)
+        full = construct_type(value=value, type_=union)
+        monkeypatch.undo()
+
+        assert type(fast) is type(full)
+        assert fast == full
+
+
+def test_discriminated_union_fast_path_falls_back_on_invalid_data(monkeypatch: pytest.MonkeyPatch) -> None:
+    # when the data does not validate against its discriminated variant we must fall
+    # through to the existing (unvalidated) construct path -- unchanged behavior.
+    from anthropic import _models
+
+    class A(BaseModel):
+        type: Literal["a"]
+
+        data: str
+
+    class B(BaseModel):
+        type: Literal["b"]
+
+        data: int
+
+    validated: list[object] = []
+    real_validate = _models.validate_type
+
+    def spy(*, type_: Any, value: object) -> object:
+        validated.append(type_)
+        return real_validate(type_=type_, value=value)
+
+    monkeypatch.setattr(_models, "validate_type", spy)
+
+    m = construct_type(
+        value={"type": "b", "data": "not-an-int"},
+        type_=cast(Any, Annotated[Union[A, B], PropertyInfo(discriminator="type")]),
+    )
+    # invalid int -> variant validation fails, falls back to .construct() keeping the raw value
+    assert isinstance(m, B)
+    assert m.data == "not-an-int"  # type: ignore[comparison-overlap]
+    # the fast path attempted variant B first, before any whole-union validation
+    assert validated[0] is B
+
+
+def test_non_discriminated_union_unaffected(monkeypatch: pytest.MonkeyPatch) -> None:
+    # a plain (non-discriminated) union has no fast path; the whole union is validated.
+    from anthropic import _models
+
+    validated: list[object] = []
+    real_validate = _models.validate_type
+
+    def spy(*, type_: Any, value: object) -> object:
+        validated.append(type_)
+        return real_validate(type_=type_, value=value)
+
+    monkeypatch.setattr(_models, "validate_type", spy)
+
+    m = construct_type(value=12, type_=cast(Any, Union[int, str]))
+    assert m == 12
+    # validated exactly once, with the union itself (no per-variant fast path)
+    assert len(validated) == 1
+
+
 @pytest.mark.skipif(PYDANTIC_V1, reason="TypeAliasType is not supported in Pydantic v1")
 def test_type_alias_type() -> None:
     Alias = TypeAliasType("Alias", str)  # pyright: ignore
