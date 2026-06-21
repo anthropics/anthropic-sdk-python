@@ -18,7 +18,7 @@ class HeuristicGuard:
     }
 
     THRESH_OPTIMAL: float = 2.3
-    THRESH_ADMISSIBLE: float = 0.1  # élargi, comme demandé
+    THRESH_ADMISSIBLE: float = 0.3  # To adjust the threshold for admissible prompts, we can change this value.
 
     @classmethod
     def analyze(cls, prompt: str) -> typing.Dict[str, typing.Any]:
