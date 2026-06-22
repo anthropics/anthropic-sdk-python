@@ -138,6 +138,7 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
                     or sse.event == "session.thread_status_idle"
                     or sse.event == "session.thread_status_rescheduled"
                     or sse.event == "session.thread_status_terminated"
+                    or sse.event == "system.message"
                 ):
                     data = sse.json()
                     if is_dict(data) and "type" not in data:
@@ -304,6 +305,7 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
                     or sse.event == "session.thread_status_idle"
                     or sse.event == "session.thread_status_rescheduled"
                     or sse.event == "session.thread_status_terminated"
+                    or sse.event == "system.message"
                 ):
                     data = sse.json()
                     if is_dict(data) and "type" not in data:
