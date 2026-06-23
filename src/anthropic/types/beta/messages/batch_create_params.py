@@ -37,6 +37,15 @@ class BatchCreateParams(TypedDict, total=False):
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
 
+    user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]
+    """The user profile ID to attribute the requests in this batch to.
+
+    Use when acting on behalf of a party other than your organization. Requires the
+    `user-profiles` beta header. Applies to every request in the batch; an
+    individual request whose `user_profile_id` body field conflicts with this header
+    is errored.
+    """
+
 
 RequestParamsContainer: TypeAlias = Union[BetaContainerParams, str]
 
@@ -379,12 +388,6 @@ class RequestParams(TypedDict, total=False):
     reaches a particular probability specified by `top_p`.
 
     Recommended for advanced use cases only.
-    """
-
-    user_profile_id: Optional[str]
-    """The user profile ID to attribute this request to.
-
-    Use when acting on behalf of a party other than your organization.
     """
 
 

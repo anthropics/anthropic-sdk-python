@@ -195,8 +195,8 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
-            user_profile_id="user_profile_id",
             betas=["message-batches-2024-09-24"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -414,8 +414,8 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
-            user_profile_id="user_profile_id",
             betas=["message-batches-2024-09-24"],
+            user_profile_id="anthropic-user-profile-id",
         )
         message_stream.response.close()
 
@@ -808,8 +808,8 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
-            user_profile_id="user_profile_id",
             betas=["message-batches-2024-09-24"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -1027,8 +1027,8 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
-            user_profile_id="user_profile_id",
             betas=["message-batches-2024-09-24"],
+            user_profile_id="anthropic-user-profile-id",
         )
         await message_stream.response.aclose()
 

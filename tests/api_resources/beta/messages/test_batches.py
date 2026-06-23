@@ -152,7 +152,7 @@ class TestBatches:
                         "service_tier": "auto",
                         "speed": "standard",
                         "stop_sequences": ["string"],
-                        "stream": True,
+                        "stream": False,
                         "system": [
                             {
                                 "text": "Today's date is 2024-06-01.",
@@ -208,11 +208,11 @@ class TestBatches:
                         ],
                         "top_k": 5,
                         "top_p": 0.7,
-                        "user_profile_id": "user_profile_id",
                     },
                 }
             ],
             betas=["message-batches-2024-09-24"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -626,7 +626,7 @@ class TestAsyncBatches:
                         "service_tier": "auto",
                         "speed": "standard",
                         "stop_sequences": ["string"],
-                        "stream": True,
+                        "stream": False,
                         "system": [
                             {
                                 "text": "Today's date is 2024-06-01.",
@@ -682,11 +682,11 @@ class TestAsyncBatches:
                         ],
                         "top_k": 5,
                         "top_p": 0.7,
-                        "user_profile_id": "user_profile_id",
                     },
                 }
             ],
             betas=["message-batches-2024-09-24"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
