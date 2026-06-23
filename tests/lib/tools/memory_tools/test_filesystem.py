@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import stat
 import tempfile
 from typing import Iterator
 from pathlib import Path
@@ -51,6 +52,27 @@ def get_directory_snapshot(base_path: str) -> dict[str, str]:
 
 
 class TestBetaLocalFilesystemMemoryTool:
+    def test_mkdir_parents_not_world_writable_under_permissive_umask(self) -> None:
+        if os.name != "posix":
+            pytest.skip("POSIX mode bits only")
+        # Permissive umask: newly created dirs would default to 0o777 unless an
+        # explicit mode is enforced on every component of the tree.
+        old_umask = os.umask(0)
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                # base_path's parent ("nested") does NOT exist yet, so the tool must
+                # create it as an intermediate parent. The bug: pathlib applies the
+                # 0o700 mode only to the leaf, leaving these intermediate parents at
+                # the umask default (0o777 here) — world-writable.
+                base_path = Path(tmp) / "nested" / "memory"
+                tool = BetaLocalFilesystemMemoryTool(base_path=str(base_path))
+                for directory in (base_path.parent, base_path, tool.memory_root):
+                    mode = stat.S_IMODE(directory.stat().st_mode)
+                    assert mode == 0o700, f"{directory} has mode {oct(mode)}, expected 0o700"
+                    assert not (mode & 0o077), f"{directory} is group/other-accessible: {oct(mode)}"
+        finally:
+            os.umask(old_umask)
+
     def test_create(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
         result = sync_local_filesystem_tool.create(
             BetaMemoryTool20250818CreateCommand(
@@ -518,6 +540,23 @@ class TestBetaLocalFilesystemMemoryTool:
 
 
 class TestBetaAsyncLocalFilesystemMemoryTool:
+    async def test_mkdir_parents_not_world_writable_under_permissive_umask(self) -> None:
+        if os.name != "posix":
+            pytest.skip("POSIX mode bits only")
+        old_umask = os.umask(0)
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                base_path = Path(tmp) / "nested" / "memory"
+                tool = BetaAsyncLocalFilesystemMemoryTool(base_path=str(base_path))
+                await tool._ensure_memory_root()  # triggers lazy directory creation
+                memory_root = Path(str(tool.memory_root))
+                for directory in (base_path.parent, base_path, memory_root):
+                    mode = stat.S_IMODE(directory.stat().st_mode)
+                    assert mode == 0o700, f"{directory} has mode {oct(mode)}, expected 0o700"
+                    assert not (mode & 0o077), f"{directory} is group/other-accessible: {oct(mode)}"
+        finally:
+            os.umask(old_umask)
+
     async def test_create(self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool) -> None:
         result = await async_local_filesystem_tool.create(
             BetaMemoryTool20250818CreateCommand(
