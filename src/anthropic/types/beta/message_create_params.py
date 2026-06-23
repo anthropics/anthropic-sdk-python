@@ -363,14 +363,15 @@ class MessageCreateParamsBase(TypedDict, total=False):
     Recommended for advanced use cases only.
     """
 
-    user_profile_id: Optional[str]
-    """The user profile ID to attribute this request to.
-
-    Use when acting on behalf of a party other than your organization.
-    """
-
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
+
+    user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]
+    """The user profile ID to attribute this request to.
+
+    Use when acting on behalf of a party other than your organization. Requires the
+    `user-profiles` beta header.
+    """
 
 
 Container: TypeAlias = Union[BetaContainerParams, str]

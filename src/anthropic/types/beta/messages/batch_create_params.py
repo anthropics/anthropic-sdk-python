@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Iterable, Optional
+from typing import List, Iterable
 from typing_extensions import Required, Annotated, TypedDict
 
 from ...._utils import PropertyInfo
@@ -22,10 +22,13 @@ class BatchCreateParams(TypedDict, total=False):
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
 
-    user_profile_id: Optional[str]
-    """The user profile ID to attribute this request to.
+    user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]
+    """The user profile ID to attribute the requests in this batch to.
 
-    Use when acting on behalf of a party other than your organization.
+    Use when acting on behalf of a party other than your organization. Requires the
+    `user-profiles` beta header. Applies to every request in the batch; an
+    individual request whose `user_profile_id` body field conflicts with this header
+    is errored.
     """
 
 

@@ -25,7 +25,7 @@ from .batches import (
     AsyncBatchesWithStreamingResponse,
 )
 from ..._types import NOT_GIVEN, Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ..._utils import is_given, required_args, maybe_transform, async_maybe_transform
+from ..._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
 from ..._compat import cached_property
 from ..._models import TypeAdapter
 from ..._resource import SyncAPIResource, AsyncAPIResource
@@ -137,6 +137,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[ToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -389,6 +390,9 @@ class Messages(SyncAPIResource):
 
               Recommended for advanced use cases only.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -421,6 +425,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[ToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -673,6 +678,9 @@ class Messages(SyncAPIResource):
 
               Recommended for advanced use cases only.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -705,6 +713,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[ToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -957,6 +966,9 @@ class Messages(SyncAPIResource):
 
               Recommended for advanced use cases only.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -989,6 +1001,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[ToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1015,6 +1028,7 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
+        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
         return self._post(
             "/v1/messages",
             body=maybe_transform(
@@ -1071,6 +1085,7 @@ class Messages(SyncAPIResource):
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1094,6 +1109,7 @@ class Messages(SyncAPIResource):
             )
 
         extra_headers = {
+            **strip_not_given({"anthropic-user-profile-id": user_profile_id}),
             _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
             _STAINLESS_STREAM_HELPER_HEADER: "messages",
             **(extra_headers or {}),
@@ -1591,6 +1607,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[ToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1843,6 +1860,9 @@ class AsyncMessages(AsyncAPIResource):
 
               Recommended for advanced use cases only.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -1875,6 +1895,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[ToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2127,6 +2148,9 @@ class AsyncMessages(AsyncAPIResource):
 
               Recommended for advanced use cases only.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -2159,6 +2183,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[ToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2411,6 +2436,9 @@ class AsyncMessages(AsyncAPIResource):
 
               Recommended for advanced use cases only.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -2443,6 +2471,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[ToolUnionParam] | Omit = omit,
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2469,6 +2498,7 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
+        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
         return await self._post(
             "/v1/messages",
             body=await async_maybe_transform(
@@ -2525,6 +2555,7 @@ class AsyncMessages(AsyncAPIResource):
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2548,6 +2579,7 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         extra_headers = {
+            **strip_not_given({"anthropic-user-profile-id": user_profile_id}),
             _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
             _STAINLESS_STREAM_HELPER_HEADER: "messages",
             **(extra_headers or {}),

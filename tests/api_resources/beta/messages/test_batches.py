@@ -211,11 +211,11 @@ class TestBatches:
                         ],
                         "top_k": 5,
                         "top_p": 0.7,
-                        "user_profile_id": "user_profile_id",
                     },
                 }
             ],
             betas=["string"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -701,11 +701,11 @@ class TestAsyncBatches:
                         ],
                         "top_k": 5,
                         "top_p": 0.7,
-                        "user_profile_id": "user_profile_id",
                     },
                 }
             ],
             betas=["string"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 

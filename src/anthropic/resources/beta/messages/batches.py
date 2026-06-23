@@ -51,6 +51,7 @@ class Batches(SyncAPIResource):
         *,
         requests: Iterable[batch_create_params.Request],
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -74,6 +75,11 @@ class Batches(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          user_profile_id: The user profile ID to attribute the requests in this batch to. Use when acting
+              on behalf of a party other than your organization. Requires the `user-profiles`
+              beta header. Applies to every request in the batch; an individual request whose
+              `user_profile_id` body field conflicts with this header is errored.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -87,7 +93,8 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-user-profile-id": user_profile_id,
                 }
             ),
             **(extra_headers or {}),
@@ -440,6 +447,7 @@ class AsyncBatches(AsyncAPIResource):
         *,
         requests: Iterable[batch_create_params.Request],
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -463,6 +471,11 @@ class AsyncBatches(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          user_profile_id: The user profile ID to attribute the requests in this batch to. Use when acting
+              on behalf of a party other than your organization. Requires the `user-profiles`
+              beta header. Applies to every request in the batch; an individual request whose
+              `user_profile_id` body field conflicts with this header is errored.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -476,7 +489,8 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-user-profile-id": user_profile_id,
                 }
             ),
             **(extra_headers or {}),

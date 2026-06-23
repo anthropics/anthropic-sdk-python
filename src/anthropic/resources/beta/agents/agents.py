@@ -99,7 +99,9 @@ class Agents(SyncAPIResource):
           description: Description of what the agent does.
 
           mcp_servers: MCP servers this agent connects to. Maximum 20. Names must be unique within the
-              array.
+              array. Every server must be referenced by an `mcp_toolset` in `tools`;
+              unreferenced servers are rejected. See the
+              [MCP connector guide](https://platform.claude.com/docs/en/managed-agents/mcp-connector).
 
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
@@ -245,8 +247,11 @@ class Agents(SyncAPIResource):
 
           description: Description. Omit to preserve; send empty string or null to clear.
 
-          mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or null to
-              clear. Names must be unique. Maximum 20.
+          mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
+              clear. Names must be unique. Maximum 20. Every server must be referenced by an
+              `mcp_toolset` in the agent's resulting `tools`; unreferenced servers are
+              rejected. See the
+              [MCP connector guide](https://platform.claude.com/docs/en/managed-agents/mcp-connector).
 
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars
@@ -496,7 +501,9 @@ class AsyncAgents(AsyncAPIResource):
           description: Description of what the agent does.
 
           mcp_servers: MCP servers this agent connects to. Maximum 20. Names must be unique within the
-              array.
+              array. Every server must be referenced by an `mcp_toolset` in `tools`;
+              unreferenced servers are rejected. See the
+              [MCP connector guide](https://platform.claude.com/docs/en/managed-agents/mcp-connector).
 
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
@@ -642,8 +649,11 @@ class AsyncAgents(AsyncAPIResource):
 
           description: Description. Omit to preserve; send empty string or null to clear.
 
-          mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or null to
-              clear. Names must be unique. Maximum 20.
+          mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
+              clear. Names must be unique. Maximum 20. Every server must be referenced by an
+              `mcp_toolset` in the agent's resulting `tools`; unreferenced servers are
+              rejected. See the
+              [MCP connector guide](https://platform.claude.com/docs/en/managed-agents/mcp-connector).
 
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars

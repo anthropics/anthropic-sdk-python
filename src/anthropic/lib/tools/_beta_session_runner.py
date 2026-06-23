@@ -218,9 +218,7 @@ def _scoped_client(client: AsyncAnthropic, environment_key: str | None) -> Async
     mutated).
     """
     if environment_key is not None:
-        return _copy_client_with_bearer_auth(
-            client, auth_token=environment_key, helper="session-tool-runner"
-        )
+        return _copy_client_with_bearer_auth(client, auth_token=environment_key, helper="session-tool-runner")
     return client.with_options(default_headers=helper_header("session-tool-runner"))
 
 
