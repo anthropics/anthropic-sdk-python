@@ -170,4 +170,18 @@ def _deepcopy_with_paths(item: _T, paths: Sequence[Sequence[str]], index: int) -
         if not array_paths:
             return cast(_T, item)
         return cast(_T, [_deepcopy_with_paths(entry, array_paths, index + 1) for entry in item])
+    if is_tuple_t(item):
+        tuple_item = cast(tuple[object, ...], item)
+        return cast(_T, _copy_file_container(tuple_item))
+    return item
+
+
+def _copy_file_container(item: object) -> object:
+    if is_mapping(item):
+        return {key: _copy_file_container(value) for key, value in item.items()}
+    if is_list(item):
+        return [_copy_file_container(entry) for entry in item]
+    if is_tuple_t(item):
+        entries = cast(tuple[object, ...], item)
+        return tuple(_copy_file_container(entry) for entry in entries)
     return item

@@ -91,6 +91,19 @@ class TestDeepcopyWithPaths:
         assert_different_identities(result_items[0], elem1)
         assert_different_identities(result_items[1], elem2)
 
+    def test_copies_mutable_file_tuple_entries(self) -> None:
+        headers = {"x-test": "value"}
+        file = ("example.txt", b"contents", "text/plain", headers)
+        original = {"file": file}
+
+        result = deepcopy_with_paths(original, [["file"]])
+
+        assert_different_identities(result, original)
+        result_file = result["file"]
+        assert_different_identities(result_file, file)
+        assert result_file[:3] == file[:3]
+        assert_different_identities(result_file[3], headers)
+
     def test_empty_paths_returns_same_object(self) -> None:
         original = {"foo": "bar"}
         result = deepcopy_with_paths(original, [])
