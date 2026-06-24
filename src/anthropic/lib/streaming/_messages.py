@@ -20,7 +20,7 @@ from ._types import (
     ParsedMessageStreamEvent,
     ParsedContentBlockStopEvent,
 )
-from ...types import RawMessageStreamEvent
+from ...types import RawMessageStreamEvent, RawContentBlockDeltaEvent
 from ..._types import NOT_GIVEN, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
@@ -444,6 +444,13 @@ def accumulate_event(
                 value=event,
             ),
         )
+        if not isinstance(cast(Any, event), BaseModel) and isinstance(cast(Any, event), dict):
+            if event.get("type") == "content_block_delta":
+                event = cast(
+                    RawMessageStreamEvent,
+                    construct_type_unchecked(type_=RawContentBlockDeltaEvent, value=event),
+                )
+
         if not isinstance(cast(Any, event), BaseModel):
             raise TypeError(f"Unexpected event runtime type, after deserialising twice - {event} - {type(event)}")
 
