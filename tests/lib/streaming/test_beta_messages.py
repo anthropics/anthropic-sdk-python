@@ -12,10 +12,20 @@ from respx import MockRouter
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._utils import assert_overloads_in_sync, assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
+from anthropic.types.beta.beta_usage import BetaUsage
 from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_types import BetaCompactionEvent, ParsedBetaMessageStreamEvent
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
-from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
+from anthropic.lib.streaming._beta_messages import (
+    TRACKS_TOOL_INPUT,
+    BetaMessageStream,
+    BetaAsyncMessageStream,
+    build_events,
+)
+from anthropic.types.beta.parsed_beta_message import ParsedBetaMessage
+from anthropic.types.beta.beta_input_json_delta import BetaInputJSONDelta
+from anthropic.types.beta.beta_server_tool_use_block import BetaServerToolUseBlock
+from anthropic.types.beta.beta_raw_content_block_delta_event import BetaRawContentBlockDeltaEvent
 
 from .helpers import get_response, to_async_iter
 
@@ -601,3 +611,36 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+def test_server_tool_use_emits_input_json_event() -> None:
+    message = ParsedBetaMessage(
+        id="msg_123",
+        type="message",
+        role="assistant",
+        content=[
+            BetaServerToolUseBlock(
+                id="srvtoolu_123",
+                type="server_tool_use",
+                name="web_search",
+                input={"query": "Paris weather"},
+            )
+        ],
+        model="claude-sonnet-4-5",
+        stop_reason=None,
+        stop_sequence=None,
+        usage=BetaUsage(input_tokens=10, output_tokens=1),
+    )
+    event = BetaRawContentBlockDeltaEvent(
+        type="content_block_delta",
+        index=0,
+        delta=BetaInputJSONDelta(type="input_json_delta", partial_json='{"query":"Paris weather"}'),
+    )
+
+    events = build_events(event=event, message_snapshot=message)
+
+    assert [stream_event.type for stream_event in events] == ["content_block_delta", "input_json"]
+    input_json_event = events[1]
+    assert input_json_event.type == "input_json"
+    assert input_json_event.partial_json == '{"query":"Paris weather"}'
+    assert input_json_event.snapshot == {"query": "Paris weather"}
