@@ -11,7 +11,7 @@ __all__ = ["BetaFallbackRefusalTrigger"]
 class BetaFallbackRefusalTrigger(BaseModel):
     """The `from` model declined for policy reasons."""
 
-    category: Optional[Literal["cyber", "bio", "frontier_llm", "reasoning_extraction"]] = None
+    category: Optional[Literal["cyber", "bio", "frontier_llm", "reasoning_extraction", "military_weapons"]] = None
     """The policy category that triggered a refusal."""
 
     type: Literal["refusal"]
