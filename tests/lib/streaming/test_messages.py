@@ -349,3 +349,121 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+# Regression tests for https://github.com/anthropics/anthropic-sdk-python/issues/941
+#
+# When Pydantic's union discriminator fails silently (certain Pydantic versions or
+# TypeAlias nesting), construct_type_unchecked returns the raw dict. The fallback in
+# accumulate_event must produce fully-typed event objects — not just BaseModel shells
+# with nested dicts — so that downstream attribute access like event.delta.type works.
+
+
+def test_accumulate_event_raw_dict_text_delta_is_fully_typed() -> None:
+    """Raw dict content_block_delta events must be fully validated by the fallback so
+    that event.delta is a typed TextDelta object, not a raw dict.  If it were a dict,
+    the event.delta.type access inside accumulate_event would raise AttributeError and
+    the text would never be appended to the snapshot."""
+    from anthropic.lib.streaming._messages import accumulate_event
+
+    snapshot = accumulate_event(
+        event={  # type: ignore[arg-type]
+            "type": "message_start",
+            "message": {
+                "id": "msg_test_941",
+                "type": "message",
+                "role": "assistant",
+                "content": [],
+                "model": "claude-3-opus-latest",
+                "stop_reason": None,
+                "stop_sequence": None,
+                "usage": {"input_tokens": 10, "output_tokens": 0},
+            },
+        },
+        current_snapshot=None,
+    )
+
+    snapshot = accumulate_event(
+        event={  # type: ignore[arg-type]
+            "type": "content_block_start",
+            "index": 0,
+            "content_block": {"type": "text", "text": ""},
+        },
+        current_snapshot=snapshot,
+    )
+
+    # This is the crux of issue #941: a content_block_delta arriving as a raw dict.
+    # The fallback must produce a RawContentBlockDeltaEvent whose .delta is a TextDelta
+    # (typed), not a dict — otherwise event.delta.type raises AttributeError and
+    # content.text is never updated.
+    snapshot = accumulate_event(
+        event={  # type: ignore[arg-type]
+            "type": "content_block_delta",
+            "index": 0,
+            "delta": {"type": "text_delta", "text": "hello"},
+        },
+        current_snapshot=snapshot,
+    )
+
+    # If event.delta were a raw dict the text would still be "" here.
+    assert snapshot.content[0].text == "hello"
+
+
+def test_accumulate_event_raw_dict_multiple_deltas_accumulate() -> None:
+    """Multiple raw dict text deltas must each append correctly, proving that the
+    fallback is re-applied on every event and not just the first one."""
+    from anthropic.lib.streaming._messages import accumulate_event
+
+    snapshot = accumulate_event(
+        event={  # type: ignore[arg-type]
+            "type": "message_start",
+            "message": {
+                "id": "msg_test_941b",
+                "type": "message",
+                "role": "assistant",
+                "content": [],
+                "model": "claude-3-opus-latest",
+                "stop_reason": None,
+                "stop_sequence": None,
+                "usage": {"input_tokens": 10, "output_tokens": 0},
+            },
+        },
+        current_snapshot=None,
+    )
+
+    snapshot = accumulate_event(
+        event={  # type: ignore[arg-type]
+            "type": "content_block_start",
+            "index": 0,
+            "content_block": {"type": "text", "text": ""},
+        },
+        current_snapshot=snapshot,
+    )
+
+    for word in ["Hello", " there", "!"]:
+        snapshot = accumulate_event(
+            event={  # type: ignore[arg-type]
+                "type": "content_block_delta",
+                "index": 0,
+                "delta": {"type": "text_delta", "text": word},
+            },
+            current_snapshot=snapshot,
+        )
+
+    assert snapshot.content[0].text == "Hello there!"
+
+
+def test_accumulate_event_raw_dict_unknown_type_still_raises() -> None:
+    """An unknown event type in the raw dict must still raise an exception so that
+    genuinely malformed events are not silently swallowed by the fallback.
+    The exact exception depends on how far deserialization gets: if the event survives
+    as a BaseModel with the wrong type, RuntimeError is raised by the event-ordering
+    check; if deserialization returns the raw dict, TypeError is raised."""
+    import pytest
+    from anthropic.lib.streaming._messages import accumulate_event
+
+    with pytest.raises((TypeError, RuntimeError)):
+        accumulate_event(
+            event={"type": "unknown_future_event", "data": "x"},  # type: ignore[arg-type]
+            current_snapshot=None,
+        )

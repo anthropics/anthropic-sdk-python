@@ -2,6 +2,7 @@ import copy
 from typing import List, cast
 
 import httpx
+import pytest
 
 from anthropic.types.beta import BetaDirectCaller, BetaToolUseBlock, BetaInputJSONDelta, BetaRawContentBlockDeltaEvent
 from anthropic.types.tool_use_block import ToolUseBlock
@@ -104,7 +105,6 @@ class TestPartialJson:
         assert "unfinished_field" in trailing_input
         assert trailing_input["unfinished_field"] == "incomplete value"
 
-    # test that with invalid JSON we throw the correct error
     def test_partial_json_with_invalid_json(self) -> None:
         """Test that invalid JSON raises an error."""
         message = ParsedBetaMessage(
@@ -147,3 +147,65 @@ class TestPartialJson:
             )
         except Exception as e:
             raise AssertionError(f"Unexpected error type: {type(e).__name__} with message: {str(e)}") from e
+
+
+# Regression tests for https://github.com/anthropics/anthropic-sdk-python/issues/941 (beta path)
+#
+# When construct_type_unchecked silently returns a raw dict, the beta accumulate_event
+# fallback must produce a fully-validated BetaRawContentBlockDeltaEvent so that
+# event.delta.type (a typed BetaTextDelta) is accessible, not a raw dict.
+
+
+class TestBetaRawDictFallback:
+    def _make_snapshot(self) -> ParsedBetaMessage:  # type: ignore[type-arg]
+        return ParsedBetaMessage(
+            id="msg_test_beta_941",
+            type="message",
+            role="assistant",
+            content=[{"type": "text", "text": ""}],
+            model="claude-3-opus-latest",
+            stop_reason=None,
+            stop_sequence=None,
+            usage=BetaUsage(input_tokens=10, output_tokens=0),
+        )
+
+    def test_raw_dict_text_delta_is_fully_typed(self) -> None:
+        """Raw dict content_block_delta must be fully validated so that event.delta is a
+        typed BetaTextDelta; otherwise event.delta.type raises AttributeError and the
+        text is never appended to the snapshot."""
+        snapshot = accumulate_event(
+            event={  # type: ignore[arg-type]
+                "type": "content_block_delta",
+                "index": 0,
+                "delta": {"type": "text_delta", "text": "hello"},
+            },
+            current_snapshot=self._make_snapshot(),
+            request_headers=httpx.Headers(),
+        )
+        assert snapshot.content[0].text == "hello"
+
+    def test_raw_dict_multiple_deltas_accumulate(self) -> None:
+        """Multiple raw dict text deltas must each append correctly."""
+        snapshot = self._make_snapshot()
+        for word in ["Hello", " beta", "!"]:
+            snapshot = accumulate_event(
+                event={  # type: ignore[arg-type]
+                    "type": "content_block_delta",
+                    "index": 0,
+                    "delta": {"type": "text_delta", "text": word},
+                },
+                current_snapshot=snapshot,
+                request_headers=httpx.Headers(),
+            )
+        assert snapshot.content[0].text == "Hello beta!"
+
+    def test_raw_dict_unknown_type_still_raises(self) -> None:
+        """An unknown event type arriving before message_start must not be silently
+        swallowed by the fallback — it must raise either TypeError (if deserialization
+        returns a raw dict) or RuntimeError (if it produces a BaseModel with wrong type)."""
+        with pytest.raises((TypeError, RuntimeError)):
+            accumulate_event(
+                event={"type": "unknown_future_event", "data": "x"},  # type: ignore[arg-type]
+                current_snapshot=None,
+                request_headers=httpx.Headers(),
+            )
