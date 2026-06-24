@@ -36,6 +36,7 @@ from __future__ import annotations
 import os
 import re
 import uuid
+import base64
 import shutil
 import logging
 import subprocess
@@ -142,6 +143,20 @@ def _fs_error(op: str, file_path: str, e: OSError) -> ToolError:
     else:
         reason = (e.strerror or "i/o error").lower()
     return ToolError(f"{op}: {file_path}: {reason}")
+
+
+_BINARY_MEDIA_TYPES: dict[str, str] = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".pdf": "application/pdf",
+}
+
+
+def _binary_media_type(path: Path) -> str | None:
+    return _BINARY_MEDIA_TYPES.get(path.suffix.lower())
 
 
 def _empty_skill_dirs() -> list[Path]:
@@ -494,7 +509,7 @@ def beta_bash_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
 
 def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
     @beta_async_tool(name="read", input_schema=BetaManagedAgentsAgentToolset20260401ReadInput)
-    async def read(file_path: str, view_range: Optional[List[int]] = None) -> str:
+    async def read(file_path: str, view_range: Optional[List[int]] = None) -> Any:
         """Read a file rooted at the working directory."""
         try:
             target = resolve_path(ctx, file_path)
@@ -513,9 +528,16 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
                     f"read: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
                     "Use bash (head/tail/sed) to read a slice."
                 )
+            media = _binary_media_type(target)
+            if media is not None:
+                data = base64.standard_b64encode(target.read_bytes()).decode("ascii")
+                kind = "document" if media == "application/pdf" else "image"
+                return [{"type": kind, "source": {"type": "base64", "media_type": media, "data": data}}]
             text = target.read_text()
         except ToolError:
             raise
+        except UnicodeDecodeError as e:
+            raise ToolError(f"read: {file_path}: file is not valid UTF-8 text; use bash to inspect binary files") from e
         except OSError as e:
             raise _fs_error("read", file_path, e) from e
         if not view_range:
