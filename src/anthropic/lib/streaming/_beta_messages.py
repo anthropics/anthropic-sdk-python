@@ -559,5 +559,7 @@ def accumulate_event(
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
         if event.usage.iterations is not None:
             current_snapshot.usage.iterations = event.usage.iterations
+        if event.usage.output_tokens_details is not None:
+            current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
 
     return current_snapshot
