@@ -3,14 +3,56 @@ from typing import List, cast
 
 import httpx
 
-from anthropic.types.beta import BetaDirectCaller, BetaToolUseBlock, BetaInputJSONDelta, BetaRawContentBlockDeltaEvent
+from anthropic.types.beta import (
+    BetaDirectCaller,
+    BetaToolUseBlock,
+    BetaInputJSONDelta,
+    BetaRawContentBlockDeltaEvent,
+    BetaServerToolUseBlock,
+)
 from anthropic.types.tool_use_block import ToolUseBlock
 from anthropic.types.beta.beta_usage import BetaUsage
-from anthropic.lib.streaming._beta_messages import accumulate_event
+from anthropic.lib.streaming._beta_messages import accumulate_event, build_events
 from anthropic.types.beta.parsed_beta_message import ParsedBetaMessage
 
 
 class TestPartialJson:
+    def test_server_tool_use_emits_input_json_event(self) -> None:
+        message = ParsedBetaMessage(
+            id="msg_123",
+            type="message",
+            role="assistant",
+            content=[
+                BetaServerToolUseBlock(
+                    type="server_tool_use",
+                    id="srvtool_123",
+                    name="web_search",
+                    input={"query": "Anth"},
+                )
+            ],
+            model="claude-sonnet-4-5",
+            stop_reason=None,
+            stop_sequence=None,
+            usage=BetaUsage(input_tokens=10, output_tokens=10),
+        )
+
+        event = BetaRawContentBlockDeltaEvent(
+            type="content_block_delta",
+            index=0,
+            delta=BetaInputJSONDelta(type="input_json_delta", partial_json='{"query":"Anth"}'),
+        )
+
+        message = accumulate_event(
+            event=event,
+            current_snapshot=message,
+            request_headers=httpx.Headers(),
+        )
+        parsed_events = build_events(event=event, message_snapshot=message)
+
+        assert [parsed_event.type for parsed_event in parsed_events] == ["content_block_delta", "input_json"]
+        assert parsed_events[1].partial_json == '{"query":"Anth"}'
+        assert parsed_events[1].snapshot == {"query": "Anth"}
+
     def test_trailing_strings_mode_header(self) -> None:
         """Test behavior differences with and without the beta header for JSON parsing."""
         message = ParsedBetaMessage(
