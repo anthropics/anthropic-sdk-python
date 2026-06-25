@@ -1512,6 +1512,8 @@ class Messages(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
+
         # Transform output_format if provided
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
 
@@ -2983,6 +2985,36 @@ class AsyncMessages(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
+
+        # Transform output_format if provided
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+
+        if is_dict(output_format):
+            transformed_output_format = cast(JSONOutputFormatParam, output_format)
+        elif is_given(output_format) and output_format is not None:
+            adapted_type: TypeAdapter[type] = TypeAdapter(output_format)
+
+            try:
+                schema = adapted_type.json_schema()
+                transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
+            except pydantic.errors.PydanticSchemaGenerationError as e:
+                raise TypeError(
+                    (
+                        "Could not generate JSON schema for the given `output_format` type. "
+                        "Use a type that works with `pydantic.TypeAdapter`"
+                    )
+                ) from e
+
+        # Merge output_format into output_config
+        merged_output_config: OutputConfigParam | Omit = omit
+        if is_given(transformed_output_format):
+            if is_given(output_config):
+                merged_output_config = {**output_config, "format": transformed_output_format}
+            else:
+                merged_output_config = {"format": transformed_output_format}
+        elif is_given(output_config):
+            merged_output_config = output_config
 
         return await self._post(
             "/v1/messages/count_tokens",
