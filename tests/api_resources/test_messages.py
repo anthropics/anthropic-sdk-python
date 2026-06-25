@@ -386,6 +386,7 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -797,6 +798,7 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
