@@ -1311,6 +1311,7 @@ class Messages(SyncAPIResource):
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[MessageCountTokensToolParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1500,6 +1501,9 @@ class Messages(SyncAPIResource):
 
               See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -1541,8 +1545,6 @@ class Messages(SyncAPIResource):
             "/v1/messages/count_tokens",
             body=maybe_transform(
                 {
-                    "messages": messages,
-                    "model": model,
                     "messages": messages,
                     "model": model,
                     "cache_control": cache_control,
@@ -2780,6 +2782,7 @@ class AsyncMessages(AsyncAPIResource):
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[MessageCountTokensToolParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2969,6 +2972,9 @@ class AsyncMessages(AsyncAPIResource):
 
               See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
 
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -2977,41 +2983,11 @@ class AsyncMessages(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        # Transform output_format if provided
-        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
-
-        if is_dict(output_format):
-            transformed_output_format = cast(JSONOutputFormatParam, output_format)
-        elif is_given(output_format) and output_format is not None:
-            adapted_type: TypeAdapter[type] = TypeAdapter(output_format)
-
-            try:
-                schema = adapted_type.json_schema()
-                transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
-            except pydantic.errors.PydanticSchemaGenerationError as e:
-                raise TypeError(
-                    (
-                        "Could not generate JSON schema for the given `output_format` type. "
-                        "Use a type that works with `pydantic.TypeAdapter`"
-                    )
-                ) from e
-
-        # Merge output_format into output_config
-        merged_output_config: OutputConfigParam | Omit = omit
-        if is_given(transformed_output_format):
-            if is_given(output_config):
-                merged_output_config = {**output_config, "format": transformed_output_format}
-            else:
-                merged_output_config = {"format": transformed_output_format}
-        elif is_given(output_config):
-            merged_output_config = output_config
 
         return await self._post(
             "/v1/messages/count_tokens",
             body=await async_maybe_transform(
                 {
-                    "messages": messages,
-                    "model": model,
                     "messages": messages,
                     "model": model,
                     "cache_control": cache_control,
