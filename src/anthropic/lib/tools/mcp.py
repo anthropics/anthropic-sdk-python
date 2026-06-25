@@ -409,7 +409,7 @@ def async_mcp_tool(
         from anthropic.lib.tools.mcp import async_mcp_tool
 
         tools_result = await mcp_client.list_tools()
-        runner = await client.beta.messages.tool_runner(
+        runner = client.beta.messages.tool_runner(
             model="claude-sonnet-4-20250514",
             max_tokens=1024,
             tools=[async_mcp_tool(t, mcp_client) for t in tools_result.tools],
