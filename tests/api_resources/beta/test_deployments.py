@@ -69,8 +69,8 @@ class TestDeployments:
                 }
             ],
             schedule={
-                "expression": "x",
-                "timezone": "x",
+                "expression": "0 9 * * 1-5",
+                "timezone": "America/Los_Angeles",
                 "type": "cron",
             },
             vault_ids=["string"],
@@ -132,7 +132,7 @@ class TestDeployments:
     @parametrize
     def test_method_retrieve(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.retrieve(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -140,7 +140,7 @@ class TestDeployments:
     @parametrize
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.retrieve(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
@@ -149,7 +149,7 @@ class TestDeployments:
     @parametrize
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.deployments.with_raw_response.retrieve(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -161,7 +161,7 @@ class TestDeployments:
     @parametrize
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.deployments.with_streaming_response.retrieve(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -182,14 +182,14 @@ class TestDeployments:
     @parametrize
     def test_method_update(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.update(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
     def test_method_update_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.update(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             agent="string",
             description="description",
             environment_id="environment_id",
@@ -214,8 +214,8 @@ class TestDeployments:
                 }
             ],
             schedule={
-                "expression": "x",
-                "timezone": "x",
+                "expression": "0 9 * * 1-5",
+                "timezone": "America/Los_Angeles",
                 "type": "cron",
             },
             vault_ids=["string"],
@@ -226,7 +226,7 @@ class TestDeployments:
     @parametrize
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.deployments.with_raw_response.update(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -237,7 +237,7 @@ class TestDeployments:
     @parametrize
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.deployments.with_streaming_response.update(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -300,14 +300,14 @@ class TestDeployments:
     @parametrize
     def test_method_archive(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.archive(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.archive(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
@@ -315,7 +315,7 @@ class TestDeployments:
     @parametrize
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.deployments.with_raw_response.archive(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -326,7 +326,7 @@ class TestDeployments:
     @parametrize
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.deployments.with_streaming_response.archive(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -346,14 +346,14 @@ class TestDeployments:
     @parametrize
     def test_method_pause(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.pause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
     def test_method_pause_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.pause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
@@ -361,7 +361,7 @@ class TestDeployments:
     @parametrize
     def test_raw_response_pause(self, client: Anthropic) -> None:
         response = client.beta.deployments.with_raw_response.pause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -372,7 +372,7 @@ class TestDeployments:
     @parametrize
     def test_streaming_response_pause(self, client: Anthropic) -> None:
         with client.beta.deployments.with_streaming_response.pause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -392,14 +392,14 @@ class TestDeployments:
     @parametrize
     def test_method_run(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.run(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeploymentRun, deployment, path=["response"])
 
     @parametrize
     def test_method_run_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.run(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeploymentRun, deployment, path=["response"])
@@ -407,7 +407,7 @@ class TestDeployments:
     @parametrize
     def test_raw_response_run(self, client: Anthropic) -> None:
         response = client.beta.deployments.with_raw_response.run(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -418,7 +418,7 @@ class TestDeployments:
     @parametrize
     def test_streaming_response_run(self, client: Anthropic) -> None:
         with client.beta.deployments.with_streaming_response.run(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -438,14 +438,14 @@ class TestDeployments:
     @parametrize
     def test_method_unpause(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.unpause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
     def test_method_unpause_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.unpause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
@@ -453,7 +453,7 @@ class TestDeployments:
     @parametrize
     def test_raw_response_unpause(self, client: Anthropic) -> None:
         response = client.beta.deployments.with_raw_response.unpause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -464,7 +464,7 @@ class TestDeployments:
     @parametrize
     def test_streaming_response_unpause(self, client: Anthropic) -> None:
         with client.beta.deployments.with_streaming_response.unpause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -534,8 +534,8 @@ class TestAsyncDeployments:
                 }
             ],
             schedule={
-                "expression": "x",
-                "timezone": "x",
+                "expression": "0 9 * * 1-5",
+                "timezone": "America/Los_Angeles",
                 "type": "cron",
             },
             vault_ids=["string"],
@@ -597,7 +597,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.retrieve(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -605,7 +605,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.retrieve(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
@@ -614,7 +614,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.deployments.with_raw_response.retrieve(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -626,7 +626,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.deployments.with_streaming_response.retrieve(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -647,14 +647,14 @@ class TestAsyncDeployments:
     @parametrize
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.update(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
     async def test_method_update_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.update(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             agent="string",
             description="description",
             environment_id="environment_id",
@@ -679,8 +679,8 @@ class TestAsyncDeployments:
                 }
             ],
             schedule={
-                "expression": "x",
-                "timezone": "x",
+                "expression": "0 9 * * 1-5",
+                "timezone": "America/Los_Angeles",
                 "type": "cron",
             },
             vault_ids=["string"],
@@ -691,7 +691,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.deployments.with_raw_response.update(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -702,7 +702,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.deployments.with_streaming_response.update(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -765,14 +765,14 @@ class TestAsyncDeployments:
     @parametrize
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.archive(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.archive(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
@@ -780,7 +780,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.deployments.with_raw_response.archive(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -791,7 +791,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.deployments.with_streaming_response.archive(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -811,14 +811,14 @@ class TestAsyncDeployments:
     @parametrize
     async def test_method_pause(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.pause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
     async def test_method_pause_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.pause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
@@ -826,7 +826,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_raw_response_pause(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.deployments.with_raw_response.pause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -837,7 +837,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_streaming_response_pause(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.deployments.with_streaming_response.pause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -857,14 +857,14 @@ class TestAsyncDeployments:
     @parametrize
     async def test_method_run(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.run(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeploymentRun, deployment, path=["response"])
 
     @parametrize
     async def test_method_run_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.run(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeploymentRun, deployment, path=["response"])
@@ -872,7 +872,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_raw_response_run(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.deployments.with_raw_response.run(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -883,7 +883,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_streaming_response_run(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.deployments.with_streaming_response.run(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -903,14 +903,14 @@ class TestAsyncDeployments:
     @parametrize
     async def test_method_unpause(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.unpause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
     async def test_method_unpause_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.unpause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
@@ -918,7 +918,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_raw_response_unpause(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.deployments.with_raw_response.unpause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         )
 
         assert response.is_closed is True
@@ -929,7 +929,7 @@ class TestAsyncDeployments:
     @parametrize
     async def test_streaming_response_unpause(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.deployments.with_streaming_response.unpause(
-            deployment_id="deployment_id",
+            deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
