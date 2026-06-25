@@ -162,7 +162,7 @@ async with stdio_client(StdioServerParameters(command="mcp-server")) as (read, w
         await mcp_client.initialize()
 
         tools_result = await mcp_client.list_tools()
-        runner = await client.beta.messages.tool_runner(
+        runner = client.beta.messages.tool_runner(
             model="claude-sonnet-4-20250514",
             max_tokens=1024,
             messages=[{"role": "user", "content": "Use the available tools"}],
