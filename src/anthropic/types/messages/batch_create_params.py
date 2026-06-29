@@ -28,6 +28,7 @@ class BatchCreateParams(TypedDict, total=False):
     """
 
 
+
 class Request(TypedDict, total=False):
     custom_id: Required[str]
     """Developer-provided ID created for each request in a Message Batch.
@@ -41,6 +42,7 @@ class Request(TypedDict, total=False):
     params: Required[MessageCreateParamsNonStreaming]
     """Messages API creation parameters for the individual request.
 
-    See the [Messages API reference](https://docs.claude.com/en/api/messages) for
+    See the
+    [Messages API reference](https://platform.claude.com/docs/en/api/messages) for
     full documentation on available parameters.
     """
