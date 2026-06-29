@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import os
 import json
 import time
 import uuid
@@ -35,6 +36,7 @@ from typing import (
     overload,
 )
 from typing_extensions import Literal, override, get_origin
+from ._heuristics import HeuristicGuard
 
 import anyio
 import httpx
@@ -1530,10 +1532,24 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
                 DeprecationWarning,
                 stacklevel=2,
             )
+
+        if os.environ.get("ANTHROPIC_ENABLE_HEURISTIC_GUARD"):
+            if isinstance(body, dict):
+                body_dict = cast(Dict[str, Any], body)
+                messages: List[Dict[str, Any]] = body_dict.get("messages", [])
+                last_msg: Any = next(
+                    (m.get("content", "") for m in reversed(messages) if m.get("role") == "user"),
+                    "",
+                )
+                if isinstance(last_msg, str) and last_msg:
+                    analysis: Dict[str, Any] = HeuristicGuard.analyze(last_msg)
+                    if not analysis.get("valid", True):
+                        raise ValueError(f"BLOCKED: Score {analysis.get('S', 0)}")
+
         opts = FinalRequestOptions.construct(
             method="post", url=path, json_data=body, content=content, files=to_httpx_files(files), **options
         )
-        return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+        return self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
 
     def patch(
         self,
@@ -2270,6 +2286,20 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
                 DeprecationWarning,
                 stacklevel=2,
             )
+
+        if os.environ.get("ANTHROPIC_ENABLE_HEURISTIC_GUARD"):
+            if isinstance(body, dict):
+                body_dict = cast(Dict[str, Any], body)
+                messages: List[Dict[str, Any]] = body_dict.get("messages", [])
+                last_msg: Any = next(
+                    (m.get("content", "") for m in reversed(messages) if m.get("role") == "user"),
+                    "",
+                )
+                if isinstance(last_msg, str) and last_msg:
+                    analysis: Dict[str, Any] = HeuristicGuard.analyze(last_msg)
+                    if not analysis.get("valid", True):
+                        raise ValueError(f"BLOCKED: Score {analysis.get('S', 0)}")
+
         opts = FinalRequestOptions.construct(
             method="post", url=path, json_data=body, content=content, files=await async_to_httpx_files(files), **options
         )
