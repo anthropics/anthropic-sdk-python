@@ -30,8 +30,8 @@ needs_pydantic_v2 = pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are o
         ("relative path inside workdir resolves", "a/b.txt", False, False),
         ("dot-dot that stays inside workdir resolves", "a/../b.txt", False, False),
         ("dot-dot that escapes workdir is rejected", "../etc/passwd", False, True),
-        ("absolute path is rejected by default", "/etc/passwd", False, True),
-        ("absolute path is allowed when unrestricted_paths is set", "/etc/passwd", True, False),
+        ("absolute path outside workdir is rejected by default", "/etc/passwd", False, True),
+        ("absolute path outside workdir is allowed when unrestricted_paths is set", "/etc/passwd", True, False),
     ],
 )
 def test_resolve_path(tmp_path: Path, description: str, p: str, unrestricted: bool, expect_error: bool) -> None:
@@ -41,6 +41,27 @@ def test_resolve_path(tmp_path: Path, description: str, p: str, unrestricted: bo
             resolve_path(env, p)
     else:
         assert resolve_path(env, p), description
+
+
+def test_resolve_path_absolute_inside_workdir(tmp_path: Path) -> None:
+    """An absolute path that canonicalises inside the workdir is permitted in
+    confined mode — the containment check is what guards the jail, not the
+    absolute/relative spelling. Regression for anthropics/anthropic-sdk-go#368.
+    """
+    env = AgentToolContext(workdir=str(tmp_path))
+    (tmp_path / "a.txt").write_text("x")
+    assert resolve_path(env, str(tmp_path / "a.txt")) == tmp_path / "a.txt"
+    assert resolve_path(env, str(tmp_path)) == tmp_path
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    assert resolve_path(env, str(sub / "b.txt")) == sub / "b.txt"
+    # Still rejected: absolute outside, and absolute-that-symlinks-outside.
+    with pytest.raises(ValueError, match="escapes workdir"):
+        resolve_path(env, "/etc/passwd")
+    if sys.platform != "win32":
+        (tmp_path / "out").symlink_to("/etc/passwd")
+        with pytest.raises(ValueError, match="escapes workdir"):
+            resolve_path(env, str(tmp_path / "out"))
 
 
 def test_resolve_path_segment_aware_sibling(tmp_path: Path) -> None:
