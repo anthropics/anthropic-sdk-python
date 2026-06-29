@@ -47,8 +47,10 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     "\n\nHuman: {userQuestion}\n\nAssistant:"
     ```
 
-    See [prompt validation](https://docs.claude.com/en/api/prompt-validation) and
-    our guide to [prompt design](https://docs.claude.com/en/docs/intro-to-prompting)
+    See
+    [prompt validation](https://platform.claude.com/docs/en/build-with-claude/working-with-messages)
+    and our guide to
+    [prompt design](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview)
     for more details.
     """
 
@@ -101,7 +103,8 @@ class CompletionCreateParamsNonStreaming(CompletionCreateParamsBase, total=False
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.claude.com/en/api/streaming) for details.
+    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+    for details.
     """
 
 
@@ -109,7 +112,8 @@ class CompletionCreateParamsStreaming(CompletionCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.claude.com/en/api/streaming) for details.
+    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+    for details.
     """
 
 
