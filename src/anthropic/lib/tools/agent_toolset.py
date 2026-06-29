@@ -557,6 +557,8 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             target = resolve_path(ctx, file_path)
         except ValueError as e:
             raise ToolError(f"edit: {e}") from e
+        if old_string == "":
+            raise ToolError("edit: old_string must not be empty")
         try:
             # stat() before any open(): the size cap stops a multi-GB file from
             # OOM'ing the runner, and is_file() rejects FIFOs/devices/dirs
