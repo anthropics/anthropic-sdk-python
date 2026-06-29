@@ -174,7 +174,7 @@ class AgentToolContext:
             constructing this context and the first tool call does not move
             where paths resolve. Pass an explicit path to override.
         unrestricted_paths: When ``False`` (default), the file tools reject
-            absolute paths and paths that escape ``workdir``. Does **not**
+            paths that resolve outside ``workdir``. Does **not**
             constrain :func:`beta_bash_tool`.
         env: Optional environment for the bash subprocess. When unset, the bash
             tool inherits the process environment with the runner's
@@ -258,25 +258,21 @@ class AgentToolContext:
 def resolve_path(ctx: AgentToolContext, p: str) -> Path:
     """Resolve ``p`` against the workdir; reject results that escape it.
 
-    ``Path.resolve()`` follows every symlink (including the leaf, even a
-    dangling one) before the containment check, so a symlink under the workdir
-    that targets ``/etc`` is rejected — and the resolved path is what the tool
-    then operates on, so it can't be followed afterwards either. See the trust
-    model on :class:`AgentToolContext`.
+    Absolute and relative inputs go through the same canonicalise-then-contain
+    check — an absolute path that lands inside the workdir is permitted, only
+    paths that resolve *outside* are rejected. ``Path.resolve()`` follows every
+    symlink (including the leaf, even a dangling one) before the containment
+    check, so a symlink under the workdir that targets ``/etc`` is rejected —
+    and the resolved path is what the tool then operates on, so it can't be
+    followed afterwards either. See the trust model on :class:`AgentToolContext`.
     """
     candidate = Path(p)
-    if candidate.is_absolute():
-        if not ctx.unrestricted_paths:
-            raise ValueError(f"absolute path {p!r} not permitted")
+    if ctx.unrestricted_paths and candidate.is_absolute():
         return candidate.resolve()
     root = Path(ctx.workdir).resolve()
-    full = (root / candidate).resolve()
-    if not ctx.unrestricted_paths:
-        # Segment-aware prefix check so /work does not satisfy a /workdir root.
-        try:
-            full.relative_to(root)
-        except ValueError as e:
-            raise ValueError(f"path {p!r} escapes workdir") from e
+    full = (candidate if candidate.is_absolute() else root / candidate).resolve()
+    if not ctx.unrestricted_paths and not _within(full, root):
+        raise ValueError(f"path {p!r} escapes workdir")
     return full
 
 
