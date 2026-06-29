@@ -15,6 +15,7 @@ from typing import (
     Iterator,
     Coroutine,
     AsyncIterator,
+    cast,
 )
 from contextlib import contextmanager, asynccontextmanager
 from typing_extensions import TypedDict, override
@@ -57,6 +58,17 @@ RunnerItemT = TypeVar("RunnerItemT")
 log = logging.getLogger(__name__)
 
 
+def _has_tool_result(messages: List[BetaMessageParam]) -> bool:
+    """Return True if any message in the list contains a tool_result content block."""
+    for msg in messages:
+        content = msg.get("content", [])
+        if isinstance(content, list) and any(
+            isinstance(b, dict) and b.get("type") == "tool_result" for b in content
+        ):
+            return True
+    return False
+
+
 class RequestOptions(TypedDict, total=False):
     extra_headers: Headers | None
     extra_query: Query | None
@@ -87,7 +99,6 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
             merged_headers = merge_headers(helper_header, options.get("extra_headers") or {})
             options = {**options, "extra_headers": merged_headers}
         self._options = options
-        self._messages_modified = False
         self._cached_tool_call_response: BetaMessageParam | None = None
         self._max_iterations = max_iterations
         self._iteration_count = 0
@@ -118,9 +129,13 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
             {"role": message.role, "content": message.content} if isinstance(message, BetaMessage) else message
             for message in messages
         ]
-        self._messages_modified = True
         self.set_messages_params(lambda params: {**params, "messages": [*params["messages"], *message_params]})
         self._cached_tool_call_response = None
+
+    def _set_messages_list(self, messages: List[BetaMessageParam]) -> None:
+        # `messages` is a parameter here (not a loop variable), so lambdas that
+        # capture it satisfy both ruff B023 and mypy's callable-type inference.
+        self.set_messages_params(lambda params: {**params, "messages": messages})
 
     def _should_stop(self) -> bool:
         if self._max_iterations is not None and self._iteration_count >= self._max_iterations:
@@ -262,6 +277,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
     def __run__(self) -> Iterator[RunnerItemT]:
         while not self._should_stop():
             with self._handle_request() as item:
+                pre_yield_message_count = len(cast(List[BetaMessageParam], self._params["messages"]))
                 yield item
                 message = self._get_last_message()
                 assert message is not None
@@ -282,15 +298,41 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
             # If the compaction was performed, skip tool call generation this iteration
             if not self._check_and_compact():
-                response = self.generate_tool_call_response()
-                if response is None:
-                    log.debug("Tool call was not requested, exiting from tool runner loop.")
-                    return
+                all_messages = list(self._params["messages"])
+                user_appended = all_messages[pre_yield_message_count:]
 
-                if not self._messages_modified:
-                    self.append_messages(message, response)
+                if _has_tool_result(user_appended):
+                    # User provided their own tool result. Ensure the assistant message
+                    # precedes it — insert it only when the user did not include it.
+                    if not any(m.get("role") == "assistant" for m in user_appended):
+                        asst_param: BetaMessageParam = {"role": message.role, "content": message.content}
+                        new_messages: List[BetaMessageParam] = [
+                            *all_messages[:pre_yield_message_count],
+                            asst_param,
+                            *user_appended,
+                        ]
+                        self._set_messages_list(new_messages)
+                else:
+                    response = self.generate_tool_call_response()
+                    if response is None:
+                        log.debug("Tool call was not requested, exiting from tool runner loop.")
+                        return
 
-            self._messages_modified = False
+                    if user_appended:
+                        # User appended extra (non-tool_result) messages. Insert the
+                        # auto-generated (assistant, tool_result) pair before them so
+                        # message ordering stays valid for the API.
+                        asst_param = {"role": message.role, "content": message.content}
+                        new_messages = [
+                            *all_messages[:pre_yield_message_count],
+                            asst_param,
+                            response,
+                            *user_appended,
+                        ]
+                        self._set_messages_list(new_messages)
+                    else:
+                        self.append_messages(message, response)
+
             self._cached_tool_call_response = None
 
     def until_done(self) -> ParsedBetaMessage[ResponseFormatT]:
@@ -550,6 +592,7 @@ class BaseAsyncToolRunner(
     async def __run__(self) -> AsyncIterator[RunnerItemT]:
         while not self._should_stop():
             async with self._handle_request() as item:
+                pre_yield_message_count = len(cast(List[BetaMessageParam], self._params["messages"]))
                 yield item
                 message = await self._get_last_message()
                 assert message is not None
@@ -570,15 +613,41 @@ class BaseAsyncToolRunner(
 
             # If the compaction was performed, skip tool call generation this iteration
             if not await self._check_and_compact():
-                response = await self.generate_tool_call_response()
-                if response is None:
-                    log.debug("Tool call was not requested, exiting from tool runner loop.")
-                    return
+                all_messages = list(self._params["messages"])
+                user_appended = all_messages[pre_yield_message_count:]
 
-                if not self._messages_modified:
-                    self.append_messages(message, response)
+                if _has_tool_result(user_appended):
+                    # User provided their own tool result. Ensure the assistant message
+                    # precedes it — insert it only when the user did not include it.
+                    if not any(m.get("role") == "assistant" for m in user_appended):
+                        asst_param: BetaMessageParam = {"role": message.role, "content": message.content}
+                        new_messages: List[BetaMessageParam] = [
+                            *all_messages[:pre_yield_message_count],
+                            asst_param,
+                            *user_appended,
+                        ]
+                        self._set_messages_list(new_messages)
+                else:
+                    response = await self.generate_tool_call_response()
+                    if response is None:
+                        log.debug("Tool call was not requested, exiting from tool runner loop.")
+                        return
 
-            self._messages_modified = False
+                    if user_appended:
+                        # User appended extra (non-tool_result) messages. Insert the
+                        # auto-generated (assistant, tool_result) pair before them so
+                        # message ordering stays valid for the API.
+                        asst_param = {"role": message.role, "content": message.content}
+                        new_messages = [
+                            *all_messages[:pre_yield_message_count],
+                            asst_param,
+                            response,
+                            *user_appended,
+                        ]
+                        self._set_messages_list(new_messages)
+                    else:
+                        self.append_messages(message, response)
+
             self._cached_tool_call_response = None
 
     async def until_done(self) -> ParsedBetaMessage[ResponseFormatT]:
