@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING, Iterator, AsyncIterator
 
 from ..._utils import lru_cache
@@ -37,7 +38,9 @@ class AWSEventStreamDecoder:
             for event in event_stream_buffer:
                 message = self._parse_message_from_event(event)
                 if message:
-                    yield ServerSentEvent(data=message, event="completion")
+                    sse = self._build_sse(message)
+                    if sse is not None:
+                        yield sse
 
     async def aiter_bytes(self, iterator: AsyncIterator[bytes]) -> AsyncIterator[ServerSentEvent]:
         """Given an async iterator that yields lines, iterate over it & yield every event encountered"""
@@ -49,7 +52,20 @@ class AWSEventStreamDecoder:
             for event in event_stream_buffer:
                 message = self._parse_message_from_event(event)
                 if message:
-                    yield ServerSentEvent(data=message, event="completion")
+                    sse = self._build_sse(message)
+                    if sse is not None:
+                        yield sse
+
+    def _build_sse(self, message: str) -> ServerSentEvent | None:
+        payload = json.loads(message)
+        if not isinstance(payload, dict):
+            return None
+
+        event_type = payload.get("type")
+        if not isinstance(event_type, str):
+            return None
+
+        return ServerSentEvent(data=message, event=event_type)
 
     def _parse_message_from_event(self, event: EventStreamMessage) -> str | None:
         response_dict = event.to_response_dict()
