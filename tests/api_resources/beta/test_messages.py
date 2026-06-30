@@ -84,7 +84,7 @@ class TestMessages:
             fallback_credit_token="x",
             fallbacks=[
                 {
-                    "model": "claude-fable-5",
+                    "model": "claude-sonnet-5",
                     "max_tokens": 0,
                     "output_config": {
                         "effort": "low",
@@ -304,7 +304,7 @@ class TestMessages:
             fallback_credit_token="x",
             fallbacks=[
                 {
-                    "model": "claude-fable-5",
+                    "model": "claude-sonnet-5",
                     "max_tokens": 0,
                     "output_config": {
                         "effort": "low",
@@ -698,7 +698,7 @@ class TestAsyncMessages:
             fallback_credit_token="x",
             fallbacks=[
                 {
-                    "model": "claude-fable-5",
+                    "model": "claude-sonnet-5",
                     "max_tokens": 0,
                     "output_config": {
                         "effort": "low",
@@ -918,7 +918,7 @@ class TestAsyncMessages:
             fallback_credit_token="x",
             fallbacks=[
                 {
-                    "model": "claude-fable-5",
+                    "model": "claude-sonnet-5",
                     "max_tokens": 0,
                     "output_config": {
                         "effort": "low",

@@ -38,7 +38,7 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5",
 )
 print(message.content)
 ```
@@ -71,7 +71,7 @@ async def main() -> None:
                 "content": "Hello, Claude",
             }
         ],
-        model="claude-sonnet-4-5-20250929",
+        model="claude-sonnet-5",
     )
     print(message.content)
 
@@ -114,7 +114,7 @@ async def main() -> None:
                     "content": "Hello, Claude",
                 }
             ],
-            model="claude-sonnet-4-5-20250929",
+            model="claude-sonnet-5",
         )
         print(message.content)
 
@@ -139,7 +139,7 @@ stream = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5",
     stream=True,
 )
 for event in stream:
@@ -161,7 +161,7 @@ stream = await client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5",
     stream=True,
 )
 async for event in stream:
@@ -312,7 +312,7 @@ try:
                 "content": "Hello, Claude",
             }
         ],
-        model="claude-sonnet-4-5-20250929",
+        model="claude-sonnet-5",
     )
 except anthropic.APIConnectionError as e:
     print("The server could not be reached")
@@ -364,7 +364,7 @@ client.with_options(max_retries=5).messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5",
 )
 ```
 
@@ -396,7 +396,7 @@ client.with_options(timeout=5.0).messages.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5",
 )
 ```
 
@@ -460,7 +460,7 @@ response = client.messages.with_raw_response.create(
         "role": "user",
         "content": "Hello, Claude",
     }],
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5",
 )
 print(response.headers.get('X-My-Header'))
 
@@ -494,7 +494,7 @@ with client.messages.with_streaming_response.create(
             "content": "Hello, Claude",
         }
     ],
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5",
 ) as response:
     print(response.headers.get("X-My-Header"))
 
