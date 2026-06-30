@@ -31,7 +31,7 @@ from .resources import (
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
-from ....pagination import SyncPageCursor, AsyncPageCursor
+from ....pagination import SyncBidirectionalPageCursor, AsyncBidirectionalPageCursor
 from ....types.beta import (
     session_list_params,
     session_create_params,
@@ -305,7 +305,7 @@ class Sessions(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> SyncPageCursor[BetaManagedAgentsSession]:
+    ) -> SyncBidirectionalPageCursor[BetaManagedAgentsSession]:
         """
         List Sessions
 
@@ -362,7 +362,7 @@ class Sessions(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/sessions?beta=true",
-            page=SyncPageCursor[BetaManagedAgentsSession],
+            page=SyncBidirectionalPageCursor[BetaManagedAgentsSession],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -736,7 +736,7 @@ class AsyncSessions(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[BetaManagedAgentsSession, AsyncPageCursor[BetaManagedAgentsSession]]:
+    ) -> AsyncPaginator[BetaManagedAgentsSession, AsyncBidirectionalPageCursor[BetaManagedAgentsSession]]:
         """
         List Sessions
 
@@ -793,7 +793,7 @@ class AsyncSessions(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/sessions?beta=true",
-            page=AsyncPageCursor[BetaManagedAgentsSession],
+            page=AsyncBidirectionalPageCursor[BetaManagedAgentsSession],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

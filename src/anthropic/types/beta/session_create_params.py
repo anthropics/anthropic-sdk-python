@@ -10,6 +10,7 @@ from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_agent_params import BetaManagedAgentsAgentParams
 from .beta_managed_agents_file_resource_params import BetaManagedAgentsFileResourceParams
+from .beta_managed_agents_agent_with_overrides_params import BetaManagedAgentsAgentWithOverridesParams
 from .beta_managed_agents_memory_store_resource_param import BetaManagedAgentsMemoryStoreResourceParam
 from .beta_managed_agents_github_repository_resource_params import BetaManagedAgentsGitHubRepositoryResourceParams
 
@@ -46,7 +47,7 @@ class SessionCreateParams(TypedDict, total=False):
     """Optional header to specify the beta version(s) you want to use."""
 
 
-Agent: TypeAlias = Union[str, BetaManagedAgentsAgentParams]
+Agent: TypeAlias = Union[str, BetaManagedAgentsAgentParams, BetaManagedAgentsAgentWithOverridesParams]
 
 Resource: TypeAlias = Union[
     BetaManagedAgentsGitHubRepositoryResourceParams,

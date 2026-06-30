@@ -106,6 +106,8 @@ class Stream(Generic[_T]):
                     or sse.event == "session.thread_status_idle"
                     or sse.event == "session.thread_status_rescheduled"
                     or sse.event == "session.thread_status_terminated"
+                    or sse.event == "event_start"
+                    or sse.event == "event_delta"
                     or sse.event == "system.message"
                 ):
                     yield process_data(data=sse.json(), cast_to=cast_to, response=response)
@@ -239,6 +241,8 @@ class AsyncStream(Generic[_T]):
                     or sse.event == "session.thread_status_idle"
                     or sse.event == "session.thread_status_rescheduled"
                     or sse.event == "session.thread_status_terminated"
+                    or sse.event == "event_start"
+                    or sse.event == "event_delta"
                     or sse.event == "system.message"
                 ):
                     yield process_data(data=sse.json(), cast_to=cast_to, response=response)
