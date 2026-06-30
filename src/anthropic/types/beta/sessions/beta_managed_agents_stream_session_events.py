@@ -4,6 +4,8 @@ from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
 from ...._utils import PropertyInfo
+from ..beta_managed_agents_delta_event import BetaManagedAgentsDeltaEvent
+from ..beta_managed_agents_start_event import BetaManagedAgentsStartEvent
 from .beta_managed_agents_user_message_event import BetaManagedAgentsUserMessageEvent
 from .beta_managed_agents_agent_message_event import BetaManagedAgentsAgentMessageEvent
 from .beta_managed_agents_session_error_event import BetaManagedAgentsSessionErrorEvent
@@ -82,6 +84,8 @@ BetaManagedAgentsStreamSessionEvents: TypeAlias = Annotated[
         BetaManagedAgentsUserToolResultEvent,
         BetaManagedAgentsSessionThreadStatusRescheduledEvent,
         BetaManagedAgentsSessionUpdatedEvent,
+        BetaManagedAgentsStartEvent,
+        BetaManagedAgentsDeltaEvent,
         BetaManagedAgentsSystemMessageEvent,
     ],
     PropertyInfo(discriminator="type"),

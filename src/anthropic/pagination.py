@@ -5,7 +5,16 @@ from typing_extensions import override
 
 from ._base_client import BasePage, PageInfo, BaseSyncPage, BaseAsyncPage
 
-__all__ = ["SyncPage", "AsyncPage", "SyncTokenPage", "AsyncTokenPage", "SyncPageCursor", "AsyncPageCursor"]
+__all__ = [
+    "SyncPage",
+    "AsyncPage",
+    "SyncTokenPage",
+    "AsyncTokenPage",
+    "SyncPageCursor",
+    "AsyncPageCursor",
+    "SyncBidirectionalPageCursor",
+    "AsyncBidirectionalPageCursor",
+]
 
 _T = TypeVar("_T")
 
@@ -165,6 +174,48 @@ class SyncPageCursor(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
 class AsyncPageCursor(BaseAsyncPage[_T], BasePage[_T], Generic[_T]):
     data: List[_T]
     next_page: Optional[str] = None
+
+    @override
+    def _get_page_items(self) -> List[_T]:
+        data = self.data
+        if not data:
+            return []
+        return data
+
+    @override
+    def next_page_info(self) -> Optional[PageInfo]:
+        next_page = self.next_page
+        if not next_page:
+            return None
+
+        return PageInfo(params={"page": next_page})
+
+
+class SyncBidirectionalPageCursor(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
+    data: List[_T]
+    next_page: Optional[str] = None
+    prev_page: Optional[str] = None
+
+    @override
+    def _get_page_items(self) -> List[_T]:
+        data = self.data
+        if not data:
+            return []
+        return data
+
+    @override
+    def next_page_info(self) -> Optional[PageInfo]:
+        next_page = self.next_page
+        if not next_page:
+            return None
+
+        return PageInfo(params={"page": next_page})
+
+
+class AsyncBidirectionalPageCursor(BaseAsyncPage[_T], BasePage[_T], Generic[_T]):
+    data: List[_T]
+    next_page: Optional[str] = None
+    prev_page: Optional[str] = None
 
     @override
     def _get_page_items(self) -> List[_T]:

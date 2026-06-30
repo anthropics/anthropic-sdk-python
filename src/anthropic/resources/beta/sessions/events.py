@@ -24,8 +24,9 @@ from ...._response import to_streamed_response_wrapper, async_to_streamed_respon
 from ...._streaming import Stream, AsyncStream
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.sessions import event_list_params, event_send_params
+from ....types.beta.sessions import event_list_params, event_send_params, event_stream_params
 from ....types.anthropic_beta_param import AnthropicBetaParam
+from ....types.beta.beta_managed_agents_delta_type import BetaManagedAgentsDeltaType
 from ....types.beta.sessions.beta_managed_agents_event_params import BetaManagedAgentsEventParams
 from ....types.beta.sessions.beta_managed_agents_session_event import BetaManagedAgentsSessionEvent
 from ....types.beta.sessions.beta_managed_agents_send_session_events import BetaManagedAgentsSendSessionEvents
@@ -201,6 +202,7 @@ class Events(SyncAPIResource):
         self,
         session_id: str,
         *,
+        event_deltas: List[BetaManagedAgentsDeltaType] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -213,6 +215,17 @@ class Events(SyncAPIResource):
         Stream Events
 
         Args:
+          event_deltas: When set, this connection also receives streaming deltas (`event_start`,
+              `event_delta`) while an event is being produced, before the event itself
+              arrives. Deltas are best-effort; when the final event is produced it carries the
+              complete content. A model request that ends early (an error or interrupt)
+              produces no final event — its terminal `span.model_request_end` closes the
+              preview. Accepts one or more event types to preview and may be repeated:
+              `agent.message` streams `content_delta` fragments; `agent.thinking` is
+              start-only — a signal that the agent has begun extended thinking, concluded by
+              the `agent.thinking` event itself. Only previews of the requested event types
+              are sent.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -239,7 +252,11 @@ class Events(SyncAPIResource):
         return self._get(
             path_template("/v1/sessions/{session_id}/events/stream?beta=true", session_id=session_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query=maybe_transform({"event_deltas": event_deltas}, event_stream_params.EventStreamParams),
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionEvents
@@ -416,6 +433,7 @@ class AsyncEvents(AsyncAPIResource):
         self,
         session_id: str,
         *,
+        event_deltas: List[BetaManagedAgentsDeltaType] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -428,6 +446,17 @@ class AsyncEvents(AsyncAPIResource):
         Stream Events
 
         Args:
+          event_deltas: When set, this connection also receives streaming deltas (`event_start`,
+              `event_delta`) while an event is being produced, before the event itself
+              arrives. Deltas are best-effort; when the final event is produced it carries the
+              complete content. A model request that ends early (an error or interrupt)
+              produces no final event — its terminal `span.model_request_end` closes the
+              preview. Accepts one or more event types to preview and may be repeated:
+              `agent.message` streams `content_delta` fragments; `agent.thinking` is
+              start-only — a signal that the agent has begun extended thinking, concluded by
+              the `agent.thinking` event itself. Only previews of the requested event types
+              are sent.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -454,7 +483,13 @@ class AsyncEvents(AsyncAPIResource):
         return await self._get(
             path_template("/v1/sessions/{session_id}/events/stream?beta=true", session_id=session_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query=await async_maybe_transform(
+                    {"event_deltas": event_deltas}, event_stream_params.EventStreamParams
+                ),
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionEvents
