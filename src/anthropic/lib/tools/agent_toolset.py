@@ -645,8 +645,15 @@ def beta_glob_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
 
 def beta_grep_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
     @beta_async_tool(name="grep", input_schema=BetaManagedAgentsAgentToolset20260401GrepInput)
-    async def grep(pattern: str, path: Optional[str] = None) -> str:
-        """Search file contents for a regular expression."""
+    async def grep(pattern: str, path: Optional[str] = None, **_ignored: Any) -> str:
+        """Search file contents for a regular expression.
+
+        Extra keyword arguments are accepted and ignored. A model often passes
+        Claude-Code-style grep options (e.g. ``output_mode``, ``head_limit``,
+        ``-i``) that are not part of the ``agent_toolset_20260401`` grep schema
+        (``pattern``/``path`` only). Without swallowing them, ``validate_call``
+        rejects the call and the model gets a hard error instead of results.
+        """
         try:
             search = resolve_path(ctx, path) if path else Path(ctx.workdir).resolve()
         except ValueError as e:
