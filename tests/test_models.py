@@ -710,6 +710,12 @@ def test_discriminated_unions_unknown_variant() -> None:
     assert m.new_thing == "bar"
 
 
+def test_construct_type_with_bare_dict() -> None:
+    value = {"key": "value"}
+
+    assert construct_type(value=value, type_=dict) == value
+
+
 def test_discriminated_unions_invalid_data_nested_unions() -> None:
     class A(BaseModel):
         type: Literal["a"]
