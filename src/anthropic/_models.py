@@ -588,7 +588,7 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
         if not is_list(value):
             return value
 
-        inner_type = args[0]  # List[inner_type]
+        inner_type = args[0] if args else object
         return [construct_type(value=entry, type_=inner_type) for entry in value]
 
     if origin == float:
