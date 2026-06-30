@@ -93,7 +93,9 @@ class Skills(SyncAPIResource):
           files: Files to upload for the skill.
 
               All files must be in the same top-level directory and must include a SKILL.md
-              file at the root of that directory.
+              file at the root of that directory. The directory name must exactly match
+              the `name` field in SKILL.md (for example, `greeting/SKILL.md` for
+              `name: greeting`).
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -365,7 +367,9 @@ class AsyncSkills(AsyncAPIResource):
           files: Files to upload for the skill.
 
               All files must be in the same top-level directory and must include a SKILL.md
-              file at the root of that directory.
+              file at the root of that directory. The directory name must exactly match
+              the `name` field in SKILL.md (for example, `greeting/SKILL.md` for
+              `name: greeting`).
 
           betas: Optional header to specify the beta version(s) you want to use.
 
