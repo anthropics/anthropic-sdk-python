@@ -11,7 +11,7 @@ async with client.messages.stream(
             "content": "Say hello there!",
         }
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-5",
 ) as stream:
     async for text in stream.text_stream:
         print(text, end="", flush=True)
@@ -60,7 +60,7 @@ async with client.messages.stream(
             "content": "Say hello there!",
         }
     ],
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-5",
 ) as stream:
     async for event in stream:
         if event.type == "text":
@@ -163,7 +163,7 @@ async with stdio_client(StdioServerParameters(command="mcp-server")) as (read, w
 
         tools_result = await mcp_client.list_tools()
         runner = await client.beta.messages.tool_runner(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-5",
             max_tokens=1024,
             messages=[{"role": "user", "content": "Use the available tools"}],
             tools=[async_mcp_tool(t, mcp_client) for t in tools_result.tools],
@@ -182,7 +182,7 @@ from anthropic.lib.tools.mcp import mcp_message
 
 prompt = await mcp_client.get_prompt(name="my-prompt")
 response = await client.beta.messages.create(
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-5",
     max_tokens=1024,
     messages=[mcp_message(m) for m in prompt.messages],
 )
@@ -195,7 +195,7 @@ from anthropic.lib.tools.mcp import mcp_resource_to_content
 
 resource = await mcp_client.read_resource(uri="file:///path/to/doc.txt")
 response = await client.beta.messages.create(
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-5",
     max_tokens=1024,
     messages=[{
         "role": "user",

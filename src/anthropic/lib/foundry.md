@@ -22,7 +22,7 @@ client = AnthropicFoundry(
 )
 
 message = client.messages.create(
-    model="claude-3-5-sonnet-20241022",
+    model="claude-sonnet-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
 )
@@ -51,7 +51,7 @@ client = AnthropicFoundry(
 )
 
 message = client.messages.create(
-    model="claude-3-5-sonnet-20241022",
+    model="claude-sonnet-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
 )
@@ -72,7 +72,7 @@ client = AnthropicFoundry(
 )
 
 with client.messages.stream(
-    model="claude-3-5-sonnet-20241022",
+    model="claude-sonnet-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Write a haiku about programming"}],
 ) as stream:
@@ -92,7 +92,7 @@ async def main():
     )
     
     message = await client.messages.create(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-5",
         max_tokens=1024,
         messages=[{"role": "user", "content": "Hello!"}],
     )
@@ -115,7 +115,7 @@ async def main():
     )
     
     async with client.messages.stream(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-5",
         max_tokens=1024,
         messages=[{"role": "user", "content": "Write a haiku about programming"}],
     ) as stream:

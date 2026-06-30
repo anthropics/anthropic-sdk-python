@@ -174,7 +174,7 @@ def conversation_loop():
         try:
             runner = client.beta.messages.tool_runner(
                 betas=["context-management-2025-06-27"],
-                model="claude-sonnet-4-20250514",
+                model="claude-sonnet-5",
                 max_tokens=2048,
                 system=DEFAULT_MEMORY_SYSTEM_PROMPT,
                 messages=messages,

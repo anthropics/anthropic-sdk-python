@@ -18,7 +18,7 @@ def main() -> None:
     # Create an agent with the built-in toolset and an always-allow permission policy
     agent = anthropic.beta.agents.create(
         name="files-example-agent",
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5",
         tools=[
             {
                 "type": "agent_toolset_20260401",

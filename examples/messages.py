@@ -10,7 +10,7 @@ response = client.messages.create(
             "content": "Hello!",
         }
     ],
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5",
 )
 print(response)
 
@@ -30,6 +30,6 @@ response2 = client.messages.create(
             "content": "How are you?",
         },
     ],
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5",
 )
 print(response2)
