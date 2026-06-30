@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Mapping, Sequence
-from typing_extensions import Self, override
+from typing import TYPE_CHECKING, Any, Union, Mapping, Callable, Sequence
+from typing_extensions import Self, TypeAlias, override
 
 import httpx
 
@@ -52,6 +52,8 @@ from .lib.credentials._auth import (
 )
 from .lib.credentials._constants import _has_auto_discoverable_credentials
 
+AuthToken: TypeAlias = Union[str, Callable[[], str]]
+
 
 def _is_base_client(client: object) -> bool:
     """True only for the base ``Anthropic`` / ``AsyncAnthropic`` classes, not subclasses.
@@ -84,7 +86,15 @@ def _bind_credentials_base_url(credentials: AccessTokenProvider | None, base_url
         bind(base_url)
 
 
-def _warn_explicit_shadow(*, api_key: str | None, auth_token: str | None, credentials: object) -> None:
+def _resolve_auth_token(auth_token: AuthToken | None) -> str | None:
+    if auth_token is None:
+        return None
+    if callable(auth_token):
+        return auth_token()
+    return auth_token
+
+
+def _warn_explicit_shadow(*, api_key: str | None, auth_token: AuthToken | None, credentials: object) -> None:
     """Warn when an explicit ``api_key=`` / ``auth_token=`` argument shadows
     an explicit ``credentials=`` provider. Call *after* any copy-inheritance
     merging so the params reflect the resolved values."""
@@ -96,7 +106,7 @@ def _warn_explicit_shadow(*, api_key: str | None, auth_token: str | None, creden
         warn_explicit_static_shadows_credentials("auth_token")
 
 
-def _warn_env_shadow(*, api_key: str | None, auth_token: str | None) -> None:
+def _warn_env_shadow(*, api_key: str | None, auth_token: AuthToken | None) -> None:
     """Warn when an ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` from the
     environment is set alongside signals that would normally drive profile /
     federation auto-discovery (``ANTHROPIC_PROFILE``, a ``configs/`` directory,
@@ -124,6 +134,7 @@ __all__ = [
     "Transport",
     "ProxiesTypes",
     "RequestOptions",
+    "AuthToken",
     "Anthropic",
     "AsyncAnthropic",
     "Client",
@@ -134,7 +145,7 @@ __all__ = [
 class Anthropic(SyncAPIClient):
     # client options
     api_key: str | None
-    auth_token: str | None
+    auth_token: AuthToken | None
     webhook_key: str | None
     credentials: AccessTokenProvider | None
     _token_cache: TokenCache | None
@@ -148,7 +159,7 @@ class Anthropic(SyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        auth_token: str | None = None,
+        auth_token: AuthToken | None = None,
         credentials: AccessTokenProvider | None = None,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
@@ -349,7 +360,7 @@ class Anthropic(SyncAPIClient):
         # credential wins per the documented precedence — AccessTokenAuth
         # short-circuits on a pre-set Authorization header and no token
         # exchange runs.
-        auth_token = self.auth_token
+        auth_token = _resolve_auth_token(self.auth_token)
         if auth_token is None:
             return {}
         return {"Authorization": f"Bearer {auth_token}"}
@@ -422,7 +433,7 @@ class Anthropic(SyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        auth_token: str | None = None,
+        auth_token: AuthToken | None = None,
         credentials: AccessTokenProvider | None | NotGiven = not_given,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
@@ -551,7 +562,7 @@ class Anthropic(SyncAPIClient):
 class AsyncAnthropic(AsyncAPIClient):
     # client options
     api_key: str | None
-    auth_token: str | None
+    auth_token: AuthToken | None
     webhook_key: str | None
     credentials: AccessTokenProvider | None
     _token_cache: TokenCache | None
@@ -565,7 +576,7 @@ class AsyncAnthropic(AsyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        auth_token: str | None = None,
+        auth_token: AuthToken | None = None,
         credentials: AccessTokenProvider | None = None,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
@@ -766,7 +777,7 @@ class AsyncAnthropic(AsyncAPIClient):
         # credential wins per the documented precedence — AccessTokenAuth
         # short-circuits on a pre-set Authorization header and no token
         # exchange runs.
-        auth_token = self.auth_token
+        auth_token = _resolve_auth_token(self.auth_token)
         if auth_token is None:
             return {}
         return {"Authorization": f"Bearer {auth_token}"}
@@ -835,7 +846,7 @@ class AsyncAnthropic(AsyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        auth_token: str | None = None,
+        auth_token: AuthToken | None = None,
         credentials: AccessTokenProvider | None | NotGiven = not_given,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
