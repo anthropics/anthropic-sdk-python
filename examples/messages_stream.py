@@ -16,7 +16,7 @@ async def main() -> None:
                 "content": "Say hello there!",
             }
         ],
-        model="claude-sonnet-4-5-20250929",
+        model="claude-sonnet-5",
     ) as stream:
         async for event in stream:
             if event.type == "text":
