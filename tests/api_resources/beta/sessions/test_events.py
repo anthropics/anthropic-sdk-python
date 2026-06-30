@@ -193,6 +193,7 @@ class TestEvents:
     def test_method_stream_with_all_params(self, client: Anthropic) -> None:
         event_stream = client.beta.sessions.events.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            event_deltas=["agent.message"],
             betas=["string"],
         )
         event_stream.response.close()
@@ -404,6 +405,7 @@ class TestAsyncEvents:
     async def test_method_stream_with_all_params(self, async_client: AsyncAnthropic) -> None:
         event_stream = await async_client.beta.sessions.events.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            event_deltas=["agent.message"],
             betas=["string"],
         )
         await event_stream.response.aclose()

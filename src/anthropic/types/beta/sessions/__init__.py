@@ -5,6 +5,7 @@ from __future__ import annotations
 from .event_list_params import EventListParams as EventListParams
 from .event_send_params import EventSendParams as EventSendParams
 from .thread_list_params import ThreadListParams as ThreadListParams
+from .event_stream_params import EventStreamParams as EventStreamParams
 from .resource_add_params import ResourceAddParams as ResourceAddParams
 from .resource_list_params import ResourceListParams as ResourceListParams
 from .resource_update_params import ResourceUpdateParams as ResourceUpdateParams

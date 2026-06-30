@@ -5,6 +5,7 @@ from typing_extensions import Literal, Annotated, TypeAlias
 
 from ...._utils import PropertyInfo
 from ...._models import BaseModel
+from .beta_managed_agents_injection_location_response import BetaManagedAgentsInjectionLocationResponse
 from .beta_managed_agents_limited_credential_networking_response import (
     BetaManagedAgentsLimitedCredentialNetworkingResponse,
 )
@@ -24,6 +25,9 @@ Networking: TypeAlias = Annotated[
 
 class BetaManagedAgentsEnvironmentVariableAuthResponse(BaseModel):
     """Environment variable credential details. The secret value is never returned."""
+
+    injection_location: BetaManagedAgentsInjectionLocationResponse
+    """Where in the outbound request the secret value is substituted."""
 
     networking: Networking
     """Outbound hosts the secret value is substituted on."""

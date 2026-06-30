@@ -29,8 +29,14 @@ from .beta_managed_agents_mcp_oauth_update_params import (
 from .beta_managed_agents_mcp_oauth_refresh_params import (
     BetaManagedAgentsMCPOAuthRefreshParams as BetaManagedAgentsMCPOAuthRefreshParams,
 )
+from .beta_managed_agents_injection_location_params import (
+    BetaManagedAgentsInjectionLocationParams as BetaManagedAgentsInjectionLocationParams,
+)
 from .beta_managed_agents_mcp_oauth_refresh_response import (
     BetaManagedAgentsMCPOAuthRefreshResponse as BetaManagedAgentsMCPOAuthRefreshResponse,
+)
+from .beta_managed_agents_injection_location_response import (
+    BetaManagedAgentsInjectionLocationResponse as BetaManagedAgentsInjectionLocationResponse,
 )
 from .beta_managed_agents_static_bearer_auth_response import (
     BetaManagedAgentsStaticBearerAuthResponse as BetaManagedAgentsStaticBearerAuthResponse,
@@ -58,6 +64,9 @@ from .beta_managed_agents_mcp_oauth_refresh_update_params import (
 )
 from .beta_managed_agents_token_endpoint_auth_basic_param import (
     BetaManagedAgentsTokenEndpointAuthBasicParam as BetaManagedAgentsTokenEndpointAuthBasicParam,
+)
+from .beta_managed_agents_injection_location_update_params import (
+    BetaManagedAgentsInjectionLocationUpdateParams as BetaManagedAgentsInjectionLocationUpdateParams,
 )
 from .beta_managed_agents_token_endpoint_auth_none_response import (
     BetaManagedAgentsTokenEndpointAuthNoneResponse as BetaManagedAgentsTokenEndpointAuthNoneResponse,
