@@ -528,18 +528,6 @@ from .beta_webhook_deployment_archived_event_data import (
 from .beta_webhook_deployment_unpaused_event_data import (
     BetaWebhookDeploymentUnpausedEventData as BetaWebhookDeploymentUnpausedEventData,
 )
-from .beta_webhook_environment_created_event_data import (
-    BetaWebhookEnvironmentCreatedEventData as BetaWebhookEnvironmentCreatedEventData,
-)
-from .beta_webhook_environment_deleted_event_data import (
-    BetaWebhookEnvironmentDeletedEventData as BetaWebhookEnvironmentDeletedEventData,
-)
-from .beta_webhook_environment_deleted_event_type import (
-    BetaWebhookEnvironmentDeletedEventType as BetaWebhookEnvironmentDeletedEventType,
-)
-from .beta_webhook_environment_updated_event_data import (
-    BetaWebhookEnvironmentUpdatedEventData as BetaWebhookEnvironmentUpdatedEventData,
-)
 from .beta_managed_agents_agent_archived_run_error import (
     BetaManagedAgentsAgentArchivedRunError as BetaManagedAgentsAgentArchivedRunError,
 )
@@ -570,15 +558,6 @@ from .beta_request_mcp_server_url_definition_param import (
 from .beta_web_fetch_tool_result_error_block_param import (
     BetaWebFetchToolResultErrorBlockParam as BetaWebFetchToolResultErrorBlockParam,
 )
-from .beta_webhook_environment_archived_event_data import (
-    BetaWebhookEnvironmentArchivedEventData as BetaWebhookEnvironmentArchivedEventData,
-)
-from .beta_webhook_memory_store_created_event_data import (
-    BetaWebhookMemoryStoreCreatedEventData as BetaWebhookMemoryStoreCreatedEventData,
-)
-from .beta_webhook_memory_store_deleted_event_data import (
-    BetaWebhookMemoryStoreDeletedEventData as BetaWebhookMemoryStoreDeletedEventData,
-)
 from .beta_webhook_session_status_idled_event_data import (
     BetaWebhookSessionStatusIdledEventData as BetaWebhookSessionStatusIdledEventData,
 )
@@ -608,9 +587,6 @@ from .beta_memory_tool_20250818_str_replace_command import (
 )
 from .beta_webhook_deployment_run_failed_event_data import (
     BetaWebhookDeploymentRunFailedEventData as BetaWebhookDeploymentRunFailedEventData,
-)
-from .beta_webhook_memory_store_archived_event_data import (
-    BetaWebhookMemoryStoreArchivedEventData as BetaWebhookMemoryStoreArchivedEventData,
 )
 from .beta_citation_web_search_result_location_param import (
     BetaCitationWebSearchResultLocationParam as BetaCitationWebSearchResultLocationParam,

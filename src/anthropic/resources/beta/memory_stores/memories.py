@@ -298,21 +298,28 @@ class Memories(SyncAPIResource):
         List memories
 
         Args:
-          depth: Query parameter for depth
+          depth: `0` (or omitted) returns all descendants below `path_prefix` (recursive). `1`
+              returns immediate children only; deeper entries roll up as `memory_prefix`
+              items. `depth=1` behaves like `ls`; omitting `depth` behaves like `find`.
 
-          limit: Query parameter for limit
+          limit: Maximum number of items to return per page. Must be between 1 and 100. Defaults
+              to 20 when omitted. Capped at 20 when `view=full`. Both `memory` and
+              `memory_prefix` items count toward the limit.
 
           order: Query parameter for order
 
           order_by: Query parameter for order_by
 
-          page: Query parameter for page
+          page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
+              previous response to fetch the next page; omit for the first page.
 
-          path_prefix: Optional path prefix filter (raw string-prefix match; include a trailing slash
-              for directory-scoped lists). This value appears in request URLs. Do not include
-              secrets or personally identifiable information.
+          path_prefix: Optional path prefix filter. Must end with `/` (segment-aligned), e.g.,
+              `/notes/`. This value appears in request URLs. Do not include secrets or
+              personally identifiable information.
 
-          view: Query parameter for view
+          view: Which projection of each `memory` to return. Defaults to `basic` (content
+              omitted). `full` populates `content` on each item and caps `limit` at 20; use
+              this as the bulk-read path for export and sync.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -691,21 +698,28 @@ class AsyncMemories(AsyncAPIResource):
         List memories
 
         Args:
-          depth: Query parameter for depth
+          depth: `0` (or omitted) returns all descendants below `path_prefix` (recursive). `1`
+              returns immediate children only; deeper entries roll up as `memory_prefix`
+              items. `depth=1` behaves like `ls`; omitting `depth` behaves like `find`.
 
-          limit: Query parameter for limit
+          limit: Maximum number of items to return per page. Must be between 1 and 100. Defaults
+              to 20 when omitted. Capped at 20 when `view=full`. Both `memory` and
+              `memory_prefix` items count toward the limit.
 
           order: Query parameter for order
 
           order_by: Query parameter for order_by
 
-          page: Query parameter for page
+          page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
+              previous response to fetch the next page; omit for the first page.
 
-          path_prefix: Optional path prefix filter (raw string-prefix match; include a trailing slash
-              for directory-scoped lists). This value appears in request URLs. Do not include
-              secrets or personally identifiable information.
+          path_prefix: Optional path prefix filter. Must end with `/` (segment-aligned), e.g.,
+              `/notes/`. This value appears in request URLs. Do not include secrets or
+              personally identifiable information.
 
-          view: Query parameter for view
+          view: Which projection of each `memory` to return. Defaults to `basic` (content
+              omitted). `full` populates `content` on each item and caps `limit` at 20; use
+              this as the bulk-read path for export and sync.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

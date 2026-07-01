@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing import List
+from typing_extensions import Required, Annotated, TypedDict
 
 from ...._types import FileTypes, SequenceNotStr
 from ...._utils import PropertyInfo
@@ -13,7 +13,7 @@ __all__ = ["VersionCreateParams"]
 
 
 class VersionCreateParams(TypedDict, total=False):
-    files: Optional[SequenceNotStr[FileTypes]]
+    files: Required[SequenceNotStr[FileTypes]]
     """Files to upload for the skill.
 
     All files must be in the same top-level directory and must include a SKILL.md
