@@ -71,7 +71,7 @@ class Versions(SyncAPIResource):
         self,
         skill_id: str,
         *,
-        files: Optional[SequenceNotStr[FileTypes]] | Omit = omit,
+        files: SequenceNotStr[FileTypes],
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -404,7 +404,7 @@ class AsyncVersions(AsyncAPIResource):
         self,
         skill_id: str,
         *,
-        files: Optional[SequenceNotStr[FileTypes]] | Omit = omit,
+        files: SequenceNotStr[FileTypes],
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.

@@ -37,6 +37,7 @@ class TestVersions:
     def test_method_create(self, client: Anthropic) -> None:
         version = client.beta.skills.versions.create(
             skill_id="skill_id",
+            files=[b"Example data"],
         )
         assert_matches_type(VersionCreateResponse, version, path=["response"])
 
@@ -53,6 +54,7 @@ class TestVersions:
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.skills.versions.with_raw_response.create(
             skill_id="skill_id",
+            files=[b"Example data"],
         )
 
         assert response.is_closed is True
@@ -64,6 +66,7 @@ class TestVersions:
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.skills.versions.with_streaming_response.create(
             skill_id="skill_id",
+            files=[b"Example data"],
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -78,6 +81,7 @@ class TestVersions:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `skill_id` but received ''"):
             client.beta.skills.versions.with_raw_response.create(
                 skill_id="",
+                files=[b"Example data"],
             )
 
     @parametrize
@@ -334,6 +338,7 @@ class TestAsyncVersions:
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         version = await async_client.beta.skills.versions.create(
             skill_id="skill_id",
+            files=[b"Example data"],
         )
         assert_matches_type(VersionCreateResponse, version, path=["response"])
 
@@ -350,6 +355,7 @@ class TestAsyncVersions:
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.skills.versions.with_raw_response.create(
             skill_id="skill_id",
+            files=[b"Example data"],
         )
 
         assert response.is_closed is True
@@ -361,6 +367,7 @@ class TestAsyncVersions:
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.skills.versions.with_streaming_response.create(
             skill_id="skill_id",
+            files=[b"Example data"],
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -375,6 +382,7 @@ class TestAsyncVersions:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `skill_id` but received ''"):
             await async_client.beta.skills.versions.with_raw_response.create(
                 skill_id="",
+                files=[b"Example data"],
             )
 
     @parametrize
