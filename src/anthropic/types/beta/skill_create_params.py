@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import Required, Annotated, TypedDict
 
 from ..._types import FileTypes, SequenceNotStr
 from ..._utils import PropertyInfo
@@ -13,18 +13,18 @@ __all__ = ["SkillCreateParams"]
 
 
 class SkillCreateParams(TypedDict, total=False):
+    files: Required[SequenceNotStr[FileTypes]]
+    """Files to upload for the skill.
+
+    All files must be in the same top-level directory and must include a SKILL.md
+    file at the root of that directory.
+    """
+
     display_title: Optional[str]
     """Display title for the skill.
 
     This is a human-readable label that is not included in the prompt sent to the
     model.
-    """
-
-    files: Optional[SequenceNotStr[FileTypes]]
-    """Files to upload for the skill.
-
-    All files must be in the same top-level directory and must include a SKILL.md
-    file at the root of that directory.
     """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
