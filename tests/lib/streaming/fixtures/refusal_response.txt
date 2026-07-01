@@ -8,7 +8,7 @@ event: content_block_stop
 data: {"type":"content_block_stop","index":0}
 
 event: message_delta
-data: {"type":"message_delta","delta":{"stop_reason":"refusal","stop_sequence":null,"stop_details":{"type":"refusal","category":"cyber","explanation":"This request was refused due to policy."}},"usage":{"output_tokens":0}}
+data: {"type":"message_delta","delta":{"stop_reason":"refusal","stop_sequence":null,"stop_details":{"type":"refusal","category":"cyber","explanation":"This request was refused due to policy."}},"usage":{"output_tokens":120,"output_tokens_details":{"thinking_tokens":67}}}
 
 event: message_stop
 data: {"type":"message_stop"}

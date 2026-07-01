@@ -232,6 +232,9 @@ def assert_refusal_response(message: BetaMessage) -> None:
     assert message.stop_details.type == "refusal"
     assert message.stop_details.category == "cyber"
     assert message.stop_details.explanation == "This request was refused due to policy."
+    assert message.usage.output_tokens == 120
+    assert message.usage.output_tokens_details is not None
+    assert message.usage.output_tokens_details.thinking_tokens == 67
 
 
 EXPECTED_FALLBACK_EVENT_TYPES = [

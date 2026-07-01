@@ -516,5 +516,7 @@ def accumulate_event(
             current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
         if event.usage.server_tool_use is not None:
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+        if event.usage.output_tokens_details is not None:
+            current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
 
     return current_snapshot
