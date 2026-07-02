@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any, List, Optional, cast
 from itertools import chain
-from typing_extensions import Literal
 
 import httpx
 
@@ -99,14 +98,14 @@ class Memories(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             path_template("/v1/memory_stores/{memory_store_id}/memories?beta=true", memory_store_id=memory_store_id),
             body=maybe_transform(
@@ -163,14 +162,14 @@ class Memories(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get(
             path_template(
                 "/v1/memory_stores/{memory_store_id}/memories/{memory_id}?beta=true",
@@ -243,14 +242,14 @@ class Memories(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             path_template(
                 "/v1/memory_stores/{memory_store_id}/memories/{memory_id}?beta=true",
@@ -281,8 +280,6 @@ class Memories(SyncAPIResource):
         *,
         depth: int | Omit = omit,
         limit: int | Omit = omit,
-        order: Literal["asc", "desc"] | Omit = omit,
-        order_by: str | Omit = omit,
         page: str | Omit = omit,
         path_prefix: str | Omit = omit,
         view: BetaManagedAgentsMemoryView | Omit = omit,
@@ -305,10 +302,6 @@ class Memories(SyncAPIResource):
           limit: Maximum number of items to return per page. Must be between 1 and 100. Defaults
               to 20 when omitted. Capped at 20 when `view=full`. Both `memory` and
               `memory_prefix` items count toward the limit.
-
-          order: Query parameter for order
-
-          order_by: Query parameter for order_by
 
           page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
               previous response to fetch the next page; omit for the first page.
@@ -336,14 +329,14 @@ class Memories(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
             path_template("/v1/memory_stores/{memory_store_id}/memories?beta=true", memory_store_id=memory_store_id),
             page=SyncPageCursor[BetaManagedAgentsMemoryListItem],
@@ -356,8 +349,6 @@ class Memories(SyncAPIResource):
                     {
                         "depth": depth,
                         "limit": limit,
-                        "order": order,
-                        "order_by": order_by,
                         "page": page,
                         "path_prefix": path_prefix,
                         "view": view,
@@ -407,14 +398,14 @@ class Memories(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._delete(
             path_template(
                 "/v1/memory_stores/{memory_store_id}/memories/{memory_id}?beta=true",
@@ -499,14 +490,14 @@ class AsyncMemories(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/memory_stores/{memory_store_id}/memories?beta=true", memory_store_id=memory_store_id),
             body=await async_maybe_transform(
@@ -563,14 +554,14 @@ class AsyncMemories(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._get(
             path_template(
                 "/v1/memory_stores/{memory_store_id}/memories/{memory_id}?beta=true",
@@ -643,14 +634,14 @@ class AsyncMemories(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             path_template(
                 "/v1/memory_stores/{memory_store_id}/memories/{memory_id}?beta=true",
@@ -681,8 +672,6 @@ class AsyncMemories(AsyncAPIResource):
         *,
         depth: int | Omit = omit,
         limit: int | Omit = omit,
-        order: Literal["asc", "desc"] | Omit = omit,
-        order_by: str | Omit = omit,
         page: str | Omit = omit,
         path_prefix: str | Omit = omit,
         view: BetaManagedAgentsMemoryView | Omit = omit,
@@ -705,10 +694,6 @@ class AsyncMemories(AsyncAPIResource):
           limit: Maximum number of items to return per page. Must be between 1 and 100. Defaults
               to 20 when omitted. Capped at 20 when `view=full`. Both `memory` and
               `memory_prefix` items count toward the limit.
-
-          order: Query parameter for order
-
-          order_by: Query parameter for order_by
 
           page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
               previous response to fetch the next page; omit for the first page.
@@ -736,14 +721,14 @@ class AsyncMemories(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
             path_template("/v1/memory_stores/{memory_store_id}/memories?beta=true", memory_store_id=memory_store_id),
             page=AsyncPageCursor[BetaManagedAgentsMemoryListItem],
@@ -756,8 +741,6 @@ class AsyncMemories(AsyncAPIResource):
                     {
                         "depth": depth,
                         "limit": limit,
-                        "order": order,
-                        "order_by": order_by,
                         "page": page,
                         "path_prefix": path_prefix,
                         "view": view,
@@ -807,14 +790,14 @@ class AsyncMemories(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._delete(
             path_template(
                 "/v1/memory_stores/{memory_store_id}/memories/{memory_id}?beta=true",

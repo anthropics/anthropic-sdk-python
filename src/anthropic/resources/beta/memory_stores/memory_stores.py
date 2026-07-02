@@ -113,14 +113,14 @@ class MemoryStores(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             "/v1/memory_stores?beta=true",
             body=maybe_transform(
@@ -168,14 +168,14 @@ class MemoryStores(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
@@ -229,14 +229,14 @@ class MemoryStores(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
             body=maybe_transform(
@@ -301,14 +301,14 @@ class MemoryStores(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/memory_stores?beta=true",
             page=SyncPageCursor[BetaManagedAgentsMemoryStore],
@@ -362,14 +362,14 @@ class MemoryStores(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._delete(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
@@ -409,14 +409,14 @@ class MemoryStores(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             path_template("/v1/memory_stores/{memory_store_id}/archive?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
@@ -499,14 +499,14 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             "/v1/memory_stores?beta=true",
             body=await async_maybe_transform(
@@ -554,14 +554,14 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._get(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
@@ -615,14 +615,14 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
             body=await async_maybe_transform(
@@ -687,14 +687,14 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/memory_stores?beta=true",
             page=AsyncPageCursor[BetaManagedAgentsMemoryStore],
@@ -748,14 +748,14 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._delete(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
@@ -795,14 +795,14 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/memory_stores/{memory_store_id}/archive?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
