@@ -36,6 +36,7 @@ from __future__ import annotations
 import os
 import re
 import uuid
+import base64
 import shutil
 import logging
 import subprocess
@@ -47,6 +48,7 @@ from itertools import islice
 from contextlib import asynccontextmanager
 from dataclasses import field, dataclass
 from collections.abc import Mapping, Callable, Awaitable, AsyncIterator
+from typing_extensions import Literal
 
 import anyio
 import anyio.abc
@@ -56,6 +58,8 @@ from ._skills import _within, download_session_skills
 from ..._types import NotGiven, not_given
 from ..._utils import is_given
 from ...types.beta import (
+    BetaImageBlockParam,
+    BetaRequestDocumentBlockParam,
     BetaManagedAgentsAgentToolset20260401BashInput,
     BetaManagedAgentsAgentToolset20260401EditInput,
     BetaManagedAgentsAgentToolset20260401GlobInput,
@@ -63,7 +67,8 @@ from ...types.beta import (
     BetaManagedAgentsAgentToolset20260401ReadInput,
     BetaManagedAgentsAgentToolset20260401WriteInput,
 )
-from ._beta_functions import ToolError, BetaAsyncFunctionTool, beta_async_tool
+from ._beta_functions import ToolError, BetaAsyncFunctionTool, BetaFunctionToolResultType, beta_async_tool
+from ...types.beta.beta_tool_result_block_param import Content as BetaContent
 
 if TYPE_CHECKING:
     from ..._client import AsyncAnthropic
@@ -142,6 +147,48 @@ def _fs_error(op: str, file_path: str, e: OSError) -> ToolError:
     else:
         reason = (e.strerror or "i/o error").lower()
     return ToolError(f"{op}: {file_path}: {reason}")
+
+
+def _sniff_binary_media_type(head: bytes) -> Optional[str]:
+    """Identify an image/PDF by leading magic bytes, returning its media type.
+
+    Sniffing the content (rather than trusting the extension) is what lets the
+    ``read`` tool hand the model an ``image``/``document`` content block instead
+    of choking on a non-UTF-8 payload. Only the media types the tool-result
+    content blocks accept are recognised; anything else returns ``None`` and is
+    treated as text.
+    """
+    if head.startswith(b"%PDF-"):
+        return "application/pdf"
+    if head.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if head.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if head.startswith((b"GIF87a", b"GIF89a")):
+        return "image/gif"
+    if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
+
+def _binary_content_block(media_type: str, raw: bytes) -> BetaContent:
+    """Wrap binary file bytes in the matching base64 tool-result content block."""
+    data = base64.standard_b64encode(raw).decode("ascii")
+    if media_type == "application/pdf":
+        document: BetaRequestDocumentBlockParam = {
+            "type": "document",
+            "source": {"type": "base64", "media_type": "application/pdf", "data": data},
+        }
+        return document
+    image: BetaImageBlockParam = {
+        "type": "image",
+        "source": {
+            "type": "base64",
+            "media_type": cast('Literal["image/jpeg", "image/png", "image/gif", "image/webp"]', media_type),
+            "data": data,
+        },
+    }
+    return image
 
 
 def _empty_skill_dirs() -> list[Path]:
@@ -490,7 +537,7 @@ def beta_bash_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
 
 def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
     @beta_async_tool(name="read", input_schema=BetaManagedAgentsAgentToolset20260401ReadInput)
-    async def read(file_path: str, view_range: Optional[List[int]] = None) -> str:
+    async def read(file_path: str, view_range: Optional[List[int]] = None) -> BetaFunctionToolResultType:
         """Read a file rooted at the working directory."""
         try:
             target = resolve_path(ctx, file_path)
@@ -509,7 +556,21 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
                     f"read: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
                     "Use bash (head/tail/sed) to read a slice."
                 )
-            text = target.read_text()
+            raw = target.read_bytes()
+            media_type = _sniff_binary_media_type(raw[:16])
+            if media_type is not None:
+                # Images/PDFs round-trip as content blocks; decoding them as
+                # UTF-8 used to raise an uncaught UnicodeDecodeError.
+                if view_range is not None:
+                    raise ToolError(f"read: view_range is not supported for {media_type} files")
+                return [_binary_content_block(media_type, raw)]
+            try:
+                text = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                raise ToolError(
+                    f"read: {file_path}: not a UTF-8 text file and not a supported binary "
+                    "(image/PDF) format. Use bash to inspect it."
+                ) from None
         except ToolError:
             raise
         except OSError as e:
