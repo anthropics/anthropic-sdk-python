@@ -18,7 +18,7 @@ class BetaManagedAgentsCustomToolParams(TypedDict, total=False):
     description: Required[str]
     """
     Description of what the tool does, shown to the agent to help it decide when to
-    use the tool. 1-1024 characters.
+    use the tool. 1-4096 characters.
     """
 
     input_schema: Required[BetaManagedAgentsCustomToolInputSchemaParam]
