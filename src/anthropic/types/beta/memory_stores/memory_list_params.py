@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import List
-from typing_extensions import Literal, Annotated, TypedDict
+from typing_extensions import Annotated, TypedDict
 
 from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
@@ -26,12 +26,6 @@ class MemoryListParams(TypedDict, total=False):
     Must be between 1 and 100. Defaults to 20 when omitted. Capped at 20 when
     `view=full`. Both `memory` and `memory_prefix` items count toward the limit.
     """
-
-    order: Literal["asc", "desc"]
-    """Query parameter for order"""
-
-    order_by: str
-    """Query parameter for order_by"""
 
     page: str
     """Opaque pagination cursor (a `page_...` value).
