@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+import base64
 from pathlib import Path
 
 import anyio
@@ -205,6 +206,55 @@ async def test_read_rejects_directory_even_when_uncapped(tmp_path: Path) -> None
     env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=None)
     with pytest.raises(ToolError, match="not a regular file"):
         await beta_read_tool(env).call({"file_path": "sub"})
+
+
+@pytest.mark.parametrize(
+    ("filename", "magic", "expected_media_type", "expected_block_type"),
+    [
+        ("img.jpg", b"\xff\xd8\xff\xe0" + b"\x00" * 16, "image/jpeg", "image"),
+        ("img.jpeg", b"\xff\xd8\xff\xe0" + b"\x00" * 16, "image/jpeg", "image"),
+        ("img.png", b"\x89PNG\r\n\x1a\n" + b"\x00" * 12, "image/png", "image"),
+        ("img.gif", b"GIF89a" + b"\x00" * 14, "image/gif", "image"),
+        ("img.webp", b"RIFF" + b"\x00" * 4 + b"WEBP", "image/webp", "image"),
+        ("doc.pdf", b"%PDF-1.4" + b"\x00" * 12, "application/pdf", "document"),
+    ],
+)
+@needs_pydantic_v2
+async def test_read_binary_returns_content_block(
+    tmp_path: Path,
+    filename: str,
+    magic: bytes,
+    expected_media_type: str,
+    expected_block_type: str,
+) -> None:
+    payload = magic + b"\x00" * 32
+    (tmp_path / filename).write_bytes(payload)
+    env = AgentToolContext(workdir=str(tmp_path))
+    result = await beta_read_tool(env).call({"file_path": filename})
+    assert isinstance(result, list) and len(result) == 1
+    block = result[0]
+    assert block["type"] == expected_block_type
+    assert block["source"]["type"] == "base64"
+    assert block["source"]["media_type"] == expected_media_type
+    assert base64.standard_b64decode(block["source"]["data"]) == payload
+
+
+@needs_pydantic_v2
+async def test_read_binary_rejects_view_range(tmp_path: Path) -> None:
+    (tmp_path / "img.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 32)
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError, match="view_range is not supported for binary files"):
+        await beta_read_tool(env).call({"file_path": "img.png", "view_range": [1, 2]})
+
+
+@needs_pydantic_v2
+async def test_read_binary_rejects_oversized(tmp_path: Path) -> None:
+    from anthropic.lib.tools.agent_toolset import DEFAULT_MAX_BINARY_BYTES
+
+    (tmp_path / "big.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * DEFAULT_MAX_BINARY_BYTES)
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError, match="exceeds"):
+        await beta_read_tool(env).call({"file_path": "big.png"})
 
 
 @pytest.mark.parametrize(
