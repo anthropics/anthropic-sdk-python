@@ -36,6 +36,7 @@ from __future__ import annotations
 import os
 import re
 import uuid
+import base64
 import shutil
 import logging
 import subprocess
@@ -86,11 +87,30 @@ BASH_OUTPUT_LIMIT = 100 * 1024
 BASH_DEFAULT_TIMEOUT = 120.0
 DEFAULT_MAX_FILE_BYTES = 256 * 1024
 READ_MAX_BYTES = DEFAULT_MAX_FILE_BYTES  # For backwards compat only.
+# Binary files (images, PDFs) are exempt from the text size cap but get their
+# own limit so a multi-MB image doesn't balloon the session context.
+DEFAULT_MAX_BINARY_BYTES = 5 * 1024 * 1024
 GREP_OUTPUT_LIMIT = 100 * 1024
 GREP_MAX_LINE_LENGTH = 2000
 GLOB_RESULT_LIMIT = 200
 WALK_MAX_ENTRIES = 50_000
 _ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]")
+
+# Map file suffixes to (media_type, block_type) for binary read support.
+# "image" blocks are used for image formats; "document" for PDFs.
+_BINARY_MEDIA_TYPES: dict[str, tuple[str, str]] = {
+    ".jpg": ("image/jpeg", "image"),
+    ".jpeg": ("image/jpeg", "image"),
+    ".png": ("image/png", "image"),
+    ".gif": ("image/gif", "image"),
+    ".webp": ("image/webp", "image"),
+    ".pdf": ("application/pdf", "document"),
+}
+
+
+def _binary_media_type(path: Path) -> tuple[str, str] | None:
+    """Return (media_type, block_type) if *path* is a known binary format, else None."""
+    return _BINARY_MEDIA_TYPES.get(path.suffix.lower())
 
 
 def _resolve_max_bytes(configured: int | None | NotGiven) -> int | None:
@@ -490,7 +510,7 @@ def beta_bash_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
 
 def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
     @beta_async_tool(name="read", input_schema=BetaManagedAgentsAgentToolset20260401ReadInput)
-    async def read(file_path: str, view_range: Optional[List[int]] = None) -> str:
+    async def read(file_path: str, view_range: Optional[List[int]] = None) -> Any:
         """Read a file rooted at the working directory."""
         try:
             target = resolve_path(ctx, file_path)
@@ -503,6 +523,22 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             st = target.stat()
             if not S_ISREG(st.st_mode):
                 raise ToolError(f"read: {file_path}: not a regular file")
+
+            binary = _binary_media_type(target)
+            if binary is not None:
+                # Binary file (image or PDF): return a base64 content block.
+                # view_range doesn't apply to binary content.
+                if view_range:
+                    raise ToolError("read: view_range is not supported for binary files")
+                if st.st_size > DEFAULT_MAX_BINARY_BYTES:
+                    raise ToolError(
+                        f"read: {file_path} is {st.st_size} bytes, exceeds "
+                        f"{DEFAULT_MAX_BINARY_BYTES}-byte limit for binary files."
+                    )
+                media_type, block_type = binary
+                data = base64.standard_b64encode(target.read_bytes()).decode("ascii")
+                return [{"type": block_type, "source": {"type": "base64", "media_type": media_type, "data": data}}]
+
             limit = _resolve_max_bytes(ctx.max_file_bytes)
             if limit is not None and st.st_size > limit:
                 raise ToolError(
