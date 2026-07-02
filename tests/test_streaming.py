@@ -7,7 +7,7 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._streaming import Stream, AsyncStream, ServerSentEvent
-from anthropic._exceptions import APIStatusError
+from anthropic._exceptions import APIConnectionError, APIStatusError
 
 _T = TypeVar("_T")
 
@@ -217,6 +217,68 @@ async def test_multi_byte_character_multiple_chunks(
     sse = await iter_next(iterator)
     assert sse.event is None
     assert sse.json() == {"content": "известни"}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_mid_stream_transport_error_is_wrapped(
+    sync: bool,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+) -> None:
+    """A transport drop mid-SSE-stream (RemoteProtocolError, ReadError, …) raises
+    APIConnectionError with the original httpx exception as __cause__, so that
+    `except anthropic.APIConnectionError:` catches mid-stream drops the same way
+    it catches initial-connection failures.
+    """
+
+    def body() -> Iterator[bytes]:
+        yield b"event: completion\n"
+        yield b'data: {"foo":1}\n'
+        yield b"\n"
+        raise httpx.RemoteProtocolError("peer closed connection without sending complete message body")
+
+    request = httpx.Request("POST", "http://test")
+    if sync:
+        iterator: Iterator[ServerSentEvent] | AsyncIterator[ServerSentEvent] = Stream(
+            cast_to=object, client=client, response=httpx.Response(200, content=body(), request=request)
+        )._iter_events()
+    else:
+        iterator = AsyncStream(
+            cast_to=object, client=async_client, response=httpx.Response(200, content=to_aiter(body()), request=request)
+        )._iter_events()
+
+    # First event arrives normally — the drop is mid-stream, not at connect.
+    sse = await iter_next(iterator)
+    assert sse.event == "completion"
+
+    with pytest.raises(APIConnectionError) as exc_info:
+        await iter_next(iterator)
+    assert isinstance(exc_info.value.__cause__, httpx.RemoteProtocolError)
+    assert "Stream interrupted" in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_mid_stream_timeout_is_not_wrapped(
+    sync: bool,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+) -> None:
+    """TimeoutException is a TransportError subclass, but the wrapping clause must
+    NOT double-wrap it — APITimeoutError already exists for timeouts and is itself
+    an APIConnectionError subclass. The bare httpx.TimeoutException should pass
+    through so callers can map it to APITimeoutError if they want."""
+
+    def body() -> Iterator[bytes]:
+        yield b"event: completion\n"
+        raise httpx.ReadTimeout("read timeout")
+
+    iterator = make_event_iterator(content=body(), sync=sync, client=client, async_client=async_client)
+
+    with pytest.raises(httpx.ReadTimeout):
+        await iter_next(iterator)
+        await iter_next(iterator)
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])

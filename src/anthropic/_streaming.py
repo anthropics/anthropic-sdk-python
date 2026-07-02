@@ -11,6 +11,7 @@ from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, r
 
 import httpx
 
+from ._exceptions import APIConnectionError
 from ._utils import is_dict, extract_type_var_from_base
 
 if TYPE_CHECKING:
@@ -72,7 +73,23 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
             yield item
 
     def _iter_events(self) -> Iterator[ServerSentEvent]:
-        yield from self._decoder.iter_bytes(self.response.iter_bytes())
+        try:
+            yield from self._decoder.iter_bytes(self.response.iter_bytes())
+        except httpx.TimeoutException:
+            # Mid-stream timeouts are already handled by `_base_client._request` for the
+            # initial request, but the SSE body iteration doesn't go through that path —
+            # re-raise as-is so callers can distinguish a hung stream from a dropped one.
+            # APITimeoutError is an APIConnectionError subclass, so customers catching
+            # the latter will still see it; this clause only exists so the next clause
+            # doesn't double-wrap it (TimeoutException is also a TransportError).
+            raise
+        except httpx.TransportError as exc:
+            # Mid-stream transport drops (RemoteProtocolError, ReadError, ConnectError, …)
+            # leak through as bare httpx exceptions because the SDK's wrapping in
+            # `_base_client._request` only covers the pre-body request. Re-wrap them so
+            # `except anthropic.APIConnectionError:` catches mid-stream drops the same way
+            # it catches connection failures, and the original is preserved as `__cause__`.
+            raise APIConnectionError(message=f"Stream interrupted: {exc}", request=self.response.request) from exc
 
     @staticmethod
     def raw_events(response: httpx.Response) -> Iterator[ServerSentEvent]:
@@ -240,8 +257,17 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
             yield item
 
     async def _iter_events(self) -> AsyncIterator[ServerSentEvent]:
-        async for sse in self._decoder.aiter_bytes(self.response.aiter_bytes()):
-            yield sse
+        try:
+            async for sse in self._decoder.aiter_bytes(self.response.aiter_bytes()):
+                yield sse
+        except httpx.TimeoutException:
+            # See sync `_iter_events` — let timeouts pass through so the next clause
+            # doesn't double-wrap them (TimeoutException is also a TransportError).
+            raise
+        except httpx.TransportError as exc:
+            # See sync `_iter_events` — wrap mid-stream transport drops so
+            # `except anthropic.APIConnectionError:` catches them.
+            raise APIConnectionError(message=f"Stream interrupted: {exc}", request=self.response.request) from exc
 
     @staticmethod
     def raw_events(response: httpx.Response) -> AsyncIterator[ServerSentEvent]:
