@@ -15,7 +15,7 @@ __all__ = ["BetaBase64ImageSourceParam"]
 class BetaBase64ImageSourceParam(TypedDict, total=False):
     data: Required[Annotated[Union[str, Base64FileInput], PropertyInfo(format="base64")]]
 
-    media_type: Required[Literal["image/jpeg", "image/png", "image/gif", "image/webp"]]
+    media_type: Required[Literal["image/jpeg", "image/png", "image/gif", "image/webp", "image/heic", "image/heif"]]
 
     type: Required[Literal["base64"]]
 
