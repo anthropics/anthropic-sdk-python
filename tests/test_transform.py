@@ -502,3 +502,11 @@ async def test_strips_notgiven(use_async: bool) -> None:
 async def test_strips_omit(use_async: bool) -> None:
     assert await transform({"foo_bar": "bar"}, Foo1, use_async) == {"fooBar": "bar"}
     assert await transform({"foo_bar": omit}, Foo1, use_async) == {}
+
+
+@parametrize
+@pytest.mark.asyncio
+async def test_bare_dict(use_async: bool) -> None:
+    # a bare `dict` annotation (no type parameters) should be handled gracefully
+    # rather than raising `IndexError: tuple index out of range`
+    assert await transform({"key": "value"}, dict, use_async) == {"key": "value"}
