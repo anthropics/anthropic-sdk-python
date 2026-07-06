@@ -370,3 +370,63 @@ def test_copy_overrides_aws_options() -> None:
         base_url="https://aws-external-anthropic.eu-west-1.api.aws",
     )
     assert str(copied2.base_url).rstrip("/") == "https://aws-external-anthropic.eu-west-1.api.aws"
+
+
+def test_copy_accepts_credentials_none_noop() -> None:
+    # `credentials=None` is accepted as a no-op: the AWS client authenticates with
+    # SigV4, not a token provider, so there is nothing to clear. The copy stays SigV4.
+    client = AnthropicAWS(
+        aws_access_key="AKID",
+        aws_secret_key="secret",
+        aws_region="us-east-1",
+        workspace_id="ws-123",
+    )
+    copied = client.copy(credentials=None)
+    assert copied._use_sigv4 is True
+    assert copied.workspace_id == "ws-123"
+    assert copied.aws_region == "us-east-1"
+
+
+def test_copy_rejects_real_credentials_provider() -> None:
+    client = AnthropicAWS(
+        aws_access_key="AKID",
+        aws_secret_key="secret",
+        aws_region="us-east-1",
+        workspace_id="ws-123",
+    )
+    with pytest.raises(TypeError, match="does not support a `credentials` provider"):
+        client.copy(credentials=object())
+
+
+def test_scoped_bearer_client_helper_on_aws() -> None:
+    # Regression: the environment poller / worker / session-tool-runner build a
+    # scoped sub-client via `_copy_client_with_bearer_auth`, which calls
+    # `client.copy(credentials=None, ...)`. That must work on the AWS client and
+    # yield a client that still signs with SigV4 (the bearer token is unused).
+    from anthropic.lib._scoped_client import _copy_client_with_bearer_auth
+
+    client = AnthropicAWS(
+        aws_access_key="AKID",
+        aws_secret_key="secret",
+        aws_region="us-east-1",
+        workspace_id="ws-123",
+    )
+    scoped = _copy_client_with_bearer_auth(client, auth_token="unused-under-sigv4", helper="environments-work-poller")
+    assert isinstance(scoped, AnthropicAWS)
+    assert scoped._use_sigv4 is True
+    assert scoped.workspace_id == "ws-123"
+
+
+def test_scoped_bearer_client_helper_on_aws_async() -> None:
+    from anthropic.lib._scoped_client import _copy_client_with_bearer_auth
+
+    client = AsyncAnthropicAWS(
+        aws_access_key="AKID",
+        aws_secret_key="secret",
+        aws_region="us-east-1",
+        workspace_id="ws-123",
+    )
+    scoped = _copy_client_with_bearer_auth(client, auth_token="unused-under-sigv4", helper="environments-worker")
+    assert isinstance(scoped, AsyncAnthropicAWS)
+    assert scoped._use_sigv4 is True
+    assert scoped.workspace_id == "ws-123"
