@@ -105,6 +105,38 @@ def assert_tool_use_response(events: list[ParsedMessageStreamEvent[None]], messa
     ]
 
 
+def assert_server_tool_use_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
+    server_tool_use = message.content[1]
+    assert server_tool_use.type == "server_tool_use"
+    assert server_tool_use.name == "web_search"
+    assert server_tool_use.input == {"query": "weather in Paris"}
+
+    # `input_json` events must fire for `server_tool_use` blocks, not just client
+    # `tool_use` — the input is streamed and accumulated for both.
+    input_json_events = [e for e in events if e.type == "input_json"]
+    assert input_json_events, "expected input_json events for the server_tool_use block"
+    assert input_json_events[-1].snapshot == {"query": "weather in Paris"}
+
+    assert [e.type for e in events] == [
+        "message_start",
+        "content_block_start",
+        "content_block_delta",
+        "text",
+        "content_block_stop",
+        "content_block_start",
+        "content_block_delta",
+        "input_json",
+        "content_block_delta",
+        "input_json",
+        "content_block_delta",
+        "input_json",
+        "content_block_delta",
+        "input_json",
+        "content_block_stop",
+        "message_delta",
+    ]
+
+
 def assert_refusal_response(message: Message) -> None:
     assert message.stop_reason == "refusal"
     assert message.stop_details is not None
@@ -192,6 +224,19 @@ class TestSyncMessages:
                 assert isinstance(cast(Any, stream), Stream)
 
             assert_tool_use_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_server_tool_use_input_json(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("server_tool_use_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "What's the weather in Paris?"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_server_tool_use_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
     def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
@@ -290,6 +335,20 @@ class TestAsyncMessages:
                 assert isinstance(cast(Any, stream), AsyncStream)
 
             assert_tool_use_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_server_tool_use_input_json(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("server_tool_use_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "What's the weather in Paris?"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_server_tool_use_response([event async for event in stream], await stream.get_final_message())
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)

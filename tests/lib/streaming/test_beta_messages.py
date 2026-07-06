@@ -99,6 +99,49 @@ EXPECTED_TOOL_USE_EVENT_TYPES = [
     "message_delta",
 ]
 
+EXPECTED_SERVER_TOOL_USE_MESSAGE = {
+    "id": "msg_01ServerToolUseInputJson",
+    "model": "claude-sonnet-4-20250514",
+    "role": "assistant",
+    "stop_reason": "end_turn",
+    "type": "message",
+    "content": [
+        {"type": "text", "text": "Let me search for that."},
+        {
+            "type": "server_tool_use",
+            "id": "srvtoolu_01WebSearch",
+            "name": "web_search",
+            "input": {"query": "weather in Paris"},
+        },
+    ],
+    "usage": {
+        "input_tokens": 42,
+        "output_tokens": 40,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "service_tier": "standard",
+    },
+}
+
+EXPECTED_SERVER_TOOL_USE_EVENT_TYPES = [
+    "message_start",
+    "content_block_start",
+    "content_block_delta",
+    "text",
+    "content_block_stop",
+    "content_block_start",
+    "content_block_delta",
+    "input_json",
+    "content_block_delta",
+    "input_json",
+    "content_block_delta",
+    "input_json",
+    "content_block_delta",
+    "input_json",
+    "content_block_stop",
+    "message_delta",
+]
+
 EXPECTED_INCOMPLETE_MESSAGE = {
     "id": "msg_01UdjYBBipA9omjYhicnevgq",
     "model": "claude-3-7-sonnet-20250219",
@@ -211,6 +254,16 @@ def assert_tool_use_response(events: list[ParsedBetaMessageStreamEvent], message
     assert [e.type for e in events] == EXPECTED_TOOL_USE_EVENT_TYPES
 
 
+def assert_server_tool_use_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
+    assert_message_matches(message, EXPECTED_SERVER_TOOL_USE_MESSAGE)
+    # `input_json` events must fire for `server_tool_use` blocks, not just
+    # `tool_use`/`mcp_tool_use` — the input is streamed and accumulated for all.
+    input_json_events = [e for e in events if e.type == "input_json"]
+    assert input_json_events, "expected input_json events for the server_tool_use block"
+    assert input_json_events[-1].snapshot == {"query": "weather in Paris"}
+    assert [e.type for e in events] == EXPECTED_SERVER_TOOL_USE_EVENT_TYPES
+
+
 def assert_incomplete_partial_input_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
     assert_message_matches(message, EXPECTED_INCOMPLETE_MESSAGE)
     assert [e.type for e in events] == EXPECTED_INCOMPLETE_EVENT_TYPES
@@ -300,6 +353,19 @@ class TestSyncMessages:
             assert isinstance(cast(Any, stream), BetaMessageStream)
 
             assert_tool_use_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_server_tool_use_input_json(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("server_tool_use_response.txt"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "What's the weather in Paris?"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_server_tool_use_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
@@ -463,6 +529,20 @@ class TestAsyncMessages:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_tool_use_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_server_tool_use_input_json(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("server_tool_use_response.txt")))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "What's the weather in Paris?"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_server_tool_use_response([event async for event in stream], await stream.get_final_message())
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
