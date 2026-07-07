@@ -512,6 +512,11 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             text = target.read_text()
         except ToolError:
             raise
+        except UnicodeDecodeError as e:
+            # read_text() decodes as UTF-8; a non-UTF-8 file (binary artifact or
+            # e.g. a latin-1 text file) would otherwise escape as a raw
+            # UnicodeDecodeError, bypassing this tool's ToolError contract.
+            raise ToolError(f"read: {file_path}: not valid UTF-8 text") from e
         except OSError as e:
             raise _fs_error("read", file_path, e) from e
         if not view_range:
@@ -570,6 +575,11 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             text = target.read_text()
         except ToolError:
             raise
+        except UnicodeDecodeError as e:
+            # A non-UTF-8 file can't be edited by string replacement — decoding
+            # with errors="replace" would corrupt it on write-back — so surface a
+            # clean ToolError instead of leaking a raw UnicodeDecodeError.
+            raise ToolError(f"edit: {file_path}: not valid UTF-8 text") from e
         except OSError as e:
             raise _fs_error("edit", file_path, e) from e
         count = text.count(old_string)

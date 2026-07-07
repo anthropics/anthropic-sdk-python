@@ -146,6 +146,24 @@ async def test_edit_rejects_directory(tmp_path: Path) -> None:
 
 
 @needs_pydantic_v2
+async def test_read_rejects_non_utf8_file(tmp_path: Path) -> None:
+    # A non-UTF-8 file (here latin-1 "café") must surface as a clean ToolError,
+    # not leak a raw UnicodeDecodeError past the tool's error contract.
+    (tmp_path / "notes.txt").write_bytes(b"caf\xe9 menu\n")
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError, match="not valid UTF-8"):
+        await beta_read_tool(env).call({"file_path": "notes.txt"})
+
+
+@needs_pydantic_v2
+async def test_edit_rejects_non_utf8_file(tmp_path: Path) -> None:
+    (tmp_path / "notes.txt").write_bytes(b"caf\xe9 menu\n")
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError, match="not valid UTF-8"):
+        await beta_edit_tool(env).call({"file_path": "notes.txt", "old_string": "menu", "new_string": "x"})
+
+
+@needs_pydantic_v2
 async def test_edit_normal_within_limit(tmp_path: Path) -> None:
     (tmp_path / "f.txt").write_text("hello world")
     env = AgentToolContext(workdir=str(tmp_path))
