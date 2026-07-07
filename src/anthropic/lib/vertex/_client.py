@@ -153,6 +153,15 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
 
     @override
     def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        if self.project_id is None:
+            # Building the request URL requires a project_id. When it isn't given
+            # explicitly (or via `ANTHROPIC_VERTEX_PROJECT_ID`) it can still be
+            # resolved from Application Default Credentials, but that only happens
+            # in `_ensure_access_token`, which `_prepare_request` calls *after*
+            # this. Resolve credentials now so the ADC project is available before
+            # we build the URL; otherwise this would fail with "could not be
+            # resolved from credentials" without ever consulting them.
+            self._ensure_access_token()
         return _prepare_options(options, project_id=self.project_id, region=self.region)
 
     @override
@@ -317,6 +326,15 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
 
     @override
     async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        if self.project_id is None:
+            # Building the request URL requires a project_id. When it isn't given
+            # explicitly (or via `ANTHROPIC_VERTEX_PROJECT_ID`) it can still be
+            # resolved from Application Default Credentials, but that only happens
+            # in `_ensure_access_token`, which `_prepare_request` calls *after*
+            # this. Resolve credentials now so the ADC project is available before
+            # we build the URL; otherwise this would fail with "could not be
+            # resolved from credentials" without ever consulting them.
+            await self._ensure_access_token()
         return _prepare_options(options, project_id=self.project_id, region=self.region)
 
     @override
