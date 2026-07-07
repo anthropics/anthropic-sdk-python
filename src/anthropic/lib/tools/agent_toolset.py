@@ -536,8 +536,20 @@ def beta_write_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
         except ValueError as e:
             raise ToolError(f"write: {e}") from e
         try:
+            # stat() before any open(): is_file() rejects FIFOs/devices without
+            # opening them (open() on an unconnected FIFO blocks) — same guard
+            # as the read/edit tools. A target that doesn't exist yet is a
+            # normal new-file write, so a missing file is not an error here.
+            try:
+                st: os.stat_result | None = target.stat()
+            except FileNotFoundError:
+                st = None
+            if st is not None and not S_ISREG(st.st_mode):
+                raise ToolError(f"write: {file_path}: not a regular file")
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(content)
+        except ToolError:
+            raise
         except OSError as e:
             raise _fs_error("write", file_path, e) from e
         return f"wrote {len(content)} bytes to {file_path}"
