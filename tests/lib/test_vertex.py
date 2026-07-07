@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import os
-from typing import cast
+from types import SimpleNamespace
+from typing import Any, cast
 from typing_extensions import Protocol
 
 import httpx
@@ -15,6 +16,11 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 class MockRequestCall(Protocol):
     request: httpx.Request
+
+
+def _fake_load_auth(*, project_id: str | None) -> tuple[Any, str]:
+    """Stand-in for `vertex._client.load_auth` that resolves the project from ADC."""
+    return SimpleNamespace(expired=False, token="fake-token"), project_id or "adc-project"
 
 
 class TestAnthropicVertex:
@@ -47,6 +53,32 @@ class TestAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    def test_project_id_resolved_from_credentials(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # With no explicit project_id (and no env var), the project must be resolved
+        # from Application Default Credentials before the request URL is built.
+        # `_prepare_options` (which builds the URL) runs before `_prepare_request`
+        # loads credentials, so it must trigger credential resolution itself.
+        monkeypatch.delenv("ANTHROPIC_VERTEX_PROJECT_ID", raising=False)
+        monkeypatch.setattr("anthropic.lib.vertex._client.load_auth", _fake_load_auth)
+        client = AnthropicVertex(region="region")
+
+        request_url = "https://region-aiplatform.googleapis.com/v1/projects/adc-project/locations/region/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
+        respx_mock.post(request_url).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+
+        client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+        )
+
+        assert client.project_id == "adc-project"
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 1
+        assert calls[0].request.url == request_url
 
     def test_copy(self) -> None:
         copied = self.client.copy()
@@ -199,6 +231,33 @@ class TestAsyncAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    async def test_project_id_resolved_from_credentials(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # With no explicit project_id (and no env var), the project must be resolved
+        # from Application Default Credentials before the request URL is built.
+        # `_prepare_options` (which builds the URL) runs before `_prepare_request`
+        # loads credentials, so it must trigger credential resolution itself.
+        monkeypatch.delenv("ANTHROPIC_VERTEX_PROJECT_ID", raising=False)
+        monkeypatch.setattr("anthropic.lib.vertex._client.load_auth", _fake_load_auth)
+        client = AsyncAnthropicVertex(region="region")
+
+        request_url = "https://region-aiplatform.googleapis.com/v1/projects/adc-project/locations/region/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
+        respx_mock.post(request_url).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+
+        await client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+        )
+
+        assert client.project_id == "adc-project"
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 1
+        assert calls[0].request.url == request_url
 
     def test_copy(self) -> None:
         copied = self.client.copy()
