@@ -9,6 +9,7 @@ import pytest
 from respx import MockRouter
 
 from anthropic import AnthropicBedrock, AsyncAnthropicBedrock
+from anthropic.lib.bedrock._auth import get_auth_headers
 from anthropic.lib.bedrock._stream_decoder import _chunk_bytes_to_sse
 
 sync_client = AnthropicBedrock(
@@ -319,3 +320,39 @@ def test_async_copy_x_stainless_helper_header_appends() -> None:
     client = async_client.with_options(default_headers={"x-stainless-helper": "parent"})
     copied = client.with_options(default_headers={"x-stainless-helper": "child"})
     assert copied.default_headers["x-stainless-helper"] == "parent, child"
+
+
+def test_get_auth_headers_without_connection_header() -> None:
+    # Signing must not require a `connection` header to be present. HTTP/2 requests
+    # forbid the header entirely, so `request.headers` can legitimately lack it; the
+    # previous `del headers["connection"]` raised `KeyError` in that case.
+    headers = get_auth_headers(
+        method="POST",
+        url="https://bedrock-runtime.us-east-1.amazonaws.com/model/foo/invoke",
+        headers=httpx.Headers({"content-type": "application/json"}),
+        aws_access_key="AKIAIOSFODNN7EXAMPLE",
+        aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+        aws_session_token=None,
+        region="us-east-1",
+        profile=None,
+        data='{"hello": "world"}',
+    )
+    assert "Authorization" in headers
+
+
+def test_get_auth_headers_strips_connection_header() -> None:
+    # Connection header must not be signed (may be stripped by proxies).
+    headers = get_auth_headers(
+        method="POST",
+        url="https://bedrock-runtime.us-east-1.amazonaws.com/model/foo/invoke",
+        headers=httpx.Headers({"content-type": "application/json", "connection": "keep-alive"}),
+        aws_access_key="AKIAIOSFODNN7EXAMPLE",
+        aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+        aws_session_token=None,
+        region="us-east-1",
+        profile=None,
+        data='{"hello": "world"}',
+    )
+    signed_headers_match = re.search(r"SignedHeaders=([^,]+)", headers["Authorization"])
+    assert signed_headers_match is not None
+    assert "connection" not in signed_headers_match.group(1).split(";")
