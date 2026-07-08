@@ -21,10 +21,10 @@ Thinking: TypeAlias = Union[
 class BetaFallbackParam(TypedDict, total=False, extra_items=object):  # type: ignore[call-arg]
     """One entry in the `fallbacks` chain on a `/v1/messages` request.
 
-    `model` is required. The four override fields (`max_tokens`, `thinking`,
-    `output_config`, and `speed`) replace the corresponding top-level field
-    for this attempt only and are validated as if the request were made to
-    `model`. Any other key is rejected at parse time.
+    `model` is required. The override fields (`max_tokens`, `thinking`,
+    `output_config`, and `speed`) set the corresponding parameter for this
+    attempt only and are validated as if the request were made to `model`.
+    Any other key is rejected at parse time.
     """
 
     model: Required[ModelParam]

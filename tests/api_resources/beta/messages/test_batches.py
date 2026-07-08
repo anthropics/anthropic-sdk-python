@@ -166,7 +166,7 @@ class TestBatches:
                                 },
                                 "citations": [
                                     {
-                                        "cited_text": "cited_text",
+                                        "cited_text": "The grass is green. The sky is blue.",
                                         "document_index": 0,
                                         "document_title": "x",
                                         "end_char_index": 0,
@@ -656,7 +656,7 @@ class TestAsyncBatches:
                                 },
                                 "citations": [
                                     {
-                                        "cited_text": "cited_text",
+                                        "cited_text": "The grass is green. The sky is blue.",
                                         "document_index": 0,
                                         "document_title": "x",
                                         "end_char_index": 0,
