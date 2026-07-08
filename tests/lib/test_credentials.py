@@ -5,7 +5,7 @@ import json
 import time
 import logging
 import pathlib
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Callable, Optional, cast
 from typing_extensions import Protocol
 
 import httpx
@@ -3150,3 +3150,427 @@ class TestDanglingActiveConfig:
         assert result is not None
         assert isinstance(result.provider, CredentialsFile)
         assert result.provider().token == "from-prod"
+
+
+# --------------------------------------------------------------------------- #
+# Secret hygiene: masked reprs and traceback frame locals
+# --------------------------------------------------------------------------- #
+
+_SECRET_ASSERTION = "eyJ-SECRET-ASSERTION-MATERIAL-eyJ"
+_SECRET_MINTED = "sk-ant-oat01-MINTED-SECRET"
+
+
+class TestAccessTokenReprMasking:
+    def test_long_token_masked_to_last_four(self) -> None:
+        tok = AccessToken(token="sk-ant-oat01-SECRETMATERIAL", expires_at=123)
+        assert repr(tok) == "AccessToken(token='...RIAL', expires_at=123)"
+        assert str(tok) == repr(tok)
+
+    def test_short_token_fully_masked(self) -> None:
+        assert repr(AccessToken(token="hunter2")) == "AccessToken(token='**********', expires_at=None)"
+
+    def test_non_str_token_does_not_crash_repr(self) -> None:
+        # A malformed token endpoint can produce a non-str token; repr must
+        # not raise (crash reporters call it blindly).
+        assert repr(AccessToken(token=cast(Any, 12345))) == "AccessToken(token='**********', expires_at=None)"
+
+
+class TestEmptySecretFieldFalsiness:
+    """The missing-token guards test truthiness of SecretStr-wrapped values,
+    which rides on ``SecretStr.__len__`` (present across the supported
+    pydantic range) — pin empty-string behavior through the public path so a
+    pydantic regression can't silently turn the guards into passes."""
+
+    def test_empty_access_token_treated_as_missing(self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(
+            tmp_path,
+            "default",
+            config={"type": "authorized_user", "client_id": "cid"},
+            credentials={"access_token": "", "refresh_token": "rt"},
+        )
+        with pytest.raises(AnthropicError, match="missing 'access_token'"):
+            CredentialsFile()()
+
+    def test_empty_refresh_token_treated_as_missing(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(
+            tmp_path,
+            "default",
+            config={"type": "authorized_user", "client_id": "cid"},
+            credentials={"access_token": "at", "refresh_token": ""},
+        )
+        with pytest.raises(WorkloadIdentityError, match="must include 'refresh_token'"):
+            CredentialsFile()()
+
+
+def _sdk_frame_locals(exc: BaseException) -> List["tuple[str, Dict[str, Any]]"]:
+    """(code name, locals) for every traceback frame owned by the anthropic
+    package, across the full ``__context__`` / ``__cause__`` chain."""
+    pkg_root = str(pathlib.Path(anthropic.__file__).parent)
+    out: List["tuple[str, Dict[str, Any]]"] = []
+    seen: "set[int]" = set()
+
+    def walk(e: Optional[BaseException]) -> None:
+        if e is None or id(e) in seen:
+            return
+        seen.add(id(e))
+        tb = e.__traceback__
+        while tb is not None:
+            code = tb.tb_frame.f_code
+            if code.co_filename.startswith(pkg_root):
+                out.append((code.co_name, dict(tb.tb_frame.f_locals)))
+            tb = tb.tb_next
+        walk(e.__context__)
+        walk(e.__cause__)
+
+    walk(exc)
+    return out
+
+
+def _assert_not_in_sdk_frame_locals(exc: BaseException, *secrets: str) -> None:
+    frames = _sdk_frame_locals(exc)
+    assert frames, "expected at least one SDK-owned frame in the traceback"
+    for name, frame_locals in frames:
+        for var, value in frame_locals.items():
+            for secret in secrets:
+                assert secret not in repr(value), f"secret retained in frame {name!r} local {var!r}"
+
+
+class TestNoSecretsInTracebackFrameLocals:
+    """Exceptions from the token-exchange paths must not retain credential
+    material in traceback frame locals (across the ``__traceback__`` /
+    ``__context__`` / ``__cause__`` chain). Plain ``logging.exception`` never
+    prints locals, but crash reporters that capture them — stdlib
+    ``TracebackException(..., capture_locals=True)``, rich tracebacks,
+    Sentry's default local-variable capture — render each local's ``repr``,
+    which is why SecretStr-wrapped locals are safe to retain."""
+
+    def _workload_provider(self, handler: Callable[[httpx.Request], httpx.Response]) -> WorkloadIdentityCredentials:
+        creds = WorkloadIdentityCredentials(
+            identity_token_provider=lambda: _SECRET_ASSERTION,
+            federation_rule_id="fdrl_01abc",
+            organization_id="org-uuid",
+            http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        )
+        creds.bind_base_url(BASE_URL)
+        return creds
+
+    def test_http_4xx_does_not_retain_assertion(self) -> None:
+        provider = self._workload_provider(lambda _: httpx.Response(401, json={"error": "invalid_grant"}))
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            provider()
+        _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)
+
+    def test_invalid_expires_in_does_not_retain_minted_token(self) -> None:
+        provider = self._workload_provider(
+            lambda _: httpx.Response(200, json={"access_token": _SECRET_MINTED, "expires_in": "NaN"})
+        )
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            provider()
+        _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION, _SECRET_MINTED)
+
+    def test_token_type_mismatch_does_not_retain_minted_token(self) -> None:
+        provider = self._workload_provider(
+            lambda _: httpx.Response(200, json={"access_token": _SECRET_MINTED, "expires_in": 600, "token_type": "MAC"})
+        )
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            provider()
+        _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION, _SECRET_MINTED)
+
+    def test_non_json_response_does_not_retain_assertion(self) -> None:
+        provider = self._workload_provider(lambda _: httpx.Response(200, text="<html>gateway error</html>"))
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            provider()
+        _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)
+        # The json decoder frames hold the raw response text (which token
+        # endpoints can echo the assertion into); the raise site must have
+        # dropped the chained cause's traceback entirely.
+        cause = exc_info.value.__cause__
+        assert cause is not None and cause.__traceback__ is None
+
+    def test_json_string_echo_response_does_not_retain_assertion(self) -> None:
+        """A 200 whose body is a JSON *string* echoing the assertion must be
+        rejected at the wrap boundary — never bound to a frame local on its
+        way to the type error."""
+        provider = self._workload_provider(lambda _: httpx.Response(200, json=_SECRET_ASSERTION))
+        with pytest.raises(WorkloadIdentityError, match="expected an object") as exc_info:
+            provider()
+        _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)
+
+    def test_transport_error_does_not_retain_assertion(self) -> None:
+        def raise_connect_error(req: httpx.Request) -> httpx.Response:
+            raise httpx.ConnectError("connection refused", request=req)
+
+        provider = self._workload_provider(raise_connect_error)
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            provider()
+        _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)
+        # The chained httpx error's frames hold the serialized request body;
+        # the raise site must have dropped its traceback entirely.
+        cause = exc_info.value.__cause__
+        assert cause is not None and cause.__traceback__ is None
+
+    def test_oversized_assertion_not_retained(self) -> None:
+        big = "A" * (17 * 1024)
+        provider = WorkloadIdentityCredentials(
+            identity_token_provider=lambda: big,
+            federation_rule_id="fdrl_01abc",
+            organization_id="org-uuid",
+            http_client=httpx.Client(),
+        )
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            provider()
+        _assert_not_in_sdk_frame_locals(exc_info.value, big)
+
+    def _write_refresh_profile(self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(
+            tmp_path,
+            "default",
+            config={"type": "authorized_user", "client_id": "cid"},
+            credentials={
+                "access_token": "old-access-SECRET",
+                "expires_at": int(time.time()) - 1,
+                "refresh_token": "rt-SECRET",
+            },
+        )
+
+    @pytest.mark.respx(base_url=BASE_URL)
+    def test_refresh_failure_does_not_retain_refresh_token(
+        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        self._write_refresh_profile(clean_env, tmp_path)
+        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx.Response(400, json={"error": "invalid_grant"}))
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET", "old-access-SECRET")
+
+    @pytest.mark.respx(base_url=BASE_URL)
+    def test_refresh_invalid_expires_does_not_retain_new_token(
+        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        self._write_refresh_profile(clean_env, tmp_path)
+        respx_mock.post(TOKEN_ENDPOINT).mock(
+            return_value=httpx.Response(200, json={"access_token": _SECRET_MINTED, "expires_in": "NaN"})
+        )
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET", "old-access-SECRET", _SECRET_MINTED)
+
+    @pytest.mark.respx(base_url=BASE_URL)
+    def test_refresh_non_json_response_raises_redacted_error(
+        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        """A non-JSON refresh response raises WorkloadIdentityError (it
+        previously escaped as a raw json ValueError whose ``.doc`` carries the
+        full response body) and retains no secrets."""
+        self._write_refresh_profile(clean_env, tmp_path)
+        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx.Response(200, text="<html>gateway error</html>"))
+        with pytest.raises(WorkloadIdentityError, match="non-JSON") as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET", "old-access-SECRET")
+        # As on the jwt-bearer path: the decoder frames hold the raw body.
+        cause = exc_info.value.__cause__
+        assert cause is not None and cause.__traceback__ is None
+
+    @pytest.mark.respx(base_url=BASE_URL)
+    def test_refresh_json_array_response_raises_redacted_error(
+        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        """A JSON-but-non-object refresh body (which can echo the request's
+        refresh token) is rejected at the wrap boundary and never bound to a
+        frame local."""
+        self._write_refresh_profile(clean_env, tmp_path)
+        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx.Response(200, json=["rt-SECRET"]))
+        with pytest.raises(WorkloadIdentityError, match="expected an object") as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET", "old-access-SECRET")
+
+    def test_scalar_credentials_file_does_not_retain_token(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        """A credentials file whose top level is a JSON string (e.g. a bare
+        token pasted into the file) must raise a clean error without the
+        value surviving in frame locals."""
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(tmp_path, "default", config={"type": "authorized_user", "client_id": "cid"})
+        creds_path = tmp_path / "credentials" / "default.json"
+        creds_path.parent.mkdir(parents=True, exist_ok=True)
+        creds_path.write_text('"rt-SECRET"')  # JSON scalar, not an object
+        creds_path.chmod(0o600)
+        with pytest.raises(AnthropicError, match="must contain a JSON object, not str") as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET")
+
+    @pytest.mark.respx(base_url=BASE_URL)
+    def test_refresh_success_writes_raw_tokens_to_disk_and_wire(
+        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        """SecretStr wrapping is an in-memory concern only: the refresh POST
+        body and the persisted credentials file must carry the raw values —
+        including unknown string fields, which are wrapped by default and must
+        round-trip unchanged."""
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(
+            tmp_path,
+            "default",
+            config={"type": "authorized_user", "client_id": "cid"},
+            credentials={
+                "access_token": "old-access-SECRET",
+                "expires_at": int(time.time()) - 1,
+                "refresh_token": "rt-SECRET",
+                "id_token": "idt-SECRET",
+            },
+        )
+        respx_mock.post(TOKEN_ENDPOINT).mock(
+            return_value=httpx.Response(
+                200, json={"access_token": "new-access", "expires_in": 3600, "refresh_token": "rt-NEW"}
+            )
+        )
+        tok = CredentialsFile()()
+        assert tok.token == "new-access"
+
+        sent = json.loads(cast("List[MockRequestCall]", respx_mock.calls)[-1].request.content)
+        assert sent == {"grant_type": "refresh_token", "refresh_token": "rt-SECRET", "client_id": "cid"}
+
+        on_disk = json.loads((tmp_path / "credentials" / "default.json").read_text())
+        assert on_disk["access_token"] == "new-access"
+        assert on_disk["refresh_token"] == "rt-NEW"
+        assert on_disk["id_token"] == "idt-SECRET"
+
+    def test_missing_access_token_does_not_retain_refresh_token(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        """A credentials file that has a refresh_token but no access_token
+        raises before any exchange; the on-disk dict must not survive raw in
+        frame locals."""
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(
+            tmp_path,
+            "default",
+            config={"type": "authorized_user", "client_id": "cid"},
+            credentials={"refresh_token": "rt-SECRET"},
+        )
+        with pytest.raises(AnthropicError, match="missing 'access_token'") as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET")
+
+    def test_invalid_json_credentials_does_not_retain_raw_text(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(tmp_path, "default", config={"type": "authorized_user", "client_id": "cid"})
+        creds_path = tmp_path / "credentials" / "default.json"
+        creds_path.parent.mkdir(parents=True, exist_ok=True)
+        creds_path.write_text('{"refresh_token": "rt-SECRET", ')  # truncated JSON
+        creds_path.chmod(0o600)
+        with pytest.raises(AnthropicError, match="not valid JSON") as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET")
+        # The json decoder frames hold the raw file text; the raise site must
+        # have dropped the chained cause's traceback entirely.
+        cause = exc_info.value.__cause__
+        assert cause is not None and cause.__traceback__ is None
+
+    def test_credentials_type_mismatch_does_not_retain_tokens(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(
+            tmp_path,
+            "default",
+            config={"type": "authorized_user", "client_id": "cid"},
+            credentials={
+                "type": "wrong_type",
+                "access_token": "at-SECRET",
+                "refresh_token": "rt-SECRET",
+            },
+        )
+        with pytest.raises(AnthropicError, match="has type") as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(exc_info.value, "at-SECRET", "rt-SECRET")
+
+    def test_corrupt_expires_at_does_not_retain_tokens(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        """``_coerce_expires_at`` raises in a secret-free frame, but the error
+        propagates through ``_call_user_oauth`` whose locals hold the creds
+        dict — those locals must render redacted. The ``id_token`` field pins
+        the secret-by-default rule: string fields the SDK doesn't know about
+        are wrapped too."""
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(
+            tmp_path,
+            "default",
+            config={"type": "authorized_user", "client_id": "cid"},
+            credentials={
+                "access_token": "at-SECRET",
+                "expires_at": "tomorrow",
+                "refresh_token": "rt-SECRET",
+                "id_token": "idt-SECRET",
+            },
+        )
+        with pytest.raises(AnthropicError, match="invalid 'expires_at'") as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(exc_info.value, "at-SECRET", "rt-SECRET", "idt-SECRET")
+
+    def test_corrupt_expires_at_external_profile_does_not_retain_token(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        """Same as above via the no-client_id (externally rotated) path."""
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(
+            tmp_path,
+            "default",
+            config={"type": "external"},
+            credentials={"access_token": "at-SECRET", "expires_at": "tomorrow"},
+        )
+        with pytest.raises(AnthropicError, match="invalid 'expires_at'") as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(exc_info.value, "at-SECRET")
+
+    @pytest.mark.respx(base_url=BASE_URL)
+    def test_failed_writeback_after_refresh_does_not_retain_tokens(
+        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        """A refresh that succeeds but fails to persist raises the write error
+        (the refresh token may have rotated server-side) — but the propagating
+        traceback's frames must not retain the new access token, the new or
+        old refresh token, or the creds dict."""
+        self._write_refresh_profile(clean_env, tmp_path)
+        respx_mock.post(TOKEN_ENDPOINT).mock(
+            return_value=httpx.Response(
+                200, json={"access_token": _SECRET_MINTED, "expires_in": 3600, "refresh_token": "rt-NEW-SECRET"}
+            )
+        )
+
+        # Make persistence fail the way a full disk would: mkstemp raises.
+        def _mkstemp_enospc(*_args: Any, **_kwargs: Any) -> "tuple[int, str]":
+            raise OSError(28, "No space left on device")
+
+        clean_env.setattr("anthropic.lib.credentials._providers.tempfile.mkstemp", _mkstemp_enospc)
+        with pytest.raises(OSError, match="No space left") as exc_info:
+            CredentialsFile()()
+        _assert_not_in_sdk_frame_locals(
+            exc_info.value, "rt-SECRET", "old-access-SECRET", _SECRET_MINTED, "rt-NEW-SECRET"
+        )
+
+    def test_oneshot_exchange_failure_does_not_retain_assertion(self) -> None:
+        """``exchange_federation_assertion`` holds the caller's assertion as a
+        parameter in its own (SDK-owned) frame; it is rebound to SecretStr on
+        entry so a failed exchange renders it redacted. The caller's own frame
+        is beyond the SDK's reach."""
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            exchange_federation_assertion(
+                assertion=_SECRET_ASSERTION,
+                federation_rule_id="fdrl_01abc",
+                organization_id="org-uuid",
+                base_url=BASE_URL,
+                http_client=httpx.Client(
+                    transport=httpx.MockTransport(lambda _: httpx.Response(401, json={"error": "invalid_grant"}))
+                ),
+            )
+        _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)

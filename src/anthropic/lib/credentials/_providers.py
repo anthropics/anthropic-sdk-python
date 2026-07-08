@@ -13,6 +13,14 @@ from typing_extensions import override
 import httpx
 
 from ._types import AccessToken, IdentityTokenProvider
+from ._secrets import (
+    SecretStr,
+    _unwrap_secret,
+    _strip_traceback,
+    _json_dumps_secrets,
+    _wrap_secret_fields,
+    _NonObjectPayloadError,
+)
 from ._constants import (
     ENV_SCOPE,
     ENV_PROFILE,
@@ -321,6 +329,11 @@ class CredentialsFile:
     def _read_credentials(self) -> Dict[str, Any]:
         """Read the credentials file. Re-reads on every call — daemons rotate it.
 
+        Secret values in the returned dict (every string field not in
+        ``_secrets._PLAIN_KEYS``) are :class:`SecretStr`-wrapped — unwrap
+        with ``_unwrap_secret`` at the point of use. Writing the dict back
+        through :meth:`_atomic_write_credentials` unwraps automatically.
+
         On Unix, verifies the file is not group/world-readable. World-readable
         credentials files are refused outright; group-readable files log a
         warning but are accepted. The check is skipped on Windows where POSIX
@@ -354,15 +367,24 @@ class CredentialsFile:
                     path,
                 )
         try:
-            raw = path.read_text(encoding="utf-8")
+            # Read → parse → wrap in one expression: neither the raw file text
+            # nor an unwrapped token dict is ever bound to a local in this
+            # frame, so traceback frame locals stay free of credential
+            # material on every error path in and below this method.
+            creds: Dict[str, Any] = _wrap_secret_fields(json.loads(path.read_text(encoding="utf-8")))
         except FileNotFoundError as err:
             raise AnthropicError(f"Credentials file not found at {path} (profile {self._profile!r}).") from err
+        except json.JSONDecodeError as err:
+            # The JSONDecodeError message carries only position info.
+            raise AnthropicError(f"Credentials file at {path} is not valid JSON: {err}") from _strip_traceback(err)
+        except _NonObjectPayloadError as err:
+            # Rejected inside the helper with the payload unbound — a scalar
+            # credentials file is still secret material (e.g. a bare token).
+            raise AnthropicError(
+                f"Credentials file at {path} must contain a JSON object, not {err.type_name}."
+            ) from None
         except (OSError, UnicodeDecodeError) as err:
             raise AnthropicError(f"Credentials file at {path} could not be read: {err}") from err
-        try:
-            creds: Dict[str, Any] = json.loads(raw)
-        except json.JSONDecodeError as err:
-            raise AnthropicError(f"Credentials file at {path} is not valid JSON: {err}") from err
 
         # Validate discriminator if present; lenient if absent so hand-written
         # or older files keep working. Catches config/credentials drift early.
@@ -405,7 +427,13 @@ class CredentialsFile:
         self._workload_delegate = None
 
     def _atomic_write_credentials(self, data: Dict[str, Any]) -> None:
-        """Atomic write to the credentials file (NOT the config file)."""
+        """Atomic write to the credentials file (NOT the config file).
+
+        ``data`` may hold :class:`SecretStr` token values (see
+        :meth:`_read_credentials`); they are unwrapped at dump time, so the
+        on-disk format is unchanged and this frame's locals stay redacted if
+        the write fails (e.g. ENOSPC) with a crash reporter capturing them.
+        """
         assert self._credentials_path is not None
         parent = self._credentials_path.parent
         parent.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -417,7 +445,7 @@ class CredentialsFile:
         try:
             try:
                 os.fchmod(fd, 0o600)
-                os.write(fd, json.dumps(data, indent=2).encode("utf-8"))
+                os.write(fd, _json_dumps_secrets(data, indent=2))
                 os.fsync(fd)
             finally:
                 os.close(fd)
@@ -469,7 +497,7 @@ class CredentialsFile:
         we run the refresh_token grant on expiry; without one, we treat the
         credentials file as externally rotated and just read it fresh.
         """
-        from ._workload import WorkloadIdentityError, _raise_token_endpoint_error
+        from ._workload import WorkloadIdentityError, _request_id, _raise_token_endpoint_error
 
         creds = self._read_credentials()
         access_token = creds.get("access_token")
@@ -481,7 +509,7 @@ class CredentialsFile:
             # No client_id → externally rotated. Return whatever the file has;
             # a sidecar/daemon is responsible for keeping it fresh.
             expires_at = _coerce_expires_at(creds.get("expires_at"), self._credentials_path)
-            return AccessToken(token=access_token, expires_at=expires_at)
+            return AccessToken(token=_unwrap_secret(access_token), expires_at=expires_at)
 
         refresh_token = creds.get("refresh_token")
         if not refresh_token:
@@ -498,9 +526,9 @@ class CredentialsFile:
         # the disk-freshness short-circuit so a revoked token isn't re-served.
         expires_at = _coerce_expires_at(creds.get("expires_at"), self._credentials_path)
         if not force_refresh and expires_at is not None and time.time() < expires_at:
-            return AccessToken(token=access_token, expires_at=expires_at)
+            return AccessToken(token=_unwrap_secret(access_token), expires_at=expires_at)
 
-        body: Dict[str, str] = {
+        body: Dict[str, Union[str, SecretStr]] = {
             "grant_type": GRANT_TYPE_REFRESH_TOKEN,
             "refresh_token": refresh_token,
             "client_id": client_id,
@@ -509,7 +537,9 @@ class CredentialsFile:
         try:
             resp = self._get_http_client().post(
                 f"{self._base_url}{TOKEN_ENDPOINT}",
-                json=body,
+                # Serialized inline so the raw request bytes are never bound
+                # to a local here; SecretStr values unwrap at dump time.
+                content=_json_dumps_secrets(body),
                 headers={
                     "Content-Type": "application/json",
                     # oauth-2025-04-20 unlocks the token endpoint family. Do
@@ -521,12 +551,32 @@ class CredentialsFile:
                 },
             )
         except httpx.HTTPError as err:
-            raise WorkloadIdentityError(f"user_oauth refresh failed to reach token endpoint: {err}") from err
+            raise WorkloadIdentityError(
+                f"user_oauth refresh failed to reach token endpoint: {err}"
+            ) from _strip_traceback(err)
 
         if resp.status_code != 200:
             _raise_token_endpoint_error(resp, message_prefix="user_oauth refresh failed")
 
-        payload: Dict[str, Any] = resp.json()
+        try:
+            payload: Dict[str, Any] = _wrap_secret_fields(resp.json())
+        except ValueError as err:
+            # A raw JSONDecodeError must not escape as the raised error — its
+            # message names the decoder, not this grant. Matches the
+            # jwt-bearer path's non-JSON handling.
+            raise WorkloadIdentityError(
+                f"user_oauth refresh returned a non-JSON response (status {resp.status_code}).",
+                status_code=resp.status_code,
+                request_id=_request_id(resp),
+            ) from _strip_traceback(err)
+        except _NonObjectPayloadError as err:
+            # Rejected inside the helper with the payload unbound — a
+            # non-object body can echo the request's refresh token.
+            raise WorkloadIdentityError(
+                f"user_oauth refresh returned a JSON {err.type_name} (status {resp.status_code}); expected an object.",
+                status_code=resp.status_code,
+                request_id=_request_id(resp),
+            ) from None
         new_access = payload.get("access_token")
         if not new_access:
             raise WorkloadIdentityError("user_oauth refresh response missing 'access_token'")
@@ -546,9 +596,11 @@ class CredentialsFile:
         creds["access_token"] = new_access
         creds["expires_at"] = new_expires_at
         creds["refresh_token"] = new_refresh
+        # A failed persist propagates: the refresh token may have rotated
+        # server-side, so silently continuing would lose it.
         self._atomic_write_credentials(creds)
 
-        return AccessToken(token=new_access, expires_at=new_expires_at)
+        return AccessToken(token=_unwrap_secret(new_access), expires_at=new_expires_at)
 
     # -- "oidc_federation" ------------------------------------------------
 
@@ -593,7 +645,7 @@ class CredentialsFile:
                     and expires_at is not None
                     and time.time() < float(expires_at) - MANDATORY_REFRESH_SECONDS
                 ):
-                    return AccessToken(token=str(access_token), expires_at=int(expires_at))
+                    return AccessToken(token=str(_unwrap_secret(access_token)), expires_at=int(expires_at))
             except (TypeError, ValueError):
                 # corrupted expires_at — fall through to re-exchange and overwrite
                 pass
@@ -605,7 +657,9 @@ class CredentialsFile:
                     **(cached or {}),
                     "version": CREDENTIALS_FILE_VERSION,
                     "type": CREDENTIALS_FILE_TYPE,
-                    "access_token": token.token,
+                    # Wrapped so a failing write never holds the raw token in
+                    # frame locals; unwrapped again at dump time.
+                    "access_token": SecretStr(token.token),
                     "expires_at": token.expires_at,
                 }
             )
