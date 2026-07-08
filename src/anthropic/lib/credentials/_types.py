@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, Callable, Optional, Protocol
 from dataclasses import field, dataclass
+from typing_extensions import override
 
 
 def _empty_headers() -> Dict[str, str]:
@@ -17,10 +18,22 @@ class AccessToken:
 
     ``expires_at`` is unix seconds; ``None`` means no expiry information
     (the token will be treated as never-expires by :class:`TokenCache`).
+
+    ``repr()`` masks the token (at most its last four characters) so a frame
+    or log line holding an ``AccessToken`` never exposes the raw value —
+    crash reporters that capture traceback locals render their ``repr``.
     """
 
     token: str
     expires_at: Optional[int] = None
+
+    @override
+    def __repr__(self) -> str:
+        # str() first: a malformed token endpoint can hand us a non-str token
+        # and a repr must never raise (crash reporters call it blindly).
+        token = str(self.token)
+        masked = f"...{token[-4:]}" if len(token) >= 12 else "**********"
+        return f"AccessToken(token='{masked}', expires_at={self.expires_at!r})"
 
 
 class AccessTokenProvider(Protocol):

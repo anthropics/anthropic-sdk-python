@@ -3,12 +3,20 @@ from __future__ import annotations
 import time
 import logging
 from types import TracebackType
-from typing import Any, Dict, Type, Optional
+from typing import Any, Dict, Type, Union, NoReturn, Optional
 from typing_extensions import override
 
 import httpx
 
 from ._types import AccessToken, IdentityTokenProvider
+from ._secrets import (
+    SecretStr,
+    _unwrap_secret,
+    _strip_traceback,
+    _json_dumps_secrets,
+    _wrap_secret_fields,
+    _NonObjectPayloadError,
+)
 from ._constants import (
     TOKEN_ENDPOINT,
     DEFAULT_BASE_URL,
@@ -64,21 +72,24 @@ def _redact_body(body: Any) -> Any:
     return None
 
 
-def _raise_token_endpoint_error(resp: httpx.Response, *, message_prefix: str, hint: Optional[str] = None) -> None:
+def _raise_token_endpoint_error(resp: httpx.Response, *, message_prefix: str, hint: Optional[str] = None) -> NoReturn:
     """Raise a redacted :class:`WorkloadIdentityError` from a non-200 token-endpoint response.
 
     Shared between the jwt-bearer exchange path in this module and the
     refresh_token grant path in :mod:`_providers`.
+
+    The raw response body (which token endpoints can echo credential material
+    into) is never bound to a local in this frame — only the redaction is —
+    so this frame is safe under crash reporters that capture traceback locals.
 
     ``hint`` is an optional caller-supplied diagnostic appended verbatim to the
     error message (after the redacted body). Callers gate it on the response
     status and their own state — this helper does not inspect ``resp`` for it.
     """
     try:
-        payload: Any = resp.json()
+        redacted = _redact_body(resp.json())
     except ValueError:
-        payload = resp.text
-    redacted = _redact_body(payload)
+        redacted = _redact_body(resp.text)
     message = f"{message_prefix} (HTTP {resp.status_code}): {redacted}"
     if hint:
         message = f"{message} {hint}"
@@ -222,16 +233,17 @@ class WorkloadIdentityCredentials:
         # file (e.g. a k8s projected SA token) may have rotated. force_refresh
         # is a no-op: this provider has no cache to bypass.
         del force_refresh
-        jwt = self._identity_token_provider()
+        jwt = SecretStr(self._identity_token_provider())
 
-        if len(jwt.encode("utf-8")) > _MAX_ASSERTION_BYTES:
+        assertion_bytes = len(jwt.get_secret_value().encode("utf-8"))
+        if assertion_bytes > _MAX_ASSERTION_BYTES:
             raise WorkloadIdentityError(
-                f"Identity token assertion is {len(jwt.encode('utf-8'))} bytes, which exceeds the "
+                f"Identity token assertion is {assertion_bytes} bytes, which exceeds the "
                 f"{_MAX_ASSERTION_BYTES}-byte limit. This is almost certainly not a JWT — check "
                 f"that the identity-token path points at the projected token, not a key or cert."
             )
 
-        body: Dict[str, str] = {
+        body: Dict[str, Union[str, SecretStr]] = {
             "grant_type": GRANT_TYPE_JWT_BEARER,
             "assertion": jwt,
             "federation_rule_id": self._federation_rule_id,
@@ -246,7 +258,9 @@ class WorkloadIdentityCredentials:
         try:
             resp = self._http_client.post(
                 url,
-                json=body,
+                # Serialized inline so the raw request bytes are never bound
+                # to a local here; SecretStr values unwrap at dump time.
+                content=_json_dumps_secrets(body),
                 headers={
                     "anthropic-beta": _JWT_BEARER_BETA_HEADER,
                     "Content-Type": "application/json",
@@ -254,7 +268,7 @@ class WorkloadIdentityCredentials:
                 },
             )
         except httpx.HTTPError as err:
-            raise WorkloadIdentityError(f"Failed to reach token endpoint {url}: {err}") from err
+            raise WorkloadIdentityError(f"Failed to reach token endpoint {url}: {err}") from _strip_traceback(err)
 
         request_id = _request_id(resp)
 
@@ -286,7 +300,10 @@ class WorkloadIdentityCredentials:
             _raise_token_endpoint_error(resp, message_prefix="Token exchange failed", hint=hint)
 
         try:
-            data = resp.json()
+            # Token values are SecretStr-wrapped in place at the parse
+            # boundary, so every error path below may hold ``data`` in its
+            # frame without retaining raw credential material.
+            data = _wrap_secret_fields(resp.json())
         except ValueError as err:
             redacted = _redact_body(resp.text)
             raise WorkloadIdentityError(
@@ -294,7 +311,16 @@ class WorkloadIdentityCredentials:
                 status_code=resp.status_code,
                 body=redacted,
                 request_id=request_id,
-            ) from err
+            ) from _strip_traceback(err)
+        except _NonObjectPayloadError as err:
+            # A non-object payload can be an echo of the request (assertion
+            # included), so it is rejected inside the helper — no frame in
+            # this traceback holds it — and only its type name is reported.
+            raise WorkloadIdentityError(
+                f"Token endpoint returned a JSON {err.type_name} (status {resp.status_code}); expected an object.",
+                status_code=resp.status_code,
+                request_id=request_id,
+            ) from None
 
         token_type = data.get("token_type")
         if token_type is not None and str(token_type).lower() != "bearer":
@@ -317,12 +343,12 @@ class WorkloadIdentityCredentials:
                 request_id=request_id,
             ) from err
 
-        return AccessToken(token=token, expires_at=int(time.time()) + expires_in)
+        return AccessToken(token=_unwrap_secret(token), expires_at=int(time.time()) + expires_in)
 
 
 def exchange_federation_assertion(
     *,
-    assertion: str,
+    assertion: Union[str, SecretStr],
     federation_rule_id: str,
     organization_id: str,
     service_account_id: Optional[str] = None,
@@ -336,9 +362,16 @@ def exchange_federation_assertion(
     This is a one-shot convenience wrapper around :class:`WorkloadIdentityCredentials`
     for callers that already have the assertion JWT in hand and just want the
     Anthropic access token back (no caching, no provider plumbing).
+
+    ``assertion`` may be a :class:`pydantic.SecretStr` to keep it redacted
+    end-to-end; a plain ``str`` is wrapped on entry.
     """
+    if isinstance(assertion, str):
+        # Rebind so this frame's local holds the wrapped form — the raw string
+        # then lives only in the caller's frame, which no callee can scrub.
+        assertion = SecretStr(assertion)
     creds = WorkloadIdentityCredentials(
-        identity_token_provider=lambda: assertion,
+        identity_token_provider=assertion.get_secret_value,
         federation_rule_id=federation_rule_id,
         organization_id=organization_id,
         service_account_id=service_account_id,
