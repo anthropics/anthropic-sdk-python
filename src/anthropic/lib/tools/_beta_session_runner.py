@@ -5,7 +5,10 @@
 reconciles against the events-list endpoint, dispatches every ``agent.tool_use``
 *and* ``agent.custom_tool_use`` event against a local tool registry, posts the
 matching result event back (``user.tool_result`` / ``user.custom_tool_result``),
-and yields one :class:`DispatchedToolCall` per completed call. It also stops
+and yields one :class:`DispatchedToolCall` per completed call. A call the
+server gated behind user confirmation (``evaluated_permission`` ``ask``, e.g.
+an ``always_ask`` tool) is held until its ``user.tool_confirmation`` event
+arrives — executed on ``allow``, never executed on ``deny``. It also stops
 itself once the session has been idle (``stop_reason`` ``end_turn``) for
 ``max_idle`` seconds. It does **not** touch the work-item lease — wrap it in
 :class:`anthropic.lib.environments.EnvironmentWorker` if you need heartbeating /
@@ -19,7 +22,7 @@ import math
 import time
 import logging
 import contextlib
-from typing import TYPE_CHECKING, Union, cast
+from typing import TYPE_CHECKING, Union, Literal, cast
 from dataclasses import dataclass
 from collections.abc import Sequence, AsyncIterator
 
@@ -37,7 +40,11 @@ from ._beta_functions import (
     aclose_runnable_tool,
 )
 from .._stainless_helpers import helper_header
-from ...types.beta.sessions import BetaManagedAgentsAgentToolUseEvent, BetaManagedAgentsAgentCustomToolUseEvent
+from ...types.beta.sessions import (
+    BetaManagedAgentsAgentToolUseEvent,
+    BetaManagedAgentsAgentCustomToolUseEvent,
+    BetaManagedAgentsUserToolConfirmationEvent,
+)
 from ...types.beta.sessions.beta_managed_agents_user_tool_result_event_params import (
     Content as _SessionContent,
     BetaManagedAgentsUserToolResultEventParams,
@@ -83,6 +90,15 @@ DispatchedToolResultParams = Union[
     BetaManagedAgentsUserCustomToolResultEventParams,
 ]
 
+# A dispatch-queue item: the tool-call event paired with the confirmation
+# verdict that released it — ``"allow"`` for an ask-gated call the user
+# approved, ``None`` for a call that needed no confirmation. (Denied calls
+# never reach the queue.) Threading the verdict with the event keeps the
+# yielded ``DispatchedToolCall.confirmation`` tied to the verdict that actually
+# released the call rather than whatever ``_confirmations`` holds by the time
+# the tool finishes.
+_WorkItem = tuple[DispatchedToolUseEvent, Union[Literal["allow"], None]]
+
 # anthropic-beta gating Sessions access to self-hosted environments. The Sessions
 # resource auto-injects this header on its own requests; this constant is kept
 # for the work-item ``stop`` call the worker issues against the Work resource.
@@ -122,6 +138,14 @@ class _IdleClock:
     in that state. :meth:`SessionToolRunner._idle_watchdog` stops the runner
     once it has been set for ``max_idle`` seconds.
 
+    Confirmation-gated calls pause the clock while they are unresolved:
+    :meth:`hold` / :meth:`release` count them — from the moment a call is held
+    awaiting its verdict until it is denied or, when allowed, until the dispatch
+    loop has finished with it — and an :meth:`arm` landing while any are
+    outstanding is deferred rather than applied. The last :meth:`release`
+    applies a still-pending deferral so the runner can time out once nothing
+    gated remains in flight.
+
     The clock is event-driven, not polled: every armed-state change signals the
     :attr:`wake` event so the watchdog wakes immediately instead of waiting out
     a poll interval. The watchdog captures :attr:`wake` *before* it reads
@@ -129,11 +153,13 @@ class _IdleClock:
     wakes it.
     """
 
-    __slots__ = ("end_turn_at", "wake")
+    __slots__ = ("end_turn_at", "wake", "_holds", "_arm_deferred")
 
     def __init__(self) -> None:
         self.end_turn_at: float | None = None
         self.wake = anyio.Event()
+        self._holds = 0
+        self._arm_deferred = False
 
     def _signal(self) -> None:
         # Wake any current waiter and arm a fresh event for the next wait.
@@ -141,25 +167,61 @@ class _IdleClock:
         self.wake = anyio.Event()
 
     def note_event(self, ev: object) -> None:
-        """Arm the clock on an ``end_turn`` idle, disarm it on anything else."""
-        if (
-            getattr(ev, "type", None) == "session.status_idle"
-            and getattr(getattr(ev, "stop_reason", None), "type", None) == "end_turn"
-        ):
+        """Arm the clock on an ``end_turn`` idle, disarm it on anything else.
+
+        ``user.tool_confirmation`` events are neutral: they signal neither agent
+        activity nor an idle, and their effect on the clock flows through
+        :meth:`hold` / :meth:`release` instead — disarming here would discard
+        the deferred arm the verdict is about to settle.
+        """
+        ev_type = getattr(ev, "type", None)
+        if ev_type == "user.tool_confirmation":
+            return
+        if ev_type == "session.status_idle" and getattr(getattr(ev, "stop_reason", None), "type", None) == "end_turn":
             self.arm()
         else:
             self.disarm()
 
     def arm(self) -> None:
-        """(Re)start the idle countdown from now and wake the watchdog."""
+        """(Re)start the idle countdown from now and wake the watchdog.
+
+        Deferred while any gated call is held or in flight — stopping then
+        would drop the held call when its verdict later arrives, or cut the
+        runner off before a released call's result can drive the next turn.
+        """
+        if self._holds:
+            self._arm_deferred = True
+            return
         self.end_turn_at = time.monotonic()
         self._signal()
 
     def disarm(self) -> None:
         """Cancel the idle countdown; only signals on an actual transition."""
+        self._arm_deferred = False
         if self.end_turn_at is not None:
             self.end_turn_at = None
             self._signal()
+
+    def hold(self) -> None:
+        """Pause the countdown while a gated call is held or in flight."""
+        self._holds += 1
+        if self.end_turn_at is not None:
+            # Defensive: a hold taken while armed converts the running
+            # countdown into a deferred one.
+            self._arm_deferred = True
+            self.end_turn_at = None
+            self._signal()
+
+    def release(self) -> None:
+        """Drop one hold; the last release applies any deferred arm.
+
+        Once nothing gated is held or in flight, a deferred ``end_turn``
+        countdown starts now (with a fresh grace window) so the runner can
+        still time out — any newer event disarms it again as usual.
+        """
+        self._holds -= 1
+        if self._holds == 0 and self._arm_deferred:
+            self.arm()
 
 
 @dataclass(frozen=True)
@@ -184,7 +246,8 @@ class DispatchedToolCall:
 
     ``None`` when the runner deliberately posted nothing: the tool name is not
     one this runner owns, so the ``tool_use_id`` was left pending for its
-    owner. ``posted`` is ``False`` in that case."""
+    owner, or the call was denied and never executed (see ``confirmation``).
+    ``posted`` is ``False`` in either case."""
 
     tool_use_id: str
     """Convenience: the id of the originating tool-call event — the same value
@@ -197,7 +260,8 @@ class DispatchedToolCall:
     """Convenience: whether the result is an error — the same value as
     ``result["is_error"]``. Always ``False`` for a skipped unowned call (the
     runner reaches no verdict on a tool it does not own; ``result`` is
-    ``None``)."""
+    ``None``) and for a denied call (nothing ran, so there is no error to
+    report; see ``confirmation``)."""
 
     posted: bool = True
     """``True`` if the result event made it to the session. ``False`` if all
@@ -206,7 +270,19 @@ class DispatchedToolCall:
     want to surface that or retry at a higher level — and also ``False``, with
     ``result`` left ``None``, when the tool name is not one this runner owns and
     it deliberately posted nothing, leaving the ``tool_use_id`` pending for its
-    owner (the split-client partial-fulfilment behavior)."""
+    owner (the split-client partial-fulfilment behavior), or when the call was
+    denied and never executed (see ``confirmation``)."""
+
+    confirmation: Literal["allow", "deny"] | None = None
+    """The confirmation verdict that gated this call, if any.
+
+    ``"allow"`` — the call required user confirmation (the server evaluated its
+    permission to ``ask``, e.g. under an ``always_ask`` policy) and the matching
+    ``user.tool_confirmation`` event approved it before the tool ran.
+    ``"deny"`` — the user denied it, or the server itself evaluated the
+    permission to ``deny``; the tool was never executed and nothing was posted
+    (``result=None``, ``posted=False``, ``is_error=False``).
+    ``None`` — the call needed no confirmation."""
 
 
 def _scoped_client(client: AsyncAnthropic, environment_key: str | None) -> AsyncAnthropic:
@@ -316,6 +392,16 @@ class SessionToolRunner:
     (``posted=False``, ``is_error=False``, ``result=None``) so the caller can
     observe the unowned dispatch.
 
+    Tool calls the server gated behind user confirmation are **not** executed
+    on arrival: an ``agent.tool_use`` event whose ``evaluated_permission`` is
+    ``ask`` (e.g. a tool configured with the ``always_ask`` permission policy)
+    is held until the matching ``user.tool_confirmation`` event arrives. An
+    ``allow`` verdict releases the call to execute as normal; a ``deny``
+    verdict — or a call the server already evaluated to ``deny`` — is never
+    executed and nothing is posted for it (the denial itself resolves the call
+    server-side), but it is still yielded (``confirmation="deny"``,
+    ``posted=False``, ``result=None``) so the caller can observe it.
+
     Usage::
 
         from anthropic.lib.tools.agent_toolset import AgentToolContext, beta_agent_toolset_20260401
@@ -393,10 +479,20 @@ class SessionToolRunner:
         # actually landed, so a failed post is retried on the next reconcile.
         self._seen: set[str] = set()
         self._answered: set[str] = set()
+        # Confirmation gating (``always_ask`` tools): ``_confirmations`` records
+        # every ``user.tool_confirmation`` verdict by ``tool_use_id``;
+        # ``_awaiting_confirmation`` holds the tool-call events whose
+        # ``evaluated_permission`` is ``ask`` and whose verdict has not arrived
+        # yet — they are released to the dispatch loop (or resolved as denied)
+        # by :meth:`_note_confirmation` / the next reconcile pass. Like ``_seen``
+        # and ``_answered``, ``_confirmations`` is per-session O(tool calls):
+        # recorded verdicts persist for the life of the run.
+        self._confirmations: dict[str, Literal["allow", "deny"]] = {}
+        self._awaiting_confirmation: dict[str, DispatchedToolUseEvent] = {}
         self._stop = anyio.Event()
         self._idle_clock = _IdleClock()
 
-        self._send_work, self._recv_work = anyio.create_memory_object_stream[DispatchedToolUseEvent](
+        self._send_work, self._recv_work = anyio.create_memory_object_stream[_WorkItem](
             max_buffer_size=100,
         )
         self._send_results, self._recv_results = anyio.create_memory_object_stream[DispatchedToolCall](
@@ -478,6 +574,16 @@ class SessionToolRunner:
                     self._answered.add(ev.tool_use_id)
                 elif ev.type == "user.custom_tool_result":
                     self._answered.add(ev.custom_tool_use_id)
+                elif ev.type == "user.tool_confirmation":
+                    # Record the verdict only, before the pending pass below, so
+                    # a tool call whose confirmation appears later in the same
+                    # history is routed with its verdict already known. Releasing
+                    # a held call here as well would enqueue it a second time
+                    # when the routing pass reaches its tool_use event. Calls
+                    # already answered are never re-routed, so skip re-recording
+                    # their verdict on every reconcile.
+                    if ev.tool_use_id not in self._answered:
+                        self._confirmations[ev.tool_use_id] = ev.result
                 last_was_end_turn = (
                     ev.type == "session.status_idle"
                     and getattr(getattr(ev, "stop_reason", None), "type", None) == "end_turn"
@@ -498,16 +604,29 @@ class SessionToolRunner:
                 self._seen.discard(ev.id)
             return
         unanswered = [ev for ev in pending if ev.id not in self._answered]
-        # If the most recent event in history is an ``end_turn`` idle and there
-        # is no outstanding tool work, the session is done — arm the idle clock
-        # so the watchdog counts down even if that ``end_turn`` arrived during a
-        # disconnect.
-        if last_was_end_turn and not unanswered:
-            self._idle_clock.arm()
-        else:
-            self._idle_clock.disarm()
+        # Disarm before routing: enqueuing below can block on a full work
+        # buffer while the clock may still be armed from before the reconnect.
+        self._idle_clock.disarm()
         for ev in unanswered:
-            await self._send_work.send(ev)
+            await self._route_tool_event(ev)
+        # A held call's verdict is normally applied by the routing pass above;
+        # if its tool_use event fell outside the listed window the pass never
+        # saw it, so apply the verdict to the held copy here.
+        for held in [ev for ev in self._awaiting_confirmation.values() if ev.id in self._confirmations]:
+            await self._apply_verdict(held, self._confirmations[held.id])
+        # Routing resolves denied calls in place (marking them answered) and
+        # holds ask-gated calls for their ``user.tool_confirmation``. If the
+        # most recent event in history is an ``end_turn`` idle and no tool work
+        # is outstanding, the session is done — arm the idle clock so the
+        # watchdog counts down even if that ``end_turn`` arrived during a
+        # disconnect. Gated calls don't count as outstanding here whether still
+        # held or just released to the dispatch queue: the clock holds them
+        # (``_IdleClock.hold``), so this ``arm`` is deferred until they resolve.
+        outstanding = [
+            ev for ev in unanswered if ev.id not in self._answered and ev.id not in self._awaiting_confirmation
+        ]
+        if last_was_end_turn and not outstanding:
+            self._idle_clock.arm()
 
     async def _stream_loop(self) -> None:
         backoff = STREAM_BACKOFF_START
@@ -522,16 +641,20 @@ class SessionToolRunner:
                     async for ev in stream:
                         backoff = STREAM_BACKOFF_START
                         # Arm/disarm the idle clock: an ``end_turn`` idle starts
-                        # the grace countdown, any other event cancels it.
+                        # the grace countdown, any other event cancels it. The
+                        # clock itself defers the countdown while gated calls
+                        # are held or in flight (see ``_IdleClock.hold``).
                         self._idle_clock.note_event(ev)
                         if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
                             if ev.id not in self._seen:
                                 self._seen.add(ev.id)
-                                await self._send_work.send(ev)
+                                await self._route_tool_event(ev)
                         elif ev.type == "user.tool_result":
                             self._answered.add(ev.tool_use_id)
                         elif ev.type == "user.custom_tool_result":
                             self._answered.add(ev.custom_tool_use_id)
+                        elif ev.type == "user.tool_confirmation":
+                            await self._note_confirmation(ev)
                         elif ev.type in ("session.status_terminated", "session.deleted"):
                             log.info("session terminated")
                             self._stop.set()
@@ -550,24 +673,147 @@ class SessionToolRunner:
                 await self._stop.wait()
             backoff = min(backoff * 2, STREAM_BACKOFF_CAP)
 
+    # -- confirmation gating (always_ask tools) ------------------------------
+
+    async def _route_tool_event(self, ev: DispatchedToolUseEvent) -> None:
+        """Enqueue ``ev`` for dispatch, honoring its evaluated permission.
+
+        A builtin call the server gated behind user confirmation
+        (``evaluated_permission == "ask"``, e.g. the ``always_ask`` policy) is
+        held until the matching ``user.tool_confirmation`` event arrives
+        instead of executing immediately. The gate fails closed: only an
+        explicit ``allow`` verdict releases a gated call, a call the server
+        already evaluated to ``deny`` is never executed regardless of any
+        verdict, a stray ``deny`` verdict recorded for a call that never needed
+        confirmation also resolves it as denied (any deny signal wins), and —
+        because the wire can carry values newer than this SDK's types — an
+        unrecognised permission is held like ``ask`` and an unrecognised
+        verdict is treated as a denial, never dispatched.
+        """
+        # ``getattr`` rather than an event-type check: today only
+        # ``agent.tool_use`` carries ``evaluated_permission``, but if the field
+        # ever lands on ``agent.custom_tool_use`` the gate must keep failing
+        # closed rather than dispatch a gated call by event type.
+        permission = getattr(ev, "evaluated_permission", None)
+        verdict = self._confirmations.get(ev.id)
+        if permission == "deny":
+            # Server already denied the call: never execute it, even if a
+            # (stray) allow verdict exists for the id.
+            await self._resolve_denied(ev)
+            return
+        if verdict is None:
+            if permission is None or permission == "allow":
+                await self._send_work.send((ev, None))
+            elif ev.id not in self._awaiting_confirmation:
+                # "ask" — or a permission value this SDK doesn't recognise,
+                # which must not dispatch unconfirmed — waits for the user's
+                # verdict. (Already-held: a reconcile after a reconnect
+                # re-routes the call; keep the existing hold.)
+                log.info(
+                    "tool %r requires user confirmation; holding tool_use_id=%s until user.tool_confirmation",
+                    ev.name,
+                    ev.id,
+                )
+                self._awaiting_confirmation[ev.id] = ev
+                self._idle_clock.hold()
+            return
+        await self._apply_verdict(ev, verdict)
+
+    async def _note_confirmation(self, ev: BetaManagedAgentsUserToolConfirmationEvent) -> None:
+        """Record an allow/deny verdict and release the held call it gates, if any."""
+        self._confirmations[ev.tool_use_id] = ev.result
+        held = self._awaiting_confirmation.get(ev.tool_use_id)
+        if held is None:
+            # Nothing held: the verdict gates a call this runner has not seen
+            # yet (or one it never gates, e.g. an ``agent.mcp_tool_use``).
+            # Keeping it in ``_confirmations`` lets a later route of that call
+            # resolve instantly.
+            return
+        await self._apply_verdict(held, ev.result)
+
+    async def _apply_verdict(self, ev: DispatchedToolUseEvent, verdict: Literal["allow", "deny"]) -> None:
+        """Dispatch or resolve a gated call according to the user's verdict.
+
+        The idle-clock hold accounting lives here: a denial drops the held
+        call's hold, while an allow keeps one hold on the call (taking it now
+        if the verdict was already known when the call was routed, so it was
+        never held) until the dispatch loop has finished with it — the
+        countdown must not run over gated work that is still in flight.
+        """
+        was_held = self._awaiting_confirmation.pop(ev.id, None) is not None
+        if verdict == "allow":
+            log.info("tool call confirmed tool=%s tool_use_id=%s", ev.name, ev.id)
+            if not was_held:
+                self._idle_clock.hold()
+            await self._send_work.send((ev, "allow"))
+        else:
+            # "deny" — or a verdict value this SDK doesn't recognise, which
+            # must not release the call (the gate fails closed).
+            if was_held:
+                self._idle_clock.release()
+            await self._resolve_denied(ev)
+
+    async def _resolve_denied(self, ev: DispatchedToolUseEvent) -> None:
+        """Resolve a denied call without executing it.
+
+        The denial itself resolves the call server-side — no result event will
+        ever be posted for it — so mark it answered to keep reconcile from
+        re-surfacing it and the idle accounting from waiting on it, then yield
+        the observability call (nothing ran, nothing was posted).
+        """
+        self._answered.add(ev.id)
+        log.info("tool call denied; not executing tool=%s tool_use_id=%s", ev.name, ev.id)
+        await self._surface_call(
+            DispatchedToolCall(
+                event=ev,
+                result=None,
+                tool_use_id=ev.id,
+                name=ev.name,
+                is_error=False,
+                posted=False,
+                confirmation="deny",
+            )
+        )
+
+    async def _surface_call(self, call: DispatchedToolCall) -> None:
+        """Yield ``call`` to the consumer, tolerating a consumer that left early.
+
+        ``BrokenResourceError`` — the consumer broke out of the iterator;
+        ``ClosedResourceError`` — the dispatch loop already closed the send
+        side (possible for the deny path, which runs from the stream loop and
+        can outlive the dispatch loop). Either way the underlying work already
+        happened; only the observability event is lost.
+        """
+        try:
+            await self._send_results.send(call)
+        except (anyio.BrokenResourceError, anyio.ClosedResourceError):
+            pass
+
     # -- tool dispatch ------------------------------------------------------
 
     async def _dispatch_loop(self) -> None:
         try:
             while True:
                 try:
-                    ev = await self._recv_work.receive()
+                    ev, confirmation = await self._recv_work.receive()
                 except anyio.EndOfStream:
                     # Producer side closed — usually because ``_stop`` was set
                     # (the idle watchdog or stream loop signalled it).
                     return
-                if ev.id in self._answered:
-                    continue
-                # Shielded execute so consumer-side cancellation can't interrupt
-                # an in-flight tool. The result will still be posted and the
-                # DispatchedToolCall enqueued before the cancel propagates.
-                with anyio.CancelScope(shield=True):
-                    await self._execute(ev)
+                try:
+                    if ev.id not in self._answered:
+                        # Shielded execute so consumer-side cancellation can't
+                        # interrupt an in-flight tool. The result will still be
+                        # posted and the DispatchedToolCall enqueued before the
+                        # cancel propagates.
+                        with anyio.CancelScope(shield=True):
+                            await self._execute(ev, confirmation)
+                finally:
+                    if confirmation == "allow":
+                        # The user-approved call is fully disposed of (executed,
+                        # or moot because it was answered elsewhere); drop the
+                        # idle-clock hold ``_apply_verdict`` kept on it.
+                        self._idle_clock.release()
         finally:
             # Closing the results stream signals the iterator that no more
             # results will arrive. Wrapped in a shield because we're often in a
@@ -575,7 +821,14 @@ class SessionToolRunner:
             with anyio.CancelScope(shield=True):
                 await self._send_results.aclose()
 
-    async def _execute(self, ev: DispatchedToolUseEvent) -> None:
+    async def _execute(self, ev: DispatchedToolUseEvent, confirmation: Literal["allow"] | None) -> None:
+        """Run ``ev``'s tool, post its result, and surface the dispatched call.
+
+        ``confirmation`` is the verdict that released the call onto the work
+        queue — ``"allow"`` for an ask-gated call the user approved, ``None``
+        for a call that needed no confirmation. (Denied calls never reach this
+        method; ``_resolve_denied`` surfaces them.)
+        """
         log.info("executing tool tool=%s tool_use_id=%s", ev.name, ev.id)
         tool = self._tools_by_name.get(ev.name)
         tool_result: DispatchedToolResultParams | None
@@ -620,22 +873,17 @@ class SessionToolRunner:
                 is_error = True
             tool_result = _build_result_event(ev, content, is_error)
             sent = await self._send_result(tool_result, ev.id)
-        try:
-            await self._send_results.send(
-                DispatchedToolCall(
-                    event=ev,
-                    result=tool_result,
-                    tool_use_id=ev.id,
-                    name=ev.name,
-                    is_error=is_error,
-                    posted=sent,
-                )
+        await self._surface_call(
+            DispatchedToolCall(
+                event=ev,
+                result=tool_result,
+                tool_use_id=ev.id,
+                name=ev.name,
+                is_error=is_error,
+                posted=sent,
+                confirmation=confirmation,
             )
-        except anyio.BrokenResourceError:
-            # The receiver closed early (consumer broke out of the iterator).
-            # Result was still posted to the session; we just can't surface
-            # the observability event.
-            pass
+        )
 
     async def _send_result(self, tool_result: DispatchedToolResultParams, tool_use_id: str) -> bool:
         """Post ``tool_result`` back to the session, retrying transient failures.

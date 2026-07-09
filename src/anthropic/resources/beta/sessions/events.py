@@ -518,9 +518,14 @@ class AsyncEvents(AsyncAPIResource):
         completed call. It handles both tool-call kinds: ``agent.tool_use``
         (built-in agent-toolset tools) answered with ``user.tool_result``, and
         ``agent.custom_tool_use`` (custom, user-defined tools) answered with
-        ``user.custom_tool_result``. Internally drives event-stream reconnect
-        (with capped backoff) via an anyio task group so it works under both
-        ``asyncio`` and ``trio``.
+        ``user.custom_tool_result``. A call the server gated behind user
+        confirmation (``evaluated_permission`` ``ask``, e.g. a tool configured
+        with the ``always_ask`` permission policy) is held until the matching
+        ``user.tool_confirmation`` event arrives — executed on ``allow``,
+        never executed on ``deny`` (the denied call is still yielded with
+        ``confirmation="deny"`` so it can be observed). Internally drives
+        event-stream reconnect (with capped backoff) via an anyio task group
+        so it works under both ``asyncio`` and ``trio``.
 
         Iteration ends when the session terminates (``session.status_terminated``
         / ``session.deleted``), when the consumer breaks out of the loop, or —
