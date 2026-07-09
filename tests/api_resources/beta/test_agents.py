@@ -176,7 +176,7 @@ class TestAgents:
             ],
             metadata={"foo": "string"},
             model={
-                "id": "claude-opus-4-6",
+                "id": "claude-opus-4-8",
                 "speed": "standard",
             },
             multiagent={
@@ -494,7 +494,7 @@ class TestAsyncAgents:
             ],
             metadata={"foo": "string"},
             model={
-                "id": "claude-opus-4-6",
+                "id": "claude-opus-4-8",
                 "speed": "standard",
             },
             multiagent={
