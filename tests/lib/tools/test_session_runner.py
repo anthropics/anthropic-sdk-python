@@ -68,12 +68,25 @@ class _StubEvent:
             setattr(self, k, v)
 
 
-def _tool_use(id: str, name: str, input: dict[str, Any]) -> _StubEvent:
-    return _StubEvent("agent.tool_use", id=id, name=name, input=input)
+def _tool_use(
+    id: str,
+    name: str,
+    input: dict[str, Any],
+    *,
+    evaluated_permission: str | None = None,
+) -> _StubEvent:
+    # ``evaluated_permission`` is always present on the real (typed) event —
+    # ``None`` unless the server evaluated a permission policy for the call.
+    return _StubEvent("agent.tool_use", id=id, name=name, input=input, evaluated_permission=evaluated_permission)
 
 
 def _tool_result(tool_use_id: str) -> _StubEvent:
     return _StubEvent("user.tool_result", tool_use_id=tool_use_id)
+
+
+def _tool_confirmation(tool_use_id: str, result: str) -> _StubEvent:
+    """The user's allow/deny verdict for an ask-gated (``always_ask``) tool call."""
+    return _StubEvent("user.tool_confirmation", id=f"conf_{tool_use_id}", tool_use_id=tool_use_id, result=result)
 
 
 def _custom_tool_use(id: str, name: str, input: dict[str, Any]) -> _StubEvent:
@@ -160,6 +173,7 @@ class FakeAsyncEvents:
         streams: list[_FakeStream | BaseException] | None = None,
         stream_events: list[_StubEvent] | None = None,
         list_events: list[_StubEvent] | None = None,
+        list_events_per_call: list[list[_StubEvent]] | None = None,
         list_raises: BaseException | None = None,
         send_failures: list[BaseException | None] | None = None,
     ) -> None:
@@ -170,6 +184,10 @@ class FakeAsyncEvents:
         else:
             self._streams = [_FakeStream([])]
         self._list_events = list(list_events or [])
+        # When set, each ``list()`` call consumes the next entry (falling back
+        # to ``list_events`` once exhausted) so reconnect tests can script a
+        # different history per reconcile pass.
+        self._list_events_per_call = [list(evs) for evs in (list_events_per_call or [])]
         self._list_raises = list_raises
         self._send_failures: list[BaseException | None] = list(send_failures or [])
         self.send_calls: list[dict[str, Any]] = []
@@ -190,9 +208,10 @@ class FakeAsyncEvents:
     def list(self, _session_id: str, *, limit: int = 1000, extra_headers: Any = None) -> Any:  # noqa: ARG002
         list_raises = self._list_raises
         self.list_headers.append(extra_headers)
+        list_events = self._list_events_per_call.pop(0) if self._list_events_per_call else self._list_events
 
         async def _gen() -> Any:
-            for ev in self._list_events:
+            for ev in list_events:
                 yield ev
             if list_raises is not None:
                 raise list_raises
@@ -546,6 +565,569 @@ async def test_skipped_unowned_tool_does_not_trip_idle() -> None:
     assert call.is_error is False
     assert call.result is None, "no result was built for the skipped call"
     assert events.send_calls == [], "runner must not post a result it does not own"
+
+
+# ---------- confirmation gating (always_ask tools) --------------------------
+
+
+@pytest.mark.asyncio()
+async def test_ask_tool_blocks_without_confirmation() -> None:
+    """An ``agent.tool_use`` whose ``evaluated_permission`` is ``ask`` (an
+    ``always_ask`` tool) must NOT execute on arrival — it is held until the
+    matching ``user.tool_confirmation`` event. Here none ever arrives, so the
+    tool never runs, nothing is posted, and nothing is yielded."""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(stream_events=[_tool_use("tu_1", "gated", {}, evaluated_permission="ask"), _terminated()])
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 0, "an ask-gated tool must not run before its confirmation"
+    assert events.send_calls == [], "no result may be posted for an unconfirmed call"
+    assert items == []
+
+
+@pytest.mark.asyncio()
+async def test_ask_tool_executes_after_allow_confirmation() -> None:
+    """An ``allow`` confirmation releases the held call: the tool runs, the
+    result is posted, and the yielded call records ``confirmation="allow"``."""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(
+        stream_events=[
+            _tool_use("tu_1", "gated", {}, evaluated_permission="ask"),
+            _tool_confirmation("tu_1", "allow"),
+            _terminated(),
+        ]
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 1
+    assert len(items) == 1
+    call = items[0]
+    assert call.confirmation == "allow"
+    assert call.posted is True
+    assert call.is_error is False
+    assert _result_text(call) == "ran"
+    assert len(events.send_calls) == 1
+    assert events.send_calls[0]["events"][0]["tool_use_id"] == "tu_1"
+
+
+@pytest.mark.asyncio()
+async def test_ask_tool_denied_never_executes() -> None:
+    """A ``deny`` confirmation resolves the held call without executing it:
+    nothing runs, nothing is posted (the denial itself resolves the call
+    server-side), and the call is still yielded for observability with
+    ``confirmation="deny"`` / ``posted=False`` / ``result=None``."""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(
+        stream_events=[
+            _tool_use("tu_1", "gated", {}, evaluated_permission="ask"),
+            _tool_confirmation("tu_1", "deny"),
+            _terminated(),
+        ]
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 0, "a denied tool must never run"
+    assert events.send_calls == [], "the denial resolves the call; the runner must post nothing"
+    assert len(items) == 1
+    call = items[0]
+    assert call.confirmation == "deny"
+    assert call.posted is False
+    assert call.is_error is False
+    assert call.result is None
+
+
+@pytest.mark.asyncio()
+async def test_pre_denied_tool_never_executes() -> None:
+    """A call the server already evaluated to ``deny`` needs no confirmation —
+    it must never execute and nothing may be posted for it."""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(stream_events=[_tool_use("tu_1", "gated", {}, evaluated_permission="deny"), _terminated()])
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 0
+    assert events.send_calls == []
+    assert len(items) == 1
+    assert items[0].confirmation == "deny"
+    assert items[0].posted is False
+    assert items[0].result is None
+
+
+@pytest.mark.asyncio()
+async def test_confirmation_in_history_releases_ask_call() -> None:
+    """An ask-gated call whose ``allow`` confirmation is already in history
+    (e.g. it was posted while the runner was disconnected) executes on the
+    reconcile pass — the verdict is recorded before pending calls are routed."""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(
+        list_events=[
+            _tool_use("tu_1", "gated", {}, evaluated_permission="ask"),
+            _tool_confirmation("tu_1", "allow"),
+        ],
+        stream_events=[_terminated()],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 1
+    assert len(items) == 1
+    assert items[0].confirmation == "allow"
+    assert items[0].posted is True
+
+
+@pytest.mark.asyncio()
+async def test_denied_ask_call_does_not_block_idle_stop() -> None:
+    """A denied call counts as resolved in the reconcile idle accounting:
+    history ends on an ``end_turn`` idle with the denied call unanswered (no
+    result event ever exists for it), and the runner must still arm the idle
+    countdown and stop on its own rather than wait forever for a result."""
+    events = FakeAsyncEvents(
+        list_events=[
+            _tool_use("tu_1", "gated", {}, evaluated_permission="ask"),
+            _tool_confirmation("tu_1", "deny"),
+            _idle_end_turn(),
+        ],
+        stream_events=[],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[], max_idle=0.05)]
+
+    assert len(items) == 1
+    assert items[0].confirmation == "deny"
+    assert events.send_calls == []
+
+
+@pytest.mark.asyncio()
+async def test_held_ask_call_keeps_runner_alive() -> None:
+    """While a call awaits its confirmation the runner must keep running —
+    even if history (defensively) ends on an ``end_turn`` idle — so the
+    verdict can still arrive and be acted on."""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(
+        list_events=[_tool_use("tu_1", "gated", {}, evaluated_permission="ask"), _idle_end_turn()],
+        stream_events=[],
+    )
+
+    async def drive() -> None:
+        async for _ in _run_with_fakes(events=events, tools=[tool], max_idle=0.1):
+            pass
+
+    # A runner that wrongly armed the idle clock would stop ~0.1s in and
+    # ``drive()`` would return; a correct one blocks awaiting the confirmation.
+    with pytest.raises((asyncio.TimeoutError, TimeoutError)):
+        await asyncio.wait_for(drive(), timeout=1.0)
+
+    assert counter["calls"] == 0
+    assert events.send_calls == []
+
+
+@pytest.mark.asyncio()
+async def test_live_idle_while_call_held_keeps_runner_alive() -> None:
+    """An ``end_turn`` idle arriving on the LIVE stream while a call is held
+    for confirmation must not start the idle countdown — stopping would drop
+    the call when its verdict later arrives. (The reconcile-path counterpart
+    is ``test_held_ask_call_keeps_runner_alive``.)"""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(
+        stream_events=[_tool_use("tu_1", "gated", {}, evaluated_permission="ask"), _idle_end_turn()],
+    )
+
+    async def drive() -> None:
+        async for _ in _run_with_fakes(events=events, tools=[tool], max_idle=0.1):
+            pass
+
+    # A runner that armed the idle clock would stop ~0.1s in and ``drive()``
+    # would return; a correct one blocks awaiting the confirmation.
+    with pytest.raises((asyncio.TimeoutError, TimeoutError)):
+        await asyncio.wait_for(drive(), timeout=1.0)
+
+    assert counter["calls"] == 0
+    assert events.send_calls == []
+
+
+@pytest.mark.asyncio()
+async def test_reconnect_does_not_double_dispatch_held_call(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A call held on the live stream whose ``allow`` confirmation shows up in
+    the reconcile history after a reconnect is dispatched exactly once: the
+    routing pass applies the recorded verdict, the history loop must not also
+    release the held copy. The first result post fails permanently so a
+    duplicate enqueue would visibly re-execute the tool."""
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.01)
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    gated_call = _tool_use("tu_1", "gated", {}, evaluated_permission="ask")
+    events = FakeAsyncEvents(
+        streams=[
+            # First connection: the gated call arrives live (and is held), then
+            # the stream drops with a transient error.
+            _FakeStream([gated_call], raise_after=1, raise_with=httpx.ReadError("dropped")),
+            _FakeStream([_terminated()]),
+        ],
+        # The reconcile after the reconnect sees both the held call and its
+        # allow verdict; the initial reconcile saw an empty history.
+        list_events_per_call=[[], [gated_call, _tool_confirmation("tu_1", "allow")]],
+        send_failures=[_api_status_error(400)],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 1, "the confirmed call must be dispatched exactly once"
+    assert len([it for it in items if it.tool_use_id == "tu_1"]) == 1
+
+
+@pytest.mark.asyncio()
+async def test_reconcile_confirmation_releases_call_held_from_live_stream(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A confirmation that only ever appears in the reconcile history (its
+    tool_use event is not in the listed window — it was held from the live
+    stream before the disconnect) still releases the held call."""
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.01)
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(
+        streams=[
+            _FakeStream(
+                [_tool_use("tu_1", "gated", {}, evaluated_permission="ask")],
+                raise_after=1,
+                raise_with=httpx.ReadError("dropped"),
+            ),
+            _FakeStream([_terminated()]),
+        ],
+        list_events_per_call=[[], [_tool_confirmation("tu_1", "allow")]],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 1
+    assert len(items) == 1
+    assert items[0].confirmation == "allow"
+    assert items[0].posted is True
+
+
+@pytest.mark.asyncio()
+async def test_held_ask_call_does_not_block_other_dispatches() -> None:
+    """Holding an ask-gated call must not stall the rest of the queue: an
+    ungated call arriving after it executes immediately, and the gated call
+    follows once its confirmation lands."""
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "echo"
+
+    async def gated(_input: dict[str, Any]) -> str:
+        return "gated"
+
+    events = FakeAsyncEvents(
+        stream_events=[
+            _tool_use("tu_gated", "gated", {}, evaluated_permission="ask"),
+            _tool_use("tu_echo", "echo", {}),
+            _tool_confirmation("tu_gated", "allow"),
+            _terminated(),
+        ]
+    )
+
+    items = [
+        item
+        async for item in _run_with_fakes(events=events, tools=[_FakeTool("echo", echo), _FakeTool("gated", gated)])
+    ]
+
+    by_id = {it.tool_use_id: it for it in items}
+    assert set(by_id) == {"tu_gated", "tu_echo"}
+    assert by_id["tu_echo"].confirmation is None
+    assert by_id["tu_echo"].posted is True
+    assert by_id["tu_gated"].confirmation == "allow"
+    assert by_id["tu_gated"].posted is True
+    # The ungated call was not held up behind the gated one: its result was
+    # posted first, the gated one only after its confirmation arrived.
+    posted_ids = [call["events"][0]["tool_use_id"] for call in events.send_calls]
+    assert posted_ids == ["tu_echo", "tu_gated"]
+
+
+@pytest.mark.asyncio()
+async def test_confirmation_for_unknown_id_is_ignored() -> None:
+    """A confirmation for a call this runner has never seen (another client's
+    call, or an ``agent.mcp_tool_use`` it never dispatches) is recorded but
+    must not crash or yield anything."""
+    events = FakeAsyncEvents(stream_events=[_tool_confirmation("tu_elsewhere", "allow"), _terminated()])
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[])]
+
+    assert items == []
+    assert events.send_calls == []
+
+
+@pytest.mark.asyncio()
+async def test_unrecognised_verdict_fails_closed() -> None:
+    """The gate is an allow-list: a confirmation whose ``result`` is a value
+    this SDK doesn't recognise (the wire can carry values newer than our
+    types) must NOT release the held call — it is resolved as a denial."""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(
+        stream_events=[
+            _tool_use("tu_1", "gated", {}, evaluated_permission="ask"),
+            _tool_confirmation("tu_1", "escalate"),  # not "allow"/"deny"
+            _terminated(),
+        ]
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 0, "only an explicit allow may release a gated call"
+    assert events.send_calls == []
+    assert len(items) == 1
+    assert items[0].confirmation == "deny"
+    assert items[0].result is None
+
+
+@pytest.mark.asyncio()
+async def test_unrecognised_permission_fails_closed() -> None:
+    """An ``evaluated_permission`` value this SDK doesn't recognise must not
+    dispatch unconfirmed — it is held like ``ask`` and released only by an
+    explicit ``allow`` verdict."""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    # Without a confirmation the call must never run...
+    events = FakeAsyncEvents(
+        stream_events=[_tool_use("tu_1", "gated", {}, evaluated_permission="ask_strict"), _terminated()]
+    )
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+    assert counter["calls"] == 0
+    assert items == []
+
+    # ...while an explicit allow still releases it.
+    events = FakeAsyncEvents(
+        stream_events=[
+            _tool_use("tu_2", "gated", {}, evaluated_permission="ask_strict"),
+            _tool_confirmation("tu_2", "allow"),
+            _terminated(),
+        ]
+    )
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+    assert counter["calls"] == 1
+    assert len(items) == 1
+    assert items[0].posted is True
+
+
+@pytest.mark.asyncio()
+async def test_pre_denied_tool_ignores_stray_allow_verdict() -> None:
+    """A call the server already evaluated to ``deny`` must never execute,
+    even if an (anomalous) ``allow`` confirmation exists for its id."""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(
+        stream_events=[
+            # Confirmation first so the verdict is already recorded when the
+            # pre-denied call is routed.
+            _tool_confirmation("tu_1", "allow"),
+            _tool_use("tu_1", "gated", {}, evaluated_permission="deny"),
+            _terminated(),
+        ]
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 0, "a server-denied call must never execute"
+    assert events.send_calls == []
+    assert len(items) == 1
+    assert items[0].confirmation == "deny"
+
+
+@pytest.mark.asyncio()
+async def test_ungated_tool_with_stray_deny_verdict_resolves_as_denied() -> None:
+    """Mirror of ``test_pre_denied_tool_ignores_stray_allow_verdict``: a stray
+    ``deny`` verdict recorded before an ungated call is routed resolves the
+    call as denied without executing it — any deny signal wins (the gate fails
+    closed)."""
+    counter = {"calls": 0}
+
+    async def echo(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("echo", echo)
+    events = FakeAsyncEvents(
+        stream_events=[
+            # Confirmation first so the stray verdict is already recorded when
+            # the ungated call is routed.
+            _tool_confirmation("tu_1", "deny"),
+            _tool_use("tu_1", "echo", {}),
+            _terminated(),
+        ]
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 0, "a deny verdict must suppress the call even if it was never gated"
+    assert events.send_calls == []
+    assert len(items) == 1
+    assert items[0].confirmation == "deny"
+    assert items[0].posted is False
+    assert items[0].result is None
+
+
+@pytest.mark.asyncio()
+async def test_deny_after_live_end_turn_resumes_idle_stop() -> None:
+    """A ``deny`` that resolves the last held call must let the idle countdown
+    resume: the session already went idle (``end_turn``) while the call was
+    held, the denial produces no further stream events, and the runner must
+    stop on its own instead of waiting forever."""
+    counter = {"calls": 0}
+
+    async def gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "ran"
+
+    tool = _FakeTool("gated", gated)
+    events = FakeAsyncEvents(
+        stream_events=[
+            _tool_use("tu_1", "gated", {}, evaluated_permission="ask"),
+            _idle_end_turn(),
+            _tool_confirmation("tu_1", "deny"),
+        ]
+    )
+
+    async def drive() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[tool], max_idle=0.05)]
+
+    # A runner that lost the end_turn while the call was held hangs here (the
+    # stream never produces another event) and ``wait_for`` would time out.
+    items = await asyncio.wait_for(drive(), timeout=2.0)
+
+    assert counter["calls"] == 0
+    assert events.send_calls == []
+    assert len(items) == 1
+    assert items[0].confirmation == "deny"
+
+
+@pytest.mark.asyncio()
+async def test_reconcile_released_call_not_cut_short_by_idle(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A held call released by the reconcile pass (its allow verdict only shows
+    up in history after a reconnect) is in-flight work: even if that history
+    ends on an ``end_turn`` idle, the idle countdown must not run while the
+    released tool is still executing. Only once the call is fully dispatched
+    does the deferred countdown start, granting a fresh grace window for the
+    events its posted result will produce."""
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.01)
+    max_idle = 0.4
+    counter = {"calls": 0}
+
+    async def slow_gated(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        await asyncio.sleep(0.6)
+        return "ran"
+
+    tool = _FakeTool("gated", slow_gated)
+    events = FakeAsyncEvents(
+        streams=[
+            # The gated call arrives live (and is held), then the stream drops.
+            _FakeStream(
+                [_tool_use("tu_1", "gated", {}, evaluated_permission="ask")],
+                raise_after=1,
+                raise_with=httpx.ReadError("dropped"),
+            ),
+            _FakeStream([]),
+        ],
+        # The reconcile after the reconnect sees only the verdict and the idle:
+        # the original tool_use event has scrolled out of the listed window.
+        list_events_per_call=[[], [_tool_confirmation("tu_1", "allow"), _idle_end_turn()]],
+    )
+
+    seen: list[DispatchedToolCall] = []
+
+    async def drive() -> None:
+        async for call in _run_with_fakes(events=events, tools=[tool], max_idle=max_idle):
+            seen.append(call)
+
+    async def run_and_time() -> tuple[float, float]:
+        loop = asyncio.get_running_loop()
+        task = asyncio.ensure_future(drive())
+        while not events.send_calls:
+            await asyncio.sleep(0.01)
+        posted_at = loop.time()
+        await task
+        return posted_at, loop.time()
+
+    posted_at, stopped_at = await asyncio.wait_for(run_and_time(), timeout=5.0)
+
+    assert counter["calls"] == 1
+    assert len(seen) == 1
+    assert seen[0].confirmation == "allow"
+    assert seen[0].posted is True
+    # A runner that armed the idle clock during the reconcile has its countdown
+    # already expired by the time the slow tool finishes (0.6s > max_idle) and
+    # stops immediately after posting; the deferred countdown instead starts
+    # only once the call is dispatched, so the runner stays up for roughly a
+    # full grace window after the post.
+    assert stopped_at - posted_at > max_idle * 0.6
 
 
 @pytest.mark.asyncio()
