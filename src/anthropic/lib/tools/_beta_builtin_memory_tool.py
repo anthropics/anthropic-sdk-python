@@ -547,7 +547,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
             raise ToolError(f"The path {command.path} is not a file.")
 
         content = _read_file_content(full_path, command.path)
-        lines = content.splitlines()
+        lines = content.split("\n")
 
         if command.insert_line < 0 or command.insert_line > len(lines):
             raise ToolError(
@@ -848,7 +848,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
             raise ToolError(f"The path {command.path} is not a file.")
 
         content = await _async_read_file_content(full_path, command.path)
-        lines = content.splitlines()
+        lines = content.split("\n")
 
         if command.insert_line < 0 or command.insert_line > len(lines):
             raise ToolError(
