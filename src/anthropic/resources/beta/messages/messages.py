@@ -269,8 +269,9 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
+          speed: Inference speed mode. `fast` provides significantly faster output token
+              generation at premium pricing. Not all models support `fast`; invalid
+              combinations are rejected at create time.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -621,8 +622,9 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
+          speed: Inference speed mode. `fast` provides significantly faster output token
+              generation at premium pricing. Not all models support `fast`; invalid
+              combinations are rejected at create time.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -968,8 +970,9 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
+          speed: Inference speed mode. `fast` provides significantly faster output token
+              generation at premium pricing. Not all models support `fast`; invalid
+              combinations are rejected at create time.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1332,8 +1335,9 @@ class Messages(SyncAPIResource):
               A schema to specify Claude's output format in responses. This parameter will be
               removed in a future release.
 
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
+          speed: Inference speed mode. `fast` provides significantly faster output token
+              generation at premium pricing. Not all models support `fast`; invalid
+              combinations are rejected at create time.
 
           system: System prompt.
 
@@ -1697,8 +1701,9 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
+          speed: Inference speed mode. `fast` provides significantly faster output token
+              generation at premium pricing. Not all models support `fast`; invalid
+              combinations are rejected at create time.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2049,8 +2054,9 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
+          speed: Inference speed mode. `fast` provides significantly faster output token
+              generation at premium pricing. Not all models support `fast`; invalid
+              combinations are rejected at create time.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2396,8 +2402,9 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
+          speed: Inference speed mode. `fast` provides significantly faster output token
+              generation at premium pricing. Not all models support `fast`; invalid
+              combinations are rejected at create time.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2760,8 +2767,9 @@ class AsyncMessages(AsyncAPIResource):
               A schema to specify Claude's output format in responses. This parameter will be
               removed in a future release.
 
-          speed: The inference speed mode for this request. `"fast"` enables high
-              output-tokens-per-second inference.
+          speed: Inference speed mode. `fast` provides significantly faster output token
+              generation at premium pricing. Not all models support `fast`; invalid
+              combinations are rejected at create time.
 
           system: System prompt.
 

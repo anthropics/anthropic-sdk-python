@@ -154,9 +154,10 @@ class MessageCountTokensParams(TypedDict, total=False):
     """
 
     speed: Optional[Literal["standard", "fast"]]
-    """The inference speed mode for this request.
+    """Inference speed mode.
 
-    `"fast"` enables high output-tokens-per-second inference.
+    `fast` provides significantly faster output token generation at premium pricing.
+    Not all models support `fast`; invalid combinations are rejected at create time.
     """
 
     system: Union[str, Iterable[BetaTextBlockParam]]
