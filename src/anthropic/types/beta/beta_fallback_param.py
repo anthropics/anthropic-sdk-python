@@ -39,5 +39,10 @@ class BetaFallbackParam(TypedDict, total=False, extra_items=object):  # type: ig
     output_config: Optional[BetaOutputConfigParam]
 
     speed: Optional[Literal["standard", "fast"]]
+    """Inference speed mode.
+
+    `fast` provides significantly faster output token generation at premium pricing.
+    Not all models support `fast`; invalid combinations are rejected at create time.
+    """
 
     thinking: Optional[Thinking]

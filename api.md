@@ -1217,3 +1217,31 @@ Methods:
 - <code title="post /v1/user_profiles/{user_profile_id}?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">update</a>(user_profile_id, \*\*<a href="src/anthropic/types/beta/user_profile_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">BetaUserProfile</a></code>
 - <code title="get /v1/user_profiles?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">list</a>(\*\*<a href="src/anthropic/types/beta/user_profile_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">SyncPageCursor[BetaUserProfile]</a></code>
 - <code title="post /v1/user_profiles/{user_profile_id}/enrollment_url?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">create_enrollment_url</a>(user_profile_id) -> <a href="./src/anthropic/types/beta/beta_user_profile_enrollment_url.py">BetaUserProfileEnrollmentURL</a></code>
+
+## Dreams
+
+Types:
+
+```python
+from anthropic.types.beta import (
+    BetaDream,
+    BetaDreamError,
+    BetaDreamInput,
+    BetaDreamMemoryStoreInput,
+    BetaDreamMemoryStoreOutput,
+    BetaDreamModelConfig,
+    BetaDreamModelConfigParam,
+    BetaDreamOutput,
+    BetaDreamSessionsInput,
+    BetaDreamStatus,
+    BetaDreamUsage,
+)
+```
+
+Methods:
+
+- <code title="post /v1/dreams?beta=true">client.beta.dreams.<a href="./src/anthropic/resources/beta/dreams.py">create</a>(\*\*<a href="src/anthropic/types/beta/dream_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_dream.py">BetaDream</a></code>
+- <code title="get /v1/dreams/{dream_id}?beta=true">client.beta.dreams.<a href="./src/anthropic/resources/beta/dreams.py">retrieve</a>(dream_id) -> <a href="./src/anthropic/types/beta/beta_dream.py">BetaDream</a></code>
+- <code title="get /v1/dreams?beta=true">client.beta.dreams.<a href="./src/anthropic/resources/beta/dreams.py">list</a>(\*\*<a href="src/anthropic/types/beta/dream_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_dream.py">SyncPageCursor[BetaDream]</a></code>
+- <code title="post /v1/dreams/{dream_id}/archive?beta=true">client.beta.dreams.<a href="./src/anthropic/resources/beta/dreams.py">archive</a>(dream_id) -> <a href="./src/anthropic/types/beta/beta_dream.py">BetaDream</a></code>
+- <code title="post /v1/dreams/{dream_id}/cancel?beta=true">client.beta.dreams.<a href="./src/anthropic/resources/beta/dreams.py">cancel</a>(dream_id) -> <a href="./src/anthropic/types/beta/beta_dream.py">BetaDream</a></code>

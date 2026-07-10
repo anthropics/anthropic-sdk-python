@@ -24,6 +24,14 @@ from .agents import (
     AgentsWithStreamingResponse,
     AsyncAgentsWithStreamingResponse,
 )
+from .dreams import (
+    Dreams,
+    AsyncDreams,
+    DreamsWithRawResponse,
+    AsyncDreamsWithRawResponse,
+    DreamsWithStreamingResponse,
+    AsyncDreamsWithStreamingResponse,
+)
 from .models import (
     Models,
     AsyncModels,
@@ -181,6 +189,12 @@ __all__ = [
     "AsyncUserProfilesWithRawResponse",
     "UserProfilesWithStreamingResponse",
     "AsyncUserProfilesWithStreamingResponse",
+    "Dreams",
+    "AsyncDreams",
+    "DreamsWithRawResponse",
+    "AsyncDreamsWithRawResponse",
+    "DreamsWithStreamingResponse",
+    "AsyncDreamsWithStreamingResponse",
     "Beta",
     "AsyncBeta",
     "BetaWithRawResponse",
