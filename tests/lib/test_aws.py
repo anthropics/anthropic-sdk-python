@@ -8,6 +8,7 @@ from respx import MockRouter
 
 from anthropic import AnthropicAWS, AsyncAnthropicAWS
 from anthropic._exceptions import AnthropicError
+from anthropic.lib.credentials import StaticToken
 
 
 class MockRequestCall(Protocol):
@@ -387,6 +388,19 @@ def test_copy_accepts_credentials_none_noop() -> None:
     assert copied.aws_region == "us-east-1"
 
 
+def test_copy_accepts_credentials_none_noop_async() -> None:
+    client = AsyncAnthropicAWS(
+        aws_access_key="AKID",
+        aws_secret_key="secret",
+        aws_region="us-east-1",
+        workspace_id="ws-123",
+    )
+    copied = client.copy(credentials=None)
+    assert copied._use_sigv4 is True
+    assert copied.workspace_id == "ws-123"
+    assert copied.aws_region == "us-east-1"
+
+
 def test_copy_rejects_real_credentials_provider() -> None:
     client = AnthropicAWS(
         aws_access_key="AKID",
@@ -395,7 +409,18 @@ def test_copy_rejects_real_credentials_provider() -> None:
         workspace_id="ws-123",
     )
     with pytest.raises(TypeError, match="does not support a `credentials` provider"):
-        client.copy(credentials=object())
+        client.copy(credentials=StaticToken("token"))
+
+
+def test_copy_rejects_real_credentials_provider_async() -> None:
+    client = AsyncAnthropicAWS(
+        aws_access_key="AKID",
+        aws_secret_key="secret",
+        aws_region="us-east-1",
+        workspace_id="ws-123",
+    )
+    with pytest.raises(TypeError, match="does not support a `credentials` provider"):
+        client.copy(credentials=StaticToken("token"))
 
 
 def test_scoped_bearer_client_helper_on_aws() -> None:
