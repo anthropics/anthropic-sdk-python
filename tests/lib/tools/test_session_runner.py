@@ -111,6 +111,13 @@ def _api_status_error(code: int) -> APIStatusError:
     return APIStatusError("boom", response=response, body=None)
 
 
+def _subthread_race_400() -> APIStatusError:
+    # The transient #1744 400: a sub-thread agent.tool_use event not yet matchable.
+    request = httpx.Request("POST", "https://api.example/x")
+    response = httpx.Response(status_code=400, request=request, content=b"{}")
+    return APIStatusError("does not match any agent.tool_use event", response=response, body=None)
+
+
 class _FakeStream:
     """Stand-in for the AsyncStream returned by ``events.stream()``.
 
@@ -1013,3 +1020,72 @@ def test_to_session_content_tool_reference_stringified() -> None:
     block = {"type": "tool_reference", "tool_name": "weather"}
     out = _to_session_content([block])
     assert out == [{"type": "text", "text": session_runner_mod.json.dumps(block)}]
+
+
+# ---------- #1744: sub-thread tool_use commit-race 400 ----------------------
+
+
+@pytest.mark.asyncio()
+async def test_subthread_race_400_is_retried_not_fatal() -> None:
+    """The #1744 sub-thread commit-race 400 is transient and must be retried.
+
+    Before the fix ``is_fatal_status_error`` classified it as fatal, so the runner
+    bailed on the first attempt and left the tool call permanently stranded.
+    """
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "ok"
+
+    tool = _FakeTool("echo", echo)
+    events = FakeAsyncEvents(
+        stream_events=[_tool_use("tu_1", "echo", {"x": 1}), _terminated()],
+        send_failures=[_subthread_race_400(), None],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert len(events.send_calls) == 2, "retried past the first race 400 instead of bailing"
+    assert items[0].posted is True
+
+
+@pytest.mark.asyncio()
+async def test_subthread_race_400_uses_extended_budget(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The race 400 keeps retrying past ``SEND_RETRIES`` (3) on its patient budget."""
+
+    async def _no_sleep(_seconds: float) -> None:
+        return None
+
+    monkeypatch.setattr(session_runner_mod.anyio, "sleep", _no_sleep)
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "ok"
+
+    tool = _FakeTool("echo", echo)
+    events = FakeAsyncEvents(
+        stream_events=[_tool_use("tu_1", "echo", {"x": 1}), _terminated()],
+        send_failures=[_subthread_race_400()] * 4 + [None],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert len(events.send_calls) == 5, "retried the race 400 past SEND_RETRIES"
+    assert items[0].posted is True
+
+
+@pytest.mark.asyncio()
+async def test_non_race_400_still_fatal() -> None:
+    """A generic 400 (no race marker) must still bail immediately — no over-broadening."""
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "ok"
+
+    tool = _FakeTool("echo", echo)
+    events = FakeAsyncEvents(
+        stream_events=[_tool_use("tu_1", "echo", {"x": 1}), _terminated()],
+        send_failures=[_api_status_error(400)],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert len(events.send_calls) == 1, "a non-race 400 must not be retried"
+    assert items[0].posted is False
