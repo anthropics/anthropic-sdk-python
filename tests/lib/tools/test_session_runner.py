@@ -787,6 +787,59 @@ async def test_reconcile_list_error_does_not_dispatch_partial() -> None:
     assert counter["calls"] == 0
 
 
+@pytest.mark.asyncio()
+async def test_reconnect_does_not_re_execute_tool_after_failed_send(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A tool whose result-post permanently failed must not be re-executed when
+    a later stream reconnect re-runs ``_reconcile``.
+
+    ``_reconcile`` re-enqueues every ``agent.tool_use`` not yet in
+    ``_answered`` — which is exactly the state of a call whose ``_send_result``
+    exhausted its retries or hit a permanent 4xx (mirroring
+    ``test_yields_with_posted_false_on_permanent_4xx``). Every *other* source of
+    duplicate delivery this file guards against (the live stream re-seeing an
+    already-answered id, a partial list-pagination re-read) is a duplicate of
+    already-settled work. This one is not: nothing has told the runner the
+    result landed, so on the next reconnect it dispatches the same
+    ``agent.tool_use`` again — and ``_execute`` unconditionally re-runs the
+    tool, not just the post. For a side-effecting tool (``bash``, a file
+    write) that is a real correctness hazard: at-least-once instead of
+    at-most-once execution.
+    """
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.001)
+    counter = {"calls": 0}
+
+    async def increment(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "done"
+
+    tool = _FakeTool("inc", increment)
+    # Every reconcile pass (both connections) sees the same still-unanswered
+    # agent.tool_use — the server's own record, since the first send attempt
+    # below permanently fails and the runner never posts a result. The second
+    # send attempt (the reconcile-triggered retry) has no scripted failure, so
+    # it succeeds.
+    events = FakeAsyncEvents(
+        list_events=[_tool_use("tu_1", "inc", {})],
+        # First connection: a filler event (so `raise_after` has something to
+        # count past) then a transient disconnect, forcing a reconnect and a
+        # second `_reconcile()` pass. Second connection: ends the run.
+        streams=[
+            _FakeStream([_StubEvent("noop")], raise_after=1, raise_with=_api_status_error(500)),
+            _FakeStream([_terminated()]),
+        ],
+        send_failures=[_api_status_error(400)],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 1, "the tool must not be re-executed once it has already run for this tool_use_id"
+    # The first yield reports the failed post; the retry on the second
+    # reconcile succeeds without recomputing the tool's result.
+    assert [item.posted for item in items] == [False, True]
+    assert all(item.tool_use_id == "tu_1" and _result_text(item) == "done" for item in items)
+    assert len(events.send_calls) == 2
+
+
 # ---------- environment-key auth -----------------------------------------
 
 
