@@ -202,8 +202,12 @@ class DispatchedToolCall:
     posted: bool = True
     """``True`` if the result event made it to the session. ``False`` if all
     retries were exhausted or the server returned a permanent 4xx — in which
-    case the session-side agent will *not* see this result and the consumer may
-    want to surface that or retry at a higher level — and also ``False``, with
+    case the session-side agent will *not yet* see this result. The runner
+    keeps retrying the post (never re-running the tool) on every later
+    reconcile pass until it succeeds or the session ends, so the consumer may
+    see a later :class:`DispatchedToolCall` for the same ``tool_use_id`` with
+    ``posted=True`` — but may still want to surface a ``False`` here, since
+    there's no bound on how long that can take. Also ``False``, with
     ``result`` left ``None``, when the tool name is not one this runner owns and
     it deliberately posted nothing, leaving the ``tool_use_id`` pending for its
     owner (the split-client partial-fulfilment behavior)."""
@@ -391,8 +395,14 @@ class SessionToolRunner:
         # ``_seen`` dedups tool-call events across the stream and the reconcile
         # pass (by event id); ``_answered`` holds the ids whose result post has
         # actually landed, so a failed post is retried on the next reconcile.
+        # ``_executed`` holds the computed (unconfirmed) result for an id whose
+        # tool has already run: reconcile re-enqueues anything not yet in
+        # ``_answered``, and a call already in ``_executed`` must only have its
+        # result re-posted, never re-run the tool itself (see ``_dispatch_loop``
+        # / ``_resend``).
         self._seen: set[str] = set()
         self._answered: set[str] = set()
+        self._executed: dict[str, tuple[DispatchedToolResultParams, bool]] = {}
         self._stop = anyio.Event()
         self._idle_clock = _IdleClock()
 
@@ -567,7 +577,16 @@ class SessionToolRunner:
                 # an in-flight tool. The result will still be posted and the
                 # DispatchedToolCall enqueued before the cancel propagates.
                 with anyio.CancelScope(shield=True):
-                    await self._execute(ev)
+                    if ev.id in self._executed:
+                        # Reconcile re-enqueued a call whose tool already ran
+                        # (the earlier post failed or was never confirmed) —
+                        # retry posting the result we already have. Never call
+                        # _execute again: that would re-run the tool itself,
+                        # which is unsafe for a side-effecting tool (bash, a
+                        # file write).
+                        await self._resend(ev)
+                    else:
+                        await self._execute(ev)
         finally:
             # Closing the results stream signals the iterator that no more
             # results will arrive. Wrapped in a shield because we're often in a
@@ -619,7 +638,36 @@ class SessionToolRunner:
                 content = tool_error_content(e)
                 is_error = True
             tool_result = _build_result_event(ev, content, is_error)
+            # Recorded before the send attempt: the tool has now run, so a
+            # later reconcile must never dispatch this id through _execute
+            # again, regardless of whether the send below succeeds.
+            self._executed[ev.id] = (tool_result, is_error)
             sent = await self._send_result(tool_result, ev.id)
+            if sent:
+                self._executed.pop(ev.id, None)
+        await self._post_result(ev, tool_result, is_error, sent)
+
+    async def _resend(self, ev: DispatchedToolUseEvent) -> None:
+        """Retry posting an already-computed result without re-running the tool.
+
+        Reached from ``_dispatch_loop`` when reconcile re-enqueues a call whose
+        tool already ran (via ``_execute``) but whose result was not yet
+        confirmed posted.
+        """
+        tool_result, is_error = self._executed[ev.id]
+        sent = await self._send_result(tool_result, ev.id)
+        if sent:
+            self._executed.pop(ev.id, None)
+        await self._post_result(ev, tool_result, is_error, sent)
+
+    async def _post_result(
+        self,
+        ev: DispatchedToolUseEvent,
+        tool_result: DispatchedToolResultParams | None,
+        is_error: bool,
+        sent: bool,
+    ) -> None:
+        """Surface a completed dispatch (fresh or retried) to the consumer."""
         try:
             await self._send_results.send(
                 DispatchedToolCall(
