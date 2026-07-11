@@ -273,6 +273,42 @@ def test_iter_work_auto_stop_false_does_not_stop_on_body_raise() -> None:
     assert fake.stop_calls == []
 
 
+def test_iter_work_defer_ack_yields_unacked() -> None:
+    """With ``defer_ack=True`` the poller hands items off still unacknowledged so
+    the downstream owner performs the ack; the poller itself never acks."""
+    a, b = _StubWork(id="work_a"), _StubWork(id="work_b")
+    fake = FakeWork(poll_script=[a, b, None])
+    it = iter_work(cast(Any, fake), environment_id="env_1", drain=True, auto_stop=False, defer_ack=True)
+
+    assert [item.id for item in it] == ["work_a", "work_b"]
+    assert fake.ack_calls == [], "defer_ack must not ack before yielding"
+    assert fake.stop_calls == []
+
+
+def test_iter_work_defer_ack_does_not_ack_on_body_raise() -> None:
+    """The strand this fixes: a handoff that fails after the yield must leave the
+    item unacknowledged so ``reclaim_older_than_ms`` / lease TTL can recover it,
+    rather than ack'd-and-abandoned (stuck in ``starting`` with no heartbeat)."""
+    work = _StubWork(id="work_boom")
+    fake = FakeWork(poll_script=[work])
+    it = iter_work(cast(Any, fake), environment_id="env_1", auto_stop=False, defer_ack=True)
+
+    next(it)
+    with pytest.raises(RuntimeError):
+        cast(Any, it).throw(RuntimeError("handoff failed"))
+    assert fake.ack_calls == [], "a failed handoff must leave the item unacknowledged (reclaimable)"
+    assert fake.stop_calls == []
+
+
+def test_iter_work_defer_ack_requires_auto_stop_false() -> None:
+    """``defer_ack`` only makes sense when the consumer owns the lifecycle;
+    pairing it with the lifecycle-owning ``auto_stop=True`` is a usage error."""
+    fake = FakeWork(poll_script=[_StubWork()])
+    with pytest.raises(ValueError, match="defer_ack=True requires auto_stop=False"):
+        next(iter_work(cast(Any, fake), environment_id="env_1", defer_ack=True))
+    assert fake.poll_calls == [], "must reject before polling"
+
+
 def test_iter_work_forwards_reclaim_older_than_ms() -> None:
     fake = FakeWork(poll_script=[None])
     it = iter_work(cast(Any, fake), environment_id="env_1", drain=True, reclaim_older_than_ms=2000)
@@ -319,6 +355,39 @@ async def test_aiter_work_calls_stop_when_body_raises() -> None:
     with pytest.raises(RuntimeError):
         await cast(Any, ait).athrow(RuntimeError("body failed"))
     assert fake.stop_calls == [("work_boom", fake.stop_calls[0][1])]
+
+
+@pytest.mark.asyncio()
+async def test_aiter_work_defer_ack_yields_unacked() -> None:
+    a, b = _StubWork(id="work_a"), _StubWork(id="work_b")
+    fake = FakeAsyncWork(poll_script=[a, b, None])
+    ait = aiter_work(cast(Any, fake), environment_id="env_1", drain=True, auto_stop=False, defer_ack=True)
+
+    assert [item.id async for item in ait] == ["work_a", "work_b"]
+    assert fake.ack_calls == [], "defer_ack must not ack before yielding"
+    assert fake.stop_calls == []
+
+
+@pytest.mark.asyncio()
+async def test_aiter_work_defer_ack_does_not_ack_on_body_raise() -> None:
+    work = _StubWork(id="work_boom")
+    fake = FakeAsyncWork(poll_script=[work])
+    ait = aiter_work(cast(Any, fake), environment_id="env_1", auto_stop=False, defer_ack=True)
+
+    await ait.__anext__()
+    with pytest.raises(RuntimeError):
+        await cast(Any, ait).athrow(RuntimeError("handoff failed"))
+    assert fake.ack_calls == [], "a failed handoff must leave the item unacknowledged (reclaimable)"
+    assert fake.stop_calls == []
+
+
+@pytest.mark.asyncio()
+async def test_aiter_work_defer_ack_requires_auto_stop_false() -> None:
+    fake = FakeAsyncWork(poll_script=[_StubWork()])
+    ait = aiter_work(cast(Any, fake), environment_id="env_1", defer_ack=True)
+    with pytest.raises(ValueError, match="defer_ack=True requires auto_stop=False"):
+        await ait.__anext__()
+    assert fake.poll_calls == [], "must reject before polling"
 
 
 @pytest.mark.asyncio()
