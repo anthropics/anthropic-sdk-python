@@ -776,6 +776,10 @@ def test_discriminated_unions_with_aliases_invalid_data() -> None:
         assert m.data == 100  # type: ignore[comparison-overlap]
 
 
+def test_construct_type_with_bare_dict() -> None:
+    assert construct_type(value={"foo": "bar"}, type_=dict) == {"foo": "bar"}
+
+
 def test_discriminated_unions_overlapping_discriminators_invalid_data() -> None:
     class A(BaseModel):
         type: Literal["a"]
