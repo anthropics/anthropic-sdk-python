@@ -79,6 +79,45 @@ class TestSyncWireHeaders:
         values = request.headers.get_list(STAINLESS_HELPER_HEADER)
         assert values == ["beta.messages.parse"]
 
+    @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
+    def test_parse_merges_caller_extra_headers(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
+        # caller-supplied betas, user_profile_id, and extra_headers must all
+        # survive parse()'s hand-written merge alongside the injected
+        # structured-outputs beta and the helper tag
+        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+
+        client.beta.messages.parse(
+            model="claude-sonnet-4-5",
+            max_tokens=16,
+            messages=[{"role": "user", "content": "hello"}],
+            betas=["fake-beta-2026-01-01"],
+            user_profile_id="upi_123",
+            extra_headers={"X-Custom": "1", "X-Stainless-Helper": "caller-tag"},
+        )
+
+        headers = respx_mock.calls.last.request.headers
+        # injected structured-outputs beta is appended to caller betas, not dropped
+        assert headers["anthropic-beta"] == "fake-beta-2026-01-01,structured-outputs-2025-12-15"
+        assert headers["anthropic-user-profile-id"] == "upi_123"
+        assert headers["X-Custom"] == "1"
+        # helper tag accumulates with the caller's on one line (append-header semantics)
+        assert headers.get_list(STAINLESS_HELPER_HEADER) == ["beta.messages.parse, caller-tag"]
+
+    @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
+    def test_parse_caller_beta_header_overrides(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
+        # extra_headers win outright on non-append headers, matching create()
+        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+
+        client.beta.messages.parse(
+            model="claude-sonnet-4-5",
+            max_tokens=16,
+            messages=[{"role": "user", "content": "hello"}],
+            extra_headers={"anthropic-beta": "explicit-only"},
+        )
+
+        headers = respx_mock.calls.last.request.headers
+        assert headers["anthropic-beta"] == "explicit-only"
+
 
 @pytest.mark.respx(base_url=base_url)
 class TestAsyncWireHeaders:
@@ -116,3 +155,40 @@ class TestAsyncWireHeaders:
         request = respx_mock.calls.last.request
         values = request.headers.get_list(STAINLESS_HELPER_HEADER)
         assert values == ["beta.messages.parse"]
+
+    @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
+    async def test_parse_merges_caller_extra_headers(
+        self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+
+        await async_client.beta.messages.parse(
+            model="claude-sonnet-4-5",
+            max_tokens=16,
+            messages=[{"role": "user", "content": "hello"}],
+            betas=["fake-beta-2026-01-01"],
+            user_profile_id="upi_123",
+            extra_headers={"X-Custom": "1", "X-Stainless-Helper": "caller-tag"},
+        )
+
+        headers = respx_mock.calls.last.request.headers
+        assert headers["anthropic-beta"] == "fake-beta-2026-01-01,structured-outputs-2025-12-15"
+        assert headers["anthropic-user-profile-id"] == "upi_123"
+        assert headers["X-Custom"] == "1"
+        assert headers.get_list(STAINLESS_HELPER_HEADER) == ["beta.messages.parse, caller-tag"]
+
+    @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
+    async def test_parse_caller_beta_header_overrides(
+        self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+
+        await async_client.beta.messages.parse(
+            model="claude-sonnet-4-5",
+            max_tokens=16,
+            messages=[{"role": "user", "content": "hello"}],
+            extra_headers={"anthropic-beta": "explicit-only"},
+        )
+
+        headers = respx_mock.calls.last.request.headers
+        assert headers["anthropic-beta"] == "explicit-only"
