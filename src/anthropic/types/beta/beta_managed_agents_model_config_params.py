@@ -14,9 +14,9 @@ class BetaManagedAgentsModelConfigParams(TypedDict, total=False):
     """An object that defines additional configuration control over model use"""
 
     id: Required[BetaManagedAgentsModelParam]
-    """
-    The model that will power your agent.\n\nSee
-    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    """The model that will power your agent.
+
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
 

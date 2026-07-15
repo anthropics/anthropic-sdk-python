@@ -18,5 +18,7 @@ class BetaCacheControlEphemeralParam(TypedDict, total=False):
     - `5m`: 5 minutes
     - `1h`: 1 hour
 
-    Defaults to `5m`.
+    Defaults to `5m`. See
+    [prompt caching pricing](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)
+    for details.
     """

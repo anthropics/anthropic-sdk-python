@@ -411,6 +411,7 @@ def build_events(
                         BetaCompactionEvent,
                         type="compaction",
                         content=content_block.content,
+                        encrypted_content=content_block.encrypted_content,
                     )
                 )
         else:
@@ -481,6 +482,10 @@ def accumulate_event(
                 construct_type(type_=ParsedBetaContentBlock, value=event.content_block.to_dict()),
             ),
         )
+        if event.content_block.type == "fallback":
+            # the final hop's fallback block names the model that served the response —
+            # keeps the snapshot consistent with the relabeled non-streaming message
+            current_snapshot.model = event.content_block.to.model
     elif event.type == "content_block_delta":
         content = current_snapshot.content[event.index]
         if event.delta.type == "text_delta":
@@ -525,6 +530,7 @@ def accumulate_event(
         elif event.delta.type == "compaction_delta":
             if content.type == "compaction":
                 content.content = event.delta.content
+                content.encrypted_content = event.delta.encrypted_content
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
@@ -537,6 +543,8 @@ def accumulate_event(
         current_snapshot.container = event.delta.container
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
+        if event.delta.stop_details is not None:
+            current_snapshot.stop_details = event.delta.stop_details
         current_snapshot.usage.output_tokens = event.usage.output_tokens
         current_snapshot.context_management = event.context_management
 

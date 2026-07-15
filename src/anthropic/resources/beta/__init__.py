@@ -64,6 +64,15 @@ from .sessions import (
     SessionsWithStreamingResponse,
     AsyncSessionsWithStreamingResponse,
 )
+from .webhooks import Webhooks, AsyncWebhooks
+from .deployments import (
+    Deployments,
+    AsyncDeployments,
+    DeploymentsWithRawResponse,
+    AsyncDeploymentsWithRawResponse,
+    DeploymentsWithStreamingResponse,
+    AsyncDeploymentsWithStreamingResponse,
+)
 from .environments import (
     Environments,
     AsyncEnvironments,
@@ -71,6 +80,30 @@ from .environments import (
     AsyncEnvironmentsWithRawResponse,
     EnvironmentsWithStreamingResponse,
     AsyncEnvironmentsWithStreamingResponse,
+)
+from .memory_stores import (
+    MemoryStores,
+    AsyncMemoryStores,
+    MemoryStoresWithRawResponse,
+    AsyncMemoryStoresWithRawResponse,
+    MemoryStoresWithStreamingResponse,
+    AsyncMemoryStoresWithStreamingResponse,
+)
+from .user_profiles import (
+    UserProfiles,
+    AsyncUserProfiles,
+    UserProfilesWithRawResponse,
+    AsyncUserProfilesWithRawResponse,
+    UserProfilesWithStreamingResponse,
+    AsyncUserProfilesWithStreamingResponse,
+)
+from .deployment_runs import (
+    DeploymentRuns,
+    AsyncDeploymentRuns,
+    DeploymentRunsWithRawResponse,
+    AsyncDeploymentRunsWithRawResponse,
+    DeploymentRunsWithStreamingResponse,
+    AsyncDeploymentRunsWithStreamingResponse,
 )
 
 __all__ = [
@@ -104,12 +137,30 @@ __all__ = [
     "AsyncSessionsWithRawResponse",
     "SessionsWithStreamingResponse",
     "AsyncSessionsWithStreamingResponse",
+    "Deployments",
+    "AsyncDeployments",
+    "DeploymentsWithRawResponse",
+    "AsyncDeploymentsWithRawResponse",
+    "DeploymentsWithStreamingResponse",
+    "AsyncDeploymentsWithStreamingResponse",
+    "DeploymentRuns",
+    "AsyncDeploymentRuns",
+    "DeploymentRunsWithRawResponse",
+    "AsyncDeploymentRunsWithRawResponse",
+    "DeploymentRunsWithStreamingResponse",
+    "AsyncDeploymentRunsWithStreamingResponse",
     "Vaults",
     "AsyncVaults",
     "VaultsWithRawResponse",
     "AsyncVaultsWithRawResponse",
     "VaultsWithStreamingResponse",
     "AsyncVaultsWithStreamingResponse",
+    "MemoryStores",
+    "AsyncMemoryStores",
+    "MemoryStoresWithRawResponse",
+    "AsyncMemoryStoresWithRawResponse",
+    "MemoryStoresWithStreamingResponse",
+    "AsyncMemoryStoresWithStreamingResponse",
     "Files",
     "AsyncFiles",
     "FilesWithRawResponse",
@@ -122,6 +173,14 @@ __all__ = [
     "AsyncSkillsWithRawResponse",
     "SkillsWithStreamingResponse",
     "AsyncSkillsWithStreamingResponse",
+    "Webhooks",
+    "AsyncWebhooks",
+    "UserProfiles",
+    "AsyncUserProfiles",
+    "UserProfilesWithRawResponse",
+    "AsyncUserProfilesWithRawResponse",
+    "UserProfilesWithStreamingResponse",
+    "AsyncUserProfilesWithStreamingResponse",
     "Beta",
     "AsyncBeta",
     "BetaWithRawResponse",

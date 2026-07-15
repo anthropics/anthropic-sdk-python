@@ -9,6 +9,7 @@ from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_model_param import BetaManagedAgentsModelParam
 from .beta_managed_agents_skill_params import BetaManagedAgentsSkillParams
+from .beta_managed_agents_multiagent_params import BetaManagedAgentsMultiagentParams
 from .beta_managed_agents_custom_tool_params import BetaManagedAgentsCustomToolParams
 from .beta_managed_agents_mcp_toolset_params import BetaManagedAgentsMCPToolsetParams
 from .beta_managed_agents_model_config_params import BetaManagedAgentsModelConfigParams
@@ -29,15 +30,18 @@ class AgentCreateParams(TypedDict, total=False):
     """
 
     name: Required[str]
-    """Human-readable name for the agent. 1-256 characters."""
+    """Human-readable name for the agent."""
 
     description: Optional[str]
-    """Description of what the agent does. Up to 2048 characters."""
+    """Description of what the agent does."""
 
     mcp_servers: Iterable[BetaManagedAgentsURLMCPServerParams]
     """MCP servers this agent connects to.
 
-    Maximum 20. Names must be unique within the array.
+    Maximum 20. Names must be unique within the array. Every server must be
+    referenced by an `mcp_toolset` in `tools`; unreferenced servers are rejected.
+    See the
+    [MCP connector guide](https://platform.claude.com/docs/en/managed-agents/mcp-connector).
     """
 
     metadata: Dict[str, str]
@@ -46,11 +50,17 @@ class AgentCreateParams(TypedDict, total=False):
     Maximum 16 pairs, keys up to 64 chars, values up to 512 chars.
     """
 
+    multiagent: Optional[BetaManagedAgentsMultiagentParams]
+    """
+    A coordinator topology: the session's primary thread orchestrates work by
+    spawning session threads, each running an agent drawn from the `agents` roster.
+    """
+
     skills: Iterable[BetaManagedAgentsSkillParams]
-    """Skills available to the agent. Maximum 20."""
+    """Skills available to the agent."""
 
     system: Optional[str]
-    """System prompt for the agent. Up to 100,000 characters."""
+    """System prompt for the agent."""
 
     tools: Iterable[Tool]
     """Tool configurations available to the agent.

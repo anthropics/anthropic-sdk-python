@@ -9,12 +9,14 @@ from ..._types import SequenceNotStr
 from ..._utils import PropertyInfo
 from ..model_param import ModelParam
 from .beta_message_param import BetaMessageParam
+from .beta_fallback_param import BetaFallbackParam
 from .beta_metadata_param import BetaMetadataParam
 from .parsed_beta_message import ResponseFormatT
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_container_params import BetaContainerParams
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_tool_union_param import BetaToolUnionParam
+from .beta_diagnostics_param import BetaDiagnosticsParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_output_config_param import BetaOutputConfigParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
@@ -39,8 +41,13 @@ class MessageCreateParamsBase(TypedDict, total=False):
     Note that our models may stop _before_ reaching this maximum. This parameter
     only specifies the absolute maximum number of tokens to generate.
 
+    Set to `0` to populate the
+    [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache)
+    without generating a response.
+
     Different models have different maximum values for this parameter. See
-    [models](https://docs.claude.com/en/docs/models-overview) for details.
+    [models](https://platform.claude.com/docs/en/about-claude/models/overview) for
+    details.
     """
 
     messages: Required[Iterable[BetaMessageParam]]
@@ -101,20 +108,21 @@ class MessageCreateParamsBase(TypedDict, total=False):
     { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
     ```
 
-    See [input examples](https://docs.claude.com/en/api/messages-examples).
+    See
+    [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
     Note that if you want to include a
-    [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-    top-level `system` parameter — there is no `"system"` role for input messages in
-    the Messages API.
+    [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+    you can use the top-level `system` parameter — there is no `"system"` role for
+    input messages in the Messages API.
 
     There is a limit of 100,000 messages in a single request.
     """
 
     model: Required[ModelParam]
-    """
-    The model that will complete your prompt.\n\nSee
-    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    """The model that will complete your prompt.
+
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
 
@@ -132,6 +140,42 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     This allows you to control how Claude manages context across multiple requests,
     such as whether to clear function results or not.
+    """
+
+    diagnostics: Optional[BetaDiagnosticsParam]
+    """Request-level diagnostics.
+
+    Currently carries the previous response id for prompt-cache divergence
+    reporting.
+    """
+
+    fallback_credit_token: Optional[str]
+    """The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+    When a preceding request was refused and returned a `fallback_credit_token`,
+    pass that code here on the retry to have the retry's cache-creation tokens for
+    the prefix that was warm on the refused model billed at the cache-read rate.
+    Must be redeemed by the same organization and workspace, with the same request
+    body (optionally extended by one appended `assistant` message whose content is
+    the partial text — with any trailing whitespace stripped from the final text
+    block — and paired server-tool blocks streamed before the refusal; the
+    appended-assistant form is not available for requests with `output_format` set
+    or forced `tool_choice`), on an eligible fallback model, on the same platform,
+    and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+    mid-server-tool-loop whose partial content was continuable may only be redeemed
+    with the appended-assistant form — if an exact-body retry is rejected with a 400
+    saying the token must be redeemed by continuing the partial response, retry with
+    the appended-assistant form instead.
+
+    When the appended-assistant form is used on a model that otherwise disallows
+    assistant-turn prefill, this token also authorizes that one prefill.
+    """
+
+    fallbacks: Optional[Iterable[BetaFallbackParam]]
+    """
+    Opt-in server-side retry on one or more substitute models when the requested
+    model declines for policy reasons. Tried in order: if the first entry also
+    declines, the second is tried, and so on.
     """
 
     inference_geo: Optional[str]
@@ -165,7 +209,8 @@ class MessageCreateParamsBase(TypedDict, total=False):
     for this request.
 
     Anthropic offers different levels of service for your API requests. See
-    [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+    [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
+    details.
     """
 
     speed: Optional[Literal["standard", "fast"]]
@@ -191,7 +236,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     A system prompt is a way of providing context and instructions to Claude, such
     as specifying a particular goal or role. See our
-    [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+    [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
     """
 
     temperature: float
@@ -213,7 +258,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     tokens and counts towards your `max_tokens` limit.
 
     See
-    [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+    [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
     for details.
     """
 
@@ -234,9 +279,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     There are two types of tools: **client tools** and **server tools**. The
     behavior described below applies to client tools. For
-    [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+    [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
     see their individual documentation as each has its own behavior (e.g., the
-    [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+    [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
     Each tool definition includes:
 
@@ -299,7 +344,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
     functions, or more generally whenever you want the model to produce a particular
     JSON structure of output.
 
-    See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+    See our
+    [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+    for more details.
     """
 
     top_k: int
@@ -308,8 +355,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     Used to remove "long tail" low probability responses.
     [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
 
-    Recommended for advanced use cases only. You usually only need to use
-    `temperature`.
+    Recommended for advanced use cases only.
     """
 
     top_p: float
@@ -317,15 +363,20 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     In nucleus sampling, we compute the cumulative distribution over all the options
     for each subsequent token in decreasing probability order and cut it off once it
-    reaches a particular probability specified by `top_p`. You should either alter
-    `temperature` or `top_p`, but not both.
+    reaches a particular probability specified by `top_p`.
 
-    Recommended for advanced use cases only. You usually only need to use
-    `temperature`.
+    Recommended for advanced use cases only.
     """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
+
+    user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]
+    """The user profile ID to attribute this request to.
+
+    Use when acting on behalf of a party other than your organization. Requires the
+    `user-profiles` beta header.
+    """
 
 
 Container: TypeAlias = Union[BetaContainerParams, str]
@@ -346,7 +397,8 @@ class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+    for details.
     """
 
 
@@ -354,7 +406,8 @@ class MessageCreateParamsStreaming(MessageCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+    for details.
     """
 
 

@@ -17,6 +17,7 @@ from ._client import (
     RequestOptions,
 )
 from ._models import BaseModel
+from ._request import APIRequest
 from ._version import __title__, __version__
 from ._response import APIResponse as APIResponse, AsyncAPIResponse as AsyncAPIResponse
 from ._constants import (
@@ -33,17 +34,30 @@ from ._exceptions import (
     AnthropicError,
     APIStatusError,
     RateLimitError,
+    RetryableError,
     APITimeoutError,
     BadRequestError,
+    OverloadedError,
     APIConnectionError,
     AuthenticationError,
     InternalServerError,
+    RequestTooLargeError,
     PermissionDeniedError,
     UnprocessableEntityError,
+    APIWebhookValidationError,
     APIResponseValidationError,
+)
+from ._middleware import (
+    CallNext,
+    Middleware,
+    AsyncCallNext,
+    MiddlewareInput,
+    MiddlewareCallable,
+    AsyncMiddlewareCallable,
 )
 from ._base_client import DefaultHttpxClient, DefaultAioHttpClient, DefaultAsyncHttpxClient
 from ._utils._logs import setup_logging as _setup_logging
+from .lib.middleware import BetaFallbackState, BetaRefusalFallbackMiddleware
 from .lib._parse._transform import transform_schema
 
 __all__ = [
@@ -64,14 +78,18 @@ __all__ = [
     "APITimeoutError",
     "APIConnectionError",
     "APIResponseValidationError",
+    "APIWebhookValidationError",
     "BadRequestError",
     "AuthenticationError",
     "PermissionDeniedError",
     "NotFoundError",
     "ConflictError",
+    "RequestTooLargeError",
     "UnprocessableEntityError",
     "RateLimitError",
     "InternalServerError",
+    "OverloadedError",
+    "RetryableError",
     "Timeout",
     "RequestOptions",
     "Client",
@@ -80,6 +98,15 @@ __all__ = [
     "AsyncStream",
     "Anthropic",
     "AsyncAnthropic",
+    "APIRequest",
+    "Middleware",
+    "MiddlewareInput",
+    "MiddlewareCallable",
+    "AsyncMiddlewareCallable",
+    "CallNext",
+    "AsyncCallNext",
+    "BetaFallbackState",
+    "BetaRefusalFallbackMiddleware",
     "file_from_path",
     "BaseModel",
     "DEFAULT_TIMEOUT",
@@ -104,6 +131,7 @@ from .lib.vertex import *
 from .lib.bedrock import *
 from .lib.foundry import AnthropicFoundry as AnthropicFoundry, AsyncAnthropicFoundry as AsyncAnthropicFoundry
 from .lib.streaming import *
+from .lib.credentials import *
 
 _setup_logging()
 

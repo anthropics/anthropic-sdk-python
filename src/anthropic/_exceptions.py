@@ -58,6 +58,10 @@ class APIResponseValidationError(APIError):
         self.status_code = response.status_code
 
 
+class APIWebhookValidationError(APIError):
+    pass
+
+
 class APIStatusError(APIError):
     """Raised when an API response has a status code of 4xx or 5xx."""
 
@@ -90,6 +94,15 @@ class APITimeoutError(APIConnectionError):
             message="Request timed out or interrupted. This could be due to a network timeout, dropped connection, or request cancellation. See https://docs.anthropic.com/en/api/errors#long-requests for more details.",
             request=request,
         )
+
+
+class RetryableError(AnthropicError):
+    """An error that opts into the SDK's retry policy: raise it (e.g. from
+    middleware) to have the request attempt retried.
+
+    The request is only retried while `max_retries` has not been exhausted;
+    once exhausted the error propagates to the caller as-is.
+    """
 
 
 class BadRequestError(APIStatusError):

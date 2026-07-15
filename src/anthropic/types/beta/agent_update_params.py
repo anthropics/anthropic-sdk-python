@@ -9,6 +9,7 @@ from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_model_param import BetaManagedAgentsModelParam
 from .beta_managed_agents_skill_params import BetaManagedAgentsSkillParams
+from .beta_managed_agents_multiagent_params import BetaManagedAgentsMultiagentParams
 from .beta_managed_agents_custom_tool_params import BetaManagedAgentsCustomToolParams
 from .beta_managed_agents_mcp_toolset_params import BetaManagedAgentsMCPToolsetParams
 from .beta_managed_agents_model_config_params import BetaManagedAgentsModelConfigParams
@@ -27,16 +28,15 @@ class AgentUpdateParams(TypedDict, total=False):
     """
 
     description: Optional[str]
-    """Description.
-
-    Up to 2048 characters. Omit to preserve; send empty string or null to clear.
-    """
+    """Description. Omit to preserve; send empty string or null to clear."""
 
     mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]]
     """MCP servers.
 
-    Full replacement. Omit to preserve; send empty array or null to clear. Names
-    must be unique. Maximum 20.
+    Full replacement. Omit to preserve; send empty array or `null` to clear. Names
+    must be unique. Maximum 20. Every server must be referenced by an `mcp_toolset`
+    in the agent's resulting `tools`; unreferenced servers are rejected. See the
+    [MCP connector guide](https://platform.claude.com/docs/en/managed-agents/mcp-connector).
     """
 
     metadata: Optional[Dict[str, Optional[str]]]
@@ -56,21 +56,20 @@ class AgentUpdateParams(TypedDict, total=False):
     control. Omit to preserve. Cannot be cleared.
     """
 
+    multiagent: Optional[BetaManagedAgentsMultiagentParams]
+    """
+    A coordinator topology: the session's primary thread orchestrates work by
+    spawning session threads, each running an agent drawn from the `agents` roster.
+    """
+
     name: str
-    """Human-readable name. 1-256 characters. Omit to preserve. Cannot be cleared."""
+    """Human-readable name. Must be non-empty. Omit to preserve. Cannot be cleared."""
 
     skills: Optional[Iterable[BetaManagedAgentsSkillParams]]
-    """Skills.
-
-    Full replacement. Omit to preserve; send empty array or null to clear.
-    Maximum 20.
-    """
+    """Skills. Full replacement. Omit to preserve; send empty array or null to clear."""
 
     system: Optional[str]
-    """System prompt.
-
-    Up to 100,000 characters. Omit to preserve; send empty string or null to clear.
-    """
+    """System prompt. Omit to preserve; send empty string or null to clear."""
 
     tools: Optional[Iterable[Tool]]
     """Tool configurations available to the agent.

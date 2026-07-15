@@ -10,7 +10,7 @@ import pytest
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
 from anthropic._utils import parse_datetime
-from anthropic.pagination import SyncPageCursor, AsyncPageCursor
+from anthropic.pagination import SyncBidirectionalPageCursor, AsyncBidirectionalPageCursor
 from anthropic.types.beta import (
     BetaManagedAgentsSession,
     BetaManagedAgentsDeletedSession,
@@ -132,6 +132,31 @@ class TestSessions:
     def test_method_update_with_all_params(self, client: Anthropic) -> None:
         session = client.beta.sessions.update(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            agent={
+                "mcp_servers": [
+                    {
+                        "name": "example-mcp",
+                        "type": "url",
+                        "url": "https://example-server.modelcontextprotocol.io/sse",
+                    }
+                ],
+                "tools": [
+                    {
+                        "type": "agent_toolset_20260401",
+                        "configs": [
+                            {
+                                "name": "bash",
+                                "enabled": True,
+                                "permission_policy": {"type": "always_allow"},
+                            }
+                        ],
+                        "default_config": {
+                            "enabled": True,
+                            "permission_policy": {"type": "always_allow"},
+                        },
+                    }
+                ],
+            },
             metadata={"foo": "string"},
             title="Order #1234 inquiry",
             vault_ids=["string"],
@@ -174,7 +199,7 @@ class TestSessions:
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         session = client.beta.sessions.list()
-        assert_matches_type(SyncPageCursor[BetaManagedAgentsSession], session, path=["response"])
+        assert_matches_type(SyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
     @parametrize
@@ -186,13 +211,16 @@ class TestSessions:
             created_at_gte=parse_datetime("2019-12-27T18:11:19.117Z"),
             created_at_lt=parse_datetime("2019-12-27T18:11:19.117Z"),
             created_at_lte=parse_datetime("2019-12-27T18:11:19.117Z"),
+            deployment_id="deployment_id",
             include_archived=True,
             limit=0,
+            memory_store_id="memory_store_id",
             order="asc",
             page="page",
+            statuses=["rescheduling"],
             betas=["string"],
         )
-        assert_matches_type(SyncPageCursor[BetaManagedAgentsSession], session, path=["response"])
+        assert_matches_type(SyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
     @parametrize
@@ -202,7 +230,7 @@ class TestSessions:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         session = response.parse()
-        assert_matches_type(SyncPageCursor[BetaManagedAgentsSession], session, path=["response"])
+        assert_matches_type(SyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
     @parametrize
@@ -212,7 +240,7 @@ class TestSessions:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             session = response.parse()
-            assert_matches_type(SyncPageCursor[BetaManagedAgentsSession], session, path=["response"])
+            assert_matches_type(SyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -424,6 +452,31 @@ class TestAsyncSessions:
     async def test_method_update_with_all_params(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.update(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            agent={
+                "mcp_servers": [
+                    {
+                        "name": "example-mcp",
+                        "type": "url",
+                        "url": "https://example-server.modelcontextprotocol.io/sse",
+                    }
+                ],
+                "tools": [
+                    {
+                        "type": "agent_toolset_20260401",
+                        "configs": [
+                            {
+                                "name": "bash",
+                                "enabled": True,
+                                "permission_policy": {"type": "always_allow"},
+                            }
+                        ],
+                        "default_config": {
+                            "enabled": True,
+                            "permission_policy": {"type": "always_allow"},
+                        },
+                    }
+                ],
+            },
             metadata={"foo": "string"},
             title="Order #1234 inquiry",
             vault_ids=["string"],
@@ -466,7 +519,7 @@ class TestAsyncSessions:
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.list()
-        assert_matches_type(AsyncPageCursor[BetaManagedAgentsSession], session, path=["response"])
+        assert_matches_type(AsyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
     @parametrize
@@ -478,13 +531,16 @@ class TestAsyncSessions:
             created_at_gte=parse_datetime("2019-12-27T18:11:19.117Z"),
             created_at_lt=parse_datetime("2019-12-27T18:11:19.117Z"),
             created_at_lte=parse_datetime("2019-12-27T18:11:19.117Z"),
+            deployment_id="deployment_id",
             include_archived=True,
             limit=0,
+            memory_store_id="memory_store_id",
             order="asc",
             page="page",
+            statuses=["rescheduling"],
             betas=["string"],
         )
-        assert_matches_type(AsyncPageCursor[BetaManagedAgentsSession], session, path=["response"])
+        assert_matches_type(AsyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
     @parametrize
@@ -494,7 +550,7 @@ class TestAsyncSessions:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         session = response.parse()
-        assert_matches_type(AsyncPageCursor[BetaManagedAgentsSession], session, path=["response"])
+        assert_matches_type(AsyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
     @parametrize
@@ -504,7 +560,7 @@ class TestAsyncSessions:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             session = await response.parse()
-            assert_matches_type(AsyncPageCursor[BetaManagedAgentsSession], session, path=["response"])
+            assert_matches_type(AsyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 

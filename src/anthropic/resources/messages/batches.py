@@ -8,7 +8,7 @@ import httpx
 
 from ... import _legacy_response
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ..._utils import path_template, maybe_transform, async_maybe_transform
+from ..._utils import path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
@@ -48,6 +48,7 @@ class Batches(SyncAPIResource):
         self,
         *,
         requests: Iterable[batch_create_params.Request],
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -63,11 +64,16 @@ class Batches(SyncAPIResource):
         can take up to 24 hours to complete.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           requests: List of requests for prompt completion. Each is an individual request to create
               a Message.
+
+          user_profile_id: The user profile ID to attribute the requests in this batch to. Use when acting
+              on behalf of a party other than your organization. Requires the `user-profiles`
+              beta header. Applies to every request in the batch; an individual request whose
+              `user_profile_id` body field conflicts with this header is errored.
 
           extra_headers: Send extra headers
 
@@ -77,6 +83,7 @@ class Batches(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
         return self._post(
             "/v1/messages/batches",
             body=maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
@@ -104,7 +111,7 @@ class Batches(SyncAPIResource):
         `results_url` field in the response.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -146,7 +153,7 @@ class Batches(SyncAPIResource):
         returned first.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           after_id: ID of the object to use as a cursor for pagination. When provided, returns the
@@ -205,7 +212,7 @@ class Batches(SyncAPIResource):
         like to delete an in-progress batch, you must first cancel it.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -252,7 +259,7 @@ class Batches(SyncAPIResource):
         non-interruptible.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -294,7 +301,7 @@ class Batches(SyncAPIResource):
         requests. Use the `custom_id` field to match results to requests.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -351,6 +358,7 @@ class AsyncBatches(AsyncAPIResource):
         self,
         *,
         requests: Iterable[batch_create_params.Request],
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -366,11 +374,16 @@ class AsyncBatches(AsyncAPIResource):
         can take up to 24 hours to complete.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           requests: List of requests for prompt completion. Each is an individual request to create
               a Message.
+
+          user_profile_id: The user profile ID to attribute the requests in this batch to. Use when acting
+              on behalf of a party other than your organization. Requires the `user-profiles`
+              beta header. Applies to every request in the batch; an individual request whose
+              `user_profile_id` body field conflicts with this header is errored.
 
           extra_headers: Send extra headers
 
@@ -380,6 +393,7 @@ class AsyncBatches(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
         return await self._post(
             "/v1/messages/batches",
             body=await async_maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
@@ -407,7 +421,7 @@ class AsyncBatches(AsyncAPIResource):
         `results_url` field in the response.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -449,7 +463,7 @@ class AsyncBatches(AsyncAPIResource):
         returned first.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           after_id: ID of the object to use as a cursor for pagination. When provided, returns the
@@ -508,7 +522,7 @@ class AsyncBatches(AsyncAPIResource):
         like to delete an in-progress batch, you must first cancel it.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -555,7 +569,7 @@ class AsyncBatches(AsyncAPIResource):
         non-interruptible.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.
@@ -597,7 +611,7 @@ class AsyncBatches(AsyncAPIResource):
         requests. Use the `custom_id` field to match results to requests.
 
         Learn more about the Message Batches API in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
 
         Args:
           message_batch_id: ID of the Message Batch.

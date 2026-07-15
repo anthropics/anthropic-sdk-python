@@ -11,4 +11,7 @@ __all__ = ["BetaCompactionContentBlockDelta"]
 class BetaCompactionContentBlockDelta(BaseModel):
     content: Optional[str] = None
 
+    encrypted_content: Optional[str] = None
+    """Opaque metadata from prior compaction, to be round-tripped verbatim"""
+
     type: Literal["compaction_delta"]

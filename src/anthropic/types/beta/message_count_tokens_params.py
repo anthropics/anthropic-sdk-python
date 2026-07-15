@@ -24,8 +24,10 @@ from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param
 from .beta_web_fetch_tool_20260209_param import BetaWebFetchTool20260209Param
 from .beta_web_fetch_tool_20260309_param import BetaWebFetchTool20260309Param
+from .beta_web_fetch_tool_20260318_param import BetaWebFetchTool20260318Param
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
 from .beta_web_search_tool_20260209_param import BetaWebSearchTool20260209Param
+from .beta_web_search_tool_20260318_param import BetaWebSearchTool20260318Param
 from .beta_context_management_config_param import BetaContextManagementConfigParam
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param
 from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param
@@ -37,6 +39,7 @@ from .beta_tool_computer_use_20251124_param import BetaToolComputerUse20251124Pa
 from .beta_code_execution_tool_20250522_param import BetaCodeExecutionTool20250522Param
 from .beta_code_execution_tool_20250825_param import BetaCodeExecutionTool20250825Param
 from .beta_code_execution_tool_20260120_param import BetaCodeExecutionTool20260120Param
+from .beta_code_execution_tool_20260521_param import BetaCodeExecutionTool20260521Param
 from .beta_tool_search_tool_bm25_20251119_param import BetaToolSearchToolBm25_20251119Param
 from .beta_tool_search_tool_regex_20251119_param import BetaToolSearchToolRegex20251119Param
 from .beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
@@ -103,20 +106,21 @@ class MessageCountTokensParams(TypedDict, total=False):
     { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
     ```
 
-    See [input examples](https://docs.claude.com/en/api/messages-examples).
+    See
+    [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
     Note that if you want to include a
-    [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-    top-level `system` parameter — there is no `"system"` role for input messages in
-    the Messages API.
+    [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+    you can use the top-level `system` parameter — there is no `"system"` role for
+    input messages in the Messages API.
 
     There is a limit of 100,000 messages in a single request.
     """
 
     model: Required[ModelParam]
-    """
-    The model that will complete your prompt.\n\nSee
-    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    """The model that will complete your prompt.
+
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
 
@@ -160,7 +164,7 @@ class MessageCountTokensParams(TypedDict, total=False):
 
     A system prompt is a way of providing context and instructions to Claude, such
     as specifying a particular goal or role. See our
-    [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+    [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
     """
 
     thinking: BetaThinkingConfigParam
@@ -171,7 +175,7 @@ class MessageCountTokensParams(TypedDict, total=False):
     tokens and counts towards your `max_tokens` limit.
 
     See
-    [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+    [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
     for details.
     """
 
@@ -192,9 +196,9 @@ class MessageCountTokensParams(TypedDict, total=False):
 
     There are two types of tools: **client tools** and **server tools**. The
     behavior described below applies to client tools. For
-    [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+    [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
     see their individual documentation as each has its own behavior (e.g., the
-    [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+    [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
     Each tool definition includes:
 
@@ -257,11 +261,20 @@ class MessageCountTokensParams(TypedDict, total=False):
     functions, or more generally whenever you want the model to produce a particular
     JSON structure of output.
 
-    See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+    See our
+    [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+    for more details.
     """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""
+
+    user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]
+    """The user profile ID to attribute this request to.
+
+    Use when acting on behalf of a party other than your organization. Requires the
+    `user-profiles` beta header.
+    """
 
 
 Tool: TypeAlias = Union[
@@ -271,6 +284,7 @@ Tool: TypeAlias = Union[
     BetaCodeExecutionTool20250522Param,
     BetaCodeExecutionTool20250825Param,
     BetaCodeExecutionTool20260120Param,
+    BetaCodeExecutionTool20260521Param,
     BetaToolComputerUse20241022Param,
     BetaMemoryTool20250818Param,
     BetaToolComputerUse20250124Param,
@@ -284,6 +298,8 @@ Tool: TypeAlias = Union[
     BetaWebSearchTool20260209Param,
     BetaWebFetchTool20260209Param,
     BetaWebFetchTool20260309Param,
+    BetaWebSearchTool20260318Param,
+    BetaWebFetchTool20260318Param,
     BetaAdvisorTool20260301Param,
     BetaToolSearchToolBm25_20251119Param,
     BetaToolSearchToolRegex20251119Param,

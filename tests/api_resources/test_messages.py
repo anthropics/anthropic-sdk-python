@@ -118,6 +118,7 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -257,6 +258,7 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
+            user_profile_id="anthropic-user-profile-id",
         )
         message_stream.response.close()
 
@@ -314,11 +316,11 @@ class TestMessages:
         message = client.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -327,11 +329,11 @@ class TestMessages:
         message = client.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -395,6 +397,7 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -403,11 +406,11 @@ class TestMessages:
         response = client.messages.with_raw_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
 
         assert response.is_closed is True
@@ -420,11 +423,11 @@ class TestMessages:
         with client.messages.with_streaming_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -537,6 +540,7 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -676,6 +680,7 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
+            user_profile_id="anthropic-user-profile-id",
         )
         await message_stream.response.aclose()
 
@@ -733,11 +738,11 @@ class TestAsyncMessages:
         message = await async_client.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -746,11 +751,11 @@ class TestAsyncMessages:
         message = await async_client.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -814,6 +819,7 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -822,11 +828,11 @@ class TestAsyncMessages:
         response = await async_client.messages.with_raw_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
 
         assert response.is_closed is True
@@ -839,11 +845,11 @@ class TestAsyncMessages:
         async with async_client.messages.with_streaming_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

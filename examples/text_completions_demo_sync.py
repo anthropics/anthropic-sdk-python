@@ -1,4 +1,4 @@
-#!/usr/bin/env -S poetry run python
+#!/usr/bin/env -S uv run python
 
 import anthropic
 from anthropic import Anthropic
@@ -8,7 +8,7 @@ def main() -> None:
     client = Anthropic()
 
     res = client.completions.create(
-        model="claude-sonnet-4-5-20250929",
+        model="claude-sonnet-5",
         prompt=f"{anthropic.HUMAN_PROMPT} how does a court case get to the Supreme Court? {anthropic.AI_PROMPT}",
         max_tokens_to_sample=1000,
     )

@@ -17,7 +17,7 @@ def main() -> None:
     # Create an agent
     agent = anthropic.beta.agents.create(
         name="simple-example-agent",
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5",
     )
     print("Created agent:", agent.id)
 

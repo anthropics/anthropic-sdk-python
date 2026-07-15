@@ -31,11 +31,20 @@ class SessionListParams(TypedDict, total=False):
     created_at_lte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lte]", format="iso8601")]
     """Return sessions created at or before this time (inclusive)."""
 
+    deployment_id: str
+    """Filter sessions created by this deployment ID."""
+
     include_archived: bool
     """When true, includes archived sessions. Default: false (exclude archived)."""
 
     limit: int
     """Maximum number of results to return."""
+
+    memory_store_id: str
+    """
+    Filter sessions whose resources contain a memory_store with this memory store
+    ID.
+    """
 
     order: Literal["asc", "desc"]
     """Sort direction for results, ordered by created_at.
@@ -44,7 +53,13 @@ class SessionListParams(TypedDict, total=False):
     """
 
     page: str
-    """Opaque pagination cursor from a previous response's next_page."""
+    """Opaque pagination cursor from a previous response."""
+
+    statuses: List[Literal["rescheduling", "running", "idle", "terminated"]]
+    """Filter by session status.
+
+    Repeat the parameter to match any of multiple statuses.
+    """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""

@@ -68,7 +68,7 @@ def main() -> None:
     ]
     runner = client.beta.messages.tool_runner(
         max_tokens=1024,
-        model="claude-sonnet-4-5-20250929",
+        model="claude-sonnet-5",
         tools=[*tools, make_tool_searcher(tools)],
         messages=[{"role": "user", "content": "What is the weather in SF?"}],
         betas=["tool-search-tool-2025-10-19"],

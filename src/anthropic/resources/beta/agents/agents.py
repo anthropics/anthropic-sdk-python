@@ -23,11 +23,18 @@ from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
 from ....pagination import SyncPageCursor, AsyncPageCursor
-from ....types.beta import agent_list_params, agent_create_params, agent_update_params, agent_retrieve_params
+from ....types.beta import (
+    BetaManagedAgentsMultiagentParams,
+    agent_list_params,
+    agent_create_params,
+    agent_update_params,
+    agent_retrieve_params,
+)
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_managed_agents_agent import BetaManagedAgentsAgent
 from ....types.beta.beta_managed_agents_skill_params import BetaManagedAgentsSkillParams
+from ....types.beta.beta_managed_agents_multiagent_params import BetaManagedAgentsMultiagentParams
 from ....types.beta.beta_managed_agents_url_mcp_server_params import BetaManagedAgentsURLMCPServerParams
 
 __all__ = ["Agents", "AsyncAgents"]
@@ -65,6 +72,7 @@ class Agents(SyncAPIResource):
         description: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaManagedAgentsURLMCPServerParams] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
+        multiagent: Optional[BetaManagedAgentsMultiagentParams] | Omit = omit,
         skills: Iterable[BetaManagedAgentsSkillParams] | Omit = omit,
         system: Optional[str] | Omit = omit,
         tools: Iterable[agent_create_params.Tool] | Omit = omit,
@@ -86,19 +94,24 @@ class Agents(SyncAPIResource):
               e.g. `claude-opus-4-6`, or a `model_config` object for additional configuration
               control
 
-          name: Human-readable name for the agent. 1-256 characters.
+          name: Human-readable name for the agent.
 
-          description: Description of what the agent does. Up to 2048 characters.
+          description: Description of what the agent does.
 
           mcp_servers: MCP servers this agent connects to. Maximum 20. Names must be unique within the
-              array.
+              array. Every server must be referenced by an `mcp_toolset` in `tools`;
+              unreferenced servers are rejected. See the
+              [MCP connector guide](https://platform.claude.com/docs/en/managed-agents/mcp-connector).
 
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
 
-          skills: Skills available to the agent. Maximum 20.
+          multiagent: A coordinator topology: the session's primary thread orchestrates work by
+              spawning session threads, each running an agent drawn from the `agents` roster.
 
-          system: System prompt for the agent. Up to 100,000 characters.
+          skills: Skills available to the agent.
+
+          system: System prompt for the agent.
 
           tools: Tool configurations available to the agent. Maximum of 128 tools across all
               toolsets allowed.
@@ -133,6 +146,7 @@ class Agents(SyncAPIResource):
                     "description": description,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "multiagent": multiagent,
                     "skills": skills,
                     "system": system,
                     "tools": tools,
@@ -210,6 +224,7 @@ class Agents(SyncAPIResource):
         mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]] | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         model: agent_update_params.Model | Omit = omit,
+        multiagent: Optional[BetaManagedAgentsMultiagentParams] | Omit = omit,
         name: str | Omit = omit,
         skills: Optional[Iterable[BetaManagedAgentsSkillParams]] | Omit = omit,
         system: Optional[str] | Omit = omit,
@@ -230,11 +245,13 @@ class Agents(SyncAPIResource):
               value from a create or retrieve response. The request fails if this does not
               match the server's current version.
 
-          description: Description. Up to 2048 characters. Omit to preserve; send empty string or null
-              to clear.
+          description: Description. Omit to preserve; send empty string or null to clear.
 
-          mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or null to
-              clear. Names must be unique. Maximum 20.
+          mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
+              clear. Names must be unique. Maximum 20. Every server must be referenced by an
+              `mcp_toolset` in the agent's resulting `tools`; unreferenced servers are
+              rejected. See the
+              [MCP connector guide](https://platform.claude.com/docs/en/managed-agents/mcp-connector).
 
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars
@@ -245,13 +262,14 @@ class Agents(SyncAPIResource):
               e.g. `claude-opus-4-6`, or a `model_config` object for additional configuration
               control. Omit to preserve. Cannot be cleared.
 
-          name: Human-readable name. 1-256 characters. Omit to preserve. Cannot be cleared.
+          multiagent: A coordinator topology: the session's primary thread orchestrates work by
+              spawning session threads, each running an agent drawn from the `agents` roster.
+
+          name: Human-readable name. Must be non-empty. Omit to preserve. Cannot be cleared.
 
           skills: Skills. Full replacement. Omit to preserve; send empty array or null to clear.
-              Maximum 20.
 
-          system: System prompt. Up to 100,000 characters. Omit to preserve; send empty string or
-              null to clear.
+          system: System prompt. Omit to preserve; send empty string or null to clear.
 
           tools: Tool configurations available to the agent. Full replacement. Omit to preserve;
               send empty array or null to clear. Maximum of 128 tools across all toolsets
@@ -289,6 +307,7 @@ class Agents(SyncAPIResource):
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
                     "model": model,
+                    "multiagent": multiagent,
                     "name": name,
                     "skills": skills,
                     "system": system,
@@ -455,6 +474,7 @@ class AsyncAgents(AsyncAPIResource):
         description: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaManagedAgentsURLMCPServerParams] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
+        multiagent: Optional[BetaManagedAgentsMultiagentParams] | Omit = omit,
         skills: Iterable[BetaManagedAgentsSkillParams] | Omit = omit,
         system: Optional[str] | Omit = omit,
         tools: Iterable[agent_create_params.Tool] | Omit = omit,
@@ -476,19 +496,24 @@ class AsyncAgents(AsyncAPIResource):
               e.g. `claude-opus-4-6`, or a `model_config` object for additional configuration
               control
 
-          name: Human-readable name for the agent. 1-256 characters.
+          name: Human-readable name for the agent.
 
-          description: Description of what the agent does. Up to 2048 characters.
+          description: Description of what the agent does.
 
           mcp_servers: MCP servers this agent connects to. Maximum 20. Names must be unique within the
-              array.
+              array. Every server must be referenced by an `mcp_toolset` in `tools`;
+              unreferenced servers are rejected. See the
+              [MCP connector guide](https://platform.claude.com/docs/en/managed-agents/mcp-connector).
 
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
 
-          skills: Skills available to the agent. Maximum 20.
+          multiagent: A coordinator topology: the session's primary thread orchestrates work by
+              spawning session threads, each running an agent drawn from the `agents` roster.
 
-          system: System prompt for the agent. Up to 100,000 characters.
+          skills: Skills available to the agent.
+
+          system: System prompt for the agent.
 
           tools: Tool configurations available to the agent. Maximum of 128 tools across all
               toolsets allowed.
@@ -523,6 +548,7 @@ class AsyncAgents(AsyncAPIResource):
                     "description": description,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
+                    "multiagent": multiagent,
                     "skills": skills,
                     "system": system,
                     "tools": tools,
@@ -600,6 +626,7 @@ class AsyncAgents(AsyncAPIResource):
         mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]] | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         model: agent_update_params.Model | Omit = omit,
+        multiagent: Optional[BetaManagedAgentsMultiagentParams] | Omit = omit,
         name: str | Omit = omit,
         skills: Optional[Iterable[BetaManagedAgentsSkillParams]] | Omit = omit,
         system: Optional[str] | Omit = omit,
@@ -620,11 +647,13 @@ class AsyncAgents(AsyncAPIResource):
               value from a create or retrieve response. The request fails if this does not
               match the server's current version.
 
-          description: Description. Up to 2048 characters. Omit to preserve; send empty string or null
-              to clear.
+          description: Description. Omit to preserve; send empty string or null to clear.
 
-          mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or null to
-              clear. Names must be unique. Maximum 20.
+          mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
+              clear. Names must be unique. Maximum 20. Every server must be referenced by an
+              `mcp_toolset` in the agent's resulting `tools`; unreferenced servers are
+              rejected. See the
+              [MCP connector guide](https://platform.claude.com/docs/en/managed-agents/mcp-connector).
 
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars
@@ -635,13 +664,14 @@ class AsyncAgents(AsyncAPIResource):
               e.g. `claude-opus-4-6`, or a `model_config` object for additional configuration
               control. Omit to preserve. Cannot be cleared.
 
-          name: Human-readable name. 1-256 characters. Omit to preserve. Cannot be cleared.
+          multiagent: A coordinator topology: the session's primary thread orchestrates work by
+              spawning session threads, each running an agent drawn from the `agents` roster.
+
+          name: Human-readable name. Must be non-empty. Omit to preserve. Cannot be cleared.
 
           skills: Skills. Full replacement. Omit to preserve; send empty array or null to clear.
-              Maximum 20.
 
-          system: System prompt. Up to 100,000 characters. Omit to preserve; send empty string or
-              null to clear.
+          system: System prompt. Omit to preserve; send empty string or null to clear.
 
           tools: Tool configurations available to the agent. Full replacement. Omit to preserve;
               send empty array or null to clear. Maximum of 128 tools across all toolsets
@@ -679,6 +709,7 @@ class AsyncAgents(AsyncAPIResource):
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
                     "model": model,
+                    "multiagent": multiagent,
                     "name": name,
                     "skills": skills,
                     "system": system,

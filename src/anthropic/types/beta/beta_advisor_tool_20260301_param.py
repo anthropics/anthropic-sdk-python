@@ -13,9 +13,9 @@ __all__ = ["BetaAdvisorTool20260301Param"]
 
 class BetaAdvisorTool20260301Param(TypedDict, total=False):
     model: Required[ModelParam]
-    """
-    The model that will complete your prompt.\n\nSee
-    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    """The model that will complete your prompt.
+
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
 
@@ -27,7 +27,9 @@ class BetaAdvisorTool20260301Param(TypedDict, total=False):
 
     type: Required[Literal["advisor_20260301"]]
 
-    allowed_callers: List[Literal["direct", "code_execution_20250825", "code_execution_20260120"]]
+    allowed_callers: List[
+        Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
+    ]
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
@@ -44,6 +46,18 @@ class BetaAdvisorTool20260301Param(TypedDict, total=False):
     """If true, tool will not be included in initial system prompt.
 
     Only loaded when returned via tool_reference from tool search.
+    """
+
+    max_tokens: Optional[int]
+    """Bounds the advisor's total output (thinking + text) per call.
+
+    When the advisor hits this cap, the returned advisor_result or
+    advisor_redacted_result block carries stop_reason='max_tokens', and a truncation
+    note is appended to the advice text the worker model sees (inside the encrypted
+    blob in redacted mode). When set, the server also emits a remaining-tokens
+    budget block in the advisor's prompt so the advisor self-shapes toward the cap.
+    When omitted, the advisor model's default output cap applies and no budget block
+    is emitted.
     """
 
     max_uses: Optional[int]

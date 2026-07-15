@@ -12,11 +12,14 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.repository == 'anthropics/anthropic-sdk-python'
     runs-on: ubuntu-latest
     environment: production-release
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: stainless-api/trigger-release-please@v1
+      - uses: stainless-api/trigger-release-please@bb6677c5a04578eec1ccfd9e1913b5b78ed64c61 # v1.4.0
         id: release
         with:
           repo: ${{ github.event.repository.full_name }}
@@ -24,7 +27,7 @@ jobs:
 
       - name: Install uv
         if: ${{ steps.release.outputs.releases_created }}
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           version: '0.9.13'
 
@@ -32,5 +35,3 @@ jobs:
         if: ${{ steps.release.outputs.releases_created }}
         run: |
           bash ./bin/publish-pypi
-        env:
-          PYPI_TOKEN: ${{ secrets.ANTHROPIC_PYPI_TOKEN || secrets.PYPI_TOKEN }}

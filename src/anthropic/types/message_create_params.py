@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from typing import Union, Iterable, Optional
-from typing_extensions import Literal, Required, TypeAlias, TypedDict
+from typing_extensions import Literal, Required, Annotated, TypeAlias, TypedDict
 
 from .._types import SequenceNotStr
+from .._utils import PropertyInfo
 from .model_param import ModelParam
 from .message_param import MessageParam
 from .metadata_param import MetadataParam
@@ -38,8 +39,13 @@ class MessageCreateParamsBase(TypedDict, total=False):
     Note that our models may stop _before_ reaching this maximum. This parameter
     only specifies the absolute maximum number of tokens to generate.
 
+    Set to `0` to populate the
+    [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache)
+    without generating a response.
+
     Different models have different maximum values for this parameter. See
-    [models](https://docs.claude.com/en/docs/models-overview) for details.
+    [models](https://platform.claude.com/docs/en/about-claude/models/overview) for
+    details.
     """
 
     messages: Required[Iterable[MessageParam]]
@@ -100,20 +106,21 @@ class MessageCreateParamsBase(TypedDict, total=False):
     { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
     ```
 
-    See [input examples](https://docs.claude.com/en/api/messages-examples).
+    See
+    [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
     Note that if you want to include a
-    [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-    top-level `system` parameter — there is no `"system"` role for input messages in
-    the Messages API.
+    [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+    you can use the top-level `system` parameter — there is no `"system"` role for
+    input messages in the Messages API.
 
     There is a limit of 100,000 messages in a single request.
     """
 
     model: Required[ModelParam]
-    """
-    The model that will complete your prompt.\n\nSee
-    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    """The model that will complete your prompt.
+
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
 
@@ -144,7 +151,8 @@ class MessageCreateParamsBase(TypedDict, total=False):
     for this request.
 
     Anthropic offers different levels of service for your API requests. See
-    [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+    [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
+    details.
     """
 
     stop_sequences: SequenceNotStr[str]
@@ -164,7 +172,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     A system prompt is a way of providing context and instructions to Claude, such
     as specifying a particular goal or role. See our
-    [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+    [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
     """
 
     temperature: float
@@ -186,7 +194,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     tokens and counts towards your `max_tokens` limit.
 
     See
-    [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+    [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
     for details.
     """
 
@@ -207,9 +215,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     There are two types of tools: **client tools** and **server tools**. The
     behavior described below applies to client tools. For
-    [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+    [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
     see their individual documentation as each has its own behavior (e.g., the
-    [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+    [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
     Each tool definition includes:
 
@@ -272,7 +280,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
     functions, or more generally whenever you want the model to produce a particular
     JSON structure of output.
 
-    See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+    See our
+    [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+    for more details.
     """
 
     top_k: int
@@ -281,8 +291,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     Used to remove "long tail" low probability responses.
     [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
 
-    Recommended for advanced use cases only. You usually only need to use
-    `temperature`.
+    Recommended for advanced use cases only.
     """
 
     top_p: float
@@ -290,11 +299,16 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     In nucleus sampling, we compute the cumulative distribution over all the options
     for each subsequent token in decreasing probability order and cut it off once it
-    reaches a particular probability specified by `top_p`. You should either alter
-    `temperature` or `top_p`, but not both.
+    reaches a particular probability specified by `top_p`.
 
-    Recommended for advanced use cases only. You usually only need to use
-    `temperature`.
+    Recommended for advanced use cases only.
+    """
+
+    user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]
+    """The user profile ID to attribute this request to.
+
+    Use when acting on behalf of a party other than your organization. Requires the
+    `user-profiles` beta header.
     """
 
 
@@ -318,7 +332,8 @@ class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+    for details.
     """
 
 
@@ -326,7 +341,8 @@ class MessageCreateParamsStreaming(MessageCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+    for details.
     """
 
 

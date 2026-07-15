@@ -16,6 +16,7 @@ from .versions import (
     VersionsWithStreamingResponse,
     AsyncVersionsWithStreamingResponse,
 )
+from ...._files import deepcopy_with_paths
 from ...._types import (
     Body,
     Omit,
@@ -27,15 +28,7 @@ from ...._types import (
     omit,
     not_given,
 )
-from ...._utils import (
-    is_given,
-    extract_files,
-    path_template,
-    maybe_transform,
-    strip_not_given,
-    deepcopy_minimal,
-    async_maybe_transform,
-)
+from ...._utils import is_given, extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
@@ -78,8 +71,8 @@ class Skills(SyncAPIResource):
     def create(
         self,
         *,
+        files: SequenceNotStr[FileTypes],
         display_title: Optional[str] | Omit = omit,
-        files: Optional[SequenceNotStr[FileTypes]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -92,15 +85,15 @@ class Skills(SyncAPIResource):
         Create Skill
 
         Args:
-          display_title: Display title for the skill.
-
-              This is a human-readable label that is not included in the prompt sent to the
-              model.
-
           files: Files to upload for the skill.
 
               All files must be in the same top-level directory and must include a SKILL.md
               file at the root of that directory.
+
+          display_title: Display title for the skill.
+
+              This is a human-readable label that is not included in the prompt sent to the
+              model.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -123,11 +116,12 @@ class Skills(SyncAPIResource):
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
-        body = deepcopy_minimal(
+        body = deepcopy_with_paths(
             {
-                "display_title": display_title,
                 "files": files,
-            }
+                "display_title": display_title,
+            },
+            [["files", "<array>"]],
         )
         extracted_files = extract_files(cast(Mapping[str, object], body), paths=[["files", "<array>"]])
         # It should be noted that the actual Content-Type header that will be
@@ -349,8 +343,8 @@ class AsyncSkills(AsyncAPIResource):
     async def create(
         self,
         *,
+        files: SequenceNotStr[FileTypes],
         display_title: Optional[str] | Omit = omit,
-        files: Optional[SequenceNotStr[FileTypes]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -363,15 +357,15 @@ class AsyncSkills(AsyncAPIResource):
         Create Skill
 
         Args:
-          display_title: Display title for the skill.
-
-              This is a human-readable label that is not included in the prompt sent to the
-              model.
-
           files: Files to upload for the skill.
 
               All files must be in the same top-level directory and must include a SKILL.md
               file at the root of that directory.
+
+          display_title: Display title for the skill.
+
+              This is a human-readable label that is not included in the prompt sent to the
+              model.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -394,11 +388,12 @@ class AsyncSkills(AsyncAPIResource):
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
-        body = deepcopy_minimal(
+        body = deepcopy_with_paths(
             {
-                "display_title": display_title,
                 "files": files,
-            }
+                "display_title": display_title,
+            },
+            [["files", "<array>"]],
         )
         extracted_files = extract_files(cast(Mapping[str, object], body), paths=[["files", "<array>"]])
         # It should be noted that the actual Content-Type header that will be

@@ -253,7 +253,7 @@ class TestAnthropic:
             client.__init__,  # type: ignore[misc]
         )
         copy_signature = inspect.signature(client.copy)
-        exclude_params = {"transport", "proxies", "_strict_response_validation"}
+        exclude_params = {"transport", "proxies", "_strict_response_validation", "_token_cache"}
 
         for name in init_signature.parameters.keys():
             if name in exclude_params:
@@ -421,12 +421,13 @@ class TestAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
-            client2 = Anthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
+        with mock.patch("anthropic._client.default_credentials", return_value=None):
+            with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
+                client2 = Anthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 
@@ -532,6 +533,88 @@ class TestAnthropic:
             ),
         )
         assert request.headers.get("X-Bar") == "false"
+
+    def test_request_extra_headers_httpx_headers(self, client: Anthropic) -> None:
+        # `httpx.Headers` is accepted anywhere a header mapping is, in addition to a plain dict
+        request = client.with_options(default_headers=httpx.Headers({"X-Bar": "true"}))._build_request(
+            FinalRequestOptions(
+                method="post",
+                url="/foo",
+                **make_request_options(extra_headers=httpx.Headers({"X-Foo": "Foo", "X-Bar": "false"})),
+            ),
+        )
+        assert request.headers.get("X-Foo") == "Foo"
+        # `extra_headers` still takes priority over `default_headers` when keys clash
+        assert request.headers.get("X-Bar") == "false"
+
+    def test_request_x_stainless_helper_header_appends(self, client: Anthropic) -> None:
+        # `x-stainless-helper` accumulates across mappings instead of being clobbered,
+        # so a helper set on the client and one passed per-request both survive.
+        request = client.with_options(default_headers={"x-stainless-helper": "session_runner"})._build_request(
+            FinalRequestOptions(
+                method="post",
+                url="/foo",
+                **make_request_options(extra_headers={"x-stainless-helper": "message_batches"}),
+            ),
+        )
+        assert request.headers.get("x-stainless-helper") == "session_runner, message_batches"
+
+    def test_request_x_stainless_helper_header_dedupes(self, client: Anthropic) -> None:
+        # the same helper set in both places is recorded once
+        request = client.with_options(default_headers={"x-stainless-helper": "session_runner"})._build_request(
+            FinalRequestOptions(
+                method="post",
+                url="/foo",
+                **make_request_options(extra_headers={"x-stainless-helper": "session_runner"}),
+            ),
+        )
+        assert request.headers.get("x-stainless-helper") == "session_runner"
+
+    def test_request_x_stainless_helper_header_collapses_case_variants(self, client: Anthropic) -> None:
+        # differently-cased duplicates of the helper header fold into a single
+        # deduplicated value instead of being sent as conflicting entries
+        copied = client.with_options(
+            default_headers={"X-Stainless-Helper": "parent", "x-stainless-helper": "scoped"},
+        )
+        request = copied._build_request(
+            FinalRequestOptions(
+                method="post",
+                url="/foo",
+                **make_request_options(extra_headers={"x-stainless-helper": "message_batches"}),
+            ),
+        )
+        assert request.headers.get("x-stainless-helper") == "parent, scoped, message_batches"
+
+    def test_request_x_stainless_helper_header_dedupes_multi_value(self, client: Anthropic) -> None:
+        # comma-separated values (e.g. several tagged tools) are deduplicated per token
+        copied = client.with_options(default_headers={"x-stainless-helper": "session_runner, memory_tool"})
+        request = copied._build_request(
+            FinalRequestOptions(
+                method="post",
+                url="/foo",
+                **make_request_options(extra_headers={"x-stainless-helper": "memory_tool, message_batches"}),
+            ),
+        )
+        assert request.headers.get("x-stainless-helper") == "session_runner, memory_tool, message_batches"
+
+    def test_copy_x_stainless_helper_header_appends(self, client: Anthropic) -> None:
+        # stacking `default_headers` via copy()/with_options accumulates the
+        # helper instead of clobbering, so e.g. a scoped sub-client's tag adds to
+        # one already carried by the parent.
+        copied = client.with_options(default_headers={"x-stainless-helper": "parent"}).with_options(
+            default_headers={"x-stainless-helper": "child"}
+        )
+        request = copied._build_request(FinalRequestOptions(method="post", url="/foo"))
+        assert request.headers.get("x-stainless-helper") == "parent, child"
+
+    def test_copy_preserves_header_removal(self, client: Anthropic) -> None:
+        # an Omit removal set on the client still survives a subsequent copy()
+        copied = client.with_options(
+            default_headers=cast("dict[str, str]", {"X-Foo": Omit()}),
+        ).with_options(default_headers={"X-Bar": "true"})
+        request = copied._build_request(FinalRequestOptions(method="post", url="/foo"))
+        assert request.headers.get("X-Foo") is None
+        assert request.headers.get("X-Bar") == "true"
 
     def test_request_extra_query(self, client: Anthropic) -> None:
         request = client._build_request(
@@ -1280,7 +1363,7 @@ class TestAsyncAnthropic:
             async_client.__init__,  # type: ignore[misc]
         )
         copy_signature = inspect.signature(async_client.copy)
-        exclude_params = {"transport", "proxies", "_strict_response_validation"}
+        exclude_params = {"transport", "proxies", "_strict_response_validation", "_token_cache"}
 
         for name in init_signature.parameters.keys():
             if name in exclude_params:
@@ -1450,12 +1533,13 @@ class TestAsyncAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
-            client2 = AsyncAnthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
+        with mock.patch("anthropic._client.default_credentials", return_value=None):
+            with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
+                client2 = AsyncAnthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 
@@ -1561,6 +1645,88 @@ class TestAsyncAnthropic:
             ),
         )
         assert request.headers.get("X-Bar") == "false"
+
+    def test_request_extra_headers_httpx_headers(self, async_client: AsyncAnthropic) -> None:
+        # `httpx.Headers` is accepted anywhere a header mapping is, in addition to a plain dict
+        request = async_client.with_options(default_headers=httpx.Headers({"X-Bar": "true"}))._build_request(
+            FinalRequestOptions(
+                method="post",
+                url="/foo",
+                **make_request_options(extra_headers=httpx.Headers({"X-Foo": "Foo", "X-Bar": "false"})),
+            ),
+        )
+        assert request.headers.get("X-Foo") == "Foo"
+        # `extra_headers` still takes priority over `default_headers` when keys clash
+        assert request.headers.get("X-Bar") == "false"
+
+    def test_request_x_stainless_helper_header_appends(self, async_client: AsyncAnthropic) -> None:
+        # `x-stainless-helper` accumulates across mappings instead of being clobbered,
+        # so a helper set on the client and one passed per-request both survive.
+        request = async_client.with_options(default_headers={"x-stainless-helper": "session_runner"})._build_request(
+            FinalRequestOptions(
+                method="post",
+                url="/foo",
+                **make_request_options(extra_headers={"x-stainless-helper": "message_batches"}),
+            ),
+        )
+        assert request.headers.get("x-stainless-helper") == "session_runner, message_batches"
+
+    def test_request_x_stainless_helper_header_dedupes(self, async_client: AsyncAnthropic) -> None:
+        # the same helper set in both places is recorded once
+        request = async_client.with_options(default_headers={"x-stainless-helper": "session_runner"})._build_request(
+            FinalRequestOptions(
+                method="post",
+                url="/foo",
+                **make_request_options(extra_headers={"x-stainless-helper": "session_runner"}),
+            ),
+        )
+        assert request.headers.get("x-stainless-helper") == "session_runner"
+
+    def test_request_x_stainless_helper_header_collapses_case_variants(self, async_client: AsyncAnthropic) -> None:
+        # differently-cased duplicates of the helper header fold into a single
+        # deduplicated value instead of being sent as conflicting entries
+        copied = async_client.with_options(
+            default_headers={"X-Stainless-Helper": "parent", "x-stainless-helper": "scoped"},
+        )
+        request = copied._build_request(
+            FinalRequestOptions(
+                method="post",
+                url="/foo",
+                **make_request_options(extra_headers={"x-stainless-helper": "message_batches"}),
+            ),
+        )
+        assert request.headers.get("x-stainless-helper") == "parent, scoped, message_batches"
+
+    def test_request_x_stainless_helper_header_dedupes_multi_value(self, async_client: AsyncAnthropic) -> None:
+        # comma-separated values (e.g. several tagged tools) are deduplicated per token
+        copied = async_client.with_options(default_headers={"x-stainless-helper": "session_runner, memory_tool"})
+        request = copied._build_request(
+            FinalRequestOptions(
+                method="post",
+                url="/foo",
+                **make_request_options(extra_headers={"x-stainless-helper": "memory_tool, message_batches"}),
+            ),
+        )
+        assert request.headers.get("x-stainless-helper") == "session_runner, memory_tool, message_batches"
+
+    def test_copy_x_stainless_helper_header_appends(self, async_client: AsyncAnthropic) -> None:
+        # stacking `default_headers` via copy()/with_options accumulates the
+        # helper instead of clobbering, so e.g. a scoped sub-client's tag adds to
+        # one already carried by the parent.
+        copied = async_client.with_options(default_headers={"x-stainless-helper": "parent"}).with_options(
+            default_headers={"x-stainless-helper": "child"}
+        )
+        request = copied._build_request(FinalRequestOptions(method="post", url="/foo"))
+        assert request.headers.get("x-stainless-helper") == "parent, child"
+
+    def test_copy_preserves_header_removal(self, async_client: AsyncAnthropic) -> None:
+        # an Omit removal set on the client still survives a subsequent copy()
+        copied = async_client.with_options(
+            default_headers=cast("dict[str, str]", {"X-Foo": Omit()}),
+        ).with_options(default_headers={"X-Bar": "true"})
+        request = copied._build_request(FinalRequestOptions(method="post", url="/foo"))
+        assert request.headers.get("X-Foo") is None
+        assert request.headers.get("X-Bar") == "true"
 
     def test_request_extra_query(self, client: Anthropic) -> None:
         request = client._build_request(

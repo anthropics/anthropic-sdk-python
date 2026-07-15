@@ -19,9 +19,7 @@ def main() -> None:
 
     github_token = os.environ.get("GITHUB_TOKEN")
     if not github_token:
-        raise RuntimeError(
-            "GITHUB_TOKEN is required (use a fine-grained PAT with public-repo read only)"
-        )
+        raise RuntimeError("GITHUB_TOKEN is required (use a fine-grained PAT with public-repo read only)")
 
     # Create an environment
     environment = anthropic.beta.environments.create(
@@ -56,7 +54,7 @@ def main() -> None:
     # Create v1 of the agent with the built-in toolset, an MCP server, and a custom tool
     agent_v1 = anthropic.beta.agents.create(
         name="comprehensive-example-agent",
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5",
         system="You are a helpful assistant.",
         mcp_servers=[{"type": "url", "name": MCP_SERVER_NAME, "url": MCP_SERVER_URL}],
         tools=[
@@ -102,14 +100,14 @@ def main() -> None:
     print("Streaming events:")
     anthropic.beta.sessions.events.send(
         session.id,
-        events=[
-            {"type": "user.message", "content": [{"type": "text", "text": PROMPT}]}
-        ],
+        events=[{"type": "user.message", "content": [{"type": "text", "text": PROMPT}]}],
     )
 
     with anthropic.beta.sessions.events.stream(session.id) as stream:
         for event in stream:
             print(event.to_json(indent=2))
+            # `get_weather` is a custom (non-builtin) tool, so the agent emits an
+            # `agent.custom_tool_use` event and expects a `user.custom_tool_result`.
             if event.type == "agent.custom_tool_use" and event.name == "get_weather":
                 anthropic.beta.sessions.events.send(
                     session.id,
@@ -117,17 +115,11 @@ def main() -> None:
                         {
                             "type": "user.custom_tool_result",
                             "custom_tool_use_id": event.id,
-                            "content": [
-                                {"type": "text", "text": '{"temperature_c": 14}'}
-                            ],
+                            "content": [{"type": "text", "text": '{"temperature_c": 14}'}],
                         }
                     ],
                 )
-            if (
-                event.type == "session.status_idle"
-                and event.stop_reason
-                and event.stop_reason.type == "end_turn"
-            ):
+            if event.type == "session.status_idle" and event.stop_reason and event.stop_reason.type == "end_turn":
                 break
 
 

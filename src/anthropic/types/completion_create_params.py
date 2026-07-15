@@ -32,9 +32,9 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     """
 
     model: Required[ModelParam]
-    """
-    The model that will complete your prompt.\n\nSee
-    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+    """The model that will complete your prompt.
+
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
 
@@ -48,8 +48,10 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     "\n\nHuman: {userQuestion}\n\nAssistant:"
     ```
 
-    See [prompt validation](https://docs.claude.com/en/api/prompt-validation) and
-    our guide to [prompt design](https://docs.claude.com/en/docs/intro-to-prompting)
+    See
+    [prompt validation](https://platform.claude.com/docs/en/build-with-claude/working-with-messages)
+    and our guide to
+    [prompt design](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview)
     for more details.
     """
 
@@ -81,8 +83,7 @@ class CompletionCreateParamsBase(TypedDict, total=False):
     Used to remove "long tail" low probability responses.
     [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
 
-    Recommended for advanced use cases only. You usually only need to use
-    `temperature`.
+    Recommended for advanced use cases only.
     """
 
     top_p: float
@@ -90,11 +91,9 @@ class CompletionCreateParamsBase(TypedDict, total=False):
 
     In nucleus sampling, we compute the cumulative distribution over all the options
     for each subsequent token in decreasing probability order and cut it off once it
-    reaches a particular probability specified by `top_p`. You should either alter
-    `temperature` or `top_p`, but not both.
+    reaches a particular probability specified by `top_p`.
 
-    Recommended for advanced use cases only. You usually only need to use
-    `temperature`.
+    Recommended for advanced use cases only.
     """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
@@ -109,7 +108,8 @@ class CompletionCreateParamsNonStreaming(CompletionCreateParamsBase, total=False
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.claude.com/en/api/streaming) for details.
+    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+    for details.
     """
 
 
@@ -117,7 +117,8 @@ class CompletionCreateParamsStreaming(CompletionCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://docs.claude.com/en/api/streaming) for details.
+    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+    for details.
     """
 
 

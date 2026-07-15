@@ -7,6 +7,7 @@ from ..model import Model
 from ..._models import BaseModel
 from .beta_usage import BetaUsage
 from .beta_container import BetaContainer
+from .beta_diagnostics import BetaDiagnostics
 from .beta_stop_reason import BetaStopReason
 from .beta_content_block import BetaContentBlock, BetaContentBlock as BetaContentBlock
 from .beta_refusal_stop_details import BetaRefusalStopDetails
@@ -69,10 +70,17 @@ class BetaMessage(BaseModel):
     Information about context management strategies applied during the request.
     """
 
-    model: Model
+    diagnostics: Optional[BetaDiagnostics] = None
+    """Response envelope for request-level diagnostics.
+
+    Present (possibly null) whenever the caller supplied `diagnostics` on the
+    request.
     """
-    The model that will complete your prompt.\n\nSee
-    [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+
+    model: Model
+    """The model that will complete your prompt.
+
+    See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
     """
 

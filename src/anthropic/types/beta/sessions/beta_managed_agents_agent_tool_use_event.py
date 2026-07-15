@@ -28,3 +28,11 @@ class BetaManagedAgentsAgentToolUseEvent(BaseModel):
 
     evaluated_permission: Optional[Literal["allow", "ask", "deny"]] = None
     """AgentEvaluatedPermission enum"""
+
+    session_thread_id: Optional[str] = None
+    """
+    When set, this event was cross-posted from a subagent's thread to surface its
+    permission request on the primary thread's stream. Empty on the thread's own
+    events. Echo this on a `user.tool_confirmation` event to route the approval
+    back.
+    """

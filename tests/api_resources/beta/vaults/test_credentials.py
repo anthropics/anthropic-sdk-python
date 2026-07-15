@@ -14,6 +14,7 @@ from anthropic.pagination import SyncPageCursor, AsyncPageCursor
 from anthropic.types.beta.vaults import (
     BetaManagedAgentsCredential,
     BetaManagedAgentsDeletedCredential,
+    BetaManagedAgentsCredentialValidation,
 )
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
@@ -392,6 +393,68 @@ class TestCredentials:
                 vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             )
 
+    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
+    @parametrize
+    def test_method_mcp_oauth_validate(self, client: Anthropic) -> None:
+        credential = client.beta.vaults.credentials.mcp_oauth_validate(
+            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+        )
+        assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
+
+    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
+    @parametrize
+    def test_method_mcp_oauth_validate_with_all_params(self, client: Anthropic) -> None:
+        credential = client.beta.vaults.credentials.mcp_oauth_validate(
+            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            betas=["message-batches-2024-09-24"],
+        )
+        assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
+
+    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
+    @parametrize
+    def test_raw_response_mcp_oauth_validate(self, client: Anthropic) -> None:
+        response = client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
+            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        credential = response.parse()
+        assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
+
+    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
+    @parametrize
+    def test_streaming_response_mcp_oauth_validate(self, client: Anthropic) -> None:
+        with client.beta.vaults.credentials.with_streaming_response.mcp_oauth_validate(
+            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            credential = response.parse()
+            assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
+    @parametrize
+    def test_path_params_mcp_oauth_validate(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
+            client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
+                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                vault_id="",
+            )
+
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `credential_id` but received ''"):
+            client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
+                credential_id="",
+                vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            )
+
 
 class TestAsyncCredentials:
     parametrize = pytest.mark.parametrize(
@@ -764,6 +827,68 @@ class TestAsyncCredentials:
 
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `credential_id` but received ''"):
             await async_client.beta.vaults.credentials.with_raw_response.archive(
+                credential_id="",
+                vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            )
+
+    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
+    @parametrize
+    async def test_method_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
+        credential = await async_client.beta.vaults.credentials.mcp_oauth_validate(
+            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+        )
+        assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
+
+    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
+    @parametrize
+    async def test_method_mcp_oauth_validate_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        credential = await async_client.beta.vaults.credentials.mcp_oauth_validate(
+            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            betas=["message-batches-2024-09-24"],
+        )
+        assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
+
+    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
+    @parametrize
+    async def test_raw_response_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
+            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        credential = response.parse()
+        assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
+
+    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
+    @parametrize
+    async def test_streaming_response_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.beta.vaults.credentials.with_streaming_response.mcp_oauth_validate(
+            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            credential = await response.parse()
+            assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
+    @parametrize
+    async def test_path_params_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
+            await async_client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
+                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                vault_id="",
+            )
+
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `credential_id` but received ''"):
+            await async_client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
                 credential_id="",
                 vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             )

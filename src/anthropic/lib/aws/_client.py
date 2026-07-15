@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 from typing_extensions import Self, override
 
 import httpx
@@ -16,6 +16,7 @@ from ._credentials import (
     validate_credentials,
 )
 from ..._exceptions import AnthropicError
+from ..._middleware import MiddlewareInput
 from ..._base_client import DEFAULT_MAX_RETRIES
 
 
@@ -46,9 +47,11 @@ class AnthropicAWS(Anthropic):
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         http_client: httpx.Client | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
         # Passed through to parent but not used for AWS auth
         auth_token: str | None = None,
+        webhook_key: str | None = None,
     ) -> None:
         self._skip_auth = skip_auth
 
@@ -105,12 +108,14 @@ class AnthropicAWS(Anthropic):
         super().__init__(
             api_key=resolved_api_key,
             auth_token=auth_token,
+            webhook_key=webhook_key,
             base_url=base_url,  # type: ignore[arg-type]
             timeout=timeout,
             max_retries=max_retries,
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
+            middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
 
@@ -159,7 +164,7 @@ class AnthropicAWS(Anthropic):
         request.headers.update(headers)
 
     @override
-    def copy(
+    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — subclass intentionally drops `credentials`
         self,
         *,
         api_key: str | None = None,
@@ -171,6 +176,7 @@ class AnthropicAWS(Anthropic):
         workspace_id: str | None = None,
         skip_auth: bool | None = None,
         auth_token: str | None = None,
+        webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.Client | None = None,
@@ -179,6 +185,7 @@ class AnthropicAWS(Anthropic):
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         # If region is changing and no explicit base_url, let __init__ derive it
@@ -187,6 +194,7 @@ class AnthropicAWS(Anthropic):
         return super().copy(
             api_key=api_key or self.api_key,
             auth_token=auth_token,
+            webhook_key=webhook_key,
             base_url=resolved_base_url,
             timeout=timeout,
             http_client=http_client,
@@ -195,6 +203,7 @@ class AnthropicAWS(Anthropic):
             set_default_headers=set_default_headers,
             default_query=default_query,
             set_default_query=set_default_query,
+            middleware=middleware,
             _extra_kwargs={
                 "aws_access_key": aws_access_key or self.aws_access_key,
                 "aws_secret_key": aws_secret_key or self.aws_secret_key,
@@ -207,7 +216,7 @@ class AnthropicAWS(Anthropic):
             },
         )
 
-    with_options = copy
+    with_options = copy  # type: ignore[assignment]
 
 
 class AsyncAnthropicAWS(AsyncAnthropic):
@@ -237,9 +246,11 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         http_client: httpx.AsyncClient | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
         # Accepted for compatibility with AsyncAnthropic.copy() but not used
         auth_token: str | None = None,
+        webhook_key: str | None = None,
     ) -> None:
         self._skip_auth = skip_auth
 
@@ -296,12 +307,14 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         super().__init__(
             api_key=resolved_api_key,
             auth_token=auth_token,
+            webhook_key=webhook_key,
             base_url=base_url,  # type: ignore[arg-type]
             timeout=timeout,
             max_retries=max_retries,
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
+            middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
 
@@ -350,7 +363,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         request.headers.update(headers)
 
     @override
-    def copy(
+    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — subclass intentionally drops `credentials`
         self,
         *,
         api_key: str | None = None,
@@ -362,6 +375,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         workspace_id: str | None = None,
         skip_auth: bool | None = None,
         auth_token: str | None = None,
+        webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.AsyncClient | None = None,
@@ -370,6 +384,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         # If region is changing and no explicit base_url, let __init__ derive it
@@ -378,6 +393,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         return super().copy(
             api_key=api_key or self.api_key,
             auth_token=auth_token,
+            webhook_key=webhook_key,
             base_url=resolved_base_url,
             timeout=timeout,
             http_client=http_client,
@@ -386,6 +402,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
             set_default_headers=set_default_headers,
             default_query=default_query,
             set_default_query=set_default_query,
+            middleware=middleware,
             _extra_kwargs={
                 "aws_access_key": aws_access_key or self.aws_access_key,
                 "aws_secret_key": aws_secret_key or self.aws_secret_key,
@@ -398,4 +415,4 @@ class AsyncAnthropicAWS(AsyncAnthropic):
             },
         )
 
-    with_options = copy
+    with_options = copy  # type: ignore[assignment]

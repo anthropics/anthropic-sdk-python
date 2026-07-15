@@ -9,11 +9,17 @@ from ...._models import BaseModel
 from .beta_managed_agents_text_block import BetaManagedAgentsTextBlock
 from .beta_managed_agents_image_block import BetaManagedAgentsImageBlock
 from .beta_managed_agents_document_block import BetaManagedAgentsDocumentBlock
+from .beta_managed_agents_search_result_block import BetaManagedAgentsSearchResultBlock
 
 __all__ = ["BetaManagedAgentsUserCustomToolResultEvent", "Content"]
 
 Content: TypeAlias = Annotated[
-    Union[BetaManagedAgentsTextBlock, BetaManagedAgentsImageBlock, BetaManagedAgentsDocumentBlock],
+    Union[
+        BetaManagedAgentsTextBlock,
+        BetaManagedAgentsImageBlock,
+        BetaManagedAgentsDocumentBlock,
+        BetaManagedAgentsSearchResultBlock,
+    ],
     PropertyInfo(discriminator="type"),
 ]
 
@@ -42,3 +48,9 @@ class BetaManagedAgentsUserCustomToolResultEvent(BaseModel):
 
     processed_at: Optional[datetime] = None
     """A timestamp in RFC 3339 format"""
+
+    session_thread_id: Optional[str] = None
+    """Routes this result to a subagent thread.
+
+    Copy from the `agent.custom_tool_use` event's `session_thread_id`.
+    """

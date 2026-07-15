@@ -18,13 +18,13 @@ jobs:
   lint:
     timeout-minutes: 10
     name: lint
-    runs-on: ${{ github.repository == 'stainless-sdks/anthropic-python' && 'depot-ubuntu-24.04' || 'ubuntu-latest' }}
+    runs-on: 'ubuntu-latest'
     if: (github.event_name == 'push' || github.event.pull_request.head.repo.fork)
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           version: '0.10.2'
 
@@ -41,12 +41,12 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: ${{ github.repository == 'stainless-sdks/anthropic-python' && 'depot-ubuntu-24.04' || 'ubuntu-latest' }}
+    runs-on: 'ubuntu-latest'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           version: '0.10.2'
 
@@ -58,16 +58,16 @@ jobs:
 
       - name: Get GitHub OIDC Token
         if: |-
-          github.repository == 'stainless-sdks/anthropic-python' &&
+          github.repository == 'anthropics/anthropic-sdk-python-private' &&
           !startsWith(github.ref, 'refs/heads/stl/')
         id: github-oidc
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: core.setOutput('github_token', await core.getIDToken());
 
       - name: Upload tarball
         if: |-
-          github.repository == 'stainless-sdks/anthropic-python' &&
+          github.repository == 'anthropics/anthropic-sdk-python-private' &&
           !startsWith(github.ref, 'refs/heads/stl/')
         env:
           URL: https://pkg.stainless.com/s
@@ -78,13 +78,13 @@ jobs:
   test:
     timeout-minutes: 10
     name: test
-    runs-on: ${{ github.repository == 'stainless-sdks/anthropic-python' && 'depot-ubuntu-24.04' || 'ubuntu-latest' }}
+    runs-on: 'ubuntu-latest'
     if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           version: '0.10.2'
 
@@ -93,3 +93,48 @@ jobs:
 
       - name: Run tests
         run: ./scripts/test
+
+  detect_breaking_changes_vs_main:
+    timeout-minutes: 10
+    name: detect-breaking-changes-vs-main
+    runs-on: ${{ github.repository == 'stainless-sdks/anthropic-python' && 'depot-ubuntu-24.04' || 'ubuntu-latest' }}
+    if: |-
+      (github.event_name == 'push' &&
+       !startsWith(github.ref, 'refs/heads/release-please--')) ||
+      github.event.pull_request.head.repo.fork
+    steps:
+      # fetch-depth: 0 fetches full commit history (all branches, so
+      # origin/main is available) so `git merge-base HEAD origin/main`
+      # below can resolve the fork point. filter: blob:none keeps the
+      # fetch cheap: commit metadata is downloaded eagerly, file blobs
+      # only when a later `git checkout` asks for them.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          version: '0.10.2'
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Determine base SHA
+        run: |
+          BASE_SHA=$(git merge-base HEAD origin/main 2>/dev/null || echo "")
+          echo "BASE_SHA=$BASE_SHA" >> $GITHUB_ENV
+
+      - name: Detect removed symbols
+        if: env.BASE_SHA != ''
+        run: |
+          uv run python scripts/detect-breaking-changes.py "$BASE_SHA"
+
+      - name: Detect breaking changes vs. main
+        if: env.BASE_SHA != ''
+        run: |
+          # Try to check out previous versions of the breaking change detection script. This ensures that
+          # we still detect breaking changes when entire files and their tests are removed.
+          git checkout "$BASE_SHA" -- ./scripts/detect-breaking-changes 2>/dev/null || true
+          ./scripts/detect-breaking-changes "$BASE_SHA"

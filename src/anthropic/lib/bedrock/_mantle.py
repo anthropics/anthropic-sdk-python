@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Union, Mapping, TypeVar
+from typing import Any, Union, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
 import httpx
@@ -16,11 +16,13 @@ from ..aws._auth import get_auth_headers
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import AnthropicError, APIStatusError
+from ..._middleware import MiddlewareInput
 from ..._base_client import (
     DEFAULT_MAX_RETRIES,
     BaseClient,
     SyncAPIClient,
     AsyncAPIClient,
+    merge_headers,
 )
 from ..aws._credentials import (
     resolve_region,
@@ -188,6 +190,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         http_client: httpx.Client | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         resolved_api_key, resolved_base_url, use_sigv4, merged_headers = _resolve_mantle_config(
@@ -211,6 +214,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
             custom_headers=merged_headers,
             custom_query=default_query,
             http_client=http_client,
+            middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
 
@@ -239,7 +243,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         api_key = self.api_key
         if api_key is None:
             return {}
-        return {"X-Api-Key": api_key}
+        return {"Authorization": f"Bearer {api_key}"}
 
     @property
     @override
@@ -294,8 +298,12 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
+        """
+        Create a new client instance re-using the same options given to the current client with optional overriding.
+        """
         if default_headers is not None and set_default_headers is not None:
             raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
 
@@ -304,7 +312,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 
@@ -328,10 +336,22 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
 
     with_options = copy
+
+    def with_middleware(self, *middleware: MiddlewareInput) -> Self:
+        """A new client with the given middleware appended after this client's middleware.
+
+        Convenience for applying extra middleware to a single request:
+
+        ```py
+        client.with_middleware(my_middleware).messages.create(...)
+        ```
+        """
+        return self.copy(middleware=[*self._middleware, *middleware])
 
 
 # --- Async client ---
@@ -366,6 +386,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         http_client: httpx.AsyncClient | None = None,
+        middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         resolved_api_key, resolved_base_url, use_sigv4, merged_headers = _resolve_mantle_config(
@@ -389,6 +410,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
             custom_headers=merged_headers,
             custom_query=default_query,
             http_client=http_client,
+            middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
 
@@ -417,7 +439,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         api_key = self.api_key
         if api_key is None:
             return {}
-        return {"X-Api-Key": api_key}
+        return {"Authorization": f"Bearer {api_key}"}
 
     @property
     @override
@@ -472,8 +494,12 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
+        """
+        Create a new client instance re-using the same options given to the current client with optional overriding.
+        """
         if default_headers is not None and set_default_headers is not None:
             raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
 
@@ -482,7 +508,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 
@@ -506,7 +532,19 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
+            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
 
     with_options = copy
+
+    def with_middleware(self, *middleware: MiddlewareInput) -> Self:
+        """A new client with the given middleware appended after this client's middleware.
+
+        Convenience for applying extra middleware to a single request:
+
+        ```py
+        client.with_middleware(my_middleware).messages.create(...)
+        ```
+        """
+        return self.copy(middleware=[*self._middleware, *middleware])

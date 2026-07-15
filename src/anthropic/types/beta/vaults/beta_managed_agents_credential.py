@@ -8,11 +8,16 @@ from ...._utils import PropertyInfo
 from ...._models import BaseModel
 from .beta_managed_agents_mcp_oauth_auth_response import BetaManagedAgentsMCPOAuthAuthResponse
 from .beta_managed_agents_static_bearer_auth_response import BetaManagedAgentsStaticBearerAuthResponse
+from .beta_managed_agents_environment_variable_auth_response import BetaManagedAgentsEnvironmentVariableAuthResponse
 
 __all__ = ["BetaManagedAgentsCredential", "Auth"]
 
 Auth: TypeAlias = Annotated[
-    Union[BetaManagedAgentsMCPOAuthAuthResponse, BetaManagedAgentsStaticBearerAuthResponse],
+    Union[
+        BetaManagedAgentsMCPOAuthAuthResponse,
+        BetaManagedAgentsStaticBearerAuthResponse,
+        BetaManagedAgentsEnvironmentVariableAuthResponse,
+    ],
     PropertyInfo(discriminator="type"),
 ]
 

@@ -42,7 +42,7 @@ async def main() -> None:
 
             # Run a conversation with tool_runner()
             runner = client.beta.messages.tool_runner(
-                model="claude-sonnet-4-5-20250929",
+                model="claude-sonnet-5",
                 max_tokens=1024,
                 tools=tools,
                 messages=[{"role": "user", "content": "List the files in /tmp"}],

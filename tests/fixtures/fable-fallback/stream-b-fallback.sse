@@ -1,0 +1,63 @@
+event: message_start
+data: {"type":"message_start","message":{"model":"claude-opus-4-8","id":"msg_fixture_b_0001","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"stop_details":null,"usage":{"input_tokens":31,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":7,"service_tier":"standard","inference_geo":"global"}}               }
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}           }
+
+event: ping
+data: {"type": "ping"}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" there! Happy to expl"}   }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"ain.\n\n**Solar eclipses** happen when the Moon passes between the Sun and the Earth, casting a shadow that blocks s"}             }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"ome or all of the Sun's light for viewers inside it. They're one of the most dramatic sights in the sky."}         }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n\nSome key points:\n\n**The three main types:**\n- Total"}            }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" (the Moon completely covers the Sun's disk)\n- Partial (only part of the Sun is covered)\n- Annular (the"}          }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" famous *ring of fire*)\n\n**Why they're so striking:**\n- Totality can turn day into twilight (for"}           }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" a few minutes), and the Sun's corona becomes visible to the naked eye\n- Temperatures can drop noticeably while the shadow"}               }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" passes over\n- Animals sometimes behave as if night has fallen\n\n**Viewing safely:**"}              }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n- **Certified eclipse glasses** are a must for looking at the Sun directly. Ordinary"}    }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" sunglasses are not safe, even very dark ones.\n- A pinhole projector is an easy, safe alter"}  }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"native.\n\n**Why they're rare:**\nThe Moon's shadow traces a ("}             }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"narrow) path across the Earth, so any given spot sees a total eclipse only"}             }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" about once every few centuries. That rarity is a big part of the excitement.\n\nIs there a particular angle you're cur"}             }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"ious about? For example, I'd be happy to go deeper on the history, the science of totality, safe viewing, or how they"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'re portrayed in fiction. Just let me know what's sparking your interest!"}  }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0 }
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null,"stop_details":null},"usage":{"input_tokens":31,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":547,"output_tokens_details":{"thinking_tokens":0},"iterations":[{"input_tokens":31,"output_tokens":547,"cache_read_input_tokens":0,"cache_creation_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"type":"message"}]}               }
+
+event: message_stop
+data: {"type":"message_stop"    }
+

@@ -96,6 +96,32 @@ class TestBatches:
                                 }
                             ]
                         },
+                        "diagnostics": {"previous_message_id": "previous_message_id"},
+                        "fallback_credit_token": "x",
+                        "fallbacks": [
+                            {
+                                "model": "claude-sonnet-5",
+                                "max_tokens": 0,
+                                "output_config": {
+                                    "effort": "low",
+                                    "format": {
+                                        "schema": {"foo": "bar"},
+                                        "type": "json_schema",
+                                    },
+                                    "task_budget": {
+                                        "total": 1024,
+                                        "type": "tokens",
+                                        "remaining": 0,
+                                    },
+                                },
+                                "speed": "standard",
+                                "thinking": {
+                                    "budget_tokens": 1024,
+                                    "type": "enabled",
+                                    "display": "summarized",
+                                },
+                            }
+                        ],
                         "inference_geo": "inference_geo",
                         "mcp_servers": [
                             {
@@ -115,6 +141,11 @@ class TestBatches:
                             "format": {
                                 "schema": {"foo": "bar"},
                                 "type": "json_schema",
+                            },
+                            "task_budget": {
+                                "total": 1024,
+                                "type": "tokens",
+                                "remaining": 0,
                             },
                         },
                         "output_format": {
@@ -184,6 +215,7 @@ class TestBatches:
                 }
             ],
             betas=["string"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -554,6 +586,32 @@ class TestAsyncBatches:
                                 }
                             ]
                         },
+                        "diagnostics": {"previous_message_id": "previous_message_id"},
+                        "fallback_credit_token": "x",
+                        "fallbacks": [
+                            {
+                                "model": "claude-sonnet-5",
+                                "max_tokens": 0,
+                                "output_config": {
+                                    "effort": "low",
+                                    "format": {
+                                        "schema": {"foo": "bar"},
+                                        "type": "json_schema",
+                                    },
+                                    "task_budget": {
+                                        "total": 1024,
+                                        "type": "tokens",
+                                        "remaining": 0,
+                                    },
+                                },
+                                "speed": "standard",
+                                "thinking": {
+                                    "budget_tokens": 1024,
+                                    "type": "enabled",
+                                    "display": "summarized",
+                                },
+                            }
+                        ],
                         "inference_geo": "inference_geo",
                         "mcp_servers": [
                             {
@@ -573,6 +631,11 @@ class TestAsyncBatches:
                             "format": {
                                 "schema": {"foo": "bar"},
                                 "type": "json_schema",
+                            },
+                            "task_budget": {
+                                "total": 1024,
+                                "type": "tokens",
+                                "remaining": 0,
                             },
                         },
                         "output_format": {
@@ -642,6 +705,7 @@ class TestAsyncBatches:
                 }
             ],
             betas=["string"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 

@@ -25,21 +25,25 @@ class TestSkills:
 
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
-        skill = client.beta.skills.create()
+        skill = client.beta.skills.create(
+            files=[b"Example data"],
+        )
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         skill = client.beta.skills.create(
-            display_title="display_title",
             files=[b"Example data"],
+            display_title="display_title",
             betas=["string"],
         )
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
-        response = client.beta.skills.with_raw_response.create()
+        response = client.beta.skills.with_raw_response.create(
+            files=[b"Example data"],
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -48,7 +52,9 @@ class TestSkills:
 
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
-        with client.beta.skills.with_streaming_response.create() as response:
+        with client.beta.skills.with_streaming_response.create(
+            files=[b"Example data"],
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -192,21 +198,25 @@ class TestAsyncSkills:
 
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
-        skill = await async_client.beta.skills.create()
+        skill = await async_client.beta.skills.create(
+            files=[b"Example data"],
+        )
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.create(
-            display_title="display_title",
             files=[b"Example data"],
+            display_title="display_title",
             betas=["string"],
         )
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.skills.with_raw_response.create()
+        response = await async_client.beta.skills.with_raw_response.create(
+            files=[b"Example data"],
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -215,7 +225,9 @@ class TestAsyncSkills:
 
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.skills.with_streaming_response.create() as response:
+        async with async_client.beta.skills.with_streaming_response.create(
+            files=[b"Example data"],
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 

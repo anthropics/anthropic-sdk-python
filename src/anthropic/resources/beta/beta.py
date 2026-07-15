@@ -18,15 +18,16 @@ from .models import (
     ModelsWithStreamingResponse,
     AsyncModelsWithStreamingResponse,
 )
+from .webhooks import Webhooks, AsyncWebhooks
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from .environments import (
-    Environments,
-    AsyncEnvironments,
-    EnvironmentsWithRawResponse,
-    AsyncEnvironmentsWithRawResponse,
-    EnvironmentsWithStreamingResponse,
-    AsyncEnvironmentsWithStreamingResponse,
+from .deployments import (
+    Deployments,
+    AsyncDeployments,
+    DeploymentsWithRawResponse,
+    AsyncDeploymentsWithRawResponse,
+    DeploymentsWithStreamingResponse,
+    AsyncDeploymentsWithStreamingResponse,
 )
 from .agents.agents import (
     Agents,
@@ -44,6 +45,14 @@ from .skills.skills import (
     SkillsWithStreamingResponse,
     AsyncSkillsWithStreamingResponse,
 )
+from .user_profiles import (
+    UserProfiles,
+    AsyncUserProfiles,
+    UserProfilesWithRawResponse,
+    AsyncUserProfilesWithRawResponse,
+    UserProfilesWithStreamingResponse,
+    AsyncUserProfilesWithStreamingResponse,
+)
 from .vaults.vaults import (
     Vaults,
     AsyncVaults,
@@ -51,6 +60,14 @@ from .vaults.vaults import (
     AsyncVaultsWithRawResponse,
     VaultsWithStreamingResponse,
     AsyncVaultsWithStreamingResponse,
+)
+from .deployment_runs import (
+    DeploymentRuns,
+    AsyncDeploymentRuns,
+    DeploymentRunsWithRawResponse,
+    AsyncDeploymentRunsWithRawResponse,
+    DeploymentRunsWithStreamingResponse,
+    AsyncDeploymentRunsWithStreamingResponse,
 )
 from .messages.messages import (
     Messages,
@@ -67,6 +84,22 @@ from .sessions.sessions import (
     AsyncSessionsWithRawResponse,
     SessionsWithStreamingResponse,
     AsyncSessionsWithStreamingResponse,
+)
+from .environments.environments import (
+    Environments,
+    AsyncEnvironments,
+    EnvironmentsWithRawResponse,
+    AsyncEnvironmentsWithRawResponse,
+    EnvironmentsWithStreamingResponse,
+    AsyncEnvironmentsWithStreamingResponse,
+)
+from .memory_stores.memory_stores import (
+    MemoryStores,
+    AsyncMemoryStores,
+    MemoryStoresWithRawResponse,
+    AsyncMemoryStoresWithRawResponse,
+    MemoryStoresWithStreamingResponse,
+    AsyncMemoryStoresWithStreamingResponse,
 )
 
 __all__ = ["Beta", "AsyncBeta"]
@@ -94,8 +127,20 @@ class Beta(SyncAPIResource):
         return Sessions(self._client)
 
     @cached_property
+    def deployments(self) -> Deployments:
+        return Deployments(self._client)
+
+    @cached_property
+    def deployment_runs(self) -> DeploymentRuns:
+        return DeploymentRuns(self._client)
+
+    @cached_property
     def vaults(self) -> Vaults:
         return Vaults(self._client)
+
+    @cached_property
+    def memory_stores(self) -> MemoryStores:
+        return MemoryStores(self._client)
 
     @cached_property
     def files(self) -> Files:
@@ -104,6 +149,14 @@ class Beta(SyncAPIResource):
     @cached_property
     def skills(self) -> Skills:
         return Skills(self._client)
+
+    @cached_property
+    def webhooks(self) -> Webhooks:
+        return Webhooks(self._client)
+
+    @cached_property
+    def user_profiles(self) -> UserProfiles:
+        return UserProfiles(self._client)
 
     @cached_property
     def with_raw_response(self) -> BetaWithRawResponse:
@@ -147,8 +200,20 @@ class AsyncBeta(AsyncAPIResource):
         return AsyncSessions(self._client)
 
     @cached_property
+    def deployments(self) -> AsyncDeployments:
+        return AsyncDeployments(self._client)
+
+    @cached_property
+    def deployment_runs(self) -> AsyncDeploymentRuns:
+        return AsyncDeploymentRuns(self._client)
+
+    @cached_property
     def vaults(self) -> AsyncVaults:
         return AsyncVaults(self._client)
+
+    @cached_property
+    def memory_stores(self) -> AsyncMemoryStores:
+        return AsyncMemoryStores(self._client)
 
     @cached_property
     def files(self) -> AsyncFiles:
@@ -157,6 +222,14 @@ class AsyncBeta(AsyncAPIResource):
     @cached_property
     def skills(self) -> AsyncSkills:
         return AsyncSkills(self._client)
+
+    @cached_property
+    def webhooks(self) -> AsyncWebhooks:
+        return AsyncWebhooks(self._client)
+
+    @cached_property
+    def user_profiles(self) -> AsyncUserProfiles:
+        return AsyncUserProfiles(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncBetaWithRawResponse:
@@ -203,8 +276,20 @@ class BetaWithRawResponse:
         return SessionsWithRawResponse(self._beta.sessions)
 
     @cached_property
+    def deployments(self) -> DeploymentsWithRawResponse:
+        return DeploymentsWithRawResponse(self._beta.deployments)
+
+    @cached_property
+    def deployment_runs(self) -> DeploymentRunsWithRawResponse:
+        return DeploymentRunsWithRawResponse(self._beta.deployment_runs)
+
+    @cached_property
     def vaults(self) -> VaultsWithRawResponse:
         return VaultsWithRawResponse(self._beta.vaults)
+
+    @cached_property
+    def memory_stores(self) -> MemoryStoresWithRawResponse:
+        return MemoryStoresWithRawResponse(self._beta.memory_stores)
 
     @cached_property
     def files(self) -> FilesWithRawResponse:
@@ -213,6 +298,10 @@ class BetaWithRawResponse:
     @cached_property
     def skills(self) -> SkillsWithRawResponse:
         return SkillsWithRawResponse(self._beta.skills)
+
+    @cached_property
+    def user_profiles(self) -> UserProfilesWithRawResponse:
+        return UserProfilesWithRawResponse(self._beta.user_profiles)
 
 
 class AsyncBetaWithRawResponse:
@@ -240,8 +329,20 @@ class AsyncBetaWithRawResponse:
         return AsyncSessionsWithRawResponse(self._beta.sessions)
 
     @cached_property
+    def deployments(self) -> AsyncDeploymentsWithRawResponse:
+        return AsyncDeploymentsWithRawResponse(self._beta.deployments)
+
+    @cached_property
+    def deployment_runs(self) -> AsyncDeploymentRunsWithRawResponse:
+        return AsyncDeploymentRunsWithRawResponse(self._beta.deployment_runs)
+
+    @cached_property
     def vaults(self) -> AsyncVaultsWithRawResponse:
         return AsyncVaultsWithRawResponse(self._beta.vaults)
+
+    @cached_property
+    def memory_stores(self) -> AsyncMemoryStoresWithRawResponse:
+        return AsyncMemoryStoresWithRawResponse(self._beta.memory_stores)
 
     @cached_property
     def files(self) -> AsyncFilesWithRawResponse:
@@ -250,6 +351,10 @@ class AsyncBetaWithRawResponse:
     @cached_property
     def skills(self) -> AsyncSkillsWithRawResponse:
         return AsyncSkillsWithRawResponse(self._beta.skills)
+
+    @cached_property
+    def user_profiles(self) -> AsyncUserProfilesWithRawResponse:
+        return AsyncUserProfilesWithRawResponse(self._beta.user_profiles)
 
 
 class BetaWithStreamingResponse:
@@ -277,8 +382,20 @@ class BetaWithStreamingResponse:
         return SessionsWithStreamingResponse(self._beta.sessions)
 
     @cached_property
+    def deployments(self) -> DeploymentsWithStreamingResponse:
+        return DeploymentsWithStreamingResponse(self._beta.deployments)
+
+    @cached_property
+    def deployment_runs(self) -> DeploymentRunsWithStreamingResponse:
+        return DeploymentRunsWithStreamingResponse(self._beta.deployment_runs)
+
+    @cached_property
     def vaults(self) -> VaultsWithStreamingResponse:
         return VaultsWithStreamingResponse(self._beta.vaults)
+
+    @cached_property
+    def memory_stores(self) -> MemoryStoresWithStreamingResponse:
+        return MemoryStoresWithStreamingResponse(self._beta.memory_stores)
 
     @cached_property
     def files(self) -> FilesWithStreamingResponse:
@@ -287,6 +404,10 @@ class BetaWithStreamingResponse:
     @cached_property
     def skills(self) -> SkillsWithStreamingResponse:
         return SkillsWithStreamingResponse(self._beta.skills)
+
+    @cached_property
+    def user_profiles(self) -> UserProfilesWithStreamingResponse:
+        return UserProfilesWithStreamingResponse(self._beta.user_profiles)
 
 
 class AsyncBetaWithStreamingResponse:
@@ -314,8 +435,20 @@ class AsyncBetaWithStreamingResponse:
         return AsyncSessionsWithStreamingResponse(self._beta.sessions)
 
     @cached_property
+    def deployments(self) -> AsyncDeploymentsWithStreamingResponse:
+        return AsyncDeploymentsWithStreamingResponse(self._beta.deployments)
+
+    @cached_property
+    def deployment_runs(self) -> AsyncDeploymentRunsWithStreamingResponse:
+        return AsyncDeploymentRunsWithStreamingResponse(self._beta.deployment_runs)
+
+    @cached_property
     def vaults(self) -> AsyncVaultsWithStreamingResponse:
         return AsyncVaultsWithStreamingResponse(self._beta.vaults)
+
+    @cached_property
+    def memory_stores(self) -> AsyncMemoryStoresWithStreamingResponse:
+        return AsyncMemoryStoresWithStreamingResponse(self._beta.memory_stores)
 
     @cached_property
     def files(self) -> AsyncFilesWithStreamingResponse:
@@ -324,3 +457,7 @@ class AsyncBetaWithStreamingResponse:
     @cached_property
     def skills(self) -> AsyncSkillsWithStreamingResponse:
         return AsyncSkillsWithStreamingResponse(self._beta.skills)
+
+    @cached_property
+    def user_profiles(self) -> AsyncUserProfilesWithStreamingResponse:
+        return AsyncUserProfilesWithStreamingResponse(self._beta.user_profiles)

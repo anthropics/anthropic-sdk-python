@@ -1,6 +1,6 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime
 from typing_extensions import Literal
 
@@ -13,6 +13,13 @@ __all__ = ["BetaModelInfo"]
 class BetaModelInfo(BaseModel):
     id: str
     """Unique model identifier."""
+
+    allowed_fallback_models: Optional[List[str]] = None
+    """Model IDs this model accepts as `fallbacks[i].model` on the Messages API.
+
+    An empty list means the `fallbacks` parameter is not supported for this model as
+    primary.
+    """
 
     capabilities: Optional[BetaModelCapabilities] = None
     """Model capability information."""

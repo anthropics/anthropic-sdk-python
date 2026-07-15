@@ -4,4 +4,8 @@ set -eux
 rm -rf dist
 mkdir -p dist
 uv build
-uv publish --token=$PYPI_TOKEN
+if [ -n "${PYPI_TOKEN:-}" ]; then
+  uv publish --token=$PYPI_TOKEN
+else
+  uv publish
+fi

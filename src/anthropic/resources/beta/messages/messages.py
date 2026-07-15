@@ -36,19 +36,29 @@ from ....lib.tools import (
 from ...._constants import DEFAULT_TIMEOUT, MODEL_NONSTREAMING_TOKENS
 from ...._streaming import Stream, AsyncStream
 from ....types.beta import (
+    BetaDiagnosticsParam,
     BetaThinkingConfigParam,
     message_create_params,
     message_count_tokens_params,
 )
 from ...._exceptions import AnthropicError
-from ...._base_client import make_request_options
+from ...._base_client import (
+    merge_headers,
+    make_request_options,
+)
 from ...._utils._utils import is_dict
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ....types.model_param import ModelParam
 from ....lib._parse._response import ResponseFormatT, parse_beta_response
 from ....lib._parse._transform import transform_schema
-from ....lib._stainless_helpers import stainless_helper_header as _stainless_helper_header
+from ....lib._stainless_helpers import (
+    HELPER_METHOD_STREAM as _HELPER_METHOD_STREAM,
+    STAINLESS_HELPER_METHOD_HEADER as _STAINLESS_HELPER_METHOD_HEADER,
+    STAINLESS_STREAM_HELPER_HEADER as _STAINLESS_STREAM_HELPER_HEADER,
+    helper_header as _helper_header,
+    stainless_helper_header as _stainless_helper_header,
+)
 from ....types.beta.beta_message import BetaMessage
 from ....lib.tools._beta_functions import (
     BetaFunctionTool,
@@ -60,10 +70,12 @@ from ....lib.tools._beta_functions import (
 )
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_message_param import BetaMessageParam
+from ....types.beta.beta_fallback_param import BetaFallbackParam
 from ....types.beta.beta_metadata_param import BetaMetadataParam
 from ....types.beta.parsed_beta_message import ParsedBetaMessage
 from ....types.beta.beta_text_block_param import BetaTextBlockParam
 from ....types.beta.beta_tool_union_param import BetaToolUnionParam
+from ....types.beta.beta_diagnostics_param import BetaDiagnosticsParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....lib.tools._beta_compaction_control import CompactionControl
 from ....types.beta.beta_output_config_param import BetaOutputConfigParam
@@ -115,6 +127,9 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -132,6 +147,7 @@ class Messages(SyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -147,7 +163,7 @@ class Messages(SyncAPIResource):
         conversations.
 
         Learn more about the Messages API in our
-        [user guide](https://docs.claude.com/en/docs/initial-setup)
+        [user guide](https://platform.claude.com/docs/en/get-started)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -155,8 +171,13 @@ class Messages(SyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
+              Set to `0` to populate the
+              [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache)
+              without generating a response.
+
               Different models have different maximum values for this parameter. See
-              [models](https://docs.claude.com/en/docs/models-overview) for details.
+              [models](https://platform.claude.com/docs/en/about-claude/models/overview) for
+              details.
 
           messages: Input messages.
 
@@ -215,17 +236,19 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.claude.com/en/api/messages-examples).
+              See
+              [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
               Note that if you want to include a
-              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-              top-level `system` parameter — there is no `"system"` role for input messages in
-              the Messages API.
+              [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
@@ -237,6 +260,33 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -257,7 +307,8 @@ class Messages(SyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+              [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
+              details.
 
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
@@ -274,13 +325,14 @@ class Messages(SyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+              for details.
 
           system: System prompt.
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+              [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
           temperature: Amount of randomness injected into the response.
 
@@ -298,7 +350,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -313,9 +365,9 @@ class Messages(SyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -378,27 +430,29 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+              See our
+              [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+              for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           top_p: Use nucleus sampling.
 
               In nucleus sampling, we compute the cumulative distribution over all the options
               for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`. You should either alter
-              `temperature` or `top_p`, but not both.
+              reaches a particular probability specified by `top_p`.
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
 
           extra_headers: Send extra headers
 
@@ -421,6 +475,9 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -437,6 +494,7 @@ class Messages(SyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -452,7 +510,7 @@ class Messages(SyncAPIResource):
         conversations.
 
         Learn more about the Messages API in our
-        [user guide](https://docs.claude.com/en/docs/initial-setup)
+        [user guide](https://platform.claude.com/docs/en/get-started)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -460,8 +518,13 @@ class Messages(SyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
+              Set to `0` to populate the
+              [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache)
+              without generating a response.
+
               Different models have different maximum values for this parameter. See
-              [models](https://docs.claude.com/en/docs/models-overview) for details.
+              [models](https://platform.claude.com/docs/en/about-claude/models/overview) for
+              details.
 
           messages: Input messages.
 
@@ -520,22 +583,25 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.claude.com/en/api/messages-examples).
+              See
+              [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
               Note that if you want to include a
-              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-              top-level `system` parameter — there is no `"system"` role for input messages in
-              the Messages API.
+              [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+              for details.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -546,6 +612,33 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -566,7 +659,8 @@ class Messages(SyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+              [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
+              details.
 
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
@@ -585,7 +679,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+              [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
           temperature: Amount of randomness injected into the response.
 
@@ -603,7 +697,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -618,9 +712,9 @@ class Messages(SyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -683,27 +777,29 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+              See our
+              [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+              for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           top_p: Use nucleus sampling.
 
               In nucleus sampling, we compute the cumulative distribution over all the options
               for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`. You should either alter
-              `temperature` or `top_p`, but not both.
+              reaches a particular probability specified by `top_p`.
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
 
           extra_headers: Send extra headers
 
@@ -726,6 +822,9 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -742,6 +841,7 @@ class Messages(SyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -757,7 +857,7 @@ class Messages(SyncAPIResource):
         conversations.
 
         Learn more about the Messages API in our
-        [user guide](https://docs.claude.com/en/docs/initial-setup)
+        [user guide](https://platform.claude.com/docs/en/get-started)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -765,8 +865,13 @@ class Messages(SyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
+              Set to `0` to populate the
+              [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache)
+              without generating a response.
+
               Different models have different maximum values for this parameter. See
-              [models](https://docs.claude.com/en/docs/models-overview) for details.
+              [models](https://platform.claude.com/docs/en/about-claude/models/overview) for
+              details.
 
           messages: Input messages.
 
@@ -825,22 +930,25 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.claude.com/en/api/messages-examples).
+              See
+              [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
               Note that if you want to include a
-              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-              top-level `system` parameter — there is no `"system"` role for input messages in
-              the Messages API.
+              [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+              for details.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -851,6 +959,33 @@ class Messages(SyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -871,7 +1006,8 @@ class Messages(SyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+              [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
+              details.
 
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
@@ -890,7 +1026,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+              [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
           temperature: Amount of randomness injected into the response.
 
@@ -908,7 +1044,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -923,9 +1059,9 @@ class Messages(SyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -988,27 +1124,29 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+              See our
+              [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+              for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           top_p: Use nucleus sampling.
 
               In nucleus sampling, we compute the cumulative distribution over all the options
               for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`. You should either alter
-              `temperature` or `top_p`, but not both.
+              reaches a particular probability specified by `top_p`.
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
 
           extra_headers: Send extra headers
 
@@ -1030,6 +1168,9 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1047,6 +1188,7 @@ class Messages(SyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1079,11 +1221,16 @@ class Messages(SyncAPIResource):
 
         merged_output_config = _merge_output_configs(output_config, output_format)
 
-        extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-user-profile-id": user_profile_id,
+                }
+            ),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
         return self._post(
             "/v1/messages?beta=true",
             body=maybe_transform(
@@ -1094,6 +1241,9 @@ class Messages(SyncAPIResource):
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -1132,6 +1282,9 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1149,6 +1302,7 @@ class Messages(SyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1184,12 +1338,17 @@ class Messages(SyncAPIResource):
             # Ensure structured outputs beta is included for parse method
             betas.append("structured-outputs-2025-12-15")
 
-        extra_headers = {
-            "X-Stainless-Helper": "beta.messages.parse",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            _helper_header("beta.messages.parse"),
+            strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-user-profile-id": user_profile_id,
+                }
+            ),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         if is_given(output_format) and output_format is not None:
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
@@ -1230,6 +1389,9 @@ class Messages(SyncAPIResource):
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -1272,6 +1434,9 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         max_iterations: int | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
@@ -1289,6 +1454,7 @@ class Messages(SyncAPIResource):
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1311,6 +1477,9 @@ class Messages(SyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1326,6 +1495,7 @@ class Messages(SyncAPIResource):
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1348,6 +1518,9 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1363,6 +1536,7 @@ class Messages(SyncAPIResource):
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1383,6 +1557,9 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1399,6 +1576,7 @@ class Messages(SyncAPIResource):
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1431,12 +1609,17 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
-        extra_headers = {
-            "X-Stainless-Helper": "BetaToolRunner",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            _helper_header("BetaToolRunner"),
+            strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-user-profile-id": user_profile_id,
+                }
+            ),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         runnable_tools: list[BetaRunnableTool] = []
         raw_tools: list[BetaToolUnionParam] = []
@@ -1456,6 +1639,9 @@ class Messages(SyncAPIResource):
                 "cache_control": cache_control,
                 "container": container,
                 "context_management": context_management,
+                "diagnostics": diagnostics,
+                "fallback_credit_token": fallback_credit_token,
+                "fallbacks": fallbacks,
                 "inference_geo": inference_geo,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
@@ -1511,6 +1697,9 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1527,6 +1716,7 @@ class Messages(SyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1552,13 +1742,20 @@ class Messages(SyncAPIResource):
             )
 
         """Create a Message stream"""
-        extra_headers = {
-            "X-Stainless-Helper-Method": "stream",
-            "X-Stainless-Stream-Helper": "beta.messages",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            {
+                _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
+                _STAINLESS_STREAM_HELPER_HEADER: "beta.messages",
+            },
+            strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-user-profile-id": user_profile_id,
+                }
+            ),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         transformed_output_format: BetaJSONOutputFormatParam | Omit = omit
 
@@ -1596,6 +1793,9 @@ class Messages(SyncAPIResource):
                     "output_format": omit,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "service_tier": service_tier,
@@ -1640,6 +1840,7 @@ class Messages(SyncAPIResource):
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[message_count_tokens_params.Tool] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1654,7 +1855,7 @@ class Messages(SyncAPIResource):
         including tools, images, and documents, without creating it.
 
         Learn more about token counting in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/token-counting)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/token-counting)
 
         Args:
           messages: Input messages.
@@ -1714,17 +1915,19 @@ class Messages(SyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.claude.com/en/api/messages-examples).
+              See
+              [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
               Note that if you want to include a
-              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-              top-level `system` parameter — there is no `"system"` role for input messages in
-              the Messages API.
+              [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
@@ -1752,7 +1955,7 @@ class Messages(SyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+              [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
           thinking: Configuration for enabling Claude's extended thinking.
 
@@ -1761,7 +1964,7 @@ class Messages(SyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -1776,9 +1979,9 @@ class Messages(SyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -1841,9 +2044,14 @@ class Messages(SyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+              See our
+              [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+              for more details.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
 
           extra_headers: Send extra headers
 
@@ -1863,7 +2071,8 @@ class Messages(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["token-counting-2024-11-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-user-profile-id": user_profile_id,
                 }
             ),
             **(extra_headers or {}),
@@ -1929,6 +2138,9 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1946,6 +2158,7 @@ class AsyncMessages(AsyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1961,7 +2174,7 @@ class AsyncMessages(AsyncAPIResource):
         conversations.
 
         Learn more about the Messages API in our
-        [user guide](https://docs.claude.com/en/docs/initial-setup)
+        [user guide](https://platform.claude.com/docs/en/get-started)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -1969,8 +2182,13 @@ class AsyncMessages(AsyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
+              Set to `0` to populate the
+              [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache)
+              without generating a response.
+
               Different models have different maximum values for this parameter. See
-              [models](https://docs.claude.com/en/docs/models-overview) for details.
+              [models](https://platform.claude.com/docs/en/about-claude/models/overview) for
+              details.
 
           messages: Input messages.
 
@@ -2029,17 +2247,19 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.claude.com/en/api/messages-examples).
+              See
+              [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
               Note that if you want to include a
-              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-              top-level `system` parameter — there is no `"system"` role for input messages in
-              the Messages API.
+              [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
@@ -2051,6 +2271,33 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2071,7 +2318,8 @@ class AsyncMessages(AsyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+              [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
+              details.
 
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
@@ -2088,13 +2336,14 @@ class AsyncMessages(AsyncAPIResource):
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+              for details.
 
           system: System prompt.
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+              [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
           temperature: Amount of randomness injected into the response.
 
@@ -2112,7 +2361,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -2127,9 +2376,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -2192,27 +2441,29 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+              See our
+              [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+              for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           top_p: Use nucleus sampling.
 
               In nucleus sampling, we compute the cumulative distribution over all the options
               for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`. You should either alter
-              `temperature` or `top_p`, but not both.
+              reaches a particular probability specified by `top_p`.
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
 
           extra_headers: Send extra headers
 
@@ -2235,6 +2486,9 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2251,6 +2505,7 @@ class AsyncMessages(AsyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2266,7 +2521,7 @@ class AsyncMessages(AsyncAPIResource):
         conversations.
 
         Learn more about the Messages API in our
-        [user guide](https://docs.claude.com/en/docs/initial-setup)
+        [user guide](https://platform.claude.com/docs/en/get-started)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -2274,8 +2529,13 @@ class AsyncMessages(AsyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
+              Set to `0` to populate the
+              [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache)
+              without generating a response.
+
               Different models have different maximum values for this parameter. See
-              [models](https://docs.claude.com/en/docs/models-overview) for details.
+              [models](https://platform.claude.com/docs/en/about-claude/models/overview) for
+              details.
 
           messages: Input messages.
 
@@ -2334,22 +2594,25 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.claude.com/en/api/messages-examples).
+              See
+              [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
               Note that if you want to include a
-              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-              top-level `system` parameter — there is no `"system"` role for input messages in
-              the Messages API.
+              [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+              for details.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -2360,6 +2623,33 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2380,7 +2670,8 @@ class AsyncMessages(AsyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+              [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
+              details.
 
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
@@ -2399,7 +2690,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+              [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
           temperature: Amount of randomness injected into the response.
 
@@ -2417,7 +2708,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -2432,9 +2723,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -2497,27 +2788,29 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+              See our
+              [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+              for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           top_p: Use nucleus sampling.
 
               In nucleus sampling, we compute the cumulative distribution over all the options
               for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`. You should either alter
-              `temperature` or `top_p`, but not both.
+              reaches a particular probability specified by `top_p`.
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
 
           extra_headers: Send extra headers
 
@@ -2540,6 +2833,9 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2556,6 +2852,7 @@ class AsyncMessages(AsyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2571,7 +2868,7 @@ class AsyncMessages(AsyncAPIResource):
         conversations.
 
         Learn more about the Messages API in our
-        [user guide](https://docs.claude.com/en/docs/initial-setup)
+        [user guide](https://platform.claude.com/docs/en/get-started)
 
         Args:
           max_tokens: The maximum number of tokens to generate before stopping.
@@ -2579,8 +2876,13 @@ class AsyncMessages(AsyncAPIResource):
               Note that our models may stop _before_ reaching this maximum. This parameter
               only specifies the absolute maximum number of tokens to generate.
 
+              Set to `0` to populate the
+              [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache)
+              without generating a response.
+
               Different models have different maximum values for this parameter. See
-              [models](https://docs.claude.com/en/docs/models-overview) for details.
+              [models](https://platform.claude.com/docs/en/about-claude/models/overview) for
+              details.
 
           messages: Input messages.
 
@@ -2639,22 +2941,25 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.claude.com/en/api/messages-examples).
+              See
+              [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
               Note that if you want to include a
-              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-              top-level `system` parameter — there is no `"system"` role for input messages in
-              the Messages API.
+              [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           stream: Whether to incrementally stream the response using server-sent events.
 
-              See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
+              for details.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -2665,6 +2970,33 @@ class AsyncMessages(AsyncAPIResource):
 
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
+
+          diagnostics: Request-level diagnostics. Currently carries the previous response id for
+              prompt-cache divergence reporting.
+
+          fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
+
+              When a preceding request was refused and returned a `fallback_credit_token`,
+              pass that code here on the retry to have the retry's cache-creation tokens for
+              the prefix that was warm on the refused model billed at the cache-read rate.
+              Must be redeemed by the same organization and workspace, with the same request
+              body (optionally extended by one appended `assistant` message whose content is
+              the partial text — with any trailing whitespace stripped from the final text
+              block — and paired server-tool blocks streamed before the refusal; the
+              appended-assistant form is not available for requests with `output_format` set
+              or forced `tool_choice`), on an eligible fallback model, on the same platform,
+              and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+              mid-server-tool-loop whose partial content was continuable may only be redeemed
+              with the appended-assistant form — if an exact-body retry is rejected with a 400
+              saying the token must be redeemed by continuing the partial response, retry with
+              the appended-assistant form instead.
+
+              When the appended-assistant form is used on a model that otherwise disallows
+              assistant-turn prefill, this token also authorizes that one prefill.
+
+          fallbacks: Opt-in server-side retry on one or more substitute models when the requested
+              model declines for policy reasons. Tried in order: if the first entry also
+              declines, the second is tried, and so on.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2685,7 +3017,8 @@ class AsyncMessages(AsyncAPIResource):
               for this request.
 
               Anthropic offers different levels of service for your API requests. See
-              [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+              [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
+              details.
 
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
@@ -2704,7 +3037,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+              [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
           temperature: Amount of randomness injected into the response.
 
@@ -2722,7 +3055,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -2737,9 +3070,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -2802,27 +3135,29 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+              See our
+              [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+              for more details.
 
           top_k: Only sample from the top K options for each subsequent token.
 
               Used to remove "long tail" low probability responses.
               [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           top_p: Use nucleus sampling.
 
               In nucleus sampling, we compute the cumulative distribution over all the options
               for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`. You should either alter
-              `temperature` or `top_p`, but not both.
+              reaches a particular probability specified by `top_p`.
 
-              Recommended for advanced use cases only. You usually only need to use
-              `temperature`.
+              Recommended for advanced use cases only.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
 
           extra_headers: Send extra headers
 
@@ -2844,6 +3179,9 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2861,6 +3199,7 @@ class AsyncMessages(AsyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2893,11 +3232,16 @@ class AsyncMessages(AsyncAPIResource):
 
         merged_output_config = _merge_output_configs(output_config, output_format)
 
-        extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-user-profile-id": user_profile_id,
+                }
+            ),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
         return await self._post(
             "/v1/messages?beta=true",
             body=await async_maybe_transform(
@@ -2908,6 +3252,9 @@ class AsyncMessages(AsyncAPIResource):
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -2946,6 +3293,9 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2963,6 +3313,7 @@ class AsyncMessages(AsyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2997,12 +3348,17 @@ class AsyncMessages(AsyncAPIResource):
             # Ensure structured outputs beta is included for parse method
             betas.append("structured-outputs-2025-12-15")
 
-        extra_headers = {
-            "X-Stainless-Helper": "beta.messages.parse",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            _helper_header("beta.messages.parse"),
+            strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-user-profile-id": user_profile_id,
+                }
+            ),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         if is_given(output_format) and output_format is not None:
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
@@ -3043,6 +3399,9 @@ class AsyncMessages(AsyncAPIResource):
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "output_config": merged_output_config,
@@ -3086,6 +3445,9 @@ class AsyncMessages(AsyncAPIResource):
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3102,6 +3464,7 @@ class AsyncMessages(AsyncAPIResource):
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -3124,6 +3487,9 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3139,6 +3505,7 @@ class AsyncMessages(AsyncAPIResource):
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -3161,6 +3528,9 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3176,6 +3546,7 @@ class AsyncMessages(AsyncAPIResource):
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -3196,6 +3567,9 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3212,6 +3586,7 @@ class AsyncMessages(AsyncAPIResource):
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -3237,12 +3612,17 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
-        extra_headers = {
-            "X-Stainless-Helper": "BetaToolRunner",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            _helper_header("BetaToolRunner"),
+            strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-user-profile-id": user_profile_id,
+                }
+            ),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         runnable_tools: list[BetaAsyncRunnableTool] = []
         raw_tools: list[BetaToolUnionParam] = []
@@ -3262,6 +3642,9 @@ class AsyncMessages(AsyncAPIResource):
                 "cache_control": cache_control,
                 "container": container,
                 "context_management": context_management,
+                "diagnostics": diagnostics,
+                "fallback_credit_token": fallback_credit_token,
+                "fallbacks": fallbacks,
                 "inference_geo": inference_geo,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
@@ -3320,6 +3703,9 @@ class AsyncMessages(AsyncAPIResource):
         output_format: None | type[ResponseFormatT] | BetaJSONOutputFormatParam | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
+        diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
+        fallback_credit_token: Optional[str] | Omit = omit,
+        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
@@ -3333,6 +3719,7 @@ class AsyncMessages(AsyncAPIResource):
         top_k: int | Omit = omit,
         top_p: float | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -3357,13 +3744,20 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
-        extra_headers = {
-            "X-Stainless-Helper-Method": "stream",
-            "X-Stainless-Stream-Helper": "beta.messages",
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN}),
-            **_stainless_helper_header(tools, messages),
-            **(extra_headers or {}),
-        }
+        extra_headers = merge_headers(
+            {
+                _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
+                _STAINLESS_STREAM_HELPER_HEADER: "beta.messages",
+            },
+            strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-user-profile-id": user_profile_id,
+                }
+            ),
+            _stainless_helper_header(tools, messages),
+            extra_headers or {},
+        )
 
         transformed_output_format: BetaJSONOutputFormatParam | Omit = omit
 
@@ -3400,6 +3794,9 @@ class AsyncMessages(AsyncAPIResource):
                     "output_format": omit,
                     "container": container,
                     "context_management": context_management,
+                    "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
                     "inference_geo": inference_geo,
                     "mcp_servers": mcp_servers,
                     "service_tier": service_tier,
@@ -3444,6 +3841,7 @@ class AsyncMessages(AsyncAPIResource):
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[message_count_tokens_params.Tool] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -3458,7 +3856,7 @@ class AsyncMessages(AsyncAPIResource):
         including tools, images, and documents, without creating it.
 
         Learn more about token counting in our
-        [user guide](https://docs.claude.com/en/docs/build-with-claude/token-counting)
+        [user guide](https://platform.claude.com/docs/en/build-with-claude/token-counting)
 
         Args:
           messages: Input messages.
@@ -3518,17 +3916,19 @@ class AsyncMessages(AsyncAPIResource):
               { "role": "user", "content": [{ "type": "text", "text": "Hello, Claude" }] }
               ```
 
-              See [input examples](https://docs.claude.com/en/api/messages-examples).
+              See
+              [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
 
               Note that if you want to include a
-              [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the
-              top-level `system` parameter — there is no `"system"` role for input messages in
-              the Messages API.
+              [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
+              you can use the top-level `system` parameter — there is no `"system"` role for
+              input messages in the Messages API.
 
               There is a limit of 100,000 messages in a single request.
 
-          model: The model that will complete your prompt.\n\nSee
-              [models](https://docs.anthropic.com/en/docs/models-overview) for additional
+          model: The model that will complete your prompt.
+
+              See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
@@ -3556,7 +3956,7 @@ class AsyncMessages(AsyncAPIResource):
 
               A system prompt is a way of providing context and instructions to Claude, such
               as specifying a particular goal or role. See our
-              [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+              [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
           thinking: Configuration for enabling Claude's extended thinking.
 
@@ -3565,7 +3965,7 @@ class AsyncMessages(AsyncAPIResource):
               tokens and counts towards your `max_tokens` limit.
 
               See
-              [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking)
+              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
               for details.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
@@ -3580,9 +3980,9 @@ class AsyncMessages(AsyncAPIResource):
 
               There are two types of tools: **client tools** and **server tools**. The
               behavior described below applies to client tools. For
-              [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview#server-tools),
+              [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools),
               see their individual documentation as each has its own behavior (e.g., the
-              [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+              [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
 
               Each tool definition includes:
 
@@ -3645,9 +4045,14 @@ class AsyncMessages(AsyncAPIResource):
               functions, or more generally whenever you want the model to produce a particular
               JSON structure of output.
 
-              See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+              See our
+              [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+              for more details.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
+              party other than your organization. Requires the `user-profiles` beta header.
 
           extra_headers: Send extra headers
 
@@ -3667,7 +4072,8 @@ class AsyncMessages(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["token-counting-2024-11-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-user-profile-id": user_profile_id,
                 }
             ),
             **(extra_headers or {}),

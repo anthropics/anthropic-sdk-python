@@ -170,12 +170,12 @@ class TestAuthPrecedence:
         assert client._use_sigv4 is True
         assert client.api_key is None
 
-    def test_api_key_mode_returns_x_api_key_header(self) -> None:
+    def test_api_key_mode_returns_bearer_auth_header(self) -> None:
         client = AnthropicBedrockMantle(
             api_key="my-key",
             aws_region="us-east-1",
         )
-        assert client.auth_headers == {"X-Api-Key": "my-key"}
+        assert client.auth_headers == {"Authorization": "Bearer my-key"}
 
     def test_sigv4_mode_returns_empty_auth_headers(self) -> None:
         client = AnthropicBedrockMantle(
@@ -262,3 +262,23 @@ class TestCopy:
         )
         copied = client.copy(aws_region="us-west-2")
         assert copied.aws_region == "us-west-2"
+
+    def test_copy_x_stainless_helper_header_appends(self) -> None:
+        # `x-stainless-helper` accumulates across copies instead of being clobbered
+        client = AnthropicBedrockMantle(
+            api_key="test-key",
+            aws_region="us-east-1",
+            default_headers={"x-stainless-helper": "parent"},
+        )
+        copied = client.copy(default_headers={"x-stainless-helper": "child"})
+        assert copied.default_headers["x-stainless-helper"] == "parent, child"
+
+    def test_async_copy_x_stainless_helper_header_appends(self) -> None:
+        # `x-stainless-helper` accumulates across copies instead of being clobbered
+        client = AsyncAnthropicBedrockMantle(
+            api_key="test-key",
+            aws_region="us-east-1",
+            default_headers={"x-stainless-helper": "parent"},
+        )
+        copied = client.copy(default_headers={"x-stainless-helper": "child"})
+        assert copied.default_headers["x-stainless-helper"] == "parent, child"

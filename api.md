@@ -56,6 +56,7 @@ from anthropic.types import (
     CodeExecutionTool20250522,
     CodeExecutionTool20250825,
     CodeExecutionTool20260120,
+    CodeExecutionTool20260521,
     CodeExecutionToolResultBlock,
     CodeExecutionToolResultBlockContent,
     CodeExecutionToolResultBlockParam,
@@ -85,8 +86,10 @@ from anthropic.types import (
     MessageParam,
     MessageTokensCount,
     Metadata,
+    MidConversationSystemBlockParam,
     Model,
     OutputConfig,
+    OutputTokensDetails,
     PlainTextSource,
     RawContentBlockDelta,
     RawContentBlockDeltaEvent,
@@ -164,6 +167,7 @@ from anthropic.types import (
     WebFetchTool20250910,
     WebFetchTool20260209,
     WebFetchTool20260309,
+    WebFetchTool20260318,
     WebFetchToolResultBlock,
     WebFetchToolResultBlockParam,
     WebFetchToolResultErrorBlock,
@@ -173,6 +177,7 @@ from anthropic.types import (
     WebSearchResultBlockParam,
     WebSearchTool20250305,
     WebSearchTool20260209,
+    WebSearchTool20260318,
     WebSearchToolRequestError,
     WebSearchToolResultBlock,
     WebSearchToolResultBlockContent,
@@ -315,6 +320,12 @@ from anthropic.types.beta import (
     BetaBashCodeExecutionToolResultErrorParam,
     BetaCacheControlEphemeral,
     BetaCacheCreation,
+    BetaCacheMissMessagesChanged,
+    BetaCacheMissModelChanged,
+    BetaCacheMissPreviousMessageNotFound,
+    BetaCacheMissSystemChanged,
+    BetaCacheMissToolsChanged,
+    BetaCacheMissUnavailable,
     BetaCitationCharLocation,
     BetaCitationCharLocationParam,
     BetaCitationConfig,
@@ -339,6 +350,7 @@ from anthropic.types.beta import (
     BetaCodeExecutionTool20250522,
     BetaCodeExecutionTool20250825,
     BetaCodeExecutionTool20260120,
+    BetaCodeExecutionTool20260521,
     BetaCodeExecutionToolResultBlock,
     BetaCodeExecutionToolResultBlockContent,
     BetaCodeExecutionToolResultBlockParam,
@@ -362,10 +374,19 @@ from anthropic.types.beta import (
     BetaContextManagementConfig,
     BetaContextManagementResponse,
     BetaCountTokensContextManagementResponse,
+    BetaDiagnostics,
+    BetaDiagnosticsParam,
     BetaDirectCaller,
     BetaDocumentBlock,
     BetaEncryptedCodeExecutionResultBlock,
     BetaEncryptedCodeExecutionResultBlockParam,
+    BetaFallbackBlock,
+    BetaFallbackBlockParam,
+    BetaFallbackInfo,
+    BetaFallbackInfoParam,
+    BetaFallbackMessageIterationUsage,
+    BetaFallbackParam,
+    BetaFallbackRefusalTrigger,
     BetaFileDocumentSource,
     BetaFileImageSource,
     BetaImageBlockParam,
@@ -394,7 +415,9 @@ from anthropic.types.beta import (
     BetaMessageParam,
     BetaMessageTokensCount,
     BetaMetadata,
+    BetaMidConversationSystemBlockParam,
     BetaOutputConfig,
+    BetaOutputTokensDetails,
     BetaPlainTextSource,
     BetaRawContentBlockDelta,
     BetaRawContentBlockDeltaEvent,
@@ -444,6 +467,7 @@ from anthropic.types.beta import (
     BetaThinkingConfigParam,
     BetaThinkingDelta,
     BetaThinkingTurns,
+    BetaTokenTaskBudget,
     BetaTool,
     BetaToolBash20241022,
     BetaToolBash20250124,
@@ -484,6 +508,7 @@ from anthropic.types.beta import (
     BetaWebFetchTool20250910,
     BetaWebFetchTool20260209,
     BetaWebFetchTool20260309,
+    BetaWebFetchTool20260318,
     BetaWebFetchToolResultBlock,
     BetaWebFetchToolResultBlockParam,
     BetaWebFetchToolResultErrorBlock,
@@ -493,6 +518,7 @@ from anthropic.types.beta import (
     BetaWebSearchResultBlockParam,
     BetaWebSearchTool20250305,
     BetaWebSearchTool20260209,
+    BetaWebSearchTool20260318,
     BetaWebSearchToolRequestError,
     BetaWebSearchToolResultBlock,
     BetaWebSearchToolResultBlockContent,
@@ -543,12 +569,19 @@ Types:
 ```python
 from anthropic.types.beta import (
     BetaManagedAgentsAgent,
+    BetaManagedAgentsAgentReference,
     BetaManagedAgentsAgentToolConfig,
     BetaManagedAgentsAgentToolConfigParams,
     BetaManagedAgentsAgentToolsetDefaultConfig,
     BetaManagedAgentsAgentToolsetDefaultConfigParams,
     BetaManagedAgentsAgentToolset20260401,
+    BetaManagedAgentsAgentToolset20260401BashInput,
+    BetaManagedAgentsAgentToolset20260401EditInput,
+    BetaManagedAgentsAgentToolset20260401GlobInput,
+    BetaManagedAgentsAgentToolset20260401GrepInput,
     BetaManagedAgentsAgentToolset20260401Params,
+    BetaManagedAgentsAgentToolset20260401ReadInput,
+    BetaManagedAgentsAgentToolset20260401WriteInput,
     BetaManagedAgentsAlwaysAllowPolicy,
     BetaManagedAgentsAlwaysAskPolicy,
     BetaManagedAgentsAnthropicSkill,
@@ -568,6 +601,10 @@ from anthropic.types.beta import (
     BetaManagedAgentsModel,
     BetaManagedAgentsModelConfig,
     BetaManagedAgentsModelConfigParams,
+    BetaManagedAgentsMultiagentCoordinator,
+    BetaManagedAgentsMultiagentCoordinatorParams,
+    BetaManagedAgentsMultiagentSelfParams,
+    BetaManagedAgentsSessionThreadAgent,
     BetaManagedAgentsSkillParams,
     BetaManagedAgentsURLMCPServerParams,
 )
@@ -601,18 +638,47 @@ from anthropic.types.beta import (
     BetaLimitedNetworkParams,
     BetaPackages,
     BetaPackagesParams,
+    BetaSelfHostedConfig,
+    BetaSelfHostedConfigParams,
     BetaUnrestrictedNetwork,
 )
 ```
 
 Methods:
 
-- <code title="post /v1/environments?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments.py">create</a>(\*\*<a href="src/anthropic/types/beta/environment_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_environment.py">BetaEnvironment</a></code>
-- <code title="get /v1/environments/{environment_id}?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments.py">retrieve</a>(environment_id) -> <a href="./src/anthropic/types/beta/beta_environment.py">BetaEnvironment</a></code>
-- <code title="post /v1/environments/{environment_id}?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments.py">update</a>(environment_id, \*\*<a href="src/anthropic/types/beta/environment_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_environment.py">BetaEnvironment</a></code>
-- <code title="get /v1/environments?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments.py">list</a>(\*\*<a href="src/anthropic/types/beta/environment_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_environment.py">SyncPageCursor[BetaEnvironment]</a></code>
-- <code title="delete /v1/environments/{environment_id}?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments.py">delete</a>(environment_id) -> <a href="./src/anthropic/types/beta/beta_environment_delete_response.py">BetaEnvironmentDeleteResponse</a></code>
-- <code title="post /v1/environments/{environment_id}/archive?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments.py">archive</a>(environment_id) -> <a href="./src/anthropic/types/beta/beta_environment.py">BetaEnvironment</a></code>
+- <code title="post /v1/environments?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments/environments.py">create</a>(\*\*<a href="src/anthropic/types/beta/environment_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_environment.py">BetaEnvironment</a></code>
+- <code title="get /v1/environments/{environment_id}?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments/environments.py">retrieve</a>(environment_id) -> <a href="./src/anthropic/types/beta/beta_environment.py">BetaEnvironment</a></code>
+- <code title="post /v1/environments/{environment_id}?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments/environments.py">update</a>(environment_id, \*\*<a href="src/anthropic/types/beta/environment_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_environment.py">BetaEnvironment</a></code>
+- <code title="get /v1/environments?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments/environments.py">list</a>(\*\*<a href="src/anthropic/types/beta/environment_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_environment.py">SyncPageCursor[BetaEnvironment]</a></code>
+- <code title="delete /v1/environments/{environment_id}?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments/environments.py">delete</a>(environment_id) -> <a href="./src/anthropic/types/beta/beta_environment_delete_response.py">BetaEnvironmentDeleteResponse</a></code>
+- <code title="post /v1/environments/{environment_id}/archive?beta=true">client.beta.environments.<a href="./src/anthropic/resources/beta/environments/environments.py">archive</a>(environment_id) -> <a href="./src/anthropic/types/beta/beta_environment.py">BetaEnvironment</a></code>
+
+### Work
+
+Types:
+
+```python
+from anthropic.types.beta.environments import (
+    BetaSelfHostedWork,
+    BetaSelfHostedWorkHeartbeatResponse,
+    BetaSelfHostedWorkListResponse,
+    BetaSelfHostedWorkQueueStats,
+    BetaSelfHostedWorkStopRequest,
+    BetaSelfHostedWorkUpdateRequest,
+    BetaSessionWorkData,
+)
+```
+
+Methods:
+
+- <code title="get /v1/environments/{environment_id}/work/{work_id}?beta=true">client.beta.environments.work.<a href="./src/anthropic/resources/beta/environments/work.py">retrieve</a>(work_id, \*, environment_id) -> <a href="./src/anthropic/types/beta/environments/beta_self_hosted_work.py">BetaSelfHostedWork</a></code>
+- <code title="post /v1/environments/{environment_id}/work/{work_id}?beta=true">client.beta.environments.work.<a href="./src/anthropic/resources/beta/environments/work.py">update</a>(work_id, \*, environment_id, \*\*<a href="src/anthropic/types/beta/environments/work_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/environments/beta_self_hosted_work.py">BetaSelfHostedWork</a></code>
+- <code title="get /v1/environments/{environment_id}/work?beta=true">client.beta.environments.work.<a href="./src/anthropic/resources/beta/environments/work.py">list</a>(environment_id, \*\*<a href="src/anthropic/types/beta/environments/work_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/environments/beta_self_hosted_work.py">SyncPageCursor[BetaSelfHostedWork]</a></code>
+- <code title="post /v1/environments/{environment_id}/work/{work_id}/ack?beta=true">client.beta.environments.work.<a href="./src/anthropic/resources/beta/environments/work.py">ack</a>(work_id, \*, environment_id) -> <a href="./src/anthropic/types/beta/environments/beta_self_hosted_work.py">BetaSelfHostedWork</a></code>
+- <code title="post /v1/environments/{environment_id}/work/{work_id}/heartbeat?beta=true">client.beta.environments.work.<a href="./src/anthropic/resources/beta/environments/work.py">heartbeat</a>(work_id, \*, environment_id, \*\*<a href="src/anthropic/types/beta/environments/work_heartbeat_params.py">params</a>) -> <a href="./src/anthropic/types/beta/environments/beta_self_hosted_work_heartbeat_response.py">BetaSelfHostedWorkHeartbeatResponse</a></code>
+- <code title="get /v1/environments/{environment_id}/work/poll?beta=true">client.beta.environments.work.<a href="./src/anthropic/resources/beta/environments/work.py">poll</a>(environment_id, \*\*<a href="src/anthropic/types/beta/environments/work_poll_params.py">params</a>) -> <a href="./src/anthropic/types/beta/environments/beta_self_hosted_work.py">Optional[BetaSelfHostedWork]</a></code>
+- <code title="get /v1/environments/{environment_id}/work/stats?beta=true">client.beta.environments.work.<a href="./src/anthropic/resources/beta/environments/work.py">stats</a>(environment_id) -> <a href="./src/anthropic/types/beta/environments/beta_self_hosted_work_queue_stats.py">BetaSelfHostedWorkQueueStats</a></code>
+- <code title="post /v1/environments/{environment_id}/work/{work_id}/stop?beta=true">client.beta.environments.work.<a href="./src/anthropic/resources/beta/environments/work.py">stop</a>(work_id, \*, environment_id, \*\*<a href="src/anthropic/types/beta/environments/work_stop_params.py">params</a>) -> <a href="./src/anthropic/types/beta/environments/beta_self_hosted_work.py">BetaSelfHostedWork</a></code>
 
 ## Sessions
 
@@ -620,17 +686,36 @@ Types:
 
 ```python
 from anthropic.types.beta import (
+    BetaManagedAgentsAgentMessagePreview,
     BetaManagedAgentsAgentParams,
+    BetaManagedAgentsAgentThinkingPreview,
+    BetaManagedAgentsAgentWithOverridesParams,
     BetaManagedAgentsBranchCheckout,
     BetaManagedAgentsCacheCreationUsage,
     BetaManagedAgentsCommitCheckout,
     BetaManagedAgentsDeletedSession,
+    BetaManagedAgentsDeltaContent,
+    BetaManagedAgentsDeltaEvent,
+    BetaManagedAgentsDeltaType,
     BetaManagedAgentsFileResourceParams,
     BetaManagedAgentsGitHubRepositoryResourceParams,
+    BetaManagedAgentsMemoryStoreResourceParam,
+    BetaManagedAgentsMultiagent,
+    BetaManagedAgentsMultiagentParams,
+    BetaManagedAgentsMultiagentRosterEntryParams,
+    BetaManagedAgentsOutcomeEvaluationResource,
     BetaManagedAgentsSession,
     BetaManagedAgentsSessionAgent,
+    BetaManagedAgentsSessionAgentUpdate,
+    BetaManagedAgentsSessionMultiagentCoordinator,
     BetaManagedAgentsSessionStats,
+    BetaManagedAgentsSessionUpdatedEvent,
     BetaManagedAgentsSessionUsage,
+    BetaManagedAgentsStartEvent,
+    BetaManagedAgentsStartEventPreview,
+    BetaManagedAgentsSystemContentBlock,
+    BetaManagedAgentsSystemMessageEvent,
+    BetaManagedAgentsUserToolResultEvent,
 )
 ```
 
@@ -639,7 +724,7 @@ Methods:
 - <code title="post /v1/sessions?beta=true">client.beta.sessions.<a href="./src/anthropic/resources/beta/sessions/sessions.py">create</a>(\*\*<a href="src/anthropic/types/beta/session_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_session.py">BetaManagedAgentsSession</a></code>
 - <code title="get /v1/sessions/{session_id}?beta=true">client.beta.sessions.<a href="./src/anthropic/resources/beta/sessions/sessions.py">retrieve</a>(session_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_session.py">BetaManagedAgentsSession</a></code>
 - <code title="post /v1/sessions/{session_id}?beta=true">client.beta.sessions.<a href="./src/anthropic/resources/beta/sessions/sessions.py">update</a>(session_id, \*\*<a href="src/anthropic/types/beta/session_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_session.py">BetaManagedAgentsSession</a></code>
-- <code title="get /v1/sessions?beta=true">client.beta.sessions.<a href="./src/anthropic/resources/beta/sessions/sessions.py">list</a>(\*\*<a href="src/anthropic/types/beta/session_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_session.py">SyncPageCursor[BetaManagedAgentsSession]</a></code>
+- <code title="get /v1/sessions?beta=true">client.beta.sessions.<a href="./src/anthropic/resources/beta/sessions/sessions.py">list</a>(\*\*<a href="src/anthropic/types/beta/session_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_session.py">SyncBidirectionalPageCursor[BetaManagedAgentsSession]</a></code>
 - <code title="delete /v1/sessions/{session_id}?beta=true">client.beta.sessions.<a href="./src/anthropic/resources/beta/sessions/sessions.py">delete</a>(session_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deleted_session.py">BetaManagedAgentsDeletedSession</a></code>
 - <code title="post /v1/sessions/{session_id}/archive?beta=true">client.beta.sessions.<a href="./src/anthropic/resources/beta/sessions/sessions.py">archive</a>(session_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_session.py">BetaManagedAgentsSession</a></code>
 
@@ -655,15 +740,20 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsAgentMessageEvent,
     BetaManagedAgentsAgentThinkingEvent,
     BetaManagedAgentsAgentThreadContextCompactedEvent,
+    BetaManagedAgentsAgentThreadMessageReceivedEvent,
+    BetaManagedAgentsAgentThreadMessageSentEvent,
     BetaManagedAgentsAgentToolResultEvent,
     BetaManagedAgentsAgentToolUseEvent,
     BetaManagedAgentsBase64DocumentSource,
     BetaManagedAgentsBase64ImageSource,
     BetaManagedAgentsBillingError,
+    BetaManagedAgentsCredentialHostUnreachableError,
     BetaManagedAgentsDocumentBlock,
     BetaManagedAgentsEventParams,
     BetaManagedAgentsFileDocumentSource,
     BetaManagedAgentsFileImageSource,
+    BetaManagedAgentsFileRubric,
+    BetaManagedAgentsFileRubricParams,
     BetaManagedAgentsImageBlock,
     BetaManagedAgentsMCPAuthenticationFailedError,
     BetaManagedAgentsMCPConnectionFailedError,
@@ -674,6 +764,9 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsRetryStatusExhausted,
     BetaManagedAgentsRetryStatusRetrying,
     BetaManagedAgentsRetryStatusTerminal,
+    BetaManagedAgentsSearchResultBlock,
+    BetaManagedAgentsSearchResultCitations,
+    BetaManagedAgentsSearchResultContent,
     BetaManagedAgentsSendSessionEvents,
     BetaManagedAgentsSessionDeletedEvent,
     BetaManagedAgentsSessionEndTurn,
@@ -685,22 +778,36 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsSessionStatusRescheduledEvent,
     BetaManagedAgentsSessionStatusRunningEvent,
     BetaManagedAgentsSessionStatusTerminatedEvent,
+    BetaManagedAgentsSessionThreadCreatedEvent,
+    BetaManagedAgentsSessionThreadStatusIdleEvent,
+    BetaManagedAgentsSessionThreadStatusRescheduledEvent,
+    BetaManagedAgentsSessionThreadStatusRunningEvent,
+    BetaManagedAgentsSessionThreadStatusTerminatedEvent,
     BetaManagedAgentsSpanModelRequestEndEvent,
     BetaManagedAgentsSpanModelRequestStartEvent,
     BetaManagedAgentsSpanModelUsage,
+    BetaManagedAgentsSpanOutcomeEvaluationEndEvent,
+    BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent,
+    BetaManagedAgentsSpanOutcomeEvaluationStartEvent,
     BetaManagedAgentsStreamSessionEvents,
+    BetaManagedAgentsSystemMessageEventParams,
     BetaManagedAgentsTextBlock,
+    BetaManagedAgentsTextRubric,
+    BetaManagedAgentsTextRubricParams,
     BetaManagedAgentsUnknownError,
     BetaManagedAgentsURLDocumentSource,
     BetaManagedAgentsURLImageSource,
     BetaManagedAgentsUserCustomToolResultEvent,
     BetaManagedAgentsUserCustomToolResultEventParams,
+    BetaManagedAgentsUserDefineOutcomeEvent,
+    BetaManagedAgentsUserDefineOutcomeEventParams,
     BetaManagedAgentsUserInterruptEvent,
     BetaManagedAgentsUserInterruptEventParams,
     BetaManagedAgentsUserMessageEvent,
     BetaManagedAgentsUserMessageEventParams,
     BetaManagedAgentsUserToolConfirmationEvent,
     BetaManagedAgentsUserToolConfirmationEventParams,
+    BetaManagedAgentsUserToolResultEventParams,
 )
 ```
 
@@ -708,7 +815,7 @@ Methods:
 
 - <code title="get /v1/sessions/{session_id}/events?beta=true">client.beta.sessions.events.<a href="./src/anthropic/resources/beta/sessions/events.py">list</a>(session_id, \*\*<a href="src/anthropic/types/beta/sessions/event_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_session_event.py">SyncPageCursor[BetaManagedAgentsSessionEvent]</a></code>
 - <code title="post /v1/sessions/{session_id}/events?beta=true">client.beta.sessions.events.<a href="./src/anthropic/resources/beta/sessions/events.py">send</a>(session_id, \*\*<a href="src/anthropic/types/beta/sessions/event_send_params.py">params</a>) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_send_session_events.py">BetaManagedAgentsSendSessionEvents</a></code>
-- <code title="get /v1/sessions/{session_id}/events/stream?beta=true">client.beta.sessions.events.<a href="./src/anthropic/resources/beta/sessions/events.py">stream</a>(session_id) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_stream_session_events.py">BetaManagedAgentsStreamSessionEvents</a></code>
+- <code title="get /v1/sessions/{session_id}/events/stream?beta=true">client.beta.sessions.events.<a href="./src/anthropic/resources/beta/sessions/events.py">stream</a>(session_id, \*\*<a href="src/anthropic/types/beta/sessions/event_stream_params.py">params</a>) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_stream_session_events.py">BetaManagedAgentsStreamSessionEvents</a></code>
 
 ### Resources
 
@@ -719,6 +826,7 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsDeleteSessionResource,
     BetaManagedAgentsFileResource,
     BetaManagedAgentsGitHubRepositoryResource,
+    BetaManagedAgentsMemoryStoreResource,
     BetaManagedAgentsSessionResource,
     ResourceRetrieveResponse,
     ResourceUpdateResponse,
@@ -732,6 +840,121 @@ Methods:
 - <code title="get /v1/sessions/{session_id}/resources?beta=true">client.beta.sessions.resources.<a href="./src/anthropic/resources/beta/sessions/resources.py">list</a>(session_id, \*\*<a href="src/anthropic/types/beta/sessions/resource_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_session_resource.py">SyncPageCursor[BetaManagedAgentsSessionResource]</a></code>
 - <code title="delete /v1/sessions/{session_id}/resources/{resource_id}?beta=true">client.beta.sessions.resources.<a href="./src/anthropic/resources/beta/sessions/resources.py">delete</a>(resource_id, \*, session_id) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_delete_session_resource.py">BetaManagedAgentsDeleteSessionResource</a></code>
 - <code title="post /v1/sessions/{session_id}/resources?beta=true">client.beta.sessions.resources.<a href="./src/anthropic/resources/beta/sessions/resources.py">add</a>(session_id, \*\*<a href="src/anthropic/types/beta/sessions/resource_add_params.py">params</a>) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_file_resource.py">BetaManagedAgentsFileResource</a></code>
+
+### Threads
+
+Types:
+
+```python
+from anthropic.types.beta.sessions import (
+    BetaManagedAgentsSessionThread,
+    BetaManagedAgentsSessionThreadStats,
+    BetaManagedAgentsSessionThreadStatus,
+    BetaManagedAgentsSessionThreadUsage,
+    BetaManagedAgentsStreamSessionThreadEvents,
+)
+```
+
+Methods:
+
+- <code title="get /v1/sessions/{session_id}/threads/{thread_id}?beta=true">client.beta.sessions.threads.<a href="./src/anthropic/resources/beta/sessions/threads/threads.py">retrieve</a>(thread_id, \*, session_id) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_session_thread.py">BetaManagedAgentsSessionThread</a></code>
+- <code title="get /v1/sessions/{session_id}/threads?beta=true">client.beta.sessions.threads.<a href="./src/anthropic/resources/beta/sessions/threads/threads.py">list</a>(session_id, \*\*<a href="src/anthropic/types/beta/sessions/thread_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_session_thread.py">SyncPageCursor[BetaManagedAgentsSessionThread]</a></code>
+- <code title="post /v1/sessions/{session_id}/threads/{thread_id}/archive?beta=true">client.beta.sessions.threads.<a href="./src/anthropic/resources/beta/sessions/threads/threads.py">archive</a>(thread_id, \*, session_id) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_session_thread.py">BetaManagedAgentsSessionThread</a></code>
+
+#### Events
+
+Methods:
+
+- <code title="get /v1/sessions/{session_id}/threads/{thread_id}/events?beta=true">client.beta.sessions.threads.events.<a href="./src/anthropic/resources/beta/sessions/threads/events.py">list</a>(thread_id, \*, session_id, \*\*<a href="src/anthropic/types/beta/sessions/threads/event_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_session_event.py">SyncPageCursor[BetaManagedAgentsSessionEvent]</a></code>
+- <code title="get /v1/sessions/{session_id}/threads/{thread_id}/stream?beta=true">client.beta.sessions.threads.events.<a href="./src/anthropic/resources/beta/sessions/threads/events.py">stream</a>(thread_id, \*, session_id) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_stream_session_thread_events.py">BetaManagedAgentsStreamSessionThreadEvents</a></code>
+
+## Deployments
+
+Types:
+
+```python
+from anthropic.types.beta import (
+    BetaManagedAgentsAgentArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsCronSchedule,
+    BetaManagedAgentsCronScheduleParams,
+    BetaManagedAgentsDeployment,
+    BetaManagedAgentsDeploymentInitialEvent,
+    BetaManagedAgentsDeploymentInitialEventParams,
+    BetaManagedAgentsDeploymentPausedReason,
+    BetaManagedAgentsDeploymentPausedReasonError,
+    BetaManagedAgentsDeploymentStatus,
+    BetaManagedAgentsDeploymentSystemMessageEvent,
+    BetaManagedAgentsDeploymentUserDefineOutcomeEvent,
+    BetaManagedAgentsDeploymentUserMessageEvent,
+    BetaManagedAgentsEnvironmentArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsErrorDeploymentPausedReason,
+    BetaManagedAgentsFileNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsFileResourceConfig,
+    BetaManagedAgentsGitHubRepositoryResourceConfig,
+    BetaManagedAgentsManualDeploymentPausedReason,
+    BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonError,
+    BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsMemoryStoreResourceConfig,
+    BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError,
+    BetaManagedAgentsSchedule,
+    BetaManagedAgentsScheduleParams,
+    BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError,
+    BetaManagedAgentsSessionResourceConfig,
+    BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsUnknownDeploymentPausedReasonError,
+    BetaManagedAgentsVaultArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonError,
+)
+```
+
+Methods:
+
+- <code title="post /v1/deployments?beta=true">client.beta.deployments.<a href="./src/anthropic/resources/beta/deployments.py">create</a>(\*\*<a href="src/anthropic/types/beta/deployment_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deployment.py">BetaManagedAgentsDeployment</a></code>
+- <code title="get /v1/deployments/{deployment_id}?beta=true">client.beta.deployments.<a href="./src/anthropic/resources/beta/deployments.py">retrieve</a>(deployment_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deployment.py">BetaManagedAgentsDeployment</a></code>
+- <code title="post /v1/deployments/{deployment_id}?beta=true">client.beta.deployments.<a href="./src/anthropic/resources/beta/deployments.py">update</a>(deployment_id, \*\*<a href="src/anthropic/types/beta/deployment_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deployment.py">BetaManagedAgentsDeployment</a></code>
+- <code title="get /v1/deployments?beta=true">client.beta.deployments.<a href="./src/anthropic/resources/beta/deployments.py">list</a>(\*\*<a href="src/anthropic/types/beta/deployment_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deployment.py">SyncPageCursor[BetaManagedAgentsDeployment]</a></code>
+- <code title="post /v1/deployments/{deployment_id}/archive?beta=true">client.beta.deployments.<a href="./src/anthropic/resources/beta/deployments.py">archive</a>(deployment_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deployment.py">BetaManagedAgentsDeployment</a></code>
+- <code title="post /v1/deployments/{deployment_id}/pause?beta=true">client.beta.deployments.<a href="./src/anthropic/resources/beta/deployments.py">pause</a>(deployment_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deployment.py">BetaManagedAgentsDeployment</a></code>
+- <code title="post /v1/deployments/{deployment_id}/run?beta=true">client.beta.deployments.<a href="./src/anthropic/resources/beta/deployments.py">run</a>(deployment_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deployment_run.py">BetaManagedAgentsDeploymentRun</a></code>
+- <code title="post /v1/deployments/{deployment_id}/unpause?beta=true">client.beta.deployments.<a href="./src/anthropic/resources/beta/deployments.py">unpause</a>(deployment_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deployment.py">BetaManagedAgentsDeployment</a></code>
+
+## DeploymentRuns
+
+Types:
+
+```python
+from anthropic.types.beta import (
+    BetaManagedAgentsAgentArchivedRunError,
+    BetaManagedAgentsDeploymentRun,
+    BetaManagedAgentsEnvironmentArchivedRunError,
+    BetaManagedAgentsEnvironmentNotFoundRunError,
+    BetaManagedAgentsFileNotFoundRunError,
+    BetaManagedAgentsManualTriggerContext,
+    BetaManagedAgentsMCPEgressBlockedRunError,
+    BetaManagedAgentsMemoryStoreArchivedRunError,
+    BetaManagedAgentsOrganizationDisabledRunError,
+    BetaManagedAgentsScheduleTriggerContext,
+    BetaManagedAgentsSelfHostedResourcesUnsupportedRunError,
+    BetaManagedAgentsSessionCreationRejectedRunError,
+    BetaManagedAgentsSessionRateLimitedRunError,
+    BetaManagedAgentsSessionResourceNotFoundRunError,
+    BetaManagedAgentsSkillNotFoundRunError,
+    BetaManagedAgentsTriggerContext,
+    BetaManagedAgentsTriggerType,
+    BetaManagedAgentsUnknownRunError,
+    BetaManagedAgentsVaultArchivedRunError,
+    BetaManagedAgentsVaultNotFoundRunError,
+    BetaManagedAgentsWorkspaceArchivedRunError,
+)
+```
+
+Methods:
+
+- <code title="get /v1/deployment_runs/{deployment_run_id}?beta=true">client.beta.deployment_runs.<a href="./src/anthropic/resources/beta/deployment_runs.py">retrieve</a>(deployment_run_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deployment_run.py">BetaManagedAgentsDeploymentRun</a></code>
+- <code title="get /v1/deployment_runs?beta=true">client.beta.deployment_runs.<a href="./src/anthropic/resources/beta/deployment_runs.py">list</a>(\*\*<a href="src/anthropic/types/beta/deployment_run_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deployment_run.py">SyncPageCursor[BetaManagedAgentsDeploymentRun]</a></code>
 
 ## Vaults
 
@@ -757,13 +980,27 @@ Types:
 ```python
 from anthropic.types.beta.vaults import (
     BetaManagedAgentsCredential,
+    BetaManagedAgentsCredentialNetworkingParams,
+    BetaManagedAgentsCredentialValidation,
+    BetaManagedAgentsCredentialValidationStatus,
     BetaManagedAgentsDeletedCredential,
+    BetaManagedAgentsEnvironmentVariableAuthResponse,
+    BetaManagedAgentsEnvironmentVariableCreateParams,
+    BetaManagedAgentsEnvironmentVariableUpdateParams,
+    BetaManagedAgentsInjectionLocationParams,
+    BetaManagedAgentsInjectionLocationResponse,
+    BetaManagedAgentsInjectionLocationUpdateParams,
+    BetaManagedAgentsLimitedCredentialNetworkingParams,
+    BetaManagedAgentsLimitedCredentialNetworkingResponse,
     BetaManagedAgentsMCPOAuthAuthResponse,
     BetaManagedAgentsMCPOAuthCreateParams,
     BetaManagedAgentsMCPOAuthRefreshParams,
     BetaManagedAgentsMCPOAuthRefreshResponse,
     BetaManagedAgentsMCPOAuthRefreshUpdateParams,
     BetaManagedAgentsMCPOAuthUpdateParams,
+    BetaManagedAgentsMCPProbe,
+    BetaManagedAgentsRefreshHTTPResponse,
+    BetaManagedAgentsRefreshObject,
     BetaManagedAgentsStaticBearerAuthResponse,
     BetaManagedAgentsStaticBearerCreateParams,
     BetaManagedAgentsStaticBearerUpdateParams,
@@ -775,6 +1012,8 @@ from anthropic.types.beta.vaults import (
     BetaManagedAgentsTokenEndpointAuthPostParam,
     BetaManagedAgentsTokenEndpointAuthPostResponse,
     BetaManagedAgentsTokenEndpointAuthPostUpdateParam,
+    BetaManagedAgentsUnrestrictedCredentialNetworkingParams,
+    BetaManagedAgentsUnrestrictedCredentialNetworkingResponse,
 )
 ```
 
@@ -786,6 +1025,73 @@ Methods:
 - <code title="get /v1/vaults/{vault_id}/credentials?beta=true">client.beta.vaults.credentials.<a href="./src/anthropic/resources/beta/vaults/credentials.py">list</a>(vault_id, \*\*<a href="src/anthropic/types/beta/vaults/credential_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/vaults/beta_managed_agents_credential.py">SyncPageCursor[BetaManagedAgentsCredential]</a></code>
 - <code title="delete /v1/vaults/{vault_id}/credentials/{credential_id}?beta=true">client.beta.vaults.credentials.<a href="./src/anthropic/resources/beta/vaults/credentials.py">delete</a>(credential_id, \*, vault_id) -> <a href="./src/anthropic/types/beta/vaults/beta_managed_agents_deleted_credential.py">BetaManagedAgentsDeletedCredential</a></code>
 - <code title="post /v1/vaults/{vault_id}/credentials/{credential_id}/archive?beta=true">client.beta.vaults.credentials.<a href="./src/anthropic/resources/beta/vaults/credentials.py">archive</a>(credential_id, \*, vault_id) -> <a href="./src/anthropic/types/beta/vaults/beta_managed_agents_credential.py">BetaManagedAgentsCredential</a></code>
+- <code title="post /v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate?beta=true">client.beta.vaults.credentials.<a href="./src/anthropic/resources/beta/vaults/credentials.py">mcp_oauth_validate</a>(credential_id, \*, vault_id) -> <a href="./src/anthropic/types/beta/vaults/beta_managed_agents_credential_validation.py">BetaManagedAgentsCredentialValidation</a></code>
+
+## MemoryStores
+
+Types:
+
+```python
+from anthropic.types.beta import BetaManagedAgentsDeletedMemoryStore, BetaManagedAgentsMemoryStore
+```
+
+Methods:
+
+- <code title="post /v1/memory_stores?beta=true">client.beta.memory_stores.<a href="./src/anthropic/resources/beta/memory_stores/memory_stores.py">create</a>(\*\*<a href="src/anthropic/types/beta/memory_store_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_memory_store.py">BetaManagedAgentsMemoryStore</a></code>
+- <code title="get /v1/memory_stores/{memory_store_id}?beta=true">client.beta.memory_stores.<a href="./src/anthropic/resources/beta/memory_stores/memory_stores.py">retrieve</a>(memory_store_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_memory_store.py">BetaManagedAgentsMemoryStore</a></code>
+- <code title="post /v1/memory_stores/{memory_store_id}?beta=true">client.beta.memory_stores.<a href="./src/anthropic/resources/beta/memory_stores/memory_stores.py">update</a>(memory_store_id, \*\*<a href="src/anthropic/types/beta/memory_store_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_memory_store.py">BetaManagedAgentsMemoryStore</a></code>
+- <code title="get /v1/memory_stores?beta=true">client.beta.memory_stores.<a href="./src/anthropic/resources/beta/memory_stores/memory_stores.py">list</a>(\*\*<a href="src/anthropic/types/beta/memory_store_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_managed_agents_memory_store.py">SyncPageCursor[BetaManagedAgentsMemoryStore]</a></code>
+- <code title="delete /v1/memory_stores/{memory_store_id}?beta=true">client.beta.memory_stores.<a href="./src/anthropic/resources/beta/memory_stores/memory_stores.py">delete</a>(memory_store_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_deleted_memory_store.py">BetaManagedAgentsDeletedMemoryStore</a></code>
+- <code title="post /v1/memory_stores/{memory_store_id}/archive?beta=true">client.beta.memory_stores.<a href="./src/anthropic/resources/beta/memory_stores/memory_stores.py">archive</a>(memory_store_id) -> <a href="./src/anthropic/types/beta/beta_managed_agents_memory_store.py">BetaManagedAgentsMemoryStore</a></code>
+
+### Memories
+
+Types:
+
+```python
+from anthropic.types.beta.memory_stores import (
+    BetaManagedAgentsConflictError,
+    BetaManagedAgentsContentSha256Precondition,
+    BetaManagedAgentsDeletedMemory,
+    BetaManagedAgentsError,
+    BetaManagedAgentsMemory,
+    BetaManagedAgentsMemoryListItem,
+    BetaManagedAgentsMemoryPathConflictError,
+    BetaManagedAgentsMemoryPreconditionFailedError,
+    BetaManagedAgentsMemoryPrefix,
+    BetaManagedAgentsMemoryView,
+    BetaManagedAgentsPrecondition,
+)
+```
+
+Methods:
+
+- <code title="post /v1/memory_stores/{memory_store_id}/memories?beta=true">client.beta.memory_stores.memories.<a href="./src/anthropic/resources/beta/memory_stores/memories.py">create</a>(memory_store_id, \*\*<a href="src/anthropic/types/beta/memory_stores/memory_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/memory_stores/beta_managed_agents_memory.py">BetaManagedAgentsMemory</a></code>
+- <code title="get /v1/memory_stores/{memory_store_id}/memories/{memory_id}?beta=true">client.beta.memory_stores.memories.<a href="./src/anthropic/resources/beta/memory_stores/memories.py">retrieve</a>(memory_id, \*, memory_store_id, \*\*<a href="src/anthropic/types/beta/memory_stores/memory_retrieve_params.py">params</a>) -> <a href="./src/anthropic/types/beta/memory_stores/beta_managed_agents_memory.py">BetaManagedAgentsMemory</a></code>
+- <code title="post /v1/memory_stores/{memory_store_id}/memories/{memory_id}?beta=true">client.beta.memory_stores.memories.<a href="./src/anthropic/resources/beta/memory_stores/memories.py">update</a>(memory_id, \*, memory_store_id, \*\*<a href="src/anthropic/types/beta/memory_stores/memory_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/memory_stores/beta_managed_agents_memory.py">BetaManagedAgentsMemory</a></code>
+- <code title="get /v1/memory_stores/{memory_store_id}/memories?beta=true">client.beta.memory_stores.memories.<a href="./src/anthropic/resources/beta/memory_stores/memories.py">list</a>(memory_store_id, \*\*<a href="src/anthropic/types/beta/memory_stores/memory_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/memory_stores/beta_managed_agents_memory_list_item.py">SyncPageCursor[BetaManagedAgentsMemoryListItem]</a></code>
+- <code title="delete /v1/memory_stores/{memory_store_id}/memories/{memory_id}?beta=true">client.beta.memory_stores.memories.<a href="./src/anthropic/resources/beta/memory_stores/memories.py">delete</a>(memory_id, \*, memory_store_id, \*\*<a href="src/anthropic/types/beta/memory_stores/memory_delete_params.py">params</a>) -> <a href="./src/anthropic/types/beta/memory_stores/beta_managed_agents_deleted_memory.py">BetaManagedAgentsDeletedMemory</a></code>
+
+### MemoryVersions
+
+Types:
+
+```python
+from anthropic.types.beta.memory_stores import (
+    BetaManagedAgentsActor,
+    BetaManagedAgentsAPIActor,
+    BetaManagedAgentsMemoryVersion,
+    BetaManagedAgentsMemoryVersionOperation,
+    BetaManagedAgentsSessionActor,
+    BetaManagedAgentsUserActor,
+)
+```
+
+Methods:
+
+- <code title="get /v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}?beta=true">client.beta.memory_stores.memory_versions.<a href="./src/anthropic/resources/beta/memory_stores/memory_versions.py">retrieve</a>(memory_version_id, \*, memory_store_id, \*\*<a href="src/anthropic/types/beta/memory_stores/memory_version_retrieve_params.py">params</a>) -> <a href="./src/anthropic/types/beta/memory_stores/beta_managed_agents_memory_version.py">BetaManagedAgentsMemoryVersion</a></code>
+- <code title="get /v1/memory_stores/{memory_store_id}/memory_versions?beta=true">client.beta.memory_stores.memory_versions.<a href="./src/anthropic/resources/beta/memory_stores/memory_versions.py">list</a>(memory_store_id, \*\*<a href="src/anthropic/types/beta/memory_stores/memory_version_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/memory_stores/beta_managed_agents_memory_version.py">SyncPageCursor[BetaManagedAgentsMemoryVersion]</a></code>
+- <code title="post /v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact?beta=true">client.beta.memory_stores.memory_versions.<a href="./src/anthropic/resources/beta/memory_stores/memory_versions.py">redact</a>(memory_version_id, \*, memory_store_id) -> <a href="./src/anthropic/types/beta/memory_stores/beta_managed_agents_memory_version.py">BetaManagedAgentsMemoryVersion</a></code>
 
 ## Files
 
@@ -842,3 +1148,72 @@ Methods:
 - <code title="get /v1/skills/{skill_id}/versions/{version}?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">retrieve</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/beta/skills/version_retrieve_response.py">VersionRetrieveResponse</a></code>
 - <code title="get /v1/skills/{skill_id}/versions?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">list</a>(skill_id, \*\*<a href="src/anthropic/types/beta/skills/version_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skills/version_list_response.py">SyncPageCursor[VersionListResponse]</a></code>
 - <code title="delete /v1/skills/{skill_id}/versions/{version}?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">delete</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/beta/skills/version_delete_response.py">VersionDeleteResponse</a></code>
+- <code title="get /v1/skills/{skill_id}/versions/{version}/content?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">download</a>(version, \*, skill_id) -> BinaryAPIResponse</code>
+
+## Webhooks
+
+Types:
+
+```python
+from anthropic.types.beta import (
+    BetaWebhookAgentArchivedEventData,
+    BetaWebhookAgentCreatedEventData,
+    BetaWebhookAgentDeletedEventData,
+    BetaWebhookAgentUpdatedEventData,
+    BetaWebhookDeploymentArchivedEventData,
+    BetaWebhookDeploymentCreatedEventData,
+    BetaWebhookDeploymentDeletedEventData,
+    BetaWebhookDeploymentPausedEventData,
+    BetaWebhookDeploymentRunFailedEventData,
+    BetaWebhookDeploymentRunStartedEventData,
+    BetaWebhookDeploymentRunSucceededEventData,
+    BetaWebhookDeploymentUnpausedEventData,
+    BetaWebhookDeploymentUpdatedEventData,
+    BetaWebhookEvent,
+    BetaWebhookEventData,
+    BetaWebhookSessionArchivedEventData,
+    BetaWebhookSessionCreatedEventData,
+    BetaWebhookSessionDeletedEventData,
+    BetaWebhookSessionIdledEventData,
+    BetaWebhookSessionOutcomeEvaluationEndedEventData,
+    BetaWebhookSessionPendingEventData,
+    BetaWebhookSessionRequiresActionEventData,
+    BetaWebhookSessionRunningEventData,
+    BetaWebhookSessionStatusIdledEventData,
+    BetaWebhookSessionStatusRescheduledEventData,
+    BetaWebhookSessionStatusRunStartedEventData,
+    BetaWebhookSessionStatusTerminatedEventData,
+    BetaWebhookSessionThreadCreatedEventData,
+    BetaWebhookSessionThreadIdledEventData,
+    BetaWebhookSessionThreadTerminatedEventData,
+    BetaWebhookSessionUpdatedEventData,
+    BetaWebhookVaultArchivedEventData,
+    BetaWebhookVaultCreatedEventData,
+    BetaWebhookVaultCredentialArchivedEventData,
+    BetaWebhookVaultCredentialCreatedEventData,
+    BetaWebhookVaultCredentialDeletedEventData,
+    BetaWebhookVaultCredentialRefreshFailedEventData,
+    BetaWebhookVaultDeletedEventData,
+    UnwrapWebhookEvent,
+)
+```
+
+## UserProfiles
+
+Types:
+
+```python
+from anthropic.types.beta import (
+    BetaUserProfile,
+    BetaUserProfileEnrollmentURL,
+    BetaUserProfileTrustGrant,
+)
+```
+
+Methods:
+
+- <code title="post /v1/user_profiles?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">create</a>(\*\*<a href="src/anthropic/types/beta/user_profile_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">BetaUserProfile</a></code>
+- <code title="get /v1/user_profiles/{user_profile_id}?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">retrieve</a>(user_profile_id) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">BetaUserProfile</a></code>
+- <code title="post /v1/user_profiles/{user_profile_id}?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">update</a>(user_profile_id, \*\*<a href="src/anthropic/types/beta/user_profile_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">BetaUserProfile</a></code>
+- <code title="get /v1/user_profiles?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">list</a>(\*\*<a href="src/anthropic/types/beta/user_profile_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">SyncPageCursor[BetaUserProfile]</a></code>
+- <code title="post /v1/user_profiles/{user_profile_id}/enrollment_url?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">create_enrollment_url</a>(user_profile_id) -> <a href="./src/anthropic/types/beta/beta_user_profile_enrollment_url.py">BetaUserProfileEnrollmentURL</a></code>

@@ -5,10 +5,14 @@ from typing_extensions import Annotated, TypeAlias
 
 from ...._utils import PropertyInfo
 from .beta_managed_agents_file_resource import BetaManagedAgentsFileResource
+from .beta_managed_agents_memory_store_resource import BetaManagedAgentsMemoryStoreResource
 from .beta_managed_agents_github_repository_resource import BetaManagedAgentsGitHubRepositoryResource
 
 __all__ = ["ResourceRetrieveResponse"]
 
 ResourceRetrieveResponse: TypeAlias = Annotated[
-    Union[BetaManagedAgentsGitHubRepositoryResource, BetaManagedAgentsFileResource], PropertyInfo(discriminator="type")
+    Union[
+        BetaManagedAgentsGitHubRepositoryResource, BetaManagedAgentsFileResource, BetaManagedAgentsMemoryStoreResource
+    ],
+    PropertyInfo(discriminator="type"),
 ]

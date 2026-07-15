@@ -81,6 +81,32 @@ class TestMessages:
                     }
                 ]
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
+            fallback_credit_token="x",
+            fallbacks=[
+                {
+                    "model": "claude-sonnet-5",
+                    "max_tokens": 0,
+                    "output_config": {
+                        "effort": "low",
+                        "format": {
+                            "schema": {"foo": "bar"},
+                            "type": "json_schema",
+                        },
+                        "task_budget": {
+                            "total": 1024,
+                            "type": "tokens",
+                            "remaining": 0,
+                        },
+                    },
+                    "speed": "standard",
+                    "thinking": {
+                        "budget_tokens": 1024,
+                        "type": "enabled",
+                        "display": "summarized",
+                    },
+                }
+            ],
             inference_geo="inference_geo",
             mcp_servers=[
                 {
@@ -100,6 +126,11 @@ class TestMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
+                },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
                 },
             },
             service_tier="auto",
@@ -161,7 +192,8 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -265,6 +297,32 @@ class TestMessages:
                     }
                 ]
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
+            fallback_credit_token="x",
+            fallbacks=[
+                {
+                    "model": "claude-sonnet-5",
+                    "max_tokens": 0,
+                    "output_config": {
+                        "effort": "low",
+                        "format": {
+                            "schema": {"foo": "bar"},
+                            "type": "json_schema",
+                        },
+                        "task_budget": {
+                            "total": 1024,
+                            "type": "tokens",
+                            "remaining": 0,
+                        },
+                    },
+                    "speed": "standard",
+                    "thinking": {
+                        "budget_tokens": 1024,
+                        "type": "enabled",
+                        "display": "summarized",
+                    },
+                }
+            ],
             inference_geo="inference_geo",
             mcp_servers=[
                 {
@@ -284,6 +342,11 @@ class TestMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
+                },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
                 },
             },
             service_tier="auto",
@@ -344,7 +407,8 @@ class TestMessages:
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            user_profile_id="anthropic-user-profile-id",
         )
         message_stream.response.close()
 
@@ -392,11 +456,11 @@ class TestMessages:
         message = client.beta.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -405,11 +469,11 @@ class TestMessages:
         message = client.beta.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -452,6 +516,11 @@ class TestMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
+                },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
                 },
             },
             speed="fast",
@@ -516,11 +585,11 @@ class TestMessages:
         response = client.beta.messages.with_raw_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
 
         assert response.is_closed is True
@@ -533,11 +602,11 @@ class TestMessages:
         with client.beta.messages.with_streaming_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -630,6 +699,32 @@ class TestAsyncMessages:
                     }
                 ]
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
+            fallback_credit_token="x",
+            fallbacks=[
+                {
+                    "model": "claude-sonnet-5",
+                    "max_tokens": 0,
+                    "output_config": {
+                        "effort": "low",
+                        "format": {
+                            "schema": {"foo": "bar"},
+                            "type": "json_schema",
+                        },
+                        "task_budget": {
+                            "total": 1024,
+                            "type": "tokens",
+                            "remaining": 0,
+                        },
+                    },
+                    "speed": "standard",
+                    "thinking": {
+                        "budget_tokens": 1024,
+                        "type": "enabled",
+                        "display": "summarized",
+                    },
+                }
+            ],
             inference_geo="inference_geo",
             mcp_servers=[
                 {
@@ -649,6 +744,11 @@ class TestAsyncMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
+                },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
                 },
             },
             service_tier="auto",
@@ -710,7 +810,8 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -814,6 +915,32 @@ class TestAsyncMessages:
                     }
                 ]
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
+            fallback_credit_token="x",
+            fallbacks=[
+                {
+                    "model": "claude-sonnet-5",
+                    "max_tokens": 0,
+                    "output_config": {
+                        "effort": "low",
+                        "format": {
+                            "schema": {"foo": "bar"},
+                            "type": "json_schema",
+                        },
+                        "task_budget": {
+                            "total": 1024,
+                            "type": "tokens",
+                            "remaining": 0,
+                        },
+                    },
+                    "speed": "standard",
+                    "thinking": {
+                        "budget_tokens": 1024,
+                        "type": "enabled",
+                        "display": "summarized",
+                    },
+                }
+            ],
             inference_geo="inference_geo",
             mcp_servers=[
                 {
@@ -833,6 +960,11 @@ class TestAsyncMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
+                },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
                 },
             },
             service_tier="auto",
@@ -893,7 +1025,8 @@ class TestAsyncMessages:
             ],
             top_k=5,
             top_p=0.7,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            user_profile_id="anthropic-user-profile-id",
         )
         await message_stream.response.aclose()
 
@@ -941,11 +1074,11 @@ class TestAsyncMessages:
         message = await async_client.beta.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -954,11 +1087,11 @@ class TestAsyncMessages:
         message = await async_client.beta.messages.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -1001,6 +1134,11 @@ class TestAsyncMessages:
                 "format": {
                     "schema": {"foo": "bar"},
                     "type": "json_schema",
+                },
+                "task_budget": {
+                    "total": 1024,
+                    "type": "tokens",
+                    "remaining": 0,
                 },
             },
             speed="fast",
@@ -1057,6 +1195,7 @@ class TestAsyncMessages:
                 }
             ],
             betas=["string"],
+            user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -1065,11 +1204,11 @@ class TestAsyncMessages:
         response = await async_client.beta.messages.with_raw_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         )
 
         assert response.is_closed is True
@@ -1082,11 +1221,11 @@ class TestAsyncMessages:
         async with async_client.beta.messages.with_streaming_response.count_tokens(
             messages=[
                 {
-                    "content": "string",
+                    "content": "Hello, world",
                     "role": "user",
                 }
             ],
-            model="claude-mythos-preview",
+            model="claude-opus-4-6",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

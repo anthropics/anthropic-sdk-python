@@ -303,6 +303,37 @@ def _atomic_write_file(target_path: Path, content: str) -> None:
         raise
 
 
+def _secure_mkdir(path: Path, mode: int = _DIR_CREATE_MODE) -> None:
+    """Create ``path`` and any missing parents with ``mode``, regardless of umask.
+
+    ``Path.mkdir(parents=True, mode=...)`` and ``os.makedirs(mode=...)`` apply the
+    requested mode only to the final (leaf) directory; intermediate parents are
+    created with the process umask default, which can be world-writable under a
+    permissive umask. We create each missing component explicitly so the entire
+    newly-created chain has restrictive permissions — closing a symlink-swap hole
+    where an attacker with write access to a world-writable parent could replace
+    the sandbox root and defeat path validation.
+    """
+    missing: list[Path] = []
+    current = path
+    while not current.exists():
+        missing.append(current)
+        parent = current.parent
+        if parent == current:  # reached filesystem root
+            break
+        current = parent
+    for directory in reversed(missing):
+        try:
+            directory.mkdir(mode=mode)
+        except FileExistsError:
+            # Created concurrently between our exists() check and mkdir(); skip.
+            continue
+        # mkdir() is subject to umask; chmod is not. Enforce the exact mode so a
+        # restrictive umask can't strip owner bits. (We only chmod dirs we just
+        # created and therefore own — never pre-existing dirs.)
+        os.chmod(directory, mode)
+
+
 def _validate_no_symlink_escape(target_path: Path, memory_root: Path) -> None:
     resolved_root = memory_root.resolve()
 
@@ -351,7 +382,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
         super().__init__()
         self.base_path = Path(base_path)
         self.memory_root = self.base_path / "memories"
-        self.memory_root.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
+        _secure_mkdir(self.memory_root)
 
     def _validate_path(self, path: str) -> Path:
         """Validate and resolve memory paths"""
@@ -443,7 +474,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
     def create(self, command: BetaMemoryTool20250818CreateCommand) -> str:
         full_path = self._validate_path(command.path)
 
-        full_path.parent.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
+        _secure_mkdir(full_path.parent)
 
         try:
             fd = os.open(full_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
@@ -558,7 +589,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
         if new_full_path.exists():
             raise ToolError(f"The destination {command.new_path} already exists")
 
-        new_full_path.parent.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
+        _secure_mkdir(new_full_path.parent)
 
         try:
             old_full_path.rename(new_full_path)
@@ -572,7 +603,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
         """Override the base implementation to provide file system clearing."""
         if self.memory_root.exists():
             shutil.rmtree(self.memory_root)
-        self.memory_root.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
+        _secure_mkdir(self.memory_root)
         return "All memory cleared"
 
 
@@ -613,6 +644,10 @@ async def _async_validate_no_symlink_escape(target_path: AsyncPath, memory_root:
     await run_sync(_validate_no_symlink_escape, sync_target, sync_root)
 
 
+async def _async_secure_mkdir(path: AsyncPath, mode: int = _DIR_CREATE_MODE) -> None:
+    await run_sync(_secure_mkdir, Path(str(path)), mode)
+
+
 async def _async_read_file_content(full_path: AsyncPath, memory_path: str) -> str:
     try:
         return await full_path.read_text(encoding="utf-8")
@@ -633,7 +668,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
 
     async def _ensure_memory_root(self) -> None:
         """Ensure the memory root directory exists"""
-        await self.memory_root.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
+        await _async_secure_mkdir(self.memory_root)
 
     async def _validate_path(self, path: str) -> AsyncPath:
         """Validate and resolve memory paths"""
@@ -733,7 +768,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         await self._ensure_memory_root()
         full_path = await self._validate_path(command.path)
 
-        await full_path.parent.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
+        await _async_secure_mkdir(full_path.parent)
 
         try:
             sync_full_path = Path(str(full_path))
@@ -857,7 +892,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         if await new_full_path.exists():
             raise ToolError(f"The destination {command.new_path} already exists")
 
-        await new_full_path.parent.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
+        await _async_secure_mkdir(new_full_path.parent)
 
         try:
             await old_full_path.rename(new_full_path)
@@ -871,5 +906,5 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         """Override the base implementation to provide file system clearing."""
         if await self.memory_root.exists():
             await run_sync(shutil.rmtree, str(self.memory_root))
-        await self.memory_root.mkdir(parents=True, exist_ok=True, mode=_DIR_CREATE_MODE)
+        await _async_secure_mkdir(self.memory_root)
         return "All memory cleared"

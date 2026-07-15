@@ -24,6 +24,8 @@ import httpx
 from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ...types.beta import BetaMessage, BetaMessageParam
+from ..._base_client import merge_headers
+from ._tool_dispatch import tool_registry, tool_error_content
 from ._beta_functions import (
     ToolError,
     BetaFunctionTool,
@@ -33,7 +35,7 @@ from ._beta_functions import (
     BetaBuiltinFunctionTool,
     BetaAsyncBuiltinFunctionTool,
 )
-from .._stainless_helpers import stainless_helper_header
+from .._stainless_helpers import helper_header, stainless_helper_header
 from ._beta_compaction_control import DEFAULT_THRESHOLD, DEFAULT_SUMMARY_PROMPT, CompactionControl
 from ..streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 from ...types.beta.parsed_beta_message import ResponseFormatT, ParsedBetaMessage, ParsedBetaContentBlock
@@ -72,7 +74,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         max_iterations: int | None = None,
         compaction_control: CompactionControl | None = None,
     ) -> None:
-        self._tools_by_name = {tool.name: tool for tool in tools}
+        self._tools_by_name = tool_registry(tools)
         self._params: ParseMessageCreateParamsBase[ResponseFormatT] = {
             **params,
             "messages": [message for message in params["messages"]],
@@ -82,7 +84,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
             messages=params.get("messages"),
         )
         if helper_header:
-            merged_headers = {**helper_header, **(options.get("extra_headers") or {})}
+            merged_headers = merge_headers(helper_header, options.get("extra_headers") or {})
             options = {**options, "extra_headers": merged_headers}
         self._options = options
         self._messages_modified = False
@@ -229,7 +231,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             model=model,
             messages=messages,
             max_tokens=self._params["max_tokens"],
-            extra_headers={"X-Stainless-Helper": "compaction"},
+            extra_headers=helper_header("compaction"),
         )
 
         log.info(f"Compaction complete. New token usage: {response.usage.output_tokens}")
@@ -270,6 +272,13 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                     self._params["container"] = last_assistant_message.container.id
 
             self._iteration_count += 1
+
+            # Refusal-terminated turns are terminal: executing their tool_use blocks would
+            # fire side effects the model never confirmed, and the resulting tool_results
+            # cannot be replayed coherently. Surface the refusal as the final message.
+            if message.stop_reason == "refusal":
+                log.debug("Turn ended with a refusal, exiting from tool runner loop.")
+                return
 
             # If the compaction was performed, skip tool call generation this iteration
             if not self._check_and_compact():
@@ -348,7 +357,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": exc.content,
+                        "content": tool_error_content(exc),
                         "is_error": True,
                     }
                 )
@@ -358,7 +367,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": repr(exc),
+                        "content": tool_error_content(exc),
                         "is_error": True,
                     }
                 )
@@ -510,7 +519,7 @@ class BaseAsyncToolRunner(
             model=model,
             messages=messages,
             max_tokens=self._params["max_tokens"],
-            extra_headers={"X-Stainless-Helper": "compaction"},
+            extra_headers=helper_header("compaction"),
         )
 
         log.info(f"Compaction complete. New token usage: {response.usage.output_tokens}")
@@ -551,6 +560,13 @@ class BaseAsyncToolRunner(
                     self._params["container"] = last_assistant_message.container.id
 
             self._iteration_count += 1
+
+            # Refusal-terminated turns are terminal: executing their tool_use blocks would
+            # fire side effects the model never confirmed, and the resulting tool_results
+            # cannot be replayed coherently. Surface the refusal as the final message.
+            if message.stop_reason == "refusal":
+                log.debug("Turn ended with a refusal, exiting from tool runner loop.")
+                return
 
             # If the compaction was performed, skip tool call generation this iteration
             if not await self._check_and_compact():
@@ -649,7 +665,7 @@ class BaseAsyncToolRunner(
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": exc.content,
+                        "content": tool_error_content(exc),
                         "is_error": True,
                     }
                 )
@@ -659,7 +675,7 @@ class BaseAsyncToolRunner(
                     {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
-                        "content": repr(exc),
+                        "content": tool_error_content(exc),
                         "is_error": True,
                     }
                 )

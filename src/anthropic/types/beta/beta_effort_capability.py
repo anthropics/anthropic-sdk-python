@@ -1,5 +1,7 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+from typing import Optional
+
 from ..._models import BaseModel
 from .beta_capability_support import BetaCapabilitySupport
 
@@ -23,3 +25,6 @@ class BetaEffortCapability(BaseModel):
 
     supported: bool
     """Whether this capability is supported by the model."""
+
+    xhigh: Optional[BetaCapabilitySupport] = None
+    """Indicates whether a capability is supported."""

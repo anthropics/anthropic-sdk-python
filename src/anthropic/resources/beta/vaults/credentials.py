@@ -19,6 +19,7 @@ from ....types.beta.vaults import credential_list_params, credential_create_para
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.vaults.beta_managed_agents_credential import BetaManagedAgentsCredential
 from ....types.beta.vaults.beta_managed_agents_deleted_credential import BetaManagedAgentsDeletedCredential
+from ....types.beta.vaults.beta_managed_agents_credential_validation import BetaManagedAgentsCredentialValidation
 
 __all__ = ["Credentials", "AsyncCredentials"]
 
@@ -410,6 +411,60 @@ class Credentials(SyncAPIResource):
             cast_to=BetaManagedAgentsCredential,
         )
 
+    def mcp_oauth_validate(
+        self,
+        credential_id: str,
+        *,
+        vault_id: str,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> BetaManagedAgentsCredentialValidation:
+        """
+        Validate Credential
+
+        Args:
+          betas: Optional header to specify the beta version(s) you want to use.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not vault_id:
+            raise ValueError(f"Expected a non-empty value for `vault_id` but received {vault_id!r}")
+        if not credential_id:
+            raise ValueError(f"Expected a non-empty value for `credential_id` but received {credential_id!r}")
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    if is_given(betas)
+                    else not_given
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        return self._post(
+            path_template(
+                "/v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate?beta=true",
+                vault_id=vault_id,
+                credential_id=credential_id,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=BetaManagedAgentsCredentialValidation,
+        )
+
 
 class AsyncCredentials(AsyncAPIResource):
     @cached_property
@@ -798,6 +853,60 @@ class AsyncCredentials(AsyncAPIResource):
             cast_to=BetaManagedAgentsCredential,
         )
 
+    async def mcp_oauth_validate(
+        self,
+        credential_id: str,
+        *,
+        vault_id: str,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> BetaManagedAgentsCredentialValidation:
+        """
+        Validate Credential
+
+        Args:
+          betas: Optional header to specify the beta version(s) you want to use.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not vault_id:
+            raise ValueError(f"Expected a non-empty value for `vault_id` but received {vault_id!r}")
+        if not credential_id:
+            raise ValueError(f"Expected a non-empty value for `credential_id` but received {credential_id!r}")
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
+                    if is_given(betas)
+                    else not_given
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
+        return await self._post(
+            path_template(
+                "/v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate?beta=true",
+                vault_id=vault_id,
+                credential_id=credential_id,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=BetaManagedAgentsCredentialValidation,
+        )
+
 
 class CredentialsWithRawResponse:
     def __init__(self, credentials: Credentials) -> None:
@@ -820,6 +929,9 @@ class CredentialsWithRawResponse:
         )
         self.archive = _legacy_response.to_raw_response_wrapper(
             credentials.archive,
+        )
+        self.mcp_oauth_validate = _legacy_response.to_raw_response_wrapper(
+            credentials.mcp_oauth_validate,
         )
 
 
@@ -845,6 +957,9 @@ class AsyncCredentialsWithRawResponse:
         self.archive = _legacy_response.async_to_raw_response_wrapper(
             credentials.archive,
         )
+        self.mcp_oauth_validate = _legacy_response.async_to_raw_response_wrapper(
+            credentials.mcp_oauth_validate,
+        )
 
 
 class CredentialsWithStreamingResponse:
@@ -869,6 +984,9 @@ class CredentialsWithStreamingResponse:
         self.archive = to_streamed_response_wrapper(
             credentials.archive,
         )
+        self.mcp_oauth_validate = to_streamed_response_wrapper(
+            credentials.mcp_oauth_validate,
+        )
 
 
 class AsyncCredentialsWithStreamingResponse:
@@ -892,4 +1010,7 @@ class AsyncCredentialsWithStreamingResponse:
         )
         self.archive = async_to_streamed_response_wrapper(
             credentials.archive,
+        )
+        self.mcp_oauth_validate = async_to_streamed_response_wrapper(
+            credentials.mcp_oauth_validate,
         )

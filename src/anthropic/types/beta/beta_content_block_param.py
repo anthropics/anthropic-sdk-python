@@ -8,6 +8,7 @@ from typing_extensions import TypeAlias
 from .beta_content_block import BetaContentBlock
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_image_block_param import BetaImageBlockParam
+from .beta_fallback_block_param import BetaFallbackBlockParam
 from .beta_thinking_block_param import BetaThinkingBlockParam
 from .beta_tool_use_block_param import BetaToolUseBlockParam
 from .beta_compaction_block_param import BetaCompactionBlockParam
@@ -21,6 +22,7 @@ from .beta_redacted_thinking_block_param import BetaRedactedThinkingBlockParam
 from .beta_advisor_tool_result_block_param import BetaAdvisorToolResultBlockParam
 from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam
 from .beta_web_search_tool_result_block_param import BetaWebSearchToolResultBlockParam
+from .beta_mid_conversation_system_block_param import BetaMidConversationSystemBlockParam
 from .beta_request_mcp_tool_result_block_param import BetaRequestMCPToolResultBlockParam
 from .beta_tool_search_tool_result_block_param import BetaToolSearchToolResultBlockParam
 from .beta_code_execution_tool_result_block_param import BetaCodeExecutionToolResultBlockParam
@@ -50,5 +52,7 @@ BetaContentBlockParam: TypeAlias = Union[
     BetaRequestMCPToolResultBlockParam,
     BetaContainerUploadBlockParam,
     BetaCompactionBlockParam,
+    BetaMidConversationSystemBlockParam,
+    BetaFallbackBlockParam,
     BetaContentBlock,
 ]

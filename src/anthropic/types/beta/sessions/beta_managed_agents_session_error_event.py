@@ -13,6 +13,7 @@ from .beta_managed_agents_model_rate_limited_error import BetaManagedAgentsModel
 from .beta_managed_agents_model_request_failed_error import BetaManagedAgentsModelRequestFailedError
 from .beta_managed_agents_mcp_connection_failed_error import BetaManagedAgentsMCPConnectionFailedError
 from .beta_managed_agents_mcp_authentication_failed_error import BetaManagedAgentsMCPAuthenticationFailedError
+from .beta_managed_agents_credential_host_unreachable_error import BetaManagedAgentsCredentialHostUnreachableError
 
 __all__ = ["BetaManagedAgentsSessionErrorEvent", "Error"]
 
@@ -25,6 +26,7 @@ Error: TypeAlias = Annotated[
         BetaManagedAgentsMCPConnectionFailedError,
         BetaManagedAgentsMCPAuthenticationFailedError,
         BetaManagedAgentsBillingError,
+        BetaManagedAgentsCredentialHostUnreachableError,
     ],
     PropertyInfo(discriminator="type"),
 ]
