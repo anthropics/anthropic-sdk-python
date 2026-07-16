@@ -132,6 +132,10 @@ from .lib.bedrock import *
 from .lib.foundry import AnthropicFoundry as AnthropicFoundry, AsyncAnthropicFoundry as AsyncAnthropicFoundry
 from .lib.streaming import *
 from .lib.credentials import *
+from .lib.google_cloud import (
+    AnthropicGoogleCloud as AnthropicGoogleCloud,
+    AsyncAnthropicGoogleCloud as AsyncAnthropicGoogleCloud,
+)
 
 _setup_logging()
 

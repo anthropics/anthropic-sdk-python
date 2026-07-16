@@ -268,7 +268,10 @@ class Anthropic(SyncAPIClient):
         _bind_credentials_base_url(credentials, str(base_url))
         self.credentials = credentials
         _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
-        _warn_env_shadow(api_key=api_key, auth_token=auth_token)
+        if _is_base_client(self):
+            # Subclasses never run the auto-discovery chain (gated on `_is_base_client`
+            # below), so nothing is shadowed and the warning would be spurious.
+            _warn_env_shadow(api_key=api_key, auth_token=auth_token)
         if not isinstance(_token_cache, NotGiven):
             self._token_cache = _token_cache
         else:
@@ -685,7 +688,10 @@ class AsyncAnthropic(AsyncAPIClient):
         _bind_credentials_base_url(credentials, str(base_url))
         self.credentials = credentials
         _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
-        _warn_env_shadow(api_key=api_key, auth_token=auth_token)
+        if _is_base_client(self):
+            # Subclasses never run the auto-discovery chain (gated on `_is_base_client`
+            # below), so nothing is shadowed and the warning would be spurious.
+            _warn_env_shadow(api_key=api_key, auth_token=auth_token)
         if not isinstance(_token_cache, NotGiven):
             self._token_cache = _token_cache
         else:

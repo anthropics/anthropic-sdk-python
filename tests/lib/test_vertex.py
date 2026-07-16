@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import os
-from typing import cast
+import sys
+from typing import Any, cast
+from unittest.mock import Mock
 from typing_extensions import Protocol
 
 import httpx
@@ -9,6 +11,8 @@ import pytest
 from respx import MockRouter
 
 from anthropic import AnthropicVertex, AsyncAnthropicVertex
+from anthropic.lib.vertex._auth import refresh_auth
+from anthropic.lib._extras._common import MissingDependencyError
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -166,6 +170,13 @@ class TestAnthropicVertex:
             base_url="https://test.googleapis.com/v1",
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
+
+
+def test_refresh_without_google_auth_raises_actionable_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    # `None` in sys.modules makes the import fail even when google-auth is installed.
+    monkeypatch.setitem(sys.modules, "google.auth.transport.requests", cast(Any, None))
+    with pytest.raises(MissingDependencyError, match=r"anthropic\[vertex\]"):
+        refresh_auth(cast(Any, Mock()))
 
 
 class TestAsyncAnthropicVertex:
