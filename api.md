@@ -1245,3 +1245,35 @@ Methods:
 - <code title="get /v1/dreams?beta=true">client.beta.dreams.<a href="./src/anthropic/resources/beta/dreams.py">list</a>(\*\*<a href="src/anthropic/types/beta/dream_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_dream.py">SyncPageCursor[BetaDream]</a></code>
 - <code title="post /v1/dreams/{dream_id}/archive?beta=true">client.beta.dreams.<a href="./src/anthropic/resources/beta/dreams.py">archive</a>(dream_id) -> <a href="./src/anthropic/types/beta/beta_dream.py">BetaDream</a></code>
 - <code title="post /v1/dreams/{dream_id}/cancel?beta=true">client.beta.dreams.<a href="./src/anthropic/resources/beta/dreams.py">cancel</a>(dream_id) -> <a href="./src/anthropic/types/beta/beta_dream.py">BetaDream</a></code>
+
+## Tunnels
+
+Types:
+
+```python
+from anthropic.types.beta import BetaTunnel, BetaTunnelToken
+```
+
+Methods:
+
+- <code title="post /v1/tunnels?beta=true">client.beta.tunnels.<a href="./src/anthropic/resources/beta/tunnels/tunnels.py">create</a>(\*\*<a href="src/anthropic/types/beta/tunnel_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_tunnel.py">BetaTunnel</a></code>
+- <code title="get /v1/tunnels/{tunnel_id}?beta=true">client.beta.tunnels.<a href="./src/anthropic/resources/beta/tunnels/tunnels.py">retrieve</a>(tunnel_id) -> <a href="./src/anthropic/types/beta/beta_tunnel.py">BetaTunnel</a></code>
+- <code title="get /v1/tunnels?beta=true">client.beta.tunnels.<a href="./src/anthropic/resources/beta/tunnels/tunnels.py">list</a>(\*\*<a href="src/anthropic/types/beta/tunnel_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_tunnel.py">SyncPageCursor[BetaTunnel]</a></code>
+- <code title="post /v1/tunnels/{tunnel_id}/archive?beta=true">client.beta.tunnels.<a href="./src/anthropic/resources/beta/tunnels/tunnels.py">archive</a>(tunnel_id) -> <a href="./src/anthropic/types/beta/beta_tunnel.py">BetaTunnel</a></code>
+- <code title="post /v1/tunnels/{tunnel_id}/reveal_token?beta=true">client.beta.tunnels.<a href="./src/anthropic/resources/beta/tunnels/tunnels.py">reveal_token</a>(tunnel_id) -> <a href="./src/anthropic/types/beta/beta_tunnel_token.py">BetaTunnelToken</a></code>
+- <code title="post /v1/tunnels/{tunnel_id}/rotate_token?beta=true">client.beta.tunnels.<a href="./src/anthropic/resources/beta/tunnels/tunnels.py">rotate_token</a>(tunnel_id, \*\*<a href="src/anthropic/types/beta/tunnel_rotate_token_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_tunnel_token.py">BetaTunnelToken</a></code>
+
+### Certificates
+
+Types:
+
+```python
+from anthropic.types.beta.tunnels import BetaTunnelCertificate
+```
+
+Methods:
+
+- <code title="post /v1/tunnels/{tunnel_id}/certificates?beta=true">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">create</a>(tunnel_id, \*\*<a href="src/anthropic/types/beta/tunnels/certificate_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">BetaTunnelCertificate</a></code>
+- <code title="get /v1/tunnels/{tunnel_id}/certificates/{certificate_id}?beta=true">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">retrieve</a>(certificate_id, \*, tunnel_id) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">BetaTunnelCertificate</a></code>
+- <code title="get /v1/tunnels/{tunnel_id}/certificates?beta=true">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">list</a>(tunnel_id, \*\*<a href="src/anthropic/types/beta/tunnels/certificate_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">SyncPageCursor[BetaTunnelCertificate]</a></code>
+- <code title="post /v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive?beta=true">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">archive</a>(certificate_id, \*, tunnel_id) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">BetaTunnelCertificate</a></code>
