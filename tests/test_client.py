@@ -2300,6 +2300,26 @@ class TestAsyncAnthropic:
         platform = await asyncify(get_platform)()
         assert isinstance(platform, (str, OtherPlatform))
 
+    @pytest.mark.parametrize(
+        ("system", "release", "machine", "expected"),
+        [
+            ("Darwin", "25.0.0", "arm64", "MacOS"),
+            ("Darwin", "25.0.0", "iPhone12,1", "iOS"),
+            ("Linux", "5.10.81-android12", "aarch64", "Android"),
+        ],
+    )
+    async def test_get_platform_does_not_call_platform_platform(
+        self, monkeypatch: pytest.MonkeyPatch, system: str, release: str, machine: str, expected: str
+    ) -> None:
+        monkeypatch.setattr("anthropic._base_client.platform.system", lambda: system)
+        monkeypatch.setattr("anthropic._base_client.platform.release", lambda: release)
+        monkeypatch.setattr("anthropic._base_client.platform.machine", lambda: machine)
+        platform_mock = mock.Mock(side_effect=AssertionError("platform.platform() must not be called"))
+        monkeypatch.setattr("anthropic._base_client.platform.platform", platform_mock)
+
+        assert await asyncify(get_platform)() == expected
+        platform_mock.assert_not_called()
+
     async def test_proxy_environment_variables(self, monkeypatch: pytest.MonkeyPatch) -> None:
         # Test that the proxy environment variables are set correctly
         monkeypatch.setenv("HTTPS_PROXY", "https://example.org")

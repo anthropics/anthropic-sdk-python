@@ -2436,15 +2436,15 @@ Platform = Union[
 def get_platform() -> Platform:
     try:
         system = platform.system().lower()
-        platform_name = platform.platform().lower()
+        release = platform.release().lower()
+        machine = platform.machine().lower()
+        platform_name = "-".join(part for part in (system, release, machine) if part)
     except Exception:
         return "Unknown"
 
-    if "iphone" in platform_name or "ipad" in platform_name:
+    if "iphone" in machine or "ipad" in machine:
         # Tested using Python3IDE on an iPhone 11 and Pythonista on an iPad 7
-        # system is Darwin and platform_name is a string like:
-        # - Darwin-21.6.0-iPhone12,1-64bit
-        # - Darwin-21.6.0-iPad7,11-64bit
+        # system is Darwin and machine is a string like iPhone12,1 or iPad7,11
         return "iOS"
 
     if system == "darwin":
@@ -2453,9 +2453,9 @@ def get_platform() -> Platform:
     if system == "windows":
         return "Windows"
 
-    if "android" in platform_name:
+    if hasattr(sys, "getandroidapilevel") or "android" in release:
         # Tested using Pydroid 3
-        # system is Linux and platform_name is a string like 'Linux-5.10.81-android12-9-00001-geba40aecb3b7-ab8534902-aarch64-with-libc'
+        # system is Linux and release contains 'android'
         return "Android"
 
     if system == "linux":
