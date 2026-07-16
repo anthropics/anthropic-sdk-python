@@ -56,6 +56,14 @@ from .vaults import (
     VaultsWithStreamingResponse,
     AsyncVaultsWithStreamingResponse,
 )
+from .tunnels import (
+    Tunnels,
+    AsyncTunnels,
+    TunnelsWithRawResponse,
+    AsyncTunnelsWithRawResponse,
+    TunnelsWithStreamingResponse,
+    AsyncTunnelsWithStreamingResponse,
+)
 from .messages import (
     Messages,
     AsyncMessages,
@@ -195,6 +203,12 @@ __all__ = [
     "AsyncDreamsWithRawResponse",
     "DreamsWithStreamingResponse",
     "AsyncDreamsWithStreamingResponse",
+    "Tunnels",
+    "AsyncTunnels",
+    "TunnelsWithRawResponse",
+    "AsyncTunnelsWithRawResponse",
+    "TunnelsWithStreamingResponse",
+    "AsyncTunnelsWithStreamingResponse",
     "Beta",
     "AsyncBeta",
     "BetaWithRawResponse",
