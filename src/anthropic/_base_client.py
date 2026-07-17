@@ -134,6 +134,20 @@ else:
         HTTPX_DEFAULT_TIMEOUT = Timeout(5.0)
 
 
+# httpx2 (https://github.com/pydantic/httpx2) is an API-compatible fork of httpx that
+# lives in a separate import namespace, so `httpx2.Client` & co. are distinct classes
+# that fail `isinstance(..., httpx.Client)`. Accept an injected httpx2 client when the
+# package is installed.
+try:
+    import httpx2  # type: ignore
+except ImportError:
+    httpx2 = None
+
+_SYNC_HTTP_CLIENT_TYPES = (httpx.Client,) if httpx2 is None else (httpx.Client, httpx2.Client)
+_ASYNC_HTTP_CLIENT_TYPES = (httpx.AsyncClient,) if httpx2 is None else (httpx.AsyncClient, httpx2.AsyncClient)
+_TIMEOUT_EXCEPTIONS = (httpx.TimeoutException,) if httpx2 is None else (httpx.TimeoutException, httpx2.TimeoutException)
+
+
 class PageInfo:
     """Stores the necessary information to build the request to retrieve the next page.
 
@@ -599,12 +613,20 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
             headers.pop("Content-Type", None)
             kwargs.pop("data", None)
 
+        # httpx2's `build_request` rejects a classic `httpx.URL`, so pass the URL as a
+        # string for httpx2 clients while leaving classic httpx clients untouched.
+        url = (
+            str(prepared_url)
+            if httpx2 is not None and isinstance(self._client, (httpx2.Client, httpx2.AsyncClient))
+            else prepared_url
+        )
+
         # TODO: report this error to httpx
         return self._client.build_request(  # pyright: ignore[reportUnknownMemberType]
             headers=headers,
             timeout=self.timeout if isinstance(options.timeout, NotGiven) else options.timeout,
             method=options.method,
-            url=prepared_url,
+            url=url,
             # the `Query` type that we use is incompatible with qs'
             # `Params` type as it needs to be typed as `Mapping[str, object]`
             # so that passing a `TypedDict` doesn't cause an error.
@@ -1007,7 +1029,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
             else:
                 timeout = DEFAULT_TIMEOUT
 
-        if http_client is not None and not isinstance(http_client, httpx.Client):  # pyright: ignore[reportUnnecessaryIsInstance]
+        if http_client is not None and not isinstance(http_client, _SYNC_HTTP_CLIENT_TYPES):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise TypeError(
                 f"Invalid `http_client` argument; Expected an instance of `httpx.Client` but got {type(http_client)}"
             )
@@ -1297,7 +1319,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
                 stream=stream or self._should_stream_response_body(request=request),
                 **kwargs,
             )
-        except httpx.TimeoutException as err:
+        except _TIMEOUT_EXCEPTIONS as err:
             log.debug("Encountered httpx.TimeoutException", exc_info=True)
             raise APITimeoutError(request=request) from err
         except Exception as err:
@@ -1749,7 +1771,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
             else:
                 timeout = DEFAULT_TIMEOUT
 
-        if http_client is not None and not isinstance(http_client, httpx.AsyncClient):  # pyright: ignore[reportUnnecessaryIsInstance]
+        if http_client is not None and not isinstance(http_client, _ASYNC_HTTP_CLIENT_TYPES):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise TypeError(
                 f"Invalid `http_client` argument; Expected an instance of `httpx.AsyncClient` but got {type(http_client)}"
             )
@@ -2049,7 +2071,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
                 stream=stream or self._should_stream_response_body(request=request),
                 **kwargs,
             )
-        except httpx.TimeoutException as err:
+        except _TIMEOUT_EXCEPTIONS as err:
             log.debug("Encountered httpx.TimeoutException", exc_info=True)
             raise APITimeoutError(request=request) from err
         except Exception as err:
