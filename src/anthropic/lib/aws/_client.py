@@ -18,6 +18,7 @@ from ._credentials import (
 from ..._exceptions import AnthropicError
 from ..._middleware import MiddlewareInput
 from ..._base_client import DEFAULT_MAX_RETRIES
+from ..credentials._types import AccessTokenProvider
 
 
 class AnthropicAWS(Anthropic):
@@ -164,7 +165,7 @@ class AnthropicAWS(Anthropic):
         request.headers.update(headers)
 
     @override
-    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — subclass intentionally drops `credentials`
+    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — narrows `credentials` to None-only
         self,
         *,
         api_key: str | None = None,
@@ -176,6 +177,7 @@ class AnthropicAWS(Anthropic):
         workspace_id: str | None = None,
         skip_auth: bool | None = None,
         auth_token: str | None = None,
+        credentials: AccessTokenProvider | None = None,
         webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
@@ -188,6 +190,14 @@ class AnthropicAWS(Anthropic):
         middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
+        # The AWS client authenticates with SigV4 (or an API key), not a token
+        # provider, so it has no `credentials`. Accept the argument for signature
+        # compatibility with the base client — internal helpers such as
+        # `_copy_client_with_bearer_auth` call `copy(credentials=None, ...)` — but
+        # only as a no-op; reject a real provider rather than silently ignoring it.
+        if credentials is not None:
+            raise TypeError("AnthropicAWS does not support a `credentials` provider (it authenticates with AWS SigV4).")
+
         # If region is changing and no explicit base_url, let __init__ derive it
         resolved_base_url = base_url or (None if aws_region else self.base_url)
 
@@ -363,7 +373,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         request.headers.update(headers)
 
     @override
-    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — subclass intentionally drops `credentials`
+    def copy(  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride] — narrows `credentials` to None-only
         self,
         *,
         api_key: str | None = None,
@@ -375,6 +385,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         workspace_id: str | None = None,
         skip_auth: bool | None = None,
         auth_token: str | None = None,
+        credentials: AccessTokenProvider | None = None,
         webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
@@ -387,6 +398,14 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
+        # The AWS client authenticates with SigV4 (or an API key), not a token
+        # provider, so it has no `credentials`. Accept the argument for signature
+        # compatibility with the base client — internal helpers such as
+        # `_copy_client_with_bearer_auth` call `copy(credentials=None, ...)` — but
+        # only as a no-op; reject a real provider rather than silently ignoring it.
+        if credentials is not None:
+            raise TypeError("AnthropicAWS does not support a `credentials` provider (it authenticates with AWS SigV4).")
+
         # If region is changing and no explicit base_url, let __init__ derive it
         resolved_base_url = base_url or (None if aws_region else self.base_url)
 
