@@ -61,6 +61,36 @@ def test_anyof_schema():
     )
 
 
+def test_type_array_schema():
+    schema = {"type": ["string", "null"]}
+    result = transform_schema(schema)
+    assert result == snapshot({"anyOf": [{"type": "string"}, {"type": "null"}]})
+
+
+def test_type_array_schema_with_constraints():
+    schema = {
+        "type": ["object", "null"],
+        "properties": {"name": {"type": "string"}},
+        "required": ["name"],
+        "description": "A nullable object",
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "properties": {"name": {"type": "string"}},
+                    "additionalProperties": False,
+                    "required": ["name"],
+                },
+                {"type": "null"},
+            ],
+            "description": "A nullable object",
+        }
+    )
+
+
 def test_enum_schema():
     schema = {
         "type": "string",
