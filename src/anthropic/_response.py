@@ -37,6 +37,19 @@ if TYPE_CHECKING:
     from ._base_client import BaseClient
 
 
+# httpx2 (https://github.com/pydantic/httpx2) raises its own `StreamConsumed` from a
+# distinct import namespace, so an injected httpx2 client's double-read would escape an
+# `except httpx.StreamConsumed`. Catch both when the package is installed.
+try:
+    import httpx2  # type: ignore
+except ImportError:
+    httpx2 = None
+
+_STREAM_CONSUMED_EXCEPTIONS = (
+    (httpx.StreamConsumed,) if httpx2 is None else (httpx.StreamConsumed, httpx2.StreamConsumed)
+)
+
+
 P = ParamSpec("P")
 R = TypeVar("R")
 _T = TypeVar("_T")
@@ -361,7 +374,7 @@ class APIResponse(BaseAPIResponse[R]):
         """Read and return the binary response content."""
         try:
             return self.http_response.read()
-        except httpx.StreamConsumed as exc:
+        except _STREAM_CONSUMED_EXCEPTIONS as exc:
             # The default error raised by httpx isn't very
             # helpful in our case so we re-raise it with
             # a different error message.
@@ -468,7 +481,7 @@ class AsyncAPIResponse(BaseAPIResponse[R]):
         """Read and return the binary response content."""
         try:
             return await self.http_response.aread()
-        except httpx.StreamConsumed as exc:
+        except _STREAM_CONSUMED_EXCEPTIONS as exc:
             # the default error raised by httpx isn't very
             # helpful in our case so we re-raise it with
             # a different error message

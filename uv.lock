@@ -23,14 +23,6 @@ conflicts = [[
     { package = "anthropic", group = "pydantic-v1" },
 ]]
 
-[options]
-exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
-exclude-newer-span = "P1D"
-
-[options.exclude-newer-package]
-strict-no-cover = "2099-01-01T00:00:00Z"
-plaine = "2099-01-01T00:00:00Z"
-
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"
