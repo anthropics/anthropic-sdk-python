@@ -9,7 +9,7 @@ __all__ = ["BetaManagedAgentsSessionRetriesExhausted"]
 
 class BetaManagedAgentsSessionRetriesExhausted(BaseModel):
     """
-    The turn ended because repeated errors exhausted the automatic retry budget or the agent reached an internal execution limit.
+    The turn ended because repeated errors exhausted the retry budget or an error escalated to `retry_status: 'exhausted'`.
     """
 
     type: Literal["retries_exhausted"]
