@@ -7,6 +7,7 @@ anyio==4.12.1
     # via
     #   anthropic
     #   httpx
+    #   httpx2
 asttokens==3.0.1
     # via inline-snapshot
 backports-asyncio-runner==1.2.0 ; python_full_version < '3.11'
@@ -45,19 +46,29 @@ griffelib==2.0.0 ; python_full_version >= '3.10'
     #   griffe
     #   griffecli
 h11==0.16.0
-    # via httpcore
+    # via
+    #   httpcore
+    #   httpcore2
 http-snapshot==0.1.8
 httpcore==1.0.9
     # via httpx
+httpcore2==2.7.0 ; python_full_version >= '3.10'
+    # via httpx2
 httpx==0.28.1
     # via
     #   anthropic
     #   http-snapshot
     #   respx
-idna==3.11
+httpx2==2.7.0 ; python_full_version >= '3.10'
+idna==3.11 ; python_full_version < '3.10'
     # via
     #   anyio
     #   httpx
+idna==3.18 ; python_full_version >= '3.10'
+    # via
+    #   anyio
+    #   httpx
+    #   httpx2
 importlib-metadata==8.7.1
 iniconfig==2.1.0 ; python_full_version < '3.10'
     # via pytest
@@ -123,6 +134,10 @@ tomli==2.4.0 ; python_full_version < '3.11'
     #   inline-snapshot
     #   mypy
     #   pytest
+truststore==0.10.4 ; python_full_version >= '3.10'
+    # via
+    #   httpcore2
+    #   httpx2
 types-awscrt==0.31.3
     # via botocore-stubs
 types-s3transfer==0.16.0
@@ -133,6 +148,7 @@ typing-extensions==4.15.0
     #   anyio
     #   boto3-stubs
     #   exceptiongroup
+    #   httpx2
     #   inline-snapshot
     #   mypy
     #   pydantic
