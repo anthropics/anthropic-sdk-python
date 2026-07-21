@@ -46,7 +46,7 @@ griffelib==2.0.0 ; python_full_version >= '3.10'
     #   griffecli
 h11==0.16.0
     # via httpcore
-http-snapshot==0.1.8
+http-snapshot==0.1.9
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
