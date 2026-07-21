@@ -11,7 +11,7 @@ __all__ = ["BetaFallbackRefusalTrigger"]
 class BetaFallbackRefusalTrigger(BaseModel):
     """The `from` model declined for policy reasons."""
 
-    category: Optional[Literal["cyber", "bio", "frontier_llm", "reasoning_extraction"]] = None
+    category: Optional[Literal["cyber", "bio", "frontier_llm", "reasoning_extraction", "general_harms"]] = None
     """The policy category that triggered a refusal.
 
     - `cyber` - The request could enable cyber harm, such as malware or exploit
@@ -26,6 +26,8 @@ class BetaFallbackRefusalTrigger(BaseModel):
       reasoning in the response text. To get reasoning in a structured form instead,
       use
       [adaptive thinking](https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking).
+    - `general_harms` - The request could be related to an area that was determined
+      as harmful. Benign work might sometimes trigger this category.
     """
 
     type: Literal["refusal"]
