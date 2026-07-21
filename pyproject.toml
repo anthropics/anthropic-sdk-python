@@ -39,7 +39,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-aiohttp = ["aiohttp", "httpx_aiohttp>=0.1.9"]
+aiohttp = ["aiohttp", "httpx_aiohttp>=0.1.9, <1"]
 vertex = ["google-auth[requests] >=2, <3"]
 google_cloud = ["google-auth[requests] >=2, <3"]
 aws = ["boto3 >= 1.28.57", "botocore >= 1.31.57"]

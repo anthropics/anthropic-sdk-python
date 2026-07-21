@@ -194,7 +194,7 @@ wheels = [
 
 [[package]]
 name = "anthropic"
-version = "0.102.0"
+version = "0.117.0"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },
@@ -220,6 +220,9 @@ aws = [
 bedrock = [
     { name = "boto3" },
     { name = "botocore" },
+]
+google-cloud = [
+    { name = "google-auth", extra = ["requests"] },
 ]
 mcp = [
     { name = "mcp", marker = "python_full_version >= '3.10'" },
@@ -270,9 +273,10 @@ requires-dist = [
     { name = "botocore", marker = "extra == 'bedrock'", specifier = ">=1.31.57" },
     { name = "distro", specifier = ">=1.7.0,<2" },
     { name = "docstring-parser", specifier = ">=0.15,<1" },
+    { name = "google-auth", extras = ["requests"], marker = "extra == 'google-cloud'", specifier = ">=2,<3" },
     { name = "google-auth", extras = ["requests"], marker = "extra == 'vertex'", specifier = ">=2,<3" },
     { name = "httpx", specifier = ">=0.25.0,<1" },
-    { name = "httpx-aiohttp", marker = "extra == 'aiohttp'", specifier = ">=0.1.9" },
+    { name = "httpx-aiohttp", marker = "extra == 'aiohttp'", specifier = ">=0.1.9,<1" },
     { name = "jiter", specifier = ">=0.4.0,<1" },
     { name = "mcp", marker = "python_full_version >= '3.10' and extra == 'mcp'", specifier = ">=1.0" },
     { name = "pydantic", specifier = ">=1.9.0,<3" },
@@ -280,7 +284,7 @@ requires-dist = [
     { name = "standardwebhooks", marker = "extra == 'webhooks'", specifier = ">=1.0.1,<2" },
     { name = "typing-extensions", specifier = ">=4.14,<5" },
 ]
-provides-extras = ["aiohttp", "vertex", "aws", "bedrock", "mcp", "webhooks"]
+provides-extras = ["aiohttp", "vertex", "google-cloud", "aws", "bedrock", "mcp", "webhooks"]
 
 [package.metadata.requires-dev]
 dev = [
