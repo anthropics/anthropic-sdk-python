@@ -157,7 +157,6 @@ class TestAgents:
     def test_method_update(self, client: Anthropic) -> None:
         agent = client.beta.agents.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            version=1,
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -165,8 +164,7 @@ class TestAgents:
     def test_method_update_with_all_params(self, client: Anthropic) -> None:
         agent = client.beta.agents.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            version=1,
-            description="description",
+            description="updated",
             mcp_servers=[
                 {
                     "name": "example-mcp",
@@ -177,6 +175,7 @@ class TestAgents:
             metadata={"foo": "string"},
             model={
                 "id": "claude-opus-4-8",
+                "effort": "low",
                 "speed": "standard",
             },
             multiagent={
@@ -208,6 +207,7 @@ class TestAgents:
                     },
                 }
             ],
+            version=1,
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
@@ -216,7 +216,6 @@ class TestAgents:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.agents.with_raw_response.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            version=1,
         )
 
         assert response.is_closed is True
@@ -228,7 +227,6 @@ class TestAgents:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.agents.with_streaming_response.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            version=1,
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -243,7 +241,6 @@ class TestAgents:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
             client.beta.agents.with_raw_response.update(
                 agent_id="",
-                version=1,
             )
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -475,7 +472,6 @@ class TestAsyncAgents:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         agent = await async_client.beta.agents.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            version=1,
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -483,8 +479,7 @@ class TestAsyncAgents:
     async def test_method_update_with_all_params(self, async_client: AsyncAnthropic) -> None:
         agent = await async_client.beta.agents.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            version=1,
-            description="description",
+            description="updated",
             mcp_servers=[
                 {
                     "name": "example-mcp",
@@ -495,6 +490,7 @@ class TestAsyncAgents:
             metadata={"foo": "string"},
             model={
                 "id": "claude-opus-4-8",
+                "effort": "low",
                 "speed": "standard",
             },
             multiagent={
@@ -526,6 +522,7 @@ class TestAsyncAgents:
                     },
                 }
             ],
+            version=1,
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
@@ -534,7 +531,6 @@ class TestAsyncAgents:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.agents.with_raw_response.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            version=1,
         )
 
         assert response.is_closed is True
@@ -546,7 +542,6 @@ class TestAsyncAgents:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.agents.with_streaming_response.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            version=1,
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -561,7 +556,6 @@ class TestAsyncAgents:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
             await async_client.beta.agents.with_raw_response.update(
                 agent_id="",
-                version=1,
             )
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")

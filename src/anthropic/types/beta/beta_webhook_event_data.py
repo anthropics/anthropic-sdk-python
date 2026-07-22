@@ -24,9 +24,16 @@ from .beta_webhook_deployment_deleted_event_data import BetaWebhookDeploymentDel
 from .beta_webhook_deployment_updated_event_data import BetaWebhookDeploymentUpdatedEventData
 from .beta_webhook_deployment_archived_event_data import BetaWebhookDeploymentArchivedEventData
 from .beta_webhook_deployment_unpaused_event_data import BetaWebhookDeploymentUnpausedEventData
+from .beta_webhook_environment_created_event_data import BetaWebhookEnvironmentCreatedEventData
+from .beta_webhook_environment_deleted_event_data import BetaWebhookEnvironmentDeletedEventData
+from .beta_webhook_environment_updated_event_data import BetaWebhookEnvironmentUpdatedEventData
+from .beta_webhook_environment_archived_event_data import BetaWebhookEnvironmentArchivedEventData
+from .beta_webhook_memory_store_created_event_data import BetaWebhookMemoryStoreCreatedEventData
+from .beta_webhook_memory_store_deleted_event_data import BetaWebhookMemoryStoreDeletedEventData
 from .beta_webhook_session_status_idled_event_data import BetaWebhookSessionStatusIdledEventData
 from .beta_webhook_session_thread_idled_event_data import BetaWebhookSessionThreadIdledEventData
 from .beta_webhook_deployment_run_failed_event_data import BetaWebhookDeploymentRunFailedEventData
+from .beta_webhook_memory_store_archived_event_data import BetaWebhookMemoryStoreArchivedEventData
 from .beta_webhook_deployment_run_started_event_data import BetaWebhookDeploymentRunStartedEventData
 from .beta_webhook_session_thread_created_event_data import BetaWebhookSessionThreadCreatedEventData
 from .beta_webhook_session_requires_action_event_data import BetaWebhookSessionRequiresActionEventData
@@ -81,6 +88,13 @@ BetaWebhookEventData: TypeAlias = Annotated[
         BetaWebhookDeploymentRunStartedEventData,
         BetaWebhookDeploymentDeletedEventData,
         BetaWebhookDeploymentRunSucceededEventData,
+        BetaWebhookEnvironmentCreatedEventData,
+        BetaWebhookEnvironmentUpdatedEventData,
+        BetaWebhookEnvironmentArchivedEventData,
+        BetaWebhookEnvironmentDeletedEventData,
+        BetaWebhookMemoryStoreCreatedEventData,
+        BetaWebhookMemoryStoreArchivedEventData,
+        BetaWebhookMemoryStoreDeletedEventData,
     ],
     PropertyInfo(discriminator="type"),
 ]
