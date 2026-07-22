@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+import threading
 from pathlib import Path
 
 import anyio
@@ -205,6 +206,43 @@ async def test_read_rejects_directory_even_when_uncapped(tmp_path: Path) -> None
     env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=None)
     with pytest.raises(ToolError, match="not a regular file"):
         await beta_read_tool(env).call({"file_path": "sub"})
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="FIFOs are POSIX-only")
+async def test_write_rejects_fifo_instead_of_blocking(tmp_path: Path) -> None:
+    """`write` must reject a FIFO the same way `read`/`edit` do.
+
+    Unlike a plain directory (which fails fast with ``IsADirectoryError``),
+    opening an unconnected FIFO for writing *blocks the calling thread
+    forever* waiting for a reader. `read`/`edit` avoid this with an
+    ``S_ISREG`` stat() guard before ever calling ``open()``; `write` had no
+    such guard, so pointing it at a FIFO hangs instead of raising. Run the
+    call off-thread with a bounded join so an unfixed SDK fails this test
+    quickly instead of hanging the whole run.
+    """
+    fifo_path = tmp_path / "pipe"
+    os.mkfifo(fifo_path)
+    env = AgentToolContext(workdir=str(tmp_path))
+
+    box: dict[str, object] = {}
+
+    def runner() -> None:
+        try:
+            anyio.run(beta_write_tool(env).call, {"file_path": "pipe", "content": "hello"})
+        except BaseException as e:  # noqa: BLE001 - captured across the thread boundary
+            box["exc"] = e
+
+    thread = threading.Thread(target=runner, daemon=True)
+    thread.start()
+    thread.join(timeout=5.0)
+
+    if thread.is_alive():
+        pytest.fail("write() hung opening a FIFO instead of rejecting it as a non-regular file")
+
+    exc = box.get("exc")
+    assert isinstance(exc, ToolError), f"expected ToolError, got {exc!r}"
+    assert "not a regular file" in str(exc)
 
 
 @pytest.mark.parametrize(
