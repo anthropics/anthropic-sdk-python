@@ -219,7 +219,6 @@ class Agents(SyncAPIResource):
         self,
         agent_id: str,
         *,
-        version: int,
         description: Optional[str] | Omit = omit,
         mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]] | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
@@ -229,6 +228,7 @@ class Agents(SyncAPIResource):
         skills: Optional[Iterable[BetaManagedAgentsSkillParams]] | Omit = omit,
         system: Optional[str] | Omit = omit,
         tools: Optional[Iterable[agent_update_params.Tool]] | Omit = omit,
+        version: int | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -237,15 +237,12 @@ class Agents(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """
-        Update Agent
+        """Update Agent
 
         Args:
-          version: The agent's current version, used to prevent concurrent overwrites. Obtain this
-              value from a create or retrieve response. The request fails if this does not
-              match the server's current version.
+          description: Description.
 
-          description: Description. Omit to preserve; send empty string or null to clear.
+        Omit to preserve; send empty string or null to clear.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
               clear. Names must be unique. Maximum 20. Every server must be referenced by an
@@ -275,6 +272,11 @@ class Agents(SyncAPIResource):
               send empty array or null to clear. Maximum of 128 tools across all toolsets
               allowed.
 
+          version: The agent's current version, used to prevent concurrent overwrites. Obtain this
+              value from a create or retrieve response. Must be at least 1 if specified. When
+              supplied, the request fails if it does not match the server's current version;
+              omit to apply the update unconditionally.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -302,7 +304,6 @@ class Agents(SyncAPIResource):
             path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
             body=maybe_transform(
                 {
-                    "version": version,
                     "description": description,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -312,6 +313,7 @@ class Agents(SyncAPIResource):
                     "skills": skills,
                     "system": system,
                     "tools": tools,
+                    "version": version,
                 },
                 agent_update_params.AgentUpdateParams,
             ),
@@ -621,7 +623,6 @@ class AsyncAgents(AsyncAPIResource):
         self,
         agent_id: str,
         *,
-        version: int,
         description: Optional[str] | Omit = omit,
         mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]] | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
@@ -631,6 +632,7 @@ class AsyncAgents(AsyncAPIResource):
         skills: Optional[Iterable[BetaManagedAgentsSkillParams]] | Omit = omit,
         system: Optional[str] | Omit = omit,
         tools: Optional[Iterable[agent_update_params.Tool]] | Omit = omit,
+        version: int | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -639,15 +641,12 @@ class AsyncAgents(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """
-        Update Agent
+        """Update Agent
 
         Args:
-          version: The agent's current version, used to prevent concurrent overwrites. Obtain this
-              value from a create or retrieve response. The request fails if this does not
-              match the server's current version.
+          description: Description.
 
-          description: Description. Omit to preserve; send empty string or null to clear.
+        Omit to preserve; send empty string or null to clear.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
               clear. Names must be unique. Maximum 20. Every server must be referenced by an
@@ -677,6 +676,11 @@ class AsyncAgents(AsyncAPIResource):
               send empty array or null to clear. Maximum of 128 tools across all toolsets
               allowed.
 
+          version: The agent's current version, used to prevent concurrent overwrites. Obtain this
+              value from a create or retrieve response. Must be at least 1 if specified. When
+              supplied, the request fails if it does not match the server's current version;
+              omit to apply the update unconditionally.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -704,7 +708,6 @@ class AsyncAgents(AsyncAPIResource):
             path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
             body=await async_maybe_transform(
                 {
-                    "version": version,
                     "description": description,
                     "mcp_servers": mcp_servers,
                     "metadata": metadata,
@@ -714,6 +717,7 @@ class AsyncAgents(AsyncAPIResource):
                     "skills": skills,
                     "system": system,
                     "tools": tools,
+                    "version": version,
                 },
                 agent_update_params.AgentUpdateParams,
             ),

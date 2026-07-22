@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Dict, List, Union, Iterable, Optional
-from typing_extensions import Required, Annotated, TypeAlias, TypedDict
+from typing_extensions import Annotated, TypeAlias, TypedDict
 
 from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
@@ -20,13 +20,6 @@ __all__ = ["AgentUpdateParams", "Model", "Tool"]
 
 
 class AgentUpdateParams(TypedDict, total=False):
-    version: Required[int]
-    """The agent's current version, used to prevent concurrent overwrites.
-
-    Obtain this value from a create or retrieve response. The request fails if this
-    does not match the server's current version.
-    """
-
     description: Optional[str]
     """Description. Omit to preserve; send empty string or null to clear."""
 
@@ -76,6 +69,14 @@ class AgentUpdateParams(TypedDict, total=False):
 
     Full replacement. Omit to preserve; send empty array or null to clear. Maximum
     of 128 tools across all toolsets allowed.
+    """
+
+    version: int
+    """The agent's current version, used to prevent concurrent overwrites.
+
+    Obtain this value from a create or retrieve response. Must be at least 1 if
+    specified. When supplied, the request fails if it does not match the server's
+    current version; omit to apply the update unconditionally.
     """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]

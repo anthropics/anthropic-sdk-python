@@ -590,6 +590,11 @@ from anthropic.types.beta import (
     BetaManagedAgentsCustomTool,
     BetaManagedAgentsCustomToolInputSchema,
     BetaManagedAgentsCustomToolParams,
+    BetaManagedAgentsEffortHigh,
+    BetaManagedAgentsEffortLow,
+    BetaManagedAgentsEffortMax,
+    BetaManagedAgentsEffortMedium,
+    BetaManagedAgentsEffortXhigh,
     BetaManagedAgentsMCPServerURLDefinition,
     BetaManagedAgentsMCPToolConfig,
     BetaManagedAgentsMCPToolConfigParams,
@@ -865,7 +870,7 @@ Methods:
 Methods:
 
 - <code title="get /v1/sessions/{session_id}/threads/{thread_id}/events?beta=true">client.beta.sessions.threads.events.<a href="./src/anthropic/resources/beta/sessions/threads/events.py">list</a>(thread_id, \*, session_id, \*\*<a href="src/anthropic/types/beta/sessions/threads/event_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_session_event.py">SyncPageCursor[BetaManagedAgentsSessionEvent]</a></code>
-- <code title="get /v1/sessions/{session_id}/threads/{thread_id}/stream?beta=true">client.beta.sessions.threads.events.<a href="./src/anthropic/resources/beta/sessions/threads/events.py">stream</a>(thread_id, \*, session_id) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_stream_session_thread_events.py">BetaManagedAgentsStreamSessionThreadEvents</a></code>
+- <code title="get /v1/sessions/{session_id}/threads/{thread_id}/stream?beta=true">client.beta.sessions.threads.events.<a href="./src/anthropic/resources/beta/sessions/threads/events.py">stream</a>(thread_id, \*, session_id, \*\*<a href="src/anthropic/types/beta/sessions/threads/event_stream_params.py">params</a>) -> <a href="./src/anthropic/types/beta/sessions/beta_managed_agents_stream_session_thread_events.py">BetaManagedAgentsStreamSessionThreadEvents</a></code>
 
 ## Deployments
 
@@ -1168,8 +1173,15 @@ from anthropic.types.beta import (
     BetaWebhookDeploymentRunSucceededEventData,
     BetaWebhookDeploymentUnpausedEventData,
     BetaWebhookDeploymentUpdatedEventData,
+    BetaWebhookEnvironmentArchivedEventData,
+    BetaWebhookEnvironmentCreatedEventData,
+    BetaWebhookEnvironmentDeletedEventData,
+    BetaWebhookEnvironmentUpdatedEventData,
     BetaWebhookEvent,
     BetaWebhookEventData,
+    BetaWebhookMemoryStoreArchivedEventData,
+    BetaWebhookMemoryStoreCreatedEventData,
+    BetaWebhookMemoryStoreDeletedEventData,
     BetaWebhookSessionArchivedEventData,
     BetaWebhookSessionCreatedEventData,
     BetaWebhookSessionDeletedEventData,

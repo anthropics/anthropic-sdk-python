@@ -95,6 +95,7 @@ class TestEvents:
         event_stream = client.beta.sessions.threads.events.stream(
             thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            event_deltas=["agent.message"],
             betas=["message-batches-2024-09-24"],
         )
         event_stream.response.close()
@@ -221,6 +222,7 @@ class TestAsyncEvents:
         event_stream = await async_client.beta.sessions.threads.events.stream(
             thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            event_deltas=["agent.message"],
             betas=["message-batches-2024-09-24"],
         )
         await event_stream.response.aclose()
