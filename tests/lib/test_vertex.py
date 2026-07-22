@@ -171,6 +171,37 @@ class TestAnthropicVertex:
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
 
+    @pytest.mark.respx()
+    def test_labels_injected_into_request_body(self, respx_mock: MockRouter) -> None:
+        """Labels passed to the client are injected into the rawPredict request body."""
+        import json
+
+        client = AnthropicVertex(
+            region="region",
+            project_id="project",
+            access_token="my-access-token",
+            labels={"team": "ml-platform", "environment": "production"},
+        )
+
+        request_url = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
+        respx_mock.post(request_url).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+
+        client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude-3-sonnet@20240229",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 1
+        body = json.loads(calls[0].request.content)
+        assert body["labels"] == {"team": "ml-platform", "environment": "production"}
+
+    def test_no_labels_by_default(self) -> None:
+        """Labels are not included in the request body when not set."""
+        client = AnthropicVertex(region="region", project_id="project", access_token="my-access-token")
+        assert client._labels is None
+
 
 def test_refresh_without_google_auth_raises_actionable_error(monkeypatch: pytest.MonkeyPatch) -> None:
     # `None` in sys.modules makes the import fail even when google-auth is installed.

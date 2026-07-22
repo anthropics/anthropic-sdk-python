@@ -39,5 +39,29 @@ async def async_client() -> None:
     print(message.to_json())
 
 
+def sync_client_with_labels() -> None:
+    print("------ Sync Vertex with billing labels ------")
+
+    client = AnthropicVertex(
+        labels={
+            "team": "ml-platform",
+            "environment": "production",
+        },
+    )
+
+    message = client.messages.create(
+        model="claude-sonnet-4@20250514",
+        max_tokens=100,
+        messages=[
+            {
+                "role": "user",
+                "content": "Hello!",
+            }
+        ],
+    )
+    print(message.to_json())
+
+
 sync_client()
 asyncio.run(async_client())
+sync_client_with_labels()

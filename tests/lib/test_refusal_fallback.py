@@ -119,7 +119,12 @@ class TestRefusalFallback:
         # a `fallback` seam block is prepended at the model boundary — the same
         # block shape the streaming splice emits
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "primary-model"}, "to": {"model": "fallback-model"}, "trigger": {"type": "refusal", "category": None}}
+            {
+                "type": "fallback",
+                "from": {"model": "primary-model"},
+                "to": {"model": "fallback-model"},
+                "trigger": {"type": "refusal", "category": None},
+            }
         ]
         bodies = request_bodies(respx_mock)
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model"]
@@ -235,8 +240,18 @@ class TestRefusalFallback:
         assert state.index == 1
         # one seam per model boundary, in hop order, ahead of the served content
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "primary-model"}, "to": {"model": "mid-model"}, "trigger": {"type": "refusal", "category": None}},
-            {"type": "fallback", "from": {"model": "mid-model"}, "to": {"model": "last-model"}, "trigger": {"type": "refusal", "category": None}},
+            {
+                "type": "fallback",
+                "from": {"model": "primary-model"},
+                "to": {"model": "mid-model"},
+                "trigger": {"type": "refusal", "category": None},
+            },
+            {
+                "type": "fallback",
+                "from": {"model": "mid-model"},
+                "to": {"model": "last-model"},
+                "trigger": {"type": "refusal", "category": None},
+            },
             {"type": "text", "text": "ok"},
         ]
         bodies = request_bodies(respx_mock)
@@ -261,7 +276,12 @@ class TestRefusalFallback:
 
         assert result.model == "last-model"
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "mid-model"}, "to": {"model": "last-model"}, "trigger": {"type": "refusal", "category": None}},
+            {
+                "type": "fallback",
+                "from": {"model": "mid-model"},
+                "to": {"model": "last-model"},
+                "trigger": {"type": "refusal", "category": None},
+            },
             {"type": "text", "text": "ok"},
         ]
         bodies = request_bodies(respx_mock)
@@ -484,7 +504,12 @@ class TestAsyncRefusalFallback:
 
         assert result.model == "fallback-model"
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "primary-model"}, "to": {"model": "fallback-model"}, "trigger": {"type": "refusal", "category": None}}
+            {
+                "type": "fallback",
+                "from": {"model": "primary-model"},
+                "to": {"model": "fallback-model"},
+                "trigger": {"type": "refusal", "category": None},
+            }
         ]
         bodies = request_bodies(respx_mock)
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model"]

@@ -108,6 +108,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
         http_client: httpx.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
+        labels: dict[str, str] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         if not is_given(region):
@@ -147,13 +148,14 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         self.region = region
         self.access_token = access_token
         self.credentials = credentials
+        self._labels = labels
 
         self.messages = Messages(self)
         self.beta = Beta(self)
 
     @override
     def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        return _prepare_options(options, project_id=self.project_id, region=self.region)
+        return _prepare_options(options, project_id=self.project_id, region=self.region, labels=self._labels)
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
@@ -272,6 +274,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
         http_client: httpx.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
+        labels: dict[str, str] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         if not is_given(region):
@@ -311,13 +314,14 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         self.region = region
         self.access_token = access_token
         self.credentials = credentials
+        self._labels = labels
 
         self.messages = AsyncMessages(self)
         self.beta = AsyncBeta(self)
 
     @override
     async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        return _prepare_options(options, project_id=self.project_id, region=self.region)
+        return _prepare_options(options, project_id=self.project_id, region=self.region, labels=self._labels)
 
     @override
     async def _prepare_request(self, request: httpx.Request) -> None:
@@ -417,7 +421,13 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         return self.copy(middleware=[*self._middleware, *middleware])
 
 
-def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | None, region: str) -> FinalRequestOptions:
+def _prepare_options(
+    input_options: FinalRequestOptions,
+    *,
+    project_id: str | None,
+    region: str,
+    labels: dict[str, str] | None = None,
+) -> FinalRequestOptions:
     options = model_copy(input_options, deep=True)
 
     if is_dict(options.json_data):
@@ -437,6 +447,9 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
         specifier = "streamRawPredict" if stream else "rawPredict"
 
         options.url = f"/projects/{project_id}/locations/{region}/publishers/anthropic/models/{model}:{specifier}"
+
+        if labels:
+            options.json_data["labels"] = labels
 
     if options.url in {"/v1/messages/count_tokens", "/v1/messages/count_tokens?beta=true"} and options.method == "post":
         if project_id is None:

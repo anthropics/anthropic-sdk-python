@@ -32,7 +32,6 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-
     model="claude-opus-4-6",
 )
 
