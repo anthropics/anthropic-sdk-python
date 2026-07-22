@@ -91,6 +91,7 @@ class Sessions(SyncAPIResource):
         *,
         agent: session_create_params.Agent,
         environment_id: str,
+        initial_events: Iterable[session_create_params.InitialEvent] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         resources: Iterable[session_create_params.Resource] | Omit = omit,
         title: Optional[str] | Omit = omit,
@@ -112,6 +113,9 @@ class Sessions(SyncAPIResource):
               for the session, or an `agent` object with both id and version specified.
 
           environment_id: ID of the `environment` defining the container configuration for this session.
+
+          initial_events: Initial events to send to the `session` at creation, processed in order.
+              Supports `user.message` and `user.define_outcome` events. Maximum 50 events.
 
           metadata: Arbitrary key-value metadata attached to the session. Maximum 16 pairs, keys up
               to 64 chars, values up to 512 chars.
@@ -149,6 +153,7 @@ class Sessions(SyncAPIResource):
                 {
                     "agent": agent,
                     "environment_id": environment_id,
+                    "initial_events": initial_events,
                     "metadata": metadata,
                     "resources": resources,
                     "title": title,
@@ -522,6 +527,7 @@ class AsyncSessions(AsyncAPIResource):
         *,
         agent: session_create_params.Agent,
         environment_id: str,
+        initial_events: Iterable[session_create_params.InitialEvent] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         resources: Iterable[session_create_params.Resource] | Omit = omit,
         title: Optional[str] | Omit = omit,
@@ -543,6 +549,9 @@ class AsyncSessions(AsyncAPIResource):
               for the session, or an `agent` object with both id and version specified.
 
           environment_id: ID of the `environment` defining the container configuration for this session.
+
+          initial_events: Initial events to send to the `session` at creation, processed in order.
+              Supports `user.message` and `user.define_outcome` events. Maximum 50 events.
 
           metadata: Arbitrary key-value metadata attached to the session. Maximum 16 pairs, keys up
               to 64 chars, values up to 512 chars.
@@ -580,6 +589,7 @@ class AsyncSessions(AsyncAPIResource):
                 {
                     "agent": agent,
                     "environment_id": environment_id,
+                    "initial_events": initial_events,
                     "metadata": metadata,
                     "resources": resources,
                     "title": title,
