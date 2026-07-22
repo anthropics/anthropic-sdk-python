@@ -36,6 +36,7 @@ from __future__ import annotations
 import os
 import re
 import uuid
+import base64
 import shutil
 import logging
 import subprocess
@@ -63,7 +64,13 @@ from ...types.beta import (
     BetaManagedAgentsAgentToolset20260401ReadInput,
     BetaManagedAgentsAgentToolset20260401WriteInput,
 )
-from ._beta_functions import ToolError, BetaAsyncFunctionTool, beta_async_tool
+from ._beta_functions import (
+    ToolError,
+    BetaContent,
+    BetaAsyncFunctionTool,
+    BetaFunctionToolResultType,
+    beta_async_tool,
+)
 
 if TYPE_CHECKING:
     from ..._client import AsyncAnthropic
@@ -86,6 +93,32 @@ BASH_OUTPUT_LIMIT = 100 * 1024
 BASH_DEFAULT_TIMEOUT = 120.0
 DEFAULT_MAX_FILE_BYTES = 256 * 1024
 READ_MAX_BYTES = DEFAULT_MAX_FILE_BYTES  # For backwards compat only.
+# Default image/PDF caps for the binary ``read`` path (overridable on
+# :class:`AgentToolContext`, same shape as ``max_file_bytes``). The API
+# enforces a per-image limit on the *encoded* (base64) form and a total
+# request-size limit that the raw-PDF cap stays under after the ~4/3 base64
+# inflation; an oversized block would be rejected at request time, so reject
+# it here with a clear error instead. The spec doesn't publish these limits, so
+# they can't be codegen'd; if the API raises them, the only cost of these going
+# stale is rejecting a file early that the API would now accept — bump them
+# here (or override them on the context) when that happens.
+DEFAULT_MAX_IMAGE_BASE64_BYTES = 5 * 1024 * 1024
+DEFAULT_MAX_PDF_BYTES = 20 * 1024 * 1024
+READ_IMAGE_MAX_BASE64_BYTES = DEFAULT_MAX_IMAGE_BASE64_BYTES  # For backwards compat only.
+READ_PDF_MAX_BYTES = DEFAULT_MAX_PDF_BYTES  # For backwards compat only.
+# Extension → media type for files ``read`` returns as base64 content blocks
+# rather than text. The supported media types ARE codegen'd
+# (``BetaBase64ImageSourceParam`` / ``BetaBase64PDFSourceParam``); a test pins
+# this map's values to those literals, so a spec change that adds or removes a
+# media type fails CI until the map is updated. Not user-configurable (yet).
+_BINARY_MEDIA_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".pdf": "application/pdf",
+}
 GREP_OUTPUT_LIMIT = 100 * 1024
 GREP_MAX_LINE_LENGTH = 2000
 GLOB_RESULT_LIMIT = 200
@@ -93,14 +126,14 @@ WALK_MAX_ENTRIES = 50_000
 _ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]")
 
 
-def _resolve_max_bytes(configured: int | None | NotGiven) -> int | None:
+def _resolve_max_bytes(configured: int | None | NotGiven, default: int = DEFAULT_MAX_FILE_BYTES) -> int | None:
     """Resolve a configured cap to an effective size limit.
 
-    ``not_given`` selects ``DEFAULT_MAX_FILE_BYTES``; ``None`` disables the size
-    check (uncapped); a positive int is the cap. Governs only the size guard —
-    callers still reject non-regular files.
+    ``not_given`` selects ``default``; ``None`` disables the size check
+    (uncapped); a positive int is the cap. Governs only the size guard — callers
+    still reject non-regular files.
     """
-    return configured if is_given(configured) else DEFAULT_MAX_FILE_BYTES
+    return configured if is_given(configured) else default
 
 
 log = logging.getLogger("anthropic.lib.tools.agent_toolset")
@@ -189,7 +222,19 @@ class AgentToolContext:
             disables the cap entirely. Disabling it reintroduces the OOM risk on
             a model-controlled path, so pass ``None`` only when the sandbox can
             absorb arbitrarily large files. The non-regular-file (FIFO/device)
-            guard always applies regardless of this value.
+            guard always applies regardless of this value. Image/PDF files,
+            which ``read`` returns as base64 content blocks, are not subject to
+            the 256 KiB default (``max_image_base64_bytes`` /
+            ``max_pdf_bytes`` govern instead), but an explicit positive cap
+            binds them too.
+        max_image_base64_bytes: Cap on the *base64-encoded* size of an image
+            ``read`` returns as a content block. ``not_given`` (default)
+            uses the built-in 5 MiB cap — a memory bound plus the API's
+            per-image limit; a positive int overrides it; ``None`` disables it
+            (only ``max_file_bytes`` / the API's own limit then apply).
+        max_pdf_bytes: Cap on the raw size of a PDF ``read`` returns as a
+            document block. ``not_given`` (default) uses the built-in 20 MiB
+            cap; a positive int overrides it; ``None`` disables it.
     """
 
     # ``default_factory`` (not a literal "." ) so the cwd is snapshotted at
@@ -204,6 +249,8 @@ class AgentToolContext:
     session_id: str | None = None
     env: Optional[Mapping[str, str]] = None
     max_file_bytes: int | None | NotGiven = not_given
+    max_image_base64_bytes: int | None | NotGiven = not_given
+    max_pdf_bytes: int | None | NotGiven = not_given
     _bash: BashSession | None = field(default=None, init=False, repr=False)
     # Skill directories downloaded by ``setup_skills``; removed again on
     # ``__aexit__`` so a context doesn't leave downloaded skills behind.
@@ -488,9 +535,38 @@ def beta_bash_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
     )(cast(Any, bash_tool))
 
 
+def _read_binary_block(target: Path, file_path: str, size: int, media_type: str, ctx: AgentToolContext) -> BetaContent:
+    """Read an image/PDF as a base64 ``image``/``document`` content block.
+
+    The text cap does not apply here — its 256 KiB default would reject most
+    real images. Instead the media caps (``max_image_base64_bytes`` /
+    ``max_pdf_bytes``, defaulting to the API's own limits) govern, checked
+    against the stat size before opening (same OOM rationale as the text path)
+    and tightened by an *explicitly* configured ``max_file_bytes`` — an
+    explicit cap is a memory bound and binds every read.
+    """
+    # The image cap is on the encoded form: n raw bytes -> 4*ceil(n/3) base64.
+    if media_type == "application/pdf":
+        limit = _resolve_max_bytes(ctx.max_pdf_bytes, DEFAULT_MAX_PDF_BYTES)
+    else:
+        b64_cap = _resolve_max_bytes(ctx.max_image_base64_bytes, DEFAULT_MAX_IMAGE_BASE64_BYTES)
+        limit = (b64_cap // 4) * 3 if b64_cap is not None else None
+    if is_given(ctx.max_file_bytes) and ctx.max_file_bytes is not None:
+        limit = ctx.max_file_bytes if limit is None else min(limit, ctx.max_file_bytes)
+    if limit is not None and size > limit:
+        raise ToolError(f"read: {file_path} is {size} bytes, exceeds {limit}-byte limit for image/PDF files.")
+    data = base64.standard_b64encode(target.read_bytes()).decode("ascii")
+    if media_type == "application/pdf":
+        return {"type": "document", "source": {"type": "base64", "media_type": "application/pdf", "data": data}}
+    return {
+        "type": "image",
+        "source": {"type": "base64", "media_type": cast(Any, media_type), "data": data},
+    }
+
+
 def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
     @beta_async_tool(name="read", input_schema=BetaManagedAgentsAgentToolset20260401ReadInput)
-    async def read(file_path: str, view_range: Optional[List[int]] = None) -> str:
+    async def read(file_path: str, view_range: Optional[List[int]] = None) -> BetaFunctionToolResultType:
         """Read a file rooted at the working directory."""
         try:
             target = resolve_path(ctx, file_path)
@@ -503,15 +579,28 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             st = target.stat()
             if not S_ISREG(st.st_mode):
                 raise ToolError(f"read: {file_path}: not a regular file")
+            media_type = _BINARY_MEDIA_TYPES.get(target.suffix.lower())
+            if media_type is not None:
+                # Images/PDFs come back as content blocks (hosted-toolset
+                # parity) — read_text() on them raises UnicodeDecodeError.
+                if view_range:
+                    raise ToolError("read: view_range is not supported for image/PDF files")
+                return [_read_binary_block(target, file_path, st.st_size, media_type, ctx)]
             limit = _resolve_max_bytes(ctx.max_file_bytes)
             if limit is not None and st.st_size > limit:
                 raise ToolError(
                     f"read: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
                     "Use bash (head/tail/sed) to read a slice."
                 )
-            text = target.read_text()
+            # Explicit UTF-8: the locale default varies by host (ASCII under
+            # LANG=C), which would mislabel valid UTF-8 as binary below.
+            text = target.read_text(encoding="utf-8")
         except ToolError:
             raise
+        except UnicodeDecodeError as e:
+            raise ToolError(
+                f"read: {file_path}: not valid UTF-8 text (binary files are only supported for image/PDF extensions)"
+            ) from e
         except OSError as e:
             raise _fs_error("read", file_path, e) from e
         if not view_range:
@@ -537,7 +626,7 @@ def beta_write_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             raise ToolError(f"write: {e}") from e
         try:
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(content)
+            target.write_text(content, encoding="utf-8")
         except OSError as e:
             raise _fs_error("write", file_path, e) from e
         return f"wrote {len(content)} bytes to {file_path}"
@@ -567,9 +656,11 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
                     f"edit: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
                     "Use bash (sed/awk) to edit a large file."
                 )
-            text = target.read_text()
+            text = target.read_text(encoding="utf-8")
         except ToolError:
             raise
+        except UnicodeDecodeError as e:
+            raise ToolError(f"edit: {file_path}: not valid UTF-8 text (cannot edit binary files)") from e
         except OSError as e:
             raise _fs_error("edit", file_path, e) from e
         count = text.count(old_string)
@@ -579,7 +670,7 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             raise ToolError(f"edit: old_string appears {count} times in {file_path} (must be unique)")
         updated = text.replace(old_string, new_string) if replace_all else text.replace(old_string, new_string, 1)
         try:
-            target.write_text(updated)
+            target.write_text(updated, encoding="utf-8")
         except OSError as e:
             raise _fs_error("edit", file_path, e) from e
         return f"edited {file_path} ({count if replace_all else 1} replacement(s))"

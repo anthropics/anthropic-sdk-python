@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import os
 import sys
+import base64
+from typing import Any, cast
 from pathlib import Path
+from typing_extensions import Required, get_args, get_origin, get_type_hints
 
 import anyio
 import pytest
@@ -10,6 +13,8 @@ import pytest
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError
 from anthropic.lib.tools.agent_toolset import (
+    _BINARY_MEDIA_TYPES,
+    DEFAULT_MAX_IMAGE_BASE64_BYTES,
     BashSession,
     AgentToolContext,
     resolve_path,
@@ -20,6 +25,8 @@ from anthropic.lib.tools.agent_toolset import (
     beta_write_tool,
     beta_agent_toolset_20260401,
 )
+from anthropic.types.beta.beta_base64_pdf_source_param import BetaBase64PDFSourceParam
+from anthropic.types.beta.beta_base64_image_source_param import BetaBase64ImageSourceParam
 
 needs_pydantic_v2 = pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
 
@@ -205,6 +212,169 @@ async def test_read_rejects_directory_even_when_uncapped(tmp_path: Path) -> None
     env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=None)
     with pytest.raises(ToolError, match="not a regular file"):
         await beta_read_tool(env).call({"file_path": "sub"})
+
+
+def _media_type_literal_values(typed_dict: type, key: str) -> set[str]:
+    """Extract the values of a ``Required[Literal[...]]`` TypedDict field."""
+    hint = get_type_hints(typed_dict, include_extras=True)[key]
+    if get_origin(hint) is Required:
+        (hint,) = get_args(hint)
+    values = get_args(hint)
+    assert values, f"expected a Literal for {typed_dict.__name__}.{key}"
+    return set(values)
+
+
+def test_binary_media_types_track_generated_api_types() -> None:
+    """Pin the read tool's extension map to the codegen'd media-type literals.
+
+    When a spec change adds or removes a supported image/document media type,
+    this fails to force the extension map (and its size caps) to be revisited.
+    """
+    supported = _media_type_literal_values(BetaBase64ImageSourceParam, "media_type") | _media_type_literal_values(
+        BetaBase64PDFSourceParam, "media_type"
+    )
+    assert set(_BINARY_MEDIA_TYPES.values()) == supported
+
+
+# Real magic bytes so the round-trip assertion exercises non-UTF-8 data; the
+# tool itself only sniffs the extension.
+_JPEG_BYTES = b"\xff\xd8\xff\xe0" + b"\x00" * 32
+_PNG_BYTES = b"\x89PNG\r\n\x1a\n" + b"\x00" * 32
+_PDF_BYTES = b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n"
+
+
+@needs_pydantic_v2
+@pytest.mark.parametrize(
+    ("filename", "data", "kind", "media_type"),
+    [
+        ("slide.jpg", _JPEG_BYTES, "image", "image/jpeg"),
+        ("slide.JPEG", _JPEG_BYTES, "image", "image/jpeg"),
+        ("chart.png", _PNG_BYTES, "image", "image/png"),
+        ("doc.pdf", _PDF_BYTES, "document", "application/pdf"),
+    ],
+)
+async def test_read_binary_returns_content_block(
+    tmp_path: Path, filename: str, data: bytes, kind: str, media_type: str
+) -> None:
+    """Images/PDFs come back as base64 content blocks, not UnicodeDecodeError."""
+    (tmp_path / filename).write_bytes(data)
+    env = AgentToolContext(workdir=str(tmp_path))
+    result = await beta_read_tool(env).call({"file_path": filename})
+    assert not isinstance(result, str)
+    (block,) = [cast("dict[str, Any]", b) for b in result]
+    assert block["type"] == kind
+    source = block["source"]
+    assert source["type"] == "base64"
+    assert source["media_type"] == media_type
+    assert base64.standard_b64decode(source["data"]) == data
+
+
+@needs_pydantic_v2
+async def test_read_binary_not_subject_to_text_cap(tmp_path: Path) -> None:
+    """An image over the 256 KiB text default still reads (the API media caps govern)."""
+    (tmp_path / "big.png").write_bytes(_PNG_BYTES + b"\x00" * (300 * 1024))
+    env = AgentToolContext(workdir=str(tmp_path))
+    result = await beta_read_tool(env).call({"file_path": "big.png"})
+    assert not isinstance(result, str)
+    (block,) = [cast("dict[str, Any]", b) for b in result]
+    assert block["type"] == "image"
+
+
+@needs_pydantic_v2
+async def test_read_binary_honors_explicit_cap(tmp_path: Path) -> None:
+    (tmp_path / "big.png").write_bytes(_PNG_BYTES + b"\x00" * 2048)
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=1024)
+    with pytest.raises(ToolError, match="exceeds"):
+        await beta_read_tool(env).call({"file_path": "big.png"})
+
+
+@needs_pydantic_v2
+async def test_read_binary_rejects_over_media_cap(tmp_path: Path) -> None:
+    """An image whose base64 form would exceed the default per-image cap is rejected up front."""
+    raw_cap = (DEFAULT_MAX_IMAGE_BASE64_BYTES // 4) * 3
+    (tmp_path / "huge.png").write_bytes(b"\x00" * (raw_cap + 1))
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=None)
+    with pytest.raises(ToolError, match="exceeds"):
+        await beta_read_tool(env).call({"file_path": "huge.png"})
+
+
+@needs_pydantic_v2
+async def test_read_binary_custom_media_caps(tmp_path: Path) -> None:
+    """The media caps are configurable: a small custom cap rejects, a larger/disabled one permits."""
+    (tmp_path / "img.png").write_bytes(_PNG_BYTES + b"\x00" * 2048)  # ~2 KiB raw
+    (tmp_path / "doc.pdf").write_bytes(_PDF_BYTES + b"\x00" * 2048)
+
+    # The image cap is on the base64 form (4/3 of raw), so 1 KiB rejects ~2 KiB raw.
+    tight = AgentToolContext(workdir=str(tmp_path), max_image_base64_bytes=1024, max_pdf_bytes=1024)
+    with pytest.raises(ToolError, match="exceeds"):
+        await beta_read_tool(tight).call({"file_path": "img.png"})
+    with pytest.raises(ToolError, match="exceeds"):
+        await beta_read_tool(tight).call({"file_path": "doc.pdf"})
+
+    # A larger cap (or ``None`` to disable) admits the same files.
+    loose = AgentToolContext(workdir=str(tmp_path), max_image_base64_bytes=1024 * 1024, max_pdf_bytes=None)
+    for name, kind in (("img.png", "image"), ("doc.pdf", "document")):
+        result = await beta_read_tool(loose).call({"file_path": name})
+        assert not isinstance(result, str)
+        (block,) = [cast("dict[str, Any]", b) for b in result]
+        assert block["type"] == kind
+
+
+@needs_pydantic_v2
+async def test_read_binary_rejects_view_range(tmp_path: Path) -> None:
+    (tmp_path / "slide.jpg").write_bytes(_JPEG_BYTES)
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError, match="view_range is not supported"):
+        await beta_read_tool(env).call({"file_path": "slide.jpg", "view_range": [1, 2]})
+
+
+@needs_pydantic_v2
+async def test_read_undecodable_binary_raises_tool_error(tmp_path: Path) -> None:
+    """Non-image/PDF binary surfaces a clean ToolError, not a raw UnicodeDecodeError."""
+    (tmp_path / "blob.bin").write_bytes(b"\xff\xfe\x00\x01")
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError, match="not valid UTF-8"):
+        await beta_read_tool(env).call({"file_path": "blob.bin"})
+
+
+@needs_pydantic_v2
+async def test_edit_binary_raises_tool_error(tmp_path: Path) -> None:
+    (tmp_path / "blob.bin").write_bytes(b"\xff\xfe\x00\x01")
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError, match="not valid UTF-8"):
+        await beta_edit_tool(env).call({"file_path": "blob.bin", "old_string": "a", "new_string": "b"})
+
+
+@needs_pydantic_v2
+def test_text_io_is_utf8_under_ascii_locale(tmp_path: Path) -> None:
+    """Text I/O is explicitly UTF-8: an ASCII-locale host (LANG=C) must not
+    mislabel valid UTF-8 as binary. Runs in a subprocess because the locale
+    default is fixed at interpreter startup."""
+    import subprocess
+
+    (tmp_path / "notes.txt").write_bytes("café — naïve\n".encode("utf-8"))
+    script = "\n".join(
+        [
+            "import sys, anyio",
+            "from anthropic.lib.tools.agent_toolset import (",
+            "    AgentToolContext, beta_edit_tool, beta_read_tool)",
+            f"ctx = AgentToolContext(workdir={str(tmp_path)!r})",
+            "async def main():",
+            "    text = await beta_read_tool(ctx).call({'file_path': 'notes.txt'})",
+            "    sys.stdout.buffer.write(text.encode('utf-8'))",
+            "    await beta_edit_tool(ctx).call(",
+            "        {'file_path': 'notes.txt', 'old_string': 'caf\\u00e9', 'new_string': 'th\\u00e9'})",
+            "anyio.run(main)",
+        ]
+    )
+    proc = subprocess.run(
+        [sys.executable, "-c", script],
+        env={**os.environ, "LC_ALL": "C", "LANG": "C", "PYTHONUTF8": "0", "PYTHONCOERCECLOCALE": "0"},
+        capture_output=True,
+    )
+    assert proc.returncode == 0, proc.stderr.decode("utf-8", errors="replace")
+    assert proc.stdout.decode("utf-8") == "café — naïve\n"
+    assert (tmp_path / "notes.txt").read_text(encoding="utf-8") == "thé — naïve\n"
 
 
 @pytest.mark.parametrize(
