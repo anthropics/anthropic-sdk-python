@@ -59,15 +59,16 @@ def iter_work(
     reclaim_older_than_ms: int | None = None,
     drain: bool = False,
     auto_stop: bool = True,
+    defer_ack: bool = False,
     extra_headers: Headers | None = None,
 ) -> Iterator[BetaSelfHostedWork]:
     """Iterate work items claimed from a self-hosted environment.
 
-    Each yielded :class:`BetaSelfHostedWork` has already been ack'd. The ``work``
-    resource must be bound to a client authenticated for the environment — the
-    poller itself does not handle credentials. Use
-    ``client.beta.environments.work.poller(...)`` for the user-facing entry
-    point that constructs a scoped sub-client for you.
+    Each yielded :class:`BetaSelfHostedWork` has already been ack'd, unless
+    ``defer_ack=True`` (see below). The ``work`` resource must be bound to a
+    client authenticated for the environment — the poller itself does not handle
+    credentials. Use ``client.beta.environments.work.poller(...)`` for the
+    user-facing entry point that constructs a scoped sub-client for you.
 
     Two consumption shapes are supported:
 
@@ -92,6 +93,17 @@ def iter_work(
         loop body completes. Set False when the work item is handed off to
         another process that owns the stop call — otherwise the lease is
         terminated out from under it.
+      defer_ack: When True, yield the item still *unacknowledged* (``queued``)
+        instead of ack'ing it before the yield, leaving the consuming/handoff
+        owner to call ``work.ack`` when it commits to processing. This closes
+        the drain-and-dispatch strand: with the default ack-before-yield, an
+        item whose handoff process dies before its first heartbeat is left in
+        ``starting`` with a null heartbeat, and ``poll(reclaim_older_than_ms=…)``
+        only reclaims *unacknowledged* work, so the item never resurfaces.
+        Deferring the ack keeps a failed handoff recoverable via
+        ``reclaim_older_than_ms`` / lease TTL. Requires ``auto_stop=False``
+        (the consumer owns the full lifecycle — both ack and stop); pairing it
+        with ``auto_stop=True`` raises ``ValueError``.
       reclaim_older_than_ms: Forwarded to ``work.poll``. Reclaim un-ack'd work
         older than this many ms. Useful in drain mode so a dead runner's
         work re-surfaces on the next webhook delivery.
@@ -104,8 +116,21 @@ def iter_work(
         same-named default for that one request, so use it for caller
         passthrough (e.g. trace ids), not to set auth.
     """
+    if defer_ack and auto_stop:
+        raise ValueError(
+            "defer_ack=True requires auto_stop=False: it is for the "
+            "drain-and-dispatch pattern where the consumer owns the work-item "
+            "lifecycle (ack and stop). With auto_stop=True the poller owns that "
+            "lifecycle and must ack the item it will later stop."
+        )
     worker_id = worker_id or _default_worker_id()
-    log.info("poller starting environment_id=%s drain=%s auto_stop=%s", environment_id, drain, auto_stop)
+    log.info(
+        "poller starting environment_id=%s drain=%s auto_stop=%s defer_ack=%s",
+        environment_id,
+        drain,
+        auto_stop,
+        defer_ack,
+    )
     # Poll and ack each get their own backoff counter so a run of ack failures
     # can't inflate the next poll failure's backoff (and vice versa) — each is
     # reset on its own success, and the ``continue`` paths leave them untouched.
@@ -137,6 +162,15 @@ def iter_work(
             time.sleep(_jitter(1.0, 3.0))
             continue
         log.info("claimed work work_id=%s work_type=%s", item.id, getattr(item.data, "type", None))
+        if defer_ack:
+            # Yield the item still unacknowledged ('queued'); the consumer/handoff
+            # owner performs the ack (and stop) when it commits to processing.
+            # A handoff that dies before acking leaves the item recoverable via
+            # reclaim_older_than_ms / lease TTL instead of stranded in 'starting'.
+            # Guaranteed auto_stop=False here (validated above), so this mirrors
+            # the auto_stop-False path below minus the pre-yield ack.
+            yield item
+            continue
         try:
             work.ack(
                 item.id,
@@ -195,13 +229,27 @@ async def aiter_work(
     reclaim_older_than_ms: int | None = None,
     drain: bool = False,
     auto_stop: bool = True,
+    defer_ack: bool = False,
     extra_headers: Headers | None = None,
 ) -> AsyncIterator[BetaSelfHostedWork]:
     """Async version of :func:`iter_work`. See its docstring for semantics,
-    including how ``extra_headers`` is passed through per request.
+    including ``defer_ack`` and how ``extra_headers`` is passed through per request.
     """
+    if defer_ack and auto_stop:
+        raise ValueError(
+            "defer_ack=True requires auto_stop=False: it is for the "
+            "drain-and-dispatch pattern where the consumer owns the work-item "
+            "lifecycle (ack and stop). With auto_stop=True the poller owns that "
+            "lifecycle and must ack the item it will later stop."
+        )
     worker_id = worker_id or _default_worker_id()
-    log.info("poller starting environment_id=%s drain=%s auto_stop=%s", environment_id, drain, auto_stop)
+    log.info(
+        "poller starting environment_id=%s drain=%s auto_stop=%s defer_ack=%s",
+        environment_id,
+        drain,
+        auto_stop,
+        defer_ack,
+    )
     poll_attempt = 0
     ack_attempt = 0
     while True:
@@ -230,6 +278,15 @@ async def aiter_work(
             await anyio.sleep(_jitter(1.0, 3.0))
             continue
         log.info("claimed work work_id=%s work_type=%s", item.id, getattr(item.data, "type", None))
+        if defer_ack:
+            # Yield the item still unacknowledged ('queued'); the consumer/handoff
+            # owner performs the ack (and stop) when it commits to processing.
+            # A handoff that dies before acking leaves the item recoverable via
+            # reclaim_older_than_ms / lease TTL instead of stranded in 'starting'.
+            # Guaranteed auto_stop=False here (validated above), so this mirrors
+            # the auto_stop-False path below minus the pre-yield ack.
+            yield item
+            continue
         try:
             await work.ack(
                 item.id,
