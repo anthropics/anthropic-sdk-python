@@ -63,6 +63,13 @@ class Baz2(TypedDict):
 
 @parametrize
 @pytest.mark.asyncio
+async def test_bare_dict_annotation(use_async: bool) -> None:
+    # a bare `dict` annotation (no type parameters) should pass values through unchanged
+    assert await transform({"key": "value", "n": 1}, cast(Any, dict), use_async) == {"key": "value", "n": 1}
+
+
+@parametrize
+@pytest.mark.asyncio
 async def test_recursive_typeddict(use_async: bool) -> None:
     assert await transform({"bar": {"this_thing": 1}}, Foo2, use_async) == {"bar": {"this__thing": 1}}
     assert await transform({"bar": {"baz": {"my_baz": "foo"}}}, Foo2, use_async) == {"bar": {"Baz": {"myBaz": "foo"}}}

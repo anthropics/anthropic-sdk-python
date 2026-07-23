@@ -655,6 +655,18 @@ def test_annotated_types() -> None:
     assert m.value == "foo"
 
 
+def test_bare_dict_annotation() -> None:
+    # a bare `dict` annotation (no type parameters) should not raise
+    m = construct_type(value={"key": "value", "n": 1}, type_=cast(Any, dict))
+    assert m == {"key": "value", "n": 1}
+
+
+def test_bare_list_annotation() -> None:
+    # a bare `list` annotation (no type parameters) should not raise
+    m = construct_type(value=["a", "b", 1], type_=cast(Any, list))
+    assert m == ["a", "b", 1]
+
+
 def test_discriminated_unions_invalid_data() -> None:
     class A(BaseModel):
         type: Literal["a"]
