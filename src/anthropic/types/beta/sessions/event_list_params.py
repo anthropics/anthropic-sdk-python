@@ -15,22 +15,34 @@ __all__ = ["EventListParams"]
 
 class EventListParams(TypedDict, total=False):
     created_at_gt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gt]", format="iso8601")]
-    """Return events created after this time (exclusive)."""
+    """Return events created after this time (exclusive).
+
+    Compared against the event's `processed_at` value.
+    """
 
     created_at_gte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gte]", format="iso8601")]
-    """Return events created at or after this time (inclusive)."""
+    """Return events created at or after this time (inclusive).
+
+    Compared against the event's `processed_at` value.
+    """
 
     created_at_lt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lt]", format="iso8601")]
-    """Return events created before this time (exclusive)."""
+    """Return events created before this time (exclusive).
+
+    Compared against the event's `processed_at` value.
+    """
 
     created_at_lte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lte]", format="iso8601")]
-    """Return events created at or before this time (inclusive)."""
+    """Return events created at or before this time (inclusive).
+
+    Compared against the event's `processed_at` value.
+    """
 
     limit: int
     """Query parameter for limit"""
 
     order: Literal["asc", "desc"]
-    """Sort direction for results, ordered by created_at.
+    """Sort direction for results, ordered by the event's `processed_at`.
 
     Defaults to asc (chronological).
     """

@@ -73,18 +73,22 @@ class Events(SyncAPIResource):
         List Events
 
         Args:
-          created_at_gt: Return events created after this time (exclusive).
+          created_at_gt: Return events created after this time (exclusive). Compared against the event's
+              `processed_at` value.
 
-          created_at_gte: Return events created at or after this time (inclusive).
+          created_at_gte: Return events created at or after this time (inclusive). Compared against the
+              event's `processed_at` value.
 
-          created_at_lt: Return events created before this time (exclusive).
+          created_at_lt: Return events created before this time (exclusive). Compared against the event's
+              `processed_at` value.
 
-          created_at_lte: Return events created at or before this time (inclusive).
+          created_at_lte: Return events created at or before this time (inclusive). Compared against the
+              event's `processed_at` value.
 
           limit: Query parameter for limit
 
-          order: Sort direction for results, ordered by created_at. Defaults to asc
-              (chronological).
+          order: Sort direction for results, ordered by the event's `processed_at`. Defaults to
+              asc (chronological).
 
           page: Opaque pagination cursor from a previous response's next_page.
 
@@ -304,18 +308,22 @@ class AsyncEvents(AsyncAPIResource):
         List Events
 
         Args:
-          created_at_gt: Return events created after this time (exclusive).
+          created_at_gt: Return events created after this time (exclusive). Compared against the event's
+              `processed_at` value.
 
-          created_at_gte: Return events created at or after this time (inclusive).
+          created_at_gte: Return events created at or after this time (inclusive). Compared against the
+              event's `processed_at` value.
 
-          created_at_lt: Return events created before this time (exclusive).
+          created_at_lt: Return events created before this time (exclusive). Compared against the event's
+              `processed_at` value.
 
-          created_at_lte: Return events created at or before this time (inclusive).
+          created_at_lte: Return events created at or before this time (inclusive). Compared against the
+              event's `processed_at` value.
 
           limit: Query parameter for limit
 
-          order: Sort direction for results, ordered by created_at. Defaults to asc
-              (chronological).
+          order: Sort direction for results, ordered by the event's `processed_at`. Defaults to
+              asc (chronological).
 
           page: Opaque pagination cursor from a previous response's next_page.
 
