@@ -1,9 +1,14 @@
-"""Tests for skill-archive extraction (:mod:`anthropic.lib.tools._skills`).
+"""Tests for skill-archive extraction and upload-path normalisation
+(:mod:`anthropic.lib.tools._skills`).
 
 Skill bundles are packaged wrapped in a single directory named after the skill
 (e.g. ``pdf/SKILL.md``). The extractor must strip that wrapper so files land at
 ``<dest>/SKILL.md``, not the doubled ``<dest>/pdf/SKILL.md``. It must also still
 refuse zip-slip / tar-slip members.
+
+The upload side has a symmetric requirement: ``beta.skills.create`` rejects
+paths that are not prefixed with the skill name.  ``normalize_skill_upload_paths``
+rewrites bare paths automatically so callers don't need to know this constraint.
 """
 
 from __future__ import annotations
@@ -21,9 +26,17 @@ ArchiveMaker = Callable[[Path, dict[str, bytes]], None]
 # archive records for that member.
 ArchiveModeMaker = Callable[[Path, "dict[str, tuple[bytes, int]]"], None]
 
+import io
+
 import pytest
 
-from anthropic.lib.tools._skills import _strip_top, _archive_top_dir, _extract_skill_archive
+from anthropic.lib.tools._skills import (
+    _strip_top,
+    _archive_top_dir,
+    _extract_skill_archive,
+    normalize_skill_upload_paths,
+    _parse_skill_name_from_frontmatter,
+)
 
 
 def _make_zip(path: Path, entries: dict[str, bytes]) -> None:
@@ -194,3 +207,104 @@ def test_extract_drops_setuid_setgid_sticky(make: ArchiveModeMaker, tmp_path: Pa
     # A non-executable member with setuid set must also drop the bit.
     assert doc & 0o7000 == 0
     assert doc == 0o644
+
+
+# ---------------------------------------------------------------------------
+# normalize_skill_upload_paths
+# ---------------------------------------------------------------------------
+
+_SKILL_MD_BYTES = b"""\
+---
+name: my-skill
+description: A test skill.
+---
+
+Body text here.
+"""
+
+
+def test_parse_skill_name_from_frontmatter_found() -> None:
+    assert _parse_skill_name_from_frontmatter(_SKILL_MD_BYTES) == "my-skill"
+
+
+def test_parse_skill_name_from_frontmatter_missing() -> None:
+    assert _parse_skill_name_from_frontmatter(b"no front matter here") is None
+
+
+def test_parse_skill_name_ignores_name_in_body_without_frontmatter() -> None:
+    # A ``name:`` line in the body (e.g. a code example) must not be picked up
+    # when there is no front-matter block. Regression for PR #1604 review.
+    content = b"# Heading\n\nExample config:\n\n    name: not-the-skill\n"
+    assert _parse_skill_name_from_frontmatter(content) is None
+
+
+def test_parse_skill_name_only_reads_within_frontmatter_block() -> None:
+    # ``name:`` inside the front-matter wins; a later body occurrence is ignored.
+    content = b"---\nname: real-skill\n---\n\nSee `name: decoy` in this example.\n"
+    assert _parse_skill_name_from_frontmatter(content) == "real-skill"
+
+
+def test_normalize_bare_paths_prefixed_from_skill_md() -> None:
+    files = [
+        ("SKILL.md", _SKILL_MD_BYTES, "text/markdown"),
+        ("scripts/run.py", b"print(1)", "text/x-python"),
+    ]
+    result = normalize_skill_upload_paths(files)  # type: ignore[arg-type]
+    assert result[0][0] == "my-skill/SKILL.md"
+    assert result[1][0] == "my-skill/scripts/run.py"
+
+
+def test_normalize_already_prefixed_paths_unchanged() -> None:
+    files = [
+        ("my-skill/SKILL.md", _SKILL_MD_BYTES, "text/markdown"),
+        ("my-skill/scripts/run.py", b"print(1)", "text/x-python"),
+    ]
+    result = normalize_skill_upload_paths(files)  # type: ignore[arg-type]
+    assert result[0][0] == "my-skill/SKILL.md"
+    assert result[1][0] == "my-skill/scripts/run.py"
+
+
+def test_normalize_idempotent() -> None:
+    files = [("SKILL.md", _SKILL_MD_BYTES, "text/markdown")]
+    once = normalize_skill_upload_paths(files)  # type: ignore[arg-type]
+    twice = normalize_skill_upload_paths(once)
+    assert once == twice
+
+
+def test_normalize_fallback_to_display_title() -> None:
+    no_name_md = b"---\ndescription: No name field.\n---\n"
+    files = [("SKILL.md", no_name_md, "text/markdown")]
+    result = normalize_skill_upload_paths(files, display_title="My Skill")  # type: ignore[arg-type]
+    assert result[0][0] == "my-skill/SKILL.md"
+
+
+def test_normalize_display_title_special_chars() -> None:
+    no_name_md = b"---\ndescription: x\n---\n"
+    files = [("SKILL.md", no_name_md, "text/markdown")]
+    result = normalize_skill_upload_paths(files, display_title="My Skill v2!")  # type: ignore[arg-type]
+    assert result[0][0] == "my-skill-v2/SKILL.md"
+
+
+def test_normalize_io_stream_skill_md() -> None:
+    stream = io.BytesIO(_SKILL_MD_BYTES)
+    files = [("SKILL.md", stream, "text/markdown")]
+    result = normalize_skill_upload_paths(files)  # type: ignore[arg-type]
+    assert result[0][0] == "my-skill/SKILL.md"
+    # Stream must be rewound so the SDK can still send the bytes.
+    assert stream.read() == _SKILL_MD_BYTES
+
+
+def test_normalize_no_skill_md_no_display_title_unchanged() -> None:
+    files = [("config.json", b"{}", "application/json")]
+    result = normalize_skill_upload_paths(files)  # type: ignore[arg-type]
+    assert result[0][0] == "config.json"
+
+
+def test_normalize_two_tuple_entries() -> None:
+    files = [
+        ("SKILL.md", _SKILL_MD_BYTES),
+        ("README.md", b"# readme"),
+    ]
+    result = normalize_skill_upload_paths(files)  # type: ignore[arg-type]
+    assert result[0][0] == "my-skill/SKILL.md"
+    assert result[1][0] == "my-skill/README.md"

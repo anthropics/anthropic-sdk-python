@@ -35,6 +35,7 @@ from ...._response import to_streamed_response_wrapper, async_to_streamed_respon
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ....types.beta import skill_list_params, skill_create_params
 from ...._base_client import AsyncPaginator, make_request_options
+from ....lib.tools._skills import normalize_skill_upload_paths
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.skill_list_response import SkillListResponse
 from ....types.beta.skill_create_response import SkillCreateResponse
@@ -105,6 +106,11 @@ class Skills(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        if is_given(files) and files is not None:
+            files = normalize_skill_upload_paths(
+                list(files),
+                display_title=display_title if is_given(display_title) and display_title is not None else None,
+            )
         extra_headers = {
             **strip_not_given(
                 {
@@ -377,6 +383,11 @@ class AsyncSkills(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        if is_given(files) and files is not None:
+            files = normalize_skill_upload_paths(
+                list(files),
+                display_title=display_title if is_given(display_title) and display_title is not None else None,
+            )
         extra_headers = {
             **strip_not_given(
                 {
