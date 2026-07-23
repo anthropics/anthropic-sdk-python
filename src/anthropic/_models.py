@@ -607,6 +607,26 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
     args = get_args(type_)
 
     if is_union(origin):
+        # For a discriminated union we can resolve the matching variant up-front from
+        # the discriminator value. That lets us validate just that one variant instead
+        # of the whole union, which is materially cheaper -- validating a union forces
+        # every member to be considered -- while returning an identical object. This is
+        # the hot path for streaming, where every event is decoded against the
+        # `RawMessageStreamEvent` union (#1649). When the data doesn't validate against
+        # the resolved variant we fall through to the existing handling below, so the
+        # behaviour for invalid / non-discriminated data is unchanged.
+        variant_type: type | None = None
+        discriminator = _build_discriminated_union_meta(union=type_, meta_annotations=meta)
+        if discriminator and is_mapping(value):
+            variant_value = value.get(discriminator.field_alias_from or discriminator.field_name)
+            if variant_value and isinstance(variant_value, str):
+                variant_type = discriminator.mapping.get(variant_value)
+                if variant_type is not None:
+                    try:
+                        return validate_type(type_=cast("type[object]", variant_type), value=value)
+                    except Exception:
+                        pass
+
         try:
             return validate_type(type_=cast("type[object]", original_type or type_), value=value)
         except Exception:
@@ -626,13 +646,8 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
         #
         # without this block, if the data we get is something like `{'kind': 'bar', 'value': 'foo'}` then
         # we'd end up constructing `FooType` when it should be `BarType`.
-        discriminator = _build_discriminated_union_meta(union=type_, meta_annotations=meta)
-        if discriminator and is_mapping(value):
-            variant_value = value.get(discriminator.field_alias_from or discriminator.field_name)
-            if variant_value and isinstance(variant_value, str):
-                variant_type = discriminator.mapping.get(variant_value)
-                if variant_type:
-                    return construct_type(type_=variant_type, value=value)
+        if variant_type is not None:
+            return construct_type(type_=variant_type, value=value)
 
         # if the data is not valid, use the first variant that doesn't fail while deserializing
         for variant in args:
