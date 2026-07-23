@@ -127,6 +127,44 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
             return True
         return False
 
+    def _tool_response_already_appended(self, response: BetaMessageParam) -> bool:
+        """Return True if the tool-result message we would auto-append has already
+        been added to the conversation history (e.g. the caller appended a custom
+        tool result themselves via ``append_messages``).
+
+        The check matches by ``tool_use_id`` on the tool_result blocks in the last
+        user message. This lets callers append unrelated messages (e.g. an extra
+        user instruction) inside the loop body without breaking the
+        tool-call/tool-result threading: no tool_use_ids match, so the assistant
+        + tool result still get auto-appended on the next iteration.
+        """
+        response_content = response.get("content")
+        if not isinstance(response_content, list):
+            return False
+        response_ids = {
+            block.get("tool_use_id")
+            for block in response_content
+            if isinstance(block, dict) and block.get("type") == "tool_result" and block.get("tool_use_id")
+        }
+        if not response_ids:
+            return False
+
+        msgs = self._params.get("messages", [])
+        if not msgs:
+            return False
+        last = msgs[-1]
+        if not isinstance(last, dict) or last.get("role") != "user":
+            return False
+        last_content = last.get("content")
+        if not isinstance(last_content, list):
+            return False
+        last_ids = {
+            block.get("tool_use_id")
+            for block in last_content
+            if isinstance(block, dict) and block.get("type") == "tool_result" and block.get("tool_use_id")
+        }
+        return response_ids.issubset(last_ids)
+
 
 class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Generic[RunnerItemT, ResponseFormatT], ABC):
     def __init__(
@@ -287,7 +325,12 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     return
 
-                if not self._messages_modified:
+                # Auto-append the assistant + tool result unless the caller already
+                # supplied a matching tool_result via append_messages (the "modifying
+                # tool results" pattern). Callers who append unrelated messages
+                # (e.g. an extra user instruction) inside the loop body don't match
+                # this check, so the tool flow stays threaded — see #1536.
+                if not self._tool_response_already_appended(response):
                     self.append_messages(message, response)
 
             self._messages_modified = False
@@ -575,7 +618,12 @@ class BaseAsyncToolRunner(
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     return
 
-                if not self._messages_modified:
+                # Auto-append the assistant + tool result unless the caller already
+                # supplied a matching tool_result via append_messages (the "modifying
+                # tool results" pattern). Callers who append unrelated messages
+                # (e.g. an extra user instruction) inside the loop body don't match
+                # this check, so the tool flow stays threaded — see #1536.
+                if not self._tool_response_already_appended(response):
                     self.append_messages(message, response)
 
             self._messages_modified = False
