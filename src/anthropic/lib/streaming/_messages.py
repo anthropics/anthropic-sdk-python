@@ -477,7 +477,14 @@ def accumulate_event(
                 json_buf += bytes(event.delta.partial_json, "utf-8")
 
                 if json_buf:
-                    content.input = from_json(json_buf, partial_mode=True)
+                    try:
+                        content.input = from_json(json_buf, partial_mode=True)
+                    except ValueError as e:
+                        raise ValueError(
+                            f"Unable to parse tool parameter JSON from model. "
+                            f"Please retry your request or adjust your prompt. "
+                            f"Error: {e}. JSON: {json_buf.decode('utf-8')}"
+                        ) from e
 
                 setattr(content, JSON_BUF_PROPERTY, json_buf)
         elif event.delta.type == "citations_delta":
