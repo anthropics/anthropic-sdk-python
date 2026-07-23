@@ -464,6 +464,19 @@ class Anthropic(SyncAPIClient):
 
         http_client = http_client or self._client
         # --- credentials support (hand-written, upstream to Stainless) ---
+        replaces_static_auth = (
+            (not isinstance(credentials, NotGiven) and credentials is not None)
+            or config is not None
+            or profile is not None
+        )
+        copied_api_key = api_key if api_key is not None else self.api_key
+        copied_auth_token = auth_token if auth_token is not None else self.auth_token
+        if replaces_static_auth:
+            if api_key is None:
+                copied_api_key = None
+            if auth_token is None:
+                copied_auth_token = None
+
         if config is not None:
             if not isinstance(credentials, NotGiven) or profile is not None:
                 raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
@@ -483,8 +496,8 @@ class Anthropic(SyncAPIClient):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
         return self.__class__(
-            api_key=api_key or self.api_key,
-            auth_token=auth_token or self.auth_token,
+            api_key=copied_api_key,
+            auth_token=copied_auth_token,
             webhook_key=webhook_key or self.webhook_key,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
@@ -880,6 +893,19 @@ class AsyncAnthropic(AsyncAPIClient):
 
         http_client = http_client or self._client
         # --- credentials support (hand-written, upstream to Stainless) ---
+        replaces_static_auth = (
+            (not isinstance(credentials, NotGiven) and credentials is not None)
+            or config is not None
+            or profile is not None
+        )
+        copied_api_key = api_key if api_key is not None else self.api_key
+        copied_auth_token = auth_token if auth_token is not None else self.auth_token
+        if replaces_static_auth:
+            if api_key is None:
+                copied_api_key = None
+            if auth_token is None:
+                copied_auth_token = None
+
         if config is not None:
             if not isinstance(credentials, NotGiven) or profile is not None:
                 raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
@@ -899,8 +925,8 @@ class AsyncAnthropic(AsyncAPIClient):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
         return self.__class__(
-            api_key=api_key or self.api_key,
-            auth_token=auth_token or self.auth_token,
+            api_key=copied_api_key,
+            auth_token=copied_auth_token,
             webhook_key=webhook_key or self.webhook_key,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
