@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import json
+import base64
 import logging
 import urllib.parse
 from typing import Any, Union, Mapping, TypeVar, Sequence
@@ -10,7 +12,7 @@ import httpx
 
 from ... import _exceptions
 from ._beta import Beta, AsyncBeta
-from ..._types import NOT_GIVEN, Timeout, NotGiven
+from ..._types import NOT_GIVEN, Timeout, NotGiven, ResponseT
 from ..._utils import is_dict, is_given
 from ..._compat import model_copy
 from ..._version import __version__
@@ -63,8 +65,20 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
     if options.url.startswith("/v1/messages/batches"):
         raise AnthropicError("The Batch API is not supported in Bedrock yet")
 
-    if options.url == "/v1/messages/count_tokens":
-        raise AnthropicError("Token counting is not supported in Bedrock yet")
+    if options.url in {"/v1/messages/count_tokens", "/v1/messages/count_tokens?beta=true"} and options.method == "post":
+        if not is_dict(options.json_data):
+            raise RuntimeError("Expected dictionary json_data for post /v1/messages/count_tokens endpoint")
+
+        model = options.json_data.pop("model", None)
+        model = urllib.parse.quote(str(model), safe=":")
+        options.url = f"/model/{model}/count-tokens"
+        options.json_data = {
+            "input": {
+                "invokeModel": {
+                    "body": base64.b64encode(json.dumps(options.json_data).encode("utf-8")).decode("ascii"),
+                }
+            }
+        }
 
     return options
 
@@ -93,6 +107,20 @@ def _infer_region() -> str:
 
 
 class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
+    @override
+    def _process_response_data(
+        self,
+        *,
+        data: object,
+        cast_to: type[ResponseT],
+        response: httpx.Response,
+    ) -> ResponseT:
+        # the Bedrock CountTokens API returns `inputTokens` instead of `input_tokens`
+        if response.request.url.path.endswith("/count-tokens") and is_dict(data) and "inputTokens" in data:
+            data = {"input_tokens": data["inputTokens"]}
+
+        return super()._process_response_data(data=data, cast_to=cast_to, response=response)
+
     @override
     def _make_status_error(
         self,
