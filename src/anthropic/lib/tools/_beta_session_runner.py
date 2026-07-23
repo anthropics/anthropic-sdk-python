@@ -30,6 +30,7 @@ import anyio
 
 from .._retry import TRANSIENT_ERRORS, is_fatal_status_error
 from ..._types import Headers
+from ..._exceptions import APIStatusError
 from ._tool_dispatch import tool_registry, run_runnable_tool, tool_error_content
 from .._scoped_client import _copy_client_with_bearer_auth
 from ._beta_functions import (
@@ -121,6 +122,25 @@ STREAM_BACKOFF_CAP = 10.0
 # tests/lib/tools/test_session_runner.py::test_tool_timeout_exceeds_bash_default.
 TOOL_TIMEOUT = 150.0
 SEND_RETRIES = 3
+# The sub-thread tool_use commit race (#1744): posting a tool_result for a tool that ran
+# on a non-primary ``session_thread_id`` can 400 with "does not match any agent.tool_use
+# event" until that originating ``agent.tool_use`` event becomes matchable server-side.
+# That 400 is transient (it clears once the event commits), not a permanent bad request, so
+# it gets its own, more patient retry budget instead of the generic fatal-4xx bailout below.
+# Matched on the message because the API exposes no distinct error code for it.
+SUBTHREAD_TOOL_USE_RACE_MARKER = "does not match any agent.tool_use event"
+SUBTHREAD_RACE_SEND_RETRIES = 8
+
+
+def _is_subthread_tool_use_race(err: Exception) -> bool:
+    """True for the transient #1744 sub-thread ``agent.tool_use`` commit-race 400."""
+    return (
+        isinstance(err, APIStatusError)
+        and err.status_code == 400
+        and SUBTHREAD_TOOL_USE_RACE_MARKER in str(getattr(err, "message", None) or err)
+    )
+
+
 # Grace period, in seconds, that the runner keeps running after the session goes
 # idle with stop_reason ``end_turn`` before it stops; any new event in that
 # window resets it. ``max_idle=None`` disables it (run until the session ends).
@@ -893,7 +913,9 @@ class SessionToolRunner:
         (``tool_use_id`` vs ``custom_tool_use_id``) depending on the kind.
         """
         last_err: Exception | None = None
-        for i in range(SEND_RETRIES):
+        attempt = 0
+        retries = SEND_RETRIES
+        while attempt < retries:
             try:
                 await self._events.send(
                     self.session_id,
@@ -904,11 +926,18 @@ class SessionToolRunner:
                 return True
             except TRANSIENT_ERRORS as e:
                 last_err = e
-                if is_fatal_status_error(e):
+                if _is_subthread_tool_use_race(e):
+                    # Transient commit race (#1744): the originating sub-thread
+                    # ``agent.tool_use`` event has not committed server-side yet. Keep
+                    # retrying on a more patient budget instead of bailing as fatal, so the
+                    # result lands once the event is matchable rather than stranding the call.
+                    retries = SUBTHREAD_RACE_SEND_RETRIES
+                elif is_fatal_status_error(e):
                     break
+                attempt += 1
                 # Don't sleep after the final attempt — there is no retry to wait for.
-                if i < SEND_RETRIES - 1:
-                    await anyio.sleep(i + 1)
+                if attempt < retries:
+                    await anyio.sleep(min(attempt, STREAM_BACKOFF_CAP))
         log.error("failed to send tool result tool_use_id=%s error=%s", tool_use_id, last_err)
         return False
 
