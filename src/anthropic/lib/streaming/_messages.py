@@ -360,7 +360,11 @@ def build_events(
                     )
                 )
         elif event.delta.type == "input_json_delta":
-            if content_block.type == "tool_use":
+            # Emit `input_json` for every block whose input we accumulate below
+            # (see `accumulate_event`/`TRACKS_TOOL_INPUT`), not just client
+            # `tool_use` — otherwise `server_tool_use` blocks stream their input
+            # into the snapshot but never fire an `input_json` event.
+            if isinstance(content_block, TRACKS_TOOL_INPUT):
                 events_to_fire.append(
                     build(
                         InputJsonEvent,
