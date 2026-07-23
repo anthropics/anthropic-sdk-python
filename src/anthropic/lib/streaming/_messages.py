@@ -21,13 +21,29 @@ from ._types import (
     ParsedContentBlockStopEvent,
 )
 from ...types import RawMessageStreamEvent
+from ...types.raw_message_start_event import RawMessageStartEvent
+from ...types.raw_message_delta_event import RawMessageDeltaEvent
+from ...types.raw_message_stop_event import RawMessageStopEvent
+from ...types.raw_content_block_start_event import RawContentBlockStartEvent
+from ...types.raw_content_block_delta_event import RawContentBlockDeltaEvent
+from ...types.raw_content_block_stop_event import RawContentBlockStopEvent
 from ..._types import NOT_GIVEN, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
+from ..._compat import parse_obj
 from ..._models import build, construct_type, construct_type_unchecked
 from ..._streaming import Stream, AsyncStream
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
 from ...types.parsed_message import ParsedMessage, ParsedContentBlock
+
+_RAW_EVENT_TYPE_MAP: dict[str, type[BaseModel]] = {
+    "message_start": RawMessageStartEvent,
+    "message_delta": RawMessageDeltaEvent,
+    "message_stop": RawMessageStopEvent,
+    "content_block_start": RawContentBlockStartEvent,
+    "content_block_delta": RawContentBlockDeltaEvent,
+    "content_block_stop": RawContentBlockStopEvent,
+}
 
 
 class MessageStream(Generic[ResponseFormatT]):
@@ -444,6 +460,21 @@ def accumulate_event(
                 value=event,
             ),
         )
+        if not isinstance(cast(Any, event), BaseModel):
+            # construct_type_unchecked can silently return the raw dict when Pydantic's
+            # union discriminator fails (e.g. certain Pydantic versions or TypeAlias
+            # nesting). Fall back to parse_obj on the concrete class so that nested
+            # fields (e.g. delta inside content_block_delta) are also validated and
+            # typed, not left as raw dicts. See https://github.com/anthropics/anthropic-sdk-python/issues/941
+            raw = cast(Any, event)
+            if isinstance(raw, dict):
+                event_type = raw.get("type")
+                target_cls = _RAW_EVENT_TYPE_MAP.get(event_type) if isinstance(event_type, str) else None
+                if target_cls is not None:
+                    try:
+                        event = cast(RawMessageStreamEvent, parse_obj(target_cls, raw))
+                    except Exception:
+                        pass
         if not isinstance(cast(Any, event), BaseModel):
             raise TypeError(f"Unexpected event runtime type, after deserialising twice - {event} - {type(event)}")
 
