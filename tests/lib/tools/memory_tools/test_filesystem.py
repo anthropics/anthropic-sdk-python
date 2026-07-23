@@ -186,6 +186,16 @@ class TestBetaLocalFilesystemMemoryTool:
                 BetaMemoryTool20250818ViewCommand(command="view", path="/memories/nonexistent.txt")
             )
 
+    def test_view_error_for_non_utf8_file(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
+        memory_root = sync_local_filesystem_tool.memory_root
+        memory_root.mkdir(parents=True, exist_ok=True)
+        (memory_root / "binary.dat").write_bytes(b"\xff\xfe\x80 not utf-8")
+
+        with pytest.raises(ToolError, match="is not a valid UTF-8 text file"):
+            sync_local_filesystem_tool.view(
+                BetaMemoryTool20250818ViewCommand(command="view", path="/memories/binary.dat")
+            )
+
     def test_view_error_for_files_with_too_many_lines(
         self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
     ) -> None:
@@ -672,6 +682,18 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
         ):
             await async_local_filesystem_tool.view(
                 BetaMemoryTool20250818ViewCommand(command="view", path="/memories/nonexistent.txt")
+            )
+
+    async def test_view_error_for_non_utf8_file(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+    ) -> None:
+        memory_root = Path(str(async_local_filesystem_tool.memory_root))
+        memory_root.mkdir(parents=True, exist_ok=True)
+        (memory_root / "binary.dat").write_bytes(b"\xff\xfe\x80 not utf-8")
+
+        with pytest.raises(ToolError, match="is not a valid UTF-8 text file"):
+            await async_local_filesystem_tool.view(
+                BetaMemoryTool20250818ViewCommand(command="view", path="/memories/binary.dat")
             )
 
     async def test_view_error_for_files_with_too_many_lines(

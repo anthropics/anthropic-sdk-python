@@ -358,6 +358,8 @@ def _read_file_content(full_path: Path, memory_path: str) -> str:
         raise ToolError(
             f"The file {memory_path} no longer exists (may have been deleted or renamed concurrently)."
         ) from err
+    except UnicodeDecodeError as err:
+        raise ToolError(f"The file {memory_path} is not a valid UTF-8 text file and cannot be read as memory.") from err
 
 
 def _format_file_size(bytes_size: int) -> str:
@@ -655,6 +657,8 @@ async def _async_read_file_content(full_path: AsyncPath, memory_path: str) -> st
         raise ToolError(
             f"The file {memory_path} no longer exists (may have been deleted or renamed concurrently)."
         ) from err
+    except UnicodeDecodeError as err:
+        raise ToolError(f"The file {memory_path} is not a valid UTF-8 text file and cannot be read as memory.") from err
 
 
 class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
