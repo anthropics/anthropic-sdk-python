@@ -87,8 +87,10 @@ class Skills(SyncAPIResource):
         Args:
           files: Files to upload for the skill.
 
-              All files must be in the same top-level directory and must include a SKILL.md
-              file at the root of that directory.
+              All files must be in the same top-level directory and must include a
+              `SKILL.md` file at the root of that directory. The top-level directory
+              name must match the `name:` field declared in `SKILL.md` (for example,
+              `my-skill/SKILL.md`).
 
           display_title: Display title for the skill.
 
@@ -359,8 +361,10 @@ class AsyncSkills(AsyncAPIResource):
         Args:
           files: Files to upload for the skill.
 
-              All files must be in the same top-level directory and must include a SKILL.md
-              file at the root of that directory.
+              All files must be in the same top-level directory and must include a
+              `SKILL.md` file at the root of that directory. The top-level directory
+              name must match the `name:` field declared in `SKILL.md` (for example,
+              `my-skill/SKILL.md`).
 
           display_title: Display title for the skill.
 
