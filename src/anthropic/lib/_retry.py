@@ -31,7 +31,9 @@ _RETRYABLE_4XX = frozenset({408, 409, 429})
 
 def backoff(attempt: int, *, cap: float, base: float = 2.0) -> float:
     """Exponential backoff for ``attempt`` (1-indexed), capped at ``cap``."""
-    return min(cap, base**attempt)
+    # Cap the exponent (as ``_base_client`` does) so a very large ``attempt`` cannot
+    # overflow ``base ** attempt`` and raise before ``min`` clamps the result to ``cap``.
+    return min(cap, base ** min(attempt, 1000))
 
 
 def jitter(low: float, high: float) -> float:
