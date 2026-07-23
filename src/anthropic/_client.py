@@ -211,8 +211,13 @@ class Anthropic(SyncAPIClient):
             or profile is not None
         )
         if not has_explicit_credential:
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+            # Treat an empty-string env var as unset. Empty values are common in
+            # CI/containers/wrapper shells (e.g. `export VAR=`), and a "present"
+            # empty credential would otherwise build a malformed `Bearer ` /
+            # empty `X-Api-Key` header that the HTTP layer rejects on every
+            # request, instead of falling through to credential auto-discovery.
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
+            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
         self.api_key = api_key
         self.auth_token = auth_token
         # --- end credentials support ---
@@ -631,8 +636,13 @@ class AsyncAnthropic(AsyncAPIClient):
             or profile is not None
         )
         if not has_explicit_credential:
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+            # Treat an empty-string env var as unset. Empty values are common in
+            # CI/containers/wrapper shells (e.g. `export VAR=`), and a "present"
+            # empty credential would otherwise build a malformed `Bearer ` /
+            # empty `X-Api-Key` header that the HTTP layer rejects on every
+            # request, instead of falling through to credential auto-discovery.
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
+            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
         self.api_key = api_key
         self.auth_token = auth_token
         # --- end credentials support ---
