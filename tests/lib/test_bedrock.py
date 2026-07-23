@@ -278,6 +278,25 @@ def test_region_infer_from_specified_profile(
     assert client.aws_region == next(profile for profile in profiles if profile["name"] == aws_profile)["region"]
 
 
+def test_region_infer_from_constructor_profile(
+    monkeypatch: t.Any,
+) -> None:
+    profiles = [
+        {"name": "default", "region": "us-east-2"},
+        {"name": "custom", "region": "us-west-1"},
+    ]
+
+    with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
+        for profile in profiles:
+            temp_file.write(profile_to_ini(profile))
+        temp_file.flush()
+        monkeypatch.setenv("AWS_CONFIG_FILE", str(temp_file.name))
+
+        client = AnthropicBedrock(aws_profile="custom")
+
+        assert client.aws_region == next(profile for profile in profiles if profile["name"] == "custom")["region"]
+
+
 def test_chunk_bytes_to_sse_typed_event() -> None:
     raw = (
         b'{"type":"message_start","message":{"id":"msg_123","type":"message","role":"assistant",'
