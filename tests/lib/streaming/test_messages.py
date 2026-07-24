@@ -105,6 +105,11 @@ def assert_tool_use_response(events: list[ParsedMessageStreamEvent[None]], messa
     ]
 
 
+def assert_container_response(message: Message) -> None:
+    assert message.container is not None
+    assert message.container.id == "container_011CPTa1PkYDZagcpQ8VZCcy"
+
+
 def assert_refusal_response(message: Message) -> None:
     assert message.stop_reason == "refusal"
     assert message.stop_details is not None
@@ -206,6 +211,19 @@ class TestSyncMessages:
         ) as stream:
             assert_refusal_response(stream.get_final_message())
 
+    @pytest.mark.respx(base_url=base_url)
+    def test_container_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("container_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-8",
+        ) as stream:
+            assert_container_response(stream.get_final_message())
+
 
 class TestAsyncMessages:
     @pytest.mark.asyncio
@@ -304,6 +322,20 @@ class TestAsyncMessages:
             model="claude-opus-4-7",
         ) as stream:
             assert_refusal_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_container_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("container_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-8",
+        ) as stream:
+            assert_container_response(await stream.get_final_message())
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
