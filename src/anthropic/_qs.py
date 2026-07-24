@@ -112,9 +112,9 @@ class Querystring:
                     f"Unknown array_format value: {array_format}, choose from {', '.join(get_args(ArrayFormat))}"
                 )
 
-        serialised = self._primitive_value_to_str(value)
-        if not serialised:
+        if value is None:
             return []
+        serialised = self._primitive_value_to_str(value)
         return [(key, serialised)]
 
     def _primitive_value_to_str(self, value: PrimitiveData) -> str:
