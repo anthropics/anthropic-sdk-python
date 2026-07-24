@@ -31,7 +31,23 @@ from ...types.beta import BetaRawMessageStreamEvent
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
 from ...types.beta.parsed_beta_message import ParsedBetaMessage, ParsedBetaContentBlock
+from ...types.beta.beta_raw_message_start_event import BetaRawMessageStartEvent
+from ...types.beta.beta_raw_message_delta_event import BetaRawMessageDeltaEvent
+from ...types.beta.beta_raw_message_stop_event import BetaRawMessageStopEvent
+from ...types.beta.beta_raw_content_block_start_event import BetaRawContentBlockStartEvent
+from ...types.beta.beta_raw_content_block_delta_event import BetaRawContentBlockDeltaEvent
+from ...types.beta.beta_raw_content_block_stop_event import BetaRawContentBlockStopEvent
 
+
+
+_BETA_RAW_EVENT_TYPE_MAP: dict[str, type[BaseModel]] = {
+    "message_start": BetaRawMessageStartEvent,
+    "message_delta": BetaRawMessageDeltaEvent,
+    "message_stop": BetaRawMessageStopEvent,
+    "content_block_start": BetaRawContentBlockStartEvent,
+    "content_block_delta": BetaRawContentBlockDeltaEvent,
+    "content_block_stop": BetaRawContentBlockStopEvent,
+}
 
 class BetaMessageStream(Generic[ResponseFormatT]):
     text_stream: Iterator[str]
