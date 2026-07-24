@@ -1,15 +1,19 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 from typing import Union
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import Literal, Annotated, TypeAlias
 
+from .._utils import PropertyInfo
 from .._models import BaseModel
 from .tool_search_tool_result_error import ToolSearchToolResultError
 from .tool_search_tool_search_result_block import ToolSearchToolSearchResultBlock
 
 __all__ = ["ToolSearchToolResultBlock", "Content"]
 
-Content: TypeAlias = Union[ToolSearchToolResultError, ToolSearchToolSearchResultBlock]
+Content: TypeAlias = Annotated[
+    Union[ToolSearchToolResultError, ToolSearchToolSearchResultBlock],
+    PropertyInfo(discriminator="type"),
+]
 
 
 class ToolSearchToolResultBlock(BaseModel):
