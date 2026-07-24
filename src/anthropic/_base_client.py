@@ -771,7 +771,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         default_time = 60 * 10
 
         expected_time = maximum_time * max_tokens / 128_000
-        if expected_time > default_time or (max_nonstreaming_tokens and max_tokens > max_nonstreaming_tokens):
+        if expected_time > default_time or (max_nonstreaming_tokens is not None and max_tokens > max_nonstreaming_tokens):
             raise ValueError(
                 "Streaming is required for operations that may take longer than 10 minutes. "
                 + "See https://github.com/anthropics/anthropic-sdk-python#long-requests for more details",
