@@ -97,11 +97,16 @@ def transform_schema(
         return strict_schema
 
     type_: Optional[SupportedTypes] = json_schema.pop("type", None)
+    enum = json_schema.pop("enum", None)
     any_of = json_schema.pop("anyOf", None)
     one_of = json_schema.pop("oneOf", None)
     all_of = json_schema.pop("allOf", None)
 
-    if is_list(any_of):
+    if is_list(enum):
+        strict_schema["enum"] = [
+            variant if isinstance(variant, str | int | float | bool) else transform_schema(cast("dict[str, Any]", variant)) for variant in enum
+        ]
+    elif is_list(any_of):
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in any_of]
     elif is_list(one_of):
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in one_of]
@@ -109,7 +114,9 @@ def transform_schema(
         strict_schema["allOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in all_of]
     else:
         if type_ is None:
-            raise ValueError("Schema must have a 'type', 'anyOf', 'oneOf', or 'allOf' field.")
+            raise ValueError(
+                "Schema must have a 'type', 'enum', 'anyOf', 'oneOf', or 'allOf' field."
+            )
 
         strict_schema["type"] = type_
 
