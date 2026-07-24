@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing import Union, Iterable, Optional
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
+from .beta_request_tool_removal_block_param import BetaRequestToolRemovalBlockParam
+from .beta_request_tool_addition_block_param import BetaRequestToolAdditionBlockParam
 
-__all__ = ["BetaMidConversationSystemBlockParam"]
+__all__ = ["BetaMidConversationSystemBlockParam", "Content"]
+
+Content: TypeAlias = Union[BetaTextBlockParam, BetaRequestToolAdditionBlockParam, BetaRequestToolRemovalBlockParam]
 
 
 class BetaMidConversationSystemBlockParam(TypedDict, total=False):
@@ -18,7 +22,7 @@ class BetaMidConversationSystemBlockParam(TypedDict, total=False):
     point in the conversation, rather than only via the top-level `system` parameter.
     """
 
-    content: Required[Iterable[BetaTextBlockParam]]
+    content: Required[Iterable[Content]]
     """System instruction text blocks."""
 
     type: Required[Literal["mid_conv_system"]]

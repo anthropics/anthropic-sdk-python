@@ -25,7 +25,7 @@ from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ...types.beta import BetaMessage, BetaMessageParam
 from ..._base_client import merge_headers
-from ._tool_dispatch import tool_registry, tool_error_content
+from ._tool_dispatch import tool_registry, tool_error_content, available_tool_names
 from ._beta_functions import (
     ToolError,
     BetaFunctionTool,
@@ -126,6 +126,16 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         if self._max_iterations is not None and self._iteration_count >= self._max_iterations:
             return True
         return False
+
+    def _available_tool_names(self) -> set[str]:
+        """The tool names currently available, after applying any
+        mid-conversation ``tool_removal`` / ``tool_addition`` blocks.
+
+        Removal is only a hint to the model, which can still emit a ``tool_use``
+        for a withdrawn tool; a name absent from this set routes that call down
+        the same unknown-tool path as a tool that was never declared.
+        """
+        return available_tool_names(self._params["messages"], self._tools_by_name)
 
 
 class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Generic[RunnerItemT, ResponseFormatT], ABC):
@@ -327,9 +337,10 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             return None
 
         results: list[BetaToolResultBlockParam] = []
+        available = self._available_tool_names()
 
         for tool_use in tool_use_blocks:
-            tool = self._tools_by_name.get(tool_use.name)
+            tool = self._tools_by_name.get(tool_use.name) if tool_use.name in available else None
             if tool is None:
                 warnings.warn(
                     f"Tool '{tool_use.name}' not found in tool runner. "
@@ -635,9 +646,10 @@ class BaseAsyncToolRunner(
             return None
 
         results: list[BetaToolResultBlockParam] = []
+        available = self._available_tool_names()
 
         for tool_use in tool_use_blocks:
-            tool = self._tools_by_name.get(tool_use.name)
+            tool = self._tools_by_name.get(tool_use.name) if tool_use.name in available else None
             if tool is None:
                 warnings.warn(
                     f"Tool '{tool_use.name}' not found in tool runner. "

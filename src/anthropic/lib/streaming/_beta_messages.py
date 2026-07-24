@@ -559,5 +559,7 @@ def accumulate_event(
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
         if event.usage.iterations is not None:
             current_snapshot.usage.iterations = event.usage.iterations
+        if event.usage.fallback_credit is not None:
+            current_snapshot.usage.fallback_credit = event.usage.fallback_credit
 
     return current_snapshot

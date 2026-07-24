@@ -260,6 +260,14 @@ def assert_fallback_response(events: list[ParsedBetaMessageStreamEvent], message
     assert text_block.text == "Hello there!"
 
 
+def assert_fallback_credit_response(message: BetaMessage) -> None:
+    # `message_delta` carried `usage.fallback_credit`; the accumulated final
+    # message must surface it rather than dropping it
+    assert message.usage.fallback_credit is not None
+    assert message.usage.fallback_credit.status.type == "redeemed"
+    assert message.usage.output_tokens == 8
+
+
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
@@ -380,6 +388,19 @@ class TestSyncMessages:
             assert isinstance(cast(Any, stream), BetaMessageStream)
 
             assert_fallback_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_fallback_credit_usage_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("fallback_credit_response.txt"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_fallback_credit_response(stream.get_final_message())
 
 
 class TestAsyncMessages:
@@ -534,6 +555,20 @@ class TestAsyncMessages:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_fallback_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_fallback_credit_usage_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("fallback_credit_response.txt")))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_fallback_credit_response(await stream.get_final_message())
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])

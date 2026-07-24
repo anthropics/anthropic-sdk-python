@@ -145,6 +145,11 @@ def refusal_delta(token: str | None = "tok_abc", has_prefill_claim: bool = True)
     )
 
 
+def redeemed_token(token: str) -> dict[str, str]:
+    """The request-body form of a redeemed credit token — the object shape, best-effort mode."""
+    return {"token": token, "mode": "best_effort"}
+
+
 def collect(stream: Stream[BetaRawMessageStreamEvent]) -> list[BetaRawMessageStreamEvent]:
     return list(stream)
 
@@ -273,8 +278,9 @@ class TestShapeBContinuation:
 
         # Model swapped to the fallback, credit token from A's stop_details set.
         assert body_b["model"] == FALLBACK_MODEL
-        assert isinstance(body_b["fallback_credit_token"], str)
-        assert len(body_b["fallback_credit_token"]) > 0
+        credit = cast("dict[str, Any]", body_b["fallback_credit_token"])
+        assert credit["mode"] == "best_effort"
+        assert len(credit["token"]) > 0
 
         # Mutually exclusive with server-side fallback — both spellings absent.
         assert "fallback" not in body_b
@@ -304,8 +310,8 @@ class TestShapeBContinuation:
         collect(create_stream(client, betas=["interleaved-thinking-2025-05-14"]))
 
         assert beta_headers(respx_mock) == [
-            "interleaved-thinking-2025-05-14, fallback-credit-2026-06-01",
-            "interleaved-thinking-2025-05-14, fallback-credit-2026-06-01",
+            "interleaved-thinking-2025-05-14, fallback-credit-2026-07-01",
+            "interleaved-thinking-2025-05-14, fallback-credit-2026-07-01",
         ]
 
     @pytest.mark.respx(base_url=base_url)
@@ -367,7 +373,7 @@ class TestEdgeCases:
         collect(create_stream(client))
 
         bodies = request_bodies(respx_mock)
-        assert bodies[1]["fallback_credit_token"] == "tok_abc"
+        assert bodies[1]["fallback_credit_token"] == redeemed_token("tok_abc")
         # No appended assistant turn — identical body (shape-A).
         assert bodies[1]["messages"] == PARAMS["messages"]
 
@@ -592,7 +598,7 @@ class TestEdgeCases:
         client = make_lenient_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
 
         with pytest.raises(
-            AnthropicError, match=r"Sending the `fallbacks:` request param is not supported when using the `BetaRefusalFallbackMiddleware`\. You should either remove the middleware and send `fallbacks:` with the `server-side-fallback-2026-06-01` beta header to let the API handle refusal fallbacks, or omit the `fallbacks:` param if you'd like `BetaRefusalFallbackMiddleware` to handle fallbacks on the client side\."
+            AnthropicError, match=r"Sending the `fallbacks:` request param is not supported when using the `BetaRefusalFallbackMiddleware`\. You should either remove the middleware and send `fallbacks:` with the `server-side-fallback-2026-07-01` beta header to let the API handle refusal fallbacks, or omit the `fallbacks:` param if you'd like `BetaRefusalFallbackMiddleware` to handle fallbacks on the client side\."
         ):
             client.beta.messages.create(
                 model="claude-fable-5",
@@ -702,7 +708,7 @@ class TestFallbackChain:
         # refusal, with hop 1's partial extending the same turn as-is.
         assert bodies[1]["model"] == FALLBACK_MODEL
         assert bodies[2]["model"] == SECOND_MODEL
-        assert bodies[2]["fallback_credit_token"] == "tok_b"
+        assert bodies[2]["fallback_credit_token"] == redeemed_token("tok_b")
         assert bodies[2]["fallback_credit_token"] != bodies[1]["fallback_credit_token"]
         assert bodies[2]["messages"][1]["content"] == [
             *bodies[1]["messages"][1]["content"],
@@ -753,7 +759,7 @@ class TestFallbackChain:
 
         bodies = request_bodies(respx_mock)
         assert len(bodies) == 3
-        assert bodies[2]["fallback_credit_token"] == "tok_b"
+        assert bodies[2]["fallback_credit_token"] == redeemed_token("tok_b")
         # Hop 2 redeems the fresh token against the body it was minted for —
         # hop 1's request, including its appended turn — without hop 1's own
         # (unclaimed) partial output.
@@ -1076,7 +1082,7 @@ class TestHistorySeamReplay:
         assert bodies[0]["model"] == "claude-fable-5"
         # the seam block is the middleware's own marker — filtered off the wire
         assert bodies[0]["messages"][1]["content"] == [{"type": "text", "text": "earlier turn"}]
-        assert beta_headers(respx_mock) == ["fallback-credit-2026-06-01"]
+        assert beta_headers(respx_mock) == ["fallback-credit-2026-07-01"]
 
     @pytest.mark.respx(base_url=base_url)
     def test_a_seam_only_assistant_turn_is_dropped_whole(self, respx_mock: MockRouter) -> None:
@@ -1115,7 +1121,7 @@ class TestHistorySeamReplay:
         # the rest of the request is intact
         assert bodies[0]["model"] == "claude-fable-5"
         assert bodies[0]["max_tokens"] == 1024
-        assert beta_headers(respx_mock) == ["fallback-credit-2026-06-01"]
+        assert beta_headers(respx_mock) == ["fallback-credit-2026-07-01"]
 
 
 # --- per-hop overrides ----------------------------------------------------------
@@ -1399,7 +1405,7 @@ class TestToolUseRefusals:
         collect(create_stream(client))
 
         body_b = request_bodies(respx_mock)[1]
-        assert body_b["fallback_credit_token"] == "tok_abc"
+        assert body_b["fallback_credit_token"] == redeemed_token("tok_abc")
         appended = body_b["messages"][1]
         assert appended["role"] == "assistant"
         assert [block["type"] for block in appended["content"]] == [
@@ -1441,7 +1447,7 @@ class TestToolUseRefusals:
         collect(create_stream(client))
 
         body_b = request_bodies(respx_mock)[1]
-        assert body_b["fallback_credit_token"] == "tok_abc"
+        assert body_b["fallback_credit_token"] == redeemed_token("tok_abc")
         assert body_b["messages"] == PARAMS["messages"]
 
 
@@ -1477,7 +1483,8 @@ class TestAsyncSplicing:
 
         bodies = request_bodies(respx_mock)
         assert bodies[1]["model"] == FALLBACK_MODEL
-        assert isinstance(bodies[1]["fallback_credit_token"], str)
+        assert isinstance(bodies[1]["fallback_credit_token"], dict)
+        assert bodies[1]["fallback_credit_token"]["mode"] == "best_effort"
         appended = bodies[1]["messages"][1]
         assert appended["role"] == "assistant"
         assert [block["type"] for block in appended["content"]] == ["thinking", "text"]
@@ -1508,7 +1515,7 @@ class TestAsyncSplicing:
             ("fallback_message", SECOND_MODEL),
         ]
         bodies = request_bodies(respx_mock)
-        assert bodies[2]["fallback_credit_token"] == "tok_b"
+        assert bodies[2]["fallback_credit_token"] == redeemed_token("tok_b")
 
     @pytest.mark.respx(base_url=base_url)
     async def test_closing_the_stream_mid_passthrough_tears_down_without_a_fallback_request(
