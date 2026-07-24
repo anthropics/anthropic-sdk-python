@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import os
+import asyncio
 import logging
 import urllib.parse
 from typing import Any, Union, Mapping, TypeVar, Sequence
+from functools import partial
 from typing_extensions import Self, override
 
 import httpx
@@ -290,7 +292,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            middleware=(self._middleware if isinstance(middleware, NotGiven) else middleware),
             **_extra_kwargs,
         )
 
@@ -405,16 +407,21 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
 
         data = request.read().decode()
 
-        headers = get_auth_headers(
-            method=request.method,
-            url=str(request.url),
-            headers=request.headers,
-            aws_access_key=self.aws_access_key,
-            aws_secret_key=self.aws_secret_key,
-            aws_session_token=self.aws_session_token,
-            region=self.aws_region or "us-east-1",
-            profile=self.aws_profile,
-            data=data,
+        loop = asyncio.get_running_loop()
+        headers = await loop.run_in_executor(
+            None,
+            partial(
+                get_auth_headers,
+                method=request.method,
+                url=str(request.url),
+                headers=request.headers,
+                aws_access_key=self.aws_access_key,
+                aws_secret_key=self.aws_secret_key,
+                aws_session_token=self.aws_session_token,
+                region=self.aws_region or "us-east-1",
+                profile=self.aws_profile,
+                data=data,
+            ),
         )
         request.headers.update(headers)
 
@@ -470,7 +477,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
             default_headers=headers,
             default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            middleware=(self._middleware if isinstance(middleware, NotGiven) else middleware),
             **_extra_kwargs,
         )
 
