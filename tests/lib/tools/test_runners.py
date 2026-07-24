@@ -13,8 +13,11 @@ from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import BetaFunctionToolResultType
+from anthropic.lib.tools._tool_dispatch import available_tool_names
 from anthropic.types.beta.beta_message_param import BetaMessageParam
+from anthropic.types.beta.beta_content_block_param import BetaContentBlockParam
 from anthropic.types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
+from anthropic.types.beta.beta_tool_change_tool_reference_param import BetaToolChangeToolReferenceParam
 
 from ..utils import print_obj
 
@@ -59,6 +62,7 @@ ParsedBetaMessage(
         cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0),
         cache_creation_input_tokens=0,
         cache_read_input_tokens=0,
+        fallback_credit=None,
         inference_geo='not_available',
         input_tokens=770,
         iterations=None,
@@ -109,6 +113,7 @@ ParsedBetaMessage(
         cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0),
         cache_creation_input_tokens=0,
         cache_read_input_tokens=0,
+        fallback_credit=None,
         inference_geo='not_available',
         input_tokens=770,
         iterations=None,
@@ -767,6 +772,508 @@ async def test_refusal_ends_runner_without_executing_tools_async(respx_mock: Moc
     assert message.stop_reason == "refusal"
     assert called is False
     assert len(respx_mock.calls) == 1
+
+
+def _tool_use_response(tool_name: str, tool_use_id: str, input: Union[Dict[str, Any], None] = None) -> httpx.Response:
+    return httpx.Response(
+        200,
+        json={
+            "id": f"msg_{tool_use_id}",
+            "type": "message",
+            "role": "assistant",
+            "model": "claude-haiku-4-5",
+            "content": [
+                {
+                    "type": "tool_use",
+                    "id": tool_use_id,
+                    "name": tool_name,
+                    "input": input if input is not None else {"location": "San Francisco, CA", "units": "f"},
+                }
+            ],
+            "stop_reason": "tool_use",
+            "stop_sequence": None,
+            "usage": {"input_tokens": 1, "output_tokens": 1},
+        },
+    )
+
+
+def _end_turn_response() -> httpx.Response:
+    return httpx.Response(
+        200,
+        json={
+            "id": "msg_end_turn",
+            "type": "message",
+            "role": "assistant",
+            "model": "claude-haiku-4-5",
+            "content": [{"type": "text", "text": "Done."}],
+            "stop_reason": "end_turn",
+            "stop_sequence": None,
+            "usage": {"input_tokens": 1, "output_tokens": 1},
+        },
+    )
+
+
+def _tool_reference_block(kind: Literal["tool_removal", "tool_addition"], name: str) -> BetaContentBlockParam:
+    tool: BetaToolChangeToolReferenceParam = {"type": "tool_reference", "name": name}
+    if kind == "tool_removal":
+        return {"type": "tool_removal", "tool": tool}
+    return {"type": "tool_addition", "tool": tool}
+
+
+def _run_sync_tool_use(
+    client: Anthropic,
+    *,
+    tools: List[Any],
+    messages: List[BetaMessageParam],
+) -> List[BetaMessageParam]:
+    """Drive a tool runner over ``messages`` and collect the tool_result
+    messages it generated."""
+    runner = client.beta.messages.tool_runner(
+        max_tokens=1024,
+        model="claude-haiku-4-5",
+        tools=tools,
+        messages=messages,
+    )
+    responses: List[BetaMessageParam] = []
+    for _ in runner:
+        response = runner.generate_tool_call_response()
+        if response is not None:
+            responses.append(response)
+    return responses
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_tool_removal_routes_call_down_unknown_tool_path_sync(respx_mock: MockRouter) -> None:
+    # First runner: `get_weather` is registered but withdrawn mid-conversation via `tool_removal`.
+    # Second runner: `get_weather` was never declared at all. The model calls it in both;
+    # the resulting tool_result must be identical.
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_weather", "toolu_change"),
+            _end_turn_response(),
+            _tool_use_response("get_weather", "toolu_change"),
+            _end_turn_response(),
+        ]
+    )
+
+    weather_called = False
+
+    @beta_tool
+    def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        """Lookup the weather for a given city."""
+        nonlocal weather_called
+        weather_called = True
+        return json.dumps(_get_weather(location, units))
+
+    @beta_tool
+    def get_time(timezone: str) -> BetaFunctionToolResultType:
+        """Lookup the current time in a timezone."""
+        return timezone
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        with pytest.warns(UserWarning, match="Tool 'get_weather' not found in tool runner"):
+            removed_results = _run_sync_tool_use(
+                client,
+                tools=[get_weather],
+                messages=[
+                    {"role": "user", "content": "What is the weather in SF?"},
+                    {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]},
+                ],
+            )
+        with pytest.warns(UserWarning, match="Tool 'get_weather' not found in tool runner"):
+            never_defined_results = _run_sync_tool_use(
+                client,
+                tools=[get_time],
+                messages=[{"role": "user", "content": "What is the weather in SF?"}],
+            )
+
+    assert weather_called is False
+    assert (
+        removed_results
+        == never_defined_results
+        == [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": "toolu_change",
+                        "content": "Error: Tool 'get_weather' not found",
+                        "is_error": True,
+                    }
+                ],
+            }
+        ]
+    )
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_tool_addition_re_enables_removed_tool_sync(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_weather", "toolu_change"),
+            _end_turn_response(),
+        ]
+    )
+
+    weather_called = False
+
+    @beta_tool
+    def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        """Lookup the weather for a given city."""
+        nonlocal weather_called
+        weather_called = True
+        return json.dumps(_get_weather(location, units))
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        results = _run_sync_tool_use(
+            client,
+            tools=[get_weather],
+            messages=[
+                {"role": "user", "content": "What is the weather in SF?"},
+                {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]},
+                {"role": "system", "content": [_tool_reference_block("tool_addition", "get_weather")]},
+            ],
+        )
+
+    assert weather_called is True
+    assert results == [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": "toolu_change",
+                    "content": json.dumps(_get_weather("San Francisco, CA", "f")),
+                }
+            ],
+        }
+    ]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+async def test_tool_removal_routes_call_down_unknown_tool_path_async(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_weather", "toolu_change"),
+            _end_turn_response(),
+        ]
+    )
+
+    weather_called = False
+
+    @beta_async_tool
+    async def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        """Lookup the weather for a given city."""
+        nonlocal weather_called
+        weather_called = True
+        return json.dumps(_get_weather(location, units))
+
+    async with AsyncAnthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[
+                {"role": "user", "content": "What is the weather in SF?"},
+                {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]},
+            ],
+        )
+        results: List[BetaMessageParam] = []
+        with pytest.warns(UserWarning, match="Tool 'get_weather' not found in tool runner"):
+            async for _ in runner:
+                response = await runner.generate_tool_call_response()
+                if response is not None:
+                    results.append(response)
+
+    assert weather_called is False
+    assert results == [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": "toolu_change",
+                    "content": "Error: Tool 'get_weather' not found",
+                    "is_error": True,
+                }
+            ],
+        }
+    ]
+
+
+def _not_found_result(tool_use_id: str) -> BetaMessageParam:
+    return {
+        "role": "user",
+        "content": [
+            {
+                "type": "tool_result",
+                "tool_use_id": tool_use_id,
+                "content": "Error: Tool 'get_weather' not found",
+                "is_error": True,
+            }
+        ],
+    }
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_tool_removal_via_append_messages_between_turns_sync(respx_mock: MockRouter) -> None:
+    # The removal is not in the initial params: it is appended while iterating, on the
+    # turn *before* the model calls the withdrawn tool.
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_time", "toolu_time", input={"timezone": "UTC"}),
+            _tool_use_response("get_weather", "toolu_weather"),
+            _end_turn_response(),
+        ]
+    )
+
+    weather_called = False
+
+    @beta_tool
+    def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        """Lookup the weather for a given city."""
+        nonlocal weather_called
+        weather_called = True
+        return json.dumps(_get_weather(location, units))
+
+    @beta_tool
+    def get_time(timezone: str) -> BetaFunctionToolResultType:
+        """Lookup the current time in a timezone."""
+        return f"12:00 {timezone}"
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather, get_time],
+            messages=[{"role": "user", "content": "What time is it, and what is the weather in SF?"}],
+        )
+        results: List[BetaMessageParam] = []
+        with pytest.warns(UserWarning, match="Tool 'get_weather' not found in tool runner"):
+            for message in runner:
+                if any(block.type == "tool_use" and block.name == "get_time" for block in message.content):
+                    # Withdraw get_weather during turn 1; the model calls it on turn 2.
+                    runner.append_messages(
+                        {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]}
+                    )
+                response = runner.generate_tool_call_response()
+                if response is not None:
+                    results.append(response)
+
+    assert weather_called is False
+    assert results == [
+        {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "toolu_time", "content": "12:00 UTC"}]},
+        _not_found_result("toolu_weather"),
+    ]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_tool_removal_via_append_messages_same_turn_sync(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_weather", "toolu_weather"),
+            _end_turn_response(),
+        ]
+    )
+
+    weather_called = False
+
+    @beta_tool
+    def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        """Lookup the weather for a given city."""
+        nonlocal weather_called
+        weather_called = True
+        return json.dumps(_get_weather(location, units))
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
+        results: List[BetaMessageParam] = []
+        with pytest.warns(UserWarning, match="Tool 'get_weather' not found in tool runner"):
+            for message in runner:
+                if any(block.type == "tool_use" for block in message.content):
+                    # The tool_use is already in `message`, but the runner has not dispatched it yet:
+                    # the loop body runs before dispatch, so a removal appended here still applies.
+                    runner.append_messages(
+                        {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]}
+                    )
+                response = runner.generate_tool_call_response()
+                if response is not None:
+                    results.append(response)
+
+    assert weather_called is False
+    assert results == [_not_found_result("toolu_weather")]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_tool_removal_via_set_messages_params_sync(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_time", "toolu_time", input={"timezone": "UTC"}),
+            _tool_use_response("get_weather", "toolu_weather"),
+            _end_turn_response(),
+        ]
+    )
+
+    weather_called = False
+
+    @beta_tool
+    def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        """Lookup the weather for a given city."""
+        nonlocal weather_called
+        weather_called = True
+        return json.dumps(_get_weather(location, units))
+
+    @beta_tool
+    def get_time(timezone: str) -> BetaFunctionToolResultType:
+        """Lookup the current time in a timezone."""
+        return f"12:00 {timezone}"
+
+    replacement_history: List[BetaMessageParam] = [
+        {"role": "user", "content": "What time is it, and what is the weather in SF?"},
+        {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]},
+    ]
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather, get_time],
+            messages=[{"role": "user", "content": "What time is it, and what is the weather in SF?"}],
+        )
+        results: List[BetaMessageParam] = []
+        with pytest.warns(UserWarning, match="Tool 'get_weather' not found in tool runner"):
+            for message in runner:
+                if any(block.type == "tool_use" and block.name == "get_time" for block in message.content):
+                    # Replace the history wholesale with one carrying the removal.
+                    runner.set_messages_params(lambda params: {**params, "messages": list(replacement_history)})
+                response = runner.generate_tool_call_response()
+                if response is not None:
+                    results.append(response)
+
+    assert weather_called is False
+    assert results == [
+        {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "toolu_time", "content": "12:00 UTC"}]},
+        _not_found_result("toolu_weather"),
+    ]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_tool_addition_via_append_messages_re_enables_removed_tool_sync(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_weather", "toolu_weather"),
+            _end_turn_response(),
+        ]
+    )
+
+    weather_called = False
+
+    @beta_tool
+    def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        """Lookup the weather for a given city."""
+        nonlocal weather_called
+        weather_called = True
+        return json.dumps(_get_weather(location, units))
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[
+                {"role": "user", "content": "What is the weather in SF?"},
+                {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]},
+            ],
+        )
+        results: List[BetaMessageParam] = []
+        for message in runner:
+            if any(block.type == "tool_use" for block in message.content):
+                # Re-add the withdrawn tool before dispatch: it must execute normally again.
+                runner.append_messages(
+                    {"role": "system", "content": [_tool_reference_block("tool_addition", "get_weather")]}
+                )
+            response = runner.generate_tool_call_response()
+            if response is not None:
+                results.append(response)
+
+    assert weather_called is True
+    assert results == [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": "toolu_weather",
+                    "content": json.dumps(_get_weather("San Francisco, CA", "f")),
+                }
+            ],
+        }
+    ]
+
+
+def test_tool_removal_nested_in_mid_conv_system_block() -> None:
+    # `mid_conv_system` content is schema-limited to text/tool_addition/tool_removal, so the
+    # one-level walk still applies a nested `tool_removal` (and ignores text).
+    messages: List[BetaMessageParam] = [
+        {
+            "role": "system",
+            "content": [
+                {
+                    "type": "mid_conv_system",
+                    "content": [
+                        {"type": "text", "text": "get_weather is no longer available."},
+                        {"type": "tool_removal", "tool": {"type": "tool_reference", "name": "get_weather"}},
+                    ],
+                }
+            ],
+        }
+    ]
+    assert available_tool_names(messages, ["get_weather", "get_time"]) == {"get_time"}
+
+
+def test_tool_addition_nested_in_mid_conv_system_block() -> None:
+    messages: List[BetaMessageParam] = [
+        {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]},
+        {
+            "role": "system",
+            "content": [
+                {
+                    "type": "mid_conv_system",
+                    "content": [
+                        {"type": "tool_addition", "tool": {"type": "tool_reference", "name": "get_weather"}},
+                    ],
+                }
+            ],
+        },
+    ]
+    assert available_tool_names(messages, ["get_weather"]) == {"get_weather"}
 
 
 def _get_weather(location: str, units: Literal["c", "f"]) -> Dict[str, Any]:

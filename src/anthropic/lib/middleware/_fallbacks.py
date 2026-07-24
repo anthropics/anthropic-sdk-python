@@ -34,6 +34,7 @@ from .._stainless_helpers import helper_header
 from ...types.beta.beta_message import BetaMessage
 from ...types.anthropic_beta_param import AnthropicBetaParam
 from ...types.beta.beta_fallback_param import BetaFallbackParam
+from ...types.beta.beta_fallback_credit_token_param import BetaFallbackCreditTokenParam
 
 __all__ = [
     "BetaFallbackState",
@@ -45,8 +46,17 @@ log: logging.Logger = logging.getLogger("anthropic.lib.middleware")
 
 _MESSAGES_PATH = "/v1/messages"
 
-DEFAULT_BETAS: tuple[AnthropicBetaParam, ...] = ("fallback-credit-2026-06-01",)
+DEFAULT_BETAS: tuple[AnthropicBetaParam, ...] = ("fallback-credit-2026-07-01",)
 """Betas sent by default; override with the `betas` option."""
+
+
+def _credit_token_param(token: str) -> BetaFallbackCreditTokenParam:
+    """The retry's `fallback_credit_token`, in the object form.
+
+    `best_effort` keeps the retry serving even when redemption fails — a bare
+    string would 400 the hop on any token-layer failure.
+    """
+    return {"token": token, "mode": "best_effort"}
 
 
 class BetaFallbackState:
@@ -100,10 +110,17 @@ class BetaRefusalFallbackMiddleware(Middleware):
     first-party `client.messages` surface carry no `fallback_credit_token`, so
     those requests pass through untouched.
 
+    Each `fallbacks` entry is a patch against the ORIGINAL request params: a
+    field set to a value overrides it, a field explicitly `None` unsets it, an
+    absent field keeps the original value; `output_config` patches its
+    subfields the same way one level deep. Hops never compound — every hop
+    patches the original params, never the previous hop's patched request.
+
     Non-streaming: when a response comes back with `stop_reason: "refusal"`, the
-    request is retried with each entry of `fallbacks` merged over the original
-    params — passing along the refusal's `fallback_credit_token` when it minted
-    one — until a model accepts or the chain is exhausted. A `fallback` seam
+    request is retried with each entry of `fallbacks` applied as a patch to the
+    original params — passing along the refusal's `fallback_credit_token` (in
+    the object form, with `mode: "best_effort"`) when it minted one — until a
+    model accepts or the chain is exhausted. A `fallback` seam
     block per model boundary is prepended to the served message's content —
     the same block shape the streaming splice emits. The served hop's `usage`
     is left verbatim (streaming rewrites it to per-hop `usage.iterations`).
@@ -164,7 +181,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
             betas: Betas added to the `anthropic-beta` header of every `/v1/messages`
                 request this middleware handles — the original request included, since
                 refusals only carry a `fallback_credit_token` when the beta is enabled.
-                Defaults to `("fallback-credit-2026-06-01",)`; pass `()` to send none.
+                Defaults to `("fallback-credit-2026-07-01",)`; pass `()` to send none.
         """
         self._fallbacks = tuple(fallbacks)
         self._betas = DEFAULT_BETAS if betas is None else tuple(betas)
@@ -188,7 +205,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
         # markers — the server rejects them as unknown tags — so a history that
         # replays them is rewritten without them.
         body = _strip_seam_blocks(body)
-        initial_body = body if start_index == -1 else {**body, **self._fallbacks[start_index]}
+        initial_body = body if start_index == -1 else _apply_hop(body, self._fallbacks[start_index])
         initial_request = request.copy(body=initial_body)
 
         response = call_next(initial_request)
@@ -203,7 +220,8 @@ class BetaRefusalFallbackMiddleware(Middleware):
                 return response
             return self._splice_fallback_stream(
                 request=initial_request,
-                body=initial_body,
+                body=body,
+                initial_model=str(initial_body.get("model") or ""),
                 response=response,
                 call_next=call_next,
                 first_hop=first_hop,
@@ -256,7 +274,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
         # markers — the server rejects them as unknown tags — so a history that
         # replays them is rewritten without them.
         body = _strip_seam_blocks(body)
-        initial_body = body if start_index == -1 else {**body, **self._fallbacks[start_index]}
+        initial_body = body if start_index == -1 else _apply_hop(body, self._fallbacks[start_index])
         initial_request = request.copy(body=initial_body)
 
         response = await call_next(initial_request)
@@ -271,7 +289,8 @@ class BetaRefusalFallbackMiddleware(Middleware):
                 return response
             return self._splice_fallback_stream_async(
                 request=initial_request,
-                body=initial_body,
+                body=body,
+                initial_model=str(initial_body.get("model") or ""),
                 response=response,
                 call_next=call_next,
                 first_hop=first_hop,
@@ -326,7 +345,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
             raise AnthropicError(
                 "Sending the `fallbacks:` request param is not supported when using the "
                 "`BetaRefusalFallbackMiddleware`. You should either remove the middleware and send `fallbacks:` with the "
-                "`server-side-fallback-2026-06-01` beta header to let the API handle refusal fallbacks, or omit the "
+                "`server-side-fallback-2026-07-01` beta header to let the API handle refusal fallbacks, or omit the "
                 "`fallbacks:` param if you'd like `BetaRefusalFallbackMiddleware` to handle "
                 "fallbacks on the client side."
             )
@@ -370,6 +389,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
         *,
         request: APIRequest,
         body: dict[str, Any],
+        initial_model: str,
         response: APIResponse[Any],
         call_next: CallNext,
         first_hop: int,
@@ -378,12 +398,17 @@ class BetaRefusalFallbackMiddleware(Middleware):
         """Wrap the refusable stream in a response whose body passes events through
         until a retryable refusal, then splices the fallback chain's events on.
 
+        `body` is the original request params — every hop patches it, never the
+        previous hop's patched body; `initial_model` is the model the initial
+        request actually queried (the pinned entry's when a state pin applied).
+
         Closing the returned response (or the `Stream` parsed from it) tears down
         whichever stream is being read and abandons any in-flight fallback request.
         """
         frames = self._spliced_frames(
             request=request,
             body=body,
+            initial_model=initial_model,
             response=response,
             call_next=call_next,
             first_hop=first_hop,
@@ -404,6 +429,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
         *,
         request: APIRequest,
         body: dict[str, Any],
+        initial_model: str,
         response: AsyncAPIResponse[Any],
         call_next: AsyncCallNext,
         first_hop: int,
@@ -412,6 +438,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
         frames = self._spliced_frames_async(
             request=request,
             body=body,
+            initial_model=initial_model,
             response=response,
             call_next=call_next,
             first_hop=first_hop,
@@ -460,6 +487,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
         *,
         request: APIRequest,
         body: dict[str, Any],
+        initial_model: str,
         response: APIResponse[Any],
         call_next: CallNext,
         first_hop: int,
@@ -488,7 +516,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
             current = None
 
             # --- fallback chain: try each entry in order ---
-            chain = _ChainState.begin(body, outcome)
+            chain = _ChainState.begin(body, initial_model, outcome)
 
             for hop in range(first_hop, len(fallbacks)):
                 entry = fallbacks[hop]
@@ -583,6 +611,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
         *,
         request: APIRequest,
         body: dict[str, Any],
+        initial_model: str,
         response: AsyncAPIResponse[Any],
         call_next: AsyncCallNext,
         first_hop: int,
@@ -612,7 +641,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
             await stream_a.aclose()
             current = None
 
-            chain = _ChainState.begin(body, outcome)
+            chain = _ChainState.begin(body, initial_model, outcome)
 
             for hop in range(first_hop, len(fallbacks)):
                 entry = fallbacks[hop]
@@ -1015,8 +1044,9 @@ class _ChainState:
     wire when the primary declined pre-stream."""
 
     primary_model: str
-    """The model string the caller sent, alias or canonical — echoed by the first
-    seam's `from.model` and the first iterations entry."""
+    """The model string the initial request queried (alias or canonical; the
+    pinned entry's when a state pin applied) — echoed by the first seam's
+    `from.model` and the first iterations entry."""
 
     token: str | None
     base: List[Any]
@@ -1034,11 +1064,15 @@ class _ChainState:
         self._pending_seams: list[bytes] = []
 
     @classmethod
-    def begin(cls, body: dict[str, Any], outcome: _HopOutcome) -> _ChainState:
-        """The chain state after stream A's chainable refusal."""
+    def begin(cls, body: dict[str, Any], initial_model: str, outcome: _HopOutcome) -> _ChainState:
+        """The chain state after stream A's chainable refusal.
+
+        `body` is the original request params (pre-pin) — the base every hop
+        patches; `initial_model` is the model the initial request queried.
+        """
         assert outcome.refused is not None
         chain = cls(body)
-        chain.primary_model = str(body.get("model") or "")
+        chain.primary_model = initial_model
         chain.next_index = outcome.next_index
         chain.wire_open = outcome.opened
         start_message = _as_dict((outcome.start_event or {}).get("message"))
@@ -1091,16 +1125,19 @@ class _ChainState:
         return [*self.base, *self.partial]
 
     def hop_body(self, entry: BetaFallbackParam, continuation: list[Any]) -> dict[str, Any]:
-        """The hop's request body: the refused request's, with the entry's
-        overrides merged over it and extended by the continuation.
+        """The hop's request body: the entry applied as a patch against the
+        ORIGINAL request params (never a previous hop's patched body), extended
+        by the continuation.
 
         The server-side `fallbacks` param is stripped — it is mutually exclusive
         with a credit-token retry. When the refusal granted no prefill claim the
         appended turn is omitted entirely and the same-body form is sent.
         """
-        body: dict[str, Any] = {key: value for key, value in {**self._body, **entry}.items() if key != "fallbacks"}
+        body: dict[str, Any] = {
+            key: value for key, value in _apply_hop(self._body, entry).items() if key != "fallbacks"
+        }
         if self.token is not None:
-            body["fallback_credit_token"] = self.token
+            body["fallback_credit_token"] = _credit_token_param(self.token)
         if continuation:
             messages = body.get("messages")
             body["messages"] = [
@@ -1427,12 +1464,46 @@ def _prepend_seam_blocks_async(response: AsyncAPIResponse[Any], seams: list[dict
     )
 
 
+def _apply_hop(body: dict[str, Any], entry: BetaFallbackParam) -> dict[str, Any]:
+    """`entry` applied as a patch against `body`: a field set to a value
+    overrides it, a field explicitly `None` unsets it (absent from the retried
+    request — not sent as `null`), an absent field keeps the original value.
+
+    `output_config` patches one level deep: its subfields follow the same
+    set / `None`-unsets / absent-keeps rule against the original request's
+    `output_config`; the whole object is dropped when nothing is left.
+
+    Always a fresh dict; `body` is never mutated."""
+    patched = _patch(body, cast("Dict[str, Any]", entry))
+    output_config = _as_dict(entry.get("output_config"))
+    if output_config is not None:
+        merged = _patch(_as_dict(body.get("output_config")) or {}, output_config)
+        if merged:
+            patched["output_config"] = merged
+        else:
+            patched.pop("output_config", None)
+    return patched
+
+
+def _patch(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
+    """`overrides` applied flat against `base`: a key set to a value overrides
+    it, a key explicitly `None` unsets it, an absent key keeps the base value.
+    Always a fresh dict."""
+    patched = dict(base)
+    for key, value in overrides.items():
+        if value is None:
+            patched.pop(key, None)
+        else:
+            patched[key] = value
+    return patched
+
+
 def _merged_body(body: dict[str, Any], fallback: BetaFallbackParam, credit_token: str | None) -> dict[str, Any]:
-    """The non-streaming retry body: the fallback entry merged whole over the
-    original params, plus the refusal's credit token when it minted one."""
-    merged: dict[str, Any] = {**body, **fallback}
+    """The non-streaming retry body: the fallback entry applied as a patch
+    against the original params, plus the refusal's credit token when it minted one."""
+    merged = _apply_hop(body, fallback)
     if credit_token:
-        merged["fallback_credit_token"] = credit_token
+        merged["fallback_credit_token"] = _credit_token_param(credit_token)
     return merged
 
 

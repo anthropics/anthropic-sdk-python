@@ -19,7 +19,7 @@ from anthropic import (
     BetaRefusalFallbackMiddleware,
     omit,
 )
-from anthropic.types.beta import BetaMessage, BetaFallbackParam
+from anthropic.types.beta import BetaMessage, BetaFallbackParam, BetaOutputConfigParam
 from anthropic.lib.middleware._fallbacks import _fallback_state
 from anthropic.types.anthropic_beta_param import AnthropicBetaParam
 
@@ -76,6 +76,7 @@ def create_message(
     *,
     betas: List[AnthropicBetaParam] | Omit = omit,
     fallbacks: List[BetaFallbackParam] | Omit = omit,
+    output_config: BetaOutputConfigParam | Omit = omit,
 ) -> BetaMessage:
     return client.beta.messages.create(
         model="primary-model",
@@ -83,6 +84,7 @@ def create_message(
         messages=[{"role": "user", "content": "hi"}],
         betas=betas,
         fallbacks=fallbacks,
+        output_config=output_config,
     )
 
 
@@ -123,7 +125,7 @@ class TestRefusalFallback:
         ]
         bodies = request_bodies(respx_mock)
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model"]
-        assert bodies[1]["fallback_credit_token"] == "credit-token"
+        assert bodies[1]["fallback_credit_token"] == {"token": "credit-token", "mode": "best_effort"}
 
     @pytest.mark.respx(base_url=base_url)
     def test_pins_the_conversation_to_the_accepted_fallback_via_state(
@@ -294,6 +296,161 @@ class TestRefusalFallback:
         assert bodies[1]["max_tokens"] == 32
 
     @pytest.mark.respx(base_url=base_url)
+    def test_an_explicit_none_entry_field_unsets_it_on_the_retry(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model"), message("fallback-model")])
+        client = make_sync_client(
+            middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model", "max_tokens": None}])]
+        )
+
+        create_message(client)
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[0]["max_tokens"] == 1024
+        # explicit None unsets: absent from the retried request, not sent as null
+        assert "max_tokens" not in bodies[1]
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_each_hop_patches_the_original_params_not_the_previous_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model"), refusal("mid-model"), message("last-model")]
+        )
+        client = make_sync_client(
+            middleware=[
+                BetaRefusalFallbackMiddleware([{"model": "mid-model", "max_tokens": 32}, {"model": "last-model"}])
+            ]
+        )
+
+        create_message(client)
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[0]["max_tokens"] == 1024
+        assert bodies[1]["max_tokens"] == 32
+        # hop 2 patches the ORIGINAL request — hop 1's override does not leak,
+        # and its absent field keeps the original value
+        assert bodies[2]["max_tokens"] == 1024
+        assert bodies[2]["model"] == "last-model"
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_output_config_subfields_patch_one_level_deep(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model"), message("fallback-model")])
+        client = make_sync_client(
+            middleware=[
+                BetaRefusalFallbackMiddleware(
+                    [{"model": "fallback-model", "output_config": {"effort": "high", "format": None}}]
+                )
+            ]
+        )
+
+        create_message(
+            client,
+            output_config={
+                "effort": "low",
+                "format": {"type": "json_schema", "schema": {"type": "object"}},
+                "task_budget": {"type": "tokens", "total": 500},
+            },
+        )
+
+        bodies = request_bodies(respx_mock)
+        # `effort` set overrides, `format: None` unsets only `format`, the
+        # absent `task_budget` keeps its original value
+        assert bodies[1]["output_config"] == {"effort": "high", "task_budget": {"type": "tokens", "total": 500}}
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_an_explicit_none_output_config_unsets_it_whole(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model"), message("fallback-model")])
+        client = make_sync_client(
+            middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model", "output_config": None}])]
+        )
+
+        create_message(client, output_config={"effort": "low"})
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[0]["output_config"] == {"effort": "low"}
+        assert "output_config" not in bodies[1]
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_an_absent_output_config_keeps_the_original(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model"), message("fallback-model")])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        create_message(client, output_config={"effort": "low"})
+
+        assert request_bodies(respx_mock)[1]["output_config"] == {"effort": "low"}
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_output_config_subfields_seed_a_missing_original(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model"), message("fallback-model")])
+        client = make_sync_client(
+            middleware=[
+                BetaRefusalFallbackMiddleware(
+                    [{"model": "fallback-model", "output_config": {"effort": "high", "format": None}}]
+                )
+            ]
+        )
+
+        create_message(client)
+
+        bodies = request_bodies(respx_mock)
+        assert "output_config" not in bodies[0]
+        # the subfields the hop sets seed a new object; None entries are dropped
+        assert bodies[1]["output_config"] == {"effort": "high"}
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_unsetting_every_output_config_subfield_drops_the_key(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model"), message("fallback-model")])
+        client = make_sync_client(
+            middleware=[
+                BetaRefusalFallbackMiddleware(
+                    [{"model": "fallback-model", "output_config": {"effort": None, "format": None}}]
+                )
+            ]
+        )
+
+        create_message(
+            client,
+            output_config={"effort": "low", "format": {"type": "json_schema", "schema": {"type": "object"}}},
+        )
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[0]["output_config"]
+        # nothing left after the unsets — the key is dropped, never sent as `{}`
+        assert "output_config" not in bodies[1]
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_all_none_output_config_subfields_on_a_missing_original_add_nothing(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model"), message("fallback-model")])
+        client = make_sync_client(
+            middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model", "output_config": {"effort": None}}])]
+        )
+
+        create_message(client)
+
+        bodies = request_bodies(respx_mock)
+        assert "output_config" not in bodies[0]
+        # an empty result is never added as `{}`
+        assert "output_config" not in bodies[1]
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_output_config_subfields_do_not_leak_into_the_next_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model"), refusal("mid-model"), message("last-model")]
+        )
+        client = make_sync_client(
+            middleware=[
+                BetaRefusalFallbackMiddleware(
+                    [{"model": "mid-model", "output_config": {"effort": "high"}}, {"model": "last-model"}]
+                )
+            ]
+        )
+
+        create_message(client, output_config={"effort": "low"})
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[1]["output_config"] == {"effort": "high"}
+        # hop 2 patches the ORIGINAL output_config — hop 1's subfield does not leak
+        assert bodies[2]["output_config"] == {"effort": "low"}
+
+    @pytest.mark.respx(base_url=base_url)
     def test_a_hop_http_error_surfaces_to_the_app(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
@@ -318,7 +475,7 @@ class TestRefusalFallback:
 
         with pytest.raises(
             AnthropicError,
-            match=r"Sending the `fallbacks:` request param is not supported when using the `BetaRefusalFallbackMiddleware`\. You should either remove the middleware and send `fallbacks:` with the `server-side-fallback-2026-06-01` beta header to let the API handle refusal fallbacks, or omit the `fallbacks:` param if you'd like `BetaRefusalFallbackMiddleware` to handle fallbacks on the client side\.",
+            match=r"Sending the `fallbacks:` request param is not supported when using the `BetaRefusalFallbackMiddleware`\. You should either remove the middleware and send `fallbacks:` with the `server-side-fallback-2026-07-01` beta header to let the API handle refusal fallbacks, or omit the `fallbacks:` param if you'd like `BetaRefusalFallbackMiddleware` to handle fallbacks on the client side\.",
         ):
             create_message(client, fallbacks=[{"model": "server-fallback"}])
         # the error is raised before any request is sent
@@ -371,7 +528,7 @@ class TestBetaHeader:
 
         create_message(client)
 
-        assert beta_headers(respx_mock) == ["fallback-credit-2026-06-01", "fallback-credit-2026-06-01"]
+        assert beta_headers(respx_mock) == ["fallback-credit-2026-07-01", "fallback-credit-2026-07-01"]
 
     @pytest.mark.respx(base_url=base_url)
     def test_the_betas_option_replaces_the_default(self, respx_mock: MockRouter) -> None:
@@ -403,9 +560,9 @@ class TestBetaHeader:
         respx_mock.post("/v1/messages").mock(side_effect=[message("primary-model")])
         client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
 
-        create_message(client, betas=["fallback-credit-2026-06-01"])
+        create_message(client, betas=["fallback-credit-2026-07-01"])
 
-        assert beta_headers(respx_mock) == ["fallback-credit-2026-06-01"]
+        assert beta_headers(respx_mock) == ["fallback-credit-2026-07-01"]
 
     @pytest.mark.respx(base_url=base_url)
     def test_appends_to_betas_already_on_the_request(self, respx_mock: MockRouter) -> None:
@@ -414,7 +571,7 @@ class TestBetaHeader:
 
         create_message(client, betas=["interleaved-thinking-2025-05-14"])
 
-        assert beta_headers(respx_mock) == ["interleaved-thinking-2025-05-14, fallback-credit-2026-06-01"]
+        assert beta_headers(respx_mock) == ["interleaved-thinking-2025-05-14, fallback-credit-2026-07-01"]
 
 
 def helper_headers(respx_mock: MockRouter) -> list[list[str]]:
@@ -488,7 +645,7 @@ class TestAsyncRefusalFallback:
         ]
         bodies = request_bodies(respx_mock)
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model"]
-        assert bodies[1]["fallback_credit_token"] == "credit-token"
+        assert bodies[1]["fallback_credit_token"] == {"token": "credit-token", "mode": "best_effort"}
 
     @pytest.mark.respx(base_url=base_url)
     async def test_pins_the_conversation_to_the_accepted_fallback_via_state(self, respx_mock: MockRouter) -> None:

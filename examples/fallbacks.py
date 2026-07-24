@@ -13,7 +13,7 @@ def main() -> None:
         model="claude-fable-5",
         messages=[{"role": "user", "content": "Some prompt that triggers a refusal"}],
         fallbacks=[{"model": "claude-opus-4-8"}],
-        betas=["server-side-fallback-2026-06-01"],
+        betas=["server-side-fallback-2026-07-01"],
     )
     print("server-side:", message.model)
 

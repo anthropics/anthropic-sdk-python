@@ -5,6 +5,7 @@ from typing import Optional
 from ..._models import BaseModel
 from .beta_iterations_usage import BetaIterationsUsage
 from .beta_server_tool_usage import BetaServerToolUsage
+from .beta_fallback_credit_usage import BetaFallbackCreditUsage
 from .beta_output_tokens_details import BetaOutputTokensDetails
 
 __all__ = ["BetaMessageDeltaUsage"]
@@ -16,6 +17,9 @@ class BetaMessageDeltaUsage(BaseModel):
 
     cache_read_input_tokens: Optional[int] = None
     """The cumulative number of input tokens read from the cache."""
+
+    fallback_credit: Optional[BetaFallbackCreditUsage] = None
+    """Outcome of the `fallback_credit_token` presented on this request."""
 
     input_tokens: Optional[int] = None
     """The cumulative number of input tokens which were used."""
