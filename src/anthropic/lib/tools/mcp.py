@@ -68,7 +68,7 @@ __all__ = [
 # Supported MIME types
 # -----------------------------------------------------------------------
 
-_SUPPORTED_IMAGE_TYPES = frozenset({"image/jpeg", "image/png", "image/gif", "image/webp"})
+_SUPPORTED_IMAGE_TYPES = frozenset({"image/jpeg", "image/png", "image/gif", "image/webp", "image/heic", "image/heif"})
 
 
 class _TaggedDict(dict):  # type: ignore[type-arg]

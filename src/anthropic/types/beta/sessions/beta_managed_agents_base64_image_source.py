@@ -16,7 +16,7 @@ class BetaManagedAgentsBase64ImageSource(BaseModel):
     media_type: str
     """
     MIME type of the image (e.g., "image/png", "image/jpeg", "image/gif",
-    "image/webp").
+    "image/webp", "image/heic", "image/heif").
     """
 
     type: Literal["base64"]
