@@ -9,8 +9,8 @@ from ...._types import SequenceNotStr
 from ...._utils import PropertyInfo
 from ...model_param import ModelParam
 from ..beta_message_param import BetaMessageParam
-from ..beta_fallback_param import BetaFallbackParam
 from ..beta_metadata_param import BetaMetadataParam
+from ..beta_fallbacks_param import BetaFallbacksParam
 from ...anthropic_beta_param import AnthropicBetaParam
 from ..beta_container_params import BetaContainerParams
 from ..beta_text_block_param import BetaTextBlockParam
@@ -20,11 +20,18 @@ from ..beta_tool_choice_param import BetaToolChoiceParam
 from ..beta_output_config_param import BetaOutputConfigParam
 from ..beta_thinking_config_param import BetaThinkingConfigParam
 from ..beta_json_output_format_param import BetaJSONOutputFormatParam
+from ..beta_fallback_credit_token_param import BetaFallbackCreditTokenParam
 from ..beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 from ..beta_context_management_config_param import BetaContextManagementConfigParam
 from ..beta_request_mcp_server_url_definition_param import BetaRequestMCPServerURLDefinitionParam
 
-__all__ = ["BatchCreateParams", "Request", "RequestParams", "RequestParamsContainer"]
+__all__ = [
+    "BatchCreateParams",
+    "Request",
+    "RequestParams",
+    "RequestParamsContainer",
+    "RequestParamsFallbackCreditToken",
+]
 
 
 class BatchCreateParams(TypedDict, total=False):
@@ -48,6 +55,8 @@ class BatchCreateParams(TypedDict, total=False):
 
 
 RequestParamsContainer: TypeAlias = Union[BetaContainerParams, str]
+
+RequestParamsFallbackCreditToken: TypeAlias = Union[str, BetaFallbackCreditTokenParam]
 
 
 class RequestParams(TypedDict, total=False):
@@ -170,7 +179,7 @@ class RequestParams(TypedDict, total=False):
     reporting.
     """
 
-    fallback_credit_token: Optional[str]
+    fallback_credit_token: Optional[RequestParamsFallbackCreditToken]
     """The `fallback_credit_token` from a prior refusal's `stop_details`.
 
     When a preceding request was refused and returned a `fallback_credit_token`,
@@ -192,11 +201,12 @@ class RequestParams(TypedDict, total=False):
     assistant-turn prefill, this token also authorizes that one prefill.
     """
 
-    fallbacks: Optional[Iterable[BetaFallbackParam]]
+    fallbacks: Optional[BetaFallbacksParam]
     """
     Opt-in server-side retry on one or more substitute models when the requested
     model declines for policy reasons. Tried in order: if the first entry also
-    declines, the second is tried, and so on.
+    declines, the second is tried, and so on. The string "default" requests the
+    requested model's server-defined default fallback configuration.
     """
 
     inference_geo: Optional[str]

@@ -82,30 +82,7 @@ class TestMessages:
             },
             diagnostics={"previous_message_id": "previous_message_id"},
             fallback_credit_token="x",
-            fallbacks=[
-                {
-                    "model": "claude-sonnet-5",
-                    "max_tokens": 0,
-                    "output_config": {
-                        "effort": "low",
-                        "format": {
-                            "schema": {"foo": "bar"},
-                            "type": "json_schema",
-                        },
-                        "task_budget": {
-                            "total": 1024,
-                            "type": "tokens",
-                            "remaining": 0,
-                        },
-                    },
-                    "speed": "standard",
-                    "thinking": {
-                        "budget_tokens": 1024,
-                        "type": "enabled",
-                        "display": "summarized",
-                    },
-                }
-            ],
+            fallbacks="default",
             inference_geo="inference_geo",
             mcp_servers=[
                 {
@@ -302,30 +279,7 @@ class TestMessages:
             },
             diagnostics={"previous_message_id": "previous_message_id"},
             fallback_credit_token="x",
-            fallbacks=[
-                {
-                    "model": "claude-sonnet-5",
-                    "max_tokens": 0,
-                    "output_config": {
-                        "effort": "low",
-                        "format": {
-                            "schema": {"foo": "bar"},
-                            "type": "json_schema",
-                        },
-                        "task_budget": {
-                            "total": 1024,
-                            "type": "tokens",
-                            "remaining": 0,
-                        },
-                    },
-                    "speed": "standard",
-                    "thinking": {
-                        "budget_tokens": 1024,
-                        "type": "enabled",
-                        "display": "summarized",
-                    },
-                }
-            ],
+            fallbacks="default",
             inference_geo="inference_geo",
             mcp_servers=[
                 {
@@ -696,30 +650,7 @@ class TestAsyncMessages:
             },
             diagnostics={"previous_message_id": "previous_message_id"},
             fallback_credit_token="x",
-            fallbacks=[
-                {
-                    "model": "claude-sonnet-5",
-                    "max_tokens": 0,
-                    "output_config": {
-                        "effort": "low",
-                        "format": {
-                            "schema": {"foo": "bar"},
-                            "type": "json_schema",
-                        },
-                        "task_budget": {
-                            "total": 1024,
-                            "type": "tokens",
-                            "remaining": 0,
-                        },
-                    },
-                    "speed": "standard",
-                    "thinking": {
-                        "budget_tokens": 1024,
-                        "type": "enabled",
-                        "display": "summarized",
-                    },
-                }
-            ],
+            fallbacks="default",
             inference_geo="inference_geo",
             mcp_servers=[
                 {
@@ -916,30 +847,7 @@ class TestAsyncMessages:
             },
             diagnostics={"previous_message_id": "previous_message_id"},
             fallback_credit_token="x",
-            fallbacks=[
-                {
-                    "model": "claude-sonnet-5",
-                    "max_tokens": 0,
-                    "output_config": {
-                        "effort": "low",
-                        "format": {
-                            "schema": {"foo": "bar"},
-                            "type": "json_schema",
-                        },
-                        "task_budget": {
-                            "total": 1024,
-                            "type": "tokens",
-                            "remaining": 0,
-                        },
-                    },
-                    "speed": "standard",
-                    "thinking": {
-                        "budget_tokens": 1024,
-                        "type": "enabled",
-                        "display": "summarized",
-                    },
-                }
-            ],
+            fallbacks="default",
             inference_geo="inference_geo",
             mcp_servers=[
                 {

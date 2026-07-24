@@ -38,7 +38,9 @@ AnthropicBetaParam: TypeAlias = Union[
         "dreaming-2026-04-21",
         "thinking-token-count-2026-05-13",
         "server-side-fallback-2026-06-01",
+        "server-side-fallback-2026-07-01",
         "fallback-credit-2026-06-01",
+        "fallback-credit-2026-07-01",
         "agent-memory-2026-07-22",
     ],
 ]

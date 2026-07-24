@@ -24,6 +24,7 @@ from ...._response import to_streamed_response_wrapper, async_to_streamed_respon
 from ...._constants import DEFAULT_TIMEOUT
 from ...._streaming import Stream, AsyncStream
 from ....types.beta import (
+    BetaFallbacksParam,
     BetaDiagnosticsParam,
     BetaThinkingConfigParam,
     message_create_params,
@@ -34,8 +35,8 @@ from ....types.model_param import ModelParam
 from ....types.beta.beta_message import BetaMessage
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_message_param import BetaMessageParam
-from ....types.beta.beta_fallback_param import BetaFallbackParam
 from ....types.beta.beta_metadata_param import BetaMetadataParam
+from ....types.beta.beta_fallbacks_param import BetaFallbacksParam
 from ....types.beta.beta_text_block_param import BetaTextBlockParam
 from ....types.beta.beta_tool_union_param import BetaToolUnionParam
 from ....types.beta.beta_diagnostics_param import BetaDiagnosticsParam
@@ -87,8 +88,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
-        fallback_credit_token: Optional[str] | Omit = omit,
-        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
+        fallback_credit_token: Optional[message_create_params.FallbackCreditToken] | Omit = omit,
+        fallbacks: Optional[BetaFallbacksParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -245,7 +246,8 @@ class Messages(SyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on.
+              declines, the second is tried, and so on. The string "default" requests the
+              requested model's server-defined default fallback configuration.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -436,8 +438,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
-        fallback_credit_token: Optional[str] | Omit = omit,
-        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
+        fallback_credit_token: Optional[message_create_params.FallbackCreditToken] | Omit = omit,
+        fallbacks: Optional[BetaFallbacksParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -598,7 +600,8 @@ class Messages(SyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on.
+              declines, the second is tried, and so on. The string "default" requests the
+              requested model's server-defined default fallback configuration.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -784,8 +787,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
-        fallback_credit_token: Optional[str] | Omit = omit,
-        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
+        fallback_credit_token: Optional[message_create_params.FallbackCreditToken] | Omit = omit,
+        fallbacks: Optional[BetaFallbacksParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -946,7 +949,8 @@ class Messages(SyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on.
+              declines, the second is tried, and so on. The string "default" requests the
+              requested model's server-defined default fallback configuration.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1131,8 +1135,8 @@ class Messages(SyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
-        fallback_credit_token: Optional[str] | Omit = omit,
-        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
+        fallback_credit_token: Optional[message_create_params.FallbackCreditToken] | Omit = omit,
+        fallbacks: Optional[BetaFallbacksParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1519,8 +1523,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
-        fallback_credit_token: Optional[str] | Omit = omit,
-        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
+        fallback_credit_token: Optional[message_create_params.FallbackCreditToken] | Omit = omit,
+        fallbacks: Optional[BetaFallbacksParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -1677,7 +1681,8 @@ class AsyncMessages(AsyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on.
+              declines, the second is tried, and so on. The string "default" requests the
+              requested model's server-defined default fallback configuration.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1868,8 +1873,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
-        fallback_credit_token: Optional[str] | Omit = omit,
-        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
+        fallback_credit_token: Optional[message_create_params.FallbackCreditToken] | Omit = omit,
+        fallbacks: Optional[BetaFallbacksParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2030,7 +2035,8 @@ class AsyncMessages(AsyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on.
+              declines, the second is tried, and so on. The string "default" requests the
+              requested model's server-defined default fallback configuration.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2216,8 +2222,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
-        fallback_credit_token: Optional[str] | Omit = omit,
-        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
+        fallback_credit_token: Optional[message_create_params.FallbackCreditToken] | Omit = omit,
+        fallbacks: Optional[BetaFallbacksParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -2378,7 +2384,8 @@ class AsyncMessages(AsyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on.
+              declines, the second is tried, and so on. The string "default" requests the
+              requested model's server-defined default fallback configuration.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2563,8 +2570,8 @@ class AsyncMessages(AsyncAPIResource):
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
-        fallback_credit_token: Optional[str] | Omit = omit,
-        fallbacks: Optional[Iterable[BetaFallbackParam]] | Omit = omit,
+        fallback_credit_token: Optional[message_create_params.FallbackCreditToken] | Omit = omit,
+        fallbacks: Optional[BetaFallbacksParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
