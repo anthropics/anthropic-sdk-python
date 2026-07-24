@@ -35,6 +35,7 @@ from ...._response import to_streamed_response_wrapper, async_to_streamed_respon
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ....types.beta import skill_list_params, skill_create_params
 from ...._base_client import AsyncPaginator, make_request_options
+from ....lib.tools._skills import normalize_skill_files
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.skill_list_response import SkillListResponse
 from ....types.beta.skill_create_response import SkillCreateResponse
@@ -87,8 +88,17 @@ class Skills(SyncAPIResource):
         Args:
           files: Files to upload for the skill.
 
-              All files must be in the same top-level directory and must include a SKILL.md
-              file at the root of that directory.
+              Every path must be prefixed with a top-level directory whose name
+              **exactly matches** the ``name:`` field in the ``SKILL.md``
+              frontmatter (e.g. ``my-skill/SKILL.md``,
+              ``my-skill/scripts/tool.py``).  This is handled **automatically**
+              — bare paths like ``"SKILL.md"`` are rewritten before the request
+              is sent, so callers never need to construct the prefix manually::
+
+                  # All of these are equivalent — the SDK normalizes them:
+                  files=[("SKILL.md", skill_md_bytes, "text/markdown")]
+                  files=[("wrong/SKILL.md", skill_md_bytes, "text/markdown")]
+                  files=[("my-skill/SKILL.md", skill_md_bytes, "text/markdown")]
 
           display_title: Display title for the skill.
 
@@ -105,6 +115,12 @@ class Skills(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        if is_given(files) and files is not None:
+            _title = display_title if is_given(display_title) and display_title is not None else None
+            try:
+                files = normalize_skill_files(list(files), display_title=_title)
+            except ValueError:
+                pass  # No SKILL.md or name — let the API surface a descriptive error.
         extra_headers = {
             **strip_not_given(
                 {
@@ -359,8 +375,17 @@ class AsyncSkills(AsyncAPIResource):
         Args:
           files: Files to upload for the skill.
 
-              All files must be in the same top-level directory and must include a SKILL.md
-              file at the root of that directory.
+              Every path must be prefixed with a top-level directory whose name
+              **exactly matches** the ``name:`` field in the ``SKILL.md``
+              frontmatter (e.g. ``my-skill/SKILL.md``,
+              ``my-skill/scripts/tool.py``).  This is handled **automatically**
+              — bare paths like ``"SKILL.md"`` are rewritten before the request
+              is sent, so callers never need to construct the prefix manually::
+
+                  # All of these are equivalent — the SDK normalizes them:
+                  files=[("SKILL.md", skill_md_bytes, "text/markdown")]
+                  files=[("wrong/SKILL.md", skill_md_bytes, "text/markdown")]
+                  files=[("my-skill/SKILL.md", skill_md_bytes, "text/markdown")]
 
           display_title: Display title for the skill.
 
@@ -377,6 +402,12 @@ class AsyncSkills(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        if is_given(files) and files is not None:
+            _title = display_title if is_given(display_title) and display_title is not None else None
+            try:
+                files = normalize_skill_files(list(files), display_title=_title)
+            except ValueError:
+                pass  # No SKILL.md or name — let the API surface a descriptive error.
         extra_headers = {
             **strip_not_given(
                 {

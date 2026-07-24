@@ -1,3 +1,4 @@
+from ._skills import normalize_skill_files
 from ._beta_runner import BetaToolRunner, BetaAsyncToolRunner, BetaStreamingToolRunner, BetaAsyncStreamingToolRunner
 from ._beta_functions import (
     ToolError,
@@ -26,4 +27,5 @@ __all__ = [
     "BetaAbstractMemoryTool",
     "BetaAsyncAbstractMemoryTool",
     "ToolError",
+    "normalize_skill_files",
 ]

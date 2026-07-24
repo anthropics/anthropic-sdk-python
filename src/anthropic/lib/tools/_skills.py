@@ -8,12 +8,13 @@ tool implementations themselves.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import logging
 import tarfile
 import zipfile
 import tempfile
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 from pathlib import Path, PurePosixPath
 from functools import partial
 
@@ -21,9 +22,151 @@ import anyio
 from anyio.to_thread import run_sync
 
 if TYPE_CHECKING:
+    from ..._types import FileTypes
     from ..._client import AsyncAnthropic
 
-__all__ = ["download_session_skills"]
+__all__ = ["download_session_skills", "normalize_skill_files"]
+
+
+def _read_file_entry_content(content: object) -> bytes | None:
+    """Return the raw bytes of a FileContent value, or None if unreadable."""
+    if isinstance(content, bytes):
+        return content
+    if hasattr(content, "read"):
+        data = content.read()
+        if hasattr(content, "seek"):
+            content.seek(0)
+        return data if isinstance(data, bytes) else None
+    try:
+        return Path(content).read_bytes()  # type: ignore[arg-type]
+    except Exception:
+        return None
+
+
+def _parse_skill_name_from_frontmatter(skill_md: bytes) -> str | None:
+    """Extract the ``name:`` field from SKILL.md YAML frontmatter, or ``None``."""
+    text = skill_md.decode("utf-8", errors="replace")
+    fm = re.search(r"^---\s*\n(.*?)\n---", text, re.DOTALL)
+    if fm:
+        name_match = re.search(r"^name:\s*(\S+)", fm.group(1), re.MULTILINE)
+        if name_match:
+            return name_match.group(1).strip()
+    return None
+
+
+def normalize_skill_files(
+    files: Sequence["FileTypes"],
+    *,
+    display_title: str | None = None,
+) -> list["FileTypes"]:
+    """Normalize file paths for :meth:`~anthropic.resources.beta.Skills.create`.
+
+    ``beta.skills.create()`` requires every file path to be prefixed with a
+    top-level directory whose name **exactly matches** the ``name:`` field in
+    the ``SKILL.md`` frontmatter.  This function is called automatically inside
+    ``skills.create()`` — you do not need to call it yourself.
+
+    It can also be called explicitly if you want to inspect or log the
+    normalized paths before uploading::
+
+        skill_md = b"---\\nname: my-skill\\n---\\n\\nSkill content."
+        files = normalize_skill_files(
+            [
+                ("SKILL.md", skill_md, "text/markdown"),
+                ("scripts/tool.py", script_bytes, "text/plain"),
+            ]
+        )
+        # [
+        #   ("my-skill/SKILL.md",        skill_md,     "text/markdown"),
+        #   ("my-skill/scripts/tool.py", script_bytes, "text/plain"),
+        # ]
+
+    The skill name is resolved in order:
+
+    1. The ``name:`` field in the ``SKILL.md`` YAML frontmatter.
+    2. *display_title* normalised to ``lowercase-with-hyphens`` as a fallback
+       (useful when ``SKILL.md`` omits the field).
+
+    Paths that are already under the correct top-level directory are left
+    unchanged (idempotent).  A wrong top-level prefix is stripped and replaced
+    rather than prepended, so re-uploading a skill that was created with the
+    wrong prefix is safe.
+
+    Args:
+        files: The sequence of file entries to normalize.  Each entry must be a
+            tuple whose first element is the file path string.
+        display_title: Fallback skill name used when the ``SKILL.md``
+            frontmatter does not contain a ``name:`` field.  Special characters
+            are replaced with hyphens and the value is lower-cased.
+
+    Returns:
+        A new list with every file path prefixed by the skill name.
+
+    Raises:
+        ValueError: If no ``SKILL.md`` entry is found, or if neither the
+            frontmatter nor *display_title* supplies a skill name.
+    """
+    # Pass 1: locate SKILL.md, parse the skill name, note the current prefix.
+    skill_name: str | None = None
+    skill_md_prefix: str = ""  # top-level dir of the SKILL.md entry, or ""
+    found_skill_md = False
+
+    for entry in files:
+        if not isinstance(entry, tuple) or len(entry) < 2:
+            continue
+        filename = entry[0]
+        if not isinstance(filename, str):
+            continue
+        if filename.rsplit("/", 1)[-1] != "SKILL.md":
+            continue
+        found_skill_md = True
+        content = _read_file_entry_content(entry[1])
+        if content is not None:
+            skill_name = _parse_skill_name_from_frontmatter(content)
+        parts = filename.split("/", 1)
+        skill_md_prefix = parts[0] if len(parts) == 2 else ""
+        break
+
+    if not found_skill_md:
+        raise ValueError(
+            "No SKILL.md entry found in the files list. "
+            "Each entry must be a tuple (path, content, ...) where path is a str "
+            "and one path must be 'SKILL.md' or '<dir>/SKILL.md'."
+        )
+
+    # Fallback: derive name from display_title.
+    if skill_name is None and display_title:
+        skill_name = re.sub(r"[^a-z0-9]+", "-", display_title.lower().strip()).strip("-")
+
+    if skill_name is None:
+        raise ValueError(
+            "Could not determine skill name: SKILL.md frontmatter has no 'name:' field "
+            "and no display_title was provided as a fallback.\n"
+            "Add 'name: <your-skill-name>' to the SKILL.md frontmatter, or pass "
+            "display_title='<your-skill-name>' to normalize_skill_files()."
+        )
+
+    # Pass 2: rewrite paths so every entry is under ``{skill_name}/``.
+    #
+    # • Already-correct prefix → unchanged (idempotent).
+    # • Wrong top-level prefix → stripped then replaced (not double-prefixed).
+    # • No prefix → skill name prepended.
+    prefix = f"{skill_name}/"
+    result: list[FileTypes] = []
+    for entry in files:
+        if isinstance(entry, tuple) and entry and isinstance(entry[0], str):
+            path = entry[0]
+            if path.startswith(prefix):
+                result.append(entry)
+            elif skill_md_prefix and path.startswith(f"{skill_md_prefix}/"):
+                relative = path[len(skill_md_prefix) + 1 :]
+                result.append((prefix + relative,) + entry[1:])  # type: ignore[arg-type]
+            else:
+                result.append((prefix + path,) + entry[1:])  # type: ignore[arg-type]
+        else:
+            result.append(entry)
+    return result
+
 
 # Skill dirs hold downloaded, possibly third-party content — keep them
 # owner-only rather than inheriting whatever the process umask happens to be.
