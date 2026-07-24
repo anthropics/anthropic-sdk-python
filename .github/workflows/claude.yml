@@ -42,8 +42,9 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
           # Allow Claude to run git commands and push changes
-          allowed_tools: "Bash(git commit:*),Bash(git push:*),Bash(git merge:*),Bash(git checkout:*),Bash(git add:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git fetch:*),Bash(gh pr:*),Bash(gh issue:*)"
-
+          claude_args: |
+            --allowedTools Bash(git commit:*),Bash(git push:*),Bash(git merge:*),Bash(git checkout:*),Bash(git add:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git fetch:*),Bash(gh pr:*),Bash(gh issue:*)
+    
           # Allow github-actions[bot] to trigger Claude Code Action
           allowed_bots: "stainless-app"
 
