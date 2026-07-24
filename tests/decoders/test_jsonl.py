@@ -60,6 +60,53 @@ async def test_multi_byte_character_multiple_chunks(
     assert await iter_next(iterator) == {"content": "известни"}
 
 
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_crlf_line_endings(sync: bool) -> None:
+    def body() -> Iterator[bytes]:
+        yield b'{"foo":true}\r\n'
+        yield b'{"bar":false}\r\n'
+
+    iterator = make_jsonl_iterator(content=body(), sync=sync, line_type=object)
+
+    assert await iter_next(iterator) == {"foo": True}
+    assert await iter_next(iterator) == {"bar": False}
+
+    await assert_empty_iter(iterator)
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_crlf_split_across_chunks(sync: bool) -> None:
+    """Batch results are read with `iter_bytes(chunk_size=64)`, so a CRLF
+    terminator can land across two chunks. A lone CR must not finalize the line.
+    """
+
+    def body() -> Iterator[bytes]:
+        yield b'{"foo":true}\r'
+        yield b'\n{"bar":false}\r\n'
+
+    iterator = make_jsonl_iterator(content=body(), sync=sync, line_type=object)
+
+    assert await iter_next(iterator) == {"foo": True}
+    assert await iter_next(iterator) == {"bar": False}
+
+    await assert_empty_iter(iterator)
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_crlf_split_in_mid_line_then_terminator(sync: bool) -> None:
+    def body() -> Iterator[bytes]:
+        yield b'{"foo":'
+        yield b'true}\r'
+        yield b'\n{"bar":false}\n'
+
+    iterator = make_jsonl_iterator(content=body(), sync=sync, line_type=object)
+
+    assert await iter_next(iterator) == {"foo": True}
+    assert await iter_next(iterator) == {"bar": False}
+
+    await assert_empty_iter(iterator)
+
+
 async def to_aiter(iter: Iterator[bytes]) -> AsyncIterator[bytes]:
     for chunk in iter:
         yield chunk
