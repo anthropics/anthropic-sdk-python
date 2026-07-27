@@ -475,7 +475,11 @@ def accumulate_event(
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
     if event.type == "content_block_start":
-        # TODO: check index
+        if event.index != len(current_snapshot.content):
+            raise RuntimeError(
+                f"Unexpected content block index: {event.index}. "
+                f"Expected index {len(current_snapshot.content)} based on current snapshot state."
+            )
         current_snapshot.content.append(
             cast(
                 Any,  # Pydantic does not support generic unions at runtime
