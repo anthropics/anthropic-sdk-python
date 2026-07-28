@@ -69,6 +69,12 @@ function run_tests() {
         uv run --isolated --all-extras --no-extra=mcp --group=pydantic-v1 pytest "$@"
     fi
 
+    # The lockfile pins one mcp major; also run the mcp tests against the other one
+    # (mcp requires Python 3.10+, so skip on the minimum version)
+    if [[ "$UV_PYTHON" != "$PY_VERSION_MIN" ]]; then
+        echo "==> Running MCP tests with mcp v2"
+        uv run --isolated --all-extras --with 'mcp>=2' pytest tests/lib/tools/test_mcp_tool.py
+    fi
 }
 
 # If UV_PYTHON is already set in the environment, just run the command once

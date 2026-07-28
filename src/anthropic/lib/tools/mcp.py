@@ -65,6 +65,28 @@ __all__ = [
 ]
 
 # -----------------------------------------------------------------------
+# mcp version compatibility
+# -----------------------------------------------------------------------
+
+# mcp<2 exposes camelCase model fields (`tool.inputSchema`); mcp>=2 exposes
+# snake_case (`tool.input_schema`). Read through this helper to support both.
+
+_MCP_V1_NAMES = {
+    "input_schema": "inputSchema",
+    "mime_type": "mimeType",
+    "is_error": "isError",
+    "structured_content": "structuredContent",
+}
+
+
+def _mcp_field_v1_or_v2(obj: Any, name: str) -> Any:
+    try:
+        return getattr(obj, name)
+    except AttributeError:
+        return getattr(obj, _MCP_V1_NAMES[name])
+
+
+# -----------------------------------------------------------------------
 # Supported MIME types
 # -----------------------------------------------------------------------
 
@@ -128,15 +150,16 @@ def mcp_content(
         return block  # type: ignore[return-value]
 
     if isinstance(content, ImageContent):
-        if not _is_supported_image_type(content.mimeType):
-            raise UnsupportedMCPValueError(f"Unsupported image MIME type: {content.mimeType}")
+        mime_type = _mcp_field_v1_or_v2(content, "mime_type")
+        if not _is_supported_image_type(mime_type):
+            raise UnsupportedMCPValueError(f"Unsupported image MIME type: {mime_type}")
         image_block = _TaggedDict(
             {
                 "type": "image",
                 "source": BetaBase64ImageSourceParam(
                     type="base64",
                     data=content.data,
-                    media_type=content.mimeType,  # type: ignore[typeddict-item]
+                    media_type=mime_type,  # type: ignore[typeddict-item]
                 ),
             }
         )
@@ -159,7 +182,7 @@ def _resource_contents_to_block(
     cache_control: BetaCacheControlEphemeralParam | None = None,
 ) -> BetaContent:
     """Convert MCP resource contents to an Anthropic content block."""
-    mime_type = resource.mimeType
+    mime_type = _mcp_field_v1_or_v2(resource, "mime_type")
 
     # Images
     if mime_type is not None and _is_supported_image_type(mime_type):
@@ -262,12 +285,13 @@ def mcp_resource_to_content(
     if not result.contents:
         raise UnsupportedMCPValueError("Resource contents array must contain at least one item")
 
+    mime_types = [_mcp_field_v1_or_v2(c, "mime_type") for c in result.contents]
     supported = next(
-        (c for c in result.contents if _is_supported_resource_mime_type(c.mimeType)),
+        (c for c, mime_type in zip(result.contents, mime_types) if _is_supported_resource_mime_type(mime_type)),
         None,
     )
     if supported is None:
-        mime_types = [c.mimeType for c in result.contents if c.mimeType is not None]
+        mime_types = [m for m in mime_types if m is not None]
         raise UnsupportedMCPValueError(
             f"No supported MIME type found in resource contents. Available: {', '.join(mime_types)}"
         )
@@ -299,7 +323,7 @@ def mcp_resource_to_file(
     else:
         content_bytes = resource.text.encode("utf-8")
 
-    file_tuple = _TaggedTuple((name, content_bytes, resource.mimeType))
+    file_tuple = _TaggedTuple((name, content_bytes, _mcp_field_v1_or_v2(resource, "mime_type")))
     tag_helper(file_tuple, "mcp_resource_to_file")
     return file_tuple
 
@@ -311,12 +335,13 @@ def mcp_resource_to_file(
 
 def _convert_tool_result(result: CallToolResult) -> BetaFunctionToolResultType:
     """Convert MCP ``CallToolResult`` to a value suitable for returning from ``call()``."""
-    if result.isError:
+    if _mcp_field_v1_or_v2(result, "is_error"):
         raise ToolError([mcp_content(item) for item in result.content])
 
     # If content is empty but structuredContent is present, JSON-encode it
-    if not result.content and result.structuredContent is not None:
-        return json.dumps(result.structuredContent)
+    structured_content = _mcp_field_v1_or_v2(result, "structured_content")
+    if not result.content and structured_content is not None:
+        return json.dumps(structured_content)
 
     return [mcp_content(item) for item in result.content]
 
@@ -376,7 +401,7 @@ def mcp_tool(
         call_mcp,
         name=tool_name,
         description=tool.description,
-        input_schema=tool.inputSchema,
+        input_schema=_mcp_field_v1_or_v2(tool, "input_schema"),
         cache_control=cache_control,
         defer_loading=defer_loading,
         allowed_callers=allowed_callers,
@@ -436,7 +461,7 @@ def async_mcp_tool(
         call_mcp,
         name=tool_name,
         description=tool.description,
-        input_schema=tool.inputSchema,
+        input_schema=_mcp_field_v1_or_v2(tool, "input_schema"),
         cache_control=cache_control,
         defer_loading=defer_loading,
         allowed_callers=allowed_callers,
