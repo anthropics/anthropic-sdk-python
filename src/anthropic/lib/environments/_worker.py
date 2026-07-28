@@ -108,6 +108,7 @@ async def _heartbeat_loop(
     ttl = _HEARTBEAT_TTL_DEFAULT
     last = _NO_HEARTBEAT_SENTINEL
     last_success = time.monotonic()
+    heartbeat_count = 0
     while not stop.is_set():
         try:
             # Bound each heartbeat: a network blackhole must not leave us
@@ -139,11 +140,30 @@ async def _heartbeat_loop(
         else:
             last = resp.last_heartbeat
             last_success = time.monotonic()
+            heartbeat_count += 1
             if resp.ttl_seconds > 0:
                 ttl = resp.ttl_seconds
                 interval = max(1.0, min(resp.ttl_seconds / 2, _HEARTBEAT_DEFAULT))
             if resp.state in ("stopping", "stopped") or not resp.lease_extended:
-                log.info("heartbeat signals shutdown state=%s lease_extended=%s", resp.state, resp.lease_extended)
+                if heartbeat_count == 1:
+                    log.warning(
+                        "heartbeat signals shutdown on the very first beat "
+                        "(state=%s lease_extended=%s work_id=%s) — this almost always "
+                        "means your --on-work script exited before the spawned worker "
+                        "connected. Ensure spawn.sh BLOCKS until the sandbox exits: "
+                        "use 'docker run' (foreground), not 'docker run -d'; or "
+                        "'kubectl wait --for=condition=complete job/...' instead of "
+                        "'kubectl apply'. See the self-hosted environments docs.",
+                        resp.state,
+                        resp.lease_extended,
+                        work_id,
+                    )
+                else:
+                    log.info(
+                        "heartbeat signals shutdown state=%s lease_extended=%s",
+                        resp.state,
+                        resp.lease_extended,
+                    )
                 stop.set()
                 return
         # Sleep up to `interval` seconds, but wake immediately if stop is set.
@@ -351,6 +371,16 @@ class EnvironmentWorker:
         Raises:
           ValueError: if any of ``work_id`` / ``environment_id`` / ``session_id``
             / ``environment_key`` is still empty after the fallbacks.
+
+        Note:
+            When invoked from a ``worker poll --on-work`` script, that script MUST
+            block until the spawned worker process exits. Returning immediately after
+            launching a background container (e.g. ``kubectl apply``, ``docker run -d``)
+            causes the poller to mark the work item as complete before this worker
+            connects — the first heartbeat then returns ``state: stopping`` and the
+            session is permanently stuck at ``stop_reason: requires_action``. Use
+            ``docker run`` (foreground) or ``kubectl wait --for=condition=complete``
+            to block until the sandbox exits.
         """
         work_id = _require(work_id, name="work_id", env_var="ANTHROPIC_WORK_ID")
         environment_id = _require(environment_id, name="environment_id", env_var="ANTHROPIC_ENVIRONMENT_ID")
