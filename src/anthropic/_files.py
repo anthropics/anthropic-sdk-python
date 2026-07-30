@@ -63,15 +63,18 @@ def to_httpx_files(files: RequestFiles | None) -> HttpxRequestFiles | None:
 
 
 def _transform_file(file: FileTypes) -> HttpxFileTypes:
+    # Check the tuple form first: is_file_content() also matches tuples, so testing it before
+    # is_tuple_t() would return a (name, PathLike) tuple unchanged, leaving the PathLike for
+    # httpx to choke on (`AttributeError: 'WindowsPath' object has no attribute 'read'`, #1769).
+    if is_tuple_t(file):
+        return (file[0], read_file_content(file[1]), *file[2:])
+
     if is_file_content(file):
         if isinstance(file, os.PathLike):
             path = pathlib.Path(file)
             return (path.name, path.read_bytes())
 
         return file
-
-    if is_tuple_t(file):
-        return (file[0], read_file_content(file[1]), *file[2:])
 
     raise TypeError(f"Expected file types input to be a FileContent type or to be a tuple")
 
@@ -105,15 +108,17 @@ async def async_to_httpx_files(files: RequestFiles | None) -> HttpxRequestFiles 
 
 
 async def _async_transform_file(file: FileTypes) -> HttpxFileTypes:
+    # See _transform_file: the tuple form must be checked before is_file_content() (which also
+    # matches tuples), otherwise a (name, PathLike) tuple is returned unread (#1769).
+    if is_tuple_t(file):
+        return (file[0], await async_read_file_content(file[1]), *file[2:])
+
     if is_file_content(file):
         if isinstance(file, os.PathLike):
             path = anyio.Path(file)
             return (path.name, await path.read_bytes())
 
         return file
-
-    if is_tuple_t(file):
-        return (file[0], await async_read_file_content(file[1]), *file[2:])
 
     raise TypeError(f"Expected file types input to be a FileContent type or to be a tuple")
 
