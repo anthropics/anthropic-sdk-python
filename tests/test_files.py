@@ -43,6 +43,22 @@ async def test_async_tuple_input() -> None:
     assert result == IsList(IsTuple("file", IsTuple("README.md", IsBytes())))
 
 
+def test_tuple_with_pathlib_reads_content() -> None:
+    # Regression for #1769: `(filename, Path)` must read the Path's bytes, not pass the
+    # Path object through raw (which later fails with `'WindowsPath' object has no
+    # attribute 'read'`). The bare-Path and file-handle tuple forms already worked.
+    result = to_httpx_files({"file": ("custom_name.md", readme_path)})
+    print(result)
+    assert result == IsDict({"file": IsTuple("custom_name.md", IsBytes())})
+
+
+@pytest.mark.asyncio
+async def test_async_tuple_with_pathlib_reads_content() -> None:
+    result = await async_to_httpx_files({"file": ("custom_name.md", readme_path)})
+    print(result)
+    assert result == IsDict({"file": IsTuple("custom_name.md", IsBytes())})
+
+
 def test_string_not_allowed() -> None:
     with pytest.raises(TypeError, match="Expected file types input to be a FileContent type or to be a tuple"):
         to_httpx_files(
