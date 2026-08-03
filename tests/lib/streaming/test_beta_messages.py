@@ -402,6 +402,21 @@ class TestSyncMessages:
         ) as stream:
             assert_fallback_credit_response(stream.get_final_message())
 
+    @pytest.mark.respx(base_url=base_url)
+    def test_out_of_order_content_block_start(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("out_of_order_response.txt"))
+        )
+
+        with pytest.raises(RuntimeError, match="Unexpected content block index: 1"):
+            with sync_client.beta.messages.stream(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-3-opus-latest",
+            ) as stream:
+                for _ in stream:
+                    pass
+
 
 class TestAsyncMessages:
     @pytest.mark.asyncio
@@ -569,6 +584,22 @@ class TestAsyncMessages:
             model="claude-sonnet-4-5",
         ) as stream:
             assert_fallback_credit_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_out_of_order_content_block_start(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("out_of_order_response.txt")))
+        )
+
+        with pytest.raises(RuntimeError, match="Unexpected content block index: 1"):
+            async with async_client.beta.messages.stream(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-3-opus-latest",
+            ) as stream:
+                async for _ in stream:
+                    pass
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
