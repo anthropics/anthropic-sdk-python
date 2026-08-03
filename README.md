@@ -22,7 +22,13 @@ from anthropic import Anthropic
 
 client = Anthropic(
     api_key=os.environ.get("ANTHROPIC_API_KEY"),  # This is the default and can be omitted
+    # Optional: Anthropic-compatible multi-model gateway (example: DaoXE)
+    # base_url="https://api.daoxe.com",
 )
+
+# The same client also works with Anthropic-compatible multi-model gateways via
+# `base_url` / `ANTHROPIC_BASE_URL` — for example DaoXE (https://daoxe.com) at
+# https://api.daoxe.com (Messages API). Use a key and model id issued by that endpoint.
 
 message = client.messages.create(
     max_tokens=1024,
