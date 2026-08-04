@@ -472,7 +472,7 @@ async def test_skips_already_answered_custom_tool() -> None:
     assert items == []
 
 
-# ---------- skip unowned tools (split-client partial fulfilment) -----------
+# ---------- skip unowned tools (split-client partial fulfillment) -----------
 
 
 @pytest.mark.asyncio()

@@ -270,7 +270,7 @@ class DispatchedToolCall:
     want to surface that or retry at a higher level — and also ``False``, with
     ``result`` left ``None``, when the tool name is not one this runner owns and
     it deliberately posted nothing, leaving the ``tool_use_id`` pending for its
-    owner (the split-client partial-fulfilment behavior), or when the call was
+    owner (the split-client partial-fulfillment behavior), or when the call was
     denied and never executed (see ``confirmation``)."""
 
     confirmation: Literal["allow", "deny"] | None = None
@@ -382,7 +382,7 @@ class SessionToolRunner:
     A self-hosted session is commonly serviced by **two** clients at once: this
     runner inside the customer's sandbox (registered with the file/shell sandbox
     tools) and the customer's app backend (handling the agent's ``custom``
-    function tools). The Sessions API has a partial-fulfilment contract: when a
+    function tools). The Sessions API has a partial-fulfillment contract: when a
     session pauses on ``requires_action`` the pending tool-call ids can mix both
     kinds, and each client must post results **only** for the ids it owns and
     leave the rest pending for the other client. A tool-call event whose name is
@@ -833,7 +833,7 @@ class SessionToolRunner:
         tool = self._tools_by_name.get(ev.name)
         tool_result: DispatchedToolResultParams | None
         if tool is None:
-            # Skip unowned (split-client partial fulfilment): a name this
+            # Skip unowned (split-client partial fulfillment): a name this
             # runner is not registered for belongs to the other client
             # servicing this session (typically the customer's app backend
             # handling custom tools). Post NO result, do not mark it answered,
