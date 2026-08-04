@@ -14,7 +14,7 @@ dependencies = [
   "typing-extensions>=4.14, <5",
   "anyio>=3.5.0, <5",
   "distro>=1.7.0, <2",
-  "sniffio",
+  "sniffio>=1, <2",
     "jiter>=0.4.0, <1",
     "docstring-parser>=0.15,<1",
 ]
@@ -39,11 +39,11 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-aiohttp = ["aiohttp", "httpx_aiohttp>=0.1.9, <1"]
+aiohttp = ["aiohttp>=3, <4", "httpx_aiohttp>=0.1.9, <1"]
 vertex = ["google-auth[requests] >=2, <3"]
 google_cloud = ["google-auth[requests] >=2, <3"]
-aws = ["boto3 >= 1.28.57", "botocore >= 1.31.57"]
-bedrock = ["boto3 >= 1.28.57", "botocore >= 1.31.57"]
+aws = ["boto3 >=1.28.57, <2", "botocore >=1.31.57, <2"]
+bedrock = ["boto3 >=1.28.57, <2", "botocore >=1.31.57, <2"]
 mcp = ["mcp>=1.0, <3; python_version >= '3.10'"]
 webhooks = ["standardwebhooks >= 1.0.1, < 2"]
 
@@ -55,6 +55,7 @@ Repository = "https://github.com/anthropics/anthropic-sdk-python"
 [tool.uv]
 managed = true
 required-version = ">=0.9"
+add-bounds = "major"
 # Ensure the lockfile always uses public PyPI, regardless of contributor's global uv config
 index = [{ url = "https://pypi.org/simple", default = true }]
 conflicts = [
@@ -86,6 +87,8 @@ dev = [
     "inline-snapshot>=0.28.0",
     "griffe>=1",
     "http-snapshot[httpx]==0.1.9",
+    "packaging",
+    "tomli; python_version < '3.11'",
 ]
 pydantic-v1 = [
     "pydantic>=1.9.0,<2",
@@ -96,7 +99,7 @@ pydantic-v2 = [
 ]
 
 [build-system]
-requires = ["hatchling==1.26.3", "hatch-fancy-pypi-readme"]
+requires = ["hatchling==1.26.3", "hatch-fancy-pypi-readme>=22.4, <26"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
