@@ -12,6 +12,9 @@ else
   uv run ruff check .
 fi
 
+echo "==> Checking dependency version caps"
+uv run python scripts/utils/check-dependency-caps.py
+
 echo "==> Running pyright"
 uv run pyright
 

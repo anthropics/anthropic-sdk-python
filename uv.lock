@@ -194,7 +194,7 @@ wheels = [
 
 [[package]]
 name = "anthropic"
-version = "0.117.0"
+version = "0.120.2"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },
@@ -244,6 +244,7 @@ dev = [
     { name = "importlib-metadata" },
     { name = "inline-snapshot" },
     { name = "mypy" },
+    { name = "packaging" },
     { name = "pyright" },
     { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
@@ -255,6 +256,7 @@ dev = [
     { name = "ruff" },
     { name = "time-machine", version = "2.19.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
     { name = "time-machine", version = "3.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
+    { name = "tomli", marker = "python_full_version < '3.11' or (extra == 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1') or (extra == 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')" },
 ]
 pydantic-v1 = [
     { name = "pydantic", version = "1.10.26", source = { registry = "https://pypi.org/simple" } },
@@ -265,12 +267,12 @@ pydantic-v2 = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiohttp", marker = "extra == 'aiohttp'" },
+    { name = "aiohttp", marker = "extra == 'aiohttp'", specifier = ">=3,<4" },
     { name = "anyio", specifier = ">=3.5.0,<5" },
-    { name = "boto3", marker = "extra == 'aws'", specifier = ">=1.28.57" },
-    { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.28.57" },
-    { name = "botocore", marker = "extra == 'aws'", specifier = ">=1.31.57" },
-    { name = "botocore", marker = "extra == 'bedrock'", specifier = ">=1.31.57" },
+    { name = "boto3", marker = "extra == 'aws'", specifier = ">=1.28.57,<2" },
+    { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.28.57,<2" },
+    { name = "botocore", marker = "extra == 'aws'", specifier = ">=1.31.57,<2" },
+    { name = "botocore", marker = "extra == 'bedrock'", specifier = ">=1.31.57,<2" },
     { name = "distro", specifier = ">=1.7.0,<2" },
     { name = "docstring-parser", specifier = ">=0.15,<1" },
     { name = "google-auth", extras = ["requests"], marker = "extra == 'google-cloud'", specifier = ">=2,<3" },
@@ -280,7 +282,7 @@ requires-dist = [
     { name = "jiter", specifier = ">=0.4.0,<1" },
     { name = "mcp", marker = "python_full_version >= '3.10' and extra == 'mcp'", specifier = ">=1.0,<3" },
     { name = "pydantic", specifier = ">=1.9.0,<3" },
-    { name = "sniffio" },
+    { name = "sniffio", specifier = ">=1,<2" },
     { name = "standardwebhooks", marker = "extra == 'webhooks'", specifier = ">=1.0.1,<2" },
     { name = "typing-extensions", specifier = ">=4.14,<5" },
 ]
@@ -295,6 +297,7 @@ dev = [
     { name = "importlib-metadata", specifier = ">=6.7.0" },
     { name = "inline-snapshot", specifier = ">=0.28.0" },
     { name = "mypy", specifier = "==1.17" },
+    { name = "packaging" },
     { name = "pyright", specifier = "==1.1.399" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -303,6 +306,7 @@ dev = [
     { name = "rich", specifier = ">=13.7.1" },
     { name = "ruff" },
     { name = "time-machine" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
 pydantic-v1 = [{ name = "pydantic", specifier = ">=1.9.0,<2" }]
 pydantic-v2 = [
