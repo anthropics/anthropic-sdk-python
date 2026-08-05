@@ -48,6 +48,14 @@ Guarantees (the tests and the sibling SDKs cross-reference these IDs):
   and ``tests/lib/test_executable_policy.py`` fails if any process-spawning
   call under ``src/anthropic`` passes a program name literal that is not an
   absolute path.
+- **D1 — defense in depth (Windows only).** :func:`hardened_child_env` adds
+  ``NoDefaultCurrentDirectoryInExePath=1`` to the environment handed to a
+  helper *child* (:func:`run` applies it; async spawn sites pass it as
+  ``env=``) so anything the helper spawns by bare name in turn also skips the
+  CWD. It is never applied to this process's own ``os.environ`` — a
+  general-purpose SDK does not mutate its host's environment — and it is not
+  the fix (G1–G4 are): Python < 3.12 ``shutil.which`` and libuv < 1.45 ignore
+  the variable.
 
 A match is a regular file (symlinks followed, so a *directory* named ``rg`` is
 skipped) that is executable (``os.access(X_OK)``) on POSIX; on Windows
@@ -86,11 +94,16 @@ __all__ = [
     "require_executable",
     "resolve_argv",
     "run",
+    "hardened_child_env",
 ]
 
 WINDOWS_NATIVE_EXTENSIONS: Final = (".exe", ".com")
 """Default Windows candidate extensions (G3): native images only — never
 ``.bat``/``.cmd`` and never extensionless."""
+
+# D1: honoured by ``CreateProcess``/``cmd.exe``/CPython >= 3.12 ``shutil.which``
+# (presence, any value): do not search the current directory for bare names.
+_NO_CWD_SEARCH_ENV_VAR: Final = "NoDefaultCurrentDirectoryInExePath"
 
 # The public functions look this up at call time; the pure helpers below take an
 # explicit ``windows`` flag instead so the Windows rules are testable on any host.
@@ -294,11 +307,43 @@ def run(argv: Sequence[str | os.PathLike[str]], /, **kwargs: Any) -> subprocess.
 
     ``argv[0]`` is resolved against the ``PATH`` the child will see: the one in
     ``kwargs["env"]`` when the caller passes an environment that has one, else
-    this process's.
+    this process's. On Windows the child's environment additionally gets D1
+    (:func:`hardened_child_env`).
     """
-    env: Any = kwargs.get("env")
-    child_path: Any = cast("Mapping[Any, Any]", env).get("PATH") if isinstance(env, Mapping) else None
-    resolved = resolve_argv(argv, path=child_path if isinstance(child_path, str) else None)
+    resolved = resolve_argv(argv, path=_search_path_in(kwargs.get("env")))
+    # D1 — defense in depth for the *child*, not the fix (that is ``resolve_argv`` above).
+    hardened = hardened_child_env(kwargs.get("env"))
+    if hardened is not None:
+        kwargs["env"] = hardened
     # ``cast``: with ``**kwargs`` pyright cannot pick a single ``subprocess.run``
     # overload (they differ only in the ``CompletedProcess`` type parameter).
     return cast("subprocess.CompletedProcess[Any]", subprocess.run(resolved, **kwargs))
+
+
+def _search_path_in(env: Any) -> str | None:
+    """The ``PATH`` inside a caller-supplied child environment, if it carries one."""
+    if not isinstance(env, Mapping):
+        return None
+    value: Any = cast("Mapping[Any, Any]", env).get("PATH")
+    return value if isinstance(value, str) else None
+
+
+def hardened_child_env(env: Mapping[str, str] | None = None) -> Mapping[str, str] | None:
+    """D1 — the environment to hand to a helper child process.
+
+    Returns ``env`` unchanged (``None`` meaning "inherit ``os.environ``"), except
+    on Windows where the result additionally carries
+    ``NoDefaultCurrentDirectoryInExePath=1`` unless the caller already set it
+    (any value, any case). With it, ``CreateProcess``/``cmd.exe``/CPython >= 3.12
+    ``shutil.which`` *inside the child* skip the current directory when they
+    resolve bare names — defense in depth for whatever the helper spawns in
+    turn. Only ever applied to a child's environment: this SDK never mutates
+    its host process's ``os.environ``. Not the fix for the CWD-search class
+    (G1–G4 are) — Python < 3.12 and libuv < 1.45 ignore the variable.
+    """
+    if not _IS_WINDOWS:
+        return env
+    base: Mapping[str, str] = os.environ if env is None else env
+    if any(key.upper() == _NO_CWD_SEARCH_ENV_VAR.upper() for key in base):
+        return env
+    return {**base, _NO_CWD_SEARCH_ENV_VAR: "1"}

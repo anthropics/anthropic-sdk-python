@@ -67,7 +67,7 @@ from ...types.beta import (
     BetaManagedAgentsAgentToolset20260401ReadInput,
     BetaManagedAgentsAgentToolset20260401WriteInput,
 )
-from .._executable import find_executable
+from .._executable import find_executable, hardened_child_env
 from ._beta_functions import (
     ToolError,
     BetaContent,
@@ -753,6 +753,10 @@ def beta_grep_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             result = await anyio.run_process(
                 [rg, "-n", "--no-heading", "-e", pattern, "--", str(search)],
                 check=False,
+                # Defense in depth (Windows only), not the fix: the child env
+                # gains NoDefaultCurrentDirectoryInExePath=1 so anything rg
+                # spawns skips the CWD too. ``None`` (inherit) elsewhere.
+                env=hardened_child_env(),
             )
             if result.returncode == 1:
                 return "no matches"

@@ -10,6 +10,7 @@ from typing_extensions import Required, get_args, get_origin, get_type_hints
 import anyio
 import pytest
 
+from anthropic.lib import _executable
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError
 from anthropic.lib.tools.agent_toolset import (
@@ -518,6 +519,31 @@ async def test_grep_uses_rg_from_an_absolute_path_entry(tmp_path: Path, monkeypa
     # Spawned by absolute path (``$0``), with the tool's usual argv.
     assert res.startswith(f"REAL_RG:{real}:-n --no-heading -e needle -- {work}")
     assert not marker.exists(), "planted rg was executed"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="simulates the Windows flavour with #!/bin/sh stand-ins")
+async def test_grep_hands_rg_the_no_cwd_search_variable_on_windows(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D1 (defense in depth): under the Windows rules the ``rg`` child's
+    environment carries ``NoDefaultCurrentDirectoryInExePath=1`` while the
+    runner's own environment is left alone. Simulated on POSIX by flipping the
+    resolver's flavour; ``//tmp/…`` passes the Windows (UNC) absolute-entry
+    check and the kernel reads it as ``/tmp/…``."""
+    monkeypatch.setattr(_executable, "_IS_WINDOWS", True)
+    monkeypatch.delenv("NoDefaultCurrentDirectoryInExePath", raising=False)
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    (bin_dir / "rg.exe").write_text('#!/bin/sh\necho "RG_ENV:${NoDefaultCurrentDirectoryInExePath:-unset}"\n')
+    (bin_dir / "rg.exe").chmod(0o755)
+    monkeypatch.setenv("PATH", "/" + str(bin_dir))
+
+    env = AgentToolContext(workdir=str(tmp_path))
+    res = await beta_grep_tool(env).call({"pattern": "needle"})
+
+    assert res == "RG_ENV:1\n"
+    assert "NoDefaultCurrentDirectoryInExePath" not in os.environ
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="bash session requires /bin/bash")

@@ -1,7 +1,7 @@
 """Tests for :mod:`anthropic.lib._executable` — safe helper-executable resolution.
 
-The vector IDs (V1–V12, W1–W3, P1) and guarantee IDs (G1–G5) are shared with the
-sibling Anthropic SDKs (claude-agent-sdk-python, anthropic-sdk-typescript,
+The vector IDs (V1–V12, W1–W3, P1) and guarantee IDs (G1–G5, D1) are shared with
+the sibling Anthropic SDKs (claude-agent-sdk-python, anthropic-sdk-typescript,
 anthropic-sdk-go); keep them in sync when changing behaviour.
 """
 
@@ -14,6 +14,7 @@ from dataclasses import dataclass
 
 import pytest
 
+from anthropic.lib import _executable
 from anthropic.lib._executable import (
     WINDOWS_NATIVE_EXTENSIONS,
     ExecutableNotFoundError,
@@ -22,9 +23,12 @@ from anthropic.lib._executable import (
     find_executable,
     _candidate_names,
     _find_executable,
+    hardened_child_env,
     require_executable,
     _is_searchable_path_entry,
 )
+
+NO_CWD_VAR = "NoDefaultCurrentDirectoryInExePath"
 
 posix_only = pytest.mark.skipif(sys.platform == "win32", reason="exercises the POSIX flavour on the real filesystem")
 
@@ -352,3 +356,51 @@ def test_run_resolves_against_the_path_the_child_will_see(layout: Layout, monkey
         run(["hello"], env={"UNRELATED": "1"}, capture_output=True)
     monkeypatch.setenv("PATH", str(layout.bin))
     assert run(["hello"], env={"UNRELATED": "1"}, capture_output=True, text=True).returncode == 0
+
+
+# --------------------------------------------------------------------------- #
+# D1: NoDefaultCurrentDirectoryInExePath for helper *children* (Windows only)  #
+# --------------------------------------------------------------------------- #
+
+
+def test_d1_child_env_is_untouched_off_windows(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(_executable, "_IS_WINDOWS", False)
+    assert hardened_child_env() is None  # ``None`` = plain inheritance
+    explicit = {"A": "1"}
+    assert hardened_child_env(explicit) is explicit
+
+
+def test_d1_child_env_gains_the_variable_on_windows(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(_executable, "_IS_WINDOWS", True)
+    monkeypatch.delenv(NO_CWD_VAR, raising=False)
+    monkeypatch.setenv("SOME_INHERITED_VAR", "x")
+
+    inherited = hardened_child_env()
+    assert inherited is not None
+    assert inherited[NO_CWD_VAR] == "1"
+    assert inherited["SOME_INHERITED_VAR"] == "x"  # still the full inherited environment
+    assert NO_CWD_VAR not in os.environ  # the host process's environment is never mutated
+
+    explicit = {"A": "1"}
+    assert hardened_child_env(explicit) == {"A": "1", NO_CWD_VAR: "1"}
+    assert explicit == {"A": "1"}  # the caller's mapping is not mutated either
+
+    # The caller's own choice wins — any value, any case (Windows env is case-insensitive).
+    already = {NO_CWD_VAR.upper(): "0"}
+    assert hardened_child_env(already) is already
+    monkeypatch.setenv(NO_CWD_VAR, "1")
+    assert hardened_child_env() is None
+
+
+@posix_only
+def test_d1_run_hands_the_variable_to_the_child(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``run`` wires D1 into ``subprocess.run``'s ``env`` — shown on a POSIX host by
+    flipping the flavour and spawning an explicit absolute path (G4)."""
+    monkeypatch.delenv(NO_CWD_VAR, raising=False)
+    print_var = ["/bin/sh", "-c", f'echo "${NO_CWD_VAR}-${{EXTRA:-none}}"']
+
+    assert run(print_var, capture_output=True, text=True).stdout == "-none\n"
+    monkeypatch.setattr(_executable, "_IS_WINDOWS", True)
+    assert run(print_var, capture_output=True, text=True).stdout == "1-none\n"
+    assert run(print_var, capture_output=True, text=True, env={"EXTRA": "kept"}).stdout == "1-kept\n"
+    assert NO_CWD_VAR not in os.environ
