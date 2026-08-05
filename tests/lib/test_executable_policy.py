@@ -13,8 +13,9 @@ from __future__ import annotations
 
 import re
 import ast
-from typing import Iterator, NamedTuple
+from typing import NamedTuple
 from pathlib import Path
+from collections.abc import Iterator
 from typing_extensions import override
 
 import anthropic

@@ -76,7 +76,8 @@ import errno
 import ntpath
 import subprocess
 from typing import Any, Final, cast
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from typing_extensions import override
 
 __all__ = [
     "WINDOWS_NATIVE_EXTENSIONS",
@@ -124,6 +125,13 @@ class ExecutableNotFoundError(FileNotFoundError):
             name,
         )
         self.name = name
+
+    @override
+    def __reduce__(self) -> tuple[type[ExecutableNotFoundError], tuple[str]]:
+        # ``OSError.__reduce__`` would replay ``(errno, strerror, filename)`` into
+        # our one-argument ``__init__``; keep the exception picklable/copyable
+        # (e.g. when raised inside a ``ProcessPoolExecutor`` worker).
+        return (type(self), (self.name,))
 
 
 def _strip_enclosing_quotes(entry: str) -> str:
@@ -199,6 +207,8 @@ def _find_executable(name: str, *, path: str, windows: bool, windows_extensions:
     candidates = _candidate_names(name, windows=windows, windows_extensions=windows_extensions)
     if not candidates:
         return None
+    # Plain split, like CPython's ``shutil.which``: a quoted Windows entry that
+    # itself contains ``;`` is not reassembled (a false negative, never a CWD hit).
     for raw_entry in path.split(";" if windows else ":"):
         entry = _strip_enclosing_quotes(raw_entry) if windows else raw_entry
         if not _is_searchable_path_entry(entry, windows=windows):
@@ -266,6 +276,10 @@ def resolve_argv(
     Use this in front of async spawn APIs (``anyio.open_process`` /
     ``anyio.run_process``), which are deliberately not wrapped here.
     """
+    if isinstance(argv, str):
+        # A ``str`` is a ``Sequence[str]`` to the type checker; iterating it would
+        # "resolve" its first character. Shell command lines are not supported.
+        raise TypeError("argv must be a sequence of program arguments, not a string")
     args = [os.fspath(arg) for arg in argv]
     if not args:
         raise ValueError("argv must contain at least the program to run")
@@ -276,7 +290,15 @@ def resolve_argv(
 def run(argv: Sequence[str | os.PathLike[str]], /, **kwargs: Any) -> subprocess.CompletedProcess[Any]:
     """``subprocess.run(resolve_argv(argv), **kwargs)`` — the blessed synchronous way
     to run a helper program by name. Raises :class:`ExecutableNotFoundError`
-    (a :class:`FileNotFoundError`) when ``argv[0]`` cannot be resolved."""
+    (a :class:`FileNotFoundError`) when ``argv[0]`` cannot be resolved.
+
+    ``argv[0]`` is resolved against the ``PATH`` the child will see: the one in
+    ``kwargs["env"]`` when the caller passes an environment that has one, else
+    this process's.
+    """
+    env: Any = kwargs.get("env")
+    child_path: Any = cast("Mapping[Any, Any]", env).get("PATH") if isinstance(env, Mapping) else None
+    resolved = resolve_argv(argv, path=child_path if isinstance(child_path, str) else None)
     # ``cast``: with ``**kwargs`` pyright cannot pick a single ``subprocess.run``
     # overload (they differ only in the ``CompletedProcess`` type parameter).
-    return cast("subprocess.CompletedProcess[Any]", subprocess.run(resolve_argv(argv), **kwargs))
+    return cast("subprocess.CompletedProcess[Any]", subprocess.run(resolved, **kwargs))

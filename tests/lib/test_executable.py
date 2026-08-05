@@ -296,6 +296,21 @@ def test_require_executable_raises_a_file_not_found_error(layout: Layout) -> Non
     assert require_executable("tool", path=str(layout.bin)) == str(layout.bin / "tool")
 
 
+def test_executable_not_found_error_survives_pickling() -> None:
+    """Raised inside a ``ProcessPoolExecutor`` worker it must cross the process
+    boundary intact (``OSError.__reduce__`` alone would replay three arguments
+    into the one-argument constructor)."""
+    import copy
+    import pickle
+
+    err = ExecutableNotFoundError("rg")
+    # Round-trips an object created right here — no untrusted pickle data involved.
+    for clone in (pickle.loads(pickle.dumps(err)), copy.copy(err)):
+        assert isinstance(clone, ExecutableNotFoundError)
+        assert clone.name == "rg" and clone.filename == "rg" and clone.errno == err.errno
+        assert str(clone) == str(err)
+
+
 @posix_only
 def test_resolve_argv_replaces_only_argv0(layout: Layout) -> None:
     argv = resolve_argv([Path("tool"), "--flag", Path("rel/ative")], path=str(layout.bin))
@@ -304,6 +319,9 @@ def test_resolve_argv_replaces_only_argv0(layout: Layout) -> None:
         resolve_argv([], path=str(layout.bin))
     with pytest.raises(ExecutableNotFoundError):
         resolve_argv(["tool"], path=".")
+    # A shell-style string is a ``Sequence[str]`` to the type checker, but never an argv.
+    with pytest.raises(TypeError):
+        resolve_argv("tool --flag", path=str(layout.bin))
 
 
 @posix_only
@@ -317,3 +335,20 @@ def test_run_spawns_the_resolved_absolute_path(layout: Layout, monkeypatch: pyte
     monkeypatch.setenv("PATH", ".")
     with pytest.raises(ExecutableNotFoundError):
         run(["hello"], capture_output=True)
+
+
+@posix_only
+def test_run_resolves_against_the_path_the_child_will_see(layout: Layout, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Like ``subprocess.run`` on POSIX, an explicit ``env`` carrying a ``PATH``
+    is the search path — still subject to the absolute-entries-only rule."""
+    _make_executable(layout.bin / "hello", '#!/bin/sh\necho "from-bin $0"\n')
+    monkeypatch.setenv("PATH", "")
+    child_env = {"PATH": "." + SEP + str(layout.bin)}
+    assert run(["hello"], env=child_env, capture_output=True, text=True).stdout == f"from-bin {layout.bin / 'hello'}\n"
+    with pytest.raises(ExecutableNotFoundError):
+        run(["hello"], env={"PATH": "."}, capture_output=True)
+    # No PATH in the child env: fall back to this process's (empty here) — never os.defpath.
+    with pytest.raises(ExecutableNotFoundError):
+        run(["hello"], env={"UNRELATED": "1"}, capture_output=True)
+    monkeypatch.setenv("PATH", str(layout.bin))
+    assert run(["hello"], env={"UNRELATED": "1"}, capture_output=True, text=True).returncode == 0
