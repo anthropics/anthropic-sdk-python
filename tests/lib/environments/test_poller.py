@@ -11,6 +11,7 @@ from anthropic.lib.environments._poller import _jitter, _backoff
         ("first failure backs off two seconds", 1, 2.0),
         ("second failure doubles to four seconds", 2, 4.0),
         ("very large attempt is capped at sixty seconds", 100, 60.0),
+        ("overflowing attempt is capped at sixty seconds", 1024, 60.0),
     ],
 )
 def test_backoff(description: str, attempt: int, want: float) -> None:
