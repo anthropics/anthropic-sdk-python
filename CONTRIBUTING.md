@@ -42,6 +42,28 @@ Most of the SDK is generated code. Modifications to code will be persisted betwe
 result in merge conflicts between manual patches and changes from the generator. The generator will never
 modify the contents of the `src/anthropic/lib/` and `examples/` directories.
 
+### Spawning external programs
+
+Never pass a bare program name (`"rg"`, `"git"`, `"tar"`) to a process API (`subprocess.*`,
+`anyio.open_process` / `anyio.run_process`, `asyncio.create_subprocess_exec`, `os.exec*` / `os.spawn*`).
+The OS-level lookup those trigger searches the current working directory on Windows (and `.`/empty/relative
+`PATH` entries everywhere), so a look-alike binary planted in whatever directory the user happens to run from
+would be executed. Instead, resolve the program with
+[`anthropic.lib._executable`](src/anthropic/lib/_executable.py) and spawn the absolute path it returns:
+
+```py
+from anthropic.lib._executable import find_executable, resolve_argv, run
+
+rg = find_executable("rg")  # absolute path or None — only absolute PATH entries, never the CWD
+proc = await anyio.run_process(resolve_argv(["git", "status"]))  # async: resolve first, then spawn
+result = run(["git", "status"], capture_output=True)  # sync: resolves and runs in one call
+```
+
+Absolute paths you construct yourself (e.g. `/bin/bash`) are fine as-is. CI enforces this: ruff bans
+`shutil.which` / `distutils.spawn.find_executable` (`flake8-tidy-imports.banned-api` in `pyproject.toml`), and
+`tests/lib/test_executable_policy.py` fails on any spawn call whose program is a non-absolute string literal.
+The module docstring lists the exact guarantees (G1–G5, D1), which are shared with the other Anthropic SDKs.
+
 ## Adding and running examples
 
 All files in the `examples/` directory are not modified by the generator and can be freely edited or added to.

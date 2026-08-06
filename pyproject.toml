@@ -273,6 +273,8 @@ extend-safe-fixes = ["FA102"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "functools.lru_cache".msg = "This function does not retain type information for the wrapped function's arguments; The `lru_cache` function from `_utils` should be used instead"
+"shutil.which".msg = "Searches the current directory on Windows (and via '.'/empty/relative PATH entries everywhere); use `find_executable` from `anthropic.lib._executable` instead"
+"distutils.spawn.find_executable".msg = "Searches the current directory; use `find_executable` from `anthropic.lib._executable` instead"
 
 [tool.ruff.lint.isort]
 length-sort = true

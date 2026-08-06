@@ -349,7 +349,10 @@ tools = [t for t in beta_agent_toolset_20260401(env) if t.name != "bash"]
 The `bash` tool runs an unrestricted `/bin/bash` and executes file operations and shell commands
 directly on the host. Run the worker inside a container or other isolation boundary you control.
 (The file tools — `read`/`write`/`edit`/`glob`/`grep` — confine to the workdir with a symlink-aware
-check, so they are safe without a sandbox; `bash` is not.) `bash` does not inherit the runner's
+check, so they are safe without a sandbox; `bash` is not.) Helper binaries the file tools shell out
+to (`rg` for `grep`) are looked up on absolute `PATH` entries only — never in the working directory
+or the tree being searched — so a look-alike `rg`/`rg.exe` planted in the workspace is never executed;
+without ripgrep installed, `grep` falls back to a pure-Python search. `bash` does not inherit the runner's
 `ANTHROPIC_*` credentials; pass `AgentToolContext(env=...)` to control the subprocess environment.
 
 See [`examples/managed-agents-self-hosted-sandbox-worker.py`](examples/managed-agents-self-hosted-sandbox-worker.py) for a complete example.

@@ -10,6 +10,7 @@ from typing_extensions import Required, get_args, get_origin, get_type_hints
 import anyio
 import pytest
 
+from anthropic.lib import _executable
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError
 from anthropic.lib.tools.agent_toolset import (
@@ -450,11 +451,99 @@ async def test_grep_single_file_path(tmp_path: Path, monkeypatch: pytest.MonkeyP
     """Fallback walker must handle a file path, not just directories."""
     (tmp_path / "x.txt").write_text("alpha\nbeta\n")
     env = AgentToolContext(workdir=str(tmp_path))
-    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    # An empty PATH resolves no ``rg`` (there is no fallback search location),
+    # forcing the pure-Python walker.
+    monkeypatch.setenv("PATH", "")
     res = await beta_grep_tool(env).call({"pattern": "beta", "path": "x.txt"})
     assert isinstance(res, str)
     assert "beta" in res
     assert res != "no matches"
+
+
+def _plant_fake_rg(directory: Path, marker: Path) -> None:
+    """Drop executable ``rg`` / ``rg.exe`` scripts that only record they ran."""
+    directory.mkdir(parents=True, exist_ok=True)
+    for name in ("rg", "rg.exe"):
+        script = directory / name
+        script.write_text(f"#!/bin/sh\necho planted >> '{marker}'\n")
+        script.chmod(0o755)
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="uses #!/bin/sh stand-ins for rg")
+async def test_grep_never_runs_rg_planted_in_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Regression (HackerOne #3901184): an ``rg`` sitting in the directory the
+    runner was launched from must never be executed — not via an implicit CWD
+    search, nor via ``.``/empty/relative PATH entries. With no real ``rg`` on an
+    absolute PATH entry, grep falls back to the pure-Python walker."""
+    marker = tmp_path / "marker"
+    plant = tmp_path / "plant"
+    _plant_fake_rg(plant, marker)
+    _plant_fake_rg(plant / "rel", marker)
+    monkeypatch.chdir(plant)
+    monkeypatch.setenv("PATH", os.pathsep.join([".", "", "rel", str(plant.relative_to(tmp_path))]))
+
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "x.txt").write_text("alpha\nneedle\n")
+    env = AgentToolContext(workdir=str(work))
+    res = await beta_grep_tool(env).call({"pattern": "needle"})
+
+    assert isinstance(res, str)
+    assert "x.txt:2:needle" in res
+    assert not marker.exists(), "planted rg was executed"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="uses #!/bin/sh stand-ins for rg")
+async def test_grep_uses_rg_from_an_absolute_path_entry(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The counterpart: an ``rg`` on a real (absolute) PATH entry *is* used —
+    and still wins over one planted in the CWD listed earlier via ``.``."""
+    marker = tmp_path / "marker"
+    plant = tmp_path / "plant"
+    _plant_fake_rg(plant, marker)
+    monkeypatch.chdir(plant)
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    real = bin_dir / "rg"
+    real.write_text('#!/bin/sh\necho "REAL_RG:$0:$*"\n')
+    real.chmod(0o755)
+    monkeypatch.setenv("PATH", os.pathsep.join([".", "", str(bin_dir)]))
+
+    work = tmp_path / "work"
+    work.mkdir()
+    env = AgentToolContext(workdir=str(work))
+    res = await beta_grep_tool(env).call({"pattern": "needle"})
+
+    assert isinstance(res, str)
+    # Spawned by absolute path (``$0``), with the tool's usual argv.
+    assert res.startswith(f"REAL_RG:{real}:-n --no-heading -e needle -- {work}")
+    assert not marker.exists(), "planted rg was executed"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="simulates the Windows flavour with #!/bin/sh stand-ins")
+async def test_grep_hands_rg_the_no_cwd_search_variable_on_windows(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D1 (defense in depth): under the Windows rules the ``rg`` child's
+    environment carries ``NoDefaultCurrentDirectoryInExePath=1`` while the
+    runner's own environment is left alone. Simulated on POSIX by flipping the
+    resolver's flavour; ``//tmp/…`` passes the Windows (UNC) absolute-entry
+    check and the kernel reads it as ``/tmp/…``."""
+    monkeypatch.setattr(_executable, "_IS_WINDOWS", True)
+    monkeypatch.delenv("NoDefaultCurrentDirectoryInExePath", raising=False)
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    (bin_dir / "rg.exe").write_text('#!/bin/sh\necho "RG_ENV:${NoDefaultCurrentDirectoryInExePath:-unset}"\n')
+    (bin_dir / "rg.exe").chmod(0o755)
+    monkeypatch.setenv("PATH", "/" + str(bin_dir))
+
+    env = AgentToolContext(workdir=str(tmp_path))
+    res = await beta_grep_tool(env).call({"pattern": "needle"})
+
+    assert res == "RG_ENV:1\n"
+    assert "NoDefaultCurrentDirectoryInExePath" not in os.environ
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="bash session requires /bin/bash")
@@ -595,6 +684,6 @@ async def test_grep_skips_symlinked_files(tmp_path: Path, monkeypatch: pytest.Mo
     (work / "leak").symlink_to(secret)
     (work / "real.txt").write_text("ordinary\n")
     env = AgentToolContext(workdir=str(work))
-    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    monkeypatch.setenv("PATH", "")  # no rg → pure-Python fallback walker
     res = await beta_grep_tool(env).call({"pattern": "TOPSECRET"})
     assert res == "no matches"

@@ -28,7 +28,10 @@ it cannot consume this toolset.
 
 Trust model: the file tools confine to ``workdir`` (symlink-aware) and are safe
 without a sandbox; ``bash`` is unrestricted and should run inside one. See
-:class:`AgentToolContext`.
+:class:`AgentToolContext`. Helper binaries (``rg`` for ``grep``) are resolved
+via :func:`anthropic.lib._executable.find_executable` — absolute ``PATH``
+entries only, never the working directory — so a look-alike planted in the
+tree being searched is never executed.
 """
 
 from __future__ import annotations
@@ -64,6 +67,7 @@ from ...types.beta import (
     BetaManagedAgentsAgentToolset20260401ReadInput,
     BetaManagedAgentsAgentToolset20260401WriteInput,
 )
+from .._executable import find_executable, hardened_child_env
 from ._beta_functions import (
     ToolError,
     BetaContent,
@@ -739,12 +743,20 @@ def beta_grep_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
         except ValueError as e:
             raise ToolError(f"grep: {e}") from e
 
-        if rg := shutil.which("rg"):
+        # ``find_executable`` (not ``shutil.which``): absolute PATH entries only,
+        # never the CWD, native ``.exe`` only on Windows — so an ``rg`` planted
+        # in the directory the runner was launched from is never picked up. It
+        # returns an absolute path (or ``None`` → pure-Python fallback below).
+        if rg := find_executable("rg"):
             # ``check=False`` because ripgrep exits 1 on "no matches", which
             # isn't an error for us — we surface it as a friendly string.
             result = await anyio.run_process(
                 [rg, "-n", "--no-heading", "-e", pattern, "--", str(search)],
                 check=False,
+                # Defense in depth (Windows only), not the fix: the child env
+                # gains NoDefaultCurrentDirectoryInExePath=1 so anything rg
+                # spawns skips the CWD too. ``None`` (inherit) elsewhere.
+                env=hardened_child_env(),
             )
             if result.returncode == 1:
                 return "no matches"
