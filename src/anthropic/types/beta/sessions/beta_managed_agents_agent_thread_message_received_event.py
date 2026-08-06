@@ -9,11 +9,17 @@ from ...._models import BaseModel
 from .beta_managed_agents_text_block import BetaManagedAgentsTextBlock
 from .beta_managed_agents_image_block import BetaManagedAgentsImageBlock
 from .beta_managed_agents_document_block import BetaManagedAgentsDocumentBlock
+from .beta_managed_agents_redacted_block import BetaManagedAgentsRedactedBlock
 
 __all__ = ["BetaManagedAgentsAgentThreadMessageReceivedEvent", "Content"]
 
 Content: TypeAlias = Annotated[
-    Union[BetaManagedAgentsTextBlock, BetaManagedAgentsImageBlock, BetaManagedAgentsDocumentBlock],
+    Union[
+        BetaManagedAgentsTextBlock,
+        BetaManagedAgentsImageBlock,
+        BetaManagedAgentsDocumentBlock,
+        BetaManagedAgentsRedactedBlock,
+    ],
     PropertyInfo(discriminator="type"),
 ]
 

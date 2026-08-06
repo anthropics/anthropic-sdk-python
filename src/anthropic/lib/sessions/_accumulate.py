@@ -132,6 +132,7 @@ def accumulate_managed_agents_event(
         or event.type == "session.error"
         or event.type == "session.updated"
         or event.type == "session.deleted"
+        or event.type == "session.usage"
         or event.type == "session.status_running"
         or event.type == "session.status_idle"
         or event.type == "session.status_rescheduled"

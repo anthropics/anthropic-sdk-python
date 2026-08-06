@@ -5,6 +5,7 @@ from datetime import datetime
 from typing_extensions import Literal
 
 from ..._models import BaseModel
+from .beta_managed_agents_budget_limit import BetaManagedAgentsBudgetLimit
 from .beta_managed_agents_session_agent import BetaManagedAgentsSessionAgent
 
 __all__ = ["BetaManagedAgentsSessionUpdatedEvent"]
@@ -28,6 +29,13 @@ class BetaManagedAgentsSessionUpdatedEvent(BaseModel):
     """Resolved `agent` definition for a `session`.
 
     Snapshot of the `agent` at `session` creation time.
+    """
+
+    budget: Optional[BetaManagedAgentsBudgetLimit] = None
+    """A hard spend ceiling.
+
+    The session stops issuing new model requests once the tracked list cost reaches
+    `max_list_cost`.
     """
 
     metadata: Optional[Dict[str, str]] = None

@@ -7,6 +7,7 @@ from typing_extensions import Literal, Annotated, TypeAlias
 from ...._utils import PropertyInfo
 from ...._models import BaseModel
 from .beta_managed_agents_session_end_turn import BetaManagedAgentsSessionEndTurn
+from .beta_managed_agents_session_budget_reached import BetaManagedAgentsSessionBudgetReached
 from .beta_managed_agents_session_requires_action import BetaManagedAgentsSessionRequiresAction
 from .beta_managed_agents_session_retries_exhausted import BetaManagedAgentsSessionRetriesExhausted
 
@@ -17,6 +18,7 @@ StopReason: TypeAlias = Annotated[
         BetaManagedAgentsSessionEndTurn,
         BetaManagedAgentsSessionRequiresAction,
         BetaManagedAgentsSessionRetriesExhausted,
+        BetaManagedAgentsSessionBudgetReached,
     ],
     PropertyInfo(discriminator="type"),
 ]

@@ -16,6 +16,10 @@ from anthropic.types.beta.sessions import BetaManagedAgentsAgentMessageEvent
 client = Anthropic()
 
 
+def message_text(event: BetaManagedAgentsAgentMessageEvent) -> str:
+    return "".join(block.text if block.type == "text" else "" for block in event.content)
+
+
 def main() -> None:
     # Create an environment, agent and session.
     environment = client.beta.environments.create(
@@ -77,15 +81,14 @@ def main() -> None:
 
             if ev.type == "event_delta":
                 if preview is not None and preview.type == "agent.message":
-                    text = "".join(b.text for b in preview.content)
-                    sys.stdout.write(f"\r{text}")
+                    sys.stdout.write(f"\r{message_text(preview)}")
                     sys.stdout.flush()
 
             elif ev.type == "agent.message":
                 assert event_id is not None
                 previews.pop(event_id, None)
                 sys.stdout.write("\n")
-                print("[final]", "".join(b.text for b in ev.content))
+                print("[final]", message_text(ev))
 
             elif ev.type == "span.model_request_end":
                 # The model request ended — any open preview will not get a buffered

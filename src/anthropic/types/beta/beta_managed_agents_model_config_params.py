@@ -42,6 +42,13 @@ class BetaManagedAgentsModelConfigParams(TypedDict, total=False):
     stored value unchanged.
     """
 
+    inference_geo: Optional[str]
+    """Geographic region for model inference.
+
+    When unset, requests fall through to the workspace's default_inference_geo. On
+    update, `model` is whole-object replacement — omitting inference_geo clears it.
+    """
+
     speed: Optional[Literal["standard", "fast"]]
     """Inference speed mode.
 

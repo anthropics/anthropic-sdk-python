@@ -2,23 +2,22 @@
 
 from typing import Optional
 
-from ..._models import BaseModel
-from ..beta_monetary_amount import BetaMonetaryAmount
-from .beta_managed_agents_server_tool_usage import BetaManagedAgentsServerToolUsage
-from .beta_managed_agents_cache_creation_usage import BetaManagedAgentsCacheCreationUsage
+from ...._models import BaseModel
+from ...beta_monetary_amount import BetaMonetaryAmount
+from ..beta_managed_agents_server_tool_usage import BetaManagedAgentsServerToolUsage
+from ..beta_managed_agents_cache_creation_usage import BetaManagedAgentsCacheCreationUsage
 
-__all__ = ["BetaManagedAgentsSessionUsage"]
+__all__ = ["BetaManagedAgentsSessionUsageSnapshot"]
 
 
-class BetaManagedAgentsSessionUsage(BaseModel):
-    """Cumulative token usage for a session across all turns."""
+class BetaManagedAgentsSessionUsageSnapshot(BaseModel):
+    """Point-in-time snapshot of a session's cumulative usage."""
 
     active_seconds: Optional[float] = None
     """
     Cumulative time in seconds during which the session had at least one thread in
-    running status. Overlapping activity from concurrent threads is counted once,
-    unlike `stats.active_seconds`, which sums each thread's own active time. This is
-    the duration the session's runtime cost is priced on.
+    running status. Overlapping activity from concurrent threads is counted once.
+    This is the duration the session's runtime cost is priced on.
     """
 
     cache_creation: Optional[BetaManagedAgentsCacheCreationUsage] = None

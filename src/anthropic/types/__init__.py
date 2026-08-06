@@ -28,6 +28,7 @@ from .text_delta import TextDelta as TextDelta
 from .tool_param import ToolParam as ToolParam
 from .model_param import ModelParam as ModelParam
 from .stop_reason import StopReason as StopReason
+from .beta_currency import BetaCurrency as BetaCurrency
 from .content_block import ContentBlock as ContentBlock
 from .direct_caller import DirectCaller as DirectCaller
 from .message_param import MessageParam as MessageParam
@@ -75,6 +76,7 @@ from .text_citation_param import TextCitationParam as TextCitationParam
 from .thinking_capability import ThinkingCapability as ThinkingCapability
 from .user_location_param import UserLocationParam as UserLocationParam
 from .anthropic_beta_param import AnthropicBetaParam as AnthropicBetaParam
+from .beta_monetary_amount import BetaMonetaryAmount as BetaMonetaryAmount
 from .beta_not_found_error import BetaNotFoundError as BetaNotFoundError
 from .document_block_param import DocumentBlockParam as DocumentBlockParam
 from .message_stream_event import MessageStreamEvent as MessageStreamEvent
@@ -123,6 +125,7 @@ from .content_block_start_event import ContentBlockStartEvent as ContentBlockSta
 from .search_result_block_param import SearchResultBlockParam as SearchResultBlockParam
 from .beta_gateway_timeout_error import BetaGatewayTimeoutError as BetaGatewayTimeoutError
 from .beta_invalid_request_error import BetaInvalidRequestError as BetaInvalidRequestError
+from .beta_monetary_amount_param import BetaMonetaryAmountParam as BetaMonetaryAmountParam
 from .content_block_source_param import ContentBlockSourceParam as ContentBlockSourceParam
 from .memory_tool_20250818_param import MemoryTool20250818Param as MemoryTool20250818Param
 from .tool_reference_block_param import ToolReferenceBlockParam as ToolReferenceBlockParam

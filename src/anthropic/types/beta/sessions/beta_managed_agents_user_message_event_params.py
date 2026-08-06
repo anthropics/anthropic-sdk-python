@@ -8,11 +8,15 @@ from typing_extensions import Literal, Required, TypeAlias, TypedDict
 from .beta_managed_agents_text_block_param import BetaManagedAgentsTextBlockParam
 from .beta_managed_agents_image_block_param import BetaManagedAgentsImageBlockParam
 from .beta_managed_agents_document_block_param import BetaManagedAgentsDocumentBlockParam
+from .beta_managed_agents_redacted_block_param import BetaManagedAgentsRedactedBlockParam
 
 __all__ = ["BetaManagedAgentsUserMessageEventParams", "Content"]
 
 Content: TypeAlias = Union[
-    BetaManagedAgentsTextBlockParam, BetaManagedAgentsImageBlockParam, BetaManagedAgentsDocumentBlockParam
+    BetaManagedAgentsTextBlockParam,
+    BetaManagedAgentsImageBlockParam,
+    BetaManagedAgentsDocumentBlockParam,
+    BetaManagedAgentsRedactedBlockParam,
 ]
 
 
