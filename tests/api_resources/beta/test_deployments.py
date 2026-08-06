@@ -59,6 +59,13 @@ class TestDeployments:
                 }
             ],
             name="x",
+            budget={
+                "max_list_cost": {
+                    "amount": "2500",
+                    "currency": "USD",
+                },
+                "type": "limit",
+            },
             description="description",
             metadata={"foo": "string"},
             resources=[
@@ -191,6 +198,13 @@ class TestDeployments:
         deployment = client.beta.deployments.update(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             agent="string",
+            budget={
+                "max_list_cost": {
+                    "amount": "2500",
+                    "currency": "USD",
+                },
+                "type": "limit",
+            },
             description="description",
             environment_id="environment_id",
             initial_events=[
@@ -524,6 +538,13 @@ class TestAsyncDeployments:
                 }
             ],
             name="x",
+            budget={
+                "max_list_cost": {
+                    "amount": "2500",
+                    "currency": "USD",
+                },
+                "type": "limit",
+            },
             description="description",
             metadata={"foo": "string"},
             resources=[
@@ -656,6 +677,13 @@ class TestAsyncDeployments:
         deployment = await async_client.beta.deployments.update(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             agent="string",
+            budget={
+                "max_list_cost": {
+                    "amount": "2500",
+                    "currency": "USD",
+                },
+                "type": "limit",
+            },
             description="description",
             environment_id="environment_id",
             initial_events=[

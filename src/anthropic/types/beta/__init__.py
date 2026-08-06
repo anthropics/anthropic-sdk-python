@@ -150,6 +150,7 @@ from .beta_citations_config_param import BetaCitationsConfigParam as BetaCitatio
 from .beta_compaction_block_param import BetaCompactionBlockParam as BetaCompactionBlockParam
 from .beta_container_upload_block import BetaContainerUploadBlock as BetaContainerUploadBlock
 from .beta_limited_network_params import BetaLimitedNetworkParams as BetaLimitedNetworkParams
+from .beta_managed_agents_advisor import BetaManagedAgentsAdvisor as BetaManagedAgentsAdvisor
 from .beta_managed_agents_session import BetaManagedAgentsSession as BetaManagedAgentsSession
 from .beta_raw_message_stop_event import BetaRawMessageStopEvent as BetaRawMessageStopEvent
 from .beta_tool_choice_auto_param import BetaToolChoiceAutoParam as BetaToolChoiceAutoParam
@@ -220,6 +221,7 @@ from .beta_environment_delete_response import BetaEnvironmentDeleteResponse as B
 from .beta_fallback_credit_not_applied import BetaFallbackCreditNotApplied as BetaFallbackCreditNotApplied
 from .beta_fallback_credit_token_param import BetaFallbackCreditTokenParam as BetaFallbackCreditTokenParam
 from .beta_managed_agents_agent_params import BetaManagedAgentsAgentParams as BetaManagedAgentsAgentParams
+from .beta_managed_agents_budget_limit import BetaManagedAgentsBudgetLimit as BetaManagedAgentsBudgetLimit
 from .beta_managed_agents_custom_skill import BetaManagedAgentsCustomSkill as BetaManagedAgentsCustomSkill
 from .beta_managed_agents_effort_xhigh import BetaManagedAgentsEffortXhigh as BetaManagedAgentsEffortXhigh
 from .beta_managed_agents_memory_store import BetaManagedAgentsMemoryStore as BetaManagedAgentsMemoryStore
@@ -247,6 +249,7 @@ from .beta_web_search_tool_result_error import BetaWebSearchToolResultError as B
 from .beta_advisor_redacted_result_block import BetaAdvisorRedactedResultBlock as BetaAdvisorRedactedResultBlock
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam as BetaCacheControlEphemeralParam
 from .beta_context_management_capability import BetaContextManagementCapability as BetaContextManagementCapability
+from .beta_managed_agents_advisor_params import BetaManagedAgentsAdvisorParams as BetaManagedAgentsAdvisorParams
 from .beta_managed_agents_deployment_run import BetaManagedAgentsDeploymentRun as BetaManagedAgentsDeploymentRun
 from .beta_mcp_tool_default_config_param import BetaMCPToolDefaultConfigParam as BetaMCPToolDefaultConfigParam
 from .beta_raw_content_block_delta_event import BetaRawContentBlockDeltaEvent as BetaRawContentBlockDeltaEvent
@@ -303,6 +306,7 @@ from .beta_managed_agents_effort_high_param import BetaManagedAgentsEffortHighPa
 from .beta_managed_agents_multiagent_params import (
     BetaManagedAgentsMultiagentParams as BetaManagedAgentsMultiagentParams,
 )
+from .beta_managed_agents_server_tool_usage import BetaManagedAgentsServerToolUsage as BetaManagedAgentsServerToolUsage
 from .beta_managed_agents_unknown_run_error import BetaManagedAgentsUnknownRunError as BetaManagedAgentsUnknownRunError
 from .beta_request_tool_removal_block_param import BetaRequestToolRemovalBlockParam as BetaRequestToolRemovalBlockParam
 from .beta_tool_change_tool_reference_param import BetaToolChangeToolReferenceParam as BetaToolChangeToolReferenceParam
@@ -323,6 +327,9 @@ from .beta_code_execution_result_block_param import (
     BetaCodeExecutionResultBlockParam as BetaCodeExecutionResultBlockParam,
 )
 from .beta_input_tokens_clear_at_least_param import BetaInputTokensClearAtLeastParam as BetaInputTokensClearAtLeastParam
+from .beta_managed_agents_budget_limit_param import (
+    BetaManagedAgentsBudgetLimitParam as BetaManagedAgentsBudgetLimitParam,
+)
 from .beta_managed_agents_custom_tool_params import (
     BetaManagedAgentsCustomToolParams as BetaManagedAgentsCustomToolParams,
 )
@@ -379,6 +386,9 @@ from .beta_managed_agents_effort_medium_param import (
 )
 from .beta_managed_agents_model_config_params import (
     BetaManagedAgentsModelConfigParams as BetaManagedAgentsModelConfigParams,
+)
+from .beta_managed_agents_session_usage_event import (
+    BetaManagedAgentsSessionUsageEvent as BetaManagedAgentsSessionUsageEvent,
 )
 from .beta_managed_agents_start_event_preview import (
     BetaManagedAgentsStartEventPreview as BetaManagedAgentsStartEventPreview,
@@ -673,6 +683,9 @@ from .beta_managed_agents_system_content_block_param import (
 )
 from .beta_webhook_deployment_run_started_event_data import (
     BetaWebhookDeploymentRunStartedEventData as BetaWebhookDeploymentRunStartedEventData,
+)
+from .beta_webhook_session_budget_reached_event_data import (
+    BetaWebhookSessionBudgetReachedEventData as BetaWebhookSessionBudgetReachedEventData,
 )
 from .beta_webhook_session_thread_created_event_data import (
     BetaWebhookSessionThreadCreatedEventData as BetaWebhookSessionThreadCreatedEventData,

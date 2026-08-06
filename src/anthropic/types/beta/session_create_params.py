@@ -9,6 +9,7 @@ from ..._types import SequenceNotStr
 from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_agent_params import BetaManagedAgentsAgentParams
+from .beta_managed_agents_budget_limit_param import BetaManagedAgentsBudgetLimitParam
 from .beta_managed_agents_file_resource_params import BetaManagedAgentsFileResourceParams
 from .beta_managed_agents_agent_with_overrides_params import BetaManagedAgentsAgentWithOverridesParams
 from .beta_managed_agents_memory_store_resource_param import BetaManagedAgentsMemoryStoreResourceParam
@@ -29,6 +30,13 @@ class SessionCreateParams(TypedDict, total=False):
 
     environment_id: Required[str]
     """ID of the `environment` defining the container configuration for this session."""
+
+    budget: BetaManagedAgentsBudgetLimitParam
+    """A hard spend ceiling.
+
+    The session stops issuing new model requests once the tracked list cost reaches
+    `max_list_cost`.
+    """
 
     initial_events: Iterable[InitialEvent]
     """Initial events to send to the `session` at creation, processed in order.

@@ -42,6 +42,12 @@ class BetaManagedAgentsModelConfig(BaseModel):
     Sets `output_config.effort` on every Messages call the session makes.
     """
 
+    inference_geo: Optional[str] = None
+    """Geographic region for model inference.
+
+    When unset, requests fall through to the workspace's default_inference_geo.
+    """
+
     speed: Optional[Literal["standard", "fast"]] = None
     """Inference speed mode.
 

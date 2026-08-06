@@ -49,6 +49,7 @@ from .threads.threads import (
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_managed_agents_session import BetaManagedAgentsSession
 from ....types.beta.beta_managed_agents_deleted_session import BetaManagedAgentsDeletedSession
+from ....types.beta.beta_managed_agents_budget_limit_param import BetaManagedAgentsBudgetLimitParam
 from ....types.beta.beta_managed_agents_session_agent_update_param import BetaManagedAgentsSessionAgentUpdateParam
 
 __all__ = ["Sessions", "AsyncSessions"]
@@ -91,6 +92,7 @@ class Sessions(SyncAPIResource):
         *,
         agent: session_create_params.Agent,
         environment_id: str,
+        budget: BetaManagedAgentsBudgetLimitParam | Omit = omit,
         initial_events: Iterable[session_create_params.InitialEvent] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         resources: Iterable[session_create_params.Resource] | Omit = omit,
@@ -113,6 +115,9 @@ class Sessions(SyncAPIResource):
               for the session, or an `agent` object with both id and version specified.
 
           environment_id: ID of the `environment` defining the container configuration for this session.
+
+          budget: A hard spend ceiling. The session stops issuing new model requests once the
+              tracked list cost reaches `max_list_cost`.
 
           initial_events: Initial events to send to the `session` at creation, processed in order.
               Supports `user.message` and `user.define_outcome` events. Maximum 50 events.
@@ -153,6 +158,7 @@ class Sessions(SyncAPIResource):
                 {
                     "agent": agent,
                     "environment_id": environment_id,
+                    "budget": budget,
                     "initial_events": initial_events,
                     "metadata": metadata,
                     "resources": resources,
@@ -219,6 +225,7 @@ class Sessions(SyncAPIResource):
         session_id: str,
         *,
         agent: BetaManagedAgentsSessionAgentUpdateParam | Omit = omit,
+        budget: Optional[BetaManagedAgentsBudgetLimitParam] | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         title: Optional[str] | Omit = omit,
         vault_ids: SequenceNotStr[str] | Omit = omit,
@@ -238,6 +245,9 @@ class Sessions(SyncAPIResource):
         Only `tools` and `mcp_servers` are
               updatable. Full replacement: the provided array becomes the new value. To
               preserve existing entries, GET the session, modify the array, and POST it back.
+
+          budget: A hard spend ceiling. The session stops issuing new model requests once the
+              tracked list cost reaches `max_list_cost`.
 
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omit the field to preserve.
@@ -275,6 +285,7 @@ class Sessions(SyncAPIResource):
             body=maybe_transform(
                 {
                     "agent": agent,
+                    "budget": budget,
                     "metadata": metadata,
                     "title": title,
                     "vault_ids": vault_ids,
@@ -527,6 +538,7 @@ class AsyncSessions(AsyncAPIResource):
         *,
         agent: session_create_params.Agent,
         environment_id: str,
+        budget: BetaManagedAgentsBudgetLimitParam | Omit = omit,
         initial_events: Iterable[session_create_params.InitialEvent] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         resources: Iterable[session_create_params.Resource] | Omit = omit,
@@ -549,6 +561,9 @@ class AsyncSessions(AsyncAPIResource):
               for the session, or an `agent` object with both id and version specified.
 
           environment_id: ID of the `environment` defining the container configuration for this session.
+
+          budget: A hard spend ceiling. The session stops issuing new model requests once the
+              tracked list cost reaches `max_list_cost`.
 
           initial_events: Initial events to send to the `session` at creation, processed in order.
               Supports `user.message` and `user.define_outcome` events. Maximum 50 events.
@@ -589,6 +604,7 @@ class AsyncSessions(AsyncAPIResource):
                 {
                     "agent": agent,
                     "environment_id": environment_id,
+                    "budget": budget,
                     "initial_events": initial_events,
                     "metadata": metadata,
                     "resources": resources,
@@ -655,6 +671,7 @@ class AsyncSessions(AsyncAPIResource):
         session_id: str,
         *,
         agent: BetaManagedAgentsSessionAgentUpdateParam | Omit = omit,
+        budget: Optional[BetaManagedAgentsBudgetLimitParam] | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         title: Optional[str] | Omit = omit,
         vault_ids: SequenceNotStr[str] | Omit = omit,
@@ -674,6 +691,9 @@ class AsyncSessions(AsyncAPIResource):
         Only `tools` and `mcp_servers` are
               updatable. Full replacement: the provided array becomes the new value. To
               preserve existing entries, GET the session, modify the array, and POST it back.
+
+          budget: A hard spend ceiling. The session stops issuing new model requests once the
+              tracked list cost reaches `max_list_cost`.
 
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omit the field to preserve.
@@ -711,6 +731,7 @@ class AsyncSessions(AsyncAPIResource):
             body=await async_maybe_transform(
                 {
                     "agent": agent,
+                    "budget": budget,
                     "metadata": metadata,
                     "title": title,
                     "vault_ids": vault_ids,

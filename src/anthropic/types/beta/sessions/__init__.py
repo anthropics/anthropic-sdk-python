@@ -21,6 +21,7 @@ from .beta_managed_agents_file_resource import BetaManagedAgentsFileResource as 
 from .beta_managed_agents_session_event import BetaManagedAgentsSessionEvent as BetaManagedAgentsSessionEvent
 from .beta_managed_agents_unknown_error import BetaManagedAgentsUnknownError as BetaManagedAgentsUnknownError
 from .beta_managed_agents_document_block import BetaManagedAgentsDocumentBlock as BetaManagedAgentsDocumentBlock
+from .beta_managed_agents_redacted_block import BetaManagedAgentsRedactedBlock as BetaManagedAgentsRedactedBlock
 from .beta_managed_agents_session_thread import BetaManagedAgentsSessionThread as BetaManagedAgentsSessionThread
 from .beta_managed_agents_session_end_turn import BetaManagedAgentsSessionEndTurn as BetaManagedAgentsSessionEndTurn
 from .beta_managed_agents_session_resource import BetaManagedAgentsSessionResource as BetaManagedAgentsSessionResource
@@ -68,6 +69,9 @@ from .beta_managed_agents_document_block_param import (
 from .beta_managed_agents_file_document_source import (
     BetaManagedAgentsFileDocumentSource as BetaManagedAgentsFileDocumentSource,
 )
+from .beta_managed_agents_redacted_block_param import (
+    BetaManagedAgentsRedactedBlockParam as BetaManagedAgentsRedactedBlockParam,
+)
 from .beta_managed_agents_session_thread_stats import (
     BetaManagedAgentsSessionThreadStats as BetaManagedAgentsSessionThreadStats,
 )
@@ -106,6 +110,12 @@ from .beta_managed_agents_model_overloaded_error import (
 )
 from .beta_managed_agents_retry_status_exhausted import (
     BetaManagedAgentsRetryStatusExhausted as BetaManagedAgentsRetryStatusExhausted,
+)
+from .beta_managed_agents_session_budget_reached import (
+    BetaManagedAgentsSessionBudgetReached as BetaManagedAgentsSessionBudgetReached,
+)
+from .beta_managed_agents_session_usage_snapshot import (
+    BetaManagedAgentsSessionUsageSnapshot as BetaManagedAgentsSessionUsageSnapshot,
 )
 from .beta_managed_agents_url_image_source_param import (
     BetaManagedAgentsURLImageSourceParam as BetaManagedAgentsURLImageSourceParam,

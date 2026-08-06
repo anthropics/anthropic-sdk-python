@@ -1,16 +1,22 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import Optional
+from typing import Union, Optional
 from datetime import datetime
-from typing_extensions import Literal
+from typing_extensions import Literal, Annotated, TypeAlias
 
+from ...._utils import PropertyInfo
 from ...._models import BaseModel
+from ..beta_managed_agents_advisor import BetaManagedAgentsAdvisor
 from .beta_managed_agents_session_thread_stats import BetaManagedAgentsSessionThreadStats
 from .beta_managed_agents_session_thread_usage import BetaManagedAgentsSessionThreadUsage
 from ..beta_managed_agents_session_thread_agent import BetaManagedAgentsSessionThreadAgent
 from .beta_managed_agents_session_thread_status import BetaManagedAgentsSessionThreadStatus
 
-__all__ = ["BetaManagedAgentsSessionThread"]
+__all__ = ["BetaManagedAgentsSessionThread", "Agent"]
+
+Agent: TypeAlias = Annotated[
+    Union[BetaManagedAgentsSessionThreadAgent, BetaManagedAgentsAdvisor], PropertyInfo(discriminator="type")
+]
 
 
 class BetaManagedAgentsSessionThread(BaseModel):
@@ -22,12 +28,8 @@ class BetaManagedAgentsSessionThread(BaseModel):
     id: str
     """Unique identifier for this thread."""
 
-    agent: BetaManagedAgentsSessionThreadAgent
-    """Resolved `agent` definition for a single `session_thread`.
-
-    Snapshot of the agent at thread creation time. The multiagent roster is not
-    repeated here; read it from `Session.agent`.
-    """
+    agent: Agent
+    """A session-resolved multiagent roster entry."""
 
     archived_at: Optional[datetime] = None
     """A timestamp in RFC 3339 format"""

@@ -10,6 +10,7 @@ from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_agent_params import BetaManagedAgentsAgentParams
 from .beta_managed_agents_schedule_params import BetaManagedAgentsScheduleParams
+from .beta_managed_agents_budget_limit_param import BetaManagedAgentsBudgetLimitParam
 from .beta_managed_agents_file_resource_params import BetaManagedAgentsFileResourceParams
 from .beta_managed_agents_memory_store_resource_param import BetaManagedAgentsMemoryStoreResourceParam
 from .beta_managed_agents_deployment_initial_event_params import BetaManagedAgentsDeploymentInitialEventParams
@@ -41,6 +42,13 @@ class DeploymentCreateParams(TypedDict, total=False):
 
     name: Required[str]
     """Human-readable name for the deployment."""
+
+    budget: Optional[BetaManagedAgentsBudgetLimitParam]
+    """A hard spend ceiling.
+
+    The session stops issuing new model requests once the tracked list cost reaches
+    `max_list_cost`.
+    """
 
     description: Optional[str]
     """Description of what the deployment does."""
