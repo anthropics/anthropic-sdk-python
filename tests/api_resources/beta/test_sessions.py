@@ -35,6 +35,13 @@ class TestSessions:
         session = client.beta.sessions.create(
             agent="agent_011CZkYpogX7uDKUyvBTophP",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
+            budget={
+                "max_list_cost": {
+                    "amount": "2500",
+                    "currency": "USD",
+                },
+                "type": "limit",
+            },
             initial_events=[
                 {
                     "content": [
@@ -167,6 +174,13 @@ class TestSessions:
                         },
                     }
                 ],
+            },
+            budget={
+                "max_list_cost": {
+                    "amount": "2500",
+                    "currency": "USD",
+                },
+                "type": "limit",
             },
             metadata={"foo": "string"},
             title="Order #1234 inquiry",
@@ -366,6 +380,13 @@ class TestAsyncSessions:
         session = await async_client.beta.sessions.create(
             agent="agent_011CZkYpogX7uDKUyvBTophP",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
+            budget={
+                "max_list_cost": {
+                    "amount": "2500",
+                    "currency": "USD",
+                },
+                "type": "limit",
+            },
             initial_events=[
                 {
                     "content": [
@@ -498,6 +519,13 @@ class TestAsyncSessions:
                         },
                     }
                 ],
+            },
+            budget={
+                "max_list_cost": {
+                    "amount": "2500",
+                    "currency": "USD",
+                },
+                "type": "limit",
             },
             metadata={"foo": "string"},
             title="Order #1234 inquiry",

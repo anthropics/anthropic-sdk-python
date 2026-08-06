@@ -6,6 +6,7 @@ from typing_extensions import Literal
 
 from ..._models import BaseModel
 from .beta_managed_agents_schedule import BetaManagedAgentsSchedule
+from .beta_managed_agents_budget_limit import BetaManagedAgentsBudgetLimit
 from .beta_managed_agents_agent_reference import BetaManagedAgentsAgentReference
 from .beta_managed_agents_deployment_status import BetaManagedAgentsDeploymentStatus
 from .beta_managed_agents_session_resource_config import BetaManagedAgentsSessionResourceConfig
@@ -71,4 +72,11 @@ class BetaManagedAgentsDeployment(BaseModel):
     """
     Vault IDs supplying stored credentials for sessions created from this
     deployment.
+    """
+
+    budget: Optional[BetaManagedAgentsBudgetLimit] = None
+    """A hard spend ceiling.
+
+    The session stops issuing new model requests once the tracked list cost reaches
+    `max_list_cost`.
     """

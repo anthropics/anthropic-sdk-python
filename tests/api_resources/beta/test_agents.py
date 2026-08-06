@@ -176,6 +176,7 @@ class TestAgents:
             model={
                 "id": "claude-opus-4-8",
                 "effort": "low",
+                "inference_geo": "inference_geo",
                 "speed": "standard",
             },
             multiagent={
@@ -491,6 +492,7 @@ class TestAsyncAgents:
             model={
                 "id": "claude-opus-4-8",
                 "effort": "low",
+                "inference_geo": "inference_geo",
                 "speed": "standard",
             },
             multiagent={

@@ -35,6 +35,7 @@ from .beta_webhook_session_thread_idled_event_data import BetaWebhookSessionThre
 from .beta_webhook_deployment_run_failed_event_data import BetaWebhookDeploymentRunFailedEventData
 from .beta_webhook_memory_store_archived_event_data import BetaWebhookMemoryStoreArchivedEventData
 from .beta_webhook_deployment_run_started_event_data import BetaWebhookDeploymentRunStartedEventData
+from .beta_webhook_session_budget_reached_event_data import BetaWebhookSessionBudgetReachedEventData
 from .beta_webhook_session_thread_created_event_data import BetaWebhookSessionThreadCreatedEventData
 from .beta_webhook_session_requires_action_event_data import BetaWebhookSessionRequiresActionEventData
 from .beta_webhook_deployment_run_succeeded_event_data import BetaWebhookDeploymentRunSucceededEventData
@@ -95,6 +96,7 @@ BetaWebhookEventData: TypeAlias = Annotated[
         BetaWebhookMemoryStoreCreatedEventData,
         BetaWebhookMemoryStoreArchivedEventData,
         BetaWebhookMemoryStoreDeletedEventData,
+        BetaWebhookSessionBudgetReachedEventData,
     ],
     PropertyInfo(discriminator="type"),
 ]

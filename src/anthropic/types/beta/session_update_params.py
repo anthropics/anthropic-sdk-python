@@ -8,6 +8,7 @@ from typing_extensions import Annotated, TypedDict
 from ..._types import SequenceNotStr
 from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
+from .beta_managed_agents_budget_limit_param import BetaManagedAgentsBudgetLimitParam
 from .beta_managed_agents_session_agent_update_param import BetaManagedAgentsSessionAgentUpdateParam
 
 __all__ = ["SessionUpdateParams"]
@@ -20,6 +21,13 @@ class SessionUpdateParams(TypedDict, total=False):
     Only `tools` and `mcp_servers` are updatable. Full replacement: the provided
     array becomes the new value. To preserve existing entries, GET the session,
     modify the array, and POST it back.
+    """
+
+    budget: Optional[BetaManagedAgentsBudgetLimitParam]
+    """A hard spend ceiling.
+
+    The session stops issuing new model requests once the tracked list cost reaches
+    `max_list_cost`.
     """
 
     metadata: Optional[Dict[str, Optional[str]]]

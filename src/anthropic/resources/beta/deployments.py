@@ -28,6 +28,7 @@ from ...types.beta.beta_managed_agents_deployment import BetaManagedAgentsDeploy
 from ...types.beta.beta_managed_agents_deployment_run import BetaManagedAgentsDeploymentRun
 from ...types.beta.beta_managed_agents_schedule_params import BetaManagedAgentsScheduleParams
 from ...types.beta.beta_managed_agents_deployment_status import BetaManagedAgentsDeploymentStatus
+from ...types.beta.beta_managed_agents_budget_limit_param import BetaManagedAgentsBudgetLimitParam
 from ...types.beta.beta_managed_agents_deployment_initial_event_params import (
     BetaManagedAgentsDeploymentInitialEventParams,
 )
@@ -62,6 +63,7 @@ class Deployments(SyncAPIResource):
         environment_id: str,
         initial_events: Iterable[BetaManagedAgentsDeploymentInitialEventParams],
         name: str,
+        budget: Optional[BetaManagedAgentsBudgetLimitParam] | Omit = omit,
         description: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         resources: Iterable[deployment_create_params.Resource] | Omit = omit,
@@ -91,6 +93,9 @@ class Deployments(SyncAPIResource):
               maximum 50.
 
           name: Human-readable name for the deployment.
+
+          budget: A hard spend ceiling. The session stops issuing new model requests once the
+              tracked list cost reaches `max_list_cost`.
 
           description: Description of what the deployment does.
 
@@ -135,6 +140,7 @@ class Deployments(SyncAPIResource):
                     "environment_id": environment_id,
                     "initial_events": initial_events,
                     "name": name,
+                    "budget": budget,
                     "description": description,
                     "metadata": metadata,
                     "resources": resources,
@@ -201,6 +207,7 @@ class Deployments(SyncAPIResource):
         deployment_id: str,
         *,
         agent: deployment_update_params.Agent | Omit = omit,
+        budget: Optional[BetaManagedAgentsBudgetLimitParam] | Omit = omit,
         description: Optional[str] | Omit = omit,
         environment_id: str | Omit = omit,
         initial_events: Iterable[BetaManagedAgentsDeploymentInitialEventParams] | Omit = omit,
@@ -225,6 +232,9 @@ class Deployments(SyncAPIResource):
         Accepts the `agent` ID string, which re-pins to the latest
               version, or an `agent` object with both id and version specified. Omit to
               preserve. Cannot be cleared.
+
+          budget: A hard spend ceiling. The session stops issuing new model requests once the
+              tracked list cost reaches `max_list_cost`.
 
           description: Description. Omit to preserve; send empty string or null to clear.
 
@@ -276,6 +286,7 @@ class Deployments(SyncAPIResource):
             body=maybe_transform(
                 {
                     "agent": agent,
+                    "budget": budget,
                     "description": description,
                     "environment_id": environment_id,
                     "initial_events": initial_events,
@@ -591,6 +602,7 @@ class AsyncDeployments(AsyncAPIResource):
         environment_id: str,
         initial_events: Iterable[BetaManagedAgentsDeploymentInitialEventParams],
         name: str,
+        budget: Optional[BetaManagedAgentsBudgetLimitParam] | Omit = omit,
         description: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         resources: Iterable[deployment_create_params.Resource] | Omit = omit,
@@ -620,6 +632,9 @@ class AsyncDeployments(AsyncAPIResource):
               maximum 50.
 
           name: Human-readable name for the deployment.
+
+          budget: A hard spend ceiling. The session stops issuing new model requests once the
+              tracked list cost reaches `max_list_cost`.
 
           description: Description of what the deployment does.
 
@@ -664,6 +679,7 @@ class AsyncDeployments(AsyncAPIResource):
                     "environment_id": environment_id,
                     "initial_events": initial_events,
                     "name": name,
+                    "budget": budget,
                     "description": description,
                     "metadata": metadata,
                     "resources": resources,
@@ -730,6 +746,7 @@ class AsyncDeployments(AsyncAPIResource):
         deployment_id: str,
         *,
         agent: deployment_update_params.Agent | Omit = omit,
+        budget: Optional[BetaManagedAgentsBudgetLimitParam] | Omit = omit,
         description: Optional[str] | Omit = omit,
         environment_id: str | Omit = omit,
         initial_events: Iterable[BetaManagedAgentsDeploymentInitialEventParams] | Omit = omit,
@@ -754,6 +771,9 @@ class AsyncDeployments(AsyncAPIResource):
         Accepts the `agent` ID string, which re-pins to the latest
               version, or an `agent` object with both id and version specified. Omit to
               preserve. Cannot be cleared.
+
+          budget: A hard spend ceiling. The session stops issuing new model requests once the
+              tracked list cost reaches `max_list_cost`.
 
           description: Description. Omit to preserve; send empty string or null to clear.
 
@@ -805,6 +825,7 @@ class AsyncDeployments(AsyncAPIResource):
             body=await async_maybe_transform(
                 {
                     "agent": agent,
+                    "budget": budget,
                     "description": description,
                     "environment_id": environment_id,
                     "initial_events": initial_events,
