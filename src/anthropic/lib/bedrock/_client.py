@@ -15,7 +15,7 @@ from ..._utils import is_dict, is_given
 from ..._compat import model_copy
 from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
-from ..._exceptions import AnthropicError, APIStatusError
+from ..._exceptions import AnthropicError, APIStatusError, RetryableError
 from ..._middleware import MiddlewareInput
 from ..._base_client import (
     DEFAULT_MAX_RETRIES,
@@ -94,6 +94,7 @@ def _infer_region() -> str:
 
 class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
     @override
+    @override
     def _make_status_error(
         self,
         err_msg: str,
@@ -118,6 +119,16 @@ class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
 
         if response.status_code == 422:
             return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
+
+        if response.status_code == 424:
+            # Bedrock returns 424 for "Failed Dependency" which can occur due to
+            # temporary service issues. This should be retryable.
+            return RetryableError(err_msg, response=response, body=body)
+
+        if response.status_code == 424:
+            # Bedrock returns 424 for "Failed Dependency" which can occur due to
+            # temporary service issues. This should be retryable.
+            return RetryableError(err_msg, response=response, body=body)
 
         if response.status_code == 429:
             return _exceptions.RateLimitError(err_msg, response=response, body=body)
@@ -200,291 +211,4 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
             custom_query=default_query,
             http_client=http_client,
             middleware=middleware,
-            _strict_response_validation=_strict_response_validation,
-        )
-
-        self.beta = Beta(self)
-        self.messages = Messages(self)
-        self.completions = Completions(self)
-
-    @override
-    def _make_sse_decoder(self) -> AWSEventStreamDecoder:
-        return AWSEventStreamDecoder()
-
-    @override
-    def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        return _prepare_options(options)
-
-    @override
-    def _prepare_request(self, request: httpx.Request) -> None:
-        if self.api_key is not None:
-            request.headers["Authorization"] = f"Bearer {self.api_key}"
-            return
-
-        from ._auth import get_auth_headers
-
-        data = request.read().decode()
-
-        headers = get_auth_headers(
-            method=request.method,
-            url=str(request.url),
-            headers=request.headers,
-            aws_access_key=self.aws_access_key,
-            aws_secret_key=self.aws_secret_key,
-            aws_session_token=self.aws_session_token,
-            region=self.aws_region or "us-east-1",
-            profile=self.aws_profile,
-            data=data,
-        )
-        request.headers.update(headers)
-
-    def copy(
-        self,
-        *,
-        aws_secret_key: str | None = None,
-        aws_access_key: str | None = None,
-        aws_region: str | None = None,
-        aws_session_token: str | None = None,
-        api_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
-        http_client: httpx.Client | None = None,
-        max_retries: int | NotGiven = NOT_GIVEN,
-        default_headers: Mapping[str, str] | None = None,
-        set_default_headers: Mapping[str, str] | None = None,
-        default_query: Mapping[str, object] | None = None,
-        set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
-        _extra_kwargs: Mapping[str, Any] = {},
-    ) -> Self:
-        """
-        Create a new client instance re-using the same options given to the current client with optional overriding.
-        """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
-            aws_secret_key=aws_secret_key or self.aws_secret_key,
-            aws_access_key=aws_access_key or self.aws_access_key,
-            aws_region=aws_region or self.aws_region,
-            aws_session_token=aws_session_token or self.aws_session_token,
-            api_key=api_key or self.api_key,
-            base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
-            http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
-            **_extra_kwargs,
-        )
-
-    # Alias for `copy` for nicer inline usage, e.g.
-    # client.with_options(timeout=10).foo.create(...)
-    with_options = copy
-
-    def with_middleware(self, *middleware: MiddlewareInput) -> Self:
-        """A new client with the given middleware appended after this client's middleware.
-
-        Convenience for applying extra middleware to a single request:
-
-        ```py
-        client.with_middleware(my_middleware).messages.create(...)
-        ```
-        """
-        return self.copy(middleware=[*self._middleware, *middleware])
-
-
-class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
-    messages: AsyncMessages
-    completions: AsyncCompletions
-    beta: AsyncBeta
-
-    def __init__(
-        self,
-        aws_secret_key: str | None = None,
-        aws_access_key: str | None = None,
-        aws_region: str | None = None,
-        aws_profile: str | None = None,
-        aws_session_token: str | None = None,
-        api_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-        max_retries: int = DEFAULT_MAX_RETRIES,
-        default_headers: Mapping[str, str] | None = None,
-        default_query: Mapping[str, object] | None = None,
-        # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
-        http_client: httpx.AsyncClient | None = None,
-        middleware: Sequence[MiddlewareInput] | None = None,
-        # Enable or disable schema validation for data returned by the API.
-        # When enabled an error APIResponseValidationError is raised
-        # if the API responds with invalid data for the expected schema.
-        #
-        # This parameter may be removed or changed in the future.
-        # If you rely on this feature, please open a GitHub issue
-        # outlining your use-case to help us decide if it should be
-        # part of our public interface in the future.
-        _strict_response_validation: bool = False,
-    ) -> None:
-        if api_key is None:
-            api_key = os.environ.get("AWS_BEARER_TOKEN_BEDROCK")
-
-        has_aws_credentials = (
-            aws_access_key is not None
-            or aws_secret_key is not None
-            or aws_session_token is not None
-            or aws_profile is not None
-        )
-        if api_key is not None and has_aws_credentials:
-            raise ValueError(
-                "Cannot specify both `api_key` and AWS credentials (`aws_access_key`, `aws_secret_key`, `aws_session_token`, `aws_profile`)"
-            )
-
-        self.api_key: str | None = api_key
-
-        self.aws_secret_key = aws_secret_key
-
-        self.aws_access_key = aws_access_key
-
-        self.aws_region = _infer_region() if aws_region is None else aws_region
-        self.aws_profile = aws_profile
-
-        self.aws_session_token = aws_session_token
-
-        if base_url is None:
-            base_url = os.environ.get("ANTHROPIC_BEDROCK_BASE_URL")
-        if base_url is None:
-            base_url = f"https://bedrock-runtime.{self.aws_region}.amazonaws.com"
-
-        super().__init__(
-            version=__version__,
-            base_url=base_url,
-            timeout=timeout,
-            max_retries=max_retries,
-            custom_headers=default_headers,
-            custom_query=default_query,
-            http_client=http_client,
-            middleware=middleware,
-            _strict_response_validation=_strict_response_validation,
-        )
-
-        self.messages = AsyncMessages(self)
-        self.completions = AsyncCompletions(self)
-        self.beta = AsyncBeta(self)
-
-    @override
-    def _make_sse_decoder(self) -> AWSEventStreamDecoder:
-        return AWSEventStreamDecoder()
-
-    @override
-    async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        return _prepare_options(options)
-
-    @override
-    async def _prepare_request(self, request: httpx.Request) -> None:
-        if self.api_key is not None:
-            request.headers["Authorization"] = f"Bearer {self.api_key}"
-            return
-
-        from ._auth import get_auth_headers
-
-        data = request.read().decode()
-
-        headers = get_auth_headers(
-            method=request.method,
-            url=str(request.url),
-            headers=request.headers,
-            aws_access_key=self.aws_access_key,
-            aws_secret_key=self.aws_secret_key,
-            aws_session_token=self.aws_session_token,
-            region=self.aws_region or "us-east-1",
-            profile=self.aws_profile,
-            data=data,
-        )
-        request.headers.update(headers)
-
-    def copy(
-        self,
-        *,
-        aws_secret_key: str | None = None,
-        aws_access_key: str | None = None,
-        aws_region: str | None = None,
-        aws_session_token: str | None = None,
-        api_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
-        http_client: httpx.AsyncClient | None = None,
-        max_retries: int | NotGiven = NOT_GIVEN,
-        default_headers: Mapping[str, str] | None = None,
-        set_default_headers: Mapping[str, str] | None = None,
-        default_query: Mapping[str, object] | None = None,
-        set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
-        _extra_kwargs: Mapping[str, Any] = {},
-    ) -> Self:
-        """
-        Create a new client instance re-using the same options given to the current client with optional overriding.
-        """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
-            aws_secret_key=aws_secret_key or self.aws_secret_key,
-            aws_access_key=aws_access_key or self.aws_access_key,
-            aws_region=aws_region or self.aws_region,
-            aws_session_token=aws_session_token or self.aws_session_token,
-            api_key=api_key or self.api_key,
-            base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
-            http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
-            **_extra_kwargs,
-        )
-
-    # Alias for `copy` for nicer inline usage, e.g.
-    # client.with_options(timeout=10).foo.create(...)
-    with_options = copy
-
-    def with_middleware(self, *middleware: MiddlewareInput) -> Self:
-        """A new client with the given middleware appended after this client's middleware.
-
-        Convenience for applying extra middleware to a single request:
-
-        ```py
-        client.with_middleware(my_middleware).messages.create(...)
-        ```
-        """
-        return self.copy(middleware=[*self._middleware, *middleware])
+            _str
