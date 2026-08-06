@@ -246,7 +246,7 @@ For running a managed agent's tools locally against a self-hosted environment, t
   `DispatchedToolCall` per completed call. Use it directly when you want to observe each dispatch
   (the worker drives one internally). Async only.
 - `client.beta.environments.work.poller(...)` — the control-plane only piece: claims work items,
-  ack's each one, and yields each claimed work item. Async only — available on `AsyncAnthropic`
+  acks each one, and yields each claimed work item. Async only — available on `AsyncAnthropic`
   (its `worker(...)` companion is async too, so the sync client does not expose either).
 
 The standard `agent_toolset_20260401` implementations (`bash`, `read`, `write`, `edit`, `glob`,
