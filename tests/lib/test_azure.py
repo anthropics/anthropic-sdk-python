@@ -112,6 +112,37 @@ class TestAnthropicFoundry:
         copied = client.with_options(default_headers={"x-stainless-helper": "child"})
         assert copied.default_headers.get("x-stainless-helper") == "parent, child"
 
+    def test_copy_with_resource_from_environment(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """copy()/with_options() must work when `resource` comes from the environment.
+
+        copy() always forwards `base_url` and never `resource`, so re-reading
+        ANTHROPIC_FOUNDRY_RESOURCE in __init__ used to collide with the forwarded
+        base_url and raise "base_url and resource are mutually exclusive".
+        """
+        monkeypatch.setenv("ANTHROPIC_FOUNDRY_API_KEY", "env-key")
+        monkeypatch.setenv("ANTHROPIC_FOUNDRY_RESOURCE", "env-resource")
+
+        client = AnthropicFoundry()
+        copied = client.copy()
+        assert str(copied.base_url) == str(client.base_url)
+
+        derived = client.with_options(max_retries=7)
+        assert derived.max_retries == 7
+        assert str(derived.base_url) == str(client.base_url)
+
+    def test_explicit_base_url_and_resource_conflict(self) -> None:
+        """Explicitly passing both `base_url` and `resource` is still rejected at runtime.
+
+        The typed overloads already forbid this statically; the runtime guard
+        protects dynamic callers, so the call is deliberately type-ignored here.
+        """
+        with pytest.raises(ValueError, match="base_url and resource are mutually exclusive"):
+            AnthropicFoundry(  # type: ignore[call-overload]  # pyright: ignore[reportCallIssue]
+                api_key="test-key",
+                base_url="https://example.com/",
+                resource="example-resource",
+            )
+
 
 class TestAsyncAnthropicFoundry:
     @pytest.mark.asyncio
@@ -180,6 +211,18 @@ class TestAsyncAnthropicFoundry:
 
         copied = client.with_options(default_headers={"x-stainless-helper": "child"})
         assert copied.default_headers.get("x-stainless-helper") == "parent, child"
+
+    def test_copy_with_resource_from_environment(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """copy() must work when `resource` is inferred from the environment."""
+        monkeypatch.setenv("ANTHROPIC_FOUNDRY_API_KEY", "env-key")
+        monkeypatch.setenv("ANTHROPIC_FOUNDRY_RESOURCE", "env-resource")
+
+        client = AsyncAnthropicFoundry()
+        copied = client.copy()
+        assert str(copied.base_url) == str(client.base_url)
+
+        derived = client.with_options(max_retries=7)
+        assert derived.max_retries == 7
 
 
 class TestFoundryDoesNotLeakAnthropicAPIKey:

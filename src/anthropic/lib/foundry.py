@@ -155,6 +155,11 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
             azure_ad_token_provider: A function that returns an Azure Active Directory token, will be invoked on every request.
         """
         api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
+        # Only an explicitly-passed `resource` conflicts with `base_url`. A `resource`
+        # picked up from the environment is a fallback for building `base_url`, so it
+        # must not clash with a `base_url` that was supplied — e.g. by `copy()`, which
+        # always forwards `base_url` and never `resource`.
+        resource_explicitly_provided = resource is not None
         resource = resource if resource is not None else os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
         base_url = base_url if base_url is not None else os.environ.get("ANTHROPIC_FOUNDRY_BASE_URL")
 
@@ -169,7 +174,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
                     "Must provide one of the `base_url` or `resource` arguments, or the `ANTHROPIC_FOUNDRY_RESOURCE` environment variable"
                 )
             base_url = f"https://{resource}.services.ai.azure.com/anthropic/"
-        elif resource is not None:
+        elif resource_explicitly_provided:
             raise ValueError("base_url and resource are mutually exclusive")
 
         super().__init__(
@@ -380,6 +385,11 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
             azure_ad_token_provider: A function that returns an Azure Active Directory token, will be invoked on every request.
         """
         api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
+        # Only an explicitly-passed `resource` conflicts with `base_url`. A `resource`
+        # picked up from the environment is a fallback for building `base_url`, so it
+        # must not clash with a `base_url` that was supplied — e.g. by `copy()`, which
+        # always forwards `base_url` and never `resource`.
+        resource_explicitly_provided = resource is not None
         resource = resource if resource is not None else os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
         base_url = base_url if base_url is not None else os.environ.get("ANTHROPIC_FOUNDRY_BASE_URL")
 
@@ -394,7 +404,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
                     "Must provide one of the `base_url` or `resource` arguments, or the `ANTHROPIC_FOUNDRY_RESOURCE` environment variable"
                 )
             base_url = f"https://{resource}.services.ai.azure.com/anthropic/"
-        elif resource is not None:
+        elif resource_explicitly_provided:
             raise ValueError("base_url and resource are mutually exclusive")
 
         super().__init__(
