@@ -1014,4 +1014,20 @@ def test_iterable_construction_str_falls_back_to_list() -> None:
 
     # falls back to list of chars rather than calling str(["h", "e", "l", "l", "o"])
     assert m.data["items"] == ["h", "e", "l", "l", "o"]
+
+
+def test_construct_type_bare_dict_does_not_crash() -> None:
+    # Bare `dict` (no type parameters) previously raised:
+    #   ValueError: not enough values to unpack (expected 2, got 0)
+    # because get_args(dict) returns () and the code unpacked it as two values.
+    result = construct_type(value={"key": "value"}, type_=dict)
+    assert result == {"key": "value"}
+
+
+def test_construct_type_bare_list_does_not_crash() -> None:
+    # Bare `list` (no type parameter) previously raised:
+    #   IndexError: tuple index out of range
+    # because get_args(list) returns () and the code indexed args[0].
+    result = construct_type(value=["a", "b", "c"], type_=list)
+    assert result == ["a", "b", "c"]
     assert m.model_dump()["data"]["items"] == ["h", "e", "l", "l", "o"]
