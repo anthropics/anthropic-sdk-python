@@ -8,6 +8,7 @@ tool implementations themselves.
 from __future__ import annotations
 
 import os
+import stat
 import shutil
 import logging
 import tarfile
@@ -16,6 +17,7 @@ import tempfile
 from typing import TYPE_CHECKING
 from pathlib import Path, PurePosixPath
 from functools import partial
+from collections.abc import Iterable
 
 import anyio
 from anyio.to_thread import run_sync
@@ -79,6 +81,36 @@ def _archive_top_dir(names: list[str]) -> str:
     return next(iter(tops)) if len(tops) == 1 and has_nested else ""
 
 
+def _wrapper_dir(all_names: Iterable[str], plain_names: Iterable[str]) -> str:
+    """Screen every member name (raising on path traversal, extracted or not),
+    then return the wrapper directory shared by the members that will be
+    extracted."""
+    for name in all_names:
+        _safe_member_name(name)
+    return _archive_top_dir([s for n in plain_names if (s := _safe_member_name(n))])
+
+
+# Zip creator hosts whose ``external_attr`` high bits are a Unix ``st_mode``.
+_ZIP_UNIX_HOSTS = (3, 19)
+_SPECIAL_FILE_TYPES = (stat.S_IFLNK, stat.S_IFCHR, stat.S_IFBLK, stat.S_IFIFO, stat.S_IFSOCK)
+
+
+def _zip_unix_mode(info: zipfile.ZipInfo) -> int | None:
+    return info.external_attr >> 16 if info.create_system in _ZIP_UNIX_HOSTS else None
+
+
+def _zip_info_is_special(info: zipfile.ZipInfo) -> bool:
+    """True for a Unix-host entry recorded as a symlink, device, FIFO or socket.
+    Type bits from other hosts are not a mode, so those entries stay plain files."""
+    mode = _zip_unix_mode(info)
+    return mode is not None and stat.S_IFMT(mode) in _SPECIAL_FILE_TYPES
+
+
+def _zip_info_is_dir(info: zipfile.ZipInfo) -> bool:
+    mode = _zip_unix_mode(info)
+    return info.is_dir() or (mode is not None and stat.S_ISDIR(mode))
+
+
 def _strip_top(safe: str, top: str) -> str:
     """Drop the leading ``top`` component from ``safe`` (an already-confined
     relative path). Returns ``""`` for the bare top-dir entry itself."""
@@ -112,7 +144,8 @@ def _extract_skill_archive(archive_path: Path, dest: Path) -> None:
     wrapper is stripped so files land directly under ``dest`` rather than a
     redundant ``dest/<skill>/`` level. Skills can be third-party, so this
     refuses any member that would escape ``dest`` (zip-slip / tar-slip) and
-    skips symlink/hardlink/device members in tar archives.
+    skips any member that is not a regular file or directory (symlink,
+    hardlink, device, FIFO), in zip and tar archives alike.
     """
     dest.mkdir(parents=True, exist_ok=True, mode=_SKILL_DIR_MODE)
     root = dest.resolve()
@@ -120,18 +153,16 @@ def _extract_skill_archive(archive_path: Path, dest: Path) -> None:
     if zipfile.is_zipfile(archive_path):
         with zipfile.ZipFile(archive_path) as zf:
             infos = zf.infolist()
-            # Compute the wrapper dir from the same confined names the loop
-            # uses, so a malicious name still raises before anything is written.
-            safe_names = [s for info in infos if (s := _safe_member_name(info.filename))]
-            top = _archive_top_dir(safe_names)
-            for info in infos:
+            plain = [info for info in infos if not _zip_info_is_special(info)]
+            top = _wrapper_dir((info.filename for info in infos), (info.filename for info in plain))
+            for info in plain:
                 safe = _strip_top(_safe_member_name(info.filename), top)
                 if not safe:
                     continue
                 target = (root / safe).resolve()
                 if not _within(target, root):
                     raise ValueError(f"refusing to extract unsafe zip member {info.filename!r}")
-                if info.is_dir():
+                if _zip_info_is_dir(info):
                     target.mkdir(parents=True, exist_ok=True)
                     continue
                 target.parent.mkdir(parents=True, exist_ok=True)
@@ -144,9 +175,9 @@ def _extract_skill_archive(archive_path: Path, dest: Path) -> None:
 
     # tarfile.open with "r:*" transparently handles tar / tar.gz / tar.bz2 / tar.xz.
     with tarfile.open(archive_path, mode="r:*") as tf:
-        members = [m for m in tf.getmembers() if not (m.issym() or m.islnk() or m.isdev())]
-        safe_names = [s for m in members if (s := _safe_member_name(m.name))]
-        top = _archive_top_dir(safe_names)
+        all_members = tf.getmembers()
+        members = [m for m in all_members if m.isreg() or m.isdir()]
+        top = _wrapper_dir((m.name for m in all_members), (m.name for m in members))
         for member in members:
             safe = _strip_top(_safe_member_name(member.name), top)
             if not safe:
