@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
+import time
 import base64
 from typing import Any, cast
 from pathlib import Path
@@ -71,6 +73,67 @@ def test_resolve_path_absolute_inside_workdir(tmp_path: Path) -> None:
             resolve_path(env, str(tmp_path / "out"))
 
 
+needs_symlinks = pytest.mark.skipif(sys.platform == "win32", reason="symlink fixtures need a POSIX filesystem")
+
+
+def _symlink_fixture(tmp_path: Path) -> Path:
+    """Workdir with two symlink cycles, a link that escapes, and a link whose
+    target spells its way through a cycle to the escaping link."""
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "secret.txt").write_text("SECRET")
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "loop_a").symlink_to("loop_b")
+    (work / "loop_b").symlink_to("loop_a")
+    (work / "self").symlink_to("self")
+    (work / "evil_link").symlink_to(outside / "secret.txt")
+    (work / "L").symlink_to("loop_a/../evil_link")
+    return work
+
+
+_LOOP_INPUTS = ["loop_a", "loop_a/child.txt", "self", "self/x"]
+
+
+@needs_symlinks
+@pytest.mark.parametrize("p", _LOOP_INPUTS)
+def test_resolve_path_rejects_symlink_loop(tmp_path: Path, p: str) -> None:
+    work = _symlink_fixture(tmp_path)
+    env = AgentToolContext(workdir=str(work))
+    started = time.monotonic()
+    with pytest.raises(
+        ValueError, match=rf"^path {re.escape(repr(p))}: too many levels of symbolic links$"
+    ) as exc_info:
+        resolve_path(env, p)
+    assert time.monotonic() - started < 2
+    assert str(tmp_path) not in str(exc_info.value)
+
+
+@needs_symlinks
+def test_resolve_path_dotdot_is_lexical_before_symlinks(tmp_path: Path) -> None:
+    """``a/../b`` never touches ``a``, so a cycle at ``a`` cannot carry ``b``
+    past the containment check on any interpreter."""
+    work = _symlink_fixture(tmp_path)
+    env = AgentToolContext(workdir=str(work))
+    for p in ("loop_a/../evil_link", "self/../evil_link"):
+        with pytest.raises(ValueError, match="escapes workdir"):
+            resolve_path(env, p)
+    with pytest.raises(ValueError, match="too many levels of symbolic links|escapes workdir"):
+        resolve_path(env, "L")
+    (work / "ok.txt").write_text("ok")
+    assert resolve_path(env, "loop_a/../ok.txt") == work / "ok.txt"
+
+
+@needs_symlinks
+def test_resolve_path_rejects_symlink_escape_live_and_dangling(tmp_path: Path) -> None:
+    work = _symlink_fixture(tmp_path)
+    (work / "dangle_out").symlink_to(tmp_path / "outside" / "nope")
+    env = AgentToolContext(workdir=str(work))
+    for p in ("evil_link", "dangle_out"):
+        with pytest.raises(ValueError, match="escapes workdir"):
+            resolve_path(env, p)
+
+
 def test_resolve_path_segment_aware_sibling(tmp_path: Path) -> None:
     """A sibling directory sharing a prefix (workdir vs workdir2) must not satisfy the jail."""
     root = tmp_path / "work"
@@ -118,6 +181,32 @@ async def test_read_view_range(tmp_path: Path) -> None:
     env = AgentToolContext(workdir=str(tmp_path))
     out = await beta_read_tool(env).call({"file_path": "f.txt", "view_range": [2, 3]})
     assert out == "b\nc"
+
+
+@needs_pydantic_v2
+@pytest.mark.parametrize(
+    ("view_range", "want"),
+    [
+        ([2, 2], "line2"),
+        ([2, 0], "line2\nline3"),
+        ([10, 12], ""),
+        ([3, 1], ""),
+        ([], "line1\nline2\nline3"),
+    ],
+)
+async def test_read_view_range_edges(tmp_path: Path, view_range: list[int], want: str) -> None:
+    (tmp_path / "a.txt").write_text("line1\nline2\nline3")
+    env = AgentToolContext(workdir=str(tmp_path))
+    assert await beta_read_tool(env).call({"file_path": "a.txt", "view_range": view_range}) == want
+
+
+@needs_pydantic_v2
+async def test_read_view_range_wrong_arity_is_rejected(tmp_path: Path) -> None:
+    (tmp_path / "a.txt").write_text("line1\nline2\nline3")
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError) as exc_info:
+        await beta_read_tool(env).call({"file_path": "a.txt", "view_range": [2]})
+    assert str(exc_info.value) == "read: view_range must be [start_line, end_line]"
 
 
 @needs_pydantic_v2
@@ -558,6 +647,80 @@ async def test_read_through_symlink_escape_is_rejected(tmp_path: Path) -> None:
 
 
 @needs_pydantic_v2
+@needs_symlinks
+async def test_read_symlink_loop_is_rejected(tmp_path: Path) -> None:
+    work = _symlink_fixture(tmp_path)
+    env = AgentToolContext(workdir=str(work))
+    with pytest.raises(ToolError) as exc_info:
+        await beta_read_tool(env).call({"file_path": "loop_a"})
+    assert str(exc_info.value) == "read: path 'loop_a': too many levels of symbolic links"
+    for p in ("loop_a/../evil_link", "L"):
+        with pytest.raises(ToolError) as exc_info:
+            await beta_read_tool(env).call({"file_path": p})
+        assert "SECRET" not in str(exc_info.value)
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_write_under_symlink_loop_creates_nothing(tmp_path: Path) -> None:
+    work = _symlink_fixture(tmp_path)
+    before = sorted(os.listdir(work))
+    env = AgentToolContext(workdir=str(work))
+    with pytest.raises(ToolError, match="too many levels of symbolic links"):
+        await beta_write_tool(env).call({"file_path": "loop_a/child.txt", "content": "x"})
+    assert sorted(os.listdir(work)) == before
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_write_through_dangling_symlink_inside_workdir(tmp_path: Path) -> None:
+    """A dangling link whose target is inside the workdir is followed: the
+    target and its missing parent directory are created."""
+    env = AgentToolContext(workdir=str(tmp_path))
+    (tmp_path / "d").symlink_to(tmp_path / "newdir" / "f.txt")
+    await beta_write_tool(env).call({"file_path": "d", "content": "via link"})
+    assert (tmp_path / "newdir" / "f.txt").read_text() == "via link"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_read_follows_symlink_chain_inside_workdir(tmp_path: Path) -> None:
+    (tmp_path / "real.txt").write_text("payload")
+    (tmp_path / "c2").symlink_to("real.txt")
+    (tmp_path / "c1").symlink_to("c2")
+    (tmp_path / "c0").symlink_to("c1")
+    env = AgentToolContext(workdir=str(tmp_path))
+    assert await beta_read_tool(env).call({"file_path": "c0"}) == "payload"
+
+
+@needs_pydantic_v2
+async def test_write_creates_deeply_nested_missing_directories(tmp_path: Path) -> None:
+    """Missing path components are not symlink hops, so any depth is allowed."""
+    env = AgentToolContext(workdir=str(tmp_path))
+    rel = "/".join(f"d{i}" for i in range(50)) + "/f.txt"
+    await beta_write_tool(env).call({"file_path": rel, "content": "deep"})
+    assert (tmp_path / rel).read_text() == "deep"
+
+
+@needs_pydantic_v2
+async def test_read_under_unreadable_directory_reports_permission_denied(tmp_path: Path) -> None:
+    if os.name != "posix":
+        pytest.skip("chmod semantics only apply on POSIX")
+    if os.geteuid() == 0:
+        pytest.skip("root bypasses POSIX mode bits")
+    noperm = tmp_path / "noperm"
+    noperm.mkdir()
+    noperm.chmod(0)
+    env = AgentToolContext(workdir=str(tmp_path))
+    try:
+        with pytest.raises(ToolError) as exc_info:
+            await beta_read_tool(env).call({"file_path": "noperm/x"})
+    finally:
+        noperm.chmod(0o700)
+    assert str(exc_info.value) == "read: path 'noperm/x': permission denied"
+
+
+@needs_pydantic_v2
 async def test_glob_rejects_dotdot_pattern(tmp_path: Path) -> None:
     """``Path.glob`` honours literal ``..`` segments — the tool must reject a
     pattern that would walk out of the workdir before it ever runs."""
@@ -583,6 +746,17 @@ async def test_glob_post_filters_symlink_escape(tmp_path: Path) -> None:
     env = AgentToolContext(workdir=str(work))
     res = await beta_glob_tool(env).call({"pattern": "escape/*.txt"})
     assert res == "no matches"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_glob_drops_matches_that_cannot_be_canonicalised(tmp_path: Path) -> None:
+    work = _symlink_fixture(tmp_path)
+    (work / "ok.txt").write_text("ok")
+    env = AgentToolContext(workdir=str(work))
+    res = await beta_glob_tool(env).call({"pattern": "*"})
+    assert isinstance(res, str)
+    assert [Path(line).name for line in res.splitlines()] == ["ok.txt"]
 
 
 @needs_pydantic_v2

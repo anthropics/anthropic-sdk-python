@@ -36,18 +36,19 @@ from __future__ import annotations
 import os
 import re
 import uuid
+import errno
 import base64
 import shutil
 import logging
 import subprocess
-from stat import S_ISREG
+from stat import S_ISLNK, S_ISREG
 from typing import TYPE_CHECKING, Any, List, Optional, NamedTuple, cast
 from pathlib import Path, PurePosixPath
 from functools import partial
 from itertools import islice
 from contextlib import asynccontextmanager
 from dataclasses import field, dataclass
-from collections.abc import Mapping, Callable, Awaitable, AsyncIterator
+from collections.abc import Mapping, Callable, Iterable, Iterator, Awaitable, AsyncIterator
 
 import anyio
 import anyio.abc
@@ -156,25 +157,30 @@ def _default_bash_env() -> dict[str, str]:
     return {k: v for k, v in os.environ.items() if not k.startswith("ANTHROPIC_")}
 
 
-def _fs_error(op: str, file_path: str, e: OSError) -> ToolError:
-    """Map a filesystem ``OSError`` to a consistent, runtime-independent message.
+def _fs_reason(e: OSError) -> str:
+    """Map a filesystem ``OSError`` to a consistent, runtime-independent phrase.
 
-    The raw ``OSError`` string is platform-specific (``[Errno 2] ENOENT: ...``);
-    normalise the common cases so the model sees the same wording everywhere.
+    The raw ``OSError`` string is platform-specific (``[Errno 2] ENOENT: ...``)
+    and can embed a host path; normalise the common cases so the model sees the
+    same wording everywhere and never the runner's absolute paths.
     """
     if isinstance(e, FileNotFoundError):
-        reason = "no such file or directory"
-    elif isinstance(e, NotADirectoryError):
-        reason = "not a directory"
-    elif isinstance(e, IsADirectoryError):
-        reason = "is a directory"
-    elif isinstance(e, PermissionError):
-        reason = "permission denied"
-    elif isinstance(e, FileExistsError):
-        reason = "file already exists"
-    else:
-        reason = (e.strerror or "i/o error").lower()
-    return ToolError(f"{op}: {file_path}: {reason}")
+        return "no such file or directory"
+    if isinstance(e, NotADirectoryError):
+        return "not a directory"
+    if isinstance(e, IsADirectoryError):
+        return "is a directory"
+    if isinstance(e, PermissionError):
+        return "permission denied"
+    if isinstance(e, FileExistsError):
+        return "file already exists"
+    if e.errno == errno.ELOOP:
+        return "too many levels of symbolic links"
+    return (e.strerror or "i/o error").lower()
+
+
+def _fs_error(op: str, file_path: str, e: OSError) -> ToolError:
+    return ToolError(f"{op}: {file_path}: {_fs_reason(e)}")
 
 
 def _empty_skill_dirs() -> list[Path]:
@@ -302,22 +308,74 @@ class AgentToolContext:
             await self._cleanup_skills()
 
 
+_MAX_SYMLINK_HOPS = 40
+_MISSING_ERRNOS = (errno.ENOENT, errno.ENOTDIR)
+
+
+def _symlink_loop_error() -> OSError:
+    return OSError(errno.ELOOP, os.strerror(errno.ELOOP))
+
+
+def _canonicalize(path: Path) -> Path:
+    """Return ``path`` with ``.``/``..`` collapsed lexically and every symlink
+    followed, or raise ``OSError`` — the same outcome on every supported Python,
+    and never a partly resolved path.
+
+    Trailing components that do not exist yet are kept as spelled, so a new
+    file under new directories still canonicalises; a dangling symlink met on
+    the way is read and followed by hand, and more than ``_MAX_SYMLINK_HOPS``
+    such hops count as a loop. Non-strict ``Path.resolve()`` is avoided because
+    its symlink-loop handling differs between CPython versions.
+    """
+    prefix = Path(os.path.normpath(str(path)))
+    missing_tail: list[str] = []
+    hops = 0
+    while True:
+        try:
+            return prefix.resolve(strict=True).joinpath(*reversed(missing_tail))
+        except RuntimeError:
+            # CPython < 3.13 reports a symlink loop from ``resolve(strict=True)`` this way.
+            raise _symlink_loop_error() from None
+        except OSError as e:
+            if e.errno not in _MISSING_ERRNOS:
+                raise
+            unresolved = e
+        try:
+            is_symlink = S_ISLNK(os.lstat(prefix).st_mode)
+        except OSError as e:
+            if e.errno not in _MISSING_ERRNOS or prefix.parent == prefix:
+                raise
+            missing_tail.append(prefix.name)
+            prefix = prefix.parent
+            continue
+        if not is_symlink:
+            raise unresolved
+        hops += 1
+        if hops > _MAX_SYMLINK_HOPS:
+            raise _symlink_loop_error()
+        prefix = Path(os.path.normpath(os.path.join(prefix.parent, os.readlink(prefix))))
+
+
 def resolve_path(ctx: AgentToolContext, p: str) -> Path:
     """Resolve ``p`` against the workdir; reject results that escape it.
 
     Absolute and relative inputs go through the same canonicalise-then-contain
     check — an absolute path that lands inside the workdir is permitted, only
-    paths that resolve *outside* are rejected. ``Path.resolve()`` follows every
-    symlink (including the leaf, even a dangling one) before the containment
-    check, so a symlink under the workdir that targets ``/etc`` is rejected —
-    and the resolved path is what the tool then operates on, so it can't be
-    followed afterwards either. See the trust model on :class:`AgentToolContext`.
+    paths that resolve *outside* are rejected. ``.`` and ``..`` components are
+    collapsed lexically first; then every symlink (including the leaf, even a
+    dangling one) is followed before the containment check, so a symlink under
+    the workdir that targets ``/etc`` is rejected — and the resolved path is
+    what the tool then operates on, so it can't be followed afterwards either.
+    A symlink loop or an unreadable component rejects the path outright rather
+    than falling back to an unresolved path. See the trust model on
+    :class:`AgentToolContext`.
     """
     candidate = Path(p)
-    if ctx.unrestricted_paths and candidate.is_absolute():
-        return candidate.resolve()
     root = Path(ctx.workdir).resolve()
-    full = (candidate if candidate.is_absolute() else root / candidate).resolve()
+    try:
+        full = _canonicalize(candidate if candidate.is_absolute() else root / candidate)
+    except OSError as e:
+        raise ValueError(f"path {p!r}: {_fs_reason(e)}") from e
     if not ctx.unrestricted_paths and not _within(full, root):
         raise ValueError(f"path {p!r} escapes workdir")
     return full
@@ -685,6 +743,18 @@ def _mtime_or_zero(p: Path) -> float:
         return 0.0
 
 
+def _confined(matches: Iterable[Path], root: Path) -> Iterator[Path]:
+    """Yield the matches whose canonical path is inside ``root``; a match that
+    cannot be canonicalised (symlink loop, unreadable) is dropped, not raised."""
+    for match in matches:
+        try:
+            canonical = _canonicalize(match)
+        except OSError:
+            continue
+        if _within(canonical, root):
+            yield match
+
+
 def beta_glob_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
     @beta_async_tool(name="glob", input_schema=BetaManagedAgentsAgentToolset20260401GlobInput)
     async def glob(pattern: str, path: Optional[str] = None) -> str:
@@ -720,8 +790,8 @@ def beta_glob_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
         if confine is not None:
             # Post-filter: a symlink traversed mid-pattern (glob follows
             # symlinks for non-``**`` segments) must not let a result escape the
-            # confinement root. ``resolve()`` canonicalises symlinks.
-            matches = [m for m in matches if _within(m.resolve(), confine)]
+            # confinement root.
+            matches = list(_confined(matches, confine))
         if not matches:
             return "no matches"
         matches.sort(key=_mtime_or_zero, reverse=True)

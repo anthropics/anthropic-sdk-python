@@ -19,18 +19,22 @@ from __future__ import annotations
 
 import os
 import asyncio
+import logging
 import contextlib
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 from collections.abc import AsyncIterator
 from typing_extensions import override
 
+import anyio
 import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.environments import _worker as worker_mod
-from anthropic.lib.environments._worker import EnvironmentWorker
+from anthropic.lib.environments._worker import EnvironmentWorker, _heartbeat_loop
+
+from .test_poller_method import _api_status_error
 
 
 class _FakeWorkResource:
@@ -533,3 +537,105 @@ async def test_heartbeat_starts_before_skill_download(monkeypatch: pytest.Monkey
     assert order.index("heartbeat") < order.index("setup_end")
     # The work item was still force-stopped on exit.
     assert len(work.stop_calls) == 1
+
+
+# ---------- heartbeat loop ---------------------------------------------------
+#
+# ``_heartbeat_loop`` is driven directly with a scripted ``work`` fake and a
+# fake clock, so the lease-staleness ceiling can be crossed without real
+# waiting. The first scripted beat reports ``ttl_seconds=0`` so the loop keeps
+# the (patched, tiny) default interval instead of the 1 s floor it applies to
+# a server-provided ttl.
+
+_HANG = object()
+_FAST_INTERVAL = 0.01
+_FAKE_TTL = 5.0
+
+
+class _FakeClock:
+    def __init__(self) -> None:
+        self.now = 0.0
+
+    def monotonic(self) -> float:
+        return self.now
+
+
+class _ScriptedHeartbeatWork:
+    """``heartbeat`` pops ``(clock_advance, outcome)`` per call: an exception is
+    raised, ``_HANG`` never returns, anything else is the response."""
+
+    def __init__(self, clock: _FakeClock, script: list[tuple[float, Any]]) -> None:
+        self._clock = clock
+        self._script = list(script)
+        self.calls = 0
+
+    async def heartbeat(self, work_id: str, **_kwargs: Any) -> Any:  # noqa: ARG002
+        self.calls += 1
+        advance, outcome = self._script.pop(0)
+        self._clock.now += advance
+        if isinstance(outcome, BaseException):
+            raise outcome
+        if outcome is _HANG:
+            await anyio.sleep_forever()
+        return outcome
+
+
+def _beat_ok(ttl_seconds: int = 0) -> Any:
+    return SimpleNamespace(last_heartbeat="hb", ttl_seconds=ttl_seconds, state="running", lease_extended=True)
+
+
+async def _run_heartbeat_loop(
+    monkeypatch: pytest.MonkeyPatch, script: list[tuple[float, Any]]
+) -> tuple[_ScriptedHeartbeatWork, anyio.Event]:
+    clock = _FakeClock()
+    monkeypatch.setattr(worker_mod, "time", SimpleNamespace(monotonic=clock.monotonic))
+    monkeypatch.setattr(worker_mod, "_HEARTBEAT_DEFAULT", _FAST_INTERVAL)
+    monkeypatch.setattr(worker_mod, "_HEARTBEAT_TTL_DEFAULT", _FAKE_TTL)
+    work = _ScriptedHeartbeatWork(clock, script)
+    stop = anyio.Event()
+    with anyio.fail_after(5):
+        await _heartbeat_loop(cast(Any, work), work_id="w_1", environment_id="e_1", stop=stop)
+    return work, stop
+
+
+def _messages(caplog: pytest.LogCaptureFixture) -> list[str]:
+    return [r.getMessage() for r in caplog.records if r.name == worker_mod.__name__]
+
+
+@pytest.mark.asyncio()
+async def test_heartbeat_conflict_is_retried_until_the_lease_is_stale(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    caplog.set_level(logging.WARNING, logger=worker_mod.__name__)
+    work, stop = await _run_heartbeat_loop(
+        monkeypatch,
+        [(0, _beat_ok()), (_FAKE_TTL - 2, _api_status_error(409)), (_FAKE_TTL, _api_status_error(409))],
+    )
+    assert work.calls == 3
+    assert stop.is_set()
+    messages = _messages(caplog)
+    assert any(m.startswith("transient heartbeat failure") for m in messages)
+    assert any(m.startswith("lease assumed lost") for m in messages)
+    assert not any(m.startswith("permanent heartbeat failure") for m in messages)
+
+
+@pytest.mark.asyncio()
+async def test_heartbeat_that_never_returns_is_cut_off_each_interval(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    caplog.set_level(logging.WARNING, logger=worker_mod.__name__)
+    work, stop = await _run_heartbeat_loop(monkeypatch, [(0, _beat_ok()), (_FAKE_TTL - 2, _HANG), (_FAKE_TTL, _HANG)])
+    assert work.calls == 3
+    assert stop.is_set()
+    assert any(m.startswith("lease assumed lost") for m in _messages(caplog))
+
+
+@pytest.mark.asyncio()
+async def test_heartbeat_permanent_4xx_stops_immediately(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    caplog.set_level(logging.WARNING, logger=worker_mod.__name__)
+    work, stop = await _run_heartbeat_loop(monkeypatch, [(0, _api_status_error(401))])
+    assert work.calls == 1
+    assert stop.is_set()
+    assert any(m.startswith("permanent heartbeat failure") for m in _messages(caplog))

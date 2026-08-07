@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.121.1 (2026-08-07)
+
+Full Changelog: [v0.121.0...v0.121.1](https://github.com/anthropics/anthropic-sdk-python/compare/v0.121.0...v0.121.1)
+
+### Bug Fixes
+
+* **tools:** reject symlink loops in tool paths and skip special skill-archive members ([#322](https://github.com/anthropics/anthropic-sdk-python/issues/322)) ([43e8669](https://github.com/anthropics/anthropic-sdk-python/commit/43e8669d066a1d18ffdbff505fc99ac45aa7492e))
+
+
+### Chores
+
+* **examples:** update messages_stream.py shebang from rye to uv ([#1519](https://github.com/anthropics/anthropic-sdk-python/issues/1519)) ([7d72364](https://github.com/anthropics/anthropic-sdk-python/commit/7d7236432934073a5c83f4eca021d35ea5bbd7c8))
+
+
+### Documentation
+
+* fix fulfillment typos in session runner ([#1795](https://github.com/anthropics/anthropic-sdk-python/issues/1795)) ([009b035](https://github.com/anthropics/anthropic-sdk-python/commit/009b035305e0724ce108ebd796935f91711fc6e1))
+* fix incorrect docstring in AsyncAnthropicFoundry.models ([#1592](https://github.com/anthropics/anthropic-sdk-python/issues/1592)) ([f1f5e9b](https://github.com/anthropics/anthropic-sdk-python/commit/f1f5e9b9170ed04833d7c4ec0ae003978ecc19a1))
+
 ## 0.121.0 (2026-08-07)
 
 Full Changelog: [v0.120.2...v0.121.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.120.2...v0.121.0)
