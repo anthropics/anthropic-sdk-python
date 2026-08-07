@@ -307,6 +307,26 @@ def test_chunk_bytes_to_sse_legacy_completion_with_metrics() -> None:
     assert sse.event == "completion"
 
 
+def test_chunk_bytes_to_sse_drops_metrics_only_trailer() -> None:
+    # The amazon-bedrock-invocationMetrics trailer carries no type and no
+    # completion field. Forwarding it to the stream-event union constructs a
+    # contract-violating RawMessageStartEvent(message=None), so it must be dropped.
+    raw = b'{"amazon-bedrock-invocationMetrics":{"inputTokenCount":10,"outputTokenCount":5}}'
+    assert _chunk_bytes_to_sse(raw) is None
+
+
+def test_metrics_trailer_would_violate_stream_event_contract() -> None:
+    from anthropic.types import RawMessageStreamEvent
+    from anthropic._models import construct_type
+
+    # Documents why the trailer must be dropped. Were it forwarded to the
+    # stream-event union, the union has no discriminator to match it and falls
+    # back to its first member, RawMessageStartEvent, with a null message.
+    trailer = {"amazon-bedrock-invocationMetrics": {"inputTokenCount": 10, "outputTokenCount": 5}}
+    event = construct_type(value=trailer, type_=cast(t.Any, RawMessageStreamEvent))
+    assert getattr(event, "message", None) is None
+
+
 def test_copy_x_stainless_helper_header_appends() -> None:
     # `x-stainless-helper` accumulates across copies instead of being clobbered
     client = sync_client.with_options(default_headers={"x-stainless-helper": "parent"})
