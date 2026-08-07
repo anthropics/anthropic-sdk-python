@@ -501,6 +501,13 @@ def accumulate_event(
         if content_block.type == "text" and is_given(output_format):
             content_block.parsed_output = parse_text(content_block.text, output_format)
     elif event.type == "message_delta":
+        # Mirror the beta accumulator (lib/streaming/_beta_messages.py): the
+        # `container` field is delivered on the `message_delta` SSE event and
+        # has to be merged into the accumulated Message, otherwise
+        # `stream.get_final_message().container` is `None` for code-execution
+        # / container-backed tool runs and the next request fails with
+        # `container_id is required when there are pending tool uses …`.
+        current_snapshot.container = event.delta.container
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
         if event.delta.stop_details is not None:
