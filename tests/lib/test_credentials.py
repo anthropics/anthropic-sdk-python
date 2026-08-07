@@ -2948,6 +2948,18 @@ class TestCredentialPrecedence:
             pass
         return modified
 
+    @staticmethod
+    async def _walk_async_auth(client: AsyncAnthropic) -> httpx.Request:
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        auth = client.custom_auth
+        if auth is None:
+            return request
+
+        async for modified in auth.async_auth_flow(request):
+            return modified
+
+        raise AssertionError("async auth flow did not yield a request")
+
     # -- step 1 beats step 2: explicit credentials= beats env static --------
 
     def test_explicit_credentials_beats_env_api_key(
@@ -3043,6 +3055,34 @@ class TestCredentialPrecedence:
         assert req.headers.get("X-Api-Key") == "sk-new"
         assert req.headers.get("Authorization") is None
         assert any("`api_key=`" in r.message for r in caplog.records)
+
+    def test_copy_with_credentials_replaces_inherited_api_key(self, caplog: pytest.LogCaptureFixture) -> None:
+        parent = Anthropic(api_key="sk-parent")
+        with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
+            copied = parent.copy(credentials=StaticToken("bearer-child"))
+
+        assert copied.api_key is None
+        assert copied.credentials is not None
+        req = self._walk_sync_auth(copied)
+        assert req.headers.get("X-Api-Key") is None
+        assert req.headers.get("Authorization") == "Bearer bearer-child"
+        assert not any("takes precedence" in r.message for r in caplog.records)
+
+    async def test_async_copy_with_credentials_replaces_inherited_api_key(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        parent = AsyncAnthropic(api_key="sk-parent")
+        with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
+            copied = parent.copy(credentials=StaticToken("bearer-child"))
+
+        assert copied.api_key is None
+        assert copied.credentials is not None
+        req = await self._walk_async_auth(copied)
+        assert req.headers.get("X-Api-Key") is None
+        assert req.headers.get("Authorization") == "Bearer bearer-child"
+        assert not any("takes precedence" in r.message for r in caplog.records)
+        await parent.close()
+        await copied.close()
 
     # -- step 2 shadows steps 3-5: env static shadows auto-discovery ---------
 
