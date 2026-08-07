@@ -31,6 +31,23 @@ from ...types.parsed_message import ParsedMessage, ParsedContentBlock
 
 
 class MessageStream(Generic[ResponseFormatT]):
+    """A synchronous stream of message events returned by the Anthropic API.
+
+    Iterate over the stream to receive :class:`ParsedMessageStreamEvent` objects
+    as they arrive.  Use as a context manager to ensure the connection is
+    closed when you are finished:
+
+    ```py
+    with client.messages.stream(...) as stream:
+        for event in stream:
+            ...
+        message = stream.get_final_message()
+    ```
+
+    Convenience helpers :attr:`text_stream`, :meth:`get_final_message`, and
+    :meth:`get_final_text` cover the most common access patterns.
+    """
+
     text_stream: Iterator[str]
     """Iterator over just the text deltas in the stream.
 
@@ -54,10 +71,12 @@ class MessageStream(Generic[ResponseFormatT]):
 
     @property
     def response(self) -> httpx.Response:
+        """The underlying :class:`httpx.Response` for this stream."""
         return self._raw_stream.response
 
     @property
     def request_id(self) -> str | None:
+        """The ``request-id`` header returned by the API, or ``None`` if absent."""
         return self.response.headers.get("request-id")  # type: ignore[no-any-return]
 
     def __next__(self) -> ParsedMessageStreamEvent[ResponseFormatT]:
@@ -122,6 +141,12 @@ class MessageStream(Generic[ResponseFormatT]):
     # properties
     @property
     def current_message_snapshot(self) -> ParsedMessage[ResponseFormatT]:
+        """The most-recently accumulated :class:`Message` snapshot.
+
+        Updated after each event is processed.  Only valid once at least one
+        event has been received; raises :exc:`AssertionError` if called before
+        iteration begins.
+        """
         assert self.__final_message_snapshot is not None
         return self.__final_message_snapshot
 
@@ -179,6 +204,24 @@ class MessageStreamManager(Generic[ResponseFormatT]):
 
 
 class AsyncMessageStream(Generic[ResponseFormatT]):
+    """An asynchronous stream of message events returned by the Anthropic API.
+
+    Iterate over the stream with ``async for`` to receive
+    :class:`ParsedMessageStreamEvent` objects as they arrive.  Use as an
+    async context manager to ensure the connection is closed when you are
+    finished:
+
+    ```py
+    async with client.messages.stream(...) as stream:
+        async for event in stream:
+            ...
+        message = await stream.get_final_message()
+    ```
+
+    Convenience helpers :attr:`text_stream`, :meth:`get_final_message`, and
+    :meth:`get_final_text` cover the most common access patterns.
+    """
+
     text_stream: AsyncIterator[str]
     """Async iterator over just the text deltas in the stream.
 
@@ -202,10 +245,12 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
 
     @property
     def response(self) -> httpx.Response:
+        """The underlying :class:`httpx.Response` for this stream."""
         return self._raw_stream.response
 
     @property
     def request_id(self) -> str | None:
+        """The ``request-id`` header returned by the API, or ``None`` if absent."""
         return self.response.headers.get("request-id")  # type: ignore[no-any-return]
 
     async def __anext__(self) -> ParsedMessageStreamEvent[ResponseFormatT]:
@@ -270,6 +315,12 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
     # properties
     @property
     def current_message_snapshot(self) -> ParsedMessage[ResponseFormatT]:
+        """The most-recently accumulated :class:`Message` snapshot.
+
+        Updated after each event is processed.  Only valid once at least one
+        event has been received; raises :exc:`AssertionError` if called before
+        iteration begins.
+        """
         assert self.__final_message_snapshot is not None
         return self.__final_message_snapshot
 
