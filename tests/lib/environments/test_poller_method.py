@@ -157,8 +157,9 @@ def test_iter_work_calls_stop_when_body_raises() -> None:
     assert fake.stop_calls == [("work_boom", fake.stop_calls[0][1])]
 
 
-def test_iter_work_backs_off_on_transient_error() -> None:
-    fake = FakeWork(poll_script=[_api_status_error(500), _StubWork(id="work_2")])
+@pytest.mark.parametrize("status", [500, 409])
+def test_iter_work_backs_off_on_transient_error(status: int) -> None:
+    fake = FakeWork(poll_script=[_api_status_error(status), _StubWork(id="work_2")])
     it = iter_work(cast(Any, fake), environment_id="env_1")
 
     item = _drain_one(it)
@@ -172,6 +173,24 @@ def test_iter_work_raises_on_permanent_4xx() -> None:
 
     with pytest.raises(APIStatusError):
         next(it)
+
+
+def test_iter_work_stop_conflict_is_silent(caplog: pytest.LogCaptureFixture) -> None:
+    """A 409 from ``stop`` means the work already ended; it is neither logged
+    nor allowed to break the loop."""
+    fake = FakeWork(poll_script=[_StubWork(id="work_done")])
+
+    def _stop(_work_id: str, **_kwargs: Any) -> None:
+        raise _api_status_error(409)
+
+    fake.stop = _stop  # type: ignore[method-assign]
+    it = iter_work(cast(Any, fake), environment_id="env_1")
+
+    _drain_one(it)
+    with pytest.raises(_StopTest):
+        next(it)
+    assert len(fake.poll_calls) == 2
+    assert not [r for r in caplog.records if "stop failed" in r.getMessage()]
 
 
 def test_iter_work_backs_off_on_httpx_transport_error() -> None:
@@ -322,13 +341,31 @@ async def test_aiter_work_calls_stop_when_body_raises() -> None:
 
 
 @pytest.mark.asyncio()
-async def test_aiter_work_backs_off_on_transient_error() -> None:
-    fake = FakeAsyncWork(poll_script=[_api_status_error(500), _StubWork(id="work_2")])
+@pytest.mark.parametrize("status", [500, 409])
+async def test_aiter_work_backs_off_on_transient_error(status: int) -> None:
+    fake = FakeAsyncWork(poll_script=[_api_status_error(status), _StubWork(id="work_2")])
     ait = aiter_work(cast(Any, fake), environment_id="env_1")
 
     item = await _adrain_one(ait)
     assert item.id == "work_2"
     assert len(fake.poll_calls) == 2
+
+
+@pytest.mark.asyncio()
+async def test_aiter_work_stop_conflict_is_silent(caplog: pytest.LogCaptureFixture) -> None:
+    fake = FakeAsyncWork(poll_script=[_StubWork(id="work_done")])
+
+    async def _stop(_work_id: str, **_kwargs: Any) -> None:
+        raise _api_status_error(409)
+
+    fake.stop = _stop  # type: ignore[method-assign]
+    ait = aiter_work(cast(Any, fake), environment_id="env_1")
+
+    await _adrain_one(ait)
+    with pytest.raises(_StopTest):
+        await ait.__anext__()
+    assert len(fake.poll_calls) == 2
+    assert not [r for r in caplog.records if "stop failed" in r.getMessage()]
 
 
 async def test_aiter_work_propagates_non_api_error_instead_of_retrying() -> None:
