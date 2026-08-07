@@ -1,3 +1,4 @@
+from ..._utils._sync import to_thread
 from __future__ import annotations
 
 import os
@@ -462,7 +463,9 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
 
         data = request.read().decode()
 
-        headers = get_auth_headers(
+        # Keep SigV4 credential work off the event loop (#1770).
+        headers = await to_thread(
+            get_auth_headers,
             method=request.method,
             url=str(request.url),
             headers=request.headers,
