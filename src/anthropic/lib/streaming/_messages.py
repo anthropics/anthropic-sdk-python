@@ -462,6 +462,8 @@ def accumulate_event(
             ),
         )
     elif event.type == "content_block_delta":
+        if event.index >= len(current_snapshot.content):
+            return current_snapshot
         content = current_snapshot.content[event.index]
         if event.delta.type == "text_delta":
             if content.type == "text":
@@ -497,6 +499,8 @@ def accumulate_event(
             if TYPE_CHECKING:  # type: ignore[unreachable]
                 assert_never(event.delta)
     elif event.type == "content_block_stop":
+        if event.index >= len(current_snapshot.content):
+            return current_snapshot
         content_block = current_snapshot.content[event.index]
         if content_block.type == "text" and is_given(output_format):
             content_block.parsed_output = parse_text(content_block.text, output_format)
