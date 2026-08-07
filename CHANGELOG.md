@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.121.0 (2026-08-07)
+
+Full Changelog: [v0.120.2...v0.121.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.120.2...v0.121.0)
+
+### Features
+
+* **api:** add `mid-conversation-tool-changes-2026-07-01` beta ([c7d1531](https://github.com/anthropics/anthropic-sdk-python/commit/c7d1531d9d63a35430333039f8c975bba4ef0411))
+* **api:** add support for session budgets, advisor tool, pinned inference location and skills auto-loading from GitHub ([193bae0](https://github.com/anthropics/anthropic-sdk-python/commit/193bae02806219047d484d7efcb9b91776a6c45c))
+
+
+### Chores
+
+* **api:** remove retired Claude Opus 4.1 models ([5352a33](https://github.com/anthropics/anthropic-sdk-python/commit/5352a33ade5b62ad782b522f1791b7eeeeff83be))
+* **docs:** small updates to descriptions ([b8d4176](https://github.com/anthropics/anthropic-sdk-python/commit/b8d41762e264fe6721847f77daa337eab4905162))
+* **docs:** updates to a few documentation strings ([3a5dd69](https://github.com/anthropics/anthropic-sdk-python/commit/3a5dd6971e0f43023533db3ed35f94ceb6c0ebde))
+* ensure all dependencies have major version constraints ([#274](https://github.com/anthropics/anthropic-sdk-python/issues/274)) ([d52999b](https://github.com/anthropics/anthropic-sdk-python/commit/d52999b4f66002ffe8263756c59ab0e276c74264))
+
 ## 0.120.2 (2026-07-28)
 
 Full Changelog: [v0.120.1...v0.120.2](https://github.com/anthropics/anthropic-sdk-python/compare/v0.120.1...v0.120.2)
