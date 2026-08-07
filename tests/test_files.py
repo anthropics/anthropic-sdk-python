@@ -22,6 +22,18 @@ def test_tuple_input() -> None:
     assert result == IsList(IsTuple("file", IsTuple("README.md", IsBytes())))
 
 
+def test_tuple_with_pathlike_reads_contents() -> None:
+    result = to_httpx_files({"file": ("foo.txt", readme_path, "text/plain")})
+    print(result)
+    assert result == IsDict({"file": IsTuple("foo.txt", IsBytes(), "text/plain")})
+
+
+def test_tuple_with_pathlike_two_elements() -> None:
+    result = to_httpx_files({"file": ("foo.txt", readme_path)})
+    print(result)
+    assert result == IsDict({"file": IsTuple("foo.txt", IsBytes())})
+
+
 @pytest.mark.asyncio
 async def test_async_pathlib_includes_file_name() -> None:
     result = await async_to_httpx_files({"file": readme_path})
@@ -41,6 +53,20 @@ async def test_async_tuple_input() -> None:
     result = await async_to_httpx_files([("file", readme_path)])
     print(result)
     assert result == IsList(IsTuple("file", IsTuple("README.md", IsBytes())))
+
+
+@pytest.mark.asyncio
+async def test_async_tuple_with_pathlike_reads_contents() -> None:
+    result = await async_to_httpx_files({"file": ("foo.txt", readme_path, "text/plain")})
+    print(result)
+    assert result == IsDict({"file": IsTuple("foo.txt", IsBytes(), "text/plain")})
+
+
+@pytest.mark.asyncio
+async def test_async_tuple_with_pathlike_two_elements() -> None:
+    result = await async_to_httpx_files({"file": ("foo.txt", readme_path)})
+    print(result)
+    assert result == IsDict({"file": IsTuple("foo.txt", IsBytes())})
 
 
 def test_string_not_allowed() -> None:
