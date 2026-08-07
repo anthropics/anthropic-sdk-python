@@ -629,7 +629,7 @@ def beta_write_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             target.write_text(content, encoding="utf-8")
         except OSError as e:
             raise _fs_error("write", file_path, e) from e
-        return f"wrote {len(content)} bytes to {file_path}"
+        return f"wrote {len(content.encode(\"utf-8\"))} bytes to {file_path}"
 
     return write
 
