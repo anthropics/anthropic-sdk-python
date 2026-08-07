@@ -43,6 +43,22 @@ async def test_async_tuple_input() -> None:
     assert result == IsList(IsTuple("file", IsTuple("README.md", IsBytes())))
 
 
+def test_tuple_with_pathlike_content() -> None:
+    # Regression for #1769: a (name, Path) tuple used as the file content must have its Path
+    # read into bytes, not returned unchanged (which made httpx raise AttributeError on Windows).
+    result = to_httpx_files({"file": ("renamed.md", readme_path)})
+    print(result)
+    assert result == IsDict({"file": IsTuple("renamed.md", IsBytes())})
+
+
+@pytest.mark.asyncio
+async def test_async_tuple_with_pathlike_content() -> None:
+    # Async regression for #1769.
+    result = await async_to_httpx_files({"file": ("renamed.md", readme_path)})
+    print(result)
+    assert result == IsDict({"file": IsTuple("renamed.md", IsBytes())})
+
+
 def test_string_not_allowed() -> None:
     with pytest.raises(TypeError, match="Expected file types input to be a FileContent type or to be a tuple"):
         to_httpx_files(
