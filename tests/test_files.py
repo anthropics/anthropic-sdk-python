@@ -43,6 +43,17 @@ async def test_async_tuple_input() -> None:
     assert result == IsList(IsTuple("file", IsTuple("README.md", IsBytes())))
 
 
+def test_pathlike_in_tuple() -> None:
+    result = to_httpx_files({"file": ("custom_name.txt", readme_path, "text/plain")})
+    assert result == IsDict({"file": IsTuple("custom_name.txt", IsBytes(), "text/plain")})
+
+
+@pytest.mark.asyncio
+async def test_async_pathlike_in_tuple() -> None:
+    result = await async_to_httpx_files({"file": ("custom_name.txt", readme_path, "text/plain")})
+    assert result == IsDict({"file": IsTuple("custom_name.txt", IsBytes(), "text/plain")})
+
+
 def test_string_not_allowed() -> None:
     with pytest.raises(TypeError, match="Expected file types input to be a FileContent type or to be a tuple"):
         to_httpx_files(
