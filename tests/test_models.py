@@ -655,6 +655,14 @@ def test_annotated_types() -> None:
     assert m.value == "foo"
 
 
+def test_construct_type_bare_container_types() -> None:
+    list_value = ["a", {"nested": "value"}]
+    dict_value = {"foo": ["bar"]}
+
+    assert construct_type(value=list_value, type_=list) is list_value
+    assert construct_type(value=dict_value, type_=dict) is dict_value
+
+
 def test_discriminated_unions_invalid_data() -> None:
     class A(BaseModel):
         type: Literal["a"]
