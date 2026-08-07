@@ -107,11 +107,11 @@ def transform_schema(
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in one_of]
     elif is_list(all_of):
         strict_schema["allOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in all_of]
-    else:
-        if type_ is None:
-            raise ValueError("Schema must have a 'type', 'anyOf', 'oneOf', or 'allOf' field.")
-
+    elif type_ is not None:
         strict_schema["type"] = type_
+    # else: a typeless schema with no combinators — e.g. an empty `{}`, which pydantic
+    # emits for an `Any`-typed field or the items of an untyped `list`/`List[Any]`. This
+    # is a valid, unconstrained ("any") schema, so leave it untyped rather than raising.
 
     enum = json_schema.pop("enum", None)
     if is_list(enum):
