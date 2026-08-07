@@ -647,7 +647,8 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
         if not is_mapping(value):
             return value
 
-        _, items_type = get_args(type_)  # Dict[_, items_type]
+        args = get_args(type_)
+        items_type = args[1] if args else object  # Dict[_, items_type]; plain dict has no args
         return {key: construct_type(value=item, type_=items_type) for key, item in value.items()}
 
     if (
