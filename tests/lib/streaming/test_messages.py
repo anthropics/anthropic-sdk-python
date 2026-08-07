@@ -115,6 +115,27 @@ def assert_refusal_response(message: Message) -> None:
 
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
+    def test_container_accumulated_from_message_delta(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("container_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-3-opus-latest",
+        ) as stream:
+            message = stream.get_final_message()
+
+        assert message.container is not None
+        assert message.container.id == "container_011CPmr789A6Pg7Rjhvi6cvJ"
+
+    @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx.Response(200, content=get_response("basic_response.txt"))
