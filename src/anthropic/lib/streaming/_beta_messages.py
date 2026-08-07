@@ -403,7 +403,6 @@ def build_events(
                         signature=content_block.signature,
                     )
                 )
-            pass
         elif event.delta.type == "compaction_delta":
             if content_block.type == "compaction":
                 events_to_fire.append(
