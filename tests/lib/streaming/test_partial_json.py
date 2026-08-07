@@ -147,3 +147,61 @@ class TestPartialJson:
             )
         except Exception as e:
             raise AssertionError(f"Unexpected error type: {type(e).__name__} with message: {str(e)}") from e
+    
+    def test_partial_json_with_invalid_json_non_beta(self) -> None:
+        """Test that invalid JSON raises a helpful error on the non-beta path too."""
+        from anthropic.types import RawMessageStartEvent, RawContentBlockDeltaEvent, RawContentBlockStartEvent
+        from anthropic.types.usage import Usage
+        from anthropic.types.message import Message
+        from anthropic.types.direct_caller import DirectCaller
+        from anthropic.types.input_json_delta import InputJSONDelta
+        from anthropic.lib.streaming._messages import accumulate_event as accumulate_event_non_beta
+
+        msg = Message(
+            id="msg_123",
+            type="message",
+            role="assistant",
+            content=[],
+            model="claude-haiku-4-5-20251001",
+            stop_reason=None,
+            stop_sequence=None,
+            usage=Usage(input_tokens=10, output_tokens=1),
+        )
+        snapshot = accumulate_event_non_beta(
+            event=RawMessageStartEvent(type="message_start", message=msg),
+            current_snapshot=None,
+        )
+        snapshot = accumulate_event_non_beta(
+            event=RawContentBlockStartEvent(
+                type="content_block_start",
+                index=0,
+                content_block=ToolUseBlock(
+                    type="tool_use",
+                    id="toolu_01",
+                    name="get_weather",
+                    input={},
+                    caller=DirectCaller(type="direct"),
+                ),
+            ),
+            current_snapshot=snapshot,
+        )
+
+        try:
+            accumulate_event_non_beta(
+                event=RawContentBlockDeltaEvent(
+                    type="content_block_delta",
+                    index=0,
+                    delta=InputJSONDelta(
+                        type="input_json_delta",
+                        partial_json='{"city": INVALID_VALUE}',
+                    ),
+                ),
+                current_snapshot=snapshot,
+            )
+            raise AssertionError("Expected ValueError for invalid JSON, but no error was raised.")
+        except ValueError as e:
+            assert str(e).startswith(
+                "Unable to parse tool parameter JSON from model. Please retry your request or adjust your prompt."
+            )
+        except Exception as e:
+            raise AssertionError(f"Unexpected error type: {type(e).__name__} with message: {str(e)}") from e
