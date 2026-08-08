@@ -469,18 +469,18 @@ def accumulate_event(
     if current_snapshot is None:
         if event.type == "message_start":
             return cast(
-                ParsedBetaMessage[ResponseFormatT], ParsedBetaMessage.construct(**cast(Any, event.message.to_dict()))
+                ParsedBetaMessage[ResponseFormatT],
+                construct_type(type_=ParsedBetaMessage, value=event.message.to_dict()),
             )
 
         raise RuntimeError(f'Unexpected event order, got {event.type} before "message_start"')
 
     if event.type == "content_block_start":
-        # TODO: check index
-        current_snapshot.content.append(
-            cast(
-                Any,  # Pydantic does not support generic unions at runtime
-                construct_type(type_=ParsedBetaContentBlock, value=event.content_block.to_dict()),
-            ),
+        while len(current_snapshot.content) <= event.index:
+            current_snapshot.content.append(None)  # type: ignore[arg-type]
+        current_snapshot.content[event.index] = cast(
+            Any,  # Pydantic does not support generic unions at runtime
+            construct_type(type_=ParsedBetaContentBlock, value=event.content_block.to_dict()),
         )
         if event.content_block.type == "fallback":
             # the final hop's fallback block names the model that served the response —
