@@ -1706,15 +1706,8 @@ else:
 
 
 class AsyncHttpxClientWrapper(DefaultAsyncHttpxClient):
-    def __del__(self) -> None:
-        if self.is_closed:
-            return
+    pass
 
-        try:
-            # TODO(someday): support non asyncio runtimes here
-            asyncio.get_running_loop().create_task(self.aclose())
-        except Exception:
-            pass
 
 
 class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
