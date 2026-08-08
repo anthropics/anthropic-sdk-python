@@ -306,6 +306,80 @@ class TestAsyncMessages:
             assert_refusal_response(await stream.get_final_message())
 
 
+class TestDrainPath:
+    """get_final_message() / until_done() must produce the same result as full event iteration."""
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_get_final_message_without_iteration_basic(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-opus-latest",
+        ) as stream:
+            message = stream.get_final_message()
+
+        assert message.content[0].type == "text"
+        assert message.content[0].text == "Hello there!"
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_get_final_message_without_iteration_tool_use(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("tool_use_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "What's the weather in Paris?"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            message = stream.get_final_message()
+
+        assert message.content[0].type == "text"
+        assert message.content[0].text == "I'll check the current weather in Paris for you."
+        assert message.content[1].type == "tool_use"
+        assert message.content[1].input == {"location": "Paris"}
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_async_get_final_message_without_iteration_basic(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-opus-latest",
+        ) as stream:
+            message = await stream.get_final_message()
+
+        assert message.content[0].type == "text"
+        assert message.content[0].text == "Hello there!"
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_async_get_final_message_without_iteration_tool_use(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("tool_use_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "What's the weather in Paris?"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            message = await stream.get_final_message()
+
+        assert message.content[0].type == "text"
+        assert message.content[0].text == "I'll check the current weather in Paris for you."
+        assert message.content[1].type == "tool_use"
+        assert message.content[1].input == {"location": "Paris"}
+
+
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
 def test_stream_method_definition_in_sync(sync: bool) -> None:
     client: Anthropic | AsyncAnthropic = sync_client if sync else async_client
