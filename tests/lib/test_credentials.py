@@ -36,6 +36,7 @@ from anthropic.lib.credentials._constants import (
     GRANT_TYPE_JWT_BEARER,
     OAUTH_API_BETA_HEADER,
     FEDERATION_BETA_HEADER,
+    _require_https,
 )
 
 BASE_URL = "https://api.anthropic.com"
@@ -729,6 +730,43 @@ class TestCredentialsFile:
         )
         with pytest.raises(AnthropicError, match="must use https"):
             creds.bind_base_url("http://evil.example.com")
+
+    @pytest.mark.parametrize(
+        "malicious_url",
+        [
+            "http://localhost.evil.com/token",  # look-alike subdomain, real host is under evil.com
+            "http://localhost@evil.com/token",  # userinfo trick, real host is evil.com
+            "http://localhost.evil.com",
+            "http://127.0.0.1.evil.com/token",  # loopback look-alike, real host is under evil.com
+            "http://127.0.0.1@evil.com/token",
+            "http://localhostx:8080",  # bare prefix look-alike, real host is localhostx
+        ],
+    )
+    def test_localhost_lookalike_http_rejected(self, malicious_url: str) -> None:
+        """Cleartext HTTP is only tolerated for the loopback host. A prefix check
+        like ``url.startswith("http://localhost")`` also accepts hosts such as
+        ``localhost.evil.com`` or ``localhost@evil.com`` (whose real host is
+        ``evil.com``) — sending the assertion JWT / refresh token to an
+        attacker-controlled host in cleartext. Match the parsed host instead."""
+        with pytest.raises(AnthropicError, match="must use https"):
+            _require_https(malicious_url, field="base_url")
+
+    @pytest.mark.parametrize(
+        "loopback_url",
+        [
+            "http://localhost",
+            "http://localhost:8080",
+            "http://localhost:8080/v1/oauth/token",
+            "http://LocalHost:8080",  # host comparison is case-insensitive
+            "http://127.0.0.1",
+            "http://127.0.0.1:8080",
+            "http://[::1]:8080",
+            "https://api.anthropic.com",  # https is always allowed
+        ],
+    )
+    def test_loopback_and_https_allowed(self, loopback_url: str) -> None:
+        """Genuine loopback HTTP endpoints and any https URL must keep working."""
+        _require_https(loopback_url, field="base_url")
 
     # -- security: profile-name validation --------------------------------
 
