@@ -1120,11 +1120,12 @@ class AsyncWork(AsyncAPIResource):
         reclaim_older_than_ms: int | None = None,
         drain: bool = False,
         auto_stop: bool = True,
+        defer_ack: bool = False,
         extra_headers: Headers | None = None,
     ) -> AsyncIterator[BetaSelfHostedWork]:
         """Async-iterate work items claimed from a self-hosted environment.
 
-        Each yielded item has been ack'd. The environment key authenticates the
+        Each yielded item has been ack'd (unless ``defer_ack=True``). The environment key authenticates the
         poll, ack, and stop calls via a scoped sub-client (built once per
         call). Async only — available on :class:`~anthropic.AsyncAnthropic`
         (the sync client does not expose ``poller``).
@@ -1152,6 +1153,10 @@ class AsyncWork(AsyncAPIResource):
           auto_stop: When True (default), call ``stop`` after the consumer's
             loop body completes. Set False when handing items off to another
             process that owns the stop call.
+          defer_ack: When True, yield the item still unacknowledged so the
+            handoff owner performs the ack (and stop), keeping a failed handoff
+            recoverable via ``reclaim_older_than_ms`` / lease TTL instead of
+            stranded in ``starting``. Requires ``auto_stop=False``.
           extra_headers: Optional headers passed through per request on the
             poll / ack / stop calls. They are threaded into each call's
             ``extra_headers=`` and never assigned onto the client, so client
@@ -1186,6 +1191,7 @@ class AsyncWork(AsyncAPIResource):
             reclaim_older_than_ms=reclaim_older_than_ms,
             drain=drain,
             auto_stop=auto_stop,
+            defer_ack=defer_ack,
             extra_headers=extra_headers,
         )
 
