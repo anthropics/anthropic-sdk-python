@@ -1,4 +1,6 @@
 import re
+import json
+import base64
 import typing as t
 import tempfile
 from typing import TypedDict, cast
@@ -164,6 +166,92 @@ def test_application_inference_profile(respx_mock: MockRouter) -> None:
     assert (
         calls[1].request.url
         == "https://bedrock-runtime.us-east-1.amazonaws.com/model/arn:aws:bedrock:us-east-1:123456789012:application-inference-profile%2Fjf2sje1c0jnb/invoke"
+    )
+
+
+@pytest.mark.respx()
+def test_count_tokens(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/count-tokens")).mock(
+        return_value=httpx.Response(200, json={"inputTokens": 42}),
+    )
+
+    count = sync_client.messages.count_tokens(
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    assert count.input_tokens == 42
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert (
+        calls[0].request.url
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/count-tokens"
+    )
+
+    request_body = json.loads(calls[0].request.read())
+    inner_body = json.loads(base64.b64decode(request_body["input"]["invokeModel"]["body"]))
+    assert inner_body == {
+        "messages": [{"role": "user", "content": "Say hello there!"}],
+        "anthropic_version": "bedrock-2023-05-31",
+    }
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_count_tokens_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/count-tokens")).mock(
+        return_value=httpx.Response(200, json={"inputTokens": 42}),
+    )
+
+    count = await async_client.messages.count_tokens(
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    assert count.input_tokens == 42
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert (
+        calls[0].request.url
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/count-tokens"
+    )
+
+
+@pytest.mark.respx()
+def test_count_tokens_beta(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/count-tokens")).mock(
+        return_value=httpx.Response(200, json={"inputTokens": 42}),
+    )
+
+    count = sync_client.beta.messages.count_tokens(
+        messages=[
+            {
+                "role": "user",
+                "content": "Say hello there!",
+            }
+        ],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    assert count.input_tokens == 42
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert (
+        calls[0].request.url
+        == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/count-tokens"
     )
 
 
