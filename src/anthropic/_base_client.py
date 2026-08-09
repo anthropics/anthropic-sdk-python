@@ -2436,7 +2436,9 @@ Platform = Union[
 def get_platform() -> Platform:
     try:
         system = platform.system().lower()
-        platform_name = platform.platform().lower()
+        platform_name = "-".join(
+            part.lower() for part in (system, platform.release(), platform.version(), platform.machine()) if part
+        )
     except Exception:
         return "Unknown"
 
