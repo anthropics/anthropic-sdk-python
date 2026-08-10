@@ -1,9 +1,10 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import List, Optional
+from typing import List, Union, Optional
 from datetime import datetime
-from typing_extensions import Literal
+from typing_extensions import Literal, Annotated, TypeAlias
 
+from ..._utils import PropertyInfo
 from ..._models import BaseModel
 from .beta_dream_error import BetaDreamError
 from .beta_dream_input import BetaDreamInput
@@ -12,12 +13,41 @@ from .beta_dream_output import BetaDreamOutput
 from .beta_dream_status import BetaDreamStatus
 from .beta_dream_model_config import BetaDreamModelConfig
 
-__all__ = ["BetaDream"]
+__all__ = [
+    "BetaDream",
+    "OutputBehavior",
+    "OutputBehaviorBetaOutputBehaviorCreateNew",
+    "OutputBehaviorBetaOutputBehaviorUpdateExisting",
+]
+
+
+class OutputBehaviorBetaOutputBehaviorCreateNew(BaseModel):
+    """
+    The default destination: the job creates a new output memory store as a clone of the memory_store input and writes the consolidated memories into it. The input store is never mutated.
+    """
+
+    type: Literal["create_new"]
+
+
+class OutputBehaviorBetaOutputBehaviorUpdateExisting(BaseModel):
+    """
+    The job writes the consolidated memories into this existing memory store instead of creating one. In EAP the store must be the job's own memory_store input, so the job consolidates the store in place.
+    """
+
+    memory_store_id: str
+
+    type: Literal["update_existing"]
+
+
+OutputBehavior: TypeAlias = Annotated[
+    Union[OutputBehaviorBetaOutputBehaviorCreateNew, OutputBehaviorBetaOutputBehaviorUpdateExisting],
+    PropertyInfo(discriminator="type"),
+]
 
 
 class BetaDream(BaseModel):
     """
-    An asynchronous memory-consolidation job that reads a memory store plus a set of session transcripts and writes consolidated memories into a new output memory store. The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to generally-available endpoints.
+    An asynchronous memory-consolidation job that reads a memory store plus a set of session transcripts and writes consolidated memories into an output memory store — a new store by default, or an existing store chosen via output_behavior. The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to generally-available endpoints.
     """
 
     id: str
@@ -42,6 +72,13 @@ class BetaDream(BaseModel):
     """Model identifier and configuration applied to every pipeline stage.
 
     Same wire shape as the Agents API ModelConfig.
+    """
+
+    output_behavior: OutputBehavior
+    """
+    The default destination: the job creates a new output memory store as a clone of
+    the memory_store input and writes the consolidated memories into it. The input
+    store is never mutated.
     """
 
     outputs: List[BetaDreamOutput]
