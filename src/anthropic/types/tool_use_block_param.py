@@ -27,5 +27,5 @@ class ToolUseBlockParam(TypedDict, total=False):
     cache_control: Optional[CacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
 
-    caller: Caller
+    caller: Optional[Caller]
     """Tool invocation directly from the model."""
