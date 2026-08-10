@@ -31,6 +31,7 @@ from ..._middleware import CallNext, Middleware, AsyncCallNext
 from ..._base_client import merge_headers
 from ...types.message import Message
 from .._stainless_helpers import helper_header
+from ...lib._parse._transform import transform_beta_fallbacks
 from ...types.beta.beta_message import BetaMessage
 from ...types.anthropic_beta_param import AnthropicBetaParam
 from ...types.beta.beta_fallback_param import BetaFallbackParam
@@ -183,7 +184,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
                 refusals only carry a `fallback_credit_token` when the beta is enabled.
                 Defaults to `("fallback-credit-2026-07-01",)`; pass `()` to send none.
         """
-        self._fallbacks = tuple(fallbacks)
+        self._fallbacks = tuple(transform_beta_fallbacks(fallbacks))
         self._betas = DEFAULT_BETAS if betas is None else tuple(betas)
         self._warned_missing_state = False
 

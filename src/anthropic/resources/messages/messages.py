@@ -44,7 +44,7 @@ from ...types.message_param import MessageParam
 from ...lib._parse._response import ResponseFormatT, parse_response
 from ...types.metadata_param import MetadataParam
 from ...types.parsed_message import ParsedMessage
-from ...lib._parse._transform import transform_schema
+from ...lib._parse._transform import transform_schema, transform_output_config
 from ...lib._stainless_helpers import (
     HELPER_METHOD_STREAM as _HELPER_METHOD_STREAM,
     STAINLESS_HELPER_METHOD_HEADER as _STAINLESS_HELPER_METHOD_HEADER,
@@ -1044,6 +1044,7 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
+        output_config = transform_output_config(output_config)
         extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
         return self._post(
             "/v1/messages",
@@ -1131,6 +1132,7 @@ class Messages(SyncAPIResource):
             **(extra_headers or {}),
         }
 
+        output_config = transform_output_config(output_config)
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
 
         if is_dict(output_format):
@@ -1247,6 +1249,7 @@ class Messages(SyncAPIResource):
             extra_headers or {},
         )
 
+        output_config = transform_output_config(output_config)
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
 
         if is_given(output_format) and output_format is not None:
@@ -1533,6 +1536,7 @@ class Messages(SyncAPIResource):
         """
         extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
 
+        output_config = transform_output_config(output_config)
         # Transform output_format if provided
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
 
@@ -2540,6 +2544,8 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
+
+        output_config = transform_output_config(output_config)
         return await self._post(
             "/v1/messages",
             body=await async_maybe_transform(
@@ -2626,6 +2632,7 @@ class AsyncMessages(AsyncAPIResource):
             **(extra_headers or {}),
         }
 
+        output_config = transform_output_config(output_config)
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
 
         if is_dict(output_format):
@@ -2741,6 +2748,7 @@ class AsyncMessages(AsyncAPIResource):
             extra_headers or {},
         )
 
+        output_config = transform_output_config(output_config)
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
 
         if is_given(output_format) and output_format is not None:
@@ -3027,6 +3035,7 @@ class AsyncMessages(AsyncAPIResource):
         """
         extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
 
+        output_config = transform_output_config(output_config)
         # Transform output_format if provided
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
 

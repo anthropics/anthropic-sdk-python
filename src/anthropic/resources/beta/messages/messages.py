@@ -52,7 +52,7 @@ from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamMa
 from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ....types.model_param import ModelParam
 from ....lib._parse._response import ResponseFormatT, parse_beta_response
-from ....lib._parse._transform import transform_schema
+from ....lib._parse._transform import transform_schema, transform_output_config, transform_beta_fallbacks
 from ....lib._stainless_helpers import (
     HELPER_METHOD_STREAM as _HELPER_METHOD_STREAM,
     STAINLESS_HELPER_METHOD_HEADER as _STAINLESS_HELPER_METHOD_HEADER,
@@ -1226,6 +1226,7 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
+        fallbacks = transform_beta_fallbacks(fallbacks)
         merged_output_config = _merge_output_configs(output_config, output_format)
 
         extra_headers = merge_headers(
@@ -1375,7 +1376,9 @@ class Messages(SyncAPIResource):
 
             merged_output_config = _merge_output_configs(output_config, transformed_output_format)
         else:
-            merged_output_config = output_config
+            merged_output_config = _merge_output_configs(output_config, omit)
+
+        fallbacks = transform_beta_fallbacks(fallbacks)
 
         def parser(response: BetaMessage) -> ParsedBetaMessage[ResponseFormatT]:
             return parse_beta_response(
@@ -1784,6 +1787,7 @@ class Messages(SyncAPIResource):
                     )
                 ) from e
 
+        fallbacks = transform_beta_fallbacks(fallbacks)
         merged_output_config = _merge_output_configs(output_config, transformed_output_format)
 
         make_request = partial(
@@ -3244,6 +3248,7 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
+        fallbacks = transform_beta_fallbacks(fallbacks)
         merged_output_config = _merge_output_configs(output_config, output_format)
 
         extra_headers = merge_headers(
@@ -3392,7 +3397,9 @@ class AsyncMessages(AsyncAPIResource):
 
             merged_output_config = _merge_output_configs(output_config, transformed_output_format)
         else:
-            merged_output_config = output_config
+            merged_output_config = _merge_output_configs(output_config, omit)
+
+        fallbacks = transform_beta_fallbacks(fallbacks)
 
         def parser(response: BetaMessage) -> ParsedBetaMessage[ResponseFormatT]:
             return parse_beta_response(
@@ -3793,6 +3800,7 @@ class AsyncMessages(AsyncAPIResource):
                     )
                 ) from e
 
+        fallbacks = transform_beta_fallbacks(fallbacks)
         merged_output_config = _merge_output_configs(output_config, transformed_output_format)
 
         request = self._post(
@@ -4214,6 +4222,7 @@ def _merge_output_configs(
     output_config: BetaOutputConfigParam | Omit,
     output_format: Optional[BetaJSONOutputFormatParam] | Omit,
 ) -> BetaOutputConfigParam | Omit:
+    output_config = transform_output_config(output_config)
     if is_given(output_format):
         if is_given(output_config):
             return {**output_config, "format": output_format}

@@ -1,9 +1,12 @@
 from copy import deepcopy
+from typing import Any
 
 import pytest
+from pydantic import Field, BaseModel
 from inline_snapshot import snapshot
 
-from anthropic.lib._parse._transform import transform_schema
+from anthropic import omit, _compat
+from anthropic.lib._parse._transform import transform_schema, transform_output_config
 
 
 def test_ref_schema():
@@ -229,3 +232,48 @@ def test_original_schema_not_mutated():
     transform_schema(original_schema)
 
     assert original_schema == original_schema_backup
+
+
+@pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs require Pydantic v2")
+def test_output_config_transforms_pydantic_format_without_mutating_input() -> None:
+    class Item(BaseModel):
+        code: str = Field(pattern=r"^[A-Z]{3}$", min_length=3)
+
+    output_config: dict[str, Any] = {"effort": "high", "format": Item}
+    result = transform_output_config(output_config)
+
+    assert output_config["format"] is Item
+    assert result["effort"] == "high"
+    assert result["format"] == {
+        "schema": {
+            "type": "object",
+            "title": "Item",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "title": "Code",
+                    "description": "{minLength: 3, pattern: ^[A-Z]{3}$}",
+                }
+            },
+            "additionalProperties": False,
+            "required": ["code"],
+        },
+        "type": "json_schema",
+    }
+
+
+def test_output_config_preserves_raw_and_omitted_formats() -> None:
+    raw_config = {"format": {"type": "json_schema", "schema": {"type": "object"}}}
+
+    assert transform_output_config(raw_config) == raw_config
+    assert transform_output_config({"format": None}) == {"format": None}
+    assert transform_output_config(omit) is omit
+
+
+@pytest.mark.skipif(not _compat.PYDANTIC_V1, reason="only applicable to Pydantic v1")
+def test_output_config_rejects_pydantic_models_on_pydantic_v1() -> None:
+    class Item(BaseModel):
+        code: str
+
+    with pytest.raises(TypeError, match="output_config.format.*Pydantic v2"):
+        transform_output_config({"format": Item})
