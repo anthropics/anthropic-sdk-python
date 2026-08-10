@@ -1,48 +1,19 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import List, Union, Optional
+from typing import List, Optional
 from datetime import datetime
-from typing_extensions import Literal, Annotated, TypeAlias
+from typing_extensions import Literal
 
-from ..._utils import PropertyInfo
 from ..._models import BaseModel
 from .beta_dream_error import BetaDreamError
 from .beta_dream_input import BetaDreamInput
 from .beta_dream_usage import BetaDreamUsage
 from .beta_dream_output import BetaDreamOutput
 from .beta_dream_status import BetaDreamStatus
+from .beta_output_behavior import BetaOutputBehavior
 from .beta_dream_model_config import BetaDreamModelConfig
 
-__all__ = [
-    "BetaDream",
-    "OutputBehavior",
-    "OutputBehaviorBetaOutputBehaviorCreateNew",
-    "OutputBehaviorBetaOutputBehaviorUpdateExisting",
-]
-
-
-class OutputBehaviorBetaOutputBehaviorCreateNew(BaseModel):
-    """
-    The default destination: the job creates a new output memory store as a clone of the memory_store input and writes the consolidated memories into it. The input store is never mutated.
-    """
-
-    type: Literal["create_new"]
-
-
-class OutputBehaviorBetaOutputBehaviorUpdateExisting(BaseModel):
-    """
-    The job writes the consolidated memories into this existing memory store instead of creating one. In EAP the store must be the job's own memory_store input, so the job consolidates the store in place.
-    """
-
-    memory_store_id: str
-
-    type: Literal["update_existing"]
-
-
-OutputBehavior: TypeAlias = Annotated[
-    Union[OutputBehaviorBetaOutputBehaviorCreateNew, OutputBehaviorBetaOutputBehaviorUpdateExisting],
-    PropertyInfo(discriminator="type"),
-]
+__all__ = ["BetaDream"]
 
 
 class BetaDream(BaseModel):
@@ -74,7 +45,7 @@ class BetaDream(BaseModel):
     Same wire shape as the Agents API ModelConfig.
     """
 
-    output_behavior: OutputBehavior
+    output_behavior: BetaOutputBehavior
     """
     The default destination: the job creates a new output memory store as a clone of
     the memory_store input and writes the consolidated memories into it. The input
