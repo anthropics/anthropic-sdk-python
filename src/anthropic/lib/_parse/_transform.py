@@ -126,13 +126,14 @@ def transform_schema(
         strict_schema["title"] = title
 
     if type_ == "object":
+        properties_present = "properties" in json_schema
         properties = cast("dict[str, dict[str, Any]] | None", json_schema.pop("properties", None))
         dynamic_key_keywords = [
             keyword
             for keyword in ("patternProperties", "propertyNames", "unevaluatedProperties")
             if keyword in json_schema
         ]
-        if not properties and dynamic_key_keywords:
+        if not properties_present and dynamic_key_keywords:
             keywords = ", ".join(dynamic_key_keywords)
             raise ValueError(
                 f"Object schemas using {keywords} without explicit properties cannot be represented by the API"

@@ -158,6 +158,25 @@ def test_object_schema_with_explicit_properties_keeps_dynamic_key_constraints_as
     )
 
 
+def test_object_schema_with_empty_explicit_properties_keeps_dynamic_key_constraints_as_description():
+    schema = {
+        "type": "object",
+        "properties": {},
+        "patternProperties": {"^S_": {"type": "string"}},
+    }
+
+    result = transform_schema(schema)
+
+    assert result == snapshot(
+        {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": False,
+            "description": "{patternProperties: {'^S_': {'type': 'string'}}}",
+        }
+    )
+
+
 def test_array_schema():
     schema = {
         "type": "array",
