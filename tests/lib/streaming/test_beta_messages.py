@@ -13,7 +13,11 @@ from anthropic import Anthropic, AsyncAnthropic
 from anthropic._utils import assert_overloads_in_sync, assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.types.beta.beta_message import BetaMessage
-from anthropic.lib.streaming._beta_types import BetaCompactionEvent, ParsedBetaMessageStreamEvent
+from anthropic.lib.streaming._beta_types import (
+    BetaInputJsonEvent,
+    BetaCompactionEvent,
+    ParsedBetaMessageStreamEvent,
+)
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
 from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
 
@@ -260,6 +264,45 @@ def assert_fallback_response(events: list[ParsedBetaMessageStreamEvent], message
     assert text_block.text == "Hello there!"
 
 
+EXPECTED_SERVER_TOOL_USE_EVENT_TYPES = [
+    "message_start",
+    "content_block_start",
+    *["content_block_delta", "input_json"] * 6,
+    "content_block_stop",
+    "content_block_start",
+    "content_block_stop",
+    "content_block_start",
+    "content_block_delta",
+    "citation",
+    "content_block_delta",
+    "text",
+    "content_block_delta",
+    "text",
+    "content_block_stop",
+    "message_delta",
+]
+
+
+def assert_server_tool_use_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
+    assert [e.type for e in events] == EXPECTED_SERVER_TOOL_USE_EVENT_TYPES
+
+    server_tool_use = message.content[0]
+    assert server_tool_use.type == "server_tool_use"
+    assert server_tool_use.input == {"query": "anthropic claude release notes"}
+
+    # input_json events must fire for server_tool_use blocks, not just client tool_use
+    input_json_events = [e for e in events if isinstance(e, BetaInputJsonEvent)]
+    assert [e.partial_json for e in input_json_events] == [
+        "",
+        '{"query": "',
+        "anthropic cl",
+        "aude re",
+        "lease notes",
+        '"}',
+    ]
+    assert input_json_events[-1].snapshot == {"query": "anthropic claude release notes"}
+
+
 def assert_fallback_credit_response(message: BetaMessage) -> None:
     # `message_delta` carried `usage.fallback_credit`; the accumulated final
     # message must surface it rather than dropping it
@@ -308,6 +351,19 @@ class TestSyncMessages:
             assert isinstance(cast(Any, stream), BetaMessageStream)
 
             assert_tool_use_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_server_tool_use(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("server_tool_use_response.txt"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_server_tool_use_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
@@ -484,6 +540,20 @@ class TestAsyncMessages:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_tool_use_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_server_tool_use(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("server_tool_use_response.txt")))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_server_tool_use_response([event async for event in stream], await stream.get_final_message())
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
