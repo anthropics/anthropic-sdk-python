@@ -118,7 +118,6 @@ include = [
   "/*.lock",
   "/*.md",
   "/mypy.ini",
-  "/noxfile.py",
   "bin/*",
   "examples/*",
   "src/*",
@@ -160,7 +159,6 @@ exclude = [
     ".git",
     "_dev",
     ".venv",
-    ".nox",
     "examples/mcp_tool_runner.py",  # mcp requires Python 3.10+, lint runs on 3.9
 ]
 
