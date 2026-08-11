@@ -540,15 +540,18 @@ def accumulate_event(
         if content_block.type == "text" and is_given(output_format):
             content_block.parsed_output = parse_text(content_block.text, output_format)
     elif event.type == "message_delta":
-        current_snapshot.container = event.delta.container
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
-        if event.delta.stop_details is not None:
-            current_snapshot.stop_details = event.delta.stop_details
+        current_snapshot.stop_details = event.delta.stop_details
+        if event.delta.container is not None:
+            current_snapshot.container = event.delta.container
         current_snapshot.usage.output_tokens = event.usage.output_tokens
-        current_snapshot.context_management = event.context_management
+        if event.context_management is not None:
+            current_snapshot.context_management = event.context_management
 
-        # Update other usage fields if they exist in the event
+        # Usage counts on a message_delta are cumulative totals, so they overwrite rather
+        # than add; optional ones are omitted when not applicable, in which case the
+        # message_start value must survive.
         if event.usage.input_tokens is not None:
             current_snapshot.usage.input_tokens = event.usage.input_tokens
         if event.usage.cache_creation_input_tokens is not None:
@@ -557,6 +560,8 @@ def accumulate_event(
             current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
         if event.usage.server_tool_use is not None:
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+        if event.usage.output_tokens_details is not None:
+            current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
         if event.usage.iterations is not None:
             current_snapshot.usage.iterations = event.usage.iterations
         if event.usage.fallback_credit is not None:

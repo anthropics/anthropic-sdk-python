@@ -311,6 +311,34 @@ def assert_fallback_credit_response(message: BetaMessage) -> None:
     assert message.usage.output_tokens == 8
 
 
+def assert_message_delta_fields_response(message: BetaMessage) -> None:
+    # every field the final `message_delta` carried must land on the accumulated message
+    assert message.container is not None
+    assert message.container.id == "container_01AbCdEfGh"
+    assert message.usage.output_tokens == 8
+    assert message.usage.input_tokens == 40
+    assert message.usage.cache_creation_input_tokens == 12
+    assert message.usage.cache_read_input_tokens == 7
+    assert message.usage.output_tokens_details is not None
+    assert message.usage.output_tokens_details.thinking_tokens == 3
+    assert message.usage.server_tool_use is not None
+    assert message.usage.server_tool_use.web_search_requests == 1
+    # never re-sent on `message_delta`, so these must survive from `message_start`
+    assert message.usage.service_tier == "standard"
+    assert message.usage.cache_creation is not None
+    assert message.usage.cache_creation.ephemeral_5m_input_tokens == 10
+
+
+def assert_context_management_response(message: BetaMessage) -> None:
+    # `context_management` is a top-level key of the `message_delta` event and is
+    # never sent on `message_start`, so the event is its only source
+    assert message.context_management is not None
+    applied_edit = message.context_management.applied_edits[0]
+    assert applied_edit.type == "clear_tool_uses_20250919"
+    assert applied_edit.cleared_tool_uses == 2
+    assert applied_edit.cleared_input_tokens == 1500
+
+
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
@@ -478,6 +506,32 @@ class TestSyncMessages:
             model="claude-sonnet-4-5",
         ) as stream:
             assert_fallback_credit_response(stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("message_delta_fields_response.txt"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_message_delta_fields_response(stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_context_management_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("context_management_response.txt"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_context_management_response(stream.get_final_message())
 
 
 class TestAsyncMessages:
@@ -682,6 +736,34 @@ class TestAsyncMessages:
             model="claude-sonnet-4-5",
         ) as stream:
             assert_fallback_credit_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("message_delta_fields_response.txt")))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_message_delta_fields_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_context_management_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("context_management_response.txt")))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_context_management_response(await stream.get_final_message())
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])

@@ -155,6 +155,36 @@ def assert_refusal_response(message: Message) -> None:
     assert message.stop_details.explanation == "This request was refused due to policy."
 
 
+def assert_message_delta_fields_response(message: Message) -> None:
+    # every field the final `message_delta` carried must land on the accumulated message
+    assert message.container is not None
+    assert message.container.id == "container_01AbCdEfGh"
+    assert message.usage.output_tokens == 8
+    assert message.usage.input_tokens == 40
+    assert message.usage.cache_creation_input_tokens == 12
+    assert message.usage.cache_read_input_tokens == 7
+    assert message.usage.output_tokens_details is not None
+    assert message.usage.output_tokens_details.thinking_tokens == 3
+    assert message.usage.server_tool_use is not None
+    assert message.usage.server_tool_use.web_search_requests == 1
+    # never re-sent on `message_delta`, so these must survive from `message_start`
+    assert message.usage.service_tier == "standard"
+    assert message.usage.cache_creation is not None
+    assert message.usage.cache_creation.ephemeral_5m_input_tokens == 10
+
+
+def assert_message_delta_omitted_usage_response(message: Message) -> None:
+    # the delta omitted every optional usage key, so the `message_start` values stand
+    assert message.usage.output_tokens == 8
+    assert message.usage.input_tokens == 25
+    assert message.usage.cache_creation_input_tokens == 10
+    assert message.usage.cache_read_input_tokens == 5
+    assert message.usage.service_tier == "priority"
+    assert message.usage.cache_creation is not None
+    assert message.usage.cache_creation.ephemeral_5m_input_tokens == 10
+    assert message.container is None
+
+
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
@@ -274,6 +304,32 @@ class TestSyncMessages:
             model="claude-opus-4-7",
         ) as stream:
             assert_refusal_response(stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("message_delta_fields_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_message_delta_fields_response(stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_message_delta_omitted_usage_keeps_message_start(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("message_delta_omitted_usage_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_message_delta_omitted_usage_response(stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.filterwarnings("error")
@@ -423,6 +479,36 @@ class TestAsyncMessages:
             model="claude-opus-4-7",
         ) as stream:
             assert_refusal_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("message_delta_fields_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_message_delta_fields_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_message_delta_omitted_usage_keeps_message_start(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(
+                200, content=to_async_iter(get_response("message_delta_omitted_usage_response.txt"))
+            )
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_message_delta_omitted_usage_response(await stream.get_final_message())
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
