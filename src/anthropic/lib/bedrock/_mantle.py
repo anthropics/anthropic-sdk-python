@@ -9,7 +9,7 @@ import httpx
 from ... import _exceptions
 from ..._qs import Querystring
 from ..._types import NOT_GIVEN, Omit, Timeout, NotGiven
-from ..._utils import is_given
+from ..._utils import asyncify, is_given
 from ..._compat import cached_property
 from ..._version import __version__
 from ..aws._auth import get_auth_headers
@@ -462,7 +462,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
 
         data = request.read().decode()
 
-        headers = get_auth_headers(
+        headers = await asyncify(get_auth_headers)(
             method=request.method,
             url=str(request.url),
             headers=request.headers,

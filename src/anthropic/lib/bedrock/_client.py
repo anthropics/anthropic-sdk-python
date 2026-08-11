@@ -11,7 +11,7 @@ import httpx
 from ... import _exceptions
 from ._beta import Beta, AsyncBeta
 from ..._types import NOT_GIVEN, Timeout, NotGiven
-from ..._utils import is_dict, is_given
+from ..._utils import is_dict, asyncify, is_given
 from ..._compat import model_copy
 from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
@@ -405,7 +405,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
 
         data = request.read().decode()
 
-        headers = get_auth_headers(
+        headers = await asyncify(get_auth_headers)(
             method=request.method,
             url=str(request.url),
             headers=request.headers,

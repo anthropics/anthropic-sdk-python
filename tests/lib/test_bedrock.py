@@ -2,6 +2,7 @@ import re
 import json
 import typing as t
 import tempfile
+import threading
 from typing import TypedDict, cast
 from typing_extensions import Protocol
 
@@ -430,3 +431,21 @@ def test_beta_messages_helpers_are_bound() -> None:
     for client in (sync_client, async_client):
         for name in ("create", "parse", "stream", "tool_runner"):
             assert callable(getattr(client.beta.messages, name))
+
+
+@pytest.mark.asyncio()
+async def test_sigv4_signing_runs_off_event_loop_async(monkeypatch: pytest.MonkeyPatch) -> None:
+    signing_threads: t.List[int] = []
+
+    def fake_get_auth_headers(**_: object) -> t.Dict[str, str]:
+        signing_threads.append(threading.get_ident())
+        return {"Authorization": "AWS4-HMAC-SHA256 stub"}
+
+    monkeypatch.setattr("anthropic.lib.bedrock._auth.get_auth_headers", fake_get_auth_headers)
+
+    request = httpx.Request("POST", "https://bedrock-runtime.us-east-1.amazonaws.com/model/x/invoke", content=b"{}")
+    await async_client._prepare_request(request)
+
+    assert len(signing_threads) == 1
+    assert signing_threads[0] != threading.get_ident()
+    assert request.headers["Authorization"] == "AWS4-HMAC-SHA256 stub"
