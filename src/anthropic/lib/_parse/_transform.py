@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import inspect
 from typing import Any, Literal, TypeVar, Optional, cast
-from collections.abc import Mapping, Iterable
 from typing_extensions import assert_never
 
 import pydantic
@@ -92,40 +91,6 @@ def transform_output_config(output_config: _T) -> _T:
         ) from e
 
     return cast(_T, {**output_config_dict, "format": transformed_format})
-
-
-def transform_batch_requests(requests: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
-    """Transform ``output_config.format`` values in Message Batch requests."""
-    transformed_requests: list[dict[str, Any]] = []
-    for request in requests:
-        params: Any = request["params"]
-        if isinstance(params, Mapping) and "output_config" in params:
-            params_dict = cast(Mapping[str, Any], params)
-            params = {
-                **params_dict,
-                "output_config": transform_output_config(params_dict["output_config"]),
-            }
-        transformed_requests.append({**request, "params": params})
-    return transformed_requests
-
-
-def transform_beta_fallbacks(fallbacks: _T) -> _T:
-    """Transform ``output_config.format`` values in beta fallback entries."""
-    if not isinstance(fallbacks, Iterable) or isinstance(fallbacks, (str, bytes, Mapping)):
-        return cast(_T, fallbacks)
-
-    transformed_fallbacks: list[Any] = []
-    fallback_iterable: Iterable[Any] = cast(Iterable[Any], fallbacks)
-    for fallback in fallback_iterable:
-        fallback_value: Any = fallback
-        if isinstance(fallback, Mapping) and "output_config" in fallback:
-            fallback_dict = cast(Mapping[str, Any], fallback)
-            fallback_value = {
-                **fallback_dict,
-                "output_config": transform_output_config(fallback_dict["output_config"]),
-            }
-        transformed_fallbacks.append(fallback_value)
-    return cast(_T, transformed_fallbacks)
 
 
 def transform_schema(

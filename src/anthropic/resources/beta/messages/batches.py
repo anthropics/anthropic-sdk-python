@@ -18,7 +18,6 @@ from ...._exceptions import AnthropicError
 from ...._base_client import AsyncPaginator, make_request_options
 from ...._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
 from ....types.beta.messages import batch_list_params, batch_create_params
-from ....lib._parse._transform import transform_batch_requests
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.messages.beta_message_batch import BetaMessageBatch
 from ....types.beta.messages.beta_deleted_message_batch import BetaDeletedMessageBatch
@@ -103,9 +102,7 @@ class Batches(SyncAPIResource):
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
             "/v1/messages/batches?beta=true",
-            body=maybe_transform(
-                {"requests": transform_batch_requests(requests)}, batch_create_params.BatchCreateParams
-            ),
+            body=maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -501,9 +498,7 @@ class AsyncBatches(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
             "/v1/messages/batches?beta=true",
-            body=await async_maybe_transform(
-                {"requests": transform_batch_requests(requests)}, batch_create_params.BatchCreateParams
-            ),
+            body=await async_maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),

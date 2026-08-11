@@ -103,43 +103,6 @@ def test_messages_count_tokens_transforms_pydantic_output_config_format(
 
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs require Pydantic v2")
-def test_message_batch_transforms_pydantic_output_config_format(client: Anthropic, respx_mock: MockRouter) -> None:
-    respx_mock.post("/v1/messages/batches").mock(return_value=httpx.Response(200, json={}))
-
-    response = client.messages.batches.with_raw_response.create(
-        requests=[
-            {
-                "custom_id": "item-1",
-                "params": {
-                    "max_tokens": 1024,
-                    "messages": [{"role": "user", "content": "Return an item"}],
-                    "model": "claude-sonnet-4-5",
-                    "output_config": {"format": Item},
-                },
-            }
-        ]
-    )
-
-    body = json.loads(response.http_request.content)
-    assert_item_schema(body["requests"][0]["params"]["output_config"]["format"])
-
-
-@pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs require Pydantic v2")
-def test_beta_fallback_transforms_pydantic_output_config_format(client: Anthropic, respx_mock: MockRouter) -> None:
-    respx_mock.post("/v1/messages?beta=true").mock(return_value=httpx.Response(200, json=message_response()))
-
-    client.beta.messages.create(
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Return an item"}],
-        model="claude-sonnet-4-5",
-        fallbacks=[{"model": "claude-haiku-4-5", "output_config": {"format": Item}}],
-    )
-
-    body = json.loads(respx_mock.calls.last.request.content)
-    assert_item_schema(body["fallbacks"][0]["output_config"]["format"])
-
-
-@pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs require Pydantic v2")
 async def test_beta_messages_create_transforms_pydantic_output_config_format(
     async_client: AsyncAnthropic, respx_mock: MockRouter
 ) -> None:
@@ -275,6 +238,24 @@ async def test_async_messages_count_tokens_transforms_pydantic_output_config_for
     )
 
     body = json.loads(respx_mock.calls.last.request.content)
+    assert_item_schema(body["output_config"]["format"])
+
+
+@pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs require Pydantic v2")
+async def test_async_beta_messages_create_transforms_pydantic_output_config_format(
+    async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    respx_mock.post("/v1/messages?beta=true").mock(return_value=httpx.Response(200, json=message_response()))
+
+    await async_client.beta.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Return an item"}],
+        model="claude-sonnet-4-5",
+        output_config={"effort": "high", "format": Item},
+    )
+
+    body = json.loads(respx_mock.calls.last.request.content)
+    assert body["output_config"]["effort"] == "high"
     assert_item_schema(body["output_config"]["format"])
 
 
