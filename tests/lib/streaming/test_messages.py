@@ -25,6 +25,12 @@ async_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_respon
 
 _T = TypeVar("_T")
 
+# the accumulator must wrap the raw parser error with context and echo the offending JSON
+INVALID_TOOL_JSON_ERROR = (
+    r"^Unable to parse tool parameter JSON from model\. Please retry your request or adjust your prompt\. "
+    r'Error: .+\. JSON: \{"location": "Paris", "unit": celsius\}$'
+)
+
 
 def assert_basic_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
     assert message.id == "msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK"
@@ -243,6 +249,20 @@ class TestSyncMessages:
             assert_server_tool_use_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
+    def test_tool_use_invalid_json(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("tool_use_invalid_json_response.txt"))
+        )
+
+        with pytest.raises(ValueError, match=INVALID_TOOL_JSON_ERROR):
+            with sync_client.messages.stream(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "What's the weather in Paris?"}],
+                model="claude-sonnet-4-5",
+            ) as stream:
+                stream.until_done()
+
+    @pytest.mark.respx(base_url=base_url)
     def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx.Response(200, content=get_response("refusal_response.txt"))
@@ -374,6 +394,21 @@ class TestAsyncMessages:
             model="claude-sonnet-4-5",
         ) as stream:
             assert_server_tool_use_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_tool_use_invalid_json(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("tool_use_invalid_json_response.txt")))
+        )
+
+        with pytest.raises(ValueError, match=INVALID_TOOL_JSON_ERROR):
+            async with async_client.messages.stream(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "What's the weather in Paris?"}],
+                model="claude-sonnet-4-5",
+            ) as stream:
+                await stream.until_done()
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
