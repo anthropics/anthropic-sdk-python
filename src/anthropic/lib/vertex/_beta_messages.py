@@ -13,7 +13,9 @@ __all__ = ["Messages", "AsyncMessages"]
 
 class Messages(SyncAPIResource):
     create = FirstPartyMessagesAPI.create
+    parse = FirstPartyMessagesAPI.parse
     stream = FirstPartyMessagesAPI.stream
+    tool_runner = FirstPartyMessagesAPI.tool_runner
     count_tokens = FirstPartyMessagesAPI.count_tokens
 
     @cached_property
@@ -38,7 +40,9 @@ class Messages(SyncAPIResource):
 
 class AsyncMessages(AsyncAPIResource):
     create = FirstPartyAsyncMessagesAPI.create
+    parse = FirstPartyAsyncMessagesAPI.parse
     stream = FirstPartyAsyncMessagesAPI.stream
+    tool_runner = FirstPartyAsyncMessagesAPI.tool_runner
     count_tokens = FirstPartyAsyncMessagesAPI.count_tokens
 
     @cached_property
