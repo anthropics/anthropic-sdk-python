@@ -255,6 +255,27 @@ class TestSyncMessages:
         ) as stream:
             assert_refusal_response(stream.get_final_message())
 
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.filterwarnings("error")
+    def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
+        # trailing blank line terminates the final `message_stop` SSE so it is dispatched
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=iter([*get_response("basic_response.txt"), b"\n"]))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            stop_event = [event for event in stream][-1]
+
+        assert stop_event.type == "message_stop"
+        assert stop_event.message.content[0].type == "text"
+        # must not emit `PydanticSerializationUnexpectedValue` warnings
+        stop_event.model_dump()
+        stop_event.model_dump_json()
+
 
 class TestAsyncMessages:
     @pytest.mark.asyncio
@@ -367,6 +388,28 @@ class TestAsyncMessages:
             model="claude-opus-4-7",
         ) as stream:
             assert_refusal_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.filterwarnings("error")
+    async def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
+        # trailing blank line terminates the final `message_stop` SSE so it is dispatched
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(iter([*get_response("basic_response.txt"), b"\n"])))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            stop_event = [event async for event in stream][-1]
+
+        assert stop_event.type == "message_stop"
+        assert stop_event.message.content[0].type == "text"
+        # must not emit `PydanticSerializationUnexpectedValue` warnings
+        stop_event.model_dump()
+        stop_event.model_dump_json()
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])

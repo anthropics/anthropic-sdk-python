@@ -88,7 +88,10 @@ class BetaCompactionEvent(BaseModel):
 class ParsedBetaMessageStopEvent(BetaRawMessageStopEvent, GenericModel, Generic[ResponseFormatT]):
     type: Literal["message_stop"]
 
-    message: ParsedBetaMessage[ResponseFormatT]
+    if TYPE_CHECKING:
+        message: ParsedBetaMessage[ResponseFormatT]
+    else:
+        message: ParsedBetaMessage
 
 
 class ParsedBetaContentBlockStopEvent(BetaRawContentBlockStopEvent, GenericModel, Generic[ResponseFormatT]):
