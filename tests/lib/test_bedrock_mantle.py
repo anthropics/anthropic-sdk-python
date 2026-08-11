@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 from unittest.mock import MagicMock, patch
 
 import httpx
@@ -243,6 +244,28 @@ class TestAsyncClient:
             aws_region="us-east-1",
         )
         assert client.base_url == "https://bedrock-mantle.us-east-1.api.aws/anthropic/"
+
+    @pytest.mark.asyncio()
+    async def test_sigv4_signing_runs_off_event_loop(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        client = AsyncAnthropicBedrockMantle(
+            aws_access_key="AKID",
+            aws_secret_key="secret",
+            aws_region="us-east-1",
+        )
+        signing_threads: list[int] = []
+
+        def fake_get_auth_headers(**_: object) -> dict[str, str]:
+            signing_threads.append(threading.get_ident())
+            return {"Authorization": "AWS4-HMAC-SHA256 stub"}
+
+        monkeypatch.setattr("anthropic.lib.bedrock._mantle.get_auth_headers", fake_get_auth_headers)
+
+        request = httpx.Request("POST", "https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages", content=b"{}")
+        await client._prepare_request(request)
+
+        assert len(signing_threads) == 1
+        assert signing_threads[0] != threading.get_ident()
+        assert request.headers["Authorization"] == "AWS4-HMAC-SHA256 stub"
 
 
 class TestCopy:

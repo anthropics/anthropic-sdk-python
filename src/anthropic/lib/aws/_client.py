@@ -6,6 +6,7 @@ from typing_extensions import Self, override
 import httpx
 
 from ..._types import NOT_GIVEN, Omit, Headers, Timeout, NotGiven
+from ..._utils import asyncify
 from ..._client import Anthropic, AsyncAnthropic
 from ._credentials import (
     resolve_region,
@@ -358,7 +359,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
 
         data = request.read().decode()
 
-        headers = get_auth_headers(
+        headers = await asyncify(get_auth_headers)(
             method=request.method,
             url=str(request.url),
             headers=request.headers,

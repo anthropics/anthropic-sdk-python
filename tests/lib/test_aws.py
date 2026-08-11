@@ -1,5 +1,6 @@
 import re
-from typing import cast
+import threading
+from typing import Dict, List, cast
 from typing_extensions import Protocol
 
 import httpx
@@ -455,3 +456,27 @@ def test_scoped_bearer_client_helper_on_aws_async() -> None:
     assert isinstance(scoped, AsyncAnthropicAWS)
     assert scoped._use_sigv4 is True
     assert scoped.workspace_id == "ws-123"
+
+
+@pytest.mark.asyncio()
+async def test_sigv4_signing_runs_off_event_loop_async(monkeypatch: pytest.MonkeyPatch) -> None:
+    client = AsyncAnthropicAWS(
+        aws_access_key="AKID",
+        aws_secret_key="secret",
+        aws_region="us-east-1",
+        workspace_id="ws-123",
+    )
+    signing_threads: List[int] = []
+
+    def fake_get_auth_headers(**_: object) -> Dict[str, str]:
+        signing_threads.append(threading.get_ident())
+        return {"Authorization": "AWS4-HMAC-SHA256 stub"}
+
+    monkeypatch.setattr("anthropic.lib.aws._auth.get_auth_headers", fake_get_auth_headers)
+
+    request = httpx.Request("POST", "https://aws-external-anthropic.us-east-1.api.aws/v1/messages", content=b"{}")
+    await client._prepare_request(request)
+
+    assert len(signing_threads) == 1
+    assert signing_threads[0] != threading.get_ident()
+    assert request.headers["Authorization"] == "AWS4-HMAC-SHA256 stub"
