@@ -3085,6 +3085,36 @@ class TestCredentialPrecedence:
         assert client.api_key == "sk-from-env"
         assert not any("takes precedence" in r.message for r in caplog.records)
 
+    # -- step 2: empty env values are unset, not empty credentials -----------
+
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    def test_empty_env_auth_token_is_unset(
+        self, clean_env: pytest.MonkeyPatch, client_cls: type[Anthropic] | type[AsyncAnthropic]
+    ) -> None:
+        """``ANTHROPIC_AUTH_TOKEN=`` (present but empty) must not produce a
+        malformed ``Authorization: Bearer `` header alongside the api key."""
+        clean_env.setenv("ANTHROPIC_API_KEY", "sk-from-env")
+        clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
+        client = client_cls()
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert request.headers.get("Authorization") is None
+        assert request.headers.get("X-Api-Key") == "sk-from-env"
+        assert client.auth_token is None
+
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    def test_empty_env_credentials_fall_through_to_no_auth(
+        self, clean_env: pytest.MonkeyPatch, client_cls: type[Anthropic] | type[AsyncAnthropic]
+    ) -> None:
+        """Both env vars empty → same "no auth configured" error as unset,
+        rather than sending empty ``X-Api-Key`` / ``Authorization: Bearer ``."""
+        clean_env.setenv("ANTHROPIC_API_KEY", "")
+        clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
+        client = client_cls()
+        with pytest.raises(TypeError, match="Could not resolve authentication method"):
+            client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert client.api_key is None
+        assert client.auth_token is None
+
     # -- step 1 alone: credentials= works normally --------------------------
 
     def test_credentials_only_still_works(self, caplog: pytest.LogCaptureFixture) -> None:
