@@ -10,7 +10,7 @@ from respx import MockRouter
 from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
-from anthropic.lib.streaming import ParsedMessageStreamEvent
+from anthropic.lib.streaming import InputJsonEvent, ParsedMessageStreamEvent
 from anthropic.types.message import Message
 from anthropic.resources.messages import DEPRECATED_MODELS
 from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
@@ -105,6 +105,42 @@ def assert_tool_use_response(events: list[ParsedMessageStreamEvent[None]], messa
     ]
 
 
+def assert_server_tool_use_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
+    assert [e.type for e in events] == [
+        "message_start",
+        "content_block_start",
+        *["content_block_delta", "input_json"] * 6,
+        "content_block_stop",
+        "content_block_start",
+        "content_block_stop",
+        "content_block_start",
+        "content_block_delta",
+        "citation",
+        "content_block_delta",
+        "text",
+        "content_block_delta",
+        "text",
+        "content_block_stop",
+        "message_delta",
+    ]
+
+    server_tool_use = message.content[0]
+    assert server_tool_use.type == "server_tool_use"
+    assert server_tool_use.input == {"query": "anthropic claude release notes"}
+
+    # input_json events must fire for server_tool_use blocks, not just client tool_use
+    input_json_events = [e for e in events if isinstance(e, InputJsonEvent)]
+    assert [e.partial_json for e in input_json_events] == [
+        "",
+        '{"query": "',
+        "anthropic cl",
+        "aude re",
+        "lease notes",
+        '"}',
+    ]
+    assert input_json_events[-1].snapshot == {"query": "anthropic claude release notes"}
+
+
 def assert_refusal_response(message: Message) -> None:
     assert message.stop_reason == "refusal"
     assert message.stop_details is not None
@@ -192,6 +228,19 @@ class TestSyncMessages:
                 assert isinstance(cast(Any, stream), Stream)
 
             assert_tool_use_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_server_tool_use(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("server_tool_use_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_server_tool_use_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
     def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
@@ -290,6 +339,20 @@ class TestAsyncMessages:
                 assert isinstance(cast(Any, stream), AsyncStream)
 
             assert_tool_use_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_server_tool_use(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("server_tool_use_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_server_tool_use_response([event async for event in stream], await stream.get_final_message())
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
