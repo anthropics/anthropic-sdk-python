@@ -508,11 +508,14 @@ def accumulate_event(
     elif event.type == "message_delta":
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
-        if event.delta.stop_details is not None:
-            current_snapshot.stop_details = event.delta.stop_details
+        current_snapshot.stop_details = event.delta.stop_details
+        if event.delta.container is not None:
+            current_snapshot.container = event.delta.container
         current_snapshot.usage.output_tokens = event.usage.output_tokens
 
-        # Update other usage fields if they exist in the event
+        # Usage counts on a message_delta are cumulative totals, so they overwrite rather
+        # than add; optional ones are omitted when not applicable, in which case the
+        # message_start value must survive.
         if event.usage.input_tokens is not None:
             current_snapshot.usage.input_tokens = event.usage.input_tokens
         if event.usage.cache_creation_input_tokens is not None:
@@ -521,5 +524,7 @@ def accumulate_event(
             current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
         if event.usage.server_tool_use is not None:
             current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+        if event.usage.output_tokens_details is not None:
+            current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
 
     return current_snapshot
