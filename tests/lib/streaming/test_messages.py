@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Set, TypeVar, cast
+from typing import Any, Set, TypeVar, Iterator, cast
 
 import httpx
 import pytest
@@ -44,6 +44,8 @@ def assert_basic_response(events: list[ParsedMessageStreamEvent[None]], message:
     content = message.content[0]
     assert content.type == "text"
     assert content.text == "Hello there!"
+    # accumulated blocks must serialize like a non-streaming response: keys the API didn't send stay unset
+    assert content.to_dict() == {"type": "text", "text": "Hello there!"}
 
     assert [e.type for e in events] == [
         "message_start",
@@ -145,6 +147,20 @@ def assert_server_tool_use_response(events: list[ParsedMessageStreamEvent[None]]
         '"}',
     ]
     assert input_json_events[-1].snapshot == {"query": "anthropic claude release notes"}
+
+
+def get_tool_use_response_without_caller() -> Iterator[bytes]:
+    return (line.replace(b'"caller":{"type":"direct"},', b"") for line in get_response("tool_use_response.txt"))
+
+
+def assert_tool_use_caller_unset(message: Message) -> None:
+    tool_use = message.content[1]
+    assert tool_use.type == "tool_use"
+    assert tool_use.input == {"location": "Paris"}
+    assert tool_use.caller is None
+    # an omitted `caller` must stay unset so it doesn't round-trip as `"caller": null`, which the API rejects
+    assert "caller" not in tool_use.model_fields_set
+    assert "caller" not in tool_use.to_dict()
 
 
 def assert_refusal_response(message: Message) -> None:
@@ -291,6 +307,19 @@ class TestSyncMessages:
                 model="claude-sonnet-4-5",
             ) as stream:
                 stream.until_done()
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_tool_use_caller_omitted(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_tool_use_response_without_caller())
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "What is the weather in Paris?"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_tool_use_caller_unset(stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
     def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
@@ -465,6 +494,20 @@ class TestAsyncMessages:
                 model="claude-sonnet-4-5",
             ) as stream:
                 await stream.until_done()
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_tool_use_caller_omitted(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_tool_use_response_without_caller()))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "What is the weather in Paris?"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_tool_use_caller_unset(await stream.get_final_message())
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)

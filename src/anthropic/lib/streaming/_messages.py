@@ -458,7 +458,7 @@ def accumulate_event(
         current_snapshot.content.append(
             cast(
                 Any,  # Pydantic does not support generic unions at runtime
-                construct_type(type_=ParsedContentBlock, value=event.content_block.model_dump()),
+                construct_type(type_=ParsedContentBlock, value=event.content_block.to_dict()),
             ),
         )
     elif event.type == "content_block_delta":
