@@ -63,7 +63,7 @@ def format_str(
                 fragment_lines = fragment.splitlines()
                 code += f"{PYCON_PREFIX}{fragment_lines[0]}\n"
                 for line in fragment_lines[1:]:
-                    # Skip blank lines to handle Black adding a blank above
+                    # Skip blank lines to handle the formatter adding a blank above
                     # functions within blocks. A blank line would end the REPL
                     # continuation prompt.
                     #
