@@ -24,7 +24,7 @@ from .batches import (
     BatchesWithStreamingResponse,
     AsyncBatchesWithStreamingResponse,
 )
-from ..._types import NOT_GIVEN, Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
+from ..._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ..._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
 from ..._compat import cached_property
 from ..._models import TypeAdapter
@@ -1107,7 +1107,7 @@ class Messages(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> MessageStreamManager[ResponseFormatT]:
         """Create a Message stream"""
         if model in DEPRECATED_MODELS:
@@ -1131,7 +1131,7 @@ class Messages(SyncAPIResource):
             **(extra_headers or {}),
         }
 
-        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = not_given
 
         if is_dict(output_format):
             transformed_output_format = cast(JSONOutputFormatParam, output_format)
@@ -1194,7 +1194,7 @@ class Messages(SyncAPIResource):
         )
         return MessageStreamManager(
             make_request,
-            output_format=NOT_GIVEN if is_dict(output_format) else cast(ResponseFormatT, output_format),
+            output_format=not_given if is_dict(output_format) else cast(ResponseFormatT, output_format),
         )
 
     def parse(
@@ -1221,7 +1221,7 @@ class Messages(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> ParsedMessage[ResponseFormatT]:
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
@@ -1247,7 +1247,7 @@ class Messages(SyncAPIResource):
             extra_headers or {},
         )
 
-        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = not_given
 
         if is_given(output_format) and output_format is not None:
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
@@ -1268,7 +1268,7 @@ class Messages(SyncAPIResource):
                 response=response,
                 output_format=cast(
                     ResponseFormatT,
-                    output_format if is_given(output_format) and output_format is not None else NOT_GIVEN,
+                    output_format if is_given(output_format) and output_format is not None else not_given,
                 ),
             )
 
@@ -1534,7 +1534,7 @@ class Messages(SyncAPIResource):
         extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
 
         # Transform output_format if provided
-        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = not_given
 
         if is_dict(output_format):
             transformed_output_format = cast(JSONOutputFormatParam, output_format)
@@ -2602,7 +2602,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncMessageStreamManager[ResponseFormatT]:
         """Create a Message stream"""
         if model in DEPRECATED_MODELS:
@@ -2626,7 +2626,7 @@ class AsyncMessages(AsyncAPIResource):
             **(extra_headers or {}),
         }
 
-        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = not_given
 
         if is_dict(output_format):
             transformed_output_format = cast(JSONOutputFormatParam, output_format)
@@ -2688,7 +2688,7 @@ class AsyncMessages(AsyncAPIResource):
         )
         return AsyncMessageStreamManager(
             request,
-            output_format=NOT_GIVEN if is_dict(output_format) else cast(ResponseFormatT, output_format),
+            output_format=not_given if is_dict(output_format) else cast(ResponseFormatT, output_format),
         )
 
     async def parse(
@@ -2715,7 +2715,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> ParsedMessage[ResponseFormatT]:
         if not stream and not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
@@ -2741,7 +2741,7 @@ class AsyncMessages(AsyncAPIResource):
             extra_headers or {},
         )
 
-        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = not_given
 
         if is_given(output_format) and output_format is not None:
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
@@ -2762,7 +2762,7 @@ class AsyncMessages(AsyncAPIResource):
                 response=response,
                 output_format=cast(
                     ResponseFormatT,
-                    output_format if is_given(output_format) and output_format is not None else NOT_GIVEN,
+                    output_format if is_given(output_format) and output_format is not None else not_given,
                 ),
             )
 
@@ -3028,7 +3028,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
 
         # Transform output_format if provided
-        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = NOT_GIVEN
+        transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = not_given
 
         if is_dict(output_format):
             transformed_output_format = cast(JSONOutputFormatParam, output_format)

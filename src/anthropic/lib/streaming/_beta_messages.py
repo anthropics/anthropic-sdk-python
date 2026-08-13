@@ -12,7 +12,7 @@ from anthropic.types.beta.beta_tool_use_block import BetaToolUseBlock
 from anthropic.types.beta.beta_mcp_tool_use_block import BetaMCPToolUseBlock
 from anthropic.types.beta.beta_server_tool_use_block import BetaServerToolUseBlock
 
-from ..._types import NOT_GIVEN, NotGiven
+from ..._types import NotGiven, not_given
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
 from ._beta_types import (
@@ -312,7 +312,7 @@ class BetaAsyncMessageStreamManager(Generic[ResponseFormatT]):
         self,
         api_request: Awaitable[AsyncStream[BetaRawMessageStreamEvent]],
         *,
-        output_format: ResponseFormatT | NotGiven = NOT_GIVEN,
+        output_format: ResponseFormatT | NotGiven = not_given,
     ) -> None:
         self.__stream: BetaAsyncMessageStream[ResponseFormatT] | None = None
         self.__api_request = api_request
@@ -451,7 +451,7 @@ def accumulate_event(
     event: BetaRawMessageStreamEvent,
     current_snapshot: ParsedBetaMessage[ResponseFormatT] | None,
     request_headers: httpx.Headers,
-    output_format: ResponseFormatT | NotGiven = NOT_GIVEN,
+    output_format: ResponseFormatT | NotGiven = not_given,
 ) -> ParsedBetaMessage[ResponseFormatT]:
     if not isinstance(cast(Any, event), BaseModel):
         event = cast(  # pyright: ignore[reportUnnecessaryCast]
