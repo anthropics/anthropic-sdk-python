@@ -421,7 +421,11 @@ class TestAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        with mock.patch("anthropic._client.default_credentials", return_value=None):
+        def no_default_credentials(**_kwargs: object) -> None:
+            return None
+
+        with pytest.MonkeyPatch.context() as monkeypatch:
+            monkeypatch.setattr("anthropic._client.default_credentials", no_default_credentials)
             with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
                 client2 = Anthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
 
@@ -1533,7 +1537,11 @@ class TestAsyncAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        with mock.patch("anthropic._client.default_credentials", return_value=None):
+        def no_default_credentials(**_kwargs: object) -> None:
+            return None
+
+        with pytest.MonkeyPatch.context() as monkeypatch:
+            monkeypatch.setattr("anthropic._client.default_credentials", no_default_credentials)
             with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
                 client2 = AsyncAnthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
 

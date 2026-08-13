@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-from unittest.mock import patch
 
 import httpx
 import pytest
@@ -584,20 +583,28 @@ class TestGetAuthHeaders:
         )
         assert "Authorization" in headers
 
-    def test_raises_on_missing_credentials(self) -> None:
-        with patch("anthropic.lib.aws._auth._get_session") as mock_session:
-            mock_session.return_value.get_credentials.return_value = None
-            mock_session.return_value.region_name = "us-east-1"
-            with pytest.raises(RuntimeError, match="Could not resolve AWS credentials"):
-                get_auth_headers(
-                    method="POST",
-                    url="https://gateway.us-east-1.api.aws/v1/messages",
-                    headers=httpx.Headers({}),
-                    aws_access_key=None,
-                    aws_secret_key=None,
-                    aws_session_token=None,
-                    region="us-east-1",
-                    profile=None,
-                    data="{}",
-                    service_name="aws-external-anthropic",
-                )
+    def test_raises_on_missing_credentials(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        class NoCredentialsSession:
+            region_name = "us-east-1"
+
+            def get_credentials(self) -> None:
+                return None
+
+        def fake_get_session(**_kwargs: object) -> NoCredentialsSession:
+            return NoCredentialsSession()
+
+        monkeypatch.setattr("anthropic.lib.aws._auth._get_session", fake_get_session)
+
+        with pytest.raises(RuntimeError, match="Could not resolve AWS credentials"):
+            get_auth_headers(
+                method="POST",
+                url="https://gateway.us-east-1.api.aws/v1/messages",
+                headers=httpx.Headers({}),
+                aws_access_key=None,
+                aws_secret_key=None,
+                aws_session_token=None,
+                region="us-east-1",
+                profile=None,
+                data="{}",
+                service_name="aws-external-anthropic",
+            )
