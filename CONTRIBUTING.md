@@ -121,8 +121,7 @@ To refresh these snapshots, run the tests with the `--http-record` flag:
 
 ## Linting and formatting
 
-This repository uses [ruff](https://github.com/astral-sh/ruff) and
-[black](https://github.com/psf/black) to format the code in the repository.
+This repository uses [ruff](https://github.com/astral-sh/ruff) to lint and format the code in the repository.
 
 To lint:
 
