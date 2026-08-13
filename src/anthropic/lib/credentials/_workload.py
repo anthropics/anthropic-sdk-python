@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import time
 import logging
 from types import TracebackType
@@ -180,7 +181,7 @@ class WorkloadIdentityCredentials:
         # on the jwt-bearer request.
         self._scope = scope
         # The client passing this object as ``credentials=`` calls
-        # :meth:`bind_base_url` to set its own endpoint, so the token exchange
+        # :meth:`for_base_url` to set its own endpoint, so the token exchange
         # and the API calls hit the same deployment. There is intentionally no
         # constructor kwarg for this: a token minted by one deployment is only
         # valid against that deployment, so splitting exchange-base from
@@ -204,13 +205,30 @@ class WorkloadIdentityCredentials:
     def bind_base_url(self, base_url: str) -> None:
         """Set the API ``base_url`` the token exchange POSTs to.
 
-        Called by :class:`anthropic.Anthropic` when this object is passed as
-        ``credentials=``, so callers don't pass the same URL twice. For
-        standalone use (no client) or tests, call this directly.
+        For standalone use (no client) or tests. Clients bind through
+        :meth:`for_base_url`, which never rebinds an instance another client
+        is already exchanging through.
         """
         bound = base_url.rstrip("/")
         _require_https(bound, field="base_url")
         self._bound_base_url = bound
+
+    def for_base_url(self, base_url: str) -> "WorkloadIdentityCredentials":
+        """Return the provider a client with ``base_url`` should exchange through.
+
+        Binds in place, unless another client already bound this instance to a
+        different host (e.g. the parent of ``copy(base_url=...)``). Rebinding
+        would move that client's token exchange too, so a copy bound to
+        ``base_url`` is returned instead; it shares the identity token and
+        borrows (never closes) this instance's ``httpx.Client``.
+        """
+        bound = base_url.rstrip("/")
+        provider = self
+        if self._bound_base_url is not None and self._bound_base_url != bound:
+            provider = copy.copy(self)
+            provider._owns_http_client = False
+        provider.bind_base_url(bound)
+        return provider
 
     def close(self) -> None:
         """Close the underlying ``httpx.Client`` if we created it."""

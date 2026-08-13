@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import copy
 import json
 import stat
 import time
@@ -230,10 +231,8 @@ class CredentialsFile:
         exchange. Slots between the config file's own ``base_url`` field and
         the hard-coded default; a ``base_url`` in the config file still wins.
 
-        The owning client binds exactly once at construction; sharing one
-        instance across clients with different ``base_url`` values is
-        unsupported and silently picks the last bind when the config file
-        doesn't pin a host.
+        Rebinding affects every client holding this instance; clients bind
+        through :meth:`for_base_url` instead.
         """
         bound = base_url.rstrip("/")
         # Validate eagerly so an invalid bind fails at bind time, not at the
@@ -243,6 +242,35 @@ class CredentialsFile:
         if self._config is not None:
             self._base_url = self._resolve_base_url(self._config)
             _require_https(self._base_url, field=f"{self._config_path}: base_url")
+
+    def for_base_url(self, base_url: str) -> "CredentialsFile":
+        """Return the provider a client with ``base_url`` should exchange through.
+
+        Binds in place, unless another client already bound this instance to a
+        different host (e.g. the parent of ``copy(base_url=...)``). That binding
+        is left alone, and what happens depends on the profile:
+
+        * pins its own ``base_url``: the bind is irrelevant, return ``self``.
+        * ``oidc_federation``: return a copy bound to ``base_url``. It shares the
+          identity token and http client, but not the on-disk token cache, whose
+          tokens belong to the original deployment.
+        * ``user_oauth``: return ``self``. The refresh token is tied to the
+          deployment that issued it, so there is nothing per-host to copy.
+        """
+        bound = base_url.rstrip("/")
+        if self._bound_base_url is None or self._bound_base_url == bound:
+            self.bind_base_url(bound)
+            return self
+        config = self._load_config()
+        if config.get("base_url") or self._auth_block().get("type") != AUTH_TYPE_OIDC_FEDERATION:
+            return self
+        provider = copy.copy(self)
+        provider._http_client = self._get_http_client()
+        provider._owned_http_client = None
+        provider._workload_delegate = None
+        provider._credentials_path = None
+        provider.bind_base_url(bound)
+        return provider
 
     def _resolve_base_url(self, config: Dict[str, Any]) -> str:
         """base_url precedence: top-level config field → bound (the owning
