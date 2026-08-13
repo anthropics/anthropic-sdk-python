@@ -21,7 +21,7 @@ from ._types import (
     ParsedContentBlockStopEvent,
 )
 from ...types import RawMessageStreamEvent
-from ..._types import NOT_GIVEN, NotGiven
+from ..._types import NotGiven, not_given
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
 from ..._streaming import Stream, AsyncStream
@@ -307,7 +307,7 @@ class AsyncMessageStreamManager(Generic[ResponseFormatT]):
         self,
         api_request: Awaitable[AsyncStream[RawMessageStreamEvent]],
         *,
-        output_format: ResponseFormatT | NotGiven = NOT_GIVEN,
+        output_format: ResponseFormatT | NotGiven = not_given,
     ) -> None:
         self.__stream: AsyncMessageStream[ResponseFormatT] | None = None
         self.__api_request = api_request
@@ -434,7 +434,7 @@ def accumulate_event(
     *,
     event: RawMessageStreamEvent,
     current_snapshot: ParsedMessage[ResponseFormatT] | None,
-    output_format: ResponseFormatT | NotGiven = NOT_GIVEN,
+    output_format: ResponseFormatT | NotGiven = not_given,
 ) -> ParsedMessage[ResponseFormatT]:
     if not isinstance(cast(Any, event), BaseModel):
         event = cast(  # pyright: ignore[reportUnnecessaryCast]
