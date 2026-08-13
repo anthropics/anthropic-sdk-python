@@ -97,7 +97,7 @@ jobs:
   detect_breaking_changes_vs_main:
     timeout-minutes: 10
     name: detect-breaking-changes-vs-main
-    runs-on: ${{ github.repository == 'stainless-sdks/anthropic-python' && 'depot-ubuntu-24.04' || 'ubuntu-latest' }}
+    runs-on: 'ubuntu-latest'
     if: |-
       (github.event_name == 'push' &&
        !startsWith(github.ref, 'refs/heads/release-please--')) ||
