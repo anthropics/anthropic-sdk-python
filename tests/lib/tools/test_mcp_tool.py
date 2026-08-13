@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 import base64
 from typing import Any
-from unittest.mock import AsyncMock
 
 import anyio
 import pytest
@@ -53,11 +52,20 @@ def _read_result(contents: list[Any]) -> ReadResourceResult:
     return ReadResourceResult.model_validate({"contents": contents})
 
 
+class FakeClientSession:
+    """Quacks like the `call_tool` part of `mcp.ClientSession`, recording each call."""
+
+    def __init__(self, result: CallToolResult | None = None) -> None:
+        self.result = result or CallToolResult(content=[TextContent(type="text", text="tool output")], isError=False)
+        self.calls: list[dict[str, Any]] = []
+
+    async def call_tool(self, name: str, arguments: dict[str, Any] | None = None) -> CallToolResult:
+        self.calls.append({"name": name, "arguments": arguments})
+        return self.result
+
+
 def _mock_client(result: CallToolResult | None = None) -> Any:
-    """Return a mock that quacks like ClientSession.call_tool."""
-    default = CallToolResult(content=[TextContent(type="text", text="tool output")], isError=False)
-    mock = type("MockClient", (), {"call_tool": AsyncMock(return_value=result or default)})()
-    return mock
+    return FakeClientSession(result)
 
 
 # -----------------------------------------------------------------------
@@ -336,7 +344,7 @@ class TestAsyncMCPToolCall:
             assert block["type"] == "text"
             assert block["text"] == "42"
 
-            client.call_tool.assert_awaited_once_with(name="calc", arguments={"x": 1})
+            assert client.calls == [{"name": "calc", "arguments": {"x": 1}}]
 
         anyio.run(_test)
 

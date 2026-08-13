@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import json
 from typing import Any, Set, Dict, TypeVar, cast
-from unittest import TestCase
 
 import httpx
 import pytest
@@ -200,9 +199,7 @@ def assert_message_matches(message: BetaMessage, expected: Dict[str, Any]) -> No
         indent=2, exclude_none=True, exclude={"content": {"__all__": {"__json_buf"}}}
     )
 
-    test_case = TestCase()
-    test_case.maxDiff = None
-    test_case.assertEqual(expected, json.loads(actual_message_json))
+    assert json.loads(actual_message_json) == expected
 
 
 def assert_basic_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:

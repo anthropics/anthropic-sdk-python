@@ -4,7 +4,6 @@ import os
 import sys
 import json
 from typing import Any, Dict, List, cast
-from unittest.mock import Mock
 from typing_extensions import Protocol
 
 import httpx
@@ -254,8 +253,13 @@ class TestAnthropicVertex:
 def test_refresh_without_google_auth_raises_actionable_error(monkeypatch: pytest.MonkeyPatch) -> None:
     # `None` in sys.modules makes the import fail even when google-auth is installed.
     monkeypatch.setitem(sys.modules, "google.auth.transport.requests", cast(Any, None))
+
+    class FakeCredentials:
+        def refresh(self, _request: object) -> None:
+            raise AssertionError("should not be reached: building the request needs google-auth")
+
     with pytest.raises(MissingDependencyError, match=r"anthropic\[vertex\]"):
-        refresh_auth(cast(Any, Mock()))
+        refresh_auth(cast(Any, FakeCredentials()))
 
 
 class TestAsyncAnthropicVertex:
