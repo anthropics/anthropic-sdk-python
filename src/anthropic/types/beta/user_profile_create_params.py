@@ -26,10 +26,11 @@ class UserProfileCreateParams(TypedDict, total=False):
     """
 
     name: Optional[str]
-    """Display name of the entity this profile represents.
+    """Optional for all profiles.
 
-    Required when relationship is `resold` (the resold-to company's name); optional
-    otherwise. Maximum 255 characters.
+    Real-world name of the entity this profile represents (company or individual);
+    for `resold` profiles, the resold-to company's name where known. Maximum 255
+    characters.
     """
 
     relationship: Literal["external", "resold", "internal"]
