@@ -110,6 +110,18 @@ class TestDeepcopyWithPaths:
         assert_different_identities(result_items[0], elem1)
         assert_different_identities(result_items[1], elem2)
 
+    def test_nested_array_path_copies_tuple_and_elements(self) -> None:
+        elem1 = {"file": b"f1", "extra": 1}
+        elem2 = {"file": b"f2", "extra": 2}
+        original = {"items": (elem1, elem2)}
+        result = deepcopy_with_paths(original, [["items", "<array>", "file"]])
+        assert_different_identities(result, original)
+        result_items = result["items"]
+        assert isinstance(result_items, tuple)
+        assert_different_identities(result_items, original["items"])
+        assert_different_identities(result_items[0], elem1)
+        assert_different_identities(result_items[1], elem2)
+
     def test_empty_paths_returns_same_object(self) -> None:
         original = {"foo": "bar"}
         result = deepcopy_with_paths(original, [])
