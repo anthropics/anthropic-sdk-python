@@ -28,8 +28,8 @@ class BetaEnvironment(BaseModel):
     created_at: str
     """RFC 3339 timestamp when environment was created"""
 
-    description: str
-    """User-provided description for the environment"""
+    description: Optional[str] = None
+    """User-provided description for the environment; null when unset"""
 
     metadata: Dict[str, str]
     """User-provided metadata key-value pairs"""

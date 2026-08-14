@@ -455,9 +455,6 @@ from .beta_memory_tool_20250818_insert_command import (
 from .beta_memory_tool_20250818_rename_command import (
     BetaMemoryTool20250818RenameCommand as BetaMemoryTool20250818RenameCommand,
 )
-from .beta_mid_conversation_system_block_param import (
-    BetaMidConversationSystemBlockParam as BetaMidConversationSystemBlockParam,
-)
 from .beta_request_mcp_tool_result_block_param import (
     BetaRequestMCPToolResultBlockParam as BetaRequestMCPToolResultBlockParam,
 )

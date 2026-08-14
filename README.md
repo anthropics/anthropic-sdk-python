@@ -265,7 +265,7 @@ message = client.messages.create(
             "role": "user",
         }
     ],
-    model="claude-opus-4-6",
+    model="claude-opus-5",
     cache_control={"type": "ephemeral"},
 )
 print(message.cache_control)

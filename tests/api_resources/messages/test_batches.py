@@ -36,7 +36,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -57,7 +57,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                         "cache_control": {
                             "type": "ephemeral",
                             "ttl": "5m",
@@ -151,7 +151,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -176,7 +176,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -397,7 +397,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -418,7 +418,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                         "cache_control": {
                             "type": "ephemeral",
                             "ttl": "5m",
@@ -512,7 +512,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -537,7 +537,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],

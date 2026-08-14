@@ -12,7 +12,7 @@ class BetaDreamModelConfigParam(TypedDict, total=False):
     """Model identifier and configuration applied to every pipeline stage."""
 
     id: Required[str]
-    """Model identifier, e.g. "claude-opus-4-7". 1-256 characters."""
+    """Model identifier, e.g. "claude-opus-5". 1-256 characters."""
 
     speed: Optional[Literal["standard", "fast"]]
     """Inference speed mode.
