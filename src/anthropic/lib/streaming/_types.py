@@ -110,10 +110,7 @@ MessageStreamEvent = Annotated[
 class ParsedMessageStopEvent(RawMessageStopEvent, GenericModel, Generic[ResponseFormatT]):
     type: Literal["message_stop"]
 
-    if TYPE_CHECKING:
-        message: ParsedMessage[ResponseFormatT]
-    else:
-        message: ParsedMessage
+    message: ParsedMessage[ResponseFormatT]
 
 
 class ParsedContentBlockStopEvent(RawContentBlockStopEvent, GenericModel, Generic[ResponseFormatT]):

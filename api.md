@@ -1268,9 +1268,6 @@ from anthropic.types.beta import (
     BetaDreamSessionsInput,
     BetaDreamStatus,
     BetaDreamUsage,
-    BetaOutputBehavior,
-    BetaOutputBehaviorCreateNew,
-    BetaOutputBehaviorUpdateExisting,
 )
 ```
 

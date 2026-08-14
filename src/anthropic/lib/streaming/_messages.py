@@ -21,7 +21,8 @@ from ._types import (
     ParsedContentBlockStopEvent,
 )
 from ...types import RawMessageStreamEvent
-from ..._types import NotGiven, not_given
+from ...types.usage import Usage
+from ..._types import NOT_GIVEN, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
 from ..._streaming import Stream, AsyncStream
@@ -307,7 +308,7 @@ class AsyncMessageStreamManager(Generic[ResponseFormatT]):
         self,
         api_request: Awaitable[AsyncStream[RawMessageStreamEvent]],
         *,
-        output_format: ResponseFormatT | NotGiven = not_given,
+        output_format: ResponseFormatT | NotGiven = NOT_GIVEN,
     ) -> None:
         self.__stream: AsyncMessageStream[ResponseFormatT] | None = None
         self.__api_request = api_request
@@ -360,7 +361,7 @@ def build_events(
                     )
                 )
         elif event.delta.type == "input_json_delta":
-            if isinstance(content_block, TRACKS_TOOL_INPUT):
+            if content_block.type == "tool_use":
                 events_to_fire.append(
                     build(
                         InputJsonEvent,
@@ -434,7 +435,7 @@ def accumulate_event(
     *,
     event: RawMessageStreamEvent,
     current_snapshot: ParsedMessage[ResponseFormatT] | None,
-    output_format: ResponseFormatT | NotGiven = not_given,
+    output_format: ResponseFormatT | NotGiven = NOT_GIVEN,
 ) -> ParsedMessage[ResponseFormatT]:
     if not isinstance(cast(Any, event), BaseModel):
         event = cast(  # pyright: ignore[reportUnnecessaryCast]
@@ -458,7 +459,7 @@ def accumulate_event(
         current_snapshot.content.append(
             cast(
                 Any,  # Pydantic does not support generic unions at runtime
-                construct_type(type_=ParsedContentBlock, value=event.content_block.to_dict()),
+                construct_type(type_=ParsedContentBlock, value=event.content_block.model_dump()),
             ),
         )
     elif event.type == "content_block_delta":
@@ -477,12 +478,7 @@ def accumulate_event(
                 json_buf += bytes(event.delta.partial_json, "utf-8")
 
                 if json_buf:
-                    try:
-                        content.input = from_json(json_buf, partial_mode=True)
-                    except ValueError as e:
-                        raise ValueError(
-                            f"Unable to parse tool parameter JSON from model. Please retry your request or adjust your prompt. Error: {e}. JSON: {json_buf.decode('utf-8')}"
-                        ) from e
+                    content.input = from_json(json_buf, partial_mode=True)
 
                 setattr(content, JSON_BUF_PROPERTY, json_buf)
         elif event.delta.type == "citations_delta":
@@ -508,23 +504,21 @@ def accumulate_event(
     elif event.type == "message_delta":
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
-        current_snapshot.stop_details = event.delta.stop_details
-        if event.delta.container is not None:
-            current_snapshot.container = event.delta.container
-        current_snapshot.usage.output_tokens = event.usage.output_tokens
+        if event.delta.stop_details is not None:
+            current_snapshot.stop_details = event.delta.stop_details
+        if current_snapshot.usage is None:
+            current_snapshot.usage = Usage.construct(**event.usage.model_dump())
+        else:
+            current_snapshot.usage.output_tokens = event.usage.output_tokens
 
-        # Usage counts on a message_delta are cumulative totals, so they overwrite rather
-        # than add; optional ones are omitted when not applicable, in which case the
-        # message_start value must survive.
-        if event.usage.input_tokens is not None:
-            current_snapshot.usage.input_tokens = event.usage.input_tokens
-        if event.usage.cache_creation_input_tokens is not None:
-            current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
-        if event.usage.cache_read_input_tokens is not None:
-            current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
-        if event.usage.server_tool_use is not None:
-            current_snapshot.usage.server_tool_use = event.usage.server_tool_use
-        if event.usage.output_tokens_details is not None:
-            current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
+            # Update other usage fields if they exist in the event
+            if event.usage.input_tokens is not None:
+                current_snapshot.usage.input_tokens = event.usage.input_tokens
+            if event.usage.cache_creation_input_tokens is not None:
+                current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
+            if event.usage.cache_read_input_tokens is not None:
+                current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
+            if event.usage.server_tool_use is not None:
+                current_snapshot.usage.server_tool_use = event.usage.server_tool_use
 
     return current_snapshot

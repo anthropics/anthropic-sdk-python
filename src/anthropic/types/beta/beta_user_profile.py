@@ -46,7 +46,7 @@ class BetaUserProfile(BaseModel):
     """Platform's own identifier for this user. Not enforced unique."""
 
     name: Optional[str] = None
-    """Real-world name of the entity this profile represents (company or individual).
+    """Display name of the entity this profile represents.
 
     For `resold` this is the resold-to company's name.
     """

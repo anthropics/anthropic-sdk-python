@@ -5,7 +5,6 @@ from ._types import (
     AccessToken as AccessToken,
     CredentialResult as CredentialResult,
     AccessTokenProvider as AccessTokenProvider,
-    BaseURLBoundProvider as BaseURLBoundProvider,
     IdentityTokenProvider as IdentityTokenProvider,
 )
 from ._workload import (
@@ -24,7 +23,6 @@ from ._providers import (
 __all__ = [
     "AccessToken",
     "AccessTokenProvider",
-    "BaseURLBoundProvider",
     "CredentialResult",
     "IdentityTokenProvider",
     "StaticToken",

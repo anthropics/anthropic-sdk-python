@@ -5,8 +5,7 @@ from typing_extensions import Self, override
 
 import httpx
 
-from ..._types import Omit, Headers, Timeout, NotGiven, not_given
-from ..._utils import asyncify
+from ..._types import NOT_GIVEN, Omit, Headers, Timeout, NotGiven
 from ..._client import Anthropic, AsyncAnthropic
 from ._credentials import (
     resolve_region,
@@ -44,7 +43,7 @@ class AnthropicAWS(Anthropic):
         workspace_id: str | None = None,
         skip_auth: bool = False,
         base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -181,14 +180,14 @@ class AnthropicAWS(Anthropic):
         credentials: AccessTokenProvider | None = None,
         webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = not_given,
+        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.Client | None = None,
-        max_retries: int | NotGiven = not_given,
+        max_retries: int | NotGiven = NOT_GIVEN,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         # The AWS client authenticates with SigV4 (or an API key), not a token
@@ -252,7 +251,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         workspace_id: str | None = None,
         skip_auth: bool = False,
         base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -359,7 +358,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
 
         data = request.read().decode()
 
-        headers = await asyncify(get_auth_headers)(
+        headers = get_auth_headers(
             method=request.method,
             url=str(request.url),
             headers=request.headers,
@@ -389,14 +388,14 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         credentials: AccessTokenProvider | None = None,
         webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = not_given,
+        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         http_client: httpx.AsyncClient | None = None,
-        max_retries: int | NotGiven = not_given,
+        max_retries: int | NotGiven = NOT_GIVEN,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         # The AWS client authenticates with SigV4 (or an API key), not a token

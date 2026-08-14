@@ -43,7 +43,6 @@ class TestDreams:
             ],
             model="string",
             instructions="x",
-            output_behavior={"type": "create_new"},
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaDream, dream, path=["response"])
@@ -290,7 +289,6 @@ class TestAsyncDreams:
             ],
             model="string",
             instructions="x",
-            output_behavior={"type": "create_new"},
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaDream, dream, path=["response"])

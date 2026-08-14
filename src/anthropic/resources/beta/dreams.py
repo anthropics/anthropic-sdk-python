@@ -21,7 +21,6 @@ from ...types.beta.beta_dream import BetaDream
 from ...types.anthropic_beta_param import AnthropicBetaParam
 from ...types.beta.beta_dream_status import BetaDreamStatus
 from ...types.beta.beta_dream_input_param import BetaDreamInputParam
-from ...types.beta.beta_output_behavior_param import BetaOutputBehaviorParam
 
 __all__ = ["Dreams", "AsyncDreams"]
 
@@ -52,7 +51,6 @@ class Dreams(SyncAPIResource):
         inputs: Iterable[BetaDreamInputParam],
         model: dream_create_params.Model,
         instructions: Optional[str] | Omit = omit,
-        output_behavior: BetaOutputBehaviorParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -66,10 +64,6 @@ class Dreams(SyncAPIResource):
 
         Args:
           model: Model identifier and configuration applied to every pipeline stage.
-
-          output_behavior: The default destination: the job creates a new output memory store as a clone of
-              the memory_store input and writes the consolidated memories into it. The input
-              store is never mutated.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -99,7 +93,6 @@ class Dreams(SyncAPIResource):
                     "inputs": inputs,
                     "model": model,
                     "instructions": instructions,
-                    "output_behavior": output_behavior,
                 },
                 dream_create_params.DreamCreateParams,
             ),
@@ -357,7 +350,6 @@ class AsyncDreams(AsyncAPIResource):
         inputs: Iterable[BetaDreamInputParam],
         model: dream_create_params.Model,
         instructions: Optional[str] | Omit = omit,
-        output_behavior: BetaOutputBehaviorParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -371,10 +363,6 @@ class AsyncDreams(AsyncAPIResource):
 
         Args:
           model: Model identifier and configuration applied to every pipeline stage.
-
-          output_behavior: The default destination: the job creates a new output memory store as a clone of
-              the memory_store input and writes the consolidated memories into it. The input
-              store is never mutated.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -404,7 +392,6 @@ class AsyncDreams(AsyncAPIResource):
                     "inputs": inputs,
                     "model": model,
                     "instructions": instructions,
-                    "output_behavior": output_behavior,
                 },
                 dream_create_params.DreamCreateParams,
             ),
