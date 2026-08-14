@@ -72,12 +72,7 @@ def available_tool_names(messages: Iterable[BetaMessageParam], tool_names: Itera
 
 
 def _apply_tool_change(block: BetaContentBlockParam, available: set[str]) -> None:
-    """Apply a single ``tool_removal`` / ``tool_addition`` block to ``available``.
-
-    A ``mid_conv_system`` block's ``content`` is limited by the API schema to
-    ``text`` / ``tool_addition`` / ``tool_removal``, so exactly one level is
-    walked (no deeper nesting exists); every other block type is a no-op.
-    """
+    """Apply a single ``tool_removal`` / ``tool_addition`` block to ``available``."""
     if not isinstance(block, dict):
         # ``BetaContentBlockParam`` also admits response-side content-block
         # models; ``tool_removal`` / ``tool_addition`` are request-only
@@ -85,13 +80,6 @@ def _apply_tool_change(block: BetaContentBlockParam, available: set[str]) -> Non
         return
     if block["type"] == "tool_removal" or block["type"] == "tool_addition":
         _apply_tool_reference_change(block, available)
-    elif block["type"] == "mid_conv_system":
-        for inner in block["content"]:
-            # schema-bounded to text/tool_addition/tool_removal: one level, no recursion
-            if inner["type"] == "tool_removal" or inner["type"] == "tool_addition":
-                _apply_tool_reference_change(inner, available)
-    else:
-        pass  # other/unknown block types are ignored (forward compatibility)
 
 
 def _apply_tool_reference_change(

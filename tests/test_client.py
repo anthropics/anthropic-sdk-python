@@ -1016,7 +1016,7 @@ class TestAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-4-6",
+                model="claude-opus-5",
             ).__enter__()
 
         assert _get_open_connections(client) == 0
@@ -1038,7 +1038,7 @@ class TestAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-4-6",
+                model="claude-opus-5",
             ).__enter__()
         assert _get_open_connections(client) == 0
 
@@ -1078,7 +1078,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         )
 
         assert response.retries_taken == failures_before_success
@@ -1116,7 +1116,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             extra_headers={"x-stainless-retry-count": Omit()},
         )
 
@@ -1154,7 +1154,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             extra_headers={"x-stainless-retry-count": "42"},
         )
 
@@ -1192,7 +1192,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         ) as response:
             assert response.retries_taken == failures_before_success
             assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
@@ -2176,7 +2176,7 @@ class TestAsyncAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-4-6",
+                model="claude-opus-5",
             ).__aenter__()
 
         assert _get_open_connections(async_client) == 0
@@ -2198,7 +2198,7 @@ class TestAsyncAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-4-6",
+                model="claude-opus-5",
             ).__aenter__()
         assert _get_open_connections(async_client) == 0
 
@@ -2238,7 +2238,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         )
 
         assert response.retries_taken == failures_before_success
@@ -2276,7 +2276,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             extra_headers={"x-stainless-retry-count": Omit()},
         )
 
@@ -2314,7 +2314,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             extra_headers={"x-stainless-retry-count": "42"},
         )
 
@@ -2352,7 +2352,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         ) as response:
             assert response.retries_taken == failures_before_success
             assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
