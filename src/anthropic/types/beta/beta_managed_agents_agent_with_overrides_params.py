@@ -43,8 +43,8 @@ class BetaManagedAgentsAgentWithOverridesParams(TypedDict, total=False):
     model: Model
     """Replacement model.
 
-    Accepts the model string, e.g. `claude-opus-4-6`, or a `model_config` object.
-    Omit to use the agent's model.
+    Accepts the model string, e.g. `claude-opus-5`, or a `model_config` object. Omit
+    to use the agent's model.
     """
 
     skills: Iterable[BetaManagedAgentsSkillParams]

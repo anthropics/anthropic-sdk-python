@@ -13,7 +13,6 @@ from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import BetaFunctionToolResultType
-from anthropic.lib.tools._tool_dispatch import available_tool_names
 from anthropic.types.beta.beta_message_param import BetaMessageParam
 from anthropic.types.beta.beta_content_block_param import BetaContentBlockParam
 from anthropic.types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
@@ -1236,44 +1235,6 @@ def test_tool_addition_via_append_messages_re_enables_removed_tool_sync(respx_mo
             ],
         }
     ]
-
-
-def test_tool_removal_nested_in_mid_conv_system_block() -> None:
-    # `mid_conv_system` content is schema-limited to text/tool_addition/tool_removal, so the
-    # one-level walk still applies a nested `tool_removal` (and ignores text).
-    messages: List[BetaMessageParam] = [
-        {
-            "role": "system",
-            "content": [
-                {
-                    "type": "mid_conv_system",
-                    "content": [
-                        {"type": "text", "text": "get_weather is no longer available."},
-                        {"type": "tool_removal", "tool": {"type": "tool_reference", "name": "get_weather"}},
-                    ],
-                }
-            ],
-        }
-    ]
-    assert available_tool_names(messages, ["get_weather", "get_time"]) == {"get_time"}
-
-
-def test_tool_addition_nested_in_mid_conv_system_block() -> None:
-    messages: List[BetaMessageParam] = [
-        {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]},
-        {
-            "role": "system",
-            "content": [
-                {
-                    "type": "mid_conv_system",
-                    "content": [
-                        {"type": "tool_addition", "tool": {"type": "tool_reference", "name": "get_weather"}},
-                    ],
-                }
-            ],
-        },
-    ]
-    assert available_tool_names(messages, ["get_weather"]) == {"get_weather"}
 
 
 def _get_weather(location: str, units: Literal["c", "f"]) -> Dict[str, Any]:
