@@ -103,10 +103,33 @@ def transform_schema(
 
     if is_list(any_of):
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in any_of]
+        # The API accepts at most one of type/anyOf/oneOf/allOf at a given
+        # level. When a composition keyword is selected, `type` and any other
+        # composition keyword that coexists with it are not representable in
+        # the strict schema - demote them to the description below instead of
+        # silently dropping the constraint.
+        if type_ is not None:
+            json_schema["type"] = type_
+        if is_list(one_of):
+            json_schema["oneOf"] = one_of
+        if is_list(all_of):
+            json_schema["allOf"] = all_of
     elif is_list(one_of):
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in one_of]
+        if type_ is not None:
+            json_schema["type"] = type_
+        if is_list(any_of):
+            json_schema["anyOf"] = any_of
+        if is_list(all_of):
+            json_schema["allOf"] = all_of
     elif is_list(all_of):
         strict_schema["allOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in all_of]
+        if type_ is not None:
+            json_schema["type"] = type_
+        if is_list(any_of):
+            json_schema["anyOf"] = any_of
+        if is_list(one_of):
+            json_schema["oneOf"] = one_of
     else:
         if type_ is None:
             raise ValueError("Schema must have a 'type', 'anyOf', 'oneOf', or 'allOf' field.")

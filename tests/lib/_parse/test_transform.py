@@ -229,3 +229,42 @@ def test_original_schema_not_mutated():
     transform_schema(original_schema)
 
     assert original_schema == original_schema_backup
+
+
+def test_type_with_anyof_is_not_dropped():
+    # JSON Schema allows `type` and a composition keyword to coexist (the
+    # value must satisfy both). transform_schema previously popped `type`
+    # and discarded it whenever anyOf/oneOf/allOf was present, silently
+    # dropping the constraint. It must be demoted to the description
+    # instead, like every other unsupported property.
+    schema = {"type": "string", "anyOf": [{"type": "string"}, {"type": "integer"}]}
+    result = transform_schema(schema)
+    assert result == {"anyOf": [{"type": "string"}, {"type": "integer"}], "description": "{type: string}"}
+
+
+def test_oneof_with_anyof_is_not_dropped():
+    # When both anyOf and oneOf are present, oneOf was silently discarded
+    # (not even kept in the description), so the transformed schema no
+    # longer matched the user's constraints. Preserve it via the standard
+    # demote-to-description path.
+    schema = {"anyOf": [{"type": "string"}], "oneOf": [{"type": "string", "minLength": 1}]}
+    result = transform_schema(schema)
+    assert result == {
+        "anyOf": [{"type": "string"}],
+        "description": "{oneOf: [{'type': 'string', 'minLength': 1}]}",
+    }
+
+
+def test_allof_with_anyof_is_not_dropped():
+    schema = {"anyOf": [{"type": "string"}], "allOf": [{"type": "string"}]}
+    result = transform_schema(schema)
+    assert result == {"anyOf": [{"type": "string"}], "description": "{allOf: [{'type': 'string'}]}"}
+
+
+def test_type_with_oneof_is_not_dropped():
+    schema = {"type": "integer", "oneOf": [{"type": "integer"}, {"type": "null"}]}
+    result = transform_schema(schema)
+    assert result == {
+        "anyOf": [{"type": "integer"}, {"type": "null"}],
+        "description": "{type: integer}",
+    }
