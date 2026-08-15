@@ -14,7 +14,7 @@ ResponseFormatT = TypeVar("ResponseFormatT", default=None)
 
 
 def parse_text(text: str, output_format: ResponseFormatT | NotGiven) -> ResponseFormatT | None:
-    if is_given(output_format):
+    if is_given(output_format) and output_format is not None:
         adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
         return adapted_type.validate_json(text)
     return None

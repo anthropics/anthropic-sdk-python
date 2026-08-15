@@ -224,6 +224,31 @@ class TestSyncMessages:
             assert_basic_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
+    def test_output_format_none_streams_plain_text(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+        )
+
+        # `output_format=None` is accepted by the stream() signature and means
+        # "no structured output" — it must not be fed to the JSON parser.
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-3-opus-latest",
+            output_format=None,
+        ) as stream:
+            message = stream.get_final_message()
+
+        assert message.content[0].type == "text"
+        assert message.content[0].text == "Hello there!"
+        assert message.content[0].parsed_output is None
+
+    @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx.Response(200, content=get_response("basic_response.txt"))
@@ -404,6 +429,27 @@ class TestAsyncMessages:
                 assert isinstance(cast(Any, stream), AsyncStream)
 
             assert_basic_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_output_format_none_streams_plain_text(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+        )
+
+        # `output_format=None` is accepted by the stream() signature and means
+        # "no structured output" — it must not be fed to the JSON parser.
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-opus-latest",
+            output_format=None,
+        ) as stream:
+            message = await stream.get_final_message()
+
+        assert message.content[0].type == "text"
+        assert message.content[0].text == "Hello there!"
+        assert message.content[0].parsed_output is None
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
