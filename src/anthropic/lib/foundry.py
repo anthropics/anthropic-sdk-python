@@ -8,7 +8,7 @@ from typing_extensions import Self, override
 
 import httpx
 
-from .._types import NOT_GIVEN, Omit, Headers, Timeout, NotGiven
+from .._types import Omit, Headers, Timeout, NotGiven, not_given
 from .._utils import is_given
 from .._client import Anthropic, AsyncAnthropic
 from .._compat import model_copy
@@ -101,7 +101,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         api_key: str | None = None,
         azure_ad_token_provider: AzureADTokenProvider | None = None,
         webhook_key: str | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -118,7 +118,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         api_key: str | None = None,
         azure_ad_token_provider: AzureADTokenProvider | None = None,
         webhook_key: str | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -135,7 +135,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         azure_ad_token_provider: AzureADTokenProvider | None = None,
         webhook_key: str | None = None,
         base_url: str | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -212,14 +212,14 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         azure_ad_token_provider: AzureADTokenProvider | None = None,
         webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
-        max_retries: int | NotGiven = NOT_GIVEN,
+        max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -326,7 +326,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         api_key: str | None = None,
         azure_ad_token_provider: AsyncAzureADTokenProvider | None = None,
         webhook_key: str | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -343,7 +343,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         api_key: str | None = None,
         azure_ad_token_provider: AsyncAzureADTokenProvider | None = None,
         webhook_key: str | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -360,7 +360,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         azure_ad_token_provider: AsyncAzureADTokenProvider | None = None,
         webhook_key: str | None = None,
         base_url: str | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -437,14 +437,14 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         azure_ad_token_provider: AsyncAzureADTokenProvider | None = None,
         webhook_key: str | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
-        max_retries: int | NotGiven = NOT_GIVEN,
+        max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """

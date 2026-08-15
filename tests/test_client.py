@@ -11,7 +11,6 @@ import inspect
 import dataclasses
 import tracemalloc
 from typing import Any, Union, TypeVar, Callable, Iterable, Iterator, Optional, Coroutine, cast
-from unittest import mock
 from typing_extensions import Literal, AsyncIterator, override
 
 import httpx
@@ -421,7 +420,11 @@ class TestAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        with mock.patch("anthropic._client.default_credentials", return_value=None):
+        def no_default_credentials(**_kwargs: object) -> None:
+            return None
+
+        with pytest.MonkeyPatch.context() as monkeypatch:
+            monkeypatch.setattr("anthropic._client.default_credentials", no_default_credentials)
             with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
                 client2 = Anthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
 
@@ -981,18 +984,27 @@ class TestAnthropic:
             [-1100, "", 8],  # test large number potentially overflowing
         ],
     )
-    @mock.patch("time.time", mock.MagicMock(return_value=1696004797))
     def test_parse_retry_after_header(
-        self, remaining_retries: int, retry_after: str, timeout: float, client: Anthropic
+        self,
+        remaining_retries: int,
+        retry_after: str,
+        timeout: float,
+        client: Anthropic,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        monkeypatch.setattr("time.time", lambda: 1696004797)
+
         headers = httpx.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
         calculated = client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, client: Anthropic) -> None:
+    def test_retrying_timeout_errors_doesnt_leak(
+        self, respx_mock: MockRouter, client: Anthropic, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
@@ -1009,9 +1021,12 @@ class TestAnthropic:
 
         assert _get_open_connections(client) == 0
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, client: Anthropic) -> None:
+    def test_retrying_status_errors_doesnt_leak(
+        self, respx_mock: MockRouter, client: Anthropic, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
@@ -1028,7 +1043,6 @@ class TestAnthropic:
         assert _get_open_connections(client) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.parametrize("failure_mode", ["status", "exception"])
     def test_retries_taken(
@@ -1037,7 +1051,10 @@ class TestAnthropic:
         failures_before_success: int,
         failure_mode: Literal["status", "exception"],
         respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         client = client.with_options(max_retries=4)
 
         nb_retries = 0
@@ -1068,11 +1085,16 @@ class TestAnthropic:
         assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_omit_retry_count_header(
-        self, client: Anthropic, failures_before_success: int, respx_mock: MockRouter
+        self,
+        client: Anthropic,
+        failures_before_success: int,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         client = client.with_options(max_retries=4)
 
         nb_retries = 0
@@ -1101,11 +1123,16 @@ class TestAnthropic:
         assert len(response.http_request.headers.get_list("x-stainless-retry-count")) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_overwrite_retry_count_header(
-        self, client: Anthropic, failures_before_success: int, respx_mock: MockRouter
+        self,
+        client: Anthropic,
+        failures_before_success: int,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         client = client.with_options(max_retries=4)
 
         nb_retries = 0
@@ -1134,11 +1161,16 @@ class TestAnthropic:
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_retries_taken_new_response_class(
-        self, client: Anthropic, failures_before_success: int, respx_mock: MockRouter
+        self,
+        client: Anthropic,
+        failures_before_success: int,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         client = client.with_options(max_retries=4)
 
         nb_retries = 0
@@ -1533,7 +1565,11 @@ class TestAsyncAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("X-Api-Key") == api_key
 
-        with mock.patch("anthropic._client.default_credentials", return_value=None):
+        def no_default_credentials(**_kwargs: object) -> None:
+            return None
+
+        with pytest.MonkeyPatch.context() as monkeypatch:
+            monkeypatch.setattr("anthropic._client.default_credentials", no_default_credentials)
             with update_env(**{"ANTHROPIC_API_KEY": Omit()}):
                 client2 = AsyncAnthropic(base_url=base_url, api_key=None, _strict_response_validation=True)
 
@@ -2108,20 +2144,27 @@ class TestAsyncAnthropic:
             [-1100, "", 8],  # test large number potentially overflowing
         ],
     )
-    @mock.patch("time.time", mock.MagicMock(return_value=1696004797))
     async def test_parse_retry_after_header(
-        self, remaining_retries: int, retry_after: str, timeout: float, async_client: AsyncAnthropic
+        self,
+        remaining_retries: int,
+        retry_after: str,
+        timeout: float,
+        async_client: AsyncAnthropic,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        monkeypatch.setattr("time.time", lambda: 1696004797)
+
         headers = httpx.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
         calculated = async_client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_timeout_errors_doesnt_leak(
-        self, respx_mock: MockRouter, async_client: AsyncAnthropic
+        self, respx_mock: MockRouter, async_client: AsyncAnthropic, monkeypatch: pytest.MonkeyPatch
     ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
@@ -2138,11 +2181,12 @@ class TestAsyncAnthropic:
 
         assert _get_open_connections(async_client) == 0
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_status_errors_doesnt_leak(
-        self, respx_mock: MockRouter, async_client: AsyncAnthropic
+        self, respx_mock: MockRouter, async_client: AsyncAnthropic, monkeypatch: pytest.MonkeyPatch
     ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
@@ -2159,7 +2203,6 @@ class TestAsyncAnthropic:
         assert _get_open_connections(async_client) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.parametrize("failure_mode", ["status", "exception"])
     async def test_retries_taken(
@@ -2168,7 +2211,10 @@ class TestAsyncAnthropic:
         failures_before_success: int,
         failure_mode: Literal["status", "exception"],
         respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         client = async_client.with_options(max_retries=4)
 
         nb_retries = 0
@@ -2199,11 +2245,16 @@ class TestAsyncAnthropic:
         assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_omit_retry_count_header(
-        self, async_client: AsyncAnthropic, failures_before_success: int, respx_mock: MockRouter
+        self,
+        async_client: AsyncAnthropic,
+        failures_before_success: int,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         client = async_client.with_options(max_retries=4)
 
         nb_retries = 0
@@ -2232,11 +2283,16 @@ class TestAsyncAnthropic:
         assert len(response.http_request.headers.get_list("x-stainless-retry-count")) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_overwrite_retry_count_header(
-        self, async_client: AsyncAnthropic, failures_before_success: int, respx_mock: MockRouter
+        self,
+        async_client: AsyncAnthropic,
+        failures_before_success: int,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         client = async_client.with_options(max_retries=4)
 
         nb_retries = 0
@@ -2265,11 +2321,16 @@ class TestAsyncAnthropic:
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retries_taken_new_response_class(
-        self, async_client: AsyncAnthropic, failures_before_success: int, respx_mock: MockRouter
+        self,
+        async_client: AsyncAnthropic,
+        failures_before_success: int,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         client = async_client.with_options(max_retries=4)
 
         nb_retries = 0

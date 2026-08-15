@@ -9,7 +9,7 @@ import httpx
 from ... import _exceptions
 from ._auth import load_auth, refresh_auth
 from ._beta import Beta, AsyncBeta
-from ..._types import NOT_GIVEN, NotGiven
+from ..._types import NotGiven, not_given
 from ..._utils import is_dict, asyncify, is_given
 from ..._compat import model_copy, typed_cached_property
 from ..._models import FinalRequestOptions
@@ -96,12 +96,12 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
     def __init__(
         self,
         *,
-        region: str | NotGiven = NOT_GIVEN,
-        project_id: str | NotGiven = NOT_GIVEN,
+        region: str | NotGiven = not_given,
+        project_id: str | NotGiven = not_given,
         access_token: str | None = None,
         credentials: GoogleCredentials | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -111,7 +111,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         _strict_response_validation: bool = False,
     ) -> None:
         if not is_given(region):
-            region = os.environ.get("CLOUD_ML_REGION", NOT_GIVEN)
+            region = os.environ.get("CLOUD_ML_REGION", not_given)
         if not is_given(region):
             raise ValueError(
                 "No region was given. The client should be instantiated with the `region` argument or the `CLOUD_ML_REGION` environment variable should be set."
@@ -184,19 +184,19 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
     def copy(
         self,
         *,
-        region: str | NotGiven = NOT_GIVEN,
-        project_id: str | NotGiven = NOT_GIVEN,
+        region: str | NotGiven = not_given,
+        project_id: str | NotGiven = not_given,
         access_token: str | None = None,
         credentials: GoogleCredentials | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
-        max_retries: int | NotGiven = NOT_GIVEN,
+        max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -224,7 +224,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
 
         return self.__class__(
             region=region if is_given(region) else self.region,
-            project_id=project_id if is_given(project_id) else self.project_id or NOT_GIVEN,
+            project_id=project_id if is_given(project_id) else self.project_id or not_given,
             access_token=access_token or self.access_token,
             credentials=credentials or self.credentials,
             base_url=base_url or self.base_url,
@@ -260,12 +260,12 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
     def __init__(
         self,
         *,
-        region: str | NotGiven = NOT_GIVEN,
-        project_id: str | NotGiven = NOT_GIVEN,
+        region: str | NotGiven = not_given,
+        project_id: str | NotGiven = not_given,
         access_token: str | None = None,
         credentials: GoogleCredentials | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -275,7 +275,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         _strict_response_validation: bool = False,
     ) -> None:
         if not is_given(region):
-            region = os.environ.get("CLOUD_ML_REGION", NOT_GIVEN)
+            region = os.environ.get("CLOUD_ML_REGION", not_given)
         if not is_given(region):
             raise ValueError(
                 "No region was given. The client should be instantiated with the `region` argument or the `CLOUD_ML_REGION` environment variable should be set."
@@ -348,19 +348,19 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
     def copy(
         self,
         *,
-        region: str | NotGiven = NOT_GIVEN,
-        project_id: str | NotGiven = NOT_GIVEN,
+        region: str | NotGiven = not_given,
+        project_id: str | NotGiven = not_given,
         access_token: str | None = None,
         credentials: GoogleCredentials | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
-        max_retries: int | NotGiven = NOT_GIVEN,
+        max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -388,7 +388,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
 
         return self.__class__(
             region=region if is_given(region) else self.region,
-            project_id=project_id if is_given(project_id) else self.project_id or NOT_GIVEN,
+            project_id=project_id if is_given(project_id) else self.project_id or not_given,
             access_token=access_token or self.access_token,
             credentials=credentials or self.credentials,
             base_url=base_url or self.base_url,

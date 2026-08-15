@@ -10,8 +10,8 @@ import httpx
 
 from ... import _exceptions
 from ._beta import Beta, AsyncBeta
-from ..._types import NOT_GIVEN, Timeout, NotGiven
-from ..._utils import is_dict, is_given
+from ..._types import Timeout, NotGiven, not_given
+from ..._utils import is_dict, asyncify, is_given
 from ..._compat import model_copy
 from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
@@ -144,7 +144,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         aws_session_token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -247,14 +247,14 @@ class AnthropicBedrock(BaseBedrockClient[httpx.Client, Stream[Any]], SyncAPIClie
         aws_session_token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
-        max_retries: int | NotGiven = NOT_GIVEN,
+        max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -324,7 +324,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         aws_session_token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -405,7 +405,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
 
         data = request.read().decode()
 
-        headers = get_auth_headers(
+        headers = await asyncify(get_auth_headers)(
             method=request.method,
             url=str(request.url),
             headers=request.headers,
@@ -427,14 +427,14 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx.AsyncClient, AsyncStream[Any
         aws_session_token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
-        max_retries: int | NotGiven = NOT_GIVEN,
+        max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """

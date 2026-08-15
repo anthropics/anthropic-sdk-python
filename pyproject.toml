@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "0.121.0"
+version = "0.122.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "MIT"
@@ -118,7 +118,6 @@ include = [
   "/*.lock",
   "/*.md",
   "/mypy.ini",
-  "/noxfile.py",
   "bin/*",
   "examples/*",
   "src/*",
@@ -160,7 +159,6 @@ exclude = [
     ".git",
     "_dev",
     ".venv",
-    ".nox",
     "examples/mcp_tool_runner.py",  # mcp requires Python 3.10+, lint runs on 3.9
 ]
 
@@ -214,12 +212,6 @@ cache_fine_grained = true
 # Changing this codegen to make mypy happy would increase complexity
 # and would not be worth it.
 disable_error_code = "func-returns-value,overload-cannot-match"
-
-# https://github.com/python/mypy/issues/12162
-[[tool.mypy.overrides]]
-module = "black.files.*"
-ignore_errors = true
-ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "anthropic.lib.vertex._auth"

@@ -2,15 +2,16 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any, cast
-from unittest.mock import Mock
+import json
+from typing import Any, Dict, List, cast
 from typing_extensions import Protocol
 
 import httpx
 import pytest
 from respx import MockRouter
 
-from anthropic import AnthropicVertex, AsyncAnthropicVertex
+from anthropic import AnthropicVertex, AsyncAnthropicVertex, beta_tool, beta_async_tool
+from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.vertex._auth import refresh_auth
 from anthropic.lib._extras._common import MissingDependencyError
 
@@ -19,6 +20,53 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 class MockRequestCall(Protocol):
     request: httpx.Request
+
+
+TOOL_RUNNER_URL = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-haiku-4-5@20251001:rawPredict"
+
+
+def _vertex_message(content: List[Dict[str, Any]], stop_reason: str) -> httpx.Response:
+    return httpx.Response(
+        200,
+        json={
+            "id": "msg_01",
+            "type": "message",
+            "role": "assistant",
+            "model": "claude",
+            "content": content,
+            "stop_reason": stop_reason,
+            "stop_sequence": None,
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+        },
+    )
+
+
+def _tool_runner_responses() -> List[httpx.Response]:
+    return [
+        _vertex_message(
+            [{"type": "tool_use", "id": "toolu_01", "name": "get_weather", "input": {"city": "Paris"}}],
+            "tool_use",
+        ),
+        _vertex_message([{"type": "text", "text": "It is sunny in Paris."}], "end_turn"),
+    ]
+
+
+def _assert_tool_runner_calls(calls: List[MockRequestCall]) -> None:
+    assert len(calls) == 2
+    for call in calls:
+        assert call.request.url == TOOL_RUNNER_URL
+        assert call.request.headers["Authorization"] == "Bearer my-access-token"
+        body = json.loads(call.request.content)
+        assert "model" not in body and "stream" not in body and "output_format" not in body
+        assert body["anthropic_version"] == "vertex-2023-10-16"
+    second = json.loads(calls[1].request.content)
+    assert [m["role"] for m in second["messages"]] == ["user", "assistant", "user"]
+    assert second["messages"][1]["content"][0]["type"] == "tool_use"
+    assert second["messages"][2]["content"][0] == {
+        "type": "tool_result",
+        "tool_use_id": "toolu_01",
+        "content": "sunny in Paris",
+    }
 
 
 class TestAnthropicVertex:
@@ -171,12 +219,47 @@ class TestAnthropicVertex:
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
 
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
+    @pytest.mark.respx()
+    def test_beta_tool_runner_routes_through_raw_predict(self, respx_mock: MockRouter) -> None:
+        @beta_tool
+        def get_weather(city: str) -> str:
+            """Get the weather.
+
+            Args:
+                city: city name
+            """
+            return f"sunny in {city}"
+
+        respx_mock.post(url__startswith="https://region-aiplatform.googleapis.com/").mock(
+            side_effect=_tool_runner_responses()
+        )
+
+        final = self.client.beta.messages.tool_runner(
+            model="claude-haiku-4-5@20251001",
+            max_tokens=256,
+            messages=[{"role": "user", "content": "weather in Paris?"}],
+            tools=[get_weather],
+        ).until_done()
+
+        assert final.stop_reason == "end_turn"
+        _assert_tool_runner_calls(cast("list[MockRequestCall]", respx_mock.calls))
+
+    def test_beta_messages_helpers_are_bound(self) -> None:
+        for name in ("create", "parse", "stream", "tool_runner", "count_tokens"):
+            assert callable(getattr(self.client.beta.messages, name))
+
 
 def test_refresh_without_google_auth_raises_actionable_error(monkeypatch: pytest.MonkeyPatch) -> None:
     # `None` in sys.modules makes the import fail even when google-auth is installed.
     monkeypatch.setitem(sys.modules, "google.auth.transport.requests", cast(Any, None))
+
+    class FakeCredentials:
+        def refresh(self, _request: object) -> None:
+            raise AssertionError("should not be reached: building the request needs google-auth")
+
     with pytest.raises(MissingDependencyError, match=r"anthropic\[vertex\]"):
-        refresh_auth(cast(Any, Mock()))
+        refresh_auth(cast(Any, FakeCredentials()))
 
 
 class TestAsyncAnthropicVertex:
@@ -331,3 +414,34 @@ class TestAsyncAnthropicVertex:
             base_url="https://test.googleapis.com/v1",
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    async def test_beta_tool_runner_routes_through_raw_predict(self, respx_mock: MockRouter) -> None:
+        @beta_async_tool
+        async def get_weather(city: str) -> str:
+            """Get the weather.
+
+            Args:
+                city: city name
+            """
+            return f"sunny in {city}"
+
+        respx_mock.post(url__startswith="https://region-aiplatform.googleapis.com/").mock(
+            side_effect=_tool_runner_responses()
+        )
+
+        final = await self.client.beta.messages.tool_runner(
+            model="claude-haiku-4-5@20251001",
+            max_tokens=256,
+            messages=[{"role": "user", "content": "weather in Paris?"}],
+            tools=[get_weather],
+        ).until_done()
+
+        assert final.stop_reason == "end_turn"
+        _assert_tool_runner_calls(cast("list[MockRequestCall]", respx_mock.calls))
+
+    def test_beta_messages_helpers_are_bound(self) -> None:
+        for name in ("create", "parse", "stream", "tool_runner", "count_tokens"):
+            assert callable(getattr(self.client.beta.messages, name))

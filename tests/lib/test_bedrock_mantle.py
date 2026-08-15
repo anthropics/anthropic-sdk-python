@@ -1,11 +1,31 @@
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+import threading
 
 import httpx
 import pytest
 
 from anthropic import AnthropicBedrockMantle, AsyncAnthropicBedrockMantle
+
+MANTLE_MESSAGES_URL = "https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages"
+
+
+class GetAuthHeadersRecorder:
+    """Stands in for `anthropic.lib.bedrock._mantle.get_auth_headers` and records each call's kwargs."""
+
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+
+    def __call__(self, **kwargs: object) -> dict[str, str]:
+        self.calls.append(kwargs)
+        return {"Authorization": "AWS4-HMAC-SHA256 ...", "X-Amz-Date": "20260327T000000Z"}
+
+
+@pytest.fixture
+def get_auth_headers_recorder(monkeypatch: pytest.MonkeyPatch) -> GetAuthHeadersRecorder:
+    recorder = GetAuthHeadersRecorder()
+    monkeypatch.setattr("anthropic.lib.bedrock._mantle.get_auth_headers", recorder)
+    return recorder
 
 
 class TestBaseURL:
@@ -23,19 +43,19 @@ class TestBaseURL:
         )
         assert str(client.base_url).startswith("https://bedrock-mantle.us-west-2.api.aws/anthropic")
 
-    def test_uses_base_url_env_var(self) -> None:
-        with patch.dict("os.environ", {"ANTHROPIC_BEDROCK_MANTLE_BASE_URL": "https://custom.example.com"}):
-            client = AnthropicBedrockMantle(
-                api_key="test-key",
-            )
+    def test_uses_base_url_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("ANTHROPIC_BEDROCK_MANTLE_BASE_URL", "https://custom.example.com")
+        client = AnthropicBedrockMantle(
+            api_key="test-key",
+        )
         assert str(client.base_url).startswith("https://custom.example.com")
 
-    def test_base_url_arg_takes_precedence_over_env(self) -> None:
-        with patch.dict("os.environ", {"ANTHROPIC_BEDROCK_MANTLE_BASE_URL": "https://from-env.example.com"}):
-            client = AnthropicBedrockMantle(
-                api_key="test-key",
-                base_url="https://from-arg.example.com",
-            )
+    def test_base_url_arg_takes_precedence_over_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("ANTHROPIC_BEDROCK_MANTLE_BASE_URL", "https://from-env.example.com")
+        client = AnthropicBedrockMantle(
+            api_key="test-key",
+            base_url="https://from-arg.example.com",
+        )
         assert str(client.base_url).startswith("https://from-arg.example.com")
 
     def test_raises_without_region_or_base_url(self) -> None:
@@ -46,73 +66,63 @@ class TestBaseURL:
 
 
 class TestSigV4ServiceName:
-    def test_uses_bedrock_mantle_service_name(self) -> None:
+    def test_uses_bedrock_mantle_service_name(self, get_auth_headers_recorder: GetAuthHeadersRecorder) -> None:
         client = AnthropicBedrockMantle(
             aws_access_key="AKID",
             aws_secret_key="secret",
             aws_region="us-east-1",
         )
 
-        mock_request = MagicMock(spec=httpx.Request)
-        mock_request.method = "POST"
-        mock_request.url = httpx.URL("https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages")
-        mock_request.headers = httpx.Headers({"content-type": "application/json"})
-        mock_request.read.return_value = b'{"model": "claude-sonnet-4-20250514"}'
+        request = httpx.Request(
+            "POST",
+            MANTLE_MESSAGES_URL,
+            headers={"content-type": "application/json"},
+            content=b'{"model": "claude-sonnet-4-20250514"}',
+        )
+        client._prepare_request(request)
 
-        with patch("anthropic.lib.bedrock._mantle.get_auth_headers") as mock_auth:
-            mock_auth.return_value = {
-                "Authorization": "AWS4-HMAC-SHA256 ...",
-                "X-Amz-Date": "20260327T000000Z",
-            }
-            client._prepare_request(mock_request)
-
-            mock_auth.assert_called_once()
-            call_kwargs = mock_auth.call_args.kwargs
-            assert call_kwargs["service_name"] == "bedrock-mantle"
+        assert len(get_auth_headers_recorder.calls) == 1
+        assert get_auth_headers_recorder.calls[0]["service_name"] == "bedrock-mantle"
+        assert request.headers["Authorization"] == "AWS4-HMAC-SHA256 ..."
 
 
 class TestEnvironmentVariables:
-    def test_uses_mantle_api_key_env_var(self) -> None:
-        with patch.dict("os.environ", {"AWS_BEARER_TOKEN_BEDROCK": "mantle-key"}, clear=False):
-            client = AnthropicBedrockMantle(
-                base_url="https://example.com",
-            )
+    def test_uses_mantle_api_key_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "mantle-key")
+        client = AnthropicBedrockMantle(
+            base_url="https://example.com",
+        )
         assert client.api_key == "mantle-key"
 
-    def test_falls_back_to_aws_api_key_env_var(self) -> None:
-        with patch.dict("os.environ", {"ANTHROPIC_AWS_API_KEY": "aws-key"}, clear=False):
-            client = AnthropicBedrockMantle(
-                base_url="https://example.com",
-            )
+    def test_falls_back_to_aws_api_key_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("ANTHROPIC_AWS_API_KEY", "aws-key")
+        client = AnthropicBedrockMantle(
+            base_url="https://example.com",
+        )
         assert client.api_key == "aws-key"
 
-    def test_mantle_api_key_takes_precedence_over_aws(self) -> None:
-        with patch.dict(
-            "os.environ",
-            {
-                "AWS_BEARER_TOKEN_BEDROCK": "mantle-key",
-                "ANTHROPIC_AWS_API_KEY": "aws-key",
-            },
-            clear=False,
-        ):
-            client = AnthropicBedrockMantle(
-                base_url="https://example.com",
-            )
+    def test_mantle_api_key_takes_precedence_over_aws(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "mantle-key")
+        monkeypatch.setenv("ANTHROPIC_AWS_API_KEY", "aws-key")
+        client = AnthropicBedrockMantle(
+            base_url="https://example.com",
+        )
         assert client.api_key == "mantle-key"
 
-    def test_region_from_aws_region_env_var(self) -> None:
-        with patch.dict("os.environ", {"AWS_REGION": "eu-west-1"}, clear=False):
-            client = AnthropicBedrockMantle(
-                api_key="test-key",
-            )
+    def test_region_from_aws_region_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("AWS_REGION", "eu-west-1")
+        client = AnthropicBedrockMantle(
+            api_key="test-key",
+        )
         assert client.aws_region == "eu-west-1"
         assert client.base_url == "https://bedrock-mantle.eu-west-1.api.aws/anthropic/"
 
-    def test_region_from_aws_default_region_env_var(self) -> None:
-        with patch.dict("os.environ", {"AWS_DEFAULT_REGION": "ap-southeast-1"}, clear=False):
-            client = AnthropicBedrockMantle(
-                api_key="test-key",
-            )
+    def test_region_from_aws_default_region_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("AWS_REGION", raising=False)
+        monkeypatch.setenv("AWS_DEFAULT_REGION", "ap-southeast-1")
+        client = AnthropicBedrockMantle(
+            api_key="test-key",
+        )
         assert client.aws_region == "ap-southeast-1"
 
 
@@ -194,17 +204,17 @@ class TestAuthPrecedence:
 
 
 class TestSkipAuth:
-    def test_skip_auth_does_not_sign_request(self) -> None:
+    def test_skip_auth_does_not_sign_request(self, get_auth_headers_recorder: GetAuthHeadersRecorder) -> None:
         client = AnthropicBedrockMantle(
             skip_auth=True,
             base_url="https://example.com",
         )
 
-        mock_request = MagicMock(spec=httpx.Request)
+        request = httpx.Request("POST", "https://example.com/v1/messages", content=b"{}")
+        client._prepare_request(request)
 
-        with patch("anthropic.lib.bedrock._mantle.get_auth_headers") as mock_auth:
-            client._prepare_request(mock_request)
-            mock_auth.assert_not_called()
+        assert get_auth_headers_recorder.calls == []
+        assert "Authorization" not in request.headers
 
 
 class TestPartialCredentials:
@@ -243,6 +253,28 @@ class TestAsyncClient:
             aws_region="us-east-1",
         )
         assert client.base_url == "https://bedrock-mantle.us-east-1.api.aws/anthropic/"
+
+    @pytest.mark.asyncio()
+    async def test_sigv4_signing_runs_off_event_loop(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        client = AsyncAnthropicBedrockMantle(
+            aws_access_key="AKID",
+            aws_secret_key="secret",
+            aws_region="us-east-1",
+        )
+        signing_threads: list[int] = []
+
+        def fake_get_auth_headers(**_: object) -> dict[str, str]:
+            signing_threads.append(threading.get_ident())
+            return {"Authorization": "AWS4-HMAC-SHA256 stub"}
+
+        monkeypatch.setattr("anthropic.lib.bedrock._mantle.get_auth_headers", fake_get_auth_headers)
+
+        request = httpx.Request("POST", "https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages", content=b"{}")
+        await client._prepare_request(request)
+
+        assert len(signing_threads) == 1
+        assert signing_threads[0] != threading.get_ident()
+        assert request.headers["Authorization"] == "AWS4-HMAC-SHA256 stub"
 
 
 class TestCopy:

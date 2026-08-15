@@ -21,7 +21,7 @@ from .batches import (
     BatchesWithStreamingResponse,
     AsyncBatchesWithStreamingResponse,
 )
-from ...._types import NOT_GIVEN, Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
+from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ...._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._models import TypeAdapter
@@ -1315,7 +1315,7 @@ class Messages(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> ParsedBetaMessage[ResponseFormatT]:
         _validate_output_config_conflict(output_config, output_format)
         _warn_output_format_deprecated(output_format)
@@ -1349,7 +1349,7 @@ class Messages(SyncAPIResource):
             _helper_header("beta.messages.parse"),
             strip_not_given(
                 {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
                 }
             ),
@@ -1382,7 +1382,7 @@ class Messages(SyncAPIResource):
                 response=response,
                 output_format=cast(
                     ResponseFormatT,
-                    output_format if is_given(output_format) and output_format is not None else NOT_GIVEN,
+                    output_format if is_given(output_format) and output_format is not None else not_given,
                 ),
             )
 
@@ -1467,7 +1467,7 @@ class Messages(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaToolRunner[ResponseFormatT]: ...
 
     @overload
@@ -1508,7 +1508,7 @@ class Messages(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaStreamingToolRunner[ResponseFormatT]: ...
 
     @overload
@@ -1549,7 +1549,7 @@ class Messages(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaStreamingToolRunner[ResponseFormatT] | BetaToolRunner[ResponseFormatT]: ...
 
     def tool_runner(
@@ -1589,7 +1589,7 @@ class Messages(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaStreamingToolRunner[ResponseFormatT] | BetaToolRunner[ResponseFormatT]:
         """Create a Message stream"""
         _validate_output_config_conflict(output_config, output_format)
@@ -1620,7 +1620,7 @@ class Messages(SyncAPIResource):
             _helper_header("BetaToolRunner"),
             strip_not_given(
                 {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
                 }
             ),
@@ -1729,7 +1729,7 @@ class Messages(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaMessageStreamManager[ResponseFormatT]:
         _validate_output_config_conflict(output_config, output_format)
         _warn_output_format_deprecated(output_format)
@@ -1756,7 +1756,7 @@ class Messages(SyncAPIResource):
             },
             strip_not_given(
                 {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
                 }
             ),
@@ -1817,7 +1817,7 @@ class Messages(SyncAPIResource):
                     "tool_choice": tool_choice,
                     "stream": True,
                 },
-                message_create_params.MessageCreateParams,
+                message_create_params.MessageCreateParamsStreaming,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -1828,7 +1828,7 @@ class Messages(SyncAPIResource):
         )
         return BetaMessageStreamManager(
             make_request,
-            output_format=NOT_GIVEN if is_dict(output_format) else cast(ResponseFormatT, output_format),
+            output_format=not_given if is_dict(output_format) else cast(ResponseFormatT, output_format),
         )
 
     def count_tokens(
@@ -3333,7 +3333,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> ParsedBetaMessage[ResponseFormatT]:
         _validate_output_config_conflict(output_config, output_format)
         _warn_output_format_deprecated(output_format)
@@ -3366,7 +3366,7 @@ class AsyncMessages(AsyncAPIResource):
             _helper_header("beta.messages.parse"),
             strip_not_given(
                 {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
                 }
             ),
@@ -3399,7 +3399,7 @@ class AsyncMessages(AsyncAPIResource):
                 response=response,
                 output_format=cast(
                     ResponseFormatT,
-                    output_format if is_given(output_format) and output_format is not None else NOT_GIVEN,
+                    output_format if is_given(output_format) and output_format is not None else not_given,
                 ),
             )
 
@@ -3484,7 +3484,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaAsyncToolRunner[ResponseFormatT]: ...
 
     @overload
@@ -3525,7 +3525,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaAsyncStreamingToolRunner[ResponseFormatT]: ...
 
     @overload
@@ -3566,7 +3566,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaAsyncStreamingToolRunner[ResponseFormatT] | BetaAsyncToolRunner[ResponseFormatT]: ...
 
     def tool_runner(
@@ -3606,7 +3606,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaAsyncToolRunner[ResponseFormatT] | BetaAsyncStreamingToolRunner[ResponseFormatT]:
         """Create a Message stream"""
         _validate_output_config_conflict(output_config, output_format)
@@ -3630,7 +3630,7 @@ class AsyncMessages(AsyncAPIResource):
             _helper_header("BetaToolRunner"),
             strip_not_given(
                 {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
                 }
             ),
@@ -3739,7 +3739,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BetaAsyncMessageStreamManager[ResponseFormatT]:
         _validate_output_config_conflict(output_config, output_format)
         _warn_output_format_deprecated(output_format)
@@ -3765,7 +3765,7 @@ class AsyncMessages(AsyncAPIResource):
             },
             strip_not_given(
                 {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else NOT_GIVEN,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
                 }
             ),
@@ -3825,7 +3825,7 @@ class AsyncMessages(AsyncAPIResource):
                     "tool_choice": tool_choice,
                     "stream": True,
                 },
-                message_create_params.MessageCreateParams,
+                message_create_params.MessageCreateParamsStreaming,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -3836,7 +3836,7 @@ class AsyncMessages(AsyncAPIResource):
         )
         return BetaAsyncMessageStreamManager(
             request,
-            output_format=NOT_GIVEN if is_dict(output_format) else cast(ResponseFormatT, output_format),
+            output_format=not_given if is_dict(output_format) else cast(ResponseFormatT, output_format),
         )
 
     async def count_tokens(

@@ -44,6 +44,7 @@ from .lib.credentials import (
     AccessTokenAuth,
     CredentialsFile,
     AccessTokenProvider,
+    BaseURLBoundProvider,
     default_credentials,
 )
 from .lib.credentials._auth import (
@@ -70,18 +71,24 @@ def _close_credentials(credentials: object) -> None:
         close()
 
 
-def _bind_credentials_base_url(credentials: AccessTokenProvider | None, base_url: str) -> None:
-    """If the credential provider supports ``bind_base_url``, pass it the
-    client's resolved ``base_url`` so the token exchange and API calls hit
-    the same deployment without the caller passing the URL twice.
+def _bind_credentials_base_url(credentials: AccessTokenProvider | None, base_url: str) -> AccessTokenProvider | None:
+    """Return the provider this client should exchange tokens through.
 
-    Providers without the hook (plain callables, custom impls) are left
-    untouched and MUST resolve their own token-exchange ``base_url`` — the
-    client does not second-guess them.
+    See :class:`BaseURLBoundProvider`; any other provider (plain callables,
+    custom impls) is returned untouched and resolves its own exchange URL.
     """
-    bind = getattr(credentials, "bind_base_url", None)
-    if callable(bind):
-        bind(base_url)
+    if isinstance(credentials, BaseURLBoundProvider):
+        return credentials.for_base_url(base_url)
+    return credentials
+
+
+def _keeps_base_url(current: httpx.URL, requested: str | httpx.URL | None) -> bool:
+    """Whether a ``copy()`` stays on the parent's deployment.
+
+    Tokens are only valid for the deployment that minted them, so the parent's
+    :class:`TokenCache` is only shared in that case.
+    """
+    return requested is None or str(httpx.URL(requested)).rstrip("/") == str(current).rstrip("/")
 
 
 def _warn_explicit_shadow(*, api_key: str | None, auth_token: str | None, credentials: object) -> None:
@@ -211,8 +218,8 @@ class Anthropic(SyncAPIClient):
             or profile is not None
         )
         if not has_explicit_credential:
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
+            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
         self.api_key = api_key
         self.auth_token = auth_token
         # --- end credentials support ---
@@ -265,7 +272,7 @@ class Anthropic(SyncAPIClient):
                 credential_headers = result.extra_headers
                 if not base_url_is_explicit and result.base_url:
                     base_url = result.base_url
-        _bind_credentials_base_url(credentials, str(base_url))
+        credentials = _bind_credentials_base_url(credentials, str(base_url))
         self.credentials = credentials
         _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
         if _is_base_client(self):
@@ -476,10 +483,10 @@ class Anthropic(SyncAPIClient):
             resolved_credentials = self.credentials if isinstance(credentials, NotGiven) else credentials
             if resolved_credentials is not None and _is_base_client(self):
                 _extra_kwargs = {"credentials": resolved_credentials, **_extra_kwargs}
-                # Reuse the parent's TokenCache when the credentials provider is
-                # unchanged so with_options() copies don't trigger an independent
-                # token exchange. A new credentials= gets a fresh cache.
-                if isinstance(credentials, NotGiven):
+                # Share the parent's TokenCache only while the provider and
+                # deployment are unchanged; a new credentials= or base_url= gets
+                # its own cache.
+                if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
         return self.__class__(
@@ -631,8 +638,8 @@ class AsyncAnthropic(AsyncAPIClient):
             or profile is not None
         )
         if not has_explicit_credential:
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
+            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
         self.api_key = api_key
         self.auth_token = auth_token
         # --- end credentials support ---
@@ -685,7 +692,7 @@ class AsyncAnthropic(AsyncAPIClient):
                 credential_headers = result.extra_headers
                 if not base_url_is_explicit and result.base_url:
                     base_url = result.base_url
-        _bind_credentials_base_url(credentials, str(base_url))
+        credentials = _bind_credentials_base_url(credentials, str(base_url))
         self.credentials = credentials
         _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
         if _is_base_client(self):
@@ -892,10 +899,10 @@ class AsyncAnthropic(AsyncAPIClient):
             resolved_credentials = self.credentials if isinstance(credentials, NotGiven) else credentials
             if resolved_credentials is not None and _is_base_client(self):
                 _extra_kwargs = {"credentials": resolved_credentials, **_extra_kwargs}
-                # Reuse the parent's TokenCache when the credentials provider is
-                # unchanged so with_options() copies don't trigger an independent
-                # token exchange. A new credentials= gets a fresh cache.
-                if isinstance(credentials, NotGiven):
+                # Share the parent's TokenCache only while the provider and
+                # deployment are unchanged; a new credentials= or base_url= gets
+                # its own cache.
+                if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
         return self.__class__(

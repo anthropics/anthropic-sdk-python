@@ -31,6 +31,7 @@ from anthropic import (
 )
 from anthropic._version import __version__
 from anthropic._base_client import FinalRequestOptions
+from anthropic.lib.credentials import BaseURLBoundProvider
 from anthropic.lib.credentials._constants import (
     TOKEN_ENDPOINT,
     GRANT_TYPE_JWT_BEARER,
@@ -40,6 +41,9 @@ from anthropic.lib.credentials._constants import (
 
 BASE_URL = "https://api.anthropic.com"
 TOKEN_URL = f"{BASE_URL}{TOKEN_ENDPOINT}"
+# A second deployment, for tests that build clients against two hosts at once.
+OTHER_BASE_URL = "https://api.other.example"
+OTHER_TOKEN_URL = f"{OTHER_BASE_URL}{TOKEN_ENDPOINT}"
 
 _ALL_ENV = [
     "ANTHROPIC_API_KEY",
@@ -165,6 +169,17 @@ class TestAccessToken:
     def test_with_expiry(self) -> None:
         tok = AccessToken("abc", expires_at=123)
         assert tok.expires_at == 123
+
+
+class TestBaseURLBoundProvider:
+    def test_deployment_bound_providers_implement_it(self) -> None:
+        assert isinstance(_workload_credentials(), BaseURLBoundProvider)
+        assert isinstance(CredentialsFile("default"), BaseURLBoundProvider)
+        assert issubclass(InMemoryConfig, CredentialsFile)
+
+    def test_other_providers_do_not(self) -> None:
+        assert not isinstance(StaticToken("tok"), BaseURLBoundProvider)
+        assert not isinstance(EnvToken(), BaseURLBoundProvider)
 
 
 class TestStaticToken:
@@ -408,6 +423,58 @@ class TestCredentialsFile:
         # eager scheme validation — http:// rejected at bind time, before load
         with pytest.raises(AnthropicError, match="https"):
             CredentialsFile("p3").bind_base_url("http://evil.example")
+
+    @pytest.mark.respx()
+    def test_for_base_url_federation_profile(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
+        """A second host gets its own provider exchanging there; the original
+        keeps exchanging at the first host, and only the original uses the
+        profile's on-disk cache."""
+        jwt_path = tmp_path / "jwt"
+        jwt_path.write_text("ext-jwt")
+        _write_profile(
+            tmp_path,
+            "fed",
+            {
+                "type": "workload_identity",
+                "identity_token": {"source": "file", "path": str(jwt_path)},
+                "federation_rule_id": "fdrl_01abc",
+                "organization_id": "org-uuid",
+            },
+        )
+        _mock_token_exchange(respx_mock, BASE_URL, "tok-primary")
+        _mock_token_exchange(respx_mock, OTHER_BASE_URL, "tok-other")
+        creds = CredentialsFile("fed")
+        assert creds.for_base_url(BASE_URL) is creds
+        assert creds.for_base_url(f"{BASE_URL}/") is creds
+        other = creds.for_base_url(OTHER_BASE_URL)
+        assert other is not creds
+
+        assert other().token == "tok-other"
+        assert not (tmp_path / "credentials" / "fed.json").exists()
+        assert creds().token == "tok-primary"
+        assert json.loads((tmp_path / "credentials" / "fed.json").read_text())["access_token"] == "tok-primary"
+        # The other host's provider never consults the file the original wrote.
+        assert other().token == "tok-other"
+        assert [str(r.url) for r in _requests_to(respx_mock, OTHER_BASE_URL)] == [OTHER_TOKEN_URL, OTHER_TOKEN_URL]
+        assert [str(r.url) for r in _requests_to(respx_mock, BASE_URL)] == [TOKEN_URL]
+
+    def test_for_base_url_returns_self_when_bind_is_moot(self, tmp_path: pathlib.Path) -> None:
+        """No per-host provider is made when the bind can't change where the
+        tokens come from: the profile pins its own ``base_url``, or it is a
+        user_oauth profile whose refresh token is tied to the issuing host."""
+        _write_profile(
+            tmp_path,
+            "pinned",
+            {"type": "workload_identity", "federation_rule_id": "fdrl_x", "base_url": "https://pinned.example"},
+        )
+        pinned = CredentialsFile("pinned")
+        assert pinned.for_base_url(BASE_URL) is pinned
+        assert pinned.for_base_url(OTHER_BASE_URL) is pinned
+
+        _write_profile(tmp_path, "oauth", {"type": "authorized_user", "client_id": "cid"})
+        oauth = CredentialsFile("oauth")
+        assert oauth.for_base_url(BASE_URL) is oauth
+        assert oauth.for_base_url(OTHER_BASE_URL) is oauth
 
     @pytest.mark.respx(base_url=BASE_URL)
     def test_workload_identity_disk_cache_stale_reexchange(
@@ -1037,6 +1104,33 @@ class TestWorkloadIdentityCredentials:
         )
         with pytest.raises(AnthropicError, match="must use https"):
             creds.bind_base_url("http://evil.example")
+
+    @pytest.mark.respx()
+    def test_for_base_url(self, respx_mock: MockRouter) -> None:
+        """The first bind (and re-binds to the same host) happen in place; a
+        bind to another host yields a separate provider and leaves the
+        original's exchange endpoint alone."""
+        _mock_token_exchange(respx_mock, BASE_URL, "tok-primary")
+        _mock_token_exchange(respx_mock, OTHER_BASE_URL, "tok-other")
+        creds = _workload_credentials()
+        assert creds.for_base_url(f"{BASE_URL}/") is creds
+        assert creds.for_base_url(BASE_URL) is creds
+        other = creds.for_base_url(OTHER_BASE_URL)
+        assert other is not creds
+
+        assert other().token == "tok-other"
+        assert creds().token == "tok-primary"
+        # The per-host provider borrows the original's connection pool, so
+        # closing it must not take the original down with it.
+        other.close()
+        assert creds().token == "tok-primary"
+        assert [str(r.url) for r in _requests_to(respx_mock, BASE_URL)] == [TOKEN_URL, TOKEN_URL]
+
+    def test_for_base_url_http_rejected(self) -> None:
+        creds = _workload_credentials()
+        creds.for_base_url(BASE_URL)
+        with pytest.raises(AnthropicError, match="must use https"):
+            creds.for_base_url("http://evil.example")
 
     def test_exchange_federation_assertion_http_rejected(self) -> None:
         with pytest.raises(AnthropicError, match="must use https"):
@@ -1859,21 +1953,60 @@ def _mock_token_endpoint(respx_mock: MockRouter) -> None:
     )
 
 
+def _message_response() -> httpx.Response:
+    return httpx.Response(
+        200,
+        json={
+            "id": "msg_01",
+            "type": "message",
+            "role": "assistant",
+            "model": "claude-opus-4-5",
+            "content": [{"type": "text", "text": "hi"}],
+            "stop_reason": "end_turn",
+            "stop_sequence": None,
+            "usage": {"input_tokens": 1, "output_tokens": 1},
+        },
+    )
+
+
 def _mock_messages_endpoint(respx_mock: MockRouter) -> None:
-    respx_mock.post(f"{BASE_URL}/v1/messages").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "id": "msg_01",
-                "type": "message",
-                "role": "assistant",
-                "model": "claude-opus-4-5",
-                "content": [{"type": "text", "text": "hi"}],
-                "stop_reason": "end_turn",
-                "stop_sequence": None,
-                "usage": {"input_tokens": 1, "output_tokens": 1},
-            },
-        )
+    respx_mock.post(f"{BASE_URL}/v1/messages").mock(return_value=_message_response())
+
+
+def _mock_token_exchange(respx_mock: MockRouter, base_url: str, token: str) -> None:
+    respx_mock.post(f"{base_url}{TOKEN_ENDPOINT}").mock(
+        return_value=httpx.Response(200, json={"access_token": token, "token_type": "Bearer", "expires_in": 600})
+    )
+
+
+def _mock_deployment(respx_mock: MockRouter, base_url: str, token: str) -> None:
+    """Mock one deployment: its token endpoint mints ``token`` and its
+    messages endpoint accepts anything. Pair with :func:`_requests_to` to
+    check that a client only ever talks to (and presents tokens from) the
+    deployment it was built for."""
+    _mock_token_exchange(respx_mock, base_url, token)
+    respx_mock.post(f"{base_url}/v1/messages").mock(return_value=_message_response())
+
+
+def _requests_to(respx_mock: MockRouter, base_url: str) -> List[httpx.Request]:
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    return [c.request for c in calls if str(c.request.url).startswith(f"{base_url}/")]
+
+
+def _assert_exchanged_and_called_own_deployment(respx_mock: MockRouter, base_url: str, token: str) -> None:
+    """The traffic seen by ``base_url`` is exactly one exchange followed by
+    one request bearing the token that exchange minted."""
+    requests = _requests_to(respx_mock, base_url)
+    assert [str(r.url) for r in requests] == [f"{base_url}{TOKEN_ENDPOINT}", f"{base_url}/v1/messages"]
+    assert json.loads(requests[0].content)["assertion"] == "ext-jwt"
+    assert requests[1].headers["Authorization"] == f"Bearer {token}"
+
+
+def _workload_credentials() -> WorkloadIdentityCredentials:
+    return WorkloadIdentityCredentials(
+        identity_token_provider=lambda: "ext-jwt",
+        federation_rule_id="fdrl_01abc",
+        organization_id="org-uuid",
     )
 
 
@@ -2253,6 +2386,119 @@ class TestAnthropicCredentials:
         assert copied.credentials is client.credentials
 
     @pytest.mark.respx()
+    def test_copy_with_different_base_url_exchanges_per_client(self, respx_mock: MockRouter) -> None:
+        """``copy(base_url=...)`` must not move the parent's token exchange:
+        each client exchanges its assertion at its own host and only ever
+        presents the token that host minted."""
+        _mock_deployment(respx_mock, BASE_URL, "tok-primary")
+        _mock_deployment(respx_mock, OTHER_BASE_URL, "tok-other")
+        parent = Anthropic(credentials=_workload_credentials())
+        child = parent.copy(base_url=OTHER_BASE_URL)
+
+        # Child first: a parent whose provider had been rebound by the copy
+        # would now exchange at (and send the other host's token to) the
+        # wrong deployment.
+        _send_message(child)
+        _send_message(parent)
+
+        _assert_exchanged_and_called_own_deployment(respx_mock, OTHER_BASE_URL, "tok-other")
+        _assert_exchanged_and_called_own_deployment(respx_mock, BASE_URL, "tok-primary")
+
+    @pytest.mark.respx()
+    def test_shared_provider_binds_per_client(self, respx_mock: MockRouter) -> None:
+        """The same isolation holds when one provider instance is passed to
+        two clients directly: the first client keeps its binding."""
+        _mock_deployment(respx_mock, BASE_URL, "tok-primary")
+        _mock_deployment(respx_mock, OTHER_BASE_URL, "tok-other")
+        creds = _workload_credentials()
+        primary = Anthropic(credentials=creds)
+        other = Anthropic(credentials=creds, base_url=OTHER_BASE_URL)
+        assert primary.credentials is creds
+
+        _send_message(other)
+        _send_message(primary)
+
+        _assert_exchanged_and_called_own_deployment(respx_mock, OTHER_BASE_URL, "tok-other")
+        _assert_exchanged_and_called_own_deployment(respx_mock, BASE_URL, "tok-primary")
+
+    @pytest.mark.respx()
+    def test_copy_with_same_base_url_shares_token_exchange(self, respx_mock: MockRouter) -> None:
+        """A copy targeting the same deployment (here spelled without the
+        trailing slash the client normalises to) keeps sharing the parent's
+        provider and cache: one exchange serves both."""
+        _mock_deployment(respx_mock, BASE_URL, "tok-primary")
+        parent = Anthropic(credentials=_workload_credentials())
+        child = parent.copy(base_url=BASE_URL)
+        assert child.credentials is parent.credentials
+
+        _send_message(child)
+        _send_message(parent)
+
+        requests = _requests_to(respx_mock, BASE_URL)
+        assert [str(r.url) for r in requests] == [TOKEN_URL, f"{BASE_URL}/v1/messages", f"{BASE_URL}/v1/messages"]
+        assert all(r.headers["Authorization"] == "Bearer tok-primary" for r in requests[1:])
+
+    @pytest.mark.respx()
+    def test_copy_of_federation_profile_client_exchanges_per_client(
+        self, respx_mock: MockRouter, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Profile-backed federation: the copy exchanges at its own host and
+        stays out of the profile's on-disk token cache, which belongs to the
+        parent's deployment."""
+        monkeypatch.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        jwt_path = tmp_path / "jwt"
+        jwt_path.write_text("ext-jwt")
+        _write_profile(
+            tmp_path,
+            "fed",
+            {
+                "type": "workload_identity",
+                "identity_token": {"source": "file", "path": str(jwt_path)},
+                "federation_rule_id": "fdrl_01abc",
+                "organization_id": "org-uuid",
+            },
+        )
+        _mock_deployment(respx_mock, BASE_URL, "tok-primary")
+        _mock_deployment(respx_mock, OTHER_BASE_URL, "tok-other")
+        parent = Anthropic(profile="fed")
+        child = parent.copy(base_url=OTHER_BASE_URL)
+
+        _send_message(child)
+        _send_message(parent)
+
+        _assert_exchanged_and_called_own_deployment(respx_mock, OTHER_BASE_URL, "tok-other")
+        _assert_exchanged_and_called_own_deployment(respx_mock, BASE_URL, "tok-primary")
+        on_disk = json.loads((tmp_path / "credentials" / "fed.json").read_text())
+        assert on_disk["access_token"] == "tok-primary"
+
+    @pytest.mark.respx()
+    def test_copy_of_user_oauth_profile_client_keeps_refresh_endpoint(
+        self, respx_mock: MockRouter, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A user_oauth profile's refresh token belongs to the deployment that
+        issued it: a copy pointed at another host still refreshes at the
+        parent's host rather than posting the refresh token elsewhere."""
+        monkeypatch.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(
+            tmp_path,
+            "oauth",
+            {"type": "authorized_user", "client_id": "cid"},
+            {"access_token": "stale", "expires_at": int(time.time()) - 1, "refresh_token": "rt"},
+        )
+        _mock_token_exchange(respx_mock, BASE_URL, "tok-refreshed")
+        respx_mock.post(f"{OTHER_BASE_URL}/v1/messages").mock(return_value=_message_response())
+        parent = Anthropic(profile="oauth")
+        child = parent.copy(base_url=OTHER_BASE_URL)
+        assert child.credentials is parent.credentials
+
+        _send_message(child)
+
+        assert [str(r.url) for r in _requests_to(respx_mock, BASE_URL)] == [TOKEN_URL]
+        other_requests = _requests_to(respx_mock, OTHER_BASE_URL)
+        assert [str(r.url) for r in other_requests] == [f"{OTHER_BASE_URL}/v1/messages"]
+        assert other_requests[0].headers["Authorization"] == "Bearer tok-refreshed"
+
+    @pytest.mark.respx()
     def test_config_param_builds_in_memory_federation(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
         """``Anthropic(config={...})`` accepts a config-file-shaped dict and
         wires it through to a federation provider, including ``workspace_id``
@@ -2600,6 +2846,35 @@ class TestAsyncAnthropicCredentials:
         ]
         assert len(msg_calls) == 1
         assert msg_calls[0].request.headers["Authorization"] == "Bearer sk-ant-oat01-test"
+
+    @pytest.mark.respx()
+    async def test_async_copy_with_different_base_url_exchanges_per_client(self, respx_mock: MockRouter) -> None:
+        """Async mirror of the sync test: ``copy(base_url=...)`` leaves the
+        parent exchanging at, and presenting tokens from, its own host."""
+        _mock_deployment(respx_mock, BASE_URL, "tok-primary")
+        _mock_deployment(respx_mock, OTHER_BASE_URL, "tok-other")
+        parent = AsyncAnthropic(credentials=_workload_credentials())
+        child = parent.copy(base_url=OTHER_BASE_URL)
+
+        await _send_message_async(child)
+        await _send_message_async(parent)
+
+        _assert_exchanged_and_called_own_deployment(respx_mock, OTHER_BASE_URL, "tok-other")
+        _assert_exchanged_and_called_own_deployment(respx_mock, BASE_URL, "tok-primary")
+
+    @pytest.mark.respx()
+    async def test_async_copy_with_same_base_url_shares_token_exchange(self, respx_mock: MockRouter) -> None:
+        _mock_deployment(respx_mock, BASE_URL, "tok-primary")
+        parent = AsyncAnthropic(credentials=_workload_credentials())
+        child = parent.copy(base_url=BASE_URL)
+        assert child.credentials is parent.credentials
+
+        await _send_message_async(child)
+        await _send_message_async(parent)
+
+        requests = _requests_to(respx_mock, BASE_URL)
+        assert [str(r.url) for r in requests] == [TOKEN_URL, f"{BASE_URL}/v1/messages", f"{BASE_URL}/v1/messages"]
+        assert all(r.headers["Authorization"] == "Bearer tok-primary" for r in requests[1:])
 
     @pytest.mark.respx()
     async def test_async_authorized_user_refresh_flow(
@@ -3084,6 +3359,36 @@ class TestCredentialPrecedence:
             client = Anthropic()
         assert client.api_key == "sk-from-env"
         assert not any("takes precedence" in r.message for r in caplog.records)
+
+    # -- step 2: empty env values are unset, not empty credentials -----------
+
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    def test_empty_env_auth_token_is_unset(
+        self, clean_env: pytest.MonkeyPatch, client_cls: type[Anthropic] | type[AsyncAnthropic]
+    ) -> None:
+        """``ANTHROPIC_AUTH_TOKEN=`` (present but empty) must not produce a
+        malformed ``Authorization: Bearer `` header alongside the api key."""
+        clean_env.setenv("ANTHROPIC_API_KEY", "sk-from-env")
+        clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
+        client = client_cls()
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert request.headers.get("Authorization") is None
+        assert request.headers.get("X-Api-Key") == "sk-from-env"
+        assert client.auth_token is None
+
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    def test_empty_env_credentials_fall_through_to_no_auth(
+        self, clean_env: pytest.MonkeyPatch, client_cls: type[Anthropic] | type[AsyncAnthropic]
+    ) -> None:
+        """Both env vars empty → same "no auth configured" error as unset,
+        rather than sending empty ``X-Api-Key`` / ``Authorization: Bearer ``."""
+        clean_env.setenv("ANTHROPIC_API_KEY", "")
+        clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
+        client = client_cls()
+        with pytest.raises(TypeError, match="Could not resolve authentication method"):
+            client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert client.api_key is None
+        assert client.auth_token is None
 
     # -- step 1 alone: credentials= works normally --------------------------
 

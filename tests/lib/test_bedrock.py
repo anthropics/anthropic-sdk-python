@@ -1,6 +1,8 @@
 import re
+import json
 import typing as t
 import tempfile
+import threading
 from typing import TypedDict, cast
 from typing_extensions import Protocol
 
@@ -8,7 +10,8 @@ import httpx
 import pytest
 from respx import MockRouter
 
-from anthropic import AnthropicBedrock, AsyncAnthropicBedrock
+from anthropic import AnthropicBedrock, AsyncAnthropicBedrock, beta_tool, beta_async_tool
+from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.bedrock._stream_decoder import _chunk_bytes_to_sse
 
 sync_client = AnthropicBedrock(
@@ -319,3 +322,130 @@ def test_async_copy_x_stainless_helper_header_appends() -> None:
     client = async_client.with_options(default_headers={"x-stainless-helper": "parent"})
     copied = client.with_options(default_headers={"x-stainless-helper": "child"})
     assert copied.default_headers["x-stainless-helper"] == "parent, child"
+
+
+def _bedrock_message(content: t.List[t.Dict[str, t.Any]], stop_reason: str) -> httpx.Response:
+    return httpx.Response(
+        200,
+        json={
+            "id": "msg_01",
+            "type": "message",
+            "role": "assistant",
+            "model": "claude",
+            "content": content,
+            "stop_reason": stop_reason,
+            "stop_sequence": None,
+            "usage": {"input_tokens": 10, "output_tokens": 5},
+        },
+    )
+
+
+def _tool_runner_responses() -> t.List[httpx.Response]:
+    return [
+        _bedrock_message(
+            [{"type": "tool_use", "id": "toolu_01", "name": "get_weather", "input": {"city": "Paris"}}],
+            "tool_use",
+        ),
+        _bedrock_message([{"type": "text", "text": "It is sunny in Paris."}], "end_turn"),
+    ]
+
+
+def _assert_tool_runner_calls(calls: t.List[MockRequestCall]) -> None:
+    assert len(calls) == 2
+    for call in calls:
+        assert call.request.url.path == "/model/anthropic.claude-haiku-4-5-20251001-v1:0/invoke"
+        assert call.request.headers["Authorization"].startswith("AWS4-HMAC-SHA256 ")
+        assert "x-amz-date" in call.request.headers
+        body = json.loads(call.request.content)
+        assert "model" not in body and "stream" not in body and "output_format" not in body
+        assert body["anthropic_version"] == "bedrock-2023-05-31"
+    second = json.loads(calls[1].request.content)
+    assert [m["role"] for m in second["messages"]] == ["user", "assistant", "user"]
+    assert second["messages"][1]["content"][0]["type"] == "tool_use"
+    assert second["messages"][2]["content"][0] == {
+        "type": "tool_result",
+        "tool_use_id": "toolu_01",
+        "content": "sunny in Paris",
+    }
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_beta_tool_runner_routes_through_invoke(respx_mock: MockRouter) -> None:
+    @beta_tool
+    def get_weather(city: str) -> str:
+        """Get the weather.
+
+        Args:
+            city: city name
+        """
+        return f"sunny in {city}"
+
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*")).mock(
+        side_effect=_tool_runner_responses()
+    )
+
+    final = sync_client.beta.messages.tool_runner(
+        model="anthropic.claude-haiku-4-5-20251001-v1:0",
+        max_tokens=256,
+        messages=[{"role": "user", "content": "weather in Paris?"}],
+        tools=[get_weather],
+    ).until_done()
+
+    assert final.stop_reason == "end_turn"
+    _assert_tool_runner_calls(cast("list[MockRequestCall]", respx_mock.calls))
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_beta_tool_runner_routes_through_invoke_async(respx_mock: MockRouter) -> None:
+    @beta_async_tool
+    async def get_weather(city: str) -> str:
+        """Get the weather.
+
+        Args:
+            city: city name
+        """
+        return f"sunny in {city}"
+
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*")).mock(
+        side_effect=_tool_runner_responses()
+    )
+
+    final = await async_client.beta.messages.tool_runner(
+        model="anthropic.claude-haiku-4-5-20251001-v1:0",
+        max_tokens=256,
+        messages=[{"role": "user", "content": "weather in Paris?"}],
+        tools=[get_weather],
+    ).until_done()
+
+    assert final.stop_reason == "end_turn"
+    _assert_tool_runner_calls(cast("list[MockRequestCall]", respx_mock.calls))
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+def test_beta_messages_helpers_are_bound() -> None:
+    for client in (sync_client, async_client):
+        for name in ("create", "parse", "stream", "tool_runner"):
+            assert callable(getattr(client.beta.messages, name))
+
+
+@pytest.mark.asyncio()
+async def test_sigv4_signing_runs_off_event_loop_async(monkeypatch: pytest.MonkeyPatch) -> None:
+    signing_threads: t.List[int] = []
+
+    def fake_get_auth_headers(**_: object) -> t.Dict[str, str]:
+        signing_threads.append(threading.get_ident())
+        return {"Authorization": "AWS4-HMAC-SHA256 stub"}
+
+    monkeypatch.setattr("anthropic.lib.bedrock._auth.get_auth_headers", fake_get_auth_headers)
+
+    request = httpx.Request("POST", "https://bedrock-runtime.us-east-1.amazonaws.com/model/x/invoke", content=b"{}")
+    await async_client._prepare_request(request)
+
+    assert len(signing_threads) == 1
+    assert signing_threads[0] != threading.get_ident()
+    assert request.headers["Authorization"] == "AWS4-HMAC-SHA256 stub"

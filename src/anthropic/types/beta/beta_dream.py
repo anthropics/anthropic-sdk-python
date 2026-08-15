@@ -10,6 +10,7 @@ from .beta_dream_input import BetaDreamInput
 from .beta_dream_usage import BetaDreamUsage
 from .beta_dream_output import BetaDreamOutput
 from .beta_dream_status import BetaDreamStatus
+from .beta_output_behavior import BetaOutputBehavior
 from .beta_dream_model_config import BetaDreamModelConfig
 
 __all__ = ["BetaDream"]
@@ -17,7 +18,7 @@ __all__ = ["BetaDream"]
 
 class BetaDream(BaseModel):
     """
-    An asynchronous memory-consolidation job that reads a memory store plus a set of session transcripts and writes consolidated memories into a new output memory store. The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to generally-available endpoints.
+    An asynchronous memory-consolidation job that reads a memory store plus a set of session transcripts and writes consolidated memories into an output memory store — a new store by default, or an existing store chosen via output_behavior. The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to generally-available endpoints.
     """
 
     id: str
@@ -42,6 +43,13 @@ class BetaDream(BaseModel):
     """Model identifier and configuration applied to every pipeline stage.
 
     Same wire shape as the Agents API ModelConfig.
+    """
+
+    output_behavior: BetaOutputBehavior
+    """
+    The default destination: the job creates a new output memory store as a clone of
+    the memory_store input and writes the consolidated memories into it. The input
+    store is never mutated.
     """
 
     outputs: List[BetaDreamOutput]
