@@ -194,6 +194,13 @@ class FakeAsyncEvents:
         self.stream_calls: int = 0
         self.stream_headers: list[Any] = []
         self.list_headers: list[Any] = []
+        # ``list_filters`` records the keyword filters of each ``list()`` call
+        # (the reconcile window); ``list_cycles`` makes the listing repeat its
+        # events forever, as a pagination that wraps around would; each entry
+        # of ``list_gates`` holds the corresponding ``list()`` call until set.
+        self.list_filters: list[dict[str, Any]] = []
+        self.list_cycles = False
+        self.list_gates: list[asyncio.Event | None] = []
 
     async def stream(self, _session_id: str, *, extra_headers: Any = None) -> _FakeStream:
         self.stream_calls += 1
@@ -205,14 +212,22 @@ class FakeAsyncEvents:
             raise nxt
         return nxt
 
-    def list(self, _session_id: str, *, limit: int = 1000, extra_headers: Any = None) -> Any:  # noqa: ARG002
+    def list(self, _session_id: str, *, limit: int = 1000, extra_headers: Any = None, **filters: Any) -> Any:  # noqa: ARG002
         list_raises = self._list_raises
         self.list_headers.append(extra_headers)
+        self.list_filters.append(filters)
         list_events = self._list_events_per_call.pop(0) if self._list_events_per_call else self._list_events
+        cycle = self.list_cycles
+        gate = self.list_gates.pop(0) if self.list_gates else None
 
         async def _gen() -> Any:
-            for ev in list_events:
-                yield ev
+            if gate is not None:
+                await gate.wait()
+            while True:
+                for ev in list_events:
+                    yield ev
+                if not cycle:
+                    break
             if list_raises is not None:
                 raise list_raises
 
@@ -1595,3 +1610,89 @@ def test_to_session_content_tool_reference_stringified() -> None:
     block = {"type": "tool_reference", "tool_name": "weather"}
     out = _to_session_content([block])
     assert out == [{"type": "text", "text": session_runner_mod.json.dumps(block)}]
+
+
+# ---------- bounded / incremental reconcile ---------------------------------
+
+
+async def _echo(input: dict[str, Any]) -> str:
+    return f"echo:{input}"
+
+
+@pytest.mark.asyncio()
+async def test_reconcile_survives_a_listing_that_wraps_around() -> None:
+    """A history listing whose pagination never ends (the same events come
+    round again) must not wedge the runner: the pass stops at the first
+    repeated id, treats the distinct set as the whole history, and dispatches
+    what is unanswered in it."""
+    tool = _FakeTool("echo", _echo)
+    events = FakeAsyncEvents(
+        stream_events=[_terminated()],
+        list_events=[_tool_use("tu_1", "echo", {"v": 1}), _tool_use("tu_2", "echo", {"v": 2}), _tool_result("tu_2")],
+    )
+    events.list_cycles = True
+
+    async def collect() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    # A regression here is a hang, not a wrong answer.
+    items = await asyncio.wait_for(collect(), 5)
+
+    assert [it.tool_use_id for it in items] == ["tu_1"], "unanswered call from the wrapped history dispatched once"
+
+
+@pytest.mark.asyncio()
+async def test_reconnect_reconciles_only_the_recent_window(monkeypatch: pytest.MonkeyPatch) -> None:
+    """After one complete history read, a reconnect lists only events at or
+    after the newest ``processed_at`` already seen (less a skew allowance)
+    rather than the whole history again."""
+    from datetime import datetime, timezone
+
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.01)
+    tool = _FakeTool("echo", _echo)
+    seen_at = datetime(2030, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    live = _StubEvent(
+        "agent.tool_use", id="tu_1", name="echo", input={}, evaluated_permission=None, processed_at=seen_at
+    )
+    events = FakeAsyncEvents(
+        streams=[
+            _FakeStream([live], raise_after=1, raise_with=httpx.ReadError("dropped")),
+            _FakeStream([_terminated()]),
+        ],
+        list_events_per_call=[[], []],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert [it.tool_use_id for it in items] == ["tu_1"]
+    assert events.list_filters[0] == {}, "first attach reads the whole history"
+    assert events.list_filters[1] == {"created_at_gte": seen_at - session_runner_mod.RECONCILE_WINDOW_SKEW}, (
+        "a reconnect reads only the window a disconnect can have hidden"
+    )
+
+
+@pytest.mark.asyncio()
+async def test_slow_reconcile_after_reconnect_does_not_hold_live_dispatch(monkeypatch: pytest.MonkeyPatch) -> None:
+    """On a reconnect, a windowed history read that outlives the attach budget
+    keeps running in the background while live tool calls are dispatched."""
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.01)
+    monkeypatch.setattr(session_runner_mod, "RECONCILE_ATTACH_BUDGET", 0.05)
+    tool = _FakeTool("echo", _echo)
+    stuck = asyncio.Event()  # never set: the listing after the reconnect hangs
+    events = FakeAsyncEvents(
+        streams=[
+            # First connection drops straight away so the runner reconnects.
+            _FakeStream([_idle_end_turn()], raise_after=1, raise_with=httpx.ReadError("dropped")),
+            _FakeStream([_tool_use("tu_live", "echo", {"v": 1})]),
+        ],
+        list_events_per_call=[[], []],
+    )
+    events.list_gates = [None, stuck]
+
+    async def first_dispatched() -> str:
+        async for item in _run_with_fakes(events=events, tools=[tool]):
+            return item.tool_use_id  # arrived although the second reconcile never finished
+        raise AssertionError("runner ended without dispatching the live call")
+
+    # A regression here is a hang, not a wrong answer.
+    assert await asyncio.wait_for(first_dispatched(), 5) == "tu_live"
