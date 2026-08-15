@@ -52,7 +52,7 @@ from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamMa
 from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ....types.model_param import ModelParam
 from ....lib._parse._response import ResponseFormatT, parse_beta_response
-from ....lib._parse._transform import transform_schema
+from ....lib._parse._transform import transform_schema, transform_output_config
 from ....lib._stainless_helpers import (
     HELPER_METHOD_STREAM as _HELPER_METHOD_STREAM,
     STAINLESS_HELPER_METHOD_HEADER as _STAINLESS_HELPER_METHOD_HEADER,
@@ -1375,7 +1375,7 @@ class Messages(SyncAPIResource):
 
             merged_output_config = _merge_output_configs(output_config, transformed_output_format)
         else:
-            merged_output_config = output_config
+            merged_output_config = _merge_output_configs(output_config, omit)
 
         def parser(response: BetaMessage) -> ParsedBetaMessage[ResponseFormatT]:
             return parse_beta_response(
@@ -3392,7 +3392,7 @@ class AsyncMessages(AsyncAPIResource):
 
             merged_output_config = _merge_output_configs(output_config, transformed_output_format)
         else:
-            merged_output_config = output_config
+            merged_output_config = _merge_output_configs(output_config, omit)
 
         def parser(response: BetaMessage) -> ParsedBetaMessage[ResponseFormatT]:
             return parse_beta_response(
@@ -4214,6 +4214,7 @@ def _merge_output_configs(
     output_config: BetaOutputConfigParam | Omit,
     output_format: Optional[BetaJSONOutputFormatParam] | Omit,
 ) -> BetaOutputConfigParam | Omit:
+    output_config = transform_output_config(output_config)
     if is_given(output_format):
         if is_given(output_config):
             return {**output_config, "format": output_format}
@@ -4226,7 +4227,7 @@ def _warn_output_format_deprecated(output_format: object) -> None:
     """Emit deprecation warning if output_format is provided."""
     if is_given(output_format) and output_format is not None:
         warnings.warn(
-            "The 'output_format' parameter is deprecated. Please use 'output_config.format' instead.",
+            "The 'output_format' parameter is deprecated. Please use 'output_config.format' instead; it accepts a Pydantic model or a pre-built JSON schema sent as-is.",
             DeprecationWarning,
             stacklevel=4,
         )

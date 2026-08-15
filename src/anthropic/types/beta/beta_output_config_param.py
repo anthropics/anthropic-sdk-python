@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Type, Union, Optional
 from typing_extensions import Literal, TypedDict
+
+import pydantic
 
 from .beta_token_task_budget_param import BetaTokenTaskBudgetParam
 from .beta_json_output_format_param import BetaJSONOutputFormatParam
@@ -15,7 +17,7 @@ class BetaOutputConfigParam(TypedDict, total=False):
     effort: Optional[Literal["low", "medium", "high", "xhigh", "max"]]
     """All possible effort levels."""
 
-    format: Optional[BetaJSONOutputFormatParam]
+    format: Optional[Union[BetaJSONOutputFormatParam, Type[pydantic.BaseModel]]]
     """A schema to specify Claude's output format in responses.
 
     See

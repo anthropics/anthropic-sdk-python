@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Type, Union, Optional
 from typing_extensions import Literal, TypedDict
+
+import pydantic
 
 from .json_output_format_param import JSONOutputFormatParam
 
@@ -14,7 +16,7 @@ class OutputConfigParam(TypedDict, total=False):
     effort: Optional[Literal["low", "medium", "high", "xhigh", "max"]]
     """All possible effort levels."""
 
-    format: Optional[JSONOutputFormatParam]
+    format: Optional[Union[JSONOutputFormatParam, Type[pydantic.BaseModel]]]
     """A schema to specify Claude's output format in responses.
 
     See

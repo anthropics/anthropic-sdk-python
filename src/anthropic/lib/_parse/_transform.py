@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import inspect
-from typing import Any, Literal, Optional, cast
+from typing import Any, Literal, TypeVar, Optional, cast
 from typing_extensions import assert_never
 
 import pydantic
 
 from ..._utils import is_list
+from ..._compat import PYDANTIC_V1
+from ..._models import TypeAdapter
 
 SupportedTypes = Literal[
     "object",
@@ -31,6 +33,8 @@ SupportedStringFormats = {
     "uuid",
 }
 
+_T = TypeVar("_T")
+
 
 def get_transformed_string(
     schema: dict[str, Any],
@@ -49,6 +53,44 @@ def get_transformed_string(
     if schema.get("type") == "string" and "format" not in schema:
         schema["format"] = "text"
     return schema
+
+
+def transform_output_config(output_config: _T) -> _T:
+    """Transform a typed ``output_config.format`` into an API JSON schema.
+
+    ``output_config.format`` is normally a pre-built JSON schema. When callers
+    pass a Pydantic model instead, use the same schema normalization as the
+    legacy ``output_format`` parameter before serializing the request.
+
+    Raw schema dictionaries are left unchanged because they are already API
+    payloads and may intentionally use fields that ``transform_schema`` does
+    not support.
+    """
+    if not isinstance(output_config, dict):
+        return output_config
+
+    output_config_dict: dict[str, Any] = cast(dict[str, Any], output_config)
+    if "format" not in output_config_dict:
+        return cast(_T, output_config_dict)
+
+    output_format: Any = output_config_dict["format"]
+    if output_format is None or isinstance(output_format, dict):
+        return cast(_T, output_config_dict)
+    if PYDANTIC_V1:
+        raise TypeError("Pydantic models in `output_config.format` require Pydantic v2")
+
+    try:
+        schema = TypeAdapter(output_format).json_schema()
+        transformed_format = {"schema": transform_schema(schema), "type": "json_schema"}
+    except pydantic.errors.PydanticSchemaGenerationError as e:
+        raise TypeError(
+            (
+                "Could not generate JSON schema for `output_config.format`. "
+                "Use a type that works with `pydantic.TypeAdapter`"
+            )
+        ) from e
+
+    return cast(_T, {**output_config_dict, "format": transformed_format})
 
 
 def transform_schema(
