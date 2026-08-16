@@ -51,6 +51,27 @@ def get_transformed_string(
     return schema
 
 
+def _dynamic_object_keywords_without_properties(json_schema: dict[str, Any]) -> list[str]:
+    """Return unsupported keywords that are the only way this object can admit keys."""
+    keywords: list[str] = []
+
+    pattern_properties = json_schema.get("patternProperties")
+    if isinstance(pattern_properties, dict) and pattern_properties:
+        keywords.append("patternProperties")
+
+    additional_properties = json_schema.get("additionalProperties")
+    if isinstance(additional_properties, dict):
+        keywords.append("additionalProperties")
+
+    if "propertyNames" in json_schema and additional_properties is not False:
+        keywords.append("propertyNames")
+
+    if "unevaluatedProperties" in json_schema and json_schema["unevaluatedProperties"] is not False:
+        keywords.append("unevaluatedProperties")
+
+    return keywords
+
+
 def transform_schema(
     json_schema: type[pydantic.BaseModel] | dict[str, Any],
 ) -> dict[str, Any]:
@@ -126,8 +147,19 @@ def transform_schema(
         strict_schema["title"] = title
 
     if type_ == "object":
+        properties = json_schema.pop("properties", {})
+        if not properties:
+            unsupported_dynamic_keywords = _dynamic_object_keywords_without_properties(json_schema)
+            if unsupported_dynamic_keywords:
+                keywords = ", ".join(unsupported_dynamic_keywords)
+                raise ValueError(
+                    "Structured output schemas cannot safely transform an object that relies on "
+                    f"{keywords} without explicit properties. Transforming this schema would make "
+                    "the object accept no keys."
+                )
+
         strict_schema["properties"] = {
-            key: transform_schema(prop_schema) for key, prop_schema in json_schema.pop("properties", {}).items()
+            key: transform_schema(prop_schema) for key, prop_schema in properties.items()
         }
         json_schema.pop("additionalProperties", None)
         strict_schema["additionalProperties"] = False
