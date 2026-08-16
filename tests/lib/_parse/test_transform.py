@@ -40,6 +40,30 @@ def test_ref_schema_with_defs():
     )
 
 
+def test_ref_schema_with_sibling_keywords():
+    # $ref siblings are not representable in the strict schema; they are
+    # demoted to the description instead of being silently dropped.
+    schema = {
+        "$ref": "#/$defs/Tier",
+        "$defs": {"Tier": {"type": "string", "enum": ["free", "pro"]}},
+        "title": "Tier",
+        "enum": ["free", "pro"],
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "$defs": {
+                "Tier": {
+                    "type": "string",
+                    "enum": ["free", "pro"],
+                }
+            },
+            "$ref": "#/$defs/Tier",
+            "description": "{title: Tier, enum: ['free', 'pro']}",
+        }
+    )
+
+
 def test_anyof_schema():
     schema = {
         "anyOf": [

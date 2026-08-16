@@ -94,6 +94,16 @@ def transform_schema(
     ref = json_schema.pop("$ref", None)
     if ref is not None:
         strict_schema["$ref"] = ref
+        # Sibling keywords of a $ref are not representable in the strict
+        # schema; demote them to the description (the same policy applied to
+        # every other unsupported property below) instead of silently
+        # dropping them.
+        if json_schema:
+            strict_schema["description"] = (
+                "{"
+                + ", ".join(f"{key}: {value}" for key, value in json_schema.items())
+                + "}"
+            )
         return strict_schema
 
     type_: Optional[SupportedTypes] = json_schema.pop("type", None)
