@@ -78,7 +78,16 @@ def _chunk_bytes_to_sse(raw: bytes) -> ServerSentEvent | None:
 
     payload = cast("Dict[str, Any]", data)
     event_type = payload.get("type")
-    if not isinstance(event_type, str):
-        event_type = "completion"
+    if isinstance(event_type, str):
+        return ServerSentEvent(data=decoded, event=event_type)
 
-    return ServerSentEvent(data=decoded, event=event_type)
+    # No typed discriminator. Two untyped payload shapes reach this point. Legacy
+    # text-completion chunks carry a "completion" field and belong on the completion
+    # path. Bedrock also appends an amazon-bedrock-invocationMetrics trailer that
+    # carries neither a type nor a completion field. Forwarding that trailer to the
+    # stream-event union makes it construct as a contract-violating
+    # RawMessageStartEvent(message=None), so drop it instead.
+    if "completion" in payload:
+        return ServerSentEvent(data=decoded, event="completion")
+
+    return None
