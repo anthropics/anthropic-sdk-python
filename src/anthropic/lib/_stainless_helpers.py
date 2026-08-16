@@ -9,6 +9,7 @@ we only carry the constants and the per-object tagging machinery.
 from __future__ import annotations
 
 from typing import Any, cast
+from collections.abc import Sequence
 from typing_extensions import Literal
 
 __all__ = [
@@ -94,23 +95,37 @@ def get_helper_tag(obj: object) -> str | None:
     return getattr(obj, _HELPER_ATTR, None)  # type: ignore[return-value]
 
 
+def _replayable_sequence(value: Any) -> Sequence[Any] | None:
+    """Return a safely re-iterable helper collection, if available.
+
+    Request parameters accept arbitrary ``Iterable`` values, including generators.
+    Helper telemetry must not consume a one-shot iterable before request
+    serialization gets a chance to read it.
+    """
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return value
+    return None
+
+
 def collect_helpers(
     tools: Any = None,
     messages: Any = None,
 ) -> list[str]:
-    """Collect deduplicated helper names from tools and messages."""
+    """Collect deduplicated helper names from replayable tools and messages."""
     helpers: list[str] = []
 
     def _add(tag: str | None) -> None:
         if tag is not None and tag not in helpers:
             helpers.append(tag)
 
-    if tools:
-        for tool in tools:
+    tool_items = _replayable_sequence(tools)
+    if tool_items:
+        for tool in tool_items:
             _add(get_helper_tag(tool))
 
-    if messages:
-        for message in messages:
+    message_items = _replayable_sequence(messages)
+    if message_items:
+        for message in message_items:
             _add(get_helper_tag(message))
 
             # Check content blocks within messages
