@@ -10,15 +10,18 @@ the fake stream actually yields control to the event loop.
 from __future__ import annotations
 
 import asyncio
+import threading
 from typing import Any, Optional, cast
 from collections.abc import Callable, Awaitable, AsyncIterator
+from typing_extensions import override
 
 import httpx
 import pytest
 
 from anthropic import APIStatusError
 from anthropic._compat import PYDANTIC_V1
-from anthropic.lib.tools import ToolError, _beta_session_runner as session_runner_mod
+from anthropic.lib.tools import ToolError, BetaBuiltinFunctionTool, _beta_session_runner as session_runner_mod
+from anthropic.types.beta import BetaToolParam
 from anthropic.lib.tools._beta_session_runner import (
     SessionToolRunner,
     DispatchedToolCall,
@@ -241,6 +244,23 @@ class _FakeTool:
             self.close = close
 
     def call(self, input: dict[str, Any]) -> Any:
+        return self._fn(input)
+
+
+class _SyncTool(BetaBuiltinFunctionTool):
+    """A real ``BetaBuiltinFunctionTool``, unlike ``_FakeTool``, so ``run_runnable_tool``
+    takes its sync-tool branch."""
+
+    def __init__(self, name: str, fn: Callable[[object], str]) -> None:
+        self._name = name
+        self._fn = fn
+
+    @override
+    def to_dict(self) -> BetaToolParam:
+        return {"name": self._name, "input_schema": {"type": "object"}}
+
+    @override
+    def call(self, input: object) -> str:
         return self._fn(input)
 
 
@@ -1290,6 +1310,50 @@ async def test_tool_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
     assert len(items) == 1
     assert items[0].is_error is True
     assert "timed out" in _result_text(items[0])
+
+
+@pytest.mark.asyncio()
+async def test_sync_tool_runs_off_the_event_loop() -> None:
+    """A sync tool runs on a worker thread: the event loop keeps running while its body blocks."""
+    loop = asyncio.get_running_loop()
+    release = threading.Event()
+
+    def blocking(_input: object) -> str:
+        loop.call_soon_threadsafe(release.set)
+        if not release.wait(timeout=2):
+            raise RuntimeError("the event loop did not run while the tool blocked")
+        return "released"
+
+    events = FakeAsyncEvents(stream_events=[_custom_tool_use("ctu_1", "blocking", {}), _terminated()])
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[_SyncTool("blocking", blocking)])]
+
+    assert len(items) == 1
+    assert items[0].is_error is False
+    assert _result_text(items[0]) == "released"
+
+
+@pytest.mark.asyncio()
+async def test_tool_timeout_fires_for_blocking_sync_tool(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A sync tool that blocks past ``TOOL_TIMEOUT`` is reported timed out at the
+    deadline; its thread is abandoned rather than awaited."""
+    monkeypatch.setattr(session_runner_mod, "TOOL_TIMEOUT", 0.05)
+    release = threading.Event()
+
+    def slow(_input: object) -> str:
+        release.wait(timeout=2)
+        return "late"
+
+    events = FakeAsyncEvents(stream_events=[_custom_tool_use("ctu_1", "slow", {}), _terminated()])
+    try:
+        items = [item async for item in _run_with_fakes(events=events, tools=[_SyncTool("slow", slow)])]
+    finally:
+        release.set()
+
+    assert len(items) == 1
+    assert items[0].is_error is True
+    assert "timed out" in _result_text(items[0])
+    assert len(events.send_calls) == 1
 
 
 def test_tool_timeout_exceeds_bash_default() -> None:

@@ -227,6 +227,8 @@ class EnvironmentWorker:
         :class:`AgentToolContext`. Defaults to
         ``beta_agent_toolset_20260401(env)`` (the standard
         ``agent_toolset_20260401`` set bound to the per-session context).
+        Async tools share the event loop with the lease heartbeat, so keep
+        them non-blocking.
       workdir: Base directory for the per-session :class:`AgentToolContext`.
         Defaults to :func:`os.getcwd` captured when the worker is constructed
         (matches the TS worker's ``process.cwd()``-at-construction), so a

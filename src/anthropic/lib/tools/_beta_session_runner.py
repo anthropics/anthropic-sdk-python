@@ -374,6 +374,15 @@ class SessionToolRunner:
     :class:`~anthropic.lib.environments.EnvironmentWorker` for heartbeating /
     force-stop.
 
+    Tool calls run one at a time and each is bounded by ``TOOL_TIMEOUT``,
+    after which the runner posts an ``is_error`` "timed out" result. Async
+    tools are awaited on the event loop, so keep them non-blocking. Sync tools
+    (``@beta_tool``, :class:`~anthropic.lib.tools.BetaBuiltinFunctionTool`)
+    run on a worker thread so they cannot stall the loop, and should use
+    ``anyio.from_thread.run`` if they need to call async code. A timed-out
+    sync tool's thread is not joined, so its body may still be running during
+    later calls and the exit-time cleanup.
+
     Pass ``environment_key`` to authenticate the event stream / list / send
     calls with the self-hosted environment key (bearered, with the client's
     default ``x-api-key`` dropped); leave it unset to use the client's own

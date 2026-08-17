@@ -15,7 +15,9 @@ import inspect
 from typing import Union, TypeVar, Iterable, Awaitable
 from typing_extensions import Protocol
 
-from ._beta_functions import ToolError, BetaFunctionToolResultType
+from anyio.to_thread import run_sync
+
+from ._beta_functions import ToolError, BetaFunctionTool, BetaBuiltinFunctionTool, BetaFunctionToolResultType
 from ...types.beta.beta_message_param import BetaMessageParam
 from ...types.beta.beta_content_block_param import BetaContentBlockParam
 from ...types.beta.beta_request_tool_removal_block_param import (
@@ -122,10 +124,12 @@ def tool_error_content(exc: BaseException) -> BetaFunctionToolResultType:
 async def run_runnable_tool(tool: _CallableTool, input: dict[str, object]) -> BetaFunctionToolResultType:
     """Call ``tool`` with ``input``, awaiting the result if the tool is async.
 
-    Bridges the sync (:class:`~anthropic.lib.tools.BetaFunctionTool`) and async
-    (:class:`~anthropic.lib.tools.BetaAsyncFunctionTool`) runnable-tool shapes
-    behind a single ``await``.
+    Sync tools run on a worker thread. If the caller cancels (for example on a
+    timeout), the thread is left to finish on its own and its result is
+    dropped.
     """
+    if isinstance(tool, (BetaFunctionTool, BetaBuiltinFunctionTool)):
+        return await run_sync(tool.call, input, abandon_on_cancel=True)
     result = tool.call(input)
     if inspect.isawaitable(result):
         return await result
