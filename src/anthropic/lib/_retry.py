@@ -30,8 +30,19 @@ _RETRYABLE_4XX = frozenset({408, 409, 429})
 
 
 def backoff(attempt: int, *, cap: float, base: float = 2.0) -> float:
-    """Exponential backoff for ``attempt`` (1-indexed), capped at ``cap``."""
-    return min(cap, base**attempt)
+    """Exponential backoff for ``attempt`` (1-indexed), capped at ``cap``.
+
+    Compute the uncapped value defensively: long-running helpers can accumulate
+    an arbitrarily large attempt count during a sustained outage, and float
+    exponentiation eventually raises ``OverflowError`` before ``min()`` gets a
+    chance to apply the cap. Once that happens the correct capped value is
+    already known.
+    """
+    try:
+        delay = base**attempt
+    except OverflowError:
+        return cap
+    return min(cap, delay)
 
 
 def jitter(low: float, high: float) -> float:
