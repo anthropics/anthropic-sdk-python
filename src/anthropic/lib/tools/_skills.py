@@ -255,7 +255,16 @@ async def download_session_skills(
                 await adest.unlink()
             # ``shutil.rmtree`` is blocking; keep it off the event loop.
             await run_sync(partial(shutil.rmtree, dest, ignore_errors=True))
-            await _download_and_extract(client, skill.skill_id, version_id, dest)
+            try:
+                await _download_and_extract(client, skill.skill_id, version_id, dest)
+            except BaseException:
+                # Extraction is transactional from the caller's perspective:
+                # never leave a partially unpacked third-party skill tree that
+                # is absent from the returned cleanup list. Shield cleanup so
+                # cancellation cannot interrupt removal midway through.
+                with anyio.CancelScope(shield=True):
+                    await run_sync(partial(shutil.rmtree, dest, ignore_errors=True))
+                raise
             downloaded.append(dest)
             log.info("downloaded skill skill_id=%s version=%s -> %s", skill.skill_id, version_id, dest)
         except Exception as e:
@@ -277,4 +286,6 @@ async def _download_and_extract(client: AsyncAnthropic, skill_id: str, version_i
         # zipfile / tarfile are blocking; keep them off the event loop.
         await run_sync(_extract_skill_archive, Path(tmp_name), dest)
     finally:
-        await tmp.unlink(missing_ok=True)
+        # A cancelled download/extraction must not strand the temporary archive.
+        with anyio.CancelScope(shield=True):
+            await tmp.unlink(missing_ok=True)
