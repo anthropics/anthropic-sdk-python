@@ -32,6 +32,7 @@ from anthropic._base_client import (
     DefaultHttpxClient,
     DefaultAsyncHttpxClient,
     get_platform,
+    get_architecture,
     make_request_options,
 )
 
@@ -2153,6 +2154,23 @@ class TestAsyncAnthropic:
     async def test_get_platform(self) -> None:
         platform = await asyncify(get_platform)()
         assert isinstance(platform, (str, OtherPlatform))
+
+    def test_platform_headers_do_not_spawn_subprocesses(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # a cold process resolves `platform.uname().processor` lazily by running `uname -p`
+        monkeypatch.setattr("platform._uname_cache", None, raising=False)
+
+        spawned: list[object] = []
+
+        def fake_popen(*args: object, **kwargs: object) -> None:
+            spawned.append(args[0] if args else kwargs.get("args"))
+            raise OSError("unexpected subprocess")
+
+        monkeypatch.setattr("subprocess.Popen", fake_popen)
+
+        get_platform()
+        get_architecture()
+
+        assert spawned == []
 
     async def test_proxy_environment_variables(self, monkeypatch: pytest.MonkeyPatch) -> None:
         # Test that the proxy environment variables are set correctly

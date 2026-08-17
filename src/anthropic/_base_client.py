@@ -34,7 +34,6 @@ from typing_extensions import Literal, override, get_origin
 
 import anyio
 import httpx
-import distro
 import pydantic
 from httpx import URL
 from pydantic import PrivateAttr
@@ -1567,8 +1566,8 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
         stream_cls: type[_AsyncStreamT] | None = None,
     ) -> ResponseT | _AsyncStreamT:
         if self._platform is None:
-            # `get_platform` can make blocking IO calls so we
-            # execute it earlier while we are in an async context
+            # `get_platform()` may block (e.g. `platform.uname()` runs a WMI query on Windows),
+            # so resolve it in a worker thread rather than on the event loop
             self._platform = await asyncify(get_platform)()
 
         cast_to = self._maybe_override_cast_to(cast_to, options)
@@ -2045,17 +2044,18 @@ Platform = Union[
 
 
 def get_platform() -> Platform:
+    # NOTE: we deliberately avoid `platform.platform()` (and `platform.uname().processor`)
+    # as they shell out to `uname -p`, which would fork the process on the first request.
     try:
         system = platform.system().lower()
-        platform_name = platform.platform().lower()
+        machine = platform.machine().lower()
+        release = platform.release().lower()
     except Exception:
         return "Unknown"
 
-    if "iphone" in platform_name or "ipad" in platform_name:
-        # Tested using Python3IDE on an iPhone 11 and Pythonista on an iPad 7
-        # system is Darwin and platform_name is a string like:
-        # - Darwin-21.6.0-iPhone12,1-64bit
-        # - Darwin-21.6.0-iPad7,11-64bit
+    if system in ("ios", "ipados") or machine.startswith(("iphone", "ipad")):
+        # CPython 3.13+ reports the system as iOS / iPadOS; older builds (e.g. Pythonista)
+        # report Darwin with a machine like `iPhone12,1` / `iPad7,11`
         return "iOS"
 
     if system == "darwin":
@@ -2064,24 +2064,22 @@ def get_platform() -> Platform:
     if system == "windows":
         return "Windows"
 
-    if "android" in platform_name:
-        # Tested using Pydroid 3
-        # system is Linux and platform_name is a string like 'Linux-5.10.81-android12-9-00001-geba40aecb3b7-ab8534902-aarch64-with-libc'
+    if system == "android" or hasattr(sys, "getandroidapilevel") or "android" in release:
+        # CPython 3.13+ reports the system as Android; older builds (e.g. Pydroid 3) report
+        # Linux with a release like `5.10.81-android12-9-00001-geba40aecb3b7-ab8534902`
         return "Android"
 
     if system == "linux":
-        # https://distro.readthedocs.io/en/latest/#distro.id
-        distro_id = distro.id()
-        if distro_id == "freebsd":
-            return "FreeBSD"
-
-        if distro_id == "openbsd":
-            return "OpenBSD"
-
         return "Linux"
 
-    if platform_name:
-        return OtherPlatform(platform_name)
+    if system == "freebsd":
+        return "FreeBSD"
+
+    if system == "openbsd":
+        return "OpenBSD"
+
+    if system:
+        return OtherPlatform(system)
 
     return "Unknown"
 
