@@ -301,6 +301,10 @@ class APIResponse(BaseAPIResponse[R]):
     def request_id(self) -> str | None:
         return self.http_response.headers.get("request-id")  # type: ignore[no-any-return]
 
+    @property
+    def workspace_id(self) -> str | None:
+        return self.http_response.headers.get("anthropic-workspace-id")  # type: ignore[no-any-return]
+
     @overload
     def parse(self, *, to: type[_T]) -> _T: ...
 
@@ -406,6 +410,10 @@ class AsyncAPIResponse(BaseAPIResponse[R]):
     @property
     def request_id(self) -> str | None:
         return self.http_response.headers.get("request-id")  # type: ignore[no-any-return]
+
+    @property
+    def workspace_id(self) -> str | None:
+        return self.http_response.headers.get("anthropic-workspace-id")  # type: ignore[no-any-return]
 
     @overload
     async def parse(self, *, to: type[_T]) -> _T: ...
