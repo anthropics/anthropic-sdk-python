@@ -20,9 +20,11 @@ from __future__ import annotations
 import os
 import asyncio
 import logging
+import threading
 import contextlib
 from types import SimpleNamespace
 from typing import Any, cast
+from functools import partial
 from collections.abc import AsyncIterator
 from typing_extensions import override
 
@@ -33,8 +35,10 @@ from anthropic import Anthropic, AsyncAnthropic
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.environments import _worker as worker_mod
 from anthropic.lib.environments._worker import EnvironmentWorker, _heartbeat_loop
+from anthropic.lib.tools._tool_dispatch import run_runnable_tool
 
 from .test_poller_method import _api_status_error
+from ..tools.test_session_runner import _SyncTool
 
 
 class _FakeWorkResource:
@@ -639,3 +643,41 @@ async def test_heartbeat_permanent_4xx_stops_immediately(
     assert work.calls == 1
     assert stop.is_set()
     assert any(m.startswith("permanent heartbeat failure") for m in _messages(caplog))
+
+
+@pytest.mark.asyncio()
+async def test_heartbeat_keeps_beating_while_a_sync_tool_blocks(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Heartbeat loop and tool call share one task group, as they do in ``_handle_item``."""
+    monkeypatch.setattr(worker_mod, "_HEARTBEAT_DEFAULT", _FAST_INTERVAL)
+    in_tool, release = threading.Event(), threading.Event()
+
+    class _Work:
+        def __init__(self) -> None:
+            self.beats_during_tool = 0
+
+        async def heartbeat(self, work_id: str, **_kwargs: Any) -> Any:  # noqa: ARG002
+            if in_tool.is_set() and not release.is_set():
+                self.beats_during_tool += 1
+                if self.beats_during_tool >= 3:
+                    release.set()
+            return _beat_ok()
+
+    def blocking(_input: object) -> str:
+        in_tool.set()
+        if not release.wait(timeout=2):
+            raise RuntimeError("no heartbeat fired while the tool ran")
+        return "ok"
+
+    work, stop = _Work(), anyio.Event()
+    result: object = None
+    try:
+        with anyio.fail_after(5):
+            async with anyio.create_task_group() as tg:
+                tg.start_soon(partial(_heartbeat_loop, cast(Any, work), work_id="w_1", environment_id="e_1", stop=stop))
+                result = await run_runnable_tool(_SyncTool("blocking", blocking), {})
+                stop.set()
+    finally:
+        release.set()
+
+    assert result == "ok"
+    assert work.beats_during_tool >= 3

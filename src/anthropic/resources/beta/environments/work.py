@@ -1227,6 +1227,8 @@ class AsyncWork(AsyncAPIResource):
           tools: Tools to expose to each claimed session. Either a fixed list or
             a factory invoked once per session with that session's
             ``AgentToolContext``. Defaults to ``beta_agent_toolset_20260401(env)``.
+            Async tools share the event loop with the lease heartbeat, so keep
+            them non-blocking.
           workdir: Base directory for the per-session ``AgentToolContext``.
             Defaults to ``os.getcwd()`` captured when the worker is constructed
             (TS parity: ``process.cwd()`` at construction).

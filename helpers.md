@@ -346,6 +346,15 @@ tools = [t for t in beta_agent_toolset_20260401(env) if t.name != "bash"]
 > session tool runner / environment worker for the agent toolset, or drop `bash` (as in the second
 > line above) before passing the toolset to the Messages tool runner.
 
+> **Keep async tools non-blocking.** The environment worker heartbeats the work-item lease on the
+> same event loop that runs your async tools (`@beta_async_tool`), so a blocking call inside one can
+> cost the worker its lease. Push blocking or CPU-bound work to `anyio.to_thread.run_sync`, or write
+> a sync tool instead (`@beta_tool`, `BetaBuiltinFunctionTool`). Sync tools run on a worker thread
+> and may block freely, but must use `anyio.from_thread.run` to call async code. Each call has a
+> 150 s limit. A sync tool that runs past it is reported to the agent as timed out while its thread
+> keeps running, so a long-running sync tool should tolerate being called again before an earlier
+> run has returned.
+
 The `bash` tool runs an unrestricted `/bin/bash` and executes file operations and shell commands
 directly on the host. Run the worker inside a container or other isolation boundary you control.
 (The file tools — `read`/`write`/`edit`/`glob`/`grep` — confine to the workdir with a symlink-aware
