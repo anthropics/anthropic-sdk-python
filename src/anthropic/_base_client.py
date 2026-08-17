@@ -1316,6 +1316,7 @@ class SyncAPIClient(BaseClient[httpx.Client, Stream[Any]]):
             response.headers,
         )
         log.debug("request_id: %s", response.headers.get("request-id"))
+        log.debug("workspace_id: %s", response.headers.get("anthropic-workspace-id"))
 
         return response, options
 
@@ -2068,6 +2069,7 @@ class AsyncAPIClient(BaseClient[httpx.AsyncClient, AsyncStream[Any]]):
             response.headers,
         )
         log.debug("request_id: %s", response.headers.get("request-id"))
+        log.debug("workspace_id: %s", response.headers.get("anthropic-workspace-id"))
 
         return response, options
 

@@ -226,7 +226,11 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+            return_value=httpx.Response(
+                200,
+                headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
+                content=get_response("basic_response.txt"),
+            )
         )
 
         with sync_client.messages.stream(
@@ -240,6 +244,8 @@ class TestSyncMessages:
             model="claude-3-opus-latest",
         ) as stream:
             assert not stream.response.is_closed
+            assert stream.request_id == "my-req-id"
+            assert stream.workspace_id == "wrkspc_123"
 
         # response should be closed even if the body isn't read
         assert stream.response.is_closed
@@ -409,7 +415,11 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+            return_value=httpx.Response(
+                200,
+                headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
+                content=to_async_iter(get_response("basic_response.txt")),
+            )
         )
 
         async with async_client.messages.stream(
@@ -423,6 +433,8 @@ class TestAsyncMessages:
             model="claude-3-opus-latest",
         ) as stream:
             assert not stream.response.is_closed
+            assert stream.request_id == "my-req-id"
+            assert stream.workspace_id == "wrkspc_123"
 
         # response should be closed even if the body isn't read
         assert stream.response.is_closed

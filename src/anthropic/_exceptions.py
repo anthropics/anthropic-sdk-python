@@ -70,11 +70,14 @@ class APIStatusError(APIError):
     request_id: str | None
     type: ErrorType | None
 
+    workspace_id: str | None
+
     def __init__(self, message: str, *, response: httpx.Response, body: object | None) -> None:
         super().__init__(message, response.request, body=body)
         self.response = response
         self.status_code = response.status_code
         self.request_id = response.headers.get("request-id")
+        self.workspace_id = response.headers.get("anthropic-workspace-id")
 
         self.type = None
         if is_dict(body):

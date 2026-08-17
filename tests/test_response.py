@@ -160,7 +160,7 @@ def test_response_basemodel_request_id(client: Anthropic) -> None:
     response = APIResponse(
         raw=httpx.Response(
             200,
-            headers={"request-id": "my-req-id"},
+            headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
             content=json.dumps({"foo": "hello!", "bar": 2}),
         ),
         client=client,
@@ -171,6 +171,7 @@ def test_response_basemodel_request_id(client: Anthropic) -> None:
     )
     obj = response.parse(to=CustomModel)
     assert obj._request_id == "my-req-id"
+    assert obj._workspace_id == "wrkspc_123"
     assert obj.foo == "hello!"
     assert obj.bar == 2
     assert obj.to_dict() == {"foo": "hello!", "bar": 2}
@@ -181,7 +182,7 @@ async def test_async_response_basemodel_request_id(client: Anthropic) -> None:
     response = AsyncAPIResponse(
         raw=httpx.Response(
             200,
-            headers={"request-id": "my-req-id"},
+            headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
             content=json.dumps({"foo": "hello!", "bar": 2}),
         ),
         client=client,
@@ -192,6 +193,7 @@ async def test_async_response_basemodel_request_id(client: Anthropic) -> None:
     )
     obj = await response.parse(to=CustomModel)
     assert obj._request_id == "my-req-id"
+    assert obj._workspace_id == "wrkspc_123"
     assert obj.foo == "hello!"
     assert obj.bar == 2
     assert obj.to_dict() == {"foo": "hello!", "bar": 2}

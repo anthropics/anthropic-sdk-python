@@ -63,6 +63,10 @@ class BetaMessageStream(Generic[ResponseFormatT]):
     def request_id(self) -> str | None:
         return self.response.headers.get("request-id")  # type: ignore[no-any-return]
 
+    @property
+    def workspace_id(self) -> str | None:
+        return self.response.headers.get("anthropic-workspace-id")  # type: ignore[no-any-return]
+
     def __next__(self) -> ParsedBetaMessageStreamEvent[ResponseFormatT]:
         return self._iterator.__next__()
 
@@ -211,6 +215,10 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
     @property
     def request_id(self) -> str | None:
         return self.response.headers.get("request-id")  # type: ignore[no-any-return]
+
+    @property
+    def workspace_id(self) -> str | None:
+        return self.response.headers.get("anthropic-workspace-id")  # type: ignore[no-any-return]
 
     async def __anext__(self) -> ParsedBetaMessageStreamEvent[ResponseFormatT]:
         return await self._iterator.__anext__()
