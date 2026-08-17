@@ -137,25 +137,37 @@ def iter_work(
             time.sleep(_jitter(1.0, 3.0))
             continue
         log.info("claimed work work_id=%s work_type=%s", item.id, getattr(item.data, "type", None))
-        try:
-            work.ack(
-                item.id,
-                environment_id=environment_id,
-                extra_headers=extra_headers,
-            )
-        except TRANSIENT_ERRORS as e:
-            if _is_fatal_4xx(e):
-                log.error("ack failed permanently; force-stopping work_id=%s error=%s", item.id, e)
-                _force_stop_quietly(work, item.id, environment_id=environment_id, extra_headers=extra_headers)
+
+        acked = False
+        while not acked:
+            try:
+                work.ack(
+                    item.id,
+                    environment_id=environment_id,
+                    extra_headers=extra_headers,
+                )
+            except TRANSIENT_ERRORS as e:
+                if _is_fatal_4xx(e):
+                    log.error("ack failed permanently; force-stopping work_id=%s error=%s", item.id, e)
+                    _force_stop_quietly(work, item.id, environment_id=environment_id, extra_headers=extra_headers)
+                    ack_attempt = 0
+                    break
+                ack_attempt += 1
+                wait = _backoff(ack_attempt) + _jitter(0.0, 1.0)
+                log.warning(
+                    "ack failed, backing off work_id=%s attempt=%d backoff=%.1fs error=%s",
+                    item.id,
+                    ack_attempt,
+                    wait,
+                    e,
+                )
+                time.sleep(wait)
                 continue
-            ack_attempt += 1
-            wait = _backoff(ack_attempt) + _jitter(0.0, 1.0)
-            log.warning(
-                "ack failed, backing off work_id=%s attempt=%d backoff=%.1fs error=%s", item.id, ack_attempt, wait, e
-            )
-            time.sleep(wait)
+            ack_attempt = 0
+            acked = True
+
+        if not acked:
             continue
-        ack_attempt = 0
         if not auto_stop:
             yield item
             continue
@@ -230,25 +242,42 @@ async def aiter_work(
             await anyio.sleep(_jitter(1.0, 3.0))
             continue
         log.info("claimed work work_id=%s work_type=%s", item.id, getattr(item.data, "type", None))
-        try:
-            await work.ack(
-                item.id,
-                environment_id=environment_id,
-                extra_headers=extra_headers,
-            )
-        except TRANSIENT_ERRORS as e:
-            if _is_fatal_4xx(e):
-                log.error("ack failed permanently; force-stopping work_id=%s error=%s", item.id, e)
-                await _aforce_stop_quietly(work, item.id, environment_id=environment_id, extra_headers=extra_headers)
+
+        acked = False
+        while not acked:
+            try:
+                await work.ack(
+                    item.id,
+                    environment_id=environment_id,
+                    extra_headers=extra_headers,
+                )
+            except TRANSIENT_ERRORS as e:
+                if _is_fatal_4xx(e):
+                    log.error("ack failed permanently; force-stopping work_id=%s error=%s", item.id, e)
+                    await _aforce_stop_quietly(
+                        work,
+                        item.id,
+                        environment_id=environment_id,
+                        extra_headers=extra_headers,
+                    )
+                    ack_attempt = 0
+                    break
+                ack_attempt += 1
+                wait = _backoff(ack_attempt) + _jitter(0.0, 1.0)
+                log.warning(
+                    "ack failed, backing off work_id=%s attempt=%d backoff=%.1fs error=%s",
+                    item.id,
+                    ack_attempt,
+                    wait,
+                    e,
+                )
+                await anyio.sleep(wait)
                 continue
-            ack_attempt += 1
-            wait = _backoff(ack_attempt) + _jitter(0.0, 1.0)
-            log.warning(
-                "ack failed, backing off work_id=%s attempt=%d backoff=%.1fs error=%s", item.id, ack_attempt, wait, e
-            )
-            await anyio.sleep(wait)
+            ack_attempt = 0
+            acked = True
+
+        if not acked:
             continue
-        ack_attempt = 0
         if not auto_stop:
             yield item
             continue
