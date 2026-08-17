@@ -136,6 +136,12 @@ class BaseModel(pydantic.BaseModel):
         methods and modules are *private*.
         """
 
+        _workspace_id: Optional[str] = None
+        """The ID of the workspace the request was made in, returned via the `anthropic-workspace-id` header.
+        Like `_request_id`, this will **only** be set for the top-level response object and,
+        despite the `_` prefix, *is* public.
+        """
+
     def to_dict(
         self,
         *,
@@ -841,19 +847,21 @@ def set_pydantic_config(typ: Any, config: pydantic.ConfigDict) -> None:
     setattr(typ, "__pydantic_config__", config)  # noqa: B010
 
 
-def add_request_id(obj: BaseModel, request_id: str | None) -> None:
+def add_response_ids(obj: BaseModel, *, request_id: str | None, workspace_id: str | None) -> None:
     obj._request_id = request_id
+    obj._workspace_id = workspace_id
 
-    # in Pydantic v1, using setattr like we do above causes the attribute
+    # in Pydantic v1, using setattr like we do above causes the attributes
     # to be included when serializing the model which we don't want in this
-    # case so we need to explicitly exclude it
+    # case so we need to explicitly exclude them
     if PYDANTIC_V1:
+        private_fields = {"_request_id", "_workspace_id", "__exclude_fields__"}
         try:
             exclude_fields = obj.__exclude_fields__  # type: ignore
         except AttributeError:
-            cast(Any, obj).__exclude_fields__ = {"_request_id", "__exclude_fields__"}
+            cast(Any, obj).__exclude_fields__ = private_fields
         else:
-            cast(Any, obj).__exclude_fields__ = {*(exclude_fields or {}), "_request_id", "__exclude_fields__"}
+            cast(Any, obj).__exclude_fields__ = {*(exclude_fields or {}), *private_fields}
 
 
 # our use of subclassing here causes weirdness for type checkers,

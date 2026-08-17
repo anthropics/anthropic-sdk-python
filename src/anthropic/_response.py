@@ -26,7 +26,7 @@ import pydantic
 
 from ._types import NoneType
 from ._utils import is_given, extract_type_arg, is_annotated_type, is_type_alias_type, extract_type_var_from_base
-from ._models import BaseModel, is_basemodel, add_request_id
+from ._models import BaseModel, is_basemodel, add_response_ids
 from ._constants import RAW_RESPONSE_HEADER, OVERRIDE_CAST_TO_HEADER
 from ._streaming import Stream, AsyncStream, is_stream_class_type, extract_stream_chunk_type
 from ._exceptions import AnthropicError, APIResponseValidationError
@@ -303,6 +303,10 @@ class APIResponse(BaseAPIResponse[R]):
     def request_id(self) -> str | None:
         return self.http_response.headers.get("request-id")  # type: ignore[no-any-return]
 
+    @property
+    def workspace_id(self) -> str | None:
+        return self.http_response.headers.get("anthropic-workspace-id")  # type: ignore[no-any-return]
+
     @overload
     def parse(self, *, to: type[_T]) -> _T: ...
 
@@ -352,7 +356,7 @@ class APIResponse(BaseAPIResponse[R]):
             parsed = self._options.post_parser(parsed)
 
         if isinstance(parsed, BaseModel):
-            add_request_id(parsed, self.request_id)
+            add_response_ids(parsed, request_id=self.request_id, workspace_id=self.workspace_id)
 
         self._parsed_by_type[cache_key] = parsed
         return cast(R, parsed)
@@ -412,6 +416,10 @@ class AsyncAPIResponse(BaseAPIResponse[R]):
     def request_id(self) -> str | None:
         return self.http_response.headers.get("request-id")  # type: ignore[no-any-return]
 
+    @property
+    def workspace_id(self) -> str | None:
+        return self.http_response.headers.get("anthropic-workspace-id")  # type: ignore[no-any-return]
+
     @overload
     async def parse(self, *, to: type[_T]) -> _T: ...
 
@@ -459,7 +467,7 @@ class AsyncAPIResponse(BaseAPIResponse[R]):
             parsed = self._options.post_parser(parsed)
 
         if isinstance(parsed, BaseModel):
-            add_request_id(parsed, self.request_id)
+            add_response_ids(parsed, request_id=self.request_id, workspace_id=self.workspace_id)
 
         self._parsed_by_type[cache_key] = parsed
         return cast(R, parsed)
