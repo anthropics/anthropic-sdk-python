@@ -124,6 +124,7 @@ class MemoryVersions(SyncAPIResource):
         memory_id: str | Omit = omit,
         operation: BetaManagedAgentsMemoryVersionOperation | Omit = omit,
         page: str | Omit = omit,
+        service_account_id: str | Omit = omit,
         session_id: str | Omit = omit,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -151,6 +152,8 @@ class MemoryVersions(SyncAPIResource):
           operation: Query parameter for operation
 
           page: Query parameter for page
+
+          service_account_id: Query parameter for service_account_id
 
           session_id: Query parameter for session_id
 
@@ -198,6 +201,7 @@ class MemoryVersions(SyncAPIResource):
                         "memory_id": memory_id,
                         "operation": operation,
                         "page": page,
+                        "service_account_id": service_account_id,
                         "session_id": session_id,
                         "view": view,
                     },
@@ -356,6 +360,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         memory_id: str | Omit = omit,
         operation: BetaManagedAgentsMemoryVersionOperation | Omit = omit,
         page: str | Omit = omit,
+        service_account_id: str | Omit = omit,
         session_id: str | Omit = omit,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -383,6 +388,8 @@ class AsyncMemoryVersions(AsyncAPIResource):
           operation: Query parameter for operation
 
           page: Query parameter for page
+
+          service_account_id: Query parameter for service_account_id
 
           session_id: Query parameter for session_id
 
@@ -430,6 +437,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
                         "memory_id": memory_id,
                         "operation": operation,
                         "page": page,
+                        "service_account_id": service_account_id,
                         "session_id": session_id,
                         "view": view,
                     },

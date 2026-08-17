@@ -198,7 +198,8 @@ class Environments(SyncAPIResource):
         Args:
           config: Updated environment configuration
 
-          description: Updated description of the environment
+          description: Updated description of the environment. Omit to preserve; null clears to null;
+              an empty string is stored as an empty string.
 
           metadata: User-provided metadata key-value pairs. Set a value to null or empty string to
               delete the key.
@@ -580,7 +581,8 @@ class AsyncEnvironments(AsyncAPIResource):
         Args:
           config: Updated environment configuration
 
-          description: Updated description of the environment
+          description: Updated description of the environment. Omit to preserve; null clears to null;
+              an empty string is stored as an empty string.
 
           metadata: User-provided metadata key-value pairs. Set a value to null or empty string to
               delete the key.

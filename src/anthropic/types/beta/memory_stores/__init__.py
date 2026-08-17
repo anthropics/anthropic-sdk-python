@@ -22,6 +22,9 @@ from .beta_managed_agents_memory_list_item import BetaManagedAgentsMemoryListIte
 from .beta_managed_agents_precondition_param import (
     BetaManagedAgentsPreconditionParam as BetaManagedAgentsPreconditionParam,
 )
+from .beta_managed_agents_service_account_actor import (
+    BetaManagedAgentsServiceAccountActor as BetaManagedAgentsServiceAccountActor,
+)
 from .beta_managed_agents_memory_version_operation import (
     BetaManagedAgentsMemoryVersionOperation as BetaManagedAgentsMemoryVersionOperation,
 )

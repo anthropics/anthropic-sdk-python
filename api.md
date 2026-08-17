@@ -1105,6 +1105,7 @@ from anthropic.types.beta.memory_stores import (
     BetaManagedAgentsAPIActor,
     BetaManagedAgentsMemoryVersion,
     BetaManagedAgentsMemoryVersionOperation,
+    BetaManagedAgentsServiceAccountActor,
     BetaManagedAgentsSessionActor,
     BetaManagedAgentsUserActor,
 )
