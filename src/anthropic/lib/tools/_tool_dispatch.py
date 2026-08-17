@@ -15,6 +15,8 @@ import inspect
 from typing import Union, TypeVar, Iterable, Awaitable
 from typing_extensions import Protocol
 
+from anyio.to_thread import run_sync
+
 from ._beta_functions import ToolError, BetaFunctionToolResultType
 from ...types.beta.beta_message_param import BetaMessageParam
 from ...types.beta.beta_content_block_param import BetaContentBlockParam
@@ -132,13 +134,18 @@ def tool_error_content(exc: BaseException) -> BetaFunctionToolResultType:
 
 
 async def run_runnable_tool(tool: _CallableTool, input: dict[str, object]) -> BetaFunctionToolResultType:
-    """Call ``tool`` with ``input``, awaiting the result if the tool is async.
+    """Call ``tool`` without letting synchronous work block the event loop.
 
-    Bridges the sync (:class:`~anthropic.lib.tools.BetaFunctionTool`) and async
-    (:class:`~anthropic.lib.tools.BetaAsyncFunctionTool`) runnable-tool shapes
-    behind a single ``await``.
+    The sessions runner accepts both sync and async runnable tools. Native async
+    ``call`` methods execute on the event loop as usual; synchronous methods run
+    in AnyIO's worker thread. A synchronous wrapper that returns an awaitable is
+    still supported — the wrapper runs off-loop and its result is then awaited.
     """
-    result = tool.call(input)
+    if inspect.iscoroutinefunction(tool.call):
+        result = tool.call(input)
+    else:
+        result = await run_sync(tool.call, input)
+
     if inspect.isawaitable(result):
         return await result
     return result
