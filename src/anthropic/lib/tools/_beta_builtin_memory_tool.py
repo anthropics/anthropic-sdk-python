@@ -278,6 +278,16 @@ class BetaAsyncAbstractMemoryTool(BetaAsyncBuiltinFunctionTool):
         raise NotImplementedError("clear_all_memory not implemented")
 
 
+def _write_all(fd: int, data: bytes) -> None:
+    """Write the complete buffer to ``fd``, retrying legal short writes."""
+    offset = 0
+    while offset < len(data):
+        written = os.write(fd, data[offset:])
+        if written == 0:
+            raise OSError("os.write returned 0")
+        offset += written
+
+
 def _atomic_write_file(target_path: Path, content: str) -> None:
     dir_path = target_path.parent
     temp_path = dir_path / f".tmp-{os.getpid()}-{uuid.uuid4()}"
@@ -286,13 +296,7 @@ def _atomic_write_file(target_path: Path, content: str) -> None:
     try:
         fd = os.open(temp_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
         try:
-            offset = 0
-            while offset < len(data):
-                written = os.write(fd, data[offset:])
-                if written == 0:
-                    raise OSError("os.write returned 0")
-                offset += written
-
+            _write_all(fd, data)
             os.fsync(fd)
         finally:
             os.close(fd)
@@ -479,7 +483,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
         try:
             fd = os.open(full_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
             try:
-                os.write(fd, command.file_text.encode("utf-8"))
+                _write_all(fd, command.file_text.encode("utf-8"))
                 os.fsync(fd)
             finally:
                 os.close(fd)
@@ -618,13 +622,7 @@ async def _async_atomic_write_file(target_path: AsyncPath, content: str) -> None
         def write_replace_and_sync() -> None:
             fd = os.open(sync_temp_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
             try:
-                offset = 0
-                while offset < len(data):
-                    written = os.write(fd, data[offset:])
-                    if written == 0:
-                        raise OSError("os.write returned 0")
-                    offset += written
-
+                _write_all(fd, data)
                 os.fsync(fd)
             finally:
                 os.close(fd)
@@ -776,7 +774,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
             def create_exclusive() -> None:
                 fd = os.open(sync_full_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
                 try:
-                    os.write(fd, command.file_text.encode("utf-8"))
+                    _write_all(fd, command.file_text.encode("utf-8"))
                     os.fsync(fd)
                 finally:
                     os.close(fd)
