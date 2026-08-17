@@ -154,7 +154,10 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
             resource: Your Foundry resource name, e.g. `example-resource` for `https://example-resource.services.ai.azure.com/anthropic/`
             azure_ad_token_provider: A function that returns an Azure Active Directory token, will be invoked on every request.
         """
-        api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
+        if api_key is not None and azure_ad_token_provider is not None:
+            raise MutuallyExclusiveAuthError()
+        if api_key is None and azure_ad_token_provider is None:
+            api_key = os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
         resource = resource if resource is not None else os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
         base_url = base_url if base_url is not None else os.environ.get("ANTHROPIC_FOUNDRY_BASE_URL")
 
@@ -184,6 +187,11 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
             middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
+        # The base client also understands first-party ANTHROPIC_API_KEY /
+        # ANTHROPIC_AUTH_TOKEN environment variables. Foundry has its own auth
+        # namespace, so keep only the credential resolved above.
+        self.api_key = api_key
+        self.auth_token = None
         self._azure_ad_token_provider = azure_ad_token_provider
 
     @cached_property
@@ -231,6 +239,18 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         if default_query is not None and set_default_query is not None:
             raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
 
+        if api_key is not None and azure_ad_token_provider is not None:
+            raise MutuallyExclusiveAuthError()
+        if api_key is not None:
+            resolved_api_key = api_key
+            resolved_token_provider = None
+        elif azure_ad_token_provider is not None:
+            resolved_api_key = None
+            resolved_token_provider = azure_ad_token_provider
+        else:
+            resolved_api_key = self.api_key
+            resolved_token_provider = self._azure_ad_token_provider
+
         headers = self._custom_headers
         if default_headers is not None:
             headers = merge_headers(headers, default_headers)
@@ -244,8 +264,8 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
             params = set_default_query
 
         return self.__class__(
-            api_key=api_key or self.api_key,
-            azure_ad_token_provider=azure_ad_token_provider or self._azure_ad_token_provider,
+            api_key=resolved_api_key,
+            azure_ad_token_provider=resolved_token_provider,
             webhook_key=webhook_key or self.webhook_key,
             base_url=str(base_url or self.base_url),
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
@@ -379,7 +399,10 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
             resource: Your Foundry resource name, e.g. `example-resource` for `https://example-resource.services.ai.azure.com/anthropic/`
             azure_ad_token_provider: A function that returns an Azure Active Directory token, will be invoked on every request.
         """
-        api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
+        if api_key is not None and azure_ad_token_provider is not None:
+            raise MutuallyExclusiveAuthError()
+        if api_key is None and azure_ad_token_provider is None:
+            api_key = os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
         resource = resource if resource is not None else os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
         base_url = base_url if base_url is not None else os.environ.get("ANTHROPIC_FOUNDRY_BASE_URL")
 
@@ -409,6 +432,8 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
             middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
+        self.api_key = api_key
+        self.auth_token = None
         self._azure_ad_token_provider = azure_ad_token_provider
 
     @cached_property
@@ -456,6 +481,18 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         if default_query is not None and set_default_query is not None:
             raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
 
+        if api_key is not None and azure_ad_token_provider is not None:
+            raise MutuallyExclusiveAuthError()
+        if api_key is not None:
+            resolved_api_key = api_key
+            resolved_token_provider = None
+        elif azure_ad_token_provider is not None:
+            resolved_api_key = None
+            resolved_token_provider = azure_ad_token_provider
+        else:
+            resolved_api_key = self.api_key
+            resolved_token_provider = self._azure_ad_token_provider
+
         headers = self._custom_headers
         if default_headers is not None:
             headers = merge_headers(headers, default_headers)
@@ -469,8 +506,8 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
             params = set_default_query
 
         return self.__class__(
-            api_key=api_key or self.api_key,
-            azure_ad_token_provider=azure_ad_token_provider or self._azure_ad_token_provider,
+            api_key=resolved_api_key,
+            azure_ad_token_provider=resolved_token_provider,
             webhook_key=webhook_key or self.webhook_key,
             base_url=str(base_url or self.base_url),
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
