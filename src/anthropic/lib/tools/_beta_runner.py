@@ -225,7 +225,9 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             ]
 
             if non_tool_blocks:
-                messages[-1]["content"] = non_tool_blocks
+                # ``messages`` is only a shallow list copy. Replace the final
+                # message dict instead of mutating the runner's stored object.
+                messages[-1] = {**messages[-1], "content": non_tool_blocks}
             else:
                 messages.pop()
 
@@ -514,7 +516,9 @@ class BaseAsyncToolRunner(
             ]
 
             if non_tool_blocks:
-                messages[-1]["content"] = non_tool_blocks
+                # ``messages`` is only a shallow list copy. Replace the final
+                # message dict instead of mutating the runner's stored object.
+                messages[-1] = {**messages[-1], "content": non_tool_blocks}
             else:
                 messages.pop()
 
