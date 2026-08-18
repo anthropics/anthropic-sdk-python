@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.123.0 (2026-08-18)
+
+Full Changelog: [v0.122.0...v0.123.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.122.0...v0.123.0)
+
+### Features
+
+* **api:** additions to files and memory stores ([09ce187](https://github.com/anthropics/anthropic-sdk-python/commit/09ce187e1c21029d636534fbabc7dd328f037c68))
+* **api:** updates to skill, files, and user profiles ([c6cbffd](https://github.com/anthropics/anthropic-sdk-python/commit/c6cbffdb6df46d96d873c613d0ca5baff6745768))
+* **client:** add helpers for accessing the workspace ID in response headers ([f79882b](https://github.com/anthropics/anthropic-sdk-python/commit/f79882b74628469d7aa8a003995fd01ec0836369))
+
+
+### Bug Fixes
+
+* **api:** remove unsupported mid_conv_system content block ([6f15b8d](https://github.com/anthropics/anthropic-sdk-python/commit/6f15b8d6018247b48d826b814c1a2e6bd6af71e8))
+* **client:** compute platform headers without spawning a subprocess ([baca9f4](https://github.com/anthropics/anthropic-sdk-python/commit/baca9f443c0a596ba5926e2c2c205ed03047af8a))
+* **client:** export custom status errors from _exceptions.__all__ ([#459](https://github.com/anthropics/anthropic-sdk-python/issues/459)) ([2950ec4](https://github.com/anthropics/anthropic-sdk-python/commit/2950ec46cb18f01f705267a7dcb8775ed5469359))
+* **client:** export ServiceUnavailableError and DeadlineExceededError from the package root ([#468](https://github.com/anthropics/anthropic-sdk-python/issues/468)) ([0dcd06d](https://github.com/anthropics/anthropic-sdk-python/commit/0dcd06d1a1da60021aa926f66bd066be9cf6509b))
+* **session-runner:** retry tool-result sends for at least the lease TTL ([#453](https://github.com/anthropics/anthropic-sdk-python/issues/453)) ([e1a4891](https://github.com/anthropics/anthropic-sdk-python/commit/e1a48917193ed914e9af466143a0b0c962a5b892))
+* **tools:** run synchronous session tools in a worker thread ([#399](https://github.com/anthropics/anthropic-sdk-python/issues/399)) ([8f88c57](https://github.com/anthropics/anthropic-sdk-python/commit/8f88c57d70cc3813392be9195c9d29fe022d49d0))
+
+
+### Chores
+
+* **examples:** remove legacy Text Completions API examples ([cf5c768](https://github.com/anthropics/anthropic-sdk-python/commit/cf5c76870efccea1069e219a0bc52170c068f804))
+* **internal:** remove leftover prism references ([826ba7a](https://github.com/anthropics/anthropic-sdk-python/commit/826ba7a3ea06636421fecb5f6394a50df3ca85d5))
+
 ## 0.122.0 (2026-08-13)
 
 Full Changelog: [v0.121.0...v0.122.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.121.0...v0.122.0)
