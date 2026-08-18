@@ -94,6 +94,7 @@ async def _heartbeat_loop(
     environment_id: str,
     stop: anyio.Event,
     extra_headers: Headers | None = None,
+    on_lease_ttl: Callable[[float], object] | None = None,
 ) -> None:
     """Keep the work-item lease alive while a session is being served.
 
@@ -102,7 +103,8 @@ async def _heartbeat_loop(
     reports the work is ``stopping`` / ``stopped``, when the lease is no
     longer extended, on a permanent heartbeat failure, or when transient
     failures have run long enough that the lease must be assumed lost (so two
-    runners don't end up serving the same work).
+    runners don't end up serving the same work). ``on_lease_ttl`` is called
+    with the server-reported TTL after every successful beat.
     """
     interval = _HEARTBEAT_DEFAULT
     ttl = _HEARTBEAT_TTL_DEFAULT
@@ -142,6 +144,8 @@ async def _heartbeat_loop(
             if resp.ttl_seconds > 0:
                 ttl = resp.ttl_seconds
                 interval = max(1.0, min(resp.ttl_seconds / 2, _HEARTBEAT_DEFAULT))
+                if on_lease_ttl is not None:
+                    on_lease_ttl(ttl)
             if resp.state in ("stopping", "stopped") or not resp.lease_extended:
                 log.info("heartbeat signals shutdown state=%s lease_extended=%s", resp.state, resp.lease_extended)
                 stop.set()
@@ -401,6 +405,14 @@ class EnvironmentWorker:
             async with anyio.create_task_group() as tg:
                 stop = anyio.Event()
 
+                # Latest server-reported lease TTL; the runner reads it back as
+                # its tool-result send retry window.
+                lease_ttl: float | None = None
+
+                def _on_lease_ttl(ttl: float) -> None:
+                    nonlocal lease_ttl
+                    lease_ttl = ttl
+
                 async def _heartbeat(
                     work_id: str = work_item.id,
                     environment_id: str = work_item.environment_id,
@@ -413,6 +425,7 @@ class EnvironmentWorker:
                             environment_id=environment_id,
                             stop=stop_ev,
                             extra_headers=self._extra_headers,
+                            on_lease_ttl=_on_lease_ttl,
                         )
                     finally:
                         tg.cancel_scope.cancel()
@@ -456,6 +469,7 @@ class EnvironmentWorker:
                             max_idle=self._max_idle,
                             environment_key=environment_key,
                             extra_headers=self._extra_headers,
+                            send_retry_window=lambda: lease_ttl,
                         ) as calls:
                             async for _ in calls:
                                 pass

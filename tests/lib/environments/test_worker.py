@@ -138,6 +138,7 @@ def _install_run_session_tools(monkeypatch: pytest.MonkeyPatch, record: dict[str
         max_idle: Any = None,
         environment_key: Any = None,
         extra_headers: Any = None,
+        send_retry_window: Any = None,
     ):
         record["run"] = {
             "session_id": session_id,
@@ -148,9 +149,12 @@ def _install_run_session_tools(monkeypatch: pytest.MonkeyPatch, record: dict[str
         }
 
         async def _iter() -> AsyncIterator[Any]:
-            # The session completes on its own (no tool calls). The run then
-            # ends via the normal session-completion path; the heartbeat keeps
-            # the lease alive throughout and is stopped on the way out.
+            # The session completes on its own (no tool calls) once the lease
+            # heartbeat has had a chance to land. The run then ends via the
+            # normal session-completion path; the heartbeat keeps the lease
+            # alive throughout and is stopped on the way out.
+            await asyncio.sleep(0.05)
+            record["send_retry_window"] = send_retry_window() if send_retry_window else None
             return
             yield  # pragma: no cover  (makes this an async generator function)
 
@@ -188,8 +192,10 @@ async def test_environment_worker_serves_session(monkeypatch: pytest.MonkeyPatch
     assert record["run"]["max_idle"] == 12.0
     assert record["run"]["environment_key"] == "env_key"
     assert [t.name for t in record["run"]["tools"]] == ["bash", "read", "write", "edit", "glob", "grep"]
-    # The lease was heartbeated.
+    # The lease was heartbeated, and the lease TTL it reported (60s) became the
+    # runner's tool-result send retry window.
     assert len(work.heartbeat_calls) >= 1
+    assert record["send_retry_window"] == 60
     # The work item was force-stopped on exit.
     assert len(work.stop_calls) == 1
     assert work.stop_calls[0]["work_id"] == "w_1"
@@ -523,6 +529,7 @@ async def test_heartbeat_starts_before_skill_download(monkeypatch: pytest.Monkey
         max_idle: Any = None,  # noqa: ARG001
         environment_key: Any = None,  # noqa: ARG001
         extra_headers: Any = None,  # noqa: ARG001
+        send_retry_window: Any = None,  # noqa: ARG001
     ):
         async def _iter() -> AsyncIterator[Any]:
             return
