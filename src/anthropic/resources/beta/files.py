@@ -287,7 +287,6 @@ class Files(SyncAPIResource):
         self,
         *,
         file: FileTypes,
-        expires_in_seconds: int | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -301,9 +300,6 @@ class Files(SyncAPIResource):
 
         Args:
           file: The file to upload
-
-          expires_in_seconds: Seconds from upload until the file expires and its bytes become permanently
-              unavailable. Must be between 3600 (one hour) and 7776000 (ninety days).
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -327,13 +323,7 @@ class Files(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
         extra_headers = merge_headers(_stainless_helper_header_from_file(file), extra_headers)
-        body = deepcopy_with_paths(
-            {
-                "file": file,
-                "expires_in_seconds": expires_in_seconds,
-            },
-            [["file"]],
-        )
+        body = deepcopy_with_paths({"file": file}, [["file"]])
         files = extract_files(cast(Mapping[str, object], body), paths=[["file"]])
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
@@ -597,7 +587,6 @@ class AsyncFiles(AsyncAPIResource):
         self,
         *,
         file: FileTypes,
-        expires_in_seconds: int | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -611,9 +600,6 @@ class AsyncFiles(AsyncAPIResource):
 
         Args:
           file: The file to upload
-
-          expires_in_seconds: Seconds from upload until the file expires and its bytes become permanently
-              unavailable. Must be between 3600 (one hour) and 7776000 (ninety days).
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -637,13 +623,7 @@ class AsyncFiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
         extra_headers = merge_headers(_stainless_helper_header_from_file(file), extra_headers)
-        body = deepcopy_with_paths(
-            {
-                "file": file,
-                "expires_in_seconds": expires_in_seconds,
-            },
-            [["file"]],
-        )
+        body = deepcopy_with_paths({"file": file}, [["file"]])
         files = extract_files(cast(Mapping[str, object], body), paths=[["file"]])
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.

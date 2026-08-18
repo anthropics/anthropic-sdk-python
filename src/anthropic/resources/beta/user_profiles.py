@@ -47,6 +47,7 @@ class UserProfiles(SyncAPIResource):
     def create(
         self,
         *,
+        access_type: Literal["application", "passthrough"] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -63,6 +64,12 @@ class UserProfiles(SyncAPIResource):
         Create User Profile
 
         Args:
+          access_type: How the platform uses the API on behalf of the entity this profile represents.
+              `application`: the platform sells a product that uses the API behind the scenes,
+              and the profile represents an individual end-user of that product.
+              `passthrough`: the platform resells raw inference, and the profile identifies
+              the resold-to company.
+
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
               characters.
 
@@ -71,8 +78,9 @@ class UserProfiles(SyncAPIResource):
               non-empty strings.
 
           name: Optional for all profiles. Real-world name of the entity this profile represents
-              (company or individual); for `resold` profiles, the resold-to company's name
-              where known. Maximum 255 characters.
+              (company or individual); for a resold-to company (`relationship` `resold` /
+              `access_type` `passthrough`), that company's name where known. Maximum 255
+              characters.
 
           relationship: How the entity behind a user profile relates to the platform that owns the API
               key. `external`: an individual end-user of the platform. `resold`: a company the
@@ -91,18 +99,19 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             "/v1/user_profiles?beta=true",
             body=maybe_transform(
                 {
+                    "access_type": access_type,
                     "external_id": external_id,
                     "metadata": metadata,
                     "name": name,
@@ -147,14 +156,14 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             options=make_request_options(
@@ -167,6 +176,7 @@ class UserProfiles(SyncAPIResource):
         self,
         user_profile_id: str,
         *,
+        access_type: Optional[Literal["application", "passthrough"]] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -183,6 +193,12 @@ class UserProfiles(SyncAPIResource):
         Update User Profile
 
         Args:
+          access_type: How the platform uses the API on behalf of the entity this profile represents.
+              `application`: the platform sells a product that uses the API behind the scenes,
+              and the profile represents an individual end-user of that product.
+              `passthrough`: the platform resells raw inference, and the profile identifies
+              the resold-to company.
+
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
               255 characters.
 
@@ -213,18 +229,19 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             body=maybe_transform(
                 {
+                    "access_type": access_type,
                     "external_id": external_id,
                     "metadata": metadata,
                     "name": name,
@@ -275,14 +292,14 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/user_profiles?beta=true",
             page=SyncPageCursor[BetaUserProfile],
@@ -334,14 +351,14 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             path_template(
                 "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
@@ -376,6 +393,7 @@ class AsyncUserProfiles(AsyncAPIResource):
     async def create(
         self,
         *,
+        access_type: Literal["application", "passthrough"] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -392,6 +410,12 @@ class AsyncUserProfiles(AsyncAPIResource):
         Create User Profile
 
         Args:
+          access_type: How the platform uses the API on behalf of the entity this profile represents.
+              `application`: the platform sells a product that uses the API behind the scenes,
+              and the profile represents an individual end-user of that product.
+              `passthrough`: the platform resells raw inference, and the profile identifies
+              the resold-to company.
+
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
               characters.
 
@@ -400,8 +424,9 @@ class AsyncUserProfiles(AsyncAPIResource):
               non-empty strings.
 
           name: Optional for all profiles. Real-world name of the entity this profile represents
-              (company or individual); for `resold` profiles, the resold-to company's name
-              where known. Maximum 255 characters.
+              (company or individual); for a resold-to company (`relationship` `resold` /
+              `access_type` `passthrough`), that company's name where known. Maximum 255
+              characters.
 
           relationship: How the entity behind a user profile relates to the platform that owns the API
               key. `external`: an individual end-user of the platform. `resold`: a company the
@@ -420,18 +445,19 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             "/v1/user_profiles?beta=true",
             body=await async_maybe_transform(
                 {
+                    "access_type": access_type,
                     "external_id": external_id,
                     "metadata": metadata,
                     "name": name,
@@ -476,14 +502,14 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._get(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             options=make_request_options(
@@ -496,6 +522,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         self,
         user_profile_id: str,
         *,
+        access_type: Optional[Literal["application", "passthrough"]] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -512,6 +539,12 @@ class AsyncUserProfiles(AsyncAPIResource):
         Update User Profile
 
         Args:
+          access_type: How the platform uses the API on behalf of the entity this profile represents.
+              `application`: the platform sells a product that uses the API behind the scenes,
+              and the profile represents an individual end-user of that product.
+              `passthrough`: the platform resells raw inference, and the profile identifies
+              the resold-to company.
+
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
               255 characters.
 
@@ -542,18 +575,19 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             body=await async_maybe_transform(
                 {
+                    "access_type": access_type,
                     "external_id": external_id,
                     "metadata": metadata,
                     "name": name,
@@ -604,14 +638,14 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/user_profiles?beta=true",
             page=AsyncPageCursor[BetaUserProfile],
@@ -663,14 +697,14 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             path_template(
                 "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id

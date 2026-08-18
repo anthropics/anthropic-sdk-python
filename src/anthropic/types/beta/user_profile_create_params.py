@@ -12,6 +12,15 @@ __all__ = ["UserProfileCreateParams"]
 
 
 class UserProfileCreateParams(TypedDict, total=False):
+    access_type: Literal["application", "passthrough"]
+    """How the platform uses the API on behalf of the entity this profile represents.
+
+    `application`: the platform sells a product that uses the API behind the scenes,
+    and the profile represents an individual end-user of that product.
+    `passthrough`: the platform resells raw inference, and the profile identifies
+    the resold-to company.
+    """
+
     external_id: Optional[str]
     """Platform's own identifier for this user.
 
@@ -29,8 +38,8 @@ class UserProfileCreateParams(TypedDict, total=False):
     """Optional for all profiles.
 
     Real-world name of the entity this profile represents (company or individual);
-    for `resold` profiles, the resold-to company's name where known. Maximum 255
-    characters.
+    for a resold-to company (`relationship` `resold` / `access_type` `passthrough`),
+    that company's name where known. Maximum 255 characters.
     """
 
     relationship: Literal["external", "resold", "internal"]

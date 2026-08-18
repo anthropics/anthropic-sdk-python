@@ -12,6 +12,15 @@ __all__ = ["UserProfileUpdateParams"]
 
 
 class UserProfileUpdateParams(TypedDict, total=False):
+    access_type: Optional[Literal["application", "passthrough"]]
+    """How the platform uses the API on behalf of the entity this profile represents.
+
+    `application`: the platform sells a product that uses the API behind the scenes,
+    and the profile represents an individual end-user of that product.
+    `passthrough`: the platform resells raw inference, and the profile identifies
+    the resold-to company.
+    """
+
     external_id: Optional[str]
     """If present, replaces the stored external_id.
 

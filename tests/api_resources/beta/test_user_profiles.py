@@ -29,6 +29,7 @@ class TestUserProfiles:
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         user_profile = client.beta.user_profiles.create(
+            access_type="application",
             external_id="user_12345",
             metadata={},
             name="x",
@@ -114,6 +115,7 @@ class TestUserProfiles:
     def test_method_update_with_all_params(self, client: Anthropic) -> None:
         user_profile = client.beta.user_profiles.update(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            access_type="application",
             external_id="user_12345",
             metadata={"foo": "string"},
             name="x",
@@ -248,6 +250,7 @@ class TestAsyncUserProfiles:
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         user_profile = await async_client.beta.user_profiles.create(
+            access_type="application",
             external_id="user_12345",
             metadata={},
             name="x",
@@ -333,6 +336,7 @@ class TestAsyncUserProfiles:
     async def test_method_update_with_all_params(self, async_client: AsyncAnthropic) -> None:
         user_profile = await async_client.beta.user_profiles.update(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            access_type="application",
             external_id="user_12345",
             metadata={"foo": "string"},
             name="x",
