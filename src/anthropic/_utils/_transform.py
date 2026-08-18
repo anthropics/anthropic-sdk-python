@@ -30,6 +30,7 @@ from ._typing import (
     is_annotated_type,
     strip_annotated_type,
 )
+from ..lib._compaction import omit_compaction_encrypted_content
 
 _T = TypeVar("_T")
 
@@ -109,7 +110,7 @@ def transform(
     It should be noted that the transformations that this function does are not represented in the type system.
     """
     transformed = _transform_recursive(data, annotation=cast(type, expected_type))
-    return cast(_T, transformed)
+    return cast(_T, omit_compaction_encrypted_content(transformed))
 
 
 @lru_cache(maxsize=8096)
@@ -316,7 +317,7 @@ async def async_transform(
     It should be noted that the transformations that this function does are not represented in the type system.
     """
     transformed = await _async_transform_recursive(data, annotation=cast(type, expected_type))
-    return cast(_T, transformed)
+    return cast(_T, omit_compaction_encrypted_content(transformed))
 
 
 async def _async_transform_recursive(
