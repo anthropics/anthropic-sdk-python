@@ -238,7 +238,6 @@ class TestFiles:
     def test_method_upload_with_all_params(self, client: Anthropic) -> None:
         file = client.beta.files.upload(
             file=b"Example data",
-            expires_in_seconds=3600,
             betas=["string"],
         )
         assert_matches_type(FileMetadata, file, path=["response"])
@@ -483,7 +482,6 @@ class TestAsyncFiles:
     async def test_method_upload_with_all_params(self, async_client: AsyncAnthropic) -> None:
         file = await async_client.beta.files.upload(
             file=b"Example data",
-            expires_in_seconds=3600,
             betas=["string"],
         )
         assert_matches_type(FileMetadata, file, path=["response"])
