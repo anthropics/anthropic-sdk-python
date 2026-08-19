@@ -260,6 +260,7 @@ from .beta_managed_agents_effort_medium import BetaManagedAgentsEffortMedium as 
 from .beta_managed_agents_session_agent import BetaManagedAgentsSessionAgent as BetaManagedAgentsSessionAgent
 from .beta_managed_agents_session_stats import BetaManagedAgentsSessionStats as BetaManagedAgentsSessionStats
 from .beta_managed_agents_session_usage import BetaManagedAgentsSessionUsage as BetaManagedAgentsSessionUsage
+from .beta_managed_agents_user_location import BetaManagedAgentsUserLocation as BetaManagedAgentsUserLocation
 from .beta_memory_tool_20250818_command import BetaMemoryTool20250818Command as BetaMemoryTool20250818Command
 from .beta_raw_content_block_stop_event import BetaRawContentBlockStopEvent as BetaRawContentBlockStopEvent
 from .beta_request_document_block_param import BetaRequestDocumentBlockParam as BetaRequestDocumentBlockParam
@@ -320,8 +321,13 @@ from .beta_citation_content_block_location import BetaCitationContentBlockLocati
 from .beta_citation_search_result_location import BetaCitationSearchResultLocation as BetaCitationSearchResultLocation
 from .beta_computer_toolset_20260801_param import BetaComputerToolset20260801Param as BetaComputerToolset20260801Param
 from .beta_context_management_config_param import BetaContextManagementConfigParam as BetaContextManagementConfigParam
+from .beta_managed_agents_bash_tool_config import BetaManagedAgentsBashToolConfig as BetaManagedAgentsBashToolConfig
+from .beta_managed_agents_edit_tool_config import BetaManagedAgentsEditToolConfig as BetaManagedAgentsEditToolConfig
 from .beta_managed_agents_effort_low_param import BetaManagedAgentsEffortLowParam as BetaManagedAgentsEffortLowParam
 from .beta_managed_agents_effort_max_param import BetaManagedAgentsEffortMaxParam as BetaManagedAgentsEffortMaxParam
+from .beta_managed_agents_glob_tool_config import BetaManagedAgentsGlobToolConfig as BetaManagedAgentsGlobToolConfig
+from .beta_managed_agents_grep_tool_config import BetaManagedAgentsGrepToolConfig as BetaManagedAgentsGrepToolConfig
+from .beta_managed_agents_read_tool_config import BetaManagedAgentsReadToolConfig as BetaManagedAgentsReadToolConfig
 from .beta_output_behavior_update_existing import BetaOutputBehaviorUpdateExisting as BetaOutputBehaviorUpdateExisting
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param as BetaToolTextEditor20241022Param
 from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param as BetaToolTextEditor20250124Param
@@ -352,6 +358,7 @@ from .beta_managed_agents_multiagent_params import (
 )
 from .beta_managed_agents_server_tool_usage import BetaManagedAgentsServerToolUsage as BetaManagedAgentsServerToolUsage
 from .beta_managed_agents_unknown_run_error import BetaManagedAgentsUnknownRunError as BetaManagedAgentsUnknownRunError
+from .beta_managed_agents_write_tool_config import BetaManagedAgentsWriteToolConfig as BetaManagedAgentsWriteToolConfig
 from .beta_output_behavior_create_new_param import BetaOutputBehaviorCreateNewParam as BetaOutputBehaviorCreateNewParam
 from .beta_request_tool_removal_block_param import BetaRequestToolRemovalBlockParam as BetaRequestToolRemovalBlockParam
 from .beta_tool_change_tool_reference_param import BetaToolChangeToolReferenceParam as BetaToolChangeToolReferenceParam
@@ -471,6 +478,9 @@ from .beta_managed_agents_session_usage_event import (
 from .beta_managed_agents_start_event_preview import (
     BetaManagedAgentsStartEventPreview as BetaManagedAgentsStartEventPreview,
 )
+from .beta_managed_agents_user_location_param import (
+    BetaManagedAgentsUserLocationParam as BetaManagedAgentsUserLocationParam,
+)
 from .beta_web_search_tool_result_block_param import (
     BetaWebSearchToolResultBlockParam as BetaWebSearchToolResultBlockParam,
 )
@@ -576,6 +586,9 @@ from .beta_managed_agents_session_updated_event import (
 from .beta_managed_agents_url_mcp_server_params import (
     BetaManagedAgentsURLMCPServerParams as BetaManagedAgentsURLMCPServerParams,
 )
+from .beta_managed_agents_web_fetch_tool_config import (
+    BetaManagedAgentsWebFetchToolConfig as BetaManagedAgentsWebFetchToolConfig,
+)
 from .beta_tool_change_mcp_tool_reference_param import (
     BetaToolChangeMCPToolReferenceParam as BetaToolChangeMCPToolReferenceParam,
 )
@@ -645,6 +658,9 @@ from .beta_managed_agents_multiagent_self_params import (
 from .beta_managed_agents_user_tool_result_event import (
     BetaManagedAgentsUserToolResultEvent as BetaManagedAgentsUserToolResultEvent,
 )
+from .beta_managed_agents_web_search_tool_config import (
+    BetaManagedAgentsWebSearchToolConfig as BetaManagedAgentsWebSearchToolConfig,
+)
 from .beta_output_behavior_update_existing_param import (
     BetaOutputBehaviorUpdateExistingParam as BetaOutputBehaviorUpdateExistingParam,
 )
@@ -677,6 +693,21 @@ from .beta_code_execution_tool_result_error_param import (
 )
 from .beta_managed_agents_always_ask_policy_param import (
     BetaManagedAgentsAlwaysAskPolicyParam as BetaManagedAgentsAlwaysAskPolicyParam,
+)
+from .beta_managed_agents_bash_tool_config_params import (
+    BetaManagedAgentsBashToolConfigParams as BetaManagedAgentsBashToolConfigParams,
+)
+from .beta_managed_agents_edit_tool_config_params import (
+    BetaManagedAgentsEditToolConfigParams as BetaManagedAgentsEditToolConfigParams,
+)
+from .beta_managed_agents_glob_tool_config_params import (
+    BetaManagedAgentsGlobToolConfigParams as BetaManagedAgentsGlobToolConfigParams,
+)
+from .beta_managed_agents_grep_tool_config_params import (
+    BetaManagedAgentsGrepToolConfigParams as BetaManagedAgentsGrepToolConfigParams,
+)
+from .beta_managed_agents_read_tool_config_params import (
+    BetaManagedAgentsReadToolConfigParams as BetaManagedAgentsReadToolConfigParams,
 )
 from .beta_managed_agents_session_resource_config import (
     BetaManagedAgentsSessionResourceConfig as BetaManagedAgentsSessionResourceConfig,
@@ -719,6 +750,9 @@ from .beta_managed_agents_schedule_trigger_context import (
 )
 from .beta_managed_agents_vault_archived_run_error import (
     BetaManagedAgentsVaultArchivedRunError as BetaManagedAgentsVaultArchivedRunError,
+)
+from .beta_managed_agents_write_tool_config_params import (
+    BetaManagedAgentsWriteToolConfigParams as BetaManagedAgentsWriteToolConfigParams,
 )
 from .beta_request_mcp_server_url_definition_param import (
     BetaRequestMCPServerURLDefinitionParam as BetaRequestMCPServerURLDefinitionParam,
@@ -834,6 +868,9 @@ from .beta_managed_agents_mcp_egress_blocked_run_error import (
 from .beta_managed_agents_memory_store_resource_config import (
     BetaManagedAgentsMemoryStoreResourceConfig as BetaManagedAgentsMemoryStoreResourceConfig,
 )
+from .beta_managed_agents_web_fetch_tool_config_params import (
+    BetaManagedAgentsWebFetchToolConfigParams as BetaManagedAgentsWebFetchToolConfigParams,
+)
 from .beta_managed_agents_workspace_archived_run_error import (
     BetaManagedAgentsWorkspaceArchivedRunError as BetaManagedAgentsWorkspaceArchivedRunError,
 )
@@ -851,6 +888,9 @@ from .beta_webhook_vault_credential_deleted_event_data import (
 )
 from .beta_managed_agents_deployment_user_message_event import (
     BetaManagedAgentsDeploymentUserMessageEvent as BetaManagedAgentsDeploymentUserMessageEvent,
+)
+from .beta_managed_agents_web_search_tool_config_params import (
+    BetaManagedAgentsWebSearchToolConfigParams as BetaManagedAgentsWebSearchToolConfigParams,
 )
 from .beta_text_editor_code_execution_tool_result_block import (
     BetaTextEditorCodeExecutionToolResultBlock as BetaTextEditorCodeExecutionToolResultBlock,

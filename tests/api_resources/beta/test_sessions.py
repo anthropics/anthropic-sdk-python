@@ -166,6 +166,7 @@ class TestSessions:
                                 "name": "bash",
                                 "enabled": True,
                                 "permission_policy": {"type": "always_allow"},
+                                "type": "bash",
                             }
                         ],
                         "default_config": {
@@ -511,6 +512,7 @@ class TestAsyncSessions:
                                 "name": "bash",
                                 "enabled": True,
                                 "permission_policy": {"type": "always_allow"},
+                                "type": "bash",
                             }
                         ],
                         "default_config": {

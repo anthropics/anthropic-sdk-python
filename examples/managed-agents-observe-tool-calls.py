@@ -100,10 +100,10 @@ async def main() -> None:
         #    session's event stream, runs the matching local tool for each
         #    tool-call event, posts the result back, and yields one
         #    DispatchedToolCall per completed call. AgentToolContext gives the
-        #    tools their workdir; passing client + session_id also downloads the
+        #    tools their workdir; passing client + session also downloads the
         #    session agent's skills into the workdir before the first tool runs.
         print("\n--- dispatched tool calls ---")
-        async with AgentToolContext(workdir=workdir, client=client, session_id=session.id) as env:
+        async with AgentToolContext(workdir=workdir, client=client, session=session) as env:
             async for call in client.beta.sessions.events.tool_runner(
                 session.id,
                 tools=beta_agent_toolset_20260401(env),
@@ -176,9 +176,10 @@ async def observe_as_self_hosted_worker() -> None:
     ):
         session_id = work.data.id
 
-        # Passing client + session_id makes AgentToolContext fetch the session's
-        # resolved agent on enter and download each skill into the workdir.
-        async with AgentToolContext(workdir="/workspace", client=client, session_id=session_id) as env:
+        # Fetch the session once and hand it to AgentToolContext: on enter it
+        # downloads each of the session agent's skills into the workdir.
+        session = await client.beta.sessions.retrieve(session_id)
+        async with AgentToolContext(workdir="/workspace", client=client, session=session) as env:
             async with anyio.create_task_group() as tg:
                 stop = anyio.Event()
                 tg.start_soon(heartbeat, work.id, work.environment_id, stop)

@@ -17,4 +17,4 @@ class ContainerSkill(BaseModel):
     """Type of skill - either 'anthropic' (built-in) or 'custom' (user-defined)"""
 
     version: str
-    """Skill version or 'latest' for most recent version"""
+    """The resolved version: a skill version ID for custom skills."""
