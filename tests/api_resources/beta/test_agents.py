@@ -63,6 +63,7 @@ class TestAgents:
                             "name": "bash",
                             "enabled": True,
                             "permission_policy": {"type": "always_allow"},
+                            "type": "bash",
                         }
                     ],
                     "default_config": {
@@ -200,6 +201,7 @@ class TestAgents:
                             "name": "bash",
                             "enabled": True,
                             "permission_policy": {"type": "always_allow"},
+                            "type": "bash",
                         }
                     ],
                     "default_config": {
@@ -379,6 +381,7 @@ class TestAsyncAgents:
                             "name": "bash",
                             "enabled": True,
                             "permission_policy": {"type": "always_allow"},
+                            "type": "bash",
                         }
                     ],
                     "default_config": {
@@ -516,6 +519,7 @@ class TestAsyncAgents:
                             "name": "bash",
                             "enabled": True,
                             "permission_policy": {"type": "always_allow"},
+                            "type": "bash",
                         }
                     ],
                     "default_config": {
