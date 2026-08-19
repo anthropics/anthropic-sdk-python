@@ -29,3 +29,6 @@ class BetaToolUseBlockParam(TypedDict, total=False):
 
     caller: Caller
     """Tool invocation directly from the model."""
+
+    toolset_name: Optional[str]
+    """For a toolset member tool_use, the toolset family this member belongs to."""

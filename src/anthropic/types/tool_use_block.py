@@ -1,6 +1,6 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
 from .._utils import PropertyInfo
@@ -27,3 +27,6 @@ class ToolUseBlock(BaseModel):
     name: str
 
     type: Literal["tool_use"]
+
+    toolset_name: Optional[str] = None
+    """For a toolset member tool_use, the toolset family."""

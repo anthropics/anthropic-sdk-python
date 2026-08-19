@@ -36,10 +36,12 @@ from ._base_client import (
 )
 
 if TYPE_CHECKING:
-    from .resources import beta, models, messages, completions
+    from .resources import beta, files, models, skills, messages, completions
+    from .resources.files import Files, AsyncFiles
     from .resources.models import Models, AsyncModels
     from .resources.beta.beta import Beta, AsyncBeta
     from .resources.completions import Completions, AsyncCompletions
+    from .resources.skills.skills import Skills, AsyncSkills
     from .resources.messages.messages import Messages, AsyncMessages
 
 __all__ = [
@@ -152,6 +154,18 @@ class Anthropic(SyncAPIClient):
         from .resources.models import Models
 
         return Models(self)
+
+    @cached_property
+    def files(self) -> Files:
+        from .resources.files import Files
+
+        return Files(self)
+
+    @cached_property
+    def skills(self) -> Skills:
+        from .resources.skills import Skills
+
+        return Skills(self)
 
     @cached_property
     def beta(self) -> Beta:
@@ -402,6 +416,18 @@ class AsyncAnthropic(AsyncAPIClient):
         return AsyncModels(self)
 
     @cached_property
+    def files(self) -> AsyncFiles:
+        from .resources.files import AsyncFiles
+
+        return AsyncFiles(self)
+
+    @cached_property
+    def skills(self) -> AsyncSkills:
+        from .resources.skills import AsyncSkills
+
+        return AsyncSkills(self)
+
+    @cached_property
     def beta(self) -> AsyncBeta:
         from .resources.beta import AsyncBeta
 
@@ -575,6 +601,18 @@ class AnthropicWithRawResponse:
         return ModelsWithRawResponse(self._client.models)
 
     @cached_property
+    def files(self) -> files.FilesWithRawResponse:
+        from .resources.files import FilesWithRawResponse
+
+        return FilesWithRawResponse(self._client.files)
+
+    @cached_property
+    def skills(self) -> skills.SkillsWithRawResponse:
+        from .resources.skills import SkillsWithRawResponse
+
+        return SkillsWithRawResponse(self._client.skills)
+
+    @cached_property
     def beta(self) -> beta.BetaWithRawResponse:
         from .resources.beta import BetaWithRawResponse
 
@@ -604,6 +642,18 @@ class AsyncAnthropicWithRawResponse:
         from .resources.models import AsyncModelsWithRawResponse
 
         return AsyncModelsWithRawResponse(self._client.models)
+
+    @cached_property
+    def files(self) -> files.AsyncFilesWithRawResponse:
+        from .resources.files import AsyncFilesWithRawResponse
+
+        return AsyncFilesWithRawResponse(self._client.files)
+
+    @cached_property
+    def skills(self) -> skills.AsyncSkillsWithRawResponse:
+        from .resources.skills import AsyncSkillsWithRawResponse
+
+        return AsyncSkillsWithRawResponse(self._client.skills)
 
     @cached_property
     def beta(self) -> beta.AsyncBetaWithRawResponse:
@@ -637,6 +687,18 @@ class AnthropicWithStreamedResponse:
         return ModelsWithStreamingResponse(self._client.models)
 
     @cached_property
+    def files(self) -> files.FilesWithStreamingResponse:
+        from .resources.files import FilesWithStreamingResponse
+
+        return FilesWithStreamingResponse(self._client.files)
+
+    @cached_property
+    def skills(self) -> skills.SkillsWithStreamingResponse:
+        from .resources.skills import SkillsWithStreamingResponse
+
+        return SkillsWithStreamingResponse(self._client.skills)
+
+    @cached_property
     def beta(self) -> beta.BetaWithStreamingResponse:
         from .resources.beta import BetaWithStreamingResponse
 
@@ -666,6 +728,18 @@ class AsyncAnthropicWithStreamedResponse:
         from .resources.models import AsyncModelsWithStreamingResponse
 
         return AsyncModelsWithStreamingResponse(self._client.models)
+
+    @cached_property
+    def files(self) -> files.AsyncFilesWithStreamingResponse:
+        from .resources.files import AsyncFilesWithStreamingResponse
+
+        return AsyncFilesWithStreamingResponse(self._client.files)
+
+    @cached_property
+    def skills(self) -> skills.AsyncSkillsWithStreamingResponse:
+        from .resources.skills import AsyncSkillsWithStreamingResponse
+
+        return AsyncSkillsWithStreamingResponse(self._client.skills)
 
     @cached_property
     def beta(self) -> beta.AsyncBetaWithStreamingResponse:

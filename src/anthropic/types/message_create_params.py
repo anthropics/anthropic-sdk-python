@@ -16,6 +16,7 @@ from .tool_choice_param import ToolChoiceParam
 from .output_config_param import OutputConfigParam
 from .thinking_config_param import ThinkingConfigParam
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
+from .message_create_params_container_param import MessageCreateParamsContainerParam
 
 __all__ = ["MessageCreateParamsBase", "MessageCreateParamsNonStreaming", "MessageCreateParamsStreaming"]
 
@@ -118,7 +119,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     cacheable block in the request.
     """
 
-    container: Optional[str]
+    container: Optional[MessageCreateParamsContainerParam]
     """Container identifier for reuse across requests."""
 
     inference_geo: Optional[str]

@@ -12,9 +12,11 @@ from .web_fetch_tool_20250910_param import WebFetchTool20250910Param
 from .web_fetch_tool_20260209_param import WebFetchTool20260209Param
 from .web_fetch_tool_20260309_param import WebFetchTool20260309Param
 from .web_fetch_tool_20260318_param import WebFetchTool20260318Param
+from .browser_toolset_20260801_param import BrowserToolset20260801Param
 from .web_search_tool_20250305_param import WebSearchTool20250305Param
 from .web_search_tool_20260209_param import WebSearchTool20260209Param
 from .web_search_tool_20260318_param import WebSearchTool20260318Param
+from .computer_toolset_20260801_param import ComputerToolset20260801Param
 from .tool_text_editor_20250124_param import ToolTextEditor20250124Param
 from .tool_text_editor_20250429_param import ToolTextEditor20250429Param
 from .tool_text_editor_20250728_param import ToolTextEditor20250728Param
@@ -34,7 +36,9 @@ ToolUnionParam: TypeAlias = Union[
     CodeExecutionTool20250825Param,
     CodeExecutionTool20260120Param,
     CodeExecutionTool20260521Param,
+    BrowserToolset20260801Param,
     MemoryTool20250818Param,
+    ComputerToolset20260801Param,
     ToolTextEditor20250124Param,
     ToolTextEditor20250429Param,
     ToolTextEditor20250728Param,

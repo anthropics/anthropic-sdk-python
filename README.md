@@ -281,7 +281,7 @@ from anthropic import Anthropic
 
 client = Anthropic()
 
-client.beta.files.upload(
+client.files.upload(
     file=Path("/path/to/file"),
 )
 ```

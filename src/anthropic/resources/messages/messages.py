@@ -42,6 +42,7 @@ from ...types.thinking_config_param import ThinkingConfigParam
 from ...types.raw_message_stream_event import RawMessageStreamEvent
 from ...types.cache_control_ephemeral_param import CacheControlEphemeralParam
 from ...types.message_count_tokens_tool_param import MessageCountTokensToolParam
+from ...types.message_create_params_container_param import MessageCreateParamsContainerParam
 
 __all__ = ["Messages", "AsyncMessages"]
 
@@ -78,7 +79,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -373,7 +374,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -667,7 +668,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: bool,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -960,7 +961,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -1289,7 +1290,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -1584,7 +1585,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -1878,7 +1879,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: bool,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -2171,7 +2172,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
-        container: Optional[str] | Omit = omit,
+        container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
