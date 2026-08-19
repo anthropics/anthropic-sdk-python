@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.124.0 (2026-08-19)
+
+Full Changelog: [v0.123.0...v0.124.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.123.0...v0.124.0)
+
+### Features
+
+* **api:** Files and Skills APIs are now GA; add computer use and browser use toolsets ([9a09e84](https://github.com/anthropics/anthropic-sdk-python/commit/9a09e84608944172088acf371e7584133ca19844))
+
 ## 0.123.0 (2026-08-18)
 
 Full Changelog: [v0.122.0...v0.123.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.122.0...v0.123.0)
