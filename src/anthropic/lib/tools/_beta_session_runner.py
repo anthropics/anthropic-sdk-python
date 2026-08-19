@@ -395,7 +395,9 @@ class SessionToolRunner:
     Pass ``environment_key`` to authenticate the event stream / list / send
     calls with the self-hosted environment key (bearered, with the client's
     default ``x-api-key`` dropped); leave it unset to use the client's own
-    credentials.
+    credentials. :class:`~anthropic.lib.environments.EnvironmentWorker` may
+    pass a per-item sessions token here instead when the claimed work item
+    carried one — any Bearer credential the session endpoints accept works.
 
     A self-hosted session is commonly serviced by **two** clients at once: this
     runner inside the customer's sandbox (registered with the file/shell sandbox

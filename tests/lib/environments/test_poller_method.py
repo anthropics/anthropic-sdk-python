@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import time
 import asyncio
+import logging
 from typing import Any, cast
 from collections.abc import AsyncIterator
 
@@ -18,6 +19,7 @@ import httpx
 import pytest
 
 from anthropic import APIStatusError
+from anthropic.lib.environments import _poller as poller_mod
 from anthropic.lib.environments._poller import iter_work, aiter_work
 
 
@@ -42,7 +44,8 @@ def _api_status_error(code: int) -> APIStatusError:
 class FakeWork:
     """Sync resource fake. ``poll_script`` is consumed in order; values are
     either ``BetaSelfHostedWork``-shaped stubs, ``None`` (no work available),
-    or ``Exception`` instances (raised from poll).
+    ``Exception`` instances (raised from poll), or callables producing one of
+    those (so a script step can also move a fake clock).
     """
 
     def __init__(self, poll_script: list[Any]) -> None:
@@ -53,12 +56,7 @@ class FakeWork:
 
     def poll(self, environment_id: str, **kwargs: Any) -> Any:
         self.poll_calls.append({"environment_id": environment_id, **kwargs})
-        if not self._poll_script:
-            raise _StopTest("poll script exhausted")
-        nxt = self._poll_script.pop(0)
-        if isinstance(nxt, BaseException):
-            raise nxt
-        return nxt
+        return _next_poll_result(self._poll_script)
 
     def ack(self, work_id: str, **kwargs: Any) -> None:
         self.ack_calls.append((work_id, kwargs))
@@ -76,12 +74,7 @@ class FakeAsyncWork:
 
     async def poll(self, environment_id: str, **kwargs: Any) -> Any:
         self.poll_calls.append({"environment_id": environment_id, **kwargs})
-        if not self._poll_script:
-            raise _StopTest("poll script exhausted")
-        nxt = self._poll_script.pop(0)
-        if isinstance(nxt, BaseException):
-            raise nxt
-        return nxt
+        return _next_poll_result(self._poll_script)
 
     async def ack(self, work_id: str, **kwargs: Any) -> None:
         self.ack_calls.append((work_id, kwargs))
@@ -97,6 +90,17 @@ class _StopTest(BaseException):
     ``except Exception`` arms (which would otherwise treat the empty-script
     error as a transient poll failure and retry forever).
     """
+
+
+def _next_poll_result(script: list[Any]) -> Any:
+    if not script:
+        raise _StopTest("poll script exhausted")
+    nxt = script.pop(0)
+    if callable(nxt):
+        nxt = nxt()
+    if isinstance(nxt, BaseException):
+        raise nxt
+    return nxt
 
 
 def _sync_noop(_seconds: float) -> None:
@@ -310,6 +314,86 @@ def test_iter_work_block_ms_none_omits_param() -> None:
 
     list(it)
     assert fake.poll_calls[0]["block_ms"] is omit
+
+
+# ---------- idle-loop visibility ------------------------------------------
+#
+# An idle poller must show up in the logs without an INFO line per poll: one
+# INFO line when it goes idle (after start-up or after releasing an item),
+# DEBUG per empty poll after that, and an INFO reminder every 5 minutes.
+
+
+class _FakeClock:
+    """Stands in for the ``time`` module inside the poller: a settable
+    monotonic clock plus a no-op ``sleep``."""
+
+    def __init__(self) -> None:
+        self.now = 0.0
+
+    def monotonic(self) -> float:
+        return self.now
+
+    def sleep(self, _seconds: float) -> None:
+        return None
+
+    def advance(self, seconds: float) -> None:
+        self.now += seconds
+
+
+def _idle_script(clock: _FakeClock) -> list[Any]:
+    """Three empty polls, a fourth 301s later, a fifth, one claim, then one
+    more empty poll before the script runs out."""
+
+    def empty_poll_301s_later() -> None:
+        clock.advance(301)
+
+    return [None, None, None, empty_poll_301s_later, None, _StubWork(id="work_a"), None]
+
+
+_EXPECTED_IDLE_INFO_LINES = [
+    "idle; polling environment_id=env_1 for work",
+    "still polling environment_id=env_1; idle for 301s",
+    "claimed work work_id=work_a work_type=session",
+    "idle; polling environment_id=env_1 for work",
+]
+
+
+def _poller_records(caplog: pytest.LogCaptureFixture, level: int) -> list[str]:
+    return [
+        r.getMessage()
+        for r in caplog.records
+        if r.name == poller_mod.__name__ and r.levelno == level and not r.getMessage().startswith("poller starting")
+    ]
+
+
+def test_iter_work_logs_idle_polling(monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(poller_mod, "time", clock)
+    fake = FakeWork(poll_script=_idle_script(clock))
+    caplog.set_level(logging.DEBUG, logger=poller_mod.__name__)
+
+    with pytest.raises(_StopTest):
+        for _ in iter_work(cast(Any, fake), environment_id="env_1", auto_stop=False):
+            pass
+
+    assert _poller_records(caplog, logging.INFO) == _EXPECTED_IDLE_INFO_LINES
+    assert len(_poller_records(caplog, logging.DEBUG)) == 3
+
+
+@pytest.mark.asyncio()
+async def test_aiter_work_logs_idle_polling(monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(poller_mod, "time", clock)
+    monkeypatch.setattr(poller_mod.anyio, "sleep", _async_noop)
+    fake = FakeAsyncWork(poll_script=_idle_script(clock))
+    caplog.set_level(logging.DEBUG, logger=poller_mod.__name__)
+
+    with pytest.raises(_StopTest):
+        async for _ in aiter_work(cast(Any, fake), environment_id="env_1", auto_stop=False):
+            pass
+
+    assert _poller_records(caplog, logging.INFO) == _EXPECTED_IDLE_INFO_LINES
+    assert len(_poller_records(caplog, logging.DEBUG)) == 3
 
 
 @pytest.mark.asyncio()

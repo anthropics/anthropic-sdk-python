@@ -24,6 +24,7 @@ from anyio.to_thread import run_sync
 
 if TYPE_CHECKING:
     from ..._client import AsyncAnthropic
+    from ...types.beta import BetaManagedAgentsSession
 
 __all__ = ["download_session_skills"]
 
@@ -217,22 +218,42 @@ async def _resolve_skill_version(client: AsyncAnthropic, skill_id: str, version:
 
 
 async def download_session_skills(
-    client: AsyncAnthropic, *, session_id: str, workdir: str | os.PathLike[str]
+    client: AsyncAnthropic,
+    *,
+    workdir: str | os.PathLike[str],
+    session: BetaManagedAgentsSession | None = None,
+    session_id: str | None = None,
 ) -> list[Path]:
     """Download the session agent's skills into ``{workdir}/skills/<name>/``.
 
-    Looks up the session's resolved agent, and for each skill fetches its files
-    via ``client.beta.skills.versions.download`` and extracts the archive under a
-    directory named after the skill. The archive is streamed to a temp file
-    rather than buffered whole in memory. A failure on one skill is logged and
-    does not block the others.
+    Reads the resolved agent off ``session``, and for each skill fetches its
+    files via ``client.beta.skills.versions.download`` and extracts the archive
+    under a directory named after the skill. The archive is streamed to a temp
+    file rather than buffered whole in memory. A failure on one skill is logged
+    and does not block the others.
+
+    Pass ``session``. A session's resources cannot change while it runs, so the
+    caller fetches it once and shares that snapshot with the memory-store
+    download — the two can then never disagree about the attached resources.
+
+    ``session_id`` is deprecated: it costs an extra ``sessions.retrieve`` round
+    trip on every call, and a caller that uses it for both this and the
+    memory-store download fetches the session twice. It remains supported for
+    callers written before ``session`` existed.
 
     Returns the list of skill directories that were created, so the caller can
     remove them when the workdir is torn down.
     """
-    # The sessions/skills resources inject their anthropic-beta headers
-    # (managed-agents / skills) themselves — no need to pass `betas=` here.
-    session = await client.beta.sessions.retrieve(session_id)
+    if session is None:
+        if session_id is None:
+            raise ValueError("download_session_skills: pass session (preferred) or session_id")
+        log.warning(
+            "download_session_skills(session_id=...) is deprecated and costs an extra session fetch; "
+            "fetch the session once and pass session= instead"
+        )
+        # The sessions/skills resources inject their anthropic-beta headers
+        # (managed-agents / skills) themselves — no need to pass `betas=` here.
+        session = await client.beta.sessions.retrieve(session_id)
     skills_root = Path(await (anyio.Path(workdir) / "skills").resolve())
     # ``skills_root`` is created lazily by the extraction below — don't create it
     # up front so an agent with no skills leaves no stray directory behind.

@@ -2,28 +2,27 @@
 
 from __future__ import annotations
 
-from typing import Union, Optional
-from typing_extensions import Literal, Required, TypeAlias, TypedDict
+from typing import Union
+from typing_extensions import TypeAlias
 
-from .beta_managed_agents_always_ask_policy_param import BetaManagedAgentsAlwaysAskPolicyParam
-from .beta_managed_agents_always_allow_policy_param import BetaManagedAgentsAlwaysAllowPolicyParam
+from .beta_managed_agents_bash_tool_config_params import BetaManagedAgentsBashToolConfigParams
+from .beta_managed_agents_edit_tool_config_params import BetaManagedAgentsEditToolConfigParams
+from .beta_managed_agents_glob_tool_config_params import BetaManagedAgentsGlobToolConfigParams
+from .beta_managed_agents_grep_tool_config_params import BetaManagedAgentsGrepToolConfigParams
+from .beta_managed_agents_read_tool_config_params import BetaManagedAgentsReadToolConfigParams
+from .beta_managed_agents_write_tool_config_params import BetaManagedAgentsWriteToolConfigParams
+from .beta_managed_agents_web_fetch_tool_config_params import BetaManagedAgentsWebFetchToolConfigParams
+from .beta_managed_agents_web_search_tool_config_params import BetaManagedAgentsWebSearchToolConfigParams
 
-__all__ = ["BetaManagedAgentsAgentToolConfigParams", "PermissionPolicy"]
+__all__ = ["BetaManagedAgentsAgentToolConfigParams"]
 
-PermissionPolicy: TypeAlias = Union[BetaManagedAgentsAlwaysAllowPolicyParam, BetaManagedAgentsAlwaysAskPolicyParam]
-
-
-class BetaManagedAgentsAgentToolConfigParams(TypedDict, total=False):
-    """Configuration override for a specific tool within a toolset."""
-
-    name: Required[Literal["bash", "edit", "read", "write", "glob", "grep", "web_fetch", "web_search"]]
-    """Built-in agent tool identifier."""
-
-    enabled: Optional[bool]
-    """Whether this tool is enabled and available to Claude.
-
-    Overrides the default_config setting.
-    """
-
-    permission_policy: Optional[PermissionPolicy]
-    """Permission policy for tool execution."""
+BetaManagedAgentsAgentToolConfigParams: TypeAlias = Union[
+    BetaManagedAgentsBashToolConfigParams,
+    BetaManagedAgentsEditToolConfigParams,
+    BetaManagedAgentsReadToolConfigParams,
+    BetaManagedAgentsWriteToolConfigParams,
+    BetaManagedAgentsGlobToolConfigParams,
+    BetaManagedAgentsGrepToolConfigParams,
+    BetaManagedAgentsWebFetchToolConfigParams,
+    BetaManagedAgentsWebSearchToolConfigParams,
+]
