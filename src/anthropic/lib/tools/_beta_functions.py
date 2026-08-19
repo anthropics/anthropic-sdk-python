@@ -80,7 +80,10 @@ class BetaBuiltinFunctionTool(ABC):
         raw = self.to_dict()
         if "mcp_server_name" in raw:
             return raw["mcp_server_name"]
-        return raw["name"]
+        name = raw.get("name")
+        if name is None:
+            raise ValueError(f"Tool of type {raw.get('type')!r} does not have a name")
+        return name
 
 
 class BetaAsyncBuiltinFunctionTool(ABC):
@@ -95,7 +98,10 @@ class BetaAsyncBuiltinFunctionTool(ABC):
         raw = self.to_dict()
         if "mcp_server_name" in raw:
             return raw["mcp_server_name"]
-        return raw["name"]
+        name = raw.get("name")
+        if name is None:
+            raise ValueError(f"Tool of type {raw.get('type')!r} does not have a name")
+        return name
 
 
 class BaseFunctionTool(Generic[CallableT]):

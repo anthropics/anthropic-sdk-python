@@ -22,6 +22,10 @@ class _TaggedDict(dict):  # type: ignore[type-arg]
     """Plain dicts reject ``object.__setattr__`` — helpers tag attribute-capable subclasses."""
 
 
+class _TaggedTuple(tuple):  # type: ignore[type-arg]
+    """Same for file tuples, mirroring ``mcp_resource_to_file``'s return value."""
+
+
 def test_helper_header() -> None:
     assert helper_header("BetaToolRunner") == {STAINLESS_HELPER_HEADER: "BetaToolRunner"}
 
@@ -44,6 +48,17 @@ def _message_json() -> dict[str, object]:
     }
 
 
+def _file_json() -> dict[str, object]:
+    return {
+        "id": "file_abc123",
+        "type": "file",
+        "created_at": "2026-01-01T00:00:00Z",
+        "filename": "data.json",
+        "mime_type": "application/json",
+        "size_bytes": 2,
+    }
+
+
 @pytest.mark.respx(base_url=base_url)
 class TestSyncWireHeaders:
     def test_caller_tag_is_appended_not_clobbered(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
@@ -62,6 +77,17 @@ class TestSyncWireHeaders:
         request = respx_mock.calls.last.request
         values = request.headers.get_list(STAINLESS_HELPER_HEADER)
         assert values == ["mcp_tool, caller-tag"]
+
+    def test_file_upload_tag_is_appended_not_clobbered(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
+        respx_mock.post("/v1/files").mock(return_value=httpx.Response(200, json=_file_json()))
+
+        file = _TaggedTuple(("data.json", b"{}", "application/json"))
+        tag_helper(file, "mcp_resource_to_file")
+        client.files.upload(file=file, extra_headers={"X-Stainless-Helper": "caller-tag"})
+
+        request = respx_mock.calls.last.request
+        values = request.headers.get_list(STAINLESS_HELPER_HEADER)
+        assert values == ["mcp_resource_to_file, caller-tag"]
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
     def test_parse_sends_single_header_line(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
@@ -139,6 +165,19 @@ class TestAsyncWireHeaders:
         request = respx_mock.calls.last.request
         values = request.headers.get_list(STAINLESS_HELPER_HEADER)
         assert values == ["mcp_tool, caller-tag"]
+
+    async def test_file_upload_tag_is_appended_not_clobbered(
+        self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
+    ) -> None:
+        respx_mock.post("/v1/files").mock(return_value=httpx.Response(200, json=_file_json()))
+
+        file = _TaggedTuple(("data.json", b"{}", "application/json"))
+        tag_helper(file, "mcp_resource_to_file")
+        await async_client.files.upload(file=file, extra_headers={"X-Stainless-Helper": "caller-tag"})
+
+        request = respx_mock.calls.last.request
+        values = request.headers.get_list(STAINLESS_HELPER_HEADER)
+        assert values == ["mcp_resource_to_file, caller-tag"]
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
     async def test_parse_sends_single_header_line(

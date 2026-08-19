@@ -34,6 +34,46 @@ from anthropic.types import (
     BashCodeExecutionToolResultError,
     BashCodeExecutionToolResultErrorCode,
     BashCodeExecutionToolResultErrorParam,
+    BrowserCloseTabConfig,
+    BrowserDoubleClickConfig,
+    BrowserFileUploadConfig,
+    BrowserFindConfig,
+    BrowserFormInputConfig,
+    BrowserGetPageTextConfig,
+    BrowserHoldKeyConfig,
+    BrowserHoverConfig,
+    BrowserJavascriptExecConfig,
+    BrowserKeyConfig,
+    BrowserLeftClickConfig,
+    BrowserLeftClickDragConfig,
+    BrowserLeftMouseDownConfig,
+    BrowserLeftMouseUpConfig,
+    BrowserListTabsConfig,
+    BrowserMiddleClickConfig,
+    BrowserMouseMoveConfig,
+    BrowserNavigateConfig,
+    BrowserNewTabConfig,
+    BrowserReadConsoleConfig,
+    BrowserReadNetworkConfig,
+    BrowserReadPageConfig,
+    BrowserRightClickConfig,
+    BrowserScreenshotConfig,
+    BrowserScrollConfig,
+    BrowserScrollToConfig,
+    BrowserStateBlockParam,
+    BrowserStateChange,
+    BrowserStateChangeDownloadCompleted,
+    BrowserStateChangeDownloadFailed,
+    BrowserStateChangeDownloadStarted,
+    BrowserStateChangeTabOpened,
+    BrowserStateTabEntry,
+    BrowserSwitchTabConfig,
+    BrowserToolset20260801,
+    BrowserToolsetConfigs,
+    BrowserTripleClickConfig,
+    BrowserTypeConfig,
+    BrowserWaitConfig,
+    BrowserZoomConfig,
     CacheControlEphemeral,
     CacheCreation,
     CitationCharLocation,
@@ -64,7 +104,28 @@ from anthropic.types import (
     CodeExecutionToolResultError,
     CodeExecutionToolResultErrorCode,
     CodeExecutionToolResultErrorParam,
+    ComputerCursorPositionConfig,
+    ComputerDoubleClickConfig,
+    ComputerHoldKeyConfig,
+    ComputerKeyConfig,
+    ComputerLeftClickConfig,
+    ComputerLeftClickDragConfig,
+    ComputerLeftMouseDownConfig,
+    ComputerLeftMouseUpConfig,
+    ComputerMiddleClickConfig,
+    ComputerMouseMoveConfig,
+    ComputerRightClickConfig,
+    ComputerScreenshotConfig,
+    ComputerScrollConfig,
+    ComputerToolset20260801,
+    ComputerToolsetConfigs,
+    ComputerTripleClickConfig,
+    ComputerTypeConfig,
+    ComputerWaitConfig,
+    ComputerZoomConfig,
     Container,
+    ContainerParams,
+    ContainerSkill,
     ContainerUploadBlock,
     ContainerUploadBlockParam,
     ContentBlock,
@@ -76,12 +137,16 @@ from anthropic.types import (
     DocumentBlockParam,
     EncryptedCodeExecutionResultBlock,
     EncryptedCodeExecutionResultBlockParam,
+    FileDocumentSource,
+    FileImageSource,
     ImageBlockParam,
+    ImageTransformationsParam,
     InputJSONDelta,
     JSONOutputFormat,
     MemoryTool20250818,
     Message,
     MessageCountTokensTool,
+    MessageCreateParamsContainer,
     MessageDeltaUsage,
     MessageParam,
     MessageTokensCount,
@@ -108,6 +173,7 @@ from anthropic.types import (
     ServerToolUseBlock,
     ServerToolUseBlockParam,
     SignatureDelta,
+    SkillParams,
     StopReason,
     TextBlock,
     TextBlockParam,
@@ -248,6 +314,52 @@ Methods:
 - <code title="get /v1/models/{model_id}">client.models.<a href="./src/anthropic/resources/models.py">retrieve</a>(model_id) -> <a href="./src/anthropic/types/model_info.py">ModelInfo</a></code>
 - <code title="get /v1/models">client.models.<a href="./src/anthropic/resources/models.py">list</a>(\*\*<a href="src/anthropic/types/model_list_params.py">params</a>) -> <a href="./src/anthropic/types/model_info.py">SyncPage[ModelInfo]</a></code>
 
+# Files
+
+Types:
+
+```python
+from anthropic.types import DeletedFile, FileMetadata
+```
+
+Methods:
+
+- <code title="get /v1/files">client.files.<a href="./src/anthropic/resources/files.py">list</a>(\*\*<a href="src/anthropic/types/file_list_params.py">params</a>) -> <a href="./src/anthropic/types/file_metadata.py">SyncPageCursor[FileMetadata]</a></code>
+- <code title="delete /v1/files/{file_id}">client.files.<a href="./src/anthropic/resources/files.py">delete</a>(file_id) -> <a href="./src/anthropic/types/deleted_file.py">DeletedFile</a></code>
+- <code title="get /v1/files/{file_id}/content">client.files.<a href="./src/anthropic/resources/files.py">download</a>(file_id) -> BinaryAPIResponse</code>
+- <code title="get /v1/files/{file_id}">client.files.<a href="./src/anthropic/resources/files.py">retrieve_metadata</a>(file_id) -> <a href="./src/anthropic/types/file_metadata.py">FileMetadata</a></code>
+- <code title="post /v1/files">client.files.<a href="./src/anthropic/resources/files.py">upload</a>(\*\*<a href="src/anthropic/types/file_upload_params.py">params</a>) -> <a href="./src/anthropic/types/file_metadata.py">FileMetadata</a></code>
+
+# Skills
+
+Types:
+
+```python
+from anthropic.types import DeletedSkill, Skill, SkillSource
+```
+
+Methods:
+
+- <code title="post /v1/skills">client.skills.<a href="./src/anthropic/resources/skills/skills.py">create</a>(\*\*<a href="src/anthropic/types/skill_create_params.py">params</a>) -> <a href="./src/anthropic/types/skill.py">Skill</a></code>
+- <code title="get /v1/skills/{skill_id}">client.skills.<a href="./src/anthropic/resources/skills/skills.py">retrieve</a>(skill_id) -> <a href="./src/anthropic/types/skill.py">Skill</a></code>
+- <code title="get /v1/skills">client.skills.<a href="./src/anthropic/resources/skills/skills.py">list</a>(\*\*<a href="src/anthropic/types/skill_list_params.py">params</a>) -> <a href="./src/anthropic/types/skill.py">SyncPageCursor[Skill]</a></code>
+- <code title="delete /v1/skills/{skill_id}">client.skills.<a href="./src/anthropic/resources/skills/skills.py">delete</a>(skill_id) -> <a href="./src/anthropic/types/deleted_skill.py">DeletedSkill</a></code>
+
+## Versions
+
+Types:
+
+```python
+from anthropic.types.skills import DeletedSkillVersion, SkillVersion
+```
+
+Methods:
+
+- <code title="post /v1/skills/{skill_id}/versions">client.skills.versions.<a href="./src/anthropic/resources/skills/versions.py">create</a>(skill_id, \*\*<a href="src/anthropic/types/skills/version_create_params.py">params</a>) -> <a href="./src/anthropic/types/skills/skill_version.py">SkillVersion</a></code>
+- <code title="get /v1/skills/{skill_id}/versions/{version}">client.skills.versions.<a href="./src/anthropic/resources/skills/versions.py">retrieve</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/skills/skill_version.py">SkillVersion</a></code>
+- <code title="get /v1/skills/{skill_id}/versions">client.skills.versions.<a href="./src/anthropic/resources/skills/versions.py">list</a>(skill_id, \*\*<a href="src/anthropic/types/skills/version_list_params.py">params</a>) -> <a href="./src/anthropic/types/skills/skill_version.py">SyncPageCursor[SkillVersion]</a></code>
+- <code title="delete /v1/skills/{skill_id}/versions/{version}">client.skills.versions.<a href="./src/anthropic/resources/skills/versions.py">delete</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/skills/deleted_skill_version.py">DeletedSkillVersion</a></code>
+
 # Beta
 
 Types:
@@ -319,6 +431,46 @@ from anthropic.types.beta import (
     BetaBashCodeExecutionToolResultBlockParam,
     BetaBashCodeExecutionToolResultError,
     BetaBashCodeExecutionToolResultErrorParam,
+    BetaBrowserCloseTabConfig,
+    BetaBrowserDoubleClickConfig,
+    BetaBrowserFileUploadConfig,
+    BetaBrowserFindConfig,
+    BetaBrowserFormInputConfig,
+    BetaBrowserGetPageTextConfig,
+    BetaBrowserHoldKeyConfig,
+    BetaBrowserHoverConfig,
+    BetaBrowserJavascriptExecConfig,
+    BetaBrowserKeyConfig,
+    BetaBrowserLeftClickConfig,
+    BetaBrowserLeftClickDragConfig,
+    BetaBrowserLeftMouseDownConfig,
+    BetaBrowserLeftMouseUpConfig,
+    BetaBrowserListTabsConfig,
+    BetaBrowserMiddleClickConfig,
+    BetaBrowserMouseMoveConfig,
+    BetaBrowserNavigateConfig,
+    BetaBrowserNewTabConfig,
+    BetaBrowserReadConsoleConfig,
+    BetaBrowserReadNetworkConfig,
+    BetaBrowserReadPageConfig,
+    BetaBrowserRightClickConfig,
+    BetaBrowserScreenshotConfig,
+    BetaBrowserScrollConfig,
+    BetaBrowserScrollToConfig,
+    BetaBrowserStateBlockParam,
+    BetaBrowserStateChange,
+    BetaBrowserStateChangeDownloadCompleted,
+    BetaBrowserStateChangeDownloadFailed,
+    BetaBrowserStateChangeDownloadStarted,
+    BetaBrowserStateChangeTabOpened,
+    BetaBrowserStateTabEntry,
+    BetaBrowserSwitchTabConfig,
+    BetaBrowserToolset20260801,
+    BetaBrowserToolsetConfigs,
+    BetaBrowserTripleClickConfig,
+    BetaBrowserTypeConfig,
+    BetaBrowserWaitConfig,
+    BetaBrowserZoomConfig,
     BetaCacheControlEphemeral,
     BetaCacheCreation,
     BetaCacheMissMessagesChanged,
@@ -364,6 +516,25 @@ from anthropic.types.beta import (
     BetaCompactionBlockParam,
     BetaCompactionContentBlockDelta,
     BetaCompactionIterationUsage,
+    BetaComputerCursorPositionConfig,
+    BetaComputerDoubleClickConfig,
+    BetaComputerHoldKeyConfig,
+    BetaComputerKeyConfig,
+    BetaComputerLeftClickConfig,
+    BetaComputerLeftClickDragConfig,
+    BetaComputerLeftMouseDownConfig,
+    BetaComputerLeftMouseUpConfig,
+    BetaComputerMiddleClickConfig,
+    BetaComputerMouseMoveConfig,
+    BetaComputerRightClickConfig,
+    BetaComputerScreenshotConfig,
+    BetaComputerScrollConfig,
+    BetaComputerToolset20260801,
+    BetaComputerToolsetConfigs,
+    BetaComputerTripleClickConfig,
+    BetaComputerTypeConfig,
+    BetaComputerWaitConfig,
+    BetaComputerZoomConfig,
     BetaContainer,
     BetaContainerParams,
     BetaContainerUploadBlock,
@@ -396,6 +567,7 @@ from anthropic.types.beta import (
     BetaFileDocumentSource,
     BetaFileImageSource,
     BetaImageBlockParam,
+    BetaImageTransformationsParam,
     BetaInputJSONDelta,
     BetaInputTokensClearAtLeast,
     BetaInputTokensTrigger,
@@ -1122,16 +1294,16 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta import BetaFileScope, DeletedFile, FileMetadata
+from anthropic.types.beta import BetaDeletedFile, BetaFileMetadata, BetaFileScope
 ```
 
 Methods:
 
-- <code title="get /v1/files?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">list</a>(\*\*<a href="src/anthropic/types/beta/file_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/file_metadata.py">SyncPage[FileMetadata]</a></code>
-- <code title="delete /v1/files/{file_id}?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">delete</a>(file_id) -> <a href="./src/anthropic/types/beta/deleted_file.py">DeletedFile</a></code>
+- <code title="get /v1/files?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">list</a>(\*\*<a href="src/anthropic/types/beta/file_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_file_metadata.py">SyncPage[BetaFileMetadata]</a></code>
+- <code title="delete /v1/files/{file_id}?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">delete</a>(file_id) -> <a href="./src/anthropic/types/beta/beta_deleted_file.py">BetaDeletedFile</a></code>
 - <code title="get /v1/files/{file_id}/content?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">download</a>(file_id) -> BinaryAPIResponse</code>
-- <code title="get /v1/files/{file_id}?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">retrieve_metadata</a>(file_id) -> <a href="./src/anthropic/types/beta/file_metadata.py">FileMetadata</a></code>
-- <code title="post /v1/files?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">upload</a>(\*\*<a href="src/anthropic/types/beta/file_upload_params.py">params</a>) -> <a href="./src/anthropic/types/beta/file_metadata.py">FileMetadata</a></code>
+- <code title="get /v1/files/{file_id}?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">retrieve_metadata</a>(file_id) -> <a href="./src/anthropic/types/beta/beta_file_metadata.py">BetaFileMetadata</a></code>
+- <code title="post /v1/files?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">upload</a>(\*\*<a href="src/anthropic/types/beta/file_upload_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_file_metadata.py">BetaFileMetadata</a></code>
 
 ## Skills
 

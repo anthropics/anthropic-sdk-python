@@ -50,7 +50,16 @@ class TestMessages:
                 "type": "ephemeral",
                 "ttl": "5m",
             },
-            container="container",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "pdf",
+                        "type": "anthropic",
+                        "version": "latest",
+                    }
+                ],
+            },
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -191,7 +200,16 @@ class TestMessages:
                 "type": "ephemeral",
                 "ttl": "5m",
             },
-            container="container",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "pdf",
+                        "type": "anthropic",
+                        "version": "latest",
+                    }
+                ],
+            },
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -472,7 +490,16 @@ class TestAsyncMessages:
                 "type": "ephemeral",
                 "ttl": "5m",
             },
-            container="container",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "pdf",
+                        "type": "anthropic",
+                        "version": "latest",
+                    }
+                ],
+            },
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -613,7 +640,16 @@ class TestAsyncMessages:
                 "type": "ephemeral",
                 "ttl": "5m",
             },
-            container="container",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "pdf",
+                        "type": "anthropic",
+                        "version": "latest",
+                    }
+                ],
+            },
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={

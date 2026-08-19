@@ -7,6 +7,7 @@ from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_image_block_param import BetaImageBlockParam
+from .beta_browser_state_block_param import BetaBrowserStateBlockParam
 from .beta_search_result_block_param import BetaSearchResultBlockParam
 from .beta_tool_reference_block_param import BetaToolReferenceBlockParam
 from .beta_request_document_block_param import BetaRequestDocumentBlockParam
@@ -20,6 +21,7 @@ Content: TypeAlias = Union[
     BetaSearchResultBlockParam,
     BetaRequestDocumentBlockParam,
     BetaToolReferenceBlockParam,
+    BetaBrowserStateBlockParam,
 ]
 
 
@@ -34,3 +36,6 @@ class BetaToolResultBlockParam(TypedDict, total=False):
     content: Union[str, Iterable[Content]]
 
     is_error: bool
+
+    toolset_name: Optional[str]
+    """For a toolset member tool_result, the toolset family of the paired tool_use."""

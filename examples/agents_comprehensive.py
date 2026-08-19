@@ -45,8 +45,8 @@ def main() -> None:
     # Upload a custom skill
     skill_md_path = os.path.join(os.path.dirname(__file__), "greeting-SKILL.md")
     with open(skill_md_path, "rb") as skill_file:
-        skill = anthropic.beta.skills.create(
-            display_title=f"comprehensive-greeting-{int(time.time() * 1000)}",
+        skill = anthropic.skills.create(
+            display_name=f"comprehensive-greeting-{int(time.time() * 1000)}",
             files=[("greeting/SKILL.md", skill_file, "text/markdown")],
         )
     print("Created skill:", skill.id)

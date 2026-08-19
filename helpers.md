@@ -213,7 +213,7 @@ response = await client.beta.messages.create(
 from anthropic.lib.tools.mcp import mcp_resource_to_file
 
 resource = await mcp_client.read_resource(uri="file:///path/to/data.json")
-uploaded = await client.beta.files.upload(file=mcp_resource_to_file(resource))
+uploaded = await client.files.upload(file=mcp_resource_to_file(resource))
 ```
 
 ### Error handling

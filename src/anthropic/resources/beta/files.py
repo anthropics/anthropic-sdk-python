@@ -33,9 +33,9 @@ from ..._base_client import (
     make_request_options,
 )
 from ...lib._stainless_helpers import stainless_helper_header_from_file as _stainless_helper_header_from_file
-from ...types.beta.deleted_file import DeletedFile
-from ...types.beta.file_metadata import FileMetadata
 from ...types.anthropic_beta_param import AnthropicBetaParam
+from ...types.beta.beta_deleted_file import BetaDeletedFile
+from ...types.beta.beta_file_metadata import BetaFileMetadata
 
 __all__ = ["Files", "AsyncFiles"]
 
@@ -74,7 +74,7 @@ class Files(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> SyncPage[FileMetadata]:
+    ) -> SyncPage[BetaFileMetadata]:
         """List Files
 
         Args:
@@ -116,7 +116,7 @@ class Files(SyncAPIResource):
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/files?beta=true",
-            page=SyncPage[FileMetadata],
+            page=SyncPage[BetaFileMetadata],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -132,7 +132,7 @@ class Files(SyncAPIResource):
                     file_list_params.FileListParams,
                 ),
             ),
-            model=FileMetadata,
+            model=BetaFileMetadata,
         )
 
     def delete(
@@ -146,7 +146,7 @@ class Files(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> DeletedFile:
+    ) -> BetaDeletedFile:
         """
         Delete File
 
@@ -181,7 +181,7 @@ class Files(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=DeletedFile,
+            cast_to=BetaDeletedFile,
         )
 
     def download(
@@ -245,7 +245,7 @@ class Files(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> FileMetadata:
+    ) -> BetaFileMetadata:
         """
         Get File Metadata
 
@@ -280,7 +280,7 @@ class Files(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=FileMetadata,
+            cast_to=BetaFileMetadata,
         )
 
     def upload(
@@ -294,7 +294,7 @@ class Files(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> FileMetadata:
+    ) -> BetaFileMetadata:
         """
         Upload File
 
@@ -336,7 +336,7 @@ class Files(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=FileMetadata,
+            cast_to=BetaFileMetadata,
         )
 
 
@@ -374,7 +374,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[FileMetadata, AsyncPage[FileMetadata]]:
+    ) -> AsyncPaginator[BetaFileMetadata, AsyncPage[BetaFileMetadata]]:
         """List Files
 
         Args:
@@ -416,7 +416,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "files-api-2025-04-14", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/files?beta=true",
-            page=AsyncPage[FileMetadata],
+            page=AsyncPage[BetaFileMetadata],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -432,7 +432,7 @@ class AsyncFiles(AsyncAPIResource):
                     file_list_params.FileListParams,
                 ),
             ),
-            model=FileMetadata,
+            model=BetaFileMetadata,
         )
 
     async def delete(
@@ -446,7 +446,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> DeletedFile:
+    ) -> BetaDeletedFile:
         """
         Delete File
 
@@ -481,7 +481,7 @@ class AsyncFiles(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=DeletedFile,
+            cast_to=BetaDeletedFile,
         )
 
     async def download(
@@ -545,7 +545,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> FileMetadata:
+    ) -> BetaFileMetadata:
         """
         Get File Metadata
 
@@ -580,7 +580,7 @@ class AsyncFiles(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=FileMetadata,
+            cast_to=BetaFileMetadata,
         )
 
     async def upload(
@@ -594,7 +594,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> FileMetadata:
+    ) -> BetaFileMetadata:
         """
         Upload File
 
@@ -636,7 +636,7 @@ class AsyncFiles(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=FileMetadata,
+            cast_to=BetaFileMetadata,
         )
 
 

@@ -4,8 +4,7 @@ from typing import Optional
 from datetime import datetime
 from typing_extensions import Literal
 
-from ..._models import BaseModel
-from .beta_file_scope import BetaFileScope
+from .._models import BaseModel
 
 __all__ = ["FileMetadata"]
 
@@ -38,8 +37,9 @@ class FileMetadata(BaseModel):
     downloadable: Optional[bool] = None
     """Whether the file can be downloaded."""
 
-    scope: Optional[BetaFileScope] = None
+    expires_at: Optional[datetime] = None
     """
-    The scope of this file, indicating the context in which it was created (e.g., a
-    session).
+    RFC 3339 datetime string representing when the file will expire and become
+    unavailable for download. Null if the file does not expire. For files uploaded
+    with `expires_in_seconds`, this is the upload time plus that value.
     """
