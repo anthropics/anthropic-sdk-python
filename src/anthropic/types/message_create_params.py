@@ -19,6 +19,7 @@ from .tool_choice_any_param import ToolChoiceAnyParam
 from .tool_choice_auto_param import ToolChoiceAutoParam
 from .tool_choice_tool_param import ToolChoiceToolParam
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
+from .message_create_params_container_param import MessageCreateParamsContainerParam
 
 __all__ = [
     "MessageCreateParamsBase",
@@ -130,7 +131,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     cacheable block in the request.
     """
 
-    container: Optional[str]
+    container: Optional[MessageCreateParamsContainerParam]
     """Container identifier for reuse across requests."""
 
     inference_geo: Optional[str]

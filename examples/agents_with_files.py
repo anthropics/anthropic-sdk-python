@@ -32,7 +32,7 @@ def main() -> None:
     print("Created agent:", agent.id)
 
     # Upload a file
-    file = anthropic.beta.files.upload(
+    file = anthropic.files.upload(
         file=Path(__file__).parent / "data.csv",
     )
     print("Uploaded file:", file.id)

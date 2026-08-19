@@ -27,3 +27,6 @@ class ToolUseBlock(BaseModel):
     name: str
 
     type: Literal["tool_use"]
+
+    toolset_name: Optional[str] = None
+    """For a toolset member tool_use, the toolset family."""
