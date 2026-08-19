@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.125.0 (2026-08-19)
+
+Full Changelog: [v0.124.0...v0.125.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.124.0...v0.125.0)
+
+### Features
+
+* **api:** managed agents web search config and self hosted sandbox memory ([b75afd6](https://github.com/anthropics/anthropic-sdk-python/commit/b75afd6ffa210ff2e98bc5e90d6f1f3367038f0b))
+
 ## 0.124.0 (2026-08-19)
 
 Full Changelog: [v0.123.0...v0.124.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.123.0...v0.124.0)
