@@ -238,7 +238,8 @@ The `output_format=` argument of `messages.parse()` / `stream()` / `count_tokens
 `stream()` / `tool_runner()` now only accepts a **type**. `messages.stream()`,
 `messages.count_tokens()` and `beta.messages.stream()` used to accept a raw schema dict there too and forward it as
 `output_config.format`; that form raises a `TypeError` now. Pass schema dicts via `output_config` and keep
-`output_format=` for classes:
+`output_format=` for classes — the `DeprecationWarning` that `beta.messages.parse()` / `stream()` / `tool_runner()` used to
+emit for the class form is gone, since that is now the only form they take:
 
 ```python
 # Before
