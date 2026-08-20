@@ -40,22 +40,8 @@ from .messages import (
     MessagesWithStreamingResponse,
     AsyncMessagesWithStreamingResponse,
 )
-from .completions import (
-    Completions,
-    AsyncCompletions,
-    CompletionsWithRawResponse,
-    AsyncCompletionsWithRawResponse,
-    CompletionsWithStreamingResponse,
-    AsyncCompletionsWithStreamingResponse,
-)
 
 __all__ = [
-    "Completions",
-    "AsyncCompletions",
-    "CompletionsWithRawResponse",
-    "AsyncCompletionsWithRawResponse",
-    "CompletionsWithStreamingResponse",
-    "AsyncCompletionsWithStreamingResponse",
     "Messages",
     "AsyncMessages",
     "MessagesWithRawResponse",

@@ -217,7 +217,7 @@ class TestAsyncThreads:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        thread = response.parse()
+        thread = await response.parse()
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
     @parametrize
@@ -276,7 +276,7 @@ class TestAsyncThreads:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        thread = response.parse()
+        thread = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -327,7 +327,7 @@ class TestAsyncThreads:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        thread = response.parse()
+        thread = await response.parse()
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
     @parametrize

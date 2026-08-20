@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any, Set, TypeVar, Iterator, cast
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 
@@ -218,8 +218,7 @@ class TestSyncMessages:
             ],
             model="claude-3-opus-latest",
         ) as stream:
-            with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), Stream)
+            assert not isinstance(cast(Any, stream), Stream)
 
             assert_basic_response([event for event in stream], stream.get_final_message())
 
@@ -282,8 +281,7 @@ class TestSyncMessages:
             ],
             model="claude-sonnet-4-5",
         ) as stream:
-            with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), Stream)
+            assert not isinstance(cast(Any, stream), Stream)
 
             assert_tool_use_response([event for event in stream], stream.get_final_message())
 
@@ -406,8 +404,7 @@ class TestAsyncMessages:
             ],
             model="claude-3-opus-latest",
         ) as stream:
-            with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), AsyncStream)
+            assert not isinstance(cast(Any, stream), AsyncStream)
 
             assert_basic_response([event async for event in stream], await stream.get_final_message())
 
@@ -473,8 +470,7 @@ class TestAsyncMessages:
             ],
             model="claude-sonnet-4-5",
         ) as stream:
-            with pytest.warns(DeprecationWarning):
-                assert isinstance(cast(Any, stream), AsyncStream)
+            assert not isinstance(cast(Any, stream), AsyncStream)
 
             assert_tool_use_response([event async for event in stream], await stream.get_final_message())
 

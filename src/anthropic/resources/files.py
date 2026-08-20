@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from typing import Mapping, Optional, cast
 
-import httpx
+import httpx2
 
-from .. import _legacy_response
 from ..types import file_list_params, file_upload_params
 from .._files import deepcopy_with_paths
 from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, SequenceNotStr, omit, not_given
@@ -18,7 +17,9 @@ from .._response import (
     AsyncBinaryAPIResponse,
     StreamedBinaryAPIResponse,
     AsyncStreamedBinaryAPIResponse,
+    to_raw_response_wrapper,
     to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
     to_custom_raw_response_wrapper,
     async_to_streamed_response_wrapper,
     to_custom_streamed_response_wrapper,
@@ -69,7 +70,7 @@ class Files(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[FileMetadata]:
         """
         List Files
@@ -125,7 +126,7 @@ class Files(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> DeletedFile:
         """
         Delete File
@@ -160,7 +161,7 @@ class Files(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BinaryAPIResponse:
         """
         Download File
@@ -196,7 +197,7 @@ class Files(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> FileMetadata:
         """
         Get File Metadata
@@ -232,7 +233,7 @@ class Files(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> FileMetadata:
         """
         Upload File
@@ -306,7 +307,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[FileMetadata, AsyncPageCursor[FileMetadata]]:
         """
         List Files
@@ -362,7 +363,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> DeletedFile:
         """
         Delete File
@@ -397,7 +398,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncBinaryAPIResponse:
         """
         Download File
@@ -433,7 +434,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> FileMetadata:
         """
         Get File Metadata
@@ -469,7 +470,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> FileMetadata:
         """
         Upload File
@@ -516,20 +517,20 @@ class FilesWithRawResponse:
     def __init__(self, files: Files) -> None:
         self._files = files
 
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             files.list,
         )
-        self.delete = _legacy_response.to_raw_response_wrapper(
+        self.delete = to_raw_response_wrapper(
             files.delete,
         )
         self.download = to_custom_raw_response_wrapper(
             files.download,
             BinaryAPIResponse,
         )
-        self.retrieve_metadata = _legacy_response.to_raw_response_wrapper(
+        self.retrieve_metadata = to_raw_response_wrapper(
             files.retrieve_metadata,
         )
-        self.upload = _legacy_response.to_raw_response_wrapper(
+        self.upload = to_raw_response_wrapper(
             files.upload,
         )
 
@@ -538,20 +539,20 @@ class AsyncFilesWithRawResponse:
     def __init__(self, files: AsyncFiles) -> None:
         self._files = files
 
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             files.list,
         )
-        self.delete = _legacy_response.async_to_raw_response_wrapper(
+        self.delete = async_to_raw_response_wrapper(
             files.delete,
         )
         self.download = async_to_custom_raw_response_wrapper(
             files.download,
             AsyncBinaryAPIResponse,
         )
-        self.retrieve_metadata = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve_metadata = async_to_raw_response_wrapper(
             files.retrieve_metadata,
         )
-        self.upload = _legacy_response.async_to_raw_response_wrapper(
+        self.upload = async_to_raw_response_wrapper(
             files.upload,
         )
 

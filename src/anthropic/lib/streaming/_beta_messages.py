@@ -5,7 +5,7 @@ from types import TracebackType
 from typing import TYPE_CHECKING, Any, Type, Generic, Callable, cast
 from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
 
-import httpx
+import httpx2 as httpx
 from pydantic import BaseModel
 
 from anthropic.types.beta.beta_tool_use_block import BetaToolUseBlock

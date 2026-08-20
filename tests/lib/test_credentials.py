@@ -8,7 +8,7 @@ import pathlib
 from typing import Any, Dict, List, Callable, Optional, cast
 from typing_extensions import Protocol
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 

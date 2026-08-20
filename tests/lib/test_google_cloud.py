@@ -9,7 +9,7 @@ import pathlib
 import threading
 from typing import Any, cast
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 
@@ -189,12 +189,6 @@ class TestAnthropicGoogleCloud:
         # `.credentials` is the base client's first-party provider slot — never the
         # Google credentials, and never engaged on this client.
         assert client.credentials is None
-
-    def test_completions_is_none(self) -> None:
-        client = AnthropicGoogleCloud(
-            base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "tok"
-        )
-        assert client.completions is None
 
     def test_full_surface_present(self) -> None:
         client = AnthropicGoogleCloud(
@@ -1042,12 +1036,6 @@ class TestAsyncAnthropicGoogleCloud:
     async def test_skip_auth_mutually_exclusive_with_credentials(self) -> None:
         with pytest.raises(ValueError, match="mutually exclusive"):
             AsyncAnthropicGoogleCloud(base_url="https://example.test/", skip_auth=True, token_provider=lambda: "tok")
-
-    async def test_completions_is_none(self) -> None:
-        client = AsyncAnthropicGoogleCloud(
-            base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "tok"
-        )
-        assert client.completions is None
 
     async def test_base_url_derived(self) -> None:
         client = AsyncAnthropicGoogleCloud(

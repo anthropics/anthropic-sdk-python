@@ -28,11 +28,13 @@ class TestAsyncMessages:
                         "content": "Extract order IDs from the following text:\n\nOrder 12345\nOrder 67890",
                     }
                 ],
-                output_format={
-                    "type": "json_schema",
-                    "schema": {
-                        "type": "array",
-                        "items": {"type": "integer"},
+                output_config={
+                    "format": {
+                        "type": "json_schema",
+                        "schema": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                        },
                     },
                 },
                 betas=["structured-outputs-2025-12-15"],

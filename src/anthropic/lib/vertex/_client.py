@@ -4,7 +4,7 @@ import os
 from typing import TYPE_CHECKING, Any, Union, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
-import httpx
+import httpx2 as httpx
 
 from ... import _exceptions
 from ._auth import load_auth, refresh_auth

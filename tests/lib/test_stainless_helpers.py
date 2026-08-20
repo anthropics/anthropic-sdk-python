@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import cast
 
-import httpx
 import respx
+import httpx2 as httpx
 import pytest
 
 from anthropic import Anthropic, AsyncAnthropic, _compat

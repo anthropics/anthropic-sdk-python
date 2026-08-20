@@ -79,6 +79,10 @@ def _chunk_bytes_to_sse(raw: bytes) -> ServerSentEvent | None:
     payload = cast("Dict[str, Any]", data)
     event_type = payload.get("type")
     if not isinstance(event_type, str):
+        if "completion" not in payload:
+            # neither a Messages event nor a legacy Text Completions chunk: there is no
+            # event name to route it by, so skip it rather than mis-parse it downstream
+            return None
         event_type = "completion"
 
     return ServerSentEvent(data=decoded, event=event_type)

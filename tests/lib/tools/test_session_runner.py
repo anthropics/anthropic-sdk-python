@@ -16,7 +16,7 @@ from typing import Any, Optional, cast
 from collections.abc import Callable, Sequence, Awaitable, AsyncIterator
 from typing_extensions import override
 
-import httpx
+import httpx2 as httpx
 import pytest
 
 from anthropic import APIStatusError

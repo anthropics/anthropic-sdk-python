@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-import httpx
+import httpx2 as httpx
 import pytest
 
 from anthropic.lib.aws._auth import get_auth_headers

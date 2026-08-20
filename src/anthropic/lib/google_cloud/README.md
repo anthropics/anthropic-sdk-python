@@ -4,7 +4,7 @@
 Batches, Files, Admin, and every beta surface — served through Google Cloud. You
 authenticate with Google Cloud IAM credentials, billing flows through Google
 Cloud Marketplace, and model strings are the same first-party identifiers used
-with the `Anthropic` client. The deprecated Completions endpoint is not exposed.
+with the `Anthropic` client.
 
 This client never reads `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, or
 `ANTHROPIC_BASE_URL`; it authenticates with Google credentials only.

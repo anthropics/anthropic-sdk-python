@@ -226,7 +226,7 @@ class TestAsyncVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        version = response.parse()
+        version = await response.parse()
         assert_matches_type(SkillVersion, version, path=["response"])
 
     @parametrize
@@ -268,7 +268,7 @@ class TestAsyncVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        version = response.parse()
+        version = await response.parse()
         assert_matches_type(SkillVersion, version, path=["response"])
 
     @parametrize
@@ -323,7 +323,7 @@ class TestAsyncVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        version = response.parse()
+        version = await response.parse()
         assert_matches_type(AsyncPageCursor[SkillVersion], version, path=["response"])
 
     @parametrize
@@ -363,7 +363,7 @@ class TestAsyncVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        version = response.parse()
+        version = await response.parse()
         assert_matches_type(DeletedSkillVersion, version, path=["response"])
 
     @parametrize

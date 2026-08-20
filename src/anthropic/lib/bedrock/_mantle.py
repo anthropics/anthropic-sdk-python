@@ -4,7 +4,7 @@ import os
 from typing import Any, Union, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
-import httpx
+import httpx2 as httpx
 
 from ... import _exceptions
 from ..._qs import Querystring
@@ -256,7 +256,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         }
 
     @override
-    def _validate_headers(self, headers: Any, custom_headers: Any) -> None:
+    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
         pass
 
     @override
@@ -452,7 +452,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         }
 
     @override
-    def _validate_headers(self, headers: Any, custom_headers: Any) -> None:
+    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
         pass
 
     @override

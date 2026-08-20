@@ -19,7 +19,7 @@ from typing import (
 from contextvars import Token, ContextVar
 from typing_extensions import Literal, override
 
-import httpx
+import httpx2 as httpx
 
 from ..._utils import is_dict
 from ..._models import BaseModel
@@ -28,7 +28,7 @@ from ..._response import APIResponse, AsyncAPIResponse
 from ..._streaming import Stream, AsyncStream, ServerSentEvent
 from ..._exceptions import AnthropicError
 from ..._middleware import CallNext, Middleware, AsyncCallNext
-from ..._base_client import merge_headers
+from ..._base_client import build_headers, merge_headers
 from ...types.message import Message
 from .._stainless_helpers import helper_header
 from ...types.beta.beta_message import BetaMessage
@@ -1377,15 +1377,13 @@ def _with_middleware_headers(request: APIRequest, betas: tuple[AnthropicBetaPara
     (skipping values already present) and the middleware's helper-telemetry tag
     appended to `x-stainless-helper`. Single `request.copy()` for both.
     """
-    # httpx.Headers for the case-insensitive read; Omit-valued entries can't be
-    # the beta header's value and are carried over untouched below.
-    current = httpx.Headers({k: v for k, v in request.headers.items() if isinstance(v, str)}).get("anthropic-beta", "")
+    current = build_headers(request.headers)[0].get("anthropic-beta", "")
     existing = {value.strip() for value in current.split(",")}
     additions = dict.fromkeys(str(beta) for beta in betas if str(beta) not in existing)
-    headers = {k: v for k, v in request.headers.items() if k.lower() != "anthropic-beta"}
-    if current or additions:
-        headers["anthropic-beta"] = ", ".join(filter(None, [current, *additions]))
-    return request.copy(headers=merge_headers(headers, helper_header("fallback-refusal-middleware")))
+    beta_header = {"anthropic-beta": ", ".join(filter(None, [current, *additions]))} if current or additions else {}
+    return request.copy(
+        headers=merge_headers(request.headers, beta_header, helper_header("fallback-refusal-middleware"))
+    )
 
 
 def _credit_token(message: Message | BetaMessage) -> str | None:

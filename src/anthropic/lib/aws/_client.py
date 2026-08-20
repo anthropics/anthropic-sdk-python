@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import Any, Mapping, Sequence
 from typing_extensions import Self, override
 
-import httpx
+import httpx2 as httpx
 
-from ..._types import Omit, Headers, Timeout, NotGiven, not_given
+from ..._types import Omit, Timeout, NotGiven, not_given
 from ..._utils import asyncify
 from ..._client import Anthropic, AsyncAnthropic
 from ._credentials import (
@@ -137,10 +137,10 @@ class AnthropicAWS(Anthropic):
         return super()._api_key_auth
 
     @override
-    def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
+    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
         if self._use_sigv4 or self._skip_auth:
             return
-        super()._validate_headers(headers, custom_headers)
+        super()._validate_headers(headers, omitted)
 
     @override
     def _prepare_request(self, request: httpx.Request) -> None:
@@ -345,10 +345,10 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         return super()._api_key_auth
 
     @override
-    def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
+    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
         if self._use_sigv4 or self._skip_auth:
             return
-        super()._validate_headers(headers, custom_headers)
+        super()._validate_headers(headers, omitted)
 
     @override
     async def _prepare_request(self, request: httpx.Request) -> None:

@@ -308,7 +308,7 @@ class TestAsyncTunnels:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        tunnel = response.parse()
+        tunnel = await response.parse()
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
     @parametrize
@@ -348,7 +348,7 @@ class TestAsyncTunnels:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        tunnel = response.parse()
+        tunnel = await response.parse()
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -397,7 +397,7 @@ class TestAsyncTunnels:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        tunnel = response.parse()
+        tunnel = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaTunnel], tunnel, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -435,7 +435,7 @@ class TestAsyncTunnels:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        tunnel = response.parse()
+        tunnel = await response.parse()
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
     @parametrize
@@ -481,7 +481,7 @@ class TestAsyncTunnels:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        tunnel = response.parse()
+        tunnel = await response.parse()
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
     @parametrize
@@ -528,7 +528,7 @@ class TestAsyncTunnels:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        tunnel = response.parse()
+        tunnel = await response.parse()
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
     @parametrize

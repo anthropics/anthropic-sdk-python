@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 
-import httpx
+import httpx2 as httpx
 import pytest
 
 from anthropic import AnthropicBedrockMantle, AsyncAnthropicBedrockMantle

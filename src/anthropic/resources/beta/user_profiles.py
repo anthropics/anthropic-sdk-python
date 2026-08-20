@@ -6,14 +6,18 @@ from typing import Dict, List, Optional
 from itertools import chain
 from typing_extensions import Literal
 
-import httpx
+import httpx2
 
-from ... import _legacy_response
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ..._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ...pagination import SyncPageCursor, AsyncPageCursor
 from ...types.beta import user_profile_list_params, user_profile_create_params, user_profile_update_params
 from ..._base_client import AsyncPaginator, make_request_options
@@ -58,7 +62,7 @@ class UserProfiles(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Create User Profile
@@ -135,7 +139,7 @@ class UserProfiles(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Get User Profile
@@ -187,7 +191,7 @@ class UserProfiles(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Update User Profile
@@ -267,7 +271,7 @@ class UserProfiles(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaUserProfile]:
         """
         List User Profiles
@@ -330,7 +334,7 @@ class UserProfiles(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfileEnrollmentURL:
         """
         Create Enrollment URL
@@ -404,7 +408,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Create User Profile
@@ -481,7 +485,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Get User Profile
@@ -533,7 +537,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Update User Profile
@@ -613,7 +617,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaUserProfile, AsyncPageCursor[BetaUserProfile]]:
         """
         List User Profiles
@@ -676,7 +680,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfileEnrollmentURL:
         """
         Create Enrollment URL
@@ -720,19 +724,19 @@ class UserProfilesWithRawResponse:
     def __init__(self, user_profiles: UserProfiles) -> None:
         self._user_profiles = user_profiles
 
-        self.create = _legacy_response.to_raw_response_wrapper(
+        self.create = to_raw_response_wrapper(
             user_profiles.create,
         )
-        self.retrieve = _legacy_response.to_raw_response_wrapper(
+        self.retrieve = to_raw_response_wrapper(
             user_profiles.retrieve,
         )
-        self.update = _legacy_response.to_raw_response_wrapper(
+        self.update = to_raw_response_wrapper(
             user_profiles.update,
         )
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             user_profiles.list,
         )
-        self.create_enrollment_url = _legacy_response.to_raw_response_wrapper(
+        self.create_enrollment_url = to_raw_response_wrapper(
             user_profiles.create_enrollment_url,
         )
 
@@ -741,19 +745,19 @@ class AsyncUserProfilesWithRawResponse:
     def __init__(self, user_profiles: AsyncUserProfiles) -> None:
         self._user_profiles = user_profiles
 
-        self.create = _legacy_response.async_to_raw_response_wrapper(
+        self.create = async_to_raw_response_wrapper(
             user_profiles.create,
         )
-        self.retrieve = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve = async_to_raw_response_wrapper(
             user_profiles.retrieve,
         )
-        self.update = _legacy_response.async_to_raw_response_wrapper(
+        self.update = async_to_raw_response_wrapper(
             user_profiles.update,
         )
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             user_profiles.list,
         )
-        self.create_enrollment_url = _legacy_response.async_to_raw_response_wrapper(
+        self.create_enrollment_url = async_to_raw_response_wrapper(
             user_profiles.create_enrollment_url,
         )
 

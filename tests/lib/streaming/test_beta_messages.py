@@ -4,7 +4,7 @@ import os
 import json
 from typing import Any, Set, Dict, TypeVar, cast
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 
@@ -801,7 +801,7 @@ def test_tool_runner_method_definition_in_sync(sync: bool) -> None:
     assert_overloads_in_sync(
         client.beta.messages.create,
         client.beta.messages.tool_runner,
-        exclude_params={"stream", "tools", "max_iterations", "compaction_control", "output_format"},
+        exclude_params={"stream", "tools", "max_iterations", "output_format"},
     )
 
 

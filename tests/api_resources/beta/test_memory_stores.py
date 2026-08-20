@@ -322,7 +322,7 @@ class TestAsyncMemoryStores:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory_store = response.parse()
+        memory_store = await response.parse()
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
     @parametrize
@@ -361,7 +361,7 @@ class TestAsyncMemoryStores:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory_store = response.parse()
+        memory_store = await response.parse()
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
     @parametrize
@@ -410,7 +410,7 @@ class TestAsyncMemoryStores:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory_store = response.parse()
+        memory_store = await response.parse()
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
     @parametrize
@@ -459,7 +459,7 @@ class TestAsyncMemoryStores:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory_store = response.parse()
+        memory_store = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryStore], memory_store, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -497,7 +497,7 @@ class TestAsyncMemoryStores:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory_store = response.parse()
+        memory_store = await response.parse()
         assert_matches_type(BetaManagedAgentsDeletedMemoryStore, memory_store, path=["response"])
 
     @parametrize
@@ -543,7 +543,7 @@ class TestAsyncMemoryStores:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory_store = response.parse()
+        memory_store = await response.parse()
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
     @parametrize

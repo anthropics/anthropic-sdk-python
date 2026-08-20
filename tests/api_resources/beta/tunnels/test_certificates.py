@@ -274,7 +274,7 @@ class TestAsyncCertificates:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        certificate = response.parse()
+        certificate = await response.parse()
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
     @parametrize
@@ -328,7 +328,7 @@ class TestAsyncCertificates:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        certificate = response.parse()
+        certificate = await response.parse()
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -390,7 +390,7 @@ class TestAsyncCertificates:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        certificate = response.parse()
+        certificate = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -441,7 +441,7 @@ class TestAsyncCertificates:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        certificate = response.parse()
+        certificate = await response.parse()
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
     @parametrize

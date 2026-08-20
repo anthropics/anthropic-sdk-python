@@ -3,7 +3,7 @@ import threading
 from typing import Dict, List, cast
 from typing_extensions import Protocol
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 
@@ -258,7 +258,6 @@ def test_has_all_resources() -> None:
     assert client.messages is not None
     assert client.beta is not None
     assert client.models is not None
-    assert client.completions is not None
 
 
 def test_async_has_all_resources() -> None:
@@ -266,7 +265,6 @@ def test_async_has_all_resources() -> None:
     assert client.messages is not None
     assert client.beta is not None
     assert client.models is not None
-    assert client.completions is not None
 
 
 # --- Request behavior (API key mode) ---

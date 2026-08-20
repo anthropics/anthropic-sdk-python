@@ -95,7 +95,6 @@ __all__ = [
 BASH_OUTPUT_LIMIT = 100 * 1024
 BASH_DEFAULT_TIMEOUT = 120.0
 DEFAULT_MAX_FILE_BYTES = 256 * 1024
-READ_MAX_BYTES = DEFAULT_MAX_FILE_BYTES  # For backwards compat only.
 # Default image/PDF caps for the binary ``read`` path (overridable on
 # :class:`AgentToolContext`, same shape as ``max_file_bytes``). The API
 # enforces a per-image limit on the *encoded* (base64) form and a total

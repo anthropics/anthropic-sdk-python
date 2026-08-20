@@ -5,7 +5,7 @@ import logging
 import threading
 from typing import Callable, Optional
 
-import httpx
+import httpx2 as httpx
 
 from ._types import AccessToken, AccessTokenProvider
 from ._workload import WorkloadIdentityError

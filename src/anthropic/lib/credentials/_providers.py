@@ -11,7 +11,7 @@ import tempfile
 from typing import TYPE_CHECKING, Any, Dict, Union, Optional, cast
 from typing_extensions import override
 
-import httpx
+import httpx2 as httpx
 
 from ._types import AccessToken, IdentityTokenProvider
 from ._secrets import (
