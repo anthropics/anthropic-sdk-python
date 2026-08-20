@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.0.0 (2026-08-20)
+
+Full Changelog: [v0.125.0...v1.0.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.125.0...v1.0.0)
+
+### ⚠ BREAKING CHANGES
+
+* **client:** upgrade to httpx2 and some minor breaking changes. See MIGRATION.md for details
+
+### Features
+
+* **client:** upgrade to httpx2 and some minor breaking changes. See MIGRATION.md for details ([33e2967](https://github.com/anthropics/anthropic-sdk-python/commit/33e296749dda59c3b9af85d9bee37ae241b92a28))
+
+
+### Bug Fixes
+
+* **beta:** stop warning about `output_format=` on the parse/stream/tool_runner helpers ([59bf261](https://github.com/anthropics/anthropic-sdk-python/commit/59bf26106d3d66cef54b926aeae4268846bf13f2))
+
+
+### Chores
+
+* **streaming:** restore the original event imports in lib/streaming/_types.py ([87e9e01](https://github.com/anthropics/anthropic-sdk-python/commit/87e9e0157c08ad4b9bb4c44081171285499b1aa3))
+
+
+### Documentation
+
+* **examples:** use adaptive thinking in thinking examples ([b5870af](https://github.com/anthropics/anthropic-sdk-python/commit/b5870afda154cc12ab15fad5ca6f53a280e09ee3))
+
 ## 0.125.0 (2026-08-19)
 
 Full Changelog: [v0.124.0...v0.125.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.124.0...v0.125.0)
