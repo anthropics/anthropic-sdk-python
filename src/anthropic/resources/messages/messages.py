@@ -5,9 +5,8 @@ from __future__ import annotations
 from typing import Union, Iterable, Optional
 from typing_extensions import Literal, overload
 
-import httpx
+import httpx2
 
-from ... import _legacy_response
 from ...types import (
     ThinkingConfigParam,
     message_create_params,
@@ -25,7 +24,12 @@ from ..._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit
 from ..._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ..._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ..._constants import DEFAULT_TIMEOUT
 from ..._streaming import Stream, AsyncStream
 from ..._base_client import make_request_options
@@ -87,19 +91,16 @@ class Messages(SyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
-        temperature: float | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
-        top_k: int | Omit = omit,
-        top_p: float | Omit = omit,
         user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> Message:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -237,15 +238,6 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          temperature: Amount of randomness injected into the response.
-
-              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
-              for analytical / multiple choice, and closer to `1.0` for creative and
-              generative tasks.
-
-              Note that even with `temperature` of `0.0`, the results will not be fully
-              deterministic.
-
           thinking: Configuration for enabling Claude's extended thinking.
 
               When enabled, responses include `thinking` content blocks showing Claude's
@@ -337,21 +329,6 @@ class Messages(SyncAPIResource):
               [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
               for more details.
 
-          top_k: Only sample from the top K options for each subsequent token.
-
-              Used to remove "long tail" low probability responses.
-              [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-
-              Recommended for advanced use cases only.
-
-          top_p: Use nucleus sampling.
-
-              In nucleus sampling, we compute the cumulative distribution over all the options
-              for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`.
-
-              Recommended for advanced use cases only.
-
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
@@ -381,19 +358,16 @@ class Messages(SyncAPIResource):
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
-        temperature: float | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
-        top_k: int | Omit = omit,
-        top_p: float | Omit = omit,
         user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> Stream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -531,15 +505,6 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          temperature: Amount of randomness injected into the response.
-
-              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
-              for analytical / multiple choice, and closer to `1.0` for creative and
-              generative tasks.
-
-              Note that even with `temperature` of `0.0`, the results will not be fully
-              deterministic.
-
           thinking: Configuration for enabling Claude's extended thinking.
 
               When enabled, responses include `thinking` content blocks showing Claude's
@@ -631,21 +596,6 @@ class Messages(SyncAPIResource):
               [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
               for more details.
 
-          top_k: Only sample from the top K options for each subsequent token.
-
-              Used to remove "long tail" low probability responses.
-              [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-
-              Recommended for advanced use cases only.
-
-          top_p: Use nucleus sampling.
-
-              In nucleus sampling, we compute the cumulative distribution over all the options
-              for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`.
-
-              Recommended for advanced use cases only.
-
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
@@ -675,19 +625,16 @@ class Messages(SyncAPIResource):
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
-        temperature: float | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
-        top_k: int | Omit = omit,
-        top_p: float | Omit = omit,
         user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> Message | Stream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -825,15 +772,6 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          temperature: Amount of randomness injected into the response.
-
-              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
-              for analytical / multiple choice, and closer to `1.0` for creative and
-              generative tasks.
-
-              Note that even with `temperature` of `0.0`, the results will not be fully
-              deterministic.
-
           thinking: Configuration for enabling Claude's extended thinking.
 
               When enabled, responses include `thinking` content blocks showing Claude's
@@ -925,21 +863,6 @@ class Messages(SyncAPIResource):
               [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
               for more details.
 
-          top_k: Only sample from the top K options for each subsequent token.
-
-              Used to remove "long tail" low probability responses.
-              [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-
-              Recommended for advanced use cases only.
-
-          top_p: Use nucleus sampling.
-
-              In nucleus sampling, we compute the cumulative distribution over all the options
-              for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`.
-
-              Recommended for advanced use cases only.
-
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
@@ -969,19 +892,16 @@ class Messages(SyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
-        temperature: float | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
-        top_k: int | Omit = omit,
-        top_p: float | Omit = omit,
         user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> Message | Stream[RawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
@@ -1002,12 +922,9 @@ class Messages(SyncAPIResource):
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
-                    "temperature": temperature,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
                     "tools": tools,
-                    "top_k": top_k,
-                    "top_p": top_p,
                 },
                 message_create_params.MessageCreateParamsStreaming
                 if stream
@@ -1038,7 +955,7 @@ class Messages(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> MessageTokensCount:
         """
         Count the number of tokens in a Message.
@@ -1298,19 +1215,16 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
-        temperature: float | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
-        top_k: int | Omit = omit,
-        top_p: float | Omit = omit,
         user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> Message:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -1448,15 +1362,6 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          temperature: Amount of randomness injected into the response.
-
-              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
-              for analytical / multiple choice, and closer to `1.0` for creative and
-              generative tasks.
-
-              Note that even with `temperature` of `0.0`, the results will not be fully
-              deterministic.
-
           thinking: Configuration for enabling Claude's extended thinking.
 
               When enabled, responses include `thinking` content blocks showing Claude's
@@ -1548,21 +1453,6 @@ class AsyncMessages(AsyncAPIResource):
               [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
               for more details.
 
-          top_k: Only sample from the top K options for each subsequent token.
-
-              Used to remove "long tail" low probability responses.
-              [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-
-              Recommended for advanced use cases only.
-
-          top_p: Use nucleus sampling.
-
-              In nucleus sampling, we compute the cumulative distribution over all the options
-              for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`.
-
-              Recommended for advanced use cases only.
-
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
@@ -1592,19 +1482,16 @@ class AsyncMessages(AsyncAPIResource):
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
-        temperature: float | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
-        top_k: int | Omit = omit,
-        top_p: float | Omit = omit,
         user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncStream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -1742,15 +1629,6 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          temperature: Amount of randomness injected into the response.
-
-              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
-              for analytical / multiple choice, and closer to `1.0` for creative and
-              generative tasks.
-
-              Note that even with `temperature` of `0.0`, the results will not be fully
-              deterministic.
-
           thinking: Configuration for enabling Claude's extended thinking.
 
               When enabled, responses include `thinking` content blocks showing Claude's
@@ -1842,21 +1720,6 @@ class AsyncMessages(AsyncAPIResource):
               [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
               for more details.
 
-          top_k: Only sample from the top K options for each subsequent token.
-
-              Used to remove "long tail" low probability responses.
-              [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-
-              Recommended for advanced use cases only.
-
-          top_p: Use nucleus sampling.
-
-              In nucleus sampling, we compute the cumulative distribution over all the options
-              for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`.
-
-              Recommended for advanced use cases only.
-
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
@@ -1886,19 +1749,16 @@ class AsyncMessages(AsyncAPIResource):
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
-        temperature: float | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
-        top_k: int | Omit = omit,
-        top_p: float | Omit = omit,
         user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> Message | AsyncStream[RawMessageStreamEvent]:
         """
         Send a structured list of input messages with text and/or image content, and the
@@ -2036,15 +1896,6 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          temperature: Amount of randomness injected into the response.
-
-              Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
-              for analytical / multiple choice, and closer to `1.0` for creative and
-              generative tasks.
-
-              Note that even with `temperature` of `0.0`, the results will not be fully
-              deterministic.
-
           thinking: Configuration for enabling Claude's extended thinking.
 
               When enabled, responses include `thinking` content blocks showing Claude's
@@ -2136,21 +1987,6 @@ class AsyncMessages(AsyncAPIResource):
               [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
               for more details.
 
-          top_k: Only sample from the top K options for each subsequent token.
-
-              Used to remove "long tail" low probability responses.
-              [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-
-              Recommended for advanced use cases only.
-
-          top_p: Use nucleus sampling.
-
-              In nucleus sampling, we compute the cumulative distribution over all the options
-              for each subsequent token in decreasing probability order and cut it off once it
-              reaches a particular probability specified by `top_p`.
-
-              Recommended for advanced use cases only.
-
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
@@ -2180,19 +2016,16 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
-        temperature: float | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
-        top_k: int | Omit = omit,
-        top_p: float | Omit = omit,
         user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> Message | AsyncStream[RawMessageStreamEvent]:
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = 600
@@ -2213,12 +2046,9 @@ class AsyncMessages(AsyncAPIResource):
                     "stop_sequences": stop_sequences,
                     "stream": stream,
                     "system": system,
-                    "temperature": temperature,
                     "thinking": thinking,
                     "tool_choice": tool_choice,
                     "tools": tools,
-                    "top_k": top_k,
-                    "top_p": top_p,
                 },
                 message_create_params.MessageCreateParamsStreaming
                 if stream
@@ -2249,7 +2079,7 @@ class AsyncMessages(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> MessageTokensCount:
         """
         Count the number of tokens in a Message.
@@ -2473,10 +2303,10 @@ class MessagesWithRawResponse:
     def __init__(self, messages: Messages) -> None:
         self._messages = messages
 
-        self.create = _legacy_response.to_raw_response_wrapper(
+        self.create = to_raw_response_wrapper(
             messages.create,
         )
-        self.count_tokens = _legacy_response.to_raw_response_wrapper(
+        self.count_tokens = to_raw_response_wrapper(
             messages.count_tokens,
         )
 
@@ -2489,10 +2319,10 @@ class AsyncMessagesWithRawResponse:
     def __init__(self, messages: AsyncMessages) -> None:
         self._messages = messages
 
-        self.create = _legacy_response.async_to_raw_response_wrapper(
+        self.create = async_to_raw_response_wrapper(
             messages.create,
         )
-        self.count_tokens = _legacy_response.async_to_raw_response_wrapper(
+        self.count_tokens = async_to_raw_response_wrapper(
             messages.count_tokens,
         )
 

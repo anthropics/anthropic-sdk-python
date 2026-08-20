@@ -309,7 +309,7 @@ class TestAsyncDreams:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        dream = response.parse()
+        dream = await response.parse()
         assert_matches_type(BetaDream, dream, path=["response"])
 
     @parametrize
@@ -354,7 +354,7 @@ class TestAsyncDreams:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        dream = response.parse()
+        dream = await response.parse()
         assert_matches_type(BetaDream, dream, path=["response"])
 
     @parametrize
@@ -401,7 +401,7 @@ class TestAsyncDreams:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        dream = response.parse()
+        dream = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaDream], dream, path=["response"])
 
     @parametrize
@@ -438,7 +438,7 @@ class TestAsyncDreams:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        dream = response.parse()
+        dream = await response.parse()
         assert_matches_type(BetaDream, dream, path=["response"])
 
     @parametrize
@@ -484,7 +484,7 @@ class TestAsyncDreams:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        dream = response.parse()
+        dream = await response.parse()
         assert_matches_type(BetaDream, dream, path=["response"])
 
     @parametrize

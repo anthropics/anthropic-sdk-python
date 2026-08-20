@@ -316,7 +316,7 @@ class TestAsyncVaults:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        vault = response.parse()
+        vault = await response.parse()
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
     @parametrize
@@ -355,7 +355,7 @@ class TestAsyncVaults:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        vault = response.parse()
+        vault = await response.parse()
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
     @parametrize
@@ -403,7 +403,7 @@ class TestAsyncVaults:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        vault = response.parse()
+        vault = await response.parse()
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
     @parametrize
@@ -450,7 +450,7 @@ class TestAsyncVaults:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        vault = response.parse()
+        vault = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -488,7 +488,7 @@ class TestAsyncVaults:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        vault = response.parse()
+        vault = await response.parse()
         assert_matches_type(BetaManagedAgentsDeletedVault, vault, path=["response"])
 
     @parametrize
@@ -534,7 +534,7 @@ class TestAsyncVaults:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        vault = response.parse()
+        vault = await response.parse()
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
     @parametrize

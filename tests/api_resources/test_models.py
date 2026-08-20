@@ -128,7 +128,7 @@ class TestAsyncModels:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        model = response.parse()
+        model = await response.parse()
         assert_matches_type(ModelInfo, model, path=["response"])
 
     @parametrize
@@ -172,7 +172,7 @@ class TestAsyncModels:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        model = response.parse()
+        model = await response.parse()
         assert_matches_type(AsyncPage[ModelInfo], model, path=["response"])
 
     @parametrize

@@ -3,9 +3,9 @@
 <!-- prettier-ignore -->
 [![PyPI version](https://img.shields.io/pypi/v/anthropic.svg?label=pypi%20(stable))](https://pypi.org/project/anthropic/)
 
-The Anthropic Python library provides convenient access to the Anthropic REST API from any Python 3.9+
+The Anthropic Python library provides convenient access to the Anthropic REST API from any Python 3.10+
 application. The library includes type definitions for all request params and response fields,
-and offers both synchronous and asynchronous clients powered by [httpx](https://github.com/encode/httpx).
+and offers both synchronous and asynchronous clients powered by [httpx2](https://github.com/pydantic/httpx2).
 
 ## Documentation
 
@@ -83,7 +83,7 @@ Functionality between the synchronous and asynchronous clients is otherwise iden
 
 ### With aiohttp
 
-By default, the async client uses `httpx` for HTTP requests. However, for improved concurrency performance you may also use `aiohttp` as the HTTP backend.
+By default, the async client uses `httpx2` for HTTP requests. However, for improved concurrency performance you may also use `aiohttp` as the HTTP backend.
 
 You can enable this by installing `aiohttp`:
 
@@ -316,7 +316,7 @@ try:
     )
 except anthropic.APIConnectionError as e:
     print("The server could not be reached")
-    print(e.__cause__)  # an underlying Exception, likely raised within httpx.
+    print(e.__cause__)  # an underlying Exception, likely raised within httpx2.
 except anthropic.RateLimitError as e:
     print("A 429 status code was received; we should back off a bit.")
 except anthropic.APIStatusError as e:
@@ -371,7 +371,7 @@ client.with_options(max_retries=5).messages.create(
 ### Timeouts
 
 By default requests time out after 10 minutes. You can configure this with a `timeout` option,
-which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/timeouts/#fine-tuning-the-configuration) object:
+which accepts a float or an [`httpx2.Timeout`](https://httpx2.pydantic.dev/advanced/timeouts/#fine-tuning-the-configuration) object:
 
 ```python
 from anthropic import Anthropic
@@ -384,7 +384,7 @@ client = Anthropic(
 
 # More granular control:
 client = Anthropic(
-    timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
+    timeout=httpx2.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
 )
 
 # Override per-request:
@@ -468,22 +468,15 @@ message = response.parse()  # get the object that `messages.create()` would have
 print(message.content)
 ```
 
-These methods return a [`LegacyAPIResponse`](https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/_legacy_response.py) object. This is a legacy class as we're changing it slightly in the next major version.
+These methods return an [`APIResponse`](https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/_response.py) object.
 
-For the sync client this will mostly be the same with the exception
-of `content` & `text` will be methods instead of properties. In the
-async client, all methods will be async.
-
-A migration script will be provided & the migration in general should
-be smooth.
+The async client returns an [`AsyncAPIResponse`](https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/_response.py) with the same structure, the only difference being `await`able methods for reading the response content.
 
 #### `.with_streaming_response`
 
 The above interface eagerly reads the full response body when you make the request, which may not always be what you want.
 
 To stream the response body, use `.with_streaming_response` instead, which requires a context manager and only reads the response body once you call `.read()`, `.text()`, `.json()`, `.iter_bytes()`, `.iter_text()`, `.iter_lines()` or `.parse()`. In the async client, these are async methods.
-
-As such, `.with_streaming_response` methods return a different [`APIResponse`](https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/_response.py) object, and the async client returns an [`AsyncAPIResponse`](https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/_response.py) object.
 
 ```python
 with client.messages.with_streaming_response.create(
@@ -516,11 +509,11 @@ To make requests to undocumented endpoints, you can make requests using `client.
 http verbs. Options on the client will be respected (such as retries) when making this request.
 
 ```py
-import httpx
+import httpx2
 
 response = client.post(
     "/foo",
-    cast_to=httpx.Response,
+    cast_to=httpx2.Response,
     body={"my_param": True},
 )
 
@@ -540,14 +533,14 @@ can also get all the extra fields on the Pydantic model as a dict with
 
 ### Configuring the HTTP client
 
-You can directly override the [httpx client](https://www.python-httpx.org/api/#client) to customize it for your use case, including:
+You can directly override the [httpx2 client](https://httpx2.pydantic.dev/api/#client) to customize it for your use case, including:
 
-- Support for [proxies](https://www.python-httpx.org/advanced/proxies/)
-- Custom [transports](https://www.python-httpx.org/advanced/transports/)
-- Additional [advanced](https://www.python-httpx.org/advanced/clients/) functionality
+- Support for [proxies](https://httpx2.pydantic.dev/advanced/proxies/)
+- Custom [transports](https://httpx2.pydantic.dev/advanced/transports/)
+- Additional [advanced](https://httpx2.pydantic.dev/advanced/clients/) functionality
 
 ```python
-import httpx
+import httpx2
 from anthropic import Anthropic, DefaultHttpxClient
 
 client = Anthropic(
@@ -555,7 +548,7 @@ client = Anthropic(
     base_url="http://my.test.server.example.com:8083",
     http_client=DefaultHttpxClient(
         proxy="http://my.test.proxy.example.com",
-        transport=httpx.HTTPTransport(local_address="0.0.0.0"),
+        transport=httpx2.HTTPTransport(local_address="0.0.0.0"),
     ),
 )
 ```
@@ -605,7 +598,7 @@ print(anthropic.__version__)
 
 ## Requirements
 
-Python 3.9 or higher.
+Python 3.10 or higher.
 
 ## Contributing
 

@@ -104,7 +104,6 @@ class TestBatches:
                                 ],
                             }
                         ],
-                        "temperature": 1,
                         "thinking": {
                             "type": "adaptive",
                             "display": "summarized",
@@ -137,8 +136,6 @@ class TestBatches:
                                 "type": "custom",
                             }
                         ],
-                        "top_k": 5,
-                        "top_p": 0.7,
                     },
                 }
             ],
@@ -474,7 +471,6 @@ class TestAsyncBatches:
                                 ],
                             }
                         ],
-                        "temperature": 1,
                         "thinking": {
                             "type": "adaptive",
                             "display": "summarized",
@@ -507,8 +503,6 @@ class TestAsyncBatches:
                                 "type": "custom",
                             }
                         ],
-                        "top_k": 5,
-                        "top_p": 0.7,
                     },
                 }
             ],
@@ -538,7 +532,7 @@ class TestAsyncBatches:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        batch = response.parse()
+        batch = await response.parse()
         assert_matches_type(MessageBatch, batch, path=["response"])
 
     @parametrize
@@ -583,7 +577,7 @@ class TestAsyncBatches:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        batch = response.parse()
+        batch = await response.parse()
         assert_matches_type(MessageBatch, batch, path=["response"])
 
     @parametrize
@@ -626,7 +620,7 @@ class TestAsyncBatches:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        batch = response.parse()
+        batch = await response.parse()
         assert_matches_type(AsyncPage[MessageBatch], batch, path=["response"])
 
     @parametrize
@@ -655,7 +649,7 @@ class TestAsyncBatches:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        batch = response.parse()
+        batch = await response.parse()
         assert_matches_type(DeletedMessageBatch, batch, path=["response"])
 
     @parametrize
@@ -693,7 +687,7 @@ class TestAsyncBatches:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        batch = response.parse()
+        batch = await response.parse()
         assert_matches_type(MessageBatch, batch, path=["response"])
 
     @parametrize
@@ -731,7 +725,7 @@ class TestAsyncBatches:
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        stream = response.parse()
+        stream = await response.parse()
         async for item in stream:
             assert_matches_type(MessageBatchIndividualResponse, item, path=["line"])
 

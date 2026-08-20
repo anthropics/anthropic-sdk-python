@@ -109,10 +109,6 @@ class TestMessages:
                     "remaining": 0,
                 },
             },
-            output_format={
-                "schema": {"foo": "bar"},
-                "type": "json_schema",
-            },
             service_tier="auto",
             speed="standard",
             stop_sequences=["string"],
@@ -137,7 +133,6 @@ class TestMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -170,8 +165,6 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             betas=["message-batches-2024-09-24"],
             user_profile_id="anthropic-user-profile-id",
         )
@@ -306,10 +299,6 @@ class TestMessages:
                     "remaining": 0,
                 },
             },
-            output_format={
-                "schema": {"foo": "bar"},
-                "type": "json_schema",
-            },
             service_tier="auto",
             speed="standard",
             stop_sequences=["string"],
@@ -333,7 +322,6 @@ class TestMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -366,8 +354,6 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             betas=["message-batches-2024-09-24"],
             user_profile_id="anthropic-user-profile-id",
         )
@@ -483,10 +469,6 @@ class TestMessages:
                     "type": "tokens",
                     "remaining": 0,
                 },
-            },
-            output_format={
-                "schema": {"foo": "bar"},
-                "type": "json_schema",
             },
             speed="standard",
             system=[
@@ -677,10 +659,6 @@ class TestAsyncMessages:
                     "remaining": 0,
                 },
             },
-            output_format={
-                "schema": {"foo": "bar"},
-                "type": "json_schema",
-            },
             service_tier="auto",
             speed="standard",
             stop_sequences=["string"],
@@ -705,7 +683,6 @@ class TestAsyncMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -738,8 +715,6 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             betas=["message-batches-2024-09-24"],
             user_profile_id="anthropic-user-profile-id",
         )
@@ -760,7 +735,7 @@ class TestAsyncMessages:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        message = response.parse()
+        message = await response.parse()
         assert_matches_type(BetaMessage, message, path=["response"])
 
     @parametrize
@@ -874,10 +849,6 @@ class TestAsyncMessages:
                     "remaining": 0,
                 },
             },
-            output_format={
-                "schema": {"foo": "bar"},
-                "type": "json_schema",
-            },
             service_tier="auto",
             speed="standard",
             stop_sequences=["string"],
@@ -901,7 +872,6 @@ class TestAsyncMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -934,8 +904,6 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             betas=["message-batches-2024-09-24"],
             user_profile_id="anthropic-user-profile-id",
         )
@@ -956,7 +924,7 @@ class TestAsyncMessages:
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        stream = response.parse()
+        stream = await response.parse()
         await stream.close()
 
     @parametrize
@@ -1052,10 +1020,6 @@ class TestAsyncMessages:
                     "remaining": 0,
                 },
             },
-            output_format={
-                "schema": {"foo": "bar"},
-                "type": "json_schema",
-            },
             speed="standard",
             system=[
                 {
@@ -1128,7 +1092,7 @@ class TestAsyncMessages:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        message = response.parse()
+        message = await response.parse()
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
     @parametrize

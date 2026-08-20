@@ -501,7 +501,7 @@ class TestAsyncCredentials:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        credential = response.parse()
+        credential = await response.parse()
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
     @parametrize
@@ -560,7 +560,7 @@ class TestAsyncCredentials:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        credential = response.parse()
+        credential = await response.parse()
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
     @parametrize
@@ -632,7 +632,7 @@ class TestAsyncCredentials:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        credential = response.parse()
+        credential = await response.parse()
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
     @parametrize
@@ -692,7 +692,7 @@ class TestAsyncCredentials:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        credential = response.parse()
+        credential = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -743,7 +743,7 @@ class TestAsyncCredentials:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        credential = response.parse()
+        credential = await response.parse()
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
     @parametrize
@@ -800,7 +800,7 @@ class TestAsyncCredentials:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        credential = response.parse()
+        credential = await response.parse()
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
     @parametrize
@@ -860,7 +860,7 @@ class TestAsyncCredentials:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        credential = response.parse()
+        credential = await response.parse()
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
     @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")

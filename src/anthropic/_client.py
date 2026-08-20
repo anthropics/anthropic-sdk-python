@@ -6,20 +6,11 @@ import os
 from typing import TYPE_CHECKING, Any, Mapping
 from typing_extensions import Self, override
 
-import httpx
+import httpx2
 
 from . import _constants, _exceptions
 from ._qs import Querystring
-from ._types import (
-    Omit,
-    Headers,
-    Timeout,
-    NotGiven,
-    Transport,
-    ProxiesTypes,
-    RequestOptions,
-    not_given,
-)
+from ._types import Omit, Timeout, NotGiven, RequestOptions, not_given
 from ._utils import (
     is_given,
     is_mapping_t,
@@ -33,27 +24,18 @@ from ._base_client import (
     DEFAULT_MAX_RETRIES,
     SyncAPIClient,
     AsyncAPIClient,
+    merge_headers,
 )
 
 if TYPE_CHECKING:
-    from .resources import beta, files, models, skills, messages, completions
+    from .resources import beta, files, models, skills, messages
     from .resources.files import Files, AsyncFiles
     from .resources.models import Models, AsyncModels
     from .resources.beta.beta import Beta, AsyncBeta
-    from .resources.completions import Completions, AsyncCompletions
     from .resources.skills.skills import Skills, AsyncSkills
     from .resources.messages.messages import Messages, AsyncMessages
 
-__all__ = [
-    "Timeout",
-    "Transport",
-    "ProxiesTypes",
-    "RequestOptions",
-    "Anthropic",
-    "AsyncAnthropic",
-    "Client",
-    "AsyncClient",
-]
+__all__ = ["Timeout", "RequestOptions", "Anthropic", "AsyncAnthropic", "Client", "AsyncClient"]
 
 
 class Anthropic(SyncAPIClient):
@@ -72,15 +54,15 @@ class Anthropic(SyncAPIClient):
         api_key: str | None = None,
         auth_token: str | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        # Configure a custom httpx client.
+        # Configure a custom httpx2 client.
         # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
-        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
-        http_client: httpx.Client | None = None,
+        # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#client) for more details.
+        http_client: httpx2.Client | None = None,
         # Enable or disable schema validation for data returned by the API.
         # When enabled an error APIResponseValidationError is raised
         # if the API responds with invalid data for the expected schema.
@@ -136,12 +118,6 @@ class Anthropic(SyncAPIClient):
         )
 
         self._default_stream_cls = Stream
-
-    @cached_property
-    def completions(self) -> Completions:
-        from .resources.completions import Completions
-
-        return Completions(self)
 
     @cached_property
     def messages(self) -> Messages:
@@ -216,11 +192,11 @@ class Anthropic(SyncAPIClient):
         }
 
     @override
-    def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
-        if headers.get("X-Api-Key") or isinstance(custom_headers.get("X-Api-Key"), Omit):
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
+        if headers.get("X-Api-Key") or "x-api-key" in omitted:
             return
 
-        if headers.get("Authorization") or isinstance(custom_headers.get("Authorization"), Omit):
+        if headers.get("Authorization") or "authorization" in omitted:
             return
 
         raise TypeError(
@@ -233,9 +209,9 @@ class Anthropic(SyncAPIClient):
         api_key: str | None = None,
         auth_token: str | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
@@ -254,7 +230,7 @@ class Anthropic(SyncAPIClient):
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 
@@ -288,7 +264,7 @@ class Anthropic(SyncAPIClient):
         err_msg: str,
         *,
         body: object,
-        response: httpx.Response,
+        response: httpx2.Response,
     ) -> APIStatusError:
         if response.status_code == 400:
             return _exceptions.BadRequestError(err_msg, response=response, body=body)
@@ -332,15 +308,15 @@ class AsyncAnthropic(AsyncAPIClient):
         api_key: str | None = None,
         auth_token: str | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        # Configure a custom httpx client.
+        # Configure a custom httpx2 client.
         # We provide a `DefaultAsyncHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
-        # See the [httpx documentation](https://www.python-httpx.org/api/#asyncclient) for more details.
-        http_client: httpx.AsyncClient | None = None,
+        # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#asyncclient) for more details.
+        http_client: httpx2.AsyncClient | None = None,
         # Enable or disable schema validation for data returned by the API.
         # When enabled an error APIResponseValidationError is raised
         # if the API responds with invalid data for the expected schema.
@@ -396,12 +372,6 @@ class AsyncAnthropic(AsyncAPIClient):
         )
 
         self._default_stream_cls = AsyncStream
-
-    @cached_property
-    def completions(self) -> AsyncCompletions:
-        from .resources.completions import AsyncCompletions
-
-        return AsyncCompletions(self)
 
     @cached_property
     def messages(self) -> AsyncMessages:
@@ -476,11 +446,11 @@ class AsyncAnthropic(AsyncAPIClient):
         }
 
     @override
-    def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
-        if headers.get("X-Api-Key") or isinstance(custom_headers.get("X-Api-Key"), Omit):
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
+        if headers.get("X-Api-Key") or "x-api-key" in omitted:
             return
 
-        if headers.get("Authorization") or isinstance(custom_headers.get("Authorization"), Omit):
+        if headers.get("Authorization") or "authorization" in omitted:
             return
 
         raise TypeError(
@@ -493,9 +463,9 @@ class AsyncAnthropic(AsyncAPIClient):
         api_key: str | None = None,
         auth_token: str | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
@@ -514,7 +484,7 @@ class AsyncAnthropic(AsyncAPIClient):
 
         headers = self._custom_headers
         if default_headers is not None:
-            headers = {**headers, **default_headers}
+            headers = merge_headers(headers, default_headers)
         elif set_default_headers is not None:
             headers = set_default_headers
 
@@ -548,7 +518,7 @@ class AsyncAnthropic(AsyncAPIClient):
         err_msg: str,
         *,
         body: object,
-        response: httpx.Response,
+        response: httpx2.Response,
     ) -> APIStatusError:
         if response.status_code == 400:
             return _exceptions.BadRequestError(err_msg, response=response, body=body)
@@ -581,12 +551,6 @@ class AnthropicWithRawResponse:
 
     def __init__(self, client: Anthropic) -> None:
         self._client = client
-
-    @cached_property
-    def completions(self) -> completions.CompletionsWithRawResponse:
-        from .resources.completions import CompletionsWithRawResponse
-
-        return CompletionsWithRawResponse(self._client.completions)
 
     @cached_property
     def messages(self) -> messages.MessagesWithRawResponse:
@@ -626,12 +590,6 @@ class AsyncAnthropicWithRawResponse:
         self._client = client
 
     @cached_property
-    def completions(self) -> completions.AsyncCompletionsWithRawResponse:
-        from .resources.completions import AsyncCompletionsWithRawResponse
-
-        return AsyncCompletionsWithRawResponse(self._client.completions)
-
-    @cached_property
     def messages(self) -> messages.AsyncMessagesWithRawResponse:
         from .resources.messages import AsyncMessagesWithRawResponse
 
@@ -669,12 +627,6 @@ class AnthropicWithStreamedResponse:
         self._client = client
 
     @cached_property
-    def completions(self) -> completions.CompletionsWithStreamingResponse:
-        from .resources.completions import CompletionsWithStreamingResponse
-
-        return CompletionsWithStreamingResponse(self._client.completions)
-
-    @cached_property
     def messages(self) -> messages.MessagesWithStreamingResponse:
         from .resources.messages import MessagesWithStreamingResponse
 
@@ -710,12 +662,6 @@ class AsyncAnthropicWithStreamedResponse:
 
     def __init__(self, client: AsyncAnthropic) -> None:
         self._client = client
-
-    @cached_property
-    def completions(self) -> completions.AsyncCompletionsWithStreamingResponse:
-        from .resources.completions import AsyncCompletionsWithStreamingResponse
-
-        return AsyncCompletionsWithStreamingResponse(self._client.completions)
 
     @cached_property
     def messages(self) -> messages.AsyncMessagesWithStreamingResponse:

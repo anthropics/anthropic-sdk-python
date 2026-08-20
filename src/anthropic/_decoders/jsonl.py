@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing_extensions import Generic, TypeVar, Iterator, AsyncIterator
 
-import httpx
+import httpx2
 
 from .._models import construct_type_unchecked
 
@@ -17,7 +17,7 @@ class JSONLDecoder(Generic[_T]):
     into a given type.
     """
 
-    http_response: httpx.Response
+    http_response: httpx2.Response
     """The HTTP response this decoder was constructed from"""
 
     def __init__(
@@ -25,7 +25,7 @@ class JSONLDecoder(Generic[_T]):
         *,
         raw_iterator: Iterator[bytes],
         line_type: type[_T],
-        http_response: httpx.Response,
+        http_response: httpx2.Response,
     ) -> None:
         super().__init__()
         self.http_response = http_response
@@ -74,14 +74,14 @@ class AsyncJSONLDecoder(Generic[_T]):
     into a given type.
     """
 
-    http_response: httpx.Response
+    http_response: httpx2.Response
 
     def __init__(
         self,
         *,
         raw_iterator: AsyncIterator[bytes],
         line_type: type[_T],
-        http_response: httpx.Response,
+        http_response: httpx2.Response,
     ) -> None:
         super().__init__()
         self.http_response = http_response

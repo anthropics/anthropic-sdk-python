@@ -6,14 +6,18 @@ from typing import List, Union
 from datetime import datetime
 from itertools import chain
 
-import httpx
+import httpx2
 
-from ... import _legacy_response
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ..._utils import is_given, path_template, maybe_transform, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ..._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ...pagination import SyncPageCursor, AsyncPageCursor
 from ...types.beta import BetaManagedAgentsTriggerType, deployment_run_list_params
 from ..._base_client import AsyncPaginator, make_request_options
@@ -54,7 +58,7 @@ class DeploymentRuns(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeploymentRun:
         """
         Get Deployment Run
@@ -109,7 +113,7 @@ class DeploymentRuns(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsDeploymentRun]:
         """
         List Deployment Runs
@@ -215,7 +219,7 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeploymentRun:
         """
         Get Deployment Run
@@ -270,7 +274,7 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsDeploymentRun, AsyncPageCursor[BetaManagedAgentsDeploymentRun]]:
         """
         List Deployment Runs
@@ -350,10 +354,10 @@ class DeploymentRunsWithRawResponse:
     def __init__(self, deployment_runs: DeploymentRuns) -> None:
         self._deployment_runs = deployment_runs
 
-        self.retrieve = _legacy_response.to_raw_response_wrapper(
+        self.retrieve = to_raw_response_wrapper(
             deployment_runs.retrieve,
         )
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             deployment_runs.list,
         )
 
@@ -362,10 +366,10 @@ class AsyncDeploymentRunsWithRawResponse:
     def __init__(self, deployment_runs: AsyncDeploymentRuns) -> None:
         self._deployment_runs = deployment_runs
 
-        self.retrieve = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve = async_to_raw_response_wrapper(
             deployment_runs.retrieve,
         )
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             deployment_runs.list,
         )
 

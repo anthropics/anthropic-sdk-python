@@ -31,17 +31,14 @@ from typing_extensions import (
     runtime_checkable,
 )
 
-import httpx
+import httpx2
 import pydantic
-from httpx import URL, Proxy, Timeout, Response, BaseTransport, AsyncBaseTransport
+from httpx2 import Timeout, Response
 
 if TYPE_CHECKING:
     from ._models import BaseModel
     from ._response import APIResponse, AsyncAPIResponse
-    from ._legacy_response import HttpxBinaryResponseContent
 
-Transport = BaseTransport
-AsyncTransport = AsyncBaseTransport
 Query = Mapping[str, object]
 Body = object
 AnyMapping = Mapping[str, object]
@@ -52,10 +49,8 @@ ArrayFormat = Literal["comma", "repeat", "indices", "brackets"]
 NestedFormat = Literal["dots", "brackets"]
 
 
-# Approximates httpx internal ProxiesTypes and RequestFiles types
+# Approximates httpx internal RequestFiles types
 # while adding support for `PathLike` instances
-ProxiesDict = Dict["str | URL", Union[None, str, URL, Proxy]]
-ProxiesTypes = Union[str, Proxy, ProxiesDict]
 if TYPE_CHECKING:
     Base64FileInput = Union[IO[bytes], PathLike[str]]
     FileContent = Union[IO[bytes], bytes, PathLike[str]]
@@ -218,7 +213,6 @@ ResponseT = TypeVar(
         ModelBuilderProtocol,
         "APIResponse[Any]",
         "AsyncAPIResponse[Any]",
-        "HttpxBinaryResponseContent",
     ],
 )
 
@@ -247,7 +241,7 @@ class _GenericAlias(Protocol):
 
 
 class HttpxSendArgs(TypedDict, total=False):
-    auth: httpx.Auth
+    auth: httpx2.Auth
     follow_redirects: bool
 
 

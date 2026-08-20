@@ -22,7 +22,6 @@ from .shared import (
 from .message import Message as Message
 from .container import Container as Container
 from .beta_error import BetaError as BetaError
-from .completion import Completion as Completion
 from .model_info import ModelInfo as ModelInfo
 from .text_block import TextBlock as TextBlock
 from .text_delta import TextDelta as TextDelta
@@ -121,7 +120,6 @@ from .redacted_thinking_block import RedactedThinkingBlock as RedactedThinkingBl
 from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockParam
 from .web_search_result_block import WebSearchResultBlock as WebSearchResultBlock
 from .browser_key_config_param import BrowserKeyConfigParam as BrowserKeyConfigParam
-from .completion_create_params import CompletionCreateParams as CompletionCreateParams
 from .content_block_stop_event import ContentBlockStopEvent as ContentBlockStopEvent
 from .json_output_format_param import JSONOutputFormatParam as JSONOutputFormatParam
 from .raw_message_stream_event import RawMessageStreamEvent as RawMessageStreamEvent

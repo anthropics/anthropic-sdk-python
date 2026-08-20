@@ -6,7 +6,7 @@ import os
 import logging
 from typing import TYPE_CHECKING, Iterator, AsyncIterator
 
-import httpx
+import httpx2
 import pytest
 from pytest_asyncio import is_async_test
 
@@ -64,7 +64,7 @@ async def async_client(request: FixtureRequest) -> AsyncIterator[AsyncAnthropic]
 
     # defaults
     strict = True
-    http_client: None | httpx.AsyncClient = None
+    http_client: None | httpx2.AsyncClient = None
 
     if isinstance(param, bool):
         strict = param

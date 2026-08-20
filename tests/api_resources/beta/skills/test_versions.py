@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from typing import Any, cast
 
-import httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -24,8 +24,6 @@ from anthropic.types.beta.skills import (
     VersionDeleteResponse,
     VersionRetrieveResponse,
 )
-
-# pyright: reportDeprecated=false
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -250,7 +248,7 @@ class TestVersions:
     @pytest.mark.respx(base_url=base_url)
     def test_method_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         version = client.beta.skills.versions.download(
             version="version",
@@ -265,7 +263,7 @@ class TestVersions:
     @pytest.mark.respx(base_url=base_url)
     def test_method_download_with_all_params(self, client: Anthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         version = client.beta.skills.versions.download(
             version="version",
@@ -281,7 +279,7 @@ class TestVersions:
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
 
         version = client.beta.skills.versions.with_raw_response.download(
@@ -298,7 +296,7 @@ class TestVersions:
     @pytest.mark.respx(base_url=base_url)
     def test_streaming_response_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         with client.beta.skills.versions.with_streaming_response.download(
             version="version",
@@ -360,7 +358,7 @@ class TestAsyncVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        version = response.parse()
+        version = await response.parse()
         assert_matches_type(VersionCreateResponse, version, path=["response"])
 
     @parametrize
@@ -411,7 +409,7 @@ class TestAsyncVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        version = response.parse()
+        version = await response.parse()
         assert_matches_type(VersionRetrieveResponse, version, path=["response"])
 
     @parametrize
@@ -467,7 +465,7 @@ class TestAsyncVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        version = response.parse()
+        version = await response.parse()
         assert_matches_type(AsyncPageCursor[VersionListResponse], version, path=["response"])
 
     @parametrize
@@ -516,7 +514,7 @@ class TestAsyncVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        version = response.parse()
+        version = await response.parse()
         assert_matches_type(VersionDeleteResponse, version, path=["response"])
 
     @parametrize
@@ -551,7 +549,7 @@ class TestAsyncVersions:
     @pytest.mark.respx(base_url=base_url)
     async def test_method_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         version = await async_client.beta.skills.versions.download(
             version="version",
@@ -566,7 +564,7 @@ class TestAsyncVersions:
     @pytest.mark.respx(base_url=base_url)
     async def test_method_download_with_all_params(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         version = await async_client.beta.skills.versions.download(
             version="version",
@@ -582,7 +580,7 @@ class TestAsyncVersions:
     @pytest.mark.respx(base_url=base_url)
     async def test_raw_response_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
 
         version = await async_client.beta.skills.versions.with_raw_response.download(
@@ -599,7 +597,7 @@ class TestAsyncVersions:
     @pytest.mark.respx(base_url=base_url)
     async def test_streaming_response_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         async with async_client.beta.skills.versions.with_streaming_response.download(
             version="version",

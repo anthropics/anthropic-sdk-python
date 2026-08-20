@@ -3,19 +3,9 @@
 import typing as _t
 
 from . import types
-from ._types import NOT_GIVEN, Omit, NoneType, NotGiven, Transport, ProxiesTypes, omit, not_given
+from ._types import NOT_GIVEN, Omit, NoneType, NotGiven, omit, not_given
 from ._utils import file_from_path
-from ._client import (
-    Client,
-    Stream,
-    Timeout,
-    Anthropic,
-    Transport,
-    AsyncClient,
-    AsyncStream,
-    AsyncAnthropic,
-    RequestOptions,
-)
+from ._client import Client, Stream, Timeout, Anthropic, AsyncClient, AsyncStream, AsyncAnthropic, RequestOptions
 from ._models import BaseModel
 from ._version import __title__, __version__
 from ._response import APIResponse as APIResponse, AsyncAPIResponse as AsyncAPIResponse
@@ -51,8 +41,6 @@ __all__ = [
     "__version__",
     "__title__",
     "NoneType",
-    "Transport",
-    "ProxiesTypes",
     "NotGiven",
     "NOT_GIVEN",
     "not_given",

@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from typing import Any, cast
 
-import httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -19,8 +19,6 @@ from anthropic._response import (
     AsyncStreamedBinaryAPIResponse,
 )
 from anthropic.pagination import SyncPageCursor, AsyncPageCursor
-
-# pyright: reportDeprecated=false
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -103,7 +101,7 @@ class TestFiles:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_method_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         file = client.files.download(
             "file_id",
         )
@@ -115,7 +113,7 @@ class TestFiles:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
         file = client.files.with_raw_response.download(
             "file_id",
@@ -129,7 +127,7 @@ class TestFiles:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_streaming_response_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         with client.files.with_streaming_response.download(
             "file_id",
         ) as file:
@@ -253,7 +251,7 @@ class TestAsyncFiles:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        file = response.parse()
+        file = await response.parse()
         assert_matches_type(AsyncPageCursor[FileMetadata], file, path=["response"])
 
     @parametrize
@@ -282,7 +280,7 @@ class TestAsyncFiles:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        file = response.parse()
+        file = await response.parse()
         assert_matches_type(DeletedFile, file, path=["response"])
 
     @parametrize
@@ -308,7 +306,7 @@ class TestAsyncFiles:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_method_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         file = await async_client.files.download(
             "file_id",
         )
@@ -320,7 +318,7 @@ class TestAsyncFiles:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_raw_response_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
         file = await async_client.files.with_raw_response.download(
             "file_id",
@@ -334,7 +332,7 @@ class TestAsyncFiles:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_streaming_response_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         async with async_client.files.with_streaming_response.download(
             "file_id",
         ) as file:
@@ -370,7 +368,7 @@ class TestAsyncFiles:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        file = response.parse()
+        file = await response.parse()
         assert_matches_type(FileMetadata, file, path=["response"])
 
     @parametrize
@@ -416,7 +414,7 @@ class TestAsyncFiles:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        file = response.parse()
+        file = await response.parse()
         assert_matches_type(FileMetadata, file, path=["response"])
 
     @parametrize

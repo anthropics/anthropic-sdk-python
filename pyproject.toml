@@ -9,7 +9,7 @@ authors = [
 ]
 
 dependencies = [
-  "httpx>=0.23.0, <1",
+  "httpx2>=2.0.0, <3",
   "pydantic>=1.9.0, <3",
   "typing-extensions>=4.14, <5",
   "anyio>=3.5.0, <5",
@@ -17,11 +17,10 @@ dependencies = [
   "sniffio",
 ]
 
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 classifiers = [
   "Typing :: Typed",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -41,7 +40,7 @@ Homepage = "https://github.com/anthropics/anthropic-sdk-python"
 Repository = "https://github.com/anthropics/anthropic-sdk-python"
 
 [project.optional-dependencies]
-aiohttp = ["aiohttp", "httpx_aiohttp>=0.1.9"]
+aiohttp = ["aiohttp>=3.10.0, <4"]
 webhooks = ["standardwebhooks >= 1.0.1, < 2"]
 
 [tool.uv]
@@ -69,6 +68,7 @@ dev = [
     "rich>=13.7.1",
     "pytest-xdist>=3.6.1",
     "griffe>=1",
+    "httpx2>=2.9",
 ]
 pydantic-v1 = [
     "pydantic>=1.9.0,<2",
@@ -117,7 +117,8 @@ replacement = '[\1](https://github.com/anthropics/anthropic-sdk-python/tree/main
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--tb=short -n auto"
+addopts = "--tb=short -n auto -p tests._alias_httpx"
+pythonpath = ["."]
 xfail_strict = true
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
@@ -130,12 +131,13 @@ filterwarnings = [
 # there are a couple of flags that are still disabled by
 # default in strict mode as they are experimental and niche.
 typeCheckingMode = "strict"
-pythonVersion = "3.9"
+pythonVersion = "3.10"
 
 exclude = [
     "_dev",
     ".venv",
     ".git",
+    "src/anthropic/_vendor",
 ]
 
 reportImplicitOverride = true
@@ -194,6 +196,7 @@ disable_error_code = "func-returns-value,overload-cannot-match"
 line-length = 120
 output-format = "grouped"
 target-version = "py38"
+extend-exclude = ["src/anthropic/_vendor"]
 
 [tool.ruff.format]
 docstring-code-format = true

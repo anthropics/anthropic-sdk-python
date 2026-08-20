@@ -422,7 +422,7 @@ class TestAsyncSessions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        session = response.parse()
+        session = await response.parse()
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
     @parametrize
@@ -462,7 +462,7 @@ class TestAsyncSessions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        session = response.parse()
+        session = await response.parse()
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
     @parametrize
@@ -544,7 +544,7 @@ class TestAsyncSessions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        session = response.parse()
+        session = await response.parse()
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
     @parametrize
@@ -601,7 +601,7 @@ class TestAsyncSessions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        session = response.parse()
+        session = await response.parse()
         assert_matches_type(AsyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -639,7 +639,7 @@ class TestAsyncSessions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        session = response.parse()
+        session = await response.parse()
         assert_matches_type(BetaManagedAgentsDeletedSession, session, path=["response"])
 
     @parametrize
@@ -685,7 +685,7 @@ class TestAsyncSessions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        session = response.parse()
+        session = await response.parse()
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
     @parametrize

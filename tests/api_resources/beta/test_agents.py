@@ -403,7 +403,7 @@ class TestAsyncAgents:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        agent = response.parse()
+        agent = await response.parse()
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
     @parametrize
@@ -447,7 +447,7 @@ class TestAsyncAgents:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        agent = response.parse()
+        agent = await response.parse()
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -541,7 +541,7 @@ class TestAsyncAgents:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        agent = response.parse()
+        agent = await response.parse()
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
     @parametrize
@@ -590,7 +590,7 @@ class TestAsyncAgents:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        agent = response.parse()
+        agent = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsAgent], agent, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -628,7 +628,7 @@ class TestAsyncAgents:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        agent = response.parse()
+        agent = await response.parse()
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
     @parametrize

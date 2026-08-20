@@ -13,7 +13,7 @@ import tracemalloc
 from typing import Any, Union, TypeVar, Callable, Iterable, Iterator, Optional, Coroutine, cast
 from typing_extensions import Literal, AsyncIterator, override
 
-import httpx
+import httpx2
 import pytest
 from respx import MockRouter
 from pydantic import ValidationError
@@ -45,7 +45,7 @@ api_key = "my-anthropic-api-key"
 
 def _get_params(client: BaseClient[Any, Any]) -> dict[str, str]:
     request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-    url = httpx.URL(request.url)
+    url = httpx2.URL(request.url)
     return dict(url.params)
 
 
@@ -53,25 +53,25 @@ def _low_retry_timeout(*_args: Any, **_kwargs: Any) -> float:
     return 0.1
 
 
-def mirror_request_content(request: httpx.Request) -> httpx.Response:
-    return httpx.Response(200, content=request.content)
+def mirror_request_content(request: httpx2.Request) -> httpx2.Response:
+    return httpx2.Response(200, content=request.content)
 
 
-# note: we can't use the httpx.MockTransport class as it consumes the request
+# note: we can't use the httpx2.MockTransport class as it consumes the request
 #       body itself, which means we can't test that the body is read lazily
-class MockTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
+class MockTransport(httpx2.BaseTransport, httpx2.AsyncBaseTransport):
     def __init__(
         self,
-        handler: Callable[[httpx.Request], httpx.Response]
-        | Callable[[httpx.Request], Coroutine[Any, Any, httpx.Response]],
+        handler: Callable[[httpx2.Request], httpx2.Response]
+        | Callable[[httpx2.Request], Coroutine[Any, Any, httpx2.Response]],
     ) -> None:
         self.handler = handler
 
     @override
     def handle_request(
         self,
-        request: httpx.Request,
-    ) -> httpx.Response:
+        request: httpx2.Request,
+    ) -> httpx2.Response:
         assert not inspect.iscoroutinefunction(self.handler), "handler must not be a coroutine function"
         assert inspect.isfunction(self.handler), "handler must be a function"
         return self.handler(request)
@@ -79,8 +79,8 @@ class MockTransport(httpx.BaseTransport, httpx.AsyncBaseTransport):
     @override
     async def handle_async_request(
         self,
-        request: httpx.Request,
-    ) -> httpx.Response:
+        request: httpx2.Request,
+    ) -> httpx2.Response:
         assert inspect.iscoroutinefunction(self.handler), "handler must be a coroutine function"
         return await self.handler(request)
 
@@ -106,7 +106,7 @@ async def _make_async_iterator(iterable: Iterable[T], counter: Optional[Counter]
 
 def _get_open_connections(client: Anthropic | AsyncAnthropic) -> int:
     transport = client._client._transport
-    assert isinstance(transport, httpx.HTTPTransport) or isinstance(transport, httpx.AsyncHTTPTransport)
+    assert isinstance(transport, httpx2.HTTPTransport) or isinstance(transport, httpx2.AsyncHTTPTransport)
 
     pool = transport._pool
     return len(pool._requests)
@@ -115,22 +115,22 @@ def _get_open_connections(client: Anthropic | AsyncAnthropic) -> int:
 class TestAnthropic:
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response(self, respx_mock: MockRouter, client: Anthropic) -> None:
-        respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
-        response = client.post("/foo", cast_to=httpx.Response)
+        response = client.post("/foo", cast_to=httpx2.Response)
         assert response.status_code == 200
-        assert isinstance(response, httpx.Response)
+        assert isinstance(response, httpx2.Response)
         assert response.json() == {"foo": "bar"}
 
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response_for_binary(self, respx_mock: MockRouter, client: Anthropic) -> None:
         respx_mock.post("/foo").mock(
-            return_value=httpx.Response(200, headers={"Content-Type": "application/binary"}, content='{"foo": "bar"}')
+            return_value=httpx2.Response(200, headers={"Content-Type": "application/binary"}, content='{"foo": "bar"}')
         )
 
-        response = client.post("/foo", cast_to=httpx.Response)
+        response = client.post("/foo", cast_to=httpx2.Response)
         assert response.status_code == 200
-        assert isinstance(response, httpx.Response)
+        assert isinstance(response, httpx2.Response)
         assert response.json() == {"foo": "bar"}
 
     def test_copy(self, client: Anthropic) -> None:
@@ -152,10 +152,10 @@ class TestAnthropic:
         assert copied.max_retries == 7
 
         # timeout
-        assert isinstance(client.timeout, httpx.Timeout)
+        assert isinstance(client.timeout, httpx2.Timeout)
         copied = client.copy(timeout=None)
         assert copied.timeout is None
-        assert isinstance(client.timeout, httpx.Timeout)
+        assert isinstance(client.timeout, httpx2.Timeout)
 
     def test_copy_default_headers(self) -> None:
         client = Anthropic(
@@ -311,64 +311,64 @@ class TestAnthropic:
 
     def test_request_timeout(self, client: Anthropic) -> None:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
+        timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
         assert timeout == DEFAULT_TIMEOUT
 
-        request = client._build_request(FinalRequestOptions(method="get", url="/foo", timeout=httpx.Timeout(100.0)))
-        timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
-        assert timeout == httpx.Timeout(100.0)
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo", timeout=httpx2.Timeout(100.0)))
+        timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
+        assert timeout == httpx2.Timeout(100.0)
 
     def test_client_timeout_option(self) -> None:
         client = Anthropic(
-            base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=httpx.Timeout(0)
+            base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=httpx2.Timeout(0)
         )
 
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
-        assert timeout == httpx.Timeout(0)
+        timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
+        assert timeout == httpx2.Timeout(0)
 
         client.close()
 
     def test_http_client_timeout_option(self) -> None:
         # custom timeout given to the httpx client should be used
-        with httpx.Client(timeout=None) as http_client:
+        with httpx2.Client(timeout=None) as http_client:
             client = Anthropic(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-            timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
-            assert timeout == httpx.Timeout(None)
+            timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
+            assert timeout == httpx2.Timeout(None)
 
             client.close()
 
         # no timeout given to the httpx client should not use the httpx default
-        with httpx.Client() as http_client:
+        with httpx2.Client() as http_client:
             client = Anthropic(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-            timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
+            timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
             assert timeout == DEFAULT_TIMEOUT
 
             client.close()
 
         # explicitly passing the default timeout currently results in it being ignored
-        with httpx.Client(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
+        with httpx2.Client(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
             client = Anthropic(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-            timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
+            timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
             assert timeout == DEFAULT_TIMEOUT  # our default
 
             client.close()
 
     async def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
-            async with httpx.AsyncClient() as http_client:
+            async with httpx2.AsyncClient() as http_client:
                 Anthropic(
                     base_url=base_url,
                     api_key=api_key,
@@ -416,13 +416,84 @@ class TestAnthropic:
 
         request2 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"X-Api-Key": Omit()}))
         assert request2.headers.get("X-Api-Key") is None
+        request3 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": Omit()}))
+        assert request3.headers.get("X-Api-Key") is None
+        request4 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": "from-header"})
+        )
+        assert request4.headers.get_list("X-Api-Key") == ["from-header"]
+
+    def test_default_headers_case_insensitive(self) -> None:
+        # replaces the SDK's own `User-Agent` rather than being sent next to it
+        test_client = Anthropic(
+            base_url=base_url,
+            api_key=api_key,
+            _strict_response_validation=True,
+            default_headers={"user-agent": "my-app/1.0"},
+        )
+        request = test_client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert request.headers.get_list("user-agent") == ["my-app/1.0"]
+
+        test_client.close()
+
+    def test_extra_headers_case_insensitive(self, client: Anthropic) -> None:
+        request = client.with_options(default_headers={"X-Foo": "client"})._build_request(
+            FinalRequestOptions(method="post", url="/foo", **make_request_options(extra_headers={"x-foo": "request"}))
+        )
+        assert request.headers.get_list("x-foo") == ["request"]
+
+    def test_omit_headers_case_insensitive(self, client: Anthropic) -> None:
+        request = client.with_options(default_headers={"X-Foo": "bar"})._build_request(
+            FinalRequestOptions(method="post", url="/foo", **make_request_options(extra_headers={"x-foo": Omit()}))
+        )
+        assert "x-foo" not in request.headers
+
+        request = client.with_options(default_headers=cast("dict[str, str]", {"X-FOO": Omit()}))._build_request(
+            FinalRequestOptions(method="post", url="/foo")
+        )
+        assert "x-foo" not in request.headers
+
+        request = client._build_request(
+            FinalRequestOptions(
+                method="post", url="/foo", **make_request_options(extra_headers={"X-STAINLESS-LANG": Omit()})
+            )
+        )
+        assert "x-stainless-lang" not in request.headers
+
+        # request-time SDK headers sit in the lowest layer too, so a client-level `Omit()` also removes them
+        request = client.with_options(
+            default_headers=cast("dict[str, str]", {"X-Stainless-Retry-Count": Omit()})
+        )._build_request(FinalRequestOptions(method="post", url="/foo"))
+        assert "x-stainless-retry-count" not in request.headers
+
+    def test_with_options_headers_case_insensitive(self, client: Anthropic) -> None:
+        copied = client.with_options(default_headers={"X-Foo": "one"}).with_options(default_headers={"x-foo": "two"})
+        request = copied._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert request.headers.get_list("x-foo") == ["two"]
+        assert copied.default_headers["x-foo"] == "two"
+        assert "X-Foo" not in copied.default_headers
+
+    def test_multipart_content_type_case_insensitive(self, client: Anthropic) -> None:
+        request = client._build_request(
+            FinalRequestOptions.construct(
+                method="post",
+                url="/foo",
+                headers={"content-type": "Multipart/Form-Data"},
+                json_data={"foo": "bar"},
+                files=[("file", ("foo.txt", b"hello world"))],
+            )
+        )
+        content_types = request.headers.get_list("content-type")
+        assert len(content_types) == 1, content_types
+        assert content_types[0].startswith("multipart/form-data; boundary=")
+        assert b'name="foo"' in request.read()
 
     def test_default_query_option(self) -> None:
         client = Anthropic(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"query_param": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        url = httpx.URL(request.url)
+        url = httpx2.URL(request.url)
         assert dict(url.params) == {"query_param": "bar"}
 
         request = client._build_request(
@@ -432,14 +503,14 @@ class TestAnthropic:
                 params={"foo": "baz", "query_param": "overridden"},
             )
         )
-        url = httpx.URL(request.url)
+        url = httpx2.URL(request.url)
         assert dict(url.params) == {"foo": "baz", "query_param": "overridden"}
 
         client.close()
 
     def test_hardcoded_query_params_in_url(self, client: Anthropic) -> None:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo?beta=true"))
-        url = httpx.URL(request.url)
+        url = httpx2.URL(request.url)
         assert dict(url.params) == {"beta": "true"}
 
         request = client._build_request(
@@ -449,7 +520,7 @@ class TestAnthropic:
                 params={"limit": "10", "page": "abc"},
             )
         )
-        url = httpx.URL(request.url)
+        url = httpx2.URL(request.url)
         assert dict(url.params) == {"beta": "true", "limit": "10", "page": "abc"}
 
         request = client._build_request(
@@ -596,7 +667,7 @@ class TestAnthropic:
         response = client.post(
             "/upload",
             content=file_content,
-            cast_to=httpx.Response,
+            cast_to=httpx2.Response,
             options={"headers": {"Content-Type": "application/octet-stream"}},
         )
 
@@ -609,20 +680,20 @@ class TestAnthropic:
         counter = Counter()
         iterator = _make_sync_iterator([file_content], counter=counter)
 
-        def mock_handler(request: httpx.Request) -> httpx.Response:
+        def mock_handler(request: httpx2.Request) -> httpx2.Response:
             assert counter.value == 0, "the request body should not have been read"
-            return httpx.Response(200, content=request.read())
+            return httpx2.Response(200, content=request.read())
 
         with Anthropic(
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
-            http_client=httpx.Client(transport=MockTransport(handler=mock_handler)),
+            http_client=httpx2.Client(transport=MockTransport(handler=mock_handler)),
         ) as client:
             response = client.post(
                 "/upload",
                 content=iterator,
-                cast_to=httpx.Response,
+                cast_to=httpx2.Response,
                 options={"headers": {"Content-Type": "application/octet-stream"}},
             )
 
@@ -631,25 +702,16 @@ class TestAnthropic:
             assert response.content == file_content
             assert counter.value == 1
 
-    @pytest.mark.respx(base_url=base_url)
-    def test_binary_content_upload_with_body_is_deprecated(self, respx_mock: MockRouter, client: Anthropic) -> None:
-        respx_mock.post("/upload").mock(side_effect=mirror_request_content)
-
-        file_content = b"Hello, this is a test file."
-
-        with pytest.deprecated_call(
-            match="Passing raw bytes as `body` is deprecated and will be removed in a future version. Please pass raw bytes via the `content` parameter instead."
+    def test_binary_content_upload_with_body_is_rejected(self, client: Anthropic) -> None:
+        with pytest.raises(
+            TypeError, match="Passing raw bytes as `body` is not supported, pass them as `content` instead"
         ):
-            response = client.post(
+            client.post(
                 "/upload",
-                body=file_content,
-                cast_to=httpx.Response,
+                body=b"Hello, this is a test file.",
+                cast_to=httpx2.Response,
                 options={"headers": {"Content-Type": "application/octet-stream"}},
             )
-
-        assert response.status_code == 200
-        assert response.request.headers["Content-Type"] == "application/octet-stream"
-        assert response.content == file_content
 
     @pytest.mark.respx(base_url=base_url)
     def test_basic_union_response(self, respx_mock: MockRouter, client: Anthropic) -> None:
@@ -659,7 +721,7 @@ class TestAnthropic:
         class Model2(BaseModel):
             foo: str
 
-        respx_mock.get("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
         response = client.get("/foo", cast_to=cast(Any, Union[Model1, Model2]))
         assert isinstance(response, Model2)
@@ -675,13 +737,13 @@ class TestAnthropic:
         class Model2(BaseModel):
             foo: str
 
-        respx_mock.get("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
         response = client.get("/foo", cast_to=cast(Any, Union[Model1, Model2]))
         assert isinstance(response, Model2)
         assert response.foo == "bar"
 
-        respx_mock.get("/foo").mock(return_value=httpx.Response(200, json={"foo": 1}))
+        respx_mock.get("/foo").mock(return_value=httpx2.Response(200, json={"foo": 1}))
 
         response = client.get("/foo", cast_to=cast(Any, Union[Model1, Model2]))
         assert isinstance(response, Model1)
@@ -697,7 +759,7 @@ class TestAnthropic:
             foo: int
 
         respx_mock.get("/foo").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 content=json.dumps({"foo": 2}),
                 headers={"Content-Type": "application/text"},
@@ -731,7 +793,7 @@ class TestAnthropic:
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
-                http_client=httpx.Client(),
+                http_client=httpx2.Client(),
             ),
         ],
         ids=["standard", "custom http client"],
@@ -755,7 +817,7 @@ class TestAnthropic:
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
-                http_client=httpx.Client(),
+                http_client=httpx2.Client(),
             ),
         ],
         ids=["standard", "custom http client"],
@@ -779,7 +841,7 @@ class TestAnthropic:
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
-                http_client=httpx.Client(),
+                http_client=httpx2.Client(),
             ),
         ],
         ids=["standard", "custom http client"],
@@ -819,7 +881,7 @@ class TestAnthropic:
         class Model(BaseModel):
             foo: str
 
-        respx_mock.get("/foo").mock(return_value=httpx.Response(200, json={"foo": {"invalid": True}}))
+        respx_mock.get("/foo").mock(return_value=httpx2.Response(200, json={"foo": {"invalid": True}}))
 
         with pytest.raises(APIResponseValidationError) as exc:
             client.get("/foo", cast_to=Model)
@@ -835,7 +897,7 @@ class TestAnthropic:
         class Model(BaseModel):
             name: str
 
-        respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
         stream = client.post("/foo", cast_to=Model, stream=True, stream_cls=Stream[Model])
         assert isinstance(stream, Stream)
@@ -846,7 +908,7 @@ class TestAnthropic:
         class Model(BaseModel):
             name: str
 
-        respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
+        respx_mock.get("/foo").mock(return_value=httpx2.Response(200, text="my-custom-format"))
 
         strict_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 
@@ -892,7 +954,7 @@ class TestAnthropic:
     ) -> None:
         monkeypatch.setattr("time.time", lambda: 1696004797)
 
-        headers = httpx.Headers({"retry-after": retry_after})
+        headers = httpx2.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
         calculated = client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
@@ -903,7 +965,7 @@ class TestAnthropic:
     ) -> None:
         monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
 
-        respx_mock.post("/v1/messages").mock(side_effect=httpx.TimeoutException("Test timeout error"))
+        respx_mock.post("/v1/messages").mock(side_effect=httpx2.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
             client.messages.with_streaming_response.create(
@@ -925,7 +987,7 @@ class TestAnthropic:
     ) -> None:
         monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
 
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(500))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(500))
 
         with pytest.raises(APIStatusError):
             client.messages.with_streaming_response.create(
@@ -957,14 +1019,14 @@ class TestAnthropic:
 
         nb_retries = 0
 
-        def retry_handler(_request: httpx.Request) -> httpx.Response:
+        def retry_handler(_request: httpx2.Request) -> httpx2.Response:
             nonlocal nb_retries
             if nb_retries < failures_before_success:
                 nb_retries += 1
                 if failure_mode == "exception":
                     raise RuntimeError("oops")
-                return httpx.Response(500)
-            return httpx.Response(200)
+                return httpx2.Response(500)
+            return httpx2.Response(200)
 
         respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
 
@@ -997,12 +1059,12 @@ class TestAnthropic:
 
         nb_retries = 0
 
-        def retry_handler(_request: httpx.Request) -> httpx.Response:
+        def retry_handler(_request: httpx2.Request) -> httpx2.Response:
             nonlocal nb_retries
             if nb_retries < failures_before_success:
                 nb_retries += 1
-                return httpx.Response(500)
-            return httpx.Response(200)
+                return httpx2.Response(500)
+            return httpx2.Response(200)
 
         respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
 
@@ -1035,12 +1097,12 @@ class TestAnthropic:
 
         nb_retries = 0
 
-        def retry_handler(_request: httpx.Request) -> httpx.Response:
+        def retry_handler(_request: httpx2.Request) -> httpx2.Response:
             nonlocal nb_retries
             if nb_retries < failures_before_success:
                 nb_retries += 1
-                return httpx.Response(500)
-            return httpx.Response(200)
+                return httpx2.Response(500)
+            return httpx2.Response(200)
 
         respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
 
@@ -1057,43 +1119,6 @@ class TestAnthropic:
         )
 
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
-
-    @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @pytest.mark.respx(base_url=base_url)
-    def test_retries_taken_new_response_class(
-        self,
-        client: Anthropic,
-        failures_before_success: int,
-        respx_mock: MockRouter,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
-
-        client = client.with_options(max_retries=4)
-
-        nb_retries = 0
-
-        def retry_handler(_request: httpx.Request) -> httpx.Response:
-            nonlocal nb_retries
-            if nb_retries < failures_before_success:
-                nb_retries += 1
-                return httpx.Response(500)
-            return httpx.Response(200)
-
-        respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
-
-        with client.messages.with_streaming_response.create(
-            max_tokens=1024,
-            messages=[
-                {
-                    "content": "Hello, world",
-                    "role": "user",
-                }
-            ],
-            model="claude-opus-5",
-        ) as response:
-            assert response.retries_taken == failures_before_success
-            assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
     def test_proxy_environment_variables(self, monkeypatch: pytest.MonkeyPatch) -> None:
         # Test that the proxy environment variables are set correctly
@@ -1122,18 +1147,18 @@ class TestAnthropic:
             trust_env=True,
             http1=True,
             http2=False,
-            limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
+            limits=httpx2.Limits(max_connections=100, max_keepalive_connections=20),
         )
 
     @pytest.mark.respx(base_url=base_url)
     def test_follow_redirects(self, respx_mock: MockRouter, client: Anthropic) -> None:
         # Test that the default follow_redirects=True allows following redirects
         respx_mock.post("/redirect").mock(
-            return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
+            return_value=httpx2.Response(302, headers={"Location": f"{base_url}/redirected"})
         )
-        respx_mock.get("/redirected").mock(return_value=httpx.Response(200, json={"status": "ok"}))
+        respx_mock.get("/redirected").mock(return_value=httpx2.Response(200, json={"status": "ok"}))
 
-        response = client.post("/redirect", body={"key": "value"}, cast_to=httpx.Response)
+        response = client.post("/redirect", body={"key": "value"}, cast_to=httpx2.Response)
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
 
@@ -1141,11 +1166,13 @@ class TestAnthropic:
     def test_follow_redirects_disabled(self, respx_mock: MockRouter, client: Anthropic) -> None:
         # Test that follow_redirects=False prevents following redirects
         respx_mock.post("/redirect").mock(
-            return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
+            return_value=httpx2.Response(302, headers={"Location": f"{base_url}/redirected"})
         )
 
         with pytest.raises(APIStatusError) as exc_info:
-            client.post("/redirect", body={"key": "value"}, options={"follow_redirects": False}, cast_to=httpx.Response)
+            client.post(
+                "/redirect", body={"key": "value"}, options={"follow_redirects": False}, cast_to=httpx2.Response
+            )
 
         assert exc_info.value.response.status_code == 302
         assert exc_info.value.response.headers["Location"] == f"{base_url}/redirected"
@@ -1154,22 +1181,22 @@ class TestAnthropic:
 class TestAsyncAnthropic:
     @pytest.mark.respx(base_url=base_url)
     async def test_raw_response(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
-        respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
-        response = await async_client.post("/foo", cast_to=httpx.Response)
+        response = await async_client.post("/foo", cast_to=httpx2.Response)
         assert response.status_code == 200
-        assert isinstance(response, httpx.Response)
+        assert isinstance(response, httpx2.Response)
         assert response.json() == {"foo": "bar"}
 
     @pytest.mark.respx(base_url=base_url)
     async def test_raw_response_for_binary(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
         respx_mock.post("/foo").mock(
-            return_value=httpx.Response(200, headers={"Content-Type": "application/binary"}, content='{"foo": "bar"}')
+            return_value=httpx2.Response(200, headers={"Content-Type": "application/binary"}, content='{"foo": "bar"}')
         )
 
-        response = await async_client.post("/foo", cast_to=httpx.Response)
+        response = await async_client.post("/foo", cast_to=httpx2.Response)
         assert response.status_code == 200
-        assert isinstance(response, httpx.Response)
+        assert isinstance(response, httpx2.Response)
         assert response.json() == {"foo": "bar"}
 
     def test_copy(self, async_client: AsyncAnthropic) -> None:
@@ -1191,10 +1218,10 @@ class TestAsyncAnthropic:
         assert copied.max_retries == 7
 
         # timeout
-        assert isinstance(async_client.timeout, httpx.Timeout)
+        assert isinstance(async_client.timeout, httpx2.Timeout)
         copied = async_client.copy(timeout=None)
         assert copied.timeout is None
-        assert isinstance(async_client.timeout, httpx.Timeout)
+        assert isinstance(async_client.timeout, httpx2.Timeout)
 
     async def test_copy_default_headers(self) -> None:
         client = AsyncAnthropic(
@@ -1350,66 +1377,66 @@ class TestAsyncAnthropic:
 
     async def test_request_timeout(self, async_client: AsyncAnthropic) -> None:
         request = async_client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
+        timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
         assert timeout == DEFAULT_TIMEOUT
 
         request = async_client._build_request(
-            FinalRequestOptions(method="get", url="/foo", timeout=httpx.Timeout(100.0))
+            FinalRequestOptions(method="get", url="/foo", timeout=httpx2.Timeout(100.0))
         )
-        timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
-        assert timeout == httpx.Timeout(100.0)
+        timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
+        assert timeout == httpx2.Timeout(100.0)
 
     async def test_client_timeout_option(self) -> None:
         client = AsyncAnthropic(
-            base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=httpx.Timeout(0)
+            base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=httpx2.Timeout(0)
         )
 
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
-        assert timeout == httpx.Timeout(0)
+        timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
+        assert timeout == httpx2.Timeout(0)
 
         await client.close()
 
     async def test_http_client_timeout_option(self) -> None:
         # custom timeout given to the httpx client should be used
-        async with httpx.AsyncClient(timeout=None) as http_client:
+        async with httpx2.AsyncClient(timeout=None) as http_client:
             client = AsyncAnthropic(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-            timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
-            assert timeout == httpx.Timeout(None)
+            timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
+            assert timeout == httpx2.Timeout(None)
 
             await client.close()
 
         # no timeout given to the httpx client should not use the httpx default
-        async with httpx.AsyncClient() as http_client:
+        async with httpx2.AsyncClient() as http_client:
             client = AsyncAnthropic(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-            timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
+            timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
             assert timeout == DEFAULT_TIMEOUT
 
             await client.close()
 
         # explicitly passing the default timeout currently results in it being ignored
-        async with httpx.AsyncClient(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
+        async with httpx2.AsyncClient(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
             client = AsyncAnthropic(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-            timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
+            timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
             assert timeout == DEFAULT_TIMEOUT  # our default
 
             await client.close()
 
     def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
-            with httpx.Client() as http_client:
+            with httpx2.Client() as http_client:
                 AsyncAnthropic(
                     base_url=base_url,
                     api_key=api_key,
@@ -1457,13 +1484,86 @@ class TestAsyncAnthropic:
 
         request2 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"X-Api-Key": Omit()}))
         assert request2.headers.get("X-Api-Key") is None
+        request3 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": Omit()}))
+        assert request3.headers.get("X-Api-Key") is None
+        request4 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": "from-header"})
+        )
+        assert request4.headers.get_list("X-Api-Key") == ["from-header"]
+
+    async def test_default_headers_case_insensitive(self) -> None:
+        # replaces the SDK's own `User-Agent` rather than being sent next to it
+        test_client = AsyncAnthropic(
+            base_url=base_url,
+            api_key=api_key,
+            _strict_response_validation=True,
+            default_headers={"user-agent": "my-app/1.0"},
+        )
+        request = test_client._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert request.headers.get_list("user-agent") == ["my-app/1.0"]
+
+        await test_client.close()
+
+    def test_extra_headers_case_insensitive(self, async_client: AsyncAnthropic) -> None:
+        request = async_client.with_options(default_headers={"X-Foo": "client"})._build_request(
+            FinalRequestOptions(method="post", url="/foo", **make_request_options(extra_headers={"x-foo": "request"}))
+        )
+        assert request.headers.get_list("x-foo") == ["request"]
+
+    def test_omit_headers_case_insensitive(self, async_client: AsyncAnthropic) -> None:
+        request = async_client.with_options(default_headers={"X-Foo": "bar"})._build_request(
+            FinalRequestOptions(method="post", url="/foo", **make_request_options(extra_headers={"x-foo": Omit()}))
+        )
+        assert "x-foo" not in request.headers
+
+        request = async_client.with_options(default_headers=cast("dict[str, str]", {"X-FOO": Omit()}))._build_request(
+            FinalRequestOptions(method="post", url="/foo")
+        )
+        assert "x-foo" not in request.headers
+
+        request = async_client._build_request(
+            FinalRequestOptions(
+                method="post", url="/foo", **make_request_options(extra_headers={"X-STAINLESS-LANG": Omit()})
+            )
+        )
+        assert "x-stainless-lang" not in request.headers
+
+        # request-time SDK headers sit in the lowest layer too, so a client-level `Omit()` also removes them
+        request = async_client.with_options(
+            default_headers=cast("dict[str, str]", {"X-Stainless-Retry-Count": Omit()})
+        )._build_request(FinalRequestOptions(method="post", url="/foo"))
+        assert "x-stainless-retry-count" not in request.headers
+
+    def test_with_options_headers_case_insensitive(self, async_client: AsyncAnthropic) -> None:
+        copied = async_client.with_options(default_headers={"X-Foo": "one"}).with_options(
+            default_headers={"x-foo": "two"}
+        )
+        request = copied._build_request(FinalRequestOptions(method="get", url="/foo"))
+        assert request.headers.get_list("x-foo") == ["two"]
+        assert copied.default_headers["x-foo"] == "two"
+        assert "X-Foo" not in copied.default_headers
+
+    def test_multipart_content_type_case_insensitive(self, async_client: AsyncAnthropic) -> None:
+        request = async_client._build_request(
+            FinalRequestOptions.construct(
+                method="post",
+                url="/foo",
+                headers={"content-type": "Multipart/Form-Data"},
+                json_data={"foo": "bar"},
+                files=[("file", ("foo.txt", b"hello world"))],
+            )
+        )
+        content_types = request.headers.get_list("content-type")
+        assert len(content_types) == 1, content_types
+        assert content_types[0].startswith("multipart/form-data; boundary=")
+        assert b'name="foo"' in request.read()
 
     async def test_default_query_option(self) -> None:
         client = AsyncAnthropic(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"query_param": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        url = httpx.URL(request.url)
+        url = httpx2.URL(request.url)
         assert dict(url.params) == {"query_param": "bar"}
 
         request = client._build_request(
@@ -1473,14 +1573,14 @@ class TestAsyncAnthropic:
                 params={"foo": "baz", "query_param": "overridden"},
             )
         )
-        url = httpx.URL(request.url)
+        url = httpx2.URL(request.url)
         assert dict(url.params) == {"foo": "baz", "query_param": "overridden"}
 
         await client.close()
 
     async def test_hardcoded_query_params_in_url(self, async_client: AsyncAnthropic) -> None:
         request = async_client._build_request(FinalRequestOptions(method="get", url="/foo?beta=true"))
-        url = httpx.URL(request.url)
+        url = httpx2.URL(request.url)
         assert dict(url.params) == {"beta": "true"}
 
         request = async_client._build_request(
@@ -1490,7 +1590,7 @@ class TestAsyncAnthropic:
                 params={"limit": "10", "page": "abc"},
             )
         )
-        url = httpx.URL(request.url)
+        url = httpx2.URL(request.url)
         assert dict(url.params) == {"beta": "true", "limit": "10", "page": "abc"}
 
         request = async_client._build_request(
@@ -1637,7 +1737,7 @@ class TestAsyncAnthropic:
         response = await async_client.post(
             "/upload",
             content=file_content,
-            cast_to=httpx.Response,
+            cast_to=httpx2.Response,
             options={"headers": {"Content-Type": "application/octet-stream"}},
         )
 
@@ -1650,20 +1750,20 @@ class TestAsyncAnthropic:
         counter = Counter()
         iterator = _make_async_iterator([file_content], counter=counter)
 
-        async def mock_handler(request: httpx.Request) -> httpx.Response:
+        async def mock_handler(request: httpx2.Request) -> httpx2.Response:
             assert counter.value == 0, "the request body should not have been read"
-            return httpx.Response(200, content=await request.aread())
+            return httpx2.Response(200, content=await request.aread())
 
         async with AsyncAnthropic(
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
-            http_client=httpx.AsyncClient(transport=MockTransport(handler=mock_handler)),
+            http_client=httpx2.AsyncClient(transport=MockTransport(handler=mock_handler)),
         ) as client:
             response = await client.post(
                 "/upload",
                 content=iterator,
-                cast_to=httpx.Response,
+                cast_to=httpx2.Response,
                 options={"headers": {"Content-Type": "application/octet-stream"}},
             )
 
@@ -1672,27 +1772,16 @@ class TestAsyncAnthropic:
             assert response.content == file_content
             assert counter.value == 1
 
-    @pytest.mark.respx(base_url=base_url)
-    async def test_binary_content_upload_with_body_is_deprecated(
-        self, respx_mock: MockRouter, async_client: AsyncAnthropic
-    ) -> None:
-        respx_mock.post("/upload").mock(side_effect=mirror_request_content)
-
-        file_content = b"Hello, this is a test file."
-
-        with pytest.deprecated_call(
-            match="Passing raw bytes as `body` is deprecated and will be removed in a future version. Please pass raw bytes via the `content` parameter instead."
+    async def test_binary_content_upload_with_body_is_rejected(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(
+            TypeError, match="Passing raw bytes as `body` is not supported, pass them as `content` instead"
         ):
-            response = await async_client.post(
+            await async_client.post(
                 "/upload",
-                body=file_content,
-                cast_to=httpx.Response,
+                body=b"Hello, this is a test file.",
+                cast_to=httpx2.Response,
                 options={"headers": {"Content-Type": "application/octet-stream"}},
             )
-
-        assert response.status_code == 200
-        assert response.request.headers["Content-Type"] == "application/octet-stream"
-        assert response.content == file_content
 
     @pytest.mark.respx(base_url=base_url)
     async def test_basic_union_response(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
@@ -1702,7 +1791,7 @@ class TestAsyncAnthropic:
         class Model2(BaseModel):
             foo: str
 
-        respx_mock.get("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
         response = await async_client.get("/foo", cast_to=cast(Any, Union[Model1, Model2]))
         assert isinstance(response, Model2)
@@ -1718,13 +1807,13 @@ class TestAsyncAnthropic:
         class Model2(BaseModel):
             foo: str
 
-        respx_mock.get("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
         response = await async_client.get("/foo", cast_to=cast(Any, Union[Model1, Model2]))
         assert isinstance(response, Model2)
         assert response.foo == "bar"
 
-        respx_mock.get("/foo").mock(return_value=httpx.Response(200, json={"foo": 1}))
+        respx_mock.get("/foo").mock(return_value=httpx2.Response(200, json={"foo": 1}))
 
         response = await async_client.get("/foo", cast_to=cast(Any, Union[Model1, Model2]))
         assert isinstance(response, Model1)
@@ -1742,7 +1831,7 @@ class TestAsyncAnthropic:
             foo: int
 
         respx_mock.get("/foo").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 content=json.dumps({"foo": 2}),
                 headers={"Content-Type": "application/text"},
@@ -1780,7 +1869,7 @@ class TestAsyncAnthropic:
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
-                http_client=httpx.AsyncClient(),
+                http_client=httpx2.AsyncClient(),
             ),
         ],
         ids=["standard", "custom http client"],
@@ -1806,7 +1895,7 @@ class TestAsyncAnthropic:
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
-                http_client=httpx.AsyncClient(),
+                http_client=httpx2.AsyncClient(),
             ),
         ],
         ids=["standard", "custom http client"],
@@ -1832,7 +1921,7 @@ class TestAsyncAnthropic:
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
-                http_client=httpx.AsyncClient(),
+                http_client=httpx2.AsyncClient(),
             ),
         ],
         ids=["standard", "custom http client"],
@@ -1873,7 +1962,7 @@ class TestAsyncAnthropic:
         class Model(BaseModel):
             foo: str
 
-        respx_mock.get("/foo").mock(return_value=httpx.Response(200, json={"foo": {"invalid": True}}))
+        respx_mock.get("/foo").mock(return_value=httpx2.Response(200, json={"foo": {"invalid": True}}))
 
         with pytest.raises(APIResponseValidationError) as exc:
             await async_client.get("/foo", cast_to=Model)
@@ -1891,7 +1980,7 @@ class TestAsyncAnthropic:
         class Model(BaseModel):
             name: str
 
-        respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
         stream = await async_client.post("/foo", cast_to=Model, stream=True, stream_cls=AsyncStream[Model])
         assert isinstance(stream, AsyncStream)
@@ -1902,7 +1991,7 @@ class TestAsyncAnthropic:
         class Model(BaseModel):
             name: str
 
-        respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
+        respx_mock.get("/foo").mock(return_value=httpx2.Response(200, text="my-custom-format"))
 
         strict_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 
@@ -1948,7 +2037,7 @@ class TestAsyncAnthropic:
     ) -> None:
         monkeypatch.setattr("time.time", lambda: 1696004797)
 
-        headers = httpx.Headers({"retry-after": retry_after})
+        headers = httpx2.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
         calculated = async_client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
@@ -1959,7 +2048,7 @@ class TestAsyncAnthropic:
     ) -> None:
         monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
 
-        respx_mock.post("/v1/messages").mock(side_effect=httpx.TimeoutException("Test timeout error"))
+        respx_mock.post("/v1/messages").mock(side_effect=httpx2.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
             await async_client.messages.with_streaming_response.create(
@@ -1981,7 +2070,7 @@ class TestAsyncAnthropic:
     ) -> None:
         monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
 
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(500))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(500))
 
         with pytest.raises(APIStatusError):
             await async_client.messages.with_streaming_response.create(
@@ -2013,14 +2102,14 @@ class TestAsyncAnthropic:
 
         nb_retries = 0
 
-        def retry_handler(_request: httpx.Request) -> httpx.Response:
+        def retry_handler(_request: httpx2.Request) -> httpx2.Response:
             nonlocal nb_retries
             if nb_retries < failures_before_success:
                 nb_retries += 1
                 if failure_mode == "exception":
                     raise RuntimeError("oops")
-                return httpx.Response(500)
-            return httpx.Response(200)
+                return httpx2.Response(500)
+            return httpx2.Response(200)
 
         respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
 
@@ -2053,12 +2142,12 @@ class TestAsyncAnthropic:
 
         nb_retries = 0
 
-        def retry_handler(_request: httpx.Request) -> httpx.Response:
+        def retry_handler(_request: httpx2.Request) -> httpx2.Response:
             nonlocal nb_retries
             if nb_retries < failures_before_success:
                 nb_retries += 1
-                return httpx.Response(500)
-            return httpx.Response(200)
+                return httpx2.Response(500)
+            return httpx2.Response(200)
 
         respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
 
@@ -2091,12 +2180,12 @@ class TestAsyncAnthropic:
 
         nb_retries = 0
 
-        def retry_handler(_request: httpx.Request) -> httpx.Response:
+        def retry_handler(_request: httpx2.Request) -> httpx2.Response:
             nonlocal nb_retries
             if nb_retries < failures_before_success:
                 nb_retries += 1
-                return httpx.Response(500)
-            return httpx.Response(200)
+                return httpx2.Response(500)
+            return httpx2.Response(200)
 
         respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
 
@@ -2113,43 +2202,6 @@ class TestAsyncAnthropic:
         )
 
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
-
-    @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @pytest.mark.respx(base_url=base_url)
-    async def test_retries_taken_new_response_class(
-        self,
-        async_client: AsyncAnthropic,
-        failures_before_success: int,
-        respx_mock: MockRouter,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
-
-        client = async_client.with_options(max_retries=4)
-
-        nb_retries = 0
-
-        def retry_handler(_request: httpx.Request) -> httpx.Response:
-            nonlocal nb_retries
-            if nb_retries < failures_before_success:
-                nb_retries += 1
-                return httpx.Response(500)
-            return httpx.Response(200)
-
-        respx_mock.post("/v1/messages").mock(side_effect=retry_handler)
-
-        async with client.messages.with_streaming_response.create(
-            max_tokens=1024,
-            messages=[
-                {
-                    "content": "Hello, world",
-                    "role": "user",
-                }
-            ],
-            model="claude-opus-5",
-        ) as response:
-            assert response.retries_taken == failures_before_success
-            assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
     async def test_get_platform(self) -> None:
         platform = await asyncify(get_platform)()
@@ -2199,18 +2251,18 @@ class TestAsyncAnthropic:
             trust_env=True,
             http1=True,
             http2=False,
-            limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
+            limits=httpx2.Limits(max_connections=100, max_keepalive_connections=20),
         )
 
     @pytest.mark.respx(base_url=base_url)
     async def test_follow_redirects(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
         # Test that the default follow_redirects=True allows following redirects
         respx_mock.post("/redirect").mock(
-            return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
+            return_value=httpx2.Response(302, headers={"Location": f"{base_url}/redirected"})
         )
-        respx_mock.get("/redirected").mock(return_value=httpx.Response(200, json={"status": "ok"}))
+        respx_mock.get("/redirected").mock(return_value=httpx2.Response(200, json={"status": "ok"}))
 
-        response = await async_client.post("/redirect", body={"key": "value"}, cast_to=httpx.Response)
+        response = await async_client.post("/redirect", body={"key": "value"}, cast_to=httpx2.Response)
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
 
@@ -2218,12 +2270,12 @@ class TestAsyncAnthropic:
     async def test_follow_redirects_disabled(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
         # Test that follow_redirects=False prevents following redirects
         respx_mock.post("/redirect").mock(
-            return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
+            return_value=httpx2.Response(302, headers={"Location": f"{base_url}/redirected"})
         )
 
         with pytest.raises(APIStatusError) as exc_info:
             await async_client.post(
-                "/redirect", body={"key": "value"}, options={"follow_redirects": False}, cast_to=httpx.Response
+                "/redirect", body={"key": "value"}, options={"follow_redirects": False}, cast_to=httpx2.Response
             )
 
         assert exc_info.value.response.status_code == 302

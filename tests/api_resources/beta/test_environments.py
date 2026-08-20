@@ -372,7 +372,7 @@ class TestAsyncEnvironments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        environment = response.parse()
+        environment = await response.parse()
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
     @parametrize
@@ -411,7 +411,7 @@ class TestAsyncEnvironments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        environment = response.parse()
+        environment = await response.parse()
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
     @parametrize
@@ -479,7 +479,7 @@ class TestAsyncEnvironments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        environment = response.parse()
+        environment = await response.parse()
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
     @parametrize
@@ -523,7 +523,7 @@ class TestAsyncEnvironments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        environment = response.parse()
+        environment = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaEnvironment], environment, path=["response"])
 
     @parametrize
@@ -560,7 +560,7 @@ class TestAsyncEnvironments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        environment = response.parse()
+        environment = await response.parse()
         assert_matches_type(BetaEnvironmentDeleteResponse, environment, path=["response"])
 
     @parametrize
@@ -606,7 +606,7 @@ class TestAsyncEnvironments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        environment = response.parse()
+        environment = await response.parse()
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
     @parametrize
