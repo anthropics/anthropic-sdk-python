@@ -10,7 +10,6 @@ from anthropic.types.beta.parsed_beta_message import ParsedBetaMessage
 
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 class TestAsyncMessages:
     @pytest.mark.parametrize(
         "http_snapshot",

@@ -1199,7 +1199,6 @@ class Messages(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> ParsedBetaMessage[ResponseFormatT]:
         _validate_output_config_conflict(output_config, output_format)
-        _warn_output_format_deprecated(output_format)
 
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
@@ -1458,7 +1457,6 @@ class Messages(SyncAPIResource):
     ) -> BetaStreamingToolRunner[ResponseFormatT] | BetaToolRunner[ResponseFormatT]:
         """Create a Message stream"""
         _validate_output_config_conflict(output_config, output_format)
-        _warn_output_format_deprecated(output_format)
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -1589,7 +1587,6 @@ class Messages(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaMessageStreamManager[ResponseFormatT]:
         _validate_output_config_conflict(output_config, output_format)
-        _warn_output_format_deprecated(output_format)
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -3059,7 +3056,6 @@ class AsyncMessages(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> ParsedBetaMessage[ResponseFormatT]:
         _validate_output_config_conflict(output_config, output_format)
-        _warn_output_format_deprecated(output_format)
 
         if not is_given(timeout) and self._client.timeout == DEFAULT_TIMEOUT:
             timeout = self._client._calculate_nonstreaming_timeout(
@@ -3317,7 +3313,6 @@ class AsyncMessages(AsyncAPIResource):
     ) -> BetaAsyncToolRunner[ResponseFormatT] | BetaAsyncStreamingToolRunner[ResponseFormatT]:
         """Create a Message stream"""
         _validate_output_config_conflict(output_config, output_format)
-        _warn_output_format_deprecated(output_format)
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -3441,7 +3436,6 @@ class AsyncMessages(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaAsyncMessageStreamManager[ResponseFormatT]:
         _validate_output_config_conflict(output_config, output_format)
-        _warn_output_format_deprecated(output_format)
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -3898,13 +3892,3 @@ def _merge_output_configs(
         else:
             return {"format": output_format}
     return output_config
-
-
-def _warn_output_format_deprecated(output_format: object) -> None:
-    """Emit deprecation warning if output_format is provided."""
-    if is_given(output_format) and output_format is not None:
-        warnings.warn(
-            "The 'output_format' parameter is deprecated. Please use 'output_config.format' instead.",
-            DeprecationWarning,
-            stacklevel=4,
-        )

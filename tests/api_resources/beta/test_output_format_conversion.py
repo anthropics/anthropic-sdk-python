@@ -1,4 +1,4 @@
-"""Tests for output_format to output_config.format conversion and deprecation."""
+"""Tests for output_format to output_config.format conversion."""
 
 import json
 import warnings
@@ -62,23 +62,21 @@ class TestOutputFormatConversion:
 
     def test_stream_rejects_schema_dict(self, client: Anthropic) -> None:
         """A raw schema dict is no longer accepted by `.stream()`; it belongs in `output_config.format`."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            with pytest.raises(TypeError, match="output_config"):
-                client.beta.messages.stream(
-                    max_tokens=1024,
-                    messages=[{"role": "user", "content": "Test"}],
-                    model="claude-sonnet-4-5",
-                    output_format={"type": "json_schema", "schema": {"type": "string"}},  # type: ignore[arg-type]
-                )
+        with pytest.raises(TypeError, match="output_config"):
+            client.beta.messages.stream(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Test"}],
+                model="claude-sonnet-4-5",
+                output_format={"type": "json_schema", "schema": {"type": "string"}},  # type: ignore[arg-type]
+            )
 
 
-class TestOutputFormatDeprecation:
-    """Test that output_format parameter emits deprecation warnings."""
+class TestOutputFormatNoDeprecationWarning:
+    """The typed `output_format=` of the helpers is the supported form and must not warn."""
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse with Pydantic models requires Pydantic v2")
-    def test_parse_emits_deprecation_warning(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        """Verify .parse() emits DeprecationWarning when output_format is used."""
+    def test_parse_does_not_warn_for_type(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        """`.parse(output_format=Model)` is silent."""
 
         class SimpleModel(BaseModel):
             value: str
@@ -98,7 +96,8 @@ class TestOutputFormatDeprecation:
             )
         )
 
-        with pytest.warns(DeprecationWarning, match="output_format.*deprecated.*output_config.format"):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
             client.beta.messages.parse(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
@@ -107,8 +106,8 @@ class TestOutputFormatDeprecation:
             )
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse with Pydantic models requires Pydantic v2")
-    def test_stream_emits_deprecation_warning(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        """Verify .stream() emits DeprecationWarning when the typed output_format is used."""
+    def test_stream_does_not_warn_for_type(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        """`.stream(output_format=Model)` is silent."""
         respx_mock.post("/v1/messages?beta=true").mock(
             return_value=httpx.Response(
                 200,
@@ -127,7 +126,8 @@ class TestOutputFormatDeprecation:
         class Answer(BaseModel):
             text: str
 
-        with pytest.warns(DeprecationWarning, match="output_format.*deprecated.*output_config.format"):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
             with client.beta.messages.stream(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
