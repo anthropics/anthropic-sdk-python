@@ -60,7 +60,7 @@ def _dynamic_object_keywords_without_properties(json_schema: dict[str, Any]) -> 
         keywords.append("patternProperties")
 
     additional_properties = json_schema.get("additionalProperties")
-    if isinstance(additional_properties, dict):
+    if additional_properties is True or isinstance(additional_properties, dict):
         keywords.append("additionalProperties")
 
     if "propertyNames" in json_schema and additional_properties is not False:
