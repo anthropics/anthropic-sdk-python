@@ -6,14 +6,18 @@ from typing import Dict, List, Union, Iterable, Optional
 from datetime import datetime
 from itertools import chain
 
-import httpx
+import httpx2
 
-from ... import _legacy_response
 from ..._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ..._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ...pagination import SyncPageCursor, AsyncPageCursor
 from ...types.beta import (
     BetaManagedAgentsScheduleParams,
@@ -75,7 +79,7 @@ class Deployments(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """Create Deployment
 
@@ -165,7 +169,7 @@ class Deployments(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """
         Get Deployment
@@ -222,7 +226,7 @@ class Deployments(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """Update Deployment
 
@@ -320,7 +324,7 @@ class Deployments(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsDeployment]:
         """
         List Deployments
@@ -396,7 +400,7 @@ class Deployments(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """
         Archive Deployment
@@ -443,7 +447,7 @@ class Deployments(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """
         Pause Deployment
@@ -490,7 +494,7 @@ class Deployments(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeploymentRun:
         """
         Run Deployment Now
@@ -537,7 +541,7 @@ class Deployments(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """
         Unpause Deployment
@@ -614,7 +618,7 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """Create Deployment
 
@@ -704,7 +708,7 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """
         Get Deployment
@@ -761,7 +765,7 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """Update Deployment
 
@@ -859,7 +863,7 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsDeployment, AsyncPageCursor[BetaManagedAgentsDeployment]]:
         """
         List Deployments
@@ -935,7 +939,7 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """
         Archive Deployment
@@ -982,7 +986,7 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """
         Pause Deployment
@@ -1029,7 +1033,7 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeploymentRun:
         """
         Run Deployment Now
@@ -1076,7 +1080,7 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
         """
         Unpause Deployment
@@ -1118,28 +1122,28 @@ class DeploymentsWithRawResponse:
     def __init__(self, deployments: Deployments) -> None:
         self._deployments = deployments
 
-        self.create = _legacy_response.to_raw_response_wrapper(
+        self.create = to_raw_response_wrapper(
             deployments.create,
         )
-        self.retrieve = _legacy_response.to_raw_response_wrapper(
+        self.retrieve = to_raw_response_wrapper(
             deployments.retrieve,
         )
-        self.update = _legacy_response.to_raw_response_wrapper(
+        self.update = to_raw_response_wrapper(
             deployments.update,
         )
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             deployments.list,
         )
-        self.archive = _legacy_response.to_raw_response_wrapper(
+        self.archive = to_raw_response_wrapper(
             deployments.archive,
         )
-        self.pause = _legacy_response.to_raw_response_wrapper(
+        self.pause = to_raw_response_wrapper(
             deployments.pause,
         )
-        self.run = _legacy_response.to_raw_response_wrapper(
+        self.run = to_raw_response_wrapper(
             deployments.run,
         )
-        self.unpause = _legacy_response.to_raw_response_wrapper(
+        self.unpause = to_raw_response_wrapper(
             deployments.unpause,
         )
 
@@ -1148,28 +1152,28 @@ class AsyncDeploymentsWithRawResponse:
     def __init__(self, deployments: AsyncDeployments) -> None:
         self._deployments = deployments
 
-        self.create = _legacy_response.async_to_raw_response_wrapper(
+        self.create = async_to_raw_response_wrapper(
             deployments.create,
         )
-        self.retrieve = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve = async_to_raw_response_wrapper(
             deployments.retrieve,
         )
-        self.update = _legacy_response.async_to_raw_response_wrapper(
+        self.update = async_to_raw_response_wrapper(
             deployments.update,
         )
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             deployments.list,
         )
-        self.archive = _legacy_response.async_to_raw_response_wrapper(
+        self.archive = async_to_raw_response_wrapper(
             deployments.archive,
         )
-        self.pause = _legacy_response.async_to_raw_response_wrapper(
+        self.pause = async_to_raw_response_wrapper(
             deployments.pause,
         )
-        self.run = _legacy_response.async_to_raw_response_wrapper(
+        self.run = async_to_raw_response_wrapper(
             deployments.run,
         )
-        self.unpause = _legacy_response.async_to_raw_response_wrapper(
+        self.unpause = async_to_raw_response_wrapper(
             deployments.unpause,
         )
 

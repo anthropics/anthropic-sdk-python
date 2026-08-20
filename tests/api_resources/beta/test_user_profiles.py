@@ -265,7 +265,7 @@ class TestAsyncUserProfiles:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        user_profile = response.parse()
+        user_profile = await response.parse()
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
     @parametrize
@@ -302,7 +302,7 @@ class TestAsyncUserProfiles:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        user_profile = response.parse()
+        user_profile = await response.parse()
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
     @parametrize
@@ -353,7 +353,7 @@ class TestAsyncUserProfiles:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        user_profile = response.parse()
+        user_profile = await response.parse()
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
     @parametrize
@@ -397,7 +397,7 @@ class TestAsyncUserProfiles:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        user_profile = response.parse()
+        user_profile = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaUserProfile], user_profile, path=["response"])
 
     @parametrize
@@ -434,7 +434,7 @@ class TestAsyncUserProfiles:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        user_profile = response.parse()
+        user_profile = await response.parse()
         assert_matches_type(BetaUserProfileEnrollmentURL, user_profile, path=["response"])
 
     @parametrize

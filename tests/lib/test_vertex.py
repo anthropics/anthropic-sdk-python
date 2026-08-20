@@ -6,7 +6,7 @@ import json
 from typing import Any, Dict, List, cast
 from typing_extensions import Protocol
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 

@@ -220,7 +220,7 @@ class TestAsyncSkills:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        skill = response.parse()
+        skill = await response.parse()
         assert_matches_type(SkillCreateResponse, skill, path=["response"])
 
     @parametrize
@@ -259,7 +259,7 @@ class TestAsyncSkills:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        skill = response.parse()
+        skill = await response.parse()
         assert_matches_type(SkillRetrieveResponse, skill, path=["response"])
 
     @parametrize
@@ -303,7 +303,7 @@ class TestAsyncSkills:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        skill = response.parse()
+        skill = await response.parse()
         assert_matches_type(AsyncPageCursor[SkillListResponse], skill, path=["response"])
 
     @parametrize
@@ -340,7 +340,7 @@ class TestAsyncSkills:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        skill = response.parse()
+        skill = await response.parse()
         assert_matches_type(SkillDeleteResponse, skill, path=["response"])
 
     @parametrize

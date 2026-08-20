@@ -56,7 +56,7 @@ export DEFER_PYDANTIC_BUILD=false
 
 # Note that we need to specify the patch version here so that uv
 # won't use unstable (alpha, beta, rc) releases for the tests
-PY_VERSION_MIN=">=3.9.0"
+PY_VERSION_MIN=">=3.10.0"
 PY_VERSION_MAX=">=3.14.0"
 
 function run_tests() {

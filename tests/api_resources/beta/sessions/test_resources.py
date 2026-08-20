@@ -366,7 +366,7 @@ class TestAsyncResources:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        resource = response.parse()
+        resource = await response.parse()
         assert_matches_type(ResourceRetrieveResponse, resource, path=["response"])
 
     @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
@@ -431,7 +431,7 @@ class TestAsyncResources:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        resource = response.parse()
+        resource = await response.parse()
         assert_matches_type(ResourceUpdateResponse, resource, path=["response"])
 
     @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
@@ -495,7 +495,7 @@ class TestAsyncResources:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        resource = response.parse()
+        resource = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionResource], resource, path=["response"])
 
     @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
@@ -549,7 +549,7 @@ class TestAsyncResources:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        resource = response.parse()
+        resource = await response.parse()
         assert_matches_type(BetaManagedAgentsDeleteSessionResource, resource, path=["response"])
 
     @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
@@ -615,7 +615,7 @@ class TestAsyncResources:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        resource = response.parse()
+        resource = await response.parse()
         assert_matches_type(BetaManagedAgentsFileResource, resource, path=["response"])
 
     @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")

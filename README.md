@@ -14,6 +14,8 @@ Full documentation is available at **[platform.claude.com/docs/en/api/sdks/pytho
 pip install anthropic
 ```
 
+Upgrading from a `0.x` release? See the [v1 migration guide](MIGRATION.md).
+
 ## Getting started
 
 ```python
@@ -42,7 +44,7 @@ print(message.content)
 
 ## Requirements
 
-Python 3.9+
+Python 3.10+
 
 ## Contributing
 

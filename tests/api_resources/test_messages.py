@@ -92,7 +92,6 @@ class TestMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -125,8 +124,6 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(Message, message, path=["response"])
@@ -241,7 +238,6 @@ class TestMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -274,8 +270,6 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="anthropic-user-profile-id",
         )
         message_stream.response.close()
@@ -532,7 +526,6 @@ class TestAsyncMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -565,8 +558,6 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(Message, message, path=["response"])
@@ -586,7 +577,7 @@ class TestAsyncMessages:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        message = response.parse()
+        message = await response.parse()
         assert_matches_type(Message, message, path=["response"])
 
     @parametrize
@@ -681,7 +672,6 @@ class TestAsyncMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -714,8 +704,6 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="anthropic-user-profile-id",
         )
         await message_stream.response.aclose()
@@ -735,7 +723,7 @@ class TestAsyncMessages:
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        stream = response.parse()
+        stream = await response.parse()
         await stream.close()
 
     @parametrize
@@ -873,7 +861,7 @@ class TestAsyncMessages:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        message = response.parse()
+        message = await response.parse()
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
     @parametrize

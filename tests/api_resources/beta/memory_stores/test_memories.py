@@ -351,7 +351,7 @@ class TestAsyncMemories:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory = response.parse()
+        memory = await response.parse()
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
     @parametrize
@@ -405,7 +405,7 @@ class TestAsyncMemories:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory = response.parse()
+        memory = await response.parse()
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
     @parametrize
@@ -469,7 +469,7 @@ class TestAsyncMemories:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory = response.parse()
+        memory = await response.parse()
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
     @parametrize
@@ -531,7 +531,7 @@ class TestAsyncMemories:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory = response.parse()
+        memory = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryListItem], memory, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -583,7 +583,7 @@ class TestAsyncMemories:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory = response.parse()
+        memory = await response.parse()
         assert_matches_type(BetaManagedAgentsDeletedMemory, memory, path=["response"])
 
     @parametrize

@@ -6,7 +6,7 @@ import logging
 import threading
 from typing import Any, List, Protocol, cast
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 

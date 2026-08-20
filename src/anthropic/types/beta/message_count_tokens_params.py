@@ -15,7 +15,6 @@ from .beta_mcp_toolset_param import BetaMCPToolsetParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_output_config_param import BetaOutputConfigParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
-from .beta_json_output_format_param import BetaJSONOutputFormatParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
 from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
@@ -144,16 +143,6 @@ class MessageCountTokensParams(TypedDict, total=False):
 
     output_config: BetaOutputConfigParam
     """Configuration options for the model's output, such as the output format."""
-
-    output_format: Optional[BetaJSONOutputFormatParam]
-    """Deprecated: Use `output_config.format` instead.
-
-    See
-    [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
-
-    A schema to specify Claude's output format in responses. This parameter will be
-    removed in a future release.
-    """
 
     speed: Optional[Literal["standard", "fast"]]
     """Inference speed mode.

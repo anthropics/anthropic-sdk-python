@@ -15,7 +15,7 @@ from types import SimpleNamespace
 from typing import Any
 from collections.abc import Mapping, Callable, Awaitable, AsyncIterator
 
-import httpx
+import httpx2 as httpx
 
 from anthropic import APIStatusError
 

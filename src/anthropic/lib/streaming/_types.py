@@ -6,12 +6,12 @@ import jiter
 from ...types import (
     Message,
     ContentBlock,
-    MessageDeltaEvent as RawMessageDeltaEvent,
-    MessageStartEvent as RawMessageStartEvent,
     RawMessageStopEvent,
-    ContentBlockDeltaEvent as RawContentBlockDeltaEvent,
-    ContentBlockStartEvent as RawContentBlockStartEvent,
+    RawMessageDeltaEvent,
+    RawMessageStartEvent,
     RawContentBlockStopEvent,
+    RawContentBlockDeltaEvent,
+    RawContentBlockStartEvent,
 )
 from ..._models import BaseModel, GenericModel
 from .._parse._response import ResponseFormatT

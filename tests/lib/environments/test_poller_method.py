@@ -15,7 +15,7 @@ import logging
 from typing import Any, cast
 from collections.abc import AsyncIterator
 
-import httpx
+import httpx2 as httpx
 import pytest
 
 from anthropic import APIStatusError

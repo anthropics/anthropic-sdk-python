@@ -5,7 +5,7 @@ import threading
 from typing import Generator, AsyncGenerator
 from typing_extensions import override
 
-import httpx
+import httpx2 as httpx
 
 from ._cache import TokenCache
 from ..._utils import asyncify

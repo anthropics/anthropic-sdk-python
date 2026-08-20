@@ -2,7 +2,7 @@ import json
 from typing import Any, List, Union, cast
 from typing_extensions import Annotated
 
-import httpx
+import httpx2
 import pytest
 import pydantic
 
@@ -25,7 +25,7 @@ class ConcreteBaseAPIResponse(APIResponse[bytes]): ...
 class ConcreteAPIResponse(APIResponse[List[str]]): ...
 
 
-class ConcreteAsyncAPIResponse(APIResponse[httpx.Response]): ...
+class ConcreteAsyncAPIResponse(APIResponse[httpx2.Response]): ...
 
 
 def test_extract_response_type_direct_classes() -> None:
@@ -45,7 +45,7 @@ def test_extract_response_type_direct_class_missing_type_arg() -> None:
 def test_extract_response_type_concrete_subclasses() -> None:
     assert extract_response_type(ConcreteBaseAPIResponse) == bytes
     assert extract_response_type(ConcreteAPIResponse) == List[str]
-    assert extract_response_type(ConcreteAsyncAPIResponse) == httpx.Response
+    assert extract_response_type(ConcreteAsyncAPIResponse) == httpx2.Response
 
 
 def test_extract_response_type_binary_response() -> None:
@@ -58,7 +58,7 @@ class PydanticModel(pydantic.BaseModel): ...
 
 def test_response_parse_mismatched_basemodel(client: Anthropic) -> None:
     response = APIResponse(
-        raw=httpx.Response(200, content=b"foo"),
+        raw=httpx2.Response(200, content=b"foo"),
         client=client,
         stream=False,
         stream_cls=None,
@@ -76,7 +76,7 @@ def test_response_parse_mismatched_basemodel(client: Anthropic) -> None:
 @pytest.mark.asyncio
 async def test_async_response_parse_mismatched_basemodel(async_client: AsyncAnthropic) -> None:
     response = AsyncAPIResponse(
-        raw=httpx.Response(200, content=b"foo"),
+        raw=httpx2.Response(200, content=b"foo"),
         client=async_client,
         stream=False,
         stream_cls=None,
@@ -93,7 +93,7 @@ async def test_async_response_parse_mismatched_basemodel(async_client: AsyncAnth
 
 def test_response_parse_custom_stream(client: Anthropic) -> None:
     response = APIResponse(
-        raw=httpx.Response(200, content=b"foo"),
+        raw=httpx2.Response(200, content=b"foo"),
         client=client,
         stream=True,
         stream_cls=None,
@@ -108,7 +108,7 @@ def test_response_parse_custom_stream(client: Anthropic) -> None:
 @pytest.mark.asyncio
 async def test_async_response_parse_custom_stream(async_client: AsyncAnthropic) -> None:
     response = AsyncAPIResponse(
-        raw=httpx.Response(200, content=b"foo"),
+        raw=httpx2.Response(200, content=b"foo"),
         client=async_client,
         stream=True,
         stream_cls=None,
@@ -127,7 +127,7 @@ class CustomModel(BaseModel):
 
 def test_response_parse_custom_model(client: Anthropic) -> None:
     response = APIResponse(
-        raw=httpx.Response(200, content=json.dumps({"foo": "hello!", "bar": 2})),
+        raw=httpx2.Response(200, content=json.dumps({"foo": "hello!", "bar": 2})),
         client=client,
         stream=False,
         stream_cls=None,
@@ -143,7 +143,7 @@ def test_response_parse_custom_model(client: Anthropic) -> None:
 @pytest.mark.asyncio
 async def test_async_response_parse_custom_model(async_client: AsyncAnthropic) -> None:
     response = AsyncAPIResponse(
-        raw=httpx.Response(200, content=json.dumps({"foo": "hello!", "bar": 2})),
+        raw=httpx2.Response(200, content=json.dumps({"foo": "hello!", "bar": 2})),
         client=async_client,
         stream=False,
         stream_cls=None,
@@ -158,7 +158,7 @@ async def test_async_response_parse_custom_model(async_client: AsyncAnthropic) -
 
 def test_response_basemodel_request_id(client: Anthropic) -> None:
     response = APIResponse(
-        raw=httpx.Response(
+        raw=httpx2.Response(
             200,
             headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
             content=json.dumps({"foo": "hello!", "bar": 2}),
@@ -180,7 +180,7 @@ def test_response_basemodel_request_id(client: Anthropic) -> None:
 @pytest.mark.asyncio
 async def test_async_response_basemodel_request_id(client: Anthropic) -> None:
     response = AsyncAPIResponse(
-        raw=httpx.Response(
+        raw=httpx2.Response(
             200,
             headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
             content=json.dumps({"foo": "hello!", "bar": 2}),
@@ -201,7 +201,7 @@ async def test_async_response_basemodel_request_id(client: Anthropic) -> None:
 
 def test_response_parse_annotated_type(client: Anthropic) -> None:
     response = APIResponse(
-        raw=httpx.Response(200, content=json.dumps({"foo": "hello!", "bar": 2})),
+        raw=httpx2.Response(200, content=json.dumps({"foo": "hello!", "bar": 2})),
         client=client,
         stream=False,
         stream_cls=None,
@@ -218,7 +218,7 @@ def test_response_parse_annotated_type(client: Anthropic) -> None:
 
 async def test_async_response_parse_annotated_type(async_client: AsyncAnthropic) -> None:
     response = AsyncAPIResponse(
-        raw=httpx.Response(200, content=json.dumps({"foo": "hello!", "bar": 2})),
+        raw=httpx2.Response(200, content=json.dumps({"foo": "hello!", "bar": 2})),
         client=async_client,
         stream=False,
         stream_cls=None,
@@ -246,7 +246,7 @@ async def test_async_response_parse_annotated_type(async_client: AsyncAnthropic)
 )
 def test_response_parse_bool(client: Anthropic, content: str, expected: bool) -> None:
     response = APIResponse(
-        raw=httpx.Response(200, content=content),
+        raw=httpx2.Response(200, content=content),
         client=client,
         stream=False,
         stream_cls=None,
@@ -271,7 +271,7 @@ def test_response_parse_bool(client: Anthropic, content: str, expected: bool) ->
 )
 async def test_async_response_parse_bool(client: AsyncAnthropic, content: str, expected: bool) -> None:
     response = AsyncAPIResponse(
-        raw=httpx.Response(200, content=content),
+        raw=httpx2.Response(200, content=content),
         client=client,
         stream=False,
         stream_cls=None,
@@ -290,7 +290,7 @@ class OtherModel(BaseModel):
 @pytest.mark.parametrize("client", [False], indirect=True)  # loose validation
 def test_response_parse_expect_model_union_non_json_content(client: Anthropic) -> None:
     response = APIResponse(
-        raw=httpx.Response(200, content=b"foo", headers={"Content-Type": "application/text"}),
+        raw=httpx2.Response(200, content=b"foo", headers={"Content-Type": "application/text"}),
         client=client,
         stream=False,
         stream_cls=None,
@@ -307,7 +307,7 @@ def test_response_parse_expect_model_union_non_json_content(client: Anthropic) -
 @pytest.mark.parametrize("async_client", [False], indirect=True)  # loose validation
 async def test_async_response_parse_expect_model_union_non_json_content(async_client: AsyncAnthropic) -> None:
     response = AsyncAPIResponse(
-        raw=httpx.Response(200, content=b"foo", headers={"Content-Type": "application/text"}),
+        raw=httpx2.Response(200, content=b"foo", headers={"Content-Type": "application/text"}),
         client=async_client,
         stream=False,
         stream_cls=None,
@@ -318,3 +318,42 @@ async def test_async_response_parse_expect_model_union_non_json_content(async_cl
     obj = await response.parse(to=cast(Any, Union[CustomModel, OtherModel]))
     assert isinstance(obj, str)
     assert obj == "foo"
+
+
+def test_response_parse_json_content_type_case_insensitive(client: Anthropic) -> None:
+    response = APIResponse(
+        raw=httpx2.Response(
+            200,
+            content=b'{"foo": "bar"}',
+            headers={"Content-Type": "Application/JSON; Charset=UTF-8"},
+            request=httpx2.Request("GET", "/foo"),
+        ),
+        client=client,
+        stream=False,
+        stream_cls=None,
+        cast_to=str,
+        options=FinalRequestOptions.construct(method="get", url="/foo"),
+    )
+
+    obj = response.parse(to=object)
+    assert obj == {"foo": "bar"}
+
+
+@pytest.mark.asyncio
+async def test_async_response_parse_json_content_type_case_insensitive(async_client: AsyncAnthropic) -> None:
+    response = AsyncAPIResponse(
+        raw=httpx2.Response(
+            200,
+            content=b'{"foo": "bar"}',
+            headers={"Content-Type": "Application/JSON; Charset=UTF-8"},
+            request=httpx2.Request("GET", "/foo"),
+        ),
+        client=async_client,
+        stream=False,
+        stream_cls=None,
+        cast_to=str,
+        options=FinalRequestOptions.construct(method="get", url="/foo"),
+    )
+
+    obj = await response.parse(to=object)
+    assert obj == {"foo": "bar"}

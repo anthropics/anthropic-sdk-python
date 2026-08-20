@@ -8,7 +8,7 @@ and async client paths are covered so the ``ClientT`` generic threads through.
 
 from __future__ import annotations
 
-import httpx
+import httpx2 as httpx
 import pytest
 
 from anthropic import Anthropic, AsyncAnthropic

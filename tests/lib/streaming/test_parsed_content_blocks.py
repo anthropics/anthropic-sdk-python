@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Set, cast
 from typing_extensions import get_args, get_origin
 
-import httpx
+import httpx2 as httpx
 import pytest
 
 from anthropic.types.beta import BetaFallbackBlock

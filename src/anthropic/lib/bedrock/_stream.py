@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TypeVar
 
-import httpx
+import httpx2 as httpx
 
 from ..._client import Anthropic, AsyncAnthropic
 from ..._streaming import Stream, AsyncStream

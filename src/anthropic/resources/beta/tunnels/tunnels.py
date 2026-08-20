@@ -5,14 +5,18 @@ from __future__ import annotations
 from typing import List, Optional
 from itertools import chain
 
-import httpx
+import httpx2
 
-from .... import _legacy_response
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
-from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ...._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from .certificates import (
     Certificates,
     AsyncCertificates,
@@ -65,7 +69,7 @@ class Tunnels(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaTunnel:
         """The Tunnels API is in research preview.
 
@@ -121,7 +125,7 @@ class Tunnels(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaTunnel:
         """The Tunnels API is in research preview.
 
@@ -176,7 +180,7 @@ class Tunnels(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaTunnel]:
         """The Tunnels API is in research preview.
 
@@ -246,7 +250,7 @@ class Tunnels(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaTunnel:
         """The Tunnels API is in research preview.
 
@@ -302,7 +306,7 @@ class Tunnels(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaTunnelToken:
         """The Tunnels API is in research preview.
 
@@ -359,7 +363,7 @@ class Tunnels(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaTunnelToken:
         """The Tunnels API is in research preview.
 
@@ -442,7 +446,7 @@ class AsyncTunnels(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaTunnel:
         """The Tunnels API is in research preview.
 
@@ -498,7 +502,7 @@ class AsyncTunnels(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaTunnel:
         """The Tunnels API is in research preview.
 
@@ -553,7 +557,7 @@ class AsyncTunnels(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaTunnel, AsyncPageCursor[BetaTunnel]]:
         """The Tunnels API is in research preview.
 
@@ -623,7 +627,7 @@ class AsyncTunnels(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaTunnel:
         """The Tunnels API is in research preview.
 
@@ -679,7 +683,7 @@ class AsyncTunnels(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaTunnelToken:
         """The Tunnels API is in research preview.
 
@@ -736,7 +740,7 @@ class AsyncTunnels(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaTunnelToken:
         """The Tunnels API is in research preview.
 
@@ -789,22 +793,22 @@ class TunnelsWithRawResponse:
     def __init__(self, tunnels: Tunnels) -> None:
         self._tunnels = tunnels
 
-        self.create = _legacy_response.to_raw_response_wrapper(
+        self.create = to_raw_response_wrapper(
             tunnels.create,
         )
-        self.retrieve = _legacy_response.to_raw_response_wrapper(
+        self.retrieve = to_raw_response_wrapper(
             tunnels.retrieve,
         )
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             tunnels.list,
         )
-        self.archive = _legacy_response.to_raw_response_wrapper(
+        self.archive = to_raw_response_wrapper(
             tunnels.archive,
         )
-        self.reveal_token = _legacy_response.to_raw_response_wrapper(
+        self.reveal_token = to_raw_response_wrapper(
             tunnels.reveal_token,
         )
-        self.rotate_token = _legacy_response.to_raw_response_wrapper(
+        self.rotate_token = to_raw_response_wrapper(
             tunnels.rotate_token,
         )
 
@@ -817,22 +821,22 @@ class AsyncTunnelsWithRawResponse:
     def __init__(self, tunnels: AsyncTunnels) -> None:
         self._tunnels = tunnels
 
-        self.create = _legacy_response.async_to_raw_response_wrapper(
+        self.create = async_to_raw_response_wrapper(
             tunnels.create,
         )
-        self.retrieve = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve = async_to_raw_response_wrapper(
             tunnels.retrieve,
         )
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             tunnels.list,
         )
-        self.archive = _legacy_response.async_to_raw_response_wrapper(
+        self.archive = async_to_raw_response_wrapper(
             tunnels.archive,
         )
-        self.reveal_token = _legacy_response.async_to_raw_response_wrapper(
+        self.reveal_token = async_to_raw_response_wrapper(
             tunnels.reveal_token,
         )
-        self.rotate_token = _legacy_response.async_to_raw_response_wrapper(
+        self.rotate_token = async_to_raw_response_wrapper(
             tunnels.rotate_token,
         )
 

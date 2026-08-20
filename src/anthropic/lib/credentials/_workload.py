@@ -7,7 +7,7 @@ from types import TracebackType
 from typing import Any, Dict, Type, Union, NoReturn, Optional
 from typing_extensions import override
 
-import httpx
+import httpx2 as httpx
 
 from ._types import AccessToken, IdentityTokenProvider
 from ._secrets import (

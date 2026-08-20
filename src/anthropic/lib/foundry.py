@@ -6,9 +6,9 @@ from typing import Any, Union, Mapping, TypeVar, Callable, Sequence, Awaitable, 
 from functools import cached_property
 from typing_extensions import Self, override
 
-import httpx
+import httpx2 as httpx
 
-from .._types import Omit, Headers, Timeout, NotGiven, not_given
+from .._types import Timeout, NotGiven, not_given
 from .._utils import is_given
 from .._client import Anthropic, AsyncAnthropic
 from .._compat import model_copy
@@ -273,29 +273,22 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
 
     @override
     def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        headers: dict[str, str | Omit] = {**options.headers} if is_given(options.headers) else {}
-
-        options = model_copy(options)
-        options.headers = headers
-
         azure_ad_token = self._get_azure_ad_token()
         if azure_ad_token is not None:
-            if headers.get("Authorization") is None:
-                headers["Authorization"] = f"Bearer {azure_ad_token}"
+            auth = {"Authorization": f"Bearer {azure_ad_token}"}
         elif self.api_key is not None:
             # In this branch `self.api_key` is always the Foundry key (explicit or
             # ANTHROPIC_FOUNDRY_API_KEY) — with an Azure AD token provider configured
             # the branch above wins, so an environment `ANTHROPIC_API_KEY` can never
             # be sent here. The endpoint authenticates with `x-api-key`; `api-key` is
             # also sent for backwards compatibility.
-            if headers.get("x-api-key") is None:
-                headers["x-api-key"] = self.api_key
-            if headers.get("api-key") is None:
-                headers["api-key"] = self.api_key
+            auth = {"x-api-key": self.api_key, "api-key": self.api_key}
         else:
             # should never be hit
             raise ValueError("Unable to handle auth")
 
+        options = model_copy(options)
+        options.headers = merge_headers(auth, options.headers or {})
         return options
 
     @property
@@ -311,7 +304,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         return {}
 
     @override
-    def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
+    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
         # Foundry attaches its own auth header in `_prepare_options`, so the base
         # requirement that `X-Api-Key`/`Authorization` already be present does not apply.
         return
@@ -500,26 +493,19 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
 
     @override
     async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        headers: dict[str, str | Omit] = {**options.headers} if is_given(options.headers) else {}
-
-        options = model_copy(options)
-        options.headers = headers
-
         azure_ad_token = await self._get_azure_ad_token()
         if azure_ad_token is not None:
-            if headers.get("Authorization") is None:
-                headers["Authorization"] = f"Bearer {azure_ad_token}"
+            auth = {"Authorization": f"Bearer {azure_ad_token}"}
         elif self.api_key is not None:
             # See AnthropicFoundry._prepare_options: `self.api_key` here is always the
             # Foundry key, never an environment `ANTHROPIC_API_KEY`.
-            if headers.get("x-api-key") is None:
-                headers["x-api-key"] = self.api_key
-            if headers.get("api-key") is None:
-                headers["api-key"] = self.api_key
+            auth = {"x-api-key": self.api_key, "api-key": self.api_key}
         else:
             # should never be hit
             raise ValueError("Unable to handle auth")
 
+        options = model_copy(options)
+        options.headers = merge_headers(auth, options.headers or {})
         return options
 
     @property
@@ -530,6 +516,6 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         return {}
 
     @override
-    def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
+    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
         # Foundry attaches its own auth header in `_prepare_options`.
         return

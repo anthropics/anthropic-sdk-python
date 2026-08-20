@@ -233,3 +233,52 @@ class TestFoundryDoesNotLeakAnthropicAPIKey:
         assert headers.get("x-api-key") == "foundry-key"
         assert headers.get("api-key") == "foundry-key"
         assert "sk-ant-should-not-leak" not in headers.values()
+
+
+class TestFoundryCallerAuthHeaderCasing:
+    """A caller-supplied `Authorization` / `x-api-key` header isn't doubled up by Foundry's own, whatever its casing."""
+
+    def test_caller_authorization_header_wins_case_insensitively(self) -> None:
+        client = AnthropicFoundry(resource="example-resource", azure_ad_token_provider=lambda: "azure-token")
+
+        options = client._prepare_options(
+            FinalRequestOptions(method="post", url="/v1/messages", headers={"authorization": "Bearer per-request"})
+        )
+        headers = client._build_request(options).headers
+
+        assert headers.get_list("authorization") == ["Bearer per-request"]
+
+    def test_caller_api_key_header_wins_case_insensitively(self) -> None:
+        client = AnthropicFoundry(api_key="foundry-key", resource="example-resource")
+
+        options = client._prepare_options(
+            FinalRequestOptions(method="post", url="/v1/messages", headers={"X-Api-Key": "per-request-key"})
+        )
+        headers = client._build_request(options).headers
+
+        assert headers.get_list("x-api-key") == ["per-request-key"]
+
+    @pytest.mark.asyncio
+    async def test_async_caller_authorization_header_wins_case_insensitively(self) -> None:
+        async def token_provider() -> str:
+            return "azure-token"
+
+        client = AsyncAnthropicFoundry(resource="example-resource", azure_ad_token_provider=token_provider)
+
+        options = await client._prepare_options(
+            FinalRequestOptions(method="post", url="/v1/messages", headers={"authorization": "Bearer per-request"})
+        )
+        headers = client._build_request(options).headers
+
+        assert headers.get_list("authorization") == ["Bearer per-request"]
+
+    @pytest.mark.asyncio
+    async def test_async_caller_api_key_header_wins_case_insensitively(self) -> None:
+        client = AsyncAnthropicFoundry(api_key="foundry-key", resource="example-resource")
+
+        options = await client._prepare_options(
+            FinalRequestOptions(method="post", url="/v1/messages", headers={"X-Api-Key": "per-request-key"})
+        )
+        headers = client._build_request(options).headers
+
+        assert headers.get_list("x-api-key") == ["per-request-key"]

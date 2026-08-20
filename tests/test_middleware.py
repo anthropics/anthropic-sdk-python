@@ -7,7 +7,7 @@ from typing import Any, Protocol, cast
 from pathlib import Path
 from typing_extensions import override
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 
@@ -37,7 +37,6 @@ from anthropic._response import BinaryAPIResponse, AsyncBinaryAPIResponse, Strea
 from anthropic.lib.foundry import AnthropicFoundry, AsyncAnthropicFoundry
 from anthropic._base_client import BaseClient
 from anthropic.types.message import Message
-from anthropic._legacy_response import LegacyAPIResponse
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -1007,7 +1006,7 @@ class TestSyncMiddleware:
             model="claude-opus-4-6",
         )
 
-        assert isinstance(response, LegacyAPIResponse)
+        assert isinstance(response, APIResponse)
         assert isinstance(response.parse(), Message)
         assert len(recorder.requests) == 1
         assert recorder.requests[0].url == "/v1/messages"
@@ -1027,12 +1026,12 @@ class TestSyncMiddleware:
             model="claude-opus-4-6",
         )
 
-        # the middleware itself saw a true `APIResponse`
+        # the middleware itself saw the `APIResponse`
         assert len(middleware.responses) == 1
         assert isinstance(middleware.responses[0], APIResponse)
 
-        # the caller still receives the `LegacyAPIResponse` wrapper it expects
-        assert isinstance(response, LegacyAPIResponse)
+        # and the caller receives that same wrapper type
+        assert isinstance(response, APIResponse)
         assert response.status_code == 200
         assert response.headers["x-custom-header"] == "custom-value"
         message = response.parse()
@@ -1485,8 +1484,8 @@ class TestAsyncMiddleware:
             model="claude-opus-4-6",
         )
 
-        assert isinstance(response, LegacyAPIResponse)
-        assert isinstance(response.parse(), Message)
+        assert isinstance(response, AsyncAPIResponse)
+        assert isinstance(await response.parse(), Message)
         assert len(recorder.requests) == 1
         assert recorder.requests[0].url == "/v1/messages"
 
@@ -1505,15 +1504,15 @@ class TestAsyncMiddleware:
             model="claude-opus-4-6",
         )
 
-        # the middleware itself saw a true `AsyncAPIResponse`
+        # the middleware itself saw the `AsyncAPIResponse`
         assert len(middleware.responses) == 1
         assert isinstance(middleware.responses[0], AsyncAPIResponse)
 
-        # the caller still receives the `LegacyAPIResponse` wrapper it expects
-        assert isinstance(response, LegacyAPIResponse)
+        # and the caller receives that same wrapper type
+        assert isinstance(response, AsyncAPIResponse)
         assert response.status_code == 200
         assert response.headers["x-custom-header"] == "custom-value"
-        message = response.parse()
+        message = await response.parse()
         assert isinstance(message, Message)
         assert message.id == "msg_013Zva2CMHLNnXjNJJKqJ2EF"
 

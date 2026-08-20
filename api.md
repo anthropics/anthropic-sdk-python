@@ -708,7 +708,6 @@ from anthropic.types.beta import (
     BetaWebSearchToolResultBlockParamContent,
     BetaWebSearchToolResultError,
     BetaWebSearchToolResultErrorCode,
-    BetaBase64PDFBlock,
 )
 ```
 

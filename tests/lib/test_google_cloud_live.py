@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from typing import Iterator, AsyncIterator
 
-import httpx
+import httpx2 as httpx
 import pytest
 
 from anthropic import APIStatusError

@@ -7,7 +7,7 @@ from datetime import datetime
 from itertools import chain
 from typing_extensions import Literal
 
-import httpx
+import httpx2
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -15,12 +15,16 @@ if TYPE_CHECKING:
     from ...._client import AsyncAnthropic
     from ....lib.tools._beta_session_runner import SessionToolRunner, BetaAnyRunnableTool
 
-from .... import _legacy_response
 from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
-from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ...._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ...._streaming import Stream, AsyncStream
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
@@ -73,7 +77,7 @@ class Events(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsSessionEvent]:
         """
         List Events
@@ -162,7 +166,7 @@ class Events(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsSendSessionEvents:
         """
         Send Events
@@ -213,7 +217,7 @@ class Events(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> Stream[BetaManagedAgentsStreamSessionEvents]:
         """
         Stream Events
@@ -308,7 +312,7 @@ class AsyncEvents(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsSessionEvent, AsyncPageCursor[BetaManagedAgentsSessionEvent]]:
         """
         List Events
@@ -397,7 +401,7 @@ class AsyncEvents(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsSendSessionEvents:
         """
         Send Events
@@ -448,7 +452,7 @@ class AsyncEvents(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncStream[BetaManagedAgentsStreamSessionEvents]:
         """
         Stream Events
@@ -604,13 +608,13 @@ class EventsWithRawResponse:
     def __init__(self, events: Events) -> None:
         self._events = events
 
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             events.list,
         )
-        self.send = _legacy_response.to_raw_response_wrapper(
+        self.send = to_raw_response_wrapper(
             events.send,
         )
-        self.stream = _legacy_response.to_raw_response_wrapper(
+        self.stream = to_raw_response_wrapper(
             events.stream,
         )
 
@@ -619,13 +623,13 @@ class AsyncEventsWithRawResponse:
     def __init__(self, events: AsyncEvents) -> None:
         self._events = events
 
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             events.list,
         )
-        self.send = _legacy_response.async_to_raw_response_wrapper(
+        self.send = async_to_raw_response_wrapper(
             events.send,
         )
-        self.stream = _legacy_response.async_to_raw_response_wrapper(
+        self.stream = async_to_raw_response_wrapper(
             events.stream,
         )
 

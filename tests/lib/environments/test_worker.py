@@ -31,7 +31,7 @@ from collections.abc import Awaitable, AsyncIterator
 from typing_extensions import override
 
 import anyio
-import httpx
+import httpx2 as httpx
 import pytest
 
 from anthropic import Anthropic, APIStatusError, AsyncAnthropic

@@ -4,14 +4,18 @@ from __future__ import annotations
 
 from typing import Iterable
 
-import httpx
+import httpx2
 
-from ... import _legacy_response
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ..._utils import path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ..._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ...pagination import SyncPage, AsyncPage
 from ..._exceptions import AnthropicError
 from ..._base_client import AsyncPaginator, make_request_options
@@ -54,7 +58,7 @@ class Batches(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> MessageBatch:
         """
         Send a batch of Message creation requests.
@@ -102,7 +106,7 @@ class Batches(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> MessageBatch:
         """This endpoint is idempotent and can be used to poll for Message Batch
         completion.
@@ -145,7 +149,7 @@ class Batches(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPage[MessageBatch]:
         """List all Message Batches within a Workspace.
 
@@ -203,7 +207,7 @@ class Batches(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> DeletedMessageBatch:
         """
         Delete a Message Batch.
@@ -244,7 +248,7 @@ class Batches(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> MessageBatch:
         """Batches may be canceled any time before processing ends.
 
@@ -291,7 +295,7 @@ class Batches(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> JSONLDecoder[MessageBatchIndividualResponse]:
         """
         Streams the results of a Message Batch as a `.jsonl` file.
@@ -364,7 +368,7 @@ class AsyncBatches(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> MessageBatch:
         """
         Send a batch of Message creation requests.
@@ -412,7 +416,7 @@ class AsyncBatches(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> MessageBatch:
         """This endpoint is idempotent and can be used to poll for Message Batch
         completion.
@@ -455,7 +459,7 @@ class AsyncBatches(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[MessageBatch, AsyncPage[MessageBatch]]:
         """List all Message Batches within a Workspace.
 
@@ -513,7 +517,7 @@ class AsyncBatches(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> DeletedMessageBatch:
         """
         Delete a Message Batch.
@@ -554,7 +558,7 @@ class AsyncBatches(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> MessageBatch:
         """Batches may be canceled any time before processing ends.
 
@@ -601,7 +605,7 @@ class AsyncBatches(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncJSONLDecoder[MessageBatchIndividualResponse]:
         """
         Streams the results of a Message Batch as a `.jsonl` file.
@@ -648,19 +652,19 @@ class BatchesWithRawResponse:
     def __init__(self, batches: Batches) -> None:
         self._batches = batches
 
-        self.create = _legacy_response.to_raw_response_wrapper(
+        self.create = to_raw_response_wrapper(
             batches.create,
         )
-        self.retrieve = _legacy_response.to_raw_response_wrapper(
+        self.retrieve = to_raw_response_wrapper(
             batches.retrieve,
         )
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             batches.list,
         )
-        self.delete = _legacy_response.to_raw_response_wrapper(
+        self.delete = to_raw_response_wrapper(
             batches.delete,
         )
-        self.cancel = _legacy_response.to_raw_response_wrapper(
+        self.cancel = to_raw_response_wrapper(
             batches.cancel,
         )
 
@@ -669,19 +673,19 @@ class AsyncBatchesWithRawResponse:
     def __init__(self, batches: AsyncBatches) -> None:
         self._batches = batches
 
-        self.create = _legacy_response.async_to_raw_response_wrapper(
+        self.create = async_to_raw_response_wrapper(
             batches.create,
         )
-        self.retrieve = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve = async_to_raw_response_wrapper(
             batches.retrieve,
         )
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             batches.list,
         )
-        self.delete = _legacy_response.async_to_raw_response_wrapper(
+        self.delete = async_to_raw_response_wrapper(
             batches.delete,
         )
-        self.cancel = _legacy_response.async_to_raw_response_wrapper(
+        self.cancel = async_to_raw_response_wrapper(
             batches.cancel,
         )
 
