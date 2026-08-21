@@ -303,7 +303,6 @@ class TestAnthropic:
                         # to_raw_response_wrapper leaks through the @functools.wraps() decorator.
                         #
                         # removing the decorator fixes the leak for reasons we don't understand.
-                        "anthropic/_legacy_response.py",
                         "anthropic/_response.py",
                         # pydantic.BaseModel.model_dump || pydantic.BaseModel.dict leak memory for some reason.
                         "anthropic/_compat.py",
@@ -1473,7 +1472,6 @@ class TestAsyncAnthropic:
                         # to_raw_response_wrapper leaks through the @functools.wraps() decorator.
                         #
                         # removing the decorator fixes the leak for reasons we don't understand.
-                        "anthropic/_legacy_response.py",
                         "anthropic/_response.py",
                         # pydantic.BaseModel.model_dump || pydantic.BaseModel.dict leak memory for some reason.
                         "anthropic/_compat.py",
