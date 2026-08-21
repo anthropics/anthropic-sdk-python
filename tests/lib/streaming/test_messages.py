@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any, Set, TypeVar, Iterator, cast
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -205,7 +205,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("basic_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -225,7 +225,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
                 content=get_response("basic_response.txt"),
@@ -253,7 +253,7 @@ class TestSyncMessages:
     def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
         for deprecated_model in DEPRECATED_MODELS:
             respx_mock.post("/v1/messages").mock(
-                return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+                return_value=httpx2.Response(200, content=get_response("basic_response.txt"))
             )
 
             with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
@@ -268,7 +268,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("tool_use_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("tool_use_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -288,7 +288,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_server_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("server_tool_use_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("server_tool_use_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -301,7 +301,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_tool_use_invalid_json(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("tool_use_invalid_json_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("tool_use_invalid_json_response.txt"))
         )
 
         with pytest.raises(ValueError, match=INVALID_TOOL_JSON_ERROR):
@@ -315,7 +315,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_tool_use_caller_omitted(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_tool_use_response_without_caller())
+            return_value=httpx2.Response(200, content=get_tool_use_response_without_caller())
         )
 
         with sync_client.messages.stream(
@@ -328,7 +328,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("refusal_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("refusal_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -341,7 +341,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("message_delta_fields_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("message_delta_fields_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -354,7 +354,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_message_delta_omitted_usage_keeps_message_start(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("message_delta_omitted_usage_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("message_delta_omitted_usage_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -369,7 +369,7 @@ class TestSyncMessages:
     def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
         # trailing blank line terminates the final `message_stop` SSE so it is dispatched
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=iter([*get_response("basic_response.txt"), b"\n"]))
+            return_value=httpx2.Response(200, content=iter([*get_response("basic_response.txt"), b"\n"]))
         )
 
         with sync_client.messages.stream(
@@ -391,7 +391,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -412,7 +412,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
                 content=to_async_iter(get_response("basic_response.txt")),
@@ -441,7 +441,7 @@ class TestAsyncMessages:
     async def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
         for deprecated_model in DEPRECATED_MODELS:
             respx_mock.post("/v1/messages").mock(
-                return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+                return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
             )
 
             with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
@@ -457,7 +457,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("tool_use_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("tool_use_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -478,7 +478,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_server_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("server_tool_use_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("server_tool_use_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -492,7 +492,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_tool_use_invalid_json(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("tool_use_invalid_json_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("tool_use_invalid_json_response.txt")))
         )
 
         with pytest.raises(ValueError, match=INVALID_TOOL_JSON_ERROR):
@@ -507,7 +507,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_tool_use_caller_omitted(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_tool_use_response_without_caller()))
+            return_value=httpx2.Response(200, content=to_async_iter(get_tool_use_response_without_caller()))
         )
 
         async with async_client.messages.stream(
@@ -521,7 +521,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("refusal_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("refusal_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -535,7 +535,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("message_delta_fields_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("message_delta_fields_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -549,7 +549,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_message_delta_omitted_usage_keeps_message_start(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200, content=to_async_iter(get_response("message_delta_omitted_usage_response.txt"))
             )
         )
@@ -567,7 +567,7 @@ class TestAsyncMessages:
     async def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
         # trailing blank line terminates the final `message_stop` SSE so it is dispatched
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(iter([*get_response("basic_response.txt"), b"\n"])))
+            return_value=httpx2.Response(200, content=to_async_iter(iter([*get_response("basic_response.txt"), b"\n"])))
         )
 
         async with async_client.messages.stream(

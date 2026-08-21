@@ -19,7 +19,7 @@ from typing import (
 from contextvars import Token, ContextVar
 from typing_extensions import Literal, override
 
-import httpx2 as httpx
+import httpx2
 
 from ..._utils import is_dict
 from ..._models import BaseModel
@@ -328,7 +328,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
     def _applicable_body(self, request: APIRequest) -> dict[str, Any] | None:
         """The request's JSON body when this middleware applies to it, `None` otherwise."""
         body = _as_dict(request.json)
-        url = httpx.URL(request.url)
+        url = httpx2.URL(request.url)
         if (
             # an empty chain disables this middleware
             not self._fallbacks
@@ -495,7 +495,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
     ) -> Generator[bytes, None, None]:
         fallbacks = self._fallbacks
         # the response whose body is currently being consumed; closed on teardown
-        current: httpx.Response | None = response.http_response
+        current: httpx2.Response | None = response.http_response
 
         try:
             # --- stream A: pass through until a chainable refusal ---
@@ -619,7 +619,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
     ) -> AsyncGenerator[bytes, None]:
         fallbacks = self._fallbacks
         # the response whose body is currently being consumed; closed on teardown
-        current: httpx.Response | None = response.http_response
+        current: httpx2.Response | None = response.http_response
 
         try:
             # --- stream A: pass through until a chainable refusal ---
@@ -1003,7 +1003,7 @@ class _HopReader:
         )
 
 
-def _drive_hop(response: httpx.Response, reader: _HopReader) -> Generator[bytes, None, _HopOutcome]:
+def _drive_hop(response: httpx2.Response, reader: _HopReader) -> Generator[bytes, None, _HopOutcome]:
     """Feed one hop's SSE events through `reader`, yielding the frames to forward."""
     for sse in Stream.raw_events(response):
         for frame in reader.feed(sse):
@@ -1015,7 +1015,7 @@ def _drive_hop(response: httpx.Response, reader: _HopReader) -> Generator[bytes,
     return reader.finish()
 
 
-async def _drive_hop_async(response: httpx.Response, reader: _HopReader) -> AsyncIterator[bytes]:
+async def _drive_hop_async(response: httpx2.Response, reader: _HopReader) -> AsyncIterator[bytes]:
     """Feed one hop's SSE events through `reader`, yielding the frames to forward.
 
     The outcome is read from `reader.finish()` afterwards — async generators
@@ -1410,7 +1410,7 @@ def _seam_block(from_model: str, to_model: str, category: str | None) -> dict[st
     }
 
 
-def _seamed_http_response(original: httpx.Response, seams: list[dict[str, Any]]) -> httpx.Response | None:
+def _seamed_http_response(original: httpx2.Response, seams: list[dict[str, Any]]) -> httpx2.Response | None:
     """A copy of the served hop's response with `seams` prepended to its
     `content`, or `None` when the body isn't the expected message shape.
 
@@ -1424,7 +1424,7 @@ def _seamed_http_response(original: httpx.Response, seams: list[dict[str, Any]])
     for header in ("content-encoding", "content-length"):
         if header in headers:
             del headers[header]
-    return httpx.Response(
+    return httpx2.Response(
         status_code=original.status_code,
         headers=headers,
         content=body,
@@ -1520,14 +1520,14 @@ def _as_dict(value: object) -> dict[str, Any] | None:
     return cast("Dict[str, Any]", value) if is_dict(value) else None
 
 
-def _read_json(response: httpx.Response) -> Any:
+def _read_json(response: httpx2.Response) -> Any:
     try:
         return json.loads(response.read())
     except Exception:
         return None
 
 
-async def _read_json_async(response: httpx.Response) -> Any:
+async def _read_json_async(response: httpx2.Response) -> Any:
     try:
         return json.loads(await response.aread())
     except Exception:
@@ -1588,8 +1588,8 @@ def _backfill(primary: dict[str, Any] | None, fallback: dict[str, Any] | None) -
 
 
 def _spliced_http_response(
-    original: httpx.Response, stream: httpx.SyncByteStream | httpx.AsyncByteStream
-) -> httpx.Response:
+    original: httpx2.Response, stream: httpx2.SyncByteStream | httpx2.AsyncByteStream
+) -> httpx2.Response:
     """A synthetic response standing in for `original`, with `stream` as its body.
 
     The spliced frames are emitted post-decode, so the original's
@@ -1599,7 +1599,7 @@ def _spliced_http_response(
     for header in ("content-encoding", "content-length"):
         if header in headers:
             del headers[header]
-    return httpx.Response(
+    return httpx2.Response(
         status_code=original.status_code,
         headers=headers,
         stream=stream,
@@ -1607,7 +1607,7 @@ def _spliced_http_response(
     )
 
 
-class _FrameByteStream(httpx.SyncByteStream):
+class _FrameByteStream(httpx2.SyncByteStream):
     def __init__(self, frames: Generator[bytes, None, None]) -> None:
         self._frames = frames
 
@@ -1620,7 +1620,7 @@ class _FrameByteStream(httpx.SyncByteStream):
         self._frames.close()
 
 
-class _AsyncFrameByteStream(httpx.AsyncByteStream):
+class _AsyncFrameByteStream(httpx2.AsyncByteStream):
     def __init__(self, frames: AsyncGenerator[bytes, None]) -> None:
         self._frames = frames
 

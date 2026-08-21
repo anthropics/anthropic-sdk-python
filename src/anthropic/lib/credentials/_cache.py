@@ -5,7 +5,7 @@ import logging
 import threading
 from typing import Callable, Optional
 
-import httpx2 as httpx
+import httpx2
 
 from ._types import AccessToken, AccessTokenProvider
 from ._workload import WorkloadIdentityError
@@ -155,7 +155,7 @@ class TokenCache:
                     self._refresh_event = None
                 assert released is not None
                 released.set()
-                if advisory_fallback is not None and isinstance(err, (AnthropicError, httpx.HTTPError)):
+                if advisory_fallback is not None and isinstance(err, (AnthropicError, httpx2.HTTPError)):
                     log.warning(
                         "Advisory token refresh failed (%ds remaining); serving cached token: %s",
                         remaining_seconds,

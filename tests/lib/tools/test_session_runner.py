@@ -16,7 +16,7 @@ from typing import Any, Optional, cast
 from collections.abc import Callable, Sequence, Awaitable, AsyncIterator
 from typing_extensions import override
 
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from anthropic import APIStatusError
@@ -123,8 +123,8 @@ def _result_text(item: DispatchedToolCall) -> str:
 
 
 def _api_status_error(code: int) -> APIStatusError:
-    request = httpx.Request("POST", "https://api.example/x")
-    response = httpx.Response(status_code=code, request=request, content=b"{}")
+    request = httpx2.Request("POST", "https://api.example/x")
+    response = httpx2.Response(status_code=code, request=request, content=b"{}")
     return APIStatusError("boom", response=response, body=None)
 
 
@@ -831,7 +831,7 @@ async def test_reconnect_does_not_double_dispatch_held_call(monkeypatch: pytest.
         streams=[
             # First connection: the gated call arrives live (and is held), then
             # the stream drops with a transient error.
-            _FakeStream([gated_call], raise_after=1, raise_with=httpx.ReadError("dropped")),
+            _FakeStream([gated_call], raise_after=1, raise_with=httpx2.ReadError("dropped")),
             _FakeStream([_terminated()]),
         ],
         # The reconcile after the reconnect sees both the held call and its
@@ -864,7 +864,7 @@ async def test_reconcile_confirmation_releases_call_held_from_live_stream(monkey
             _FakeStream(
                 [_tool_use("tu_1", "gated", {}, evaluated_permission="ask")],
                 raise_after=1,
-                raise_with=httpx.ReadError("dropped"),
+                raise_with=httpx2.ReadError("dropped"),
             ),
             _FakeStream([_terminated()]),
         ],
@@ -1113,7 +1113,7 @@ async def test_reconcile_released_call_not_cut_short_by_idle(monkeypatch: pytest
             _FakeStream(
                 [_tool_use("tu_1", "gated", {}, evaluated_permission="ask")],
                 raise_after=1,
-                raise_with=httpx.ReadError("dropped"),
+                raise_with=httpx2.ReadError("dropped"),
             ),
             _FakeStream([]),
         ],

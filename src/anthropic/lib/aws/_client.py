@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Mapping, Sequence
 from typing_extensions import Self, override
 
-import httpx2 as httpx
+import httpx2
 
 from ..._types import Omit, Timeout, NotGiven, not_given
 from ..._utils import asyncify
@@ -43,12 +43,12 @@ class AnthropicAWS(Anthropic):
         aws_session_token: str | None = None,
         workspace_id: str | None = None,
         skip_auth: bool = False,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        base_url: str | httpx2.URL | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
         # Passed through to parent but not used for AWS auth
@@ -137,13 +137,13 @@ class AnthropicAWS(Anthropic):
         return super()._api_key_auth
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         if self._use_sigv4 or self._skip_auth:
             return
         super()._validate_headers(headers, omitted)
 
     @override
-    def _prepare_request(self, request: httpx.Request) -> None:
+    def _prepare_request(self, request: httpx2.Request) -> None:
         if not self._use_sigv4:
             return
 
@@ -180,9 +180,9 @@ class AnthropicAWS(Anthropic):
         auth_token: str | None = None,
         credentials: AccessTokenProvider | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
@@ -251,12 +251,12 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         aws_session_token: str | None = None,
         workspace_id: str | None = None,
         skip_auth: bool = False,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        base_url: str | httpx2.URL | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
         # Accepted for compatibility with AsyncAnthropic.copy() but not used
@@ -345,13 +345,13 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         return super()._api_key_auth
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         if self._use_sigv4 or self._skip_auth:
             return
         super()._validate_headers(headers, omitted)
 
     @override
-    async def _prepare_request(self, request: httpx.Request) -> None:
+    async def _prepare_request(self, request: httpx2.Request) -> None:
         if not self._use_sigv4:
             return
 
@@ -388,9 +388,9 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         auth_token: str | None = None,
         credentials: AccessTokenProvider | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,

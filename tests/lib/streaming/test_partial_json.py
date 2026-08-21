@@ -1,7 +1,7 @@
 import copy
 from typing import List, cast
 
-import httpx2 as httpx
+import httpx2
 
 from anthropic.types.beta import BetaDirectCaller, BetaToolUseBlock, BetaInputJSONDelta, BetaRawContentBlockDeltaEvent
 from anthropic.types.tool_use_block import ToolUseBlock
@@ -44,12 +44,12 @@ class TestPartialJson:
         message1 = accumulate_event(
             event=event_complete,
             current_snapshot=copy.deepcopy(message),
-            request_headers=httpx.Headers({"some-header": "value"}),
+            request_headers=httpx2.Headers({"some-header": "value"}),
         )
         message2 = accumulate_event(
             event=event_complete,
             current_snapshot=copy.deepcopy(message),
-            request_headers=httpx.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
+            request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
         )
 
         # Both should parse complete JSON correctly
@@ -69,14 +69,14 @@ class TestPartialJson:
         message_standard = accumulate_event(
             event=event_incomplete,
             current_snapshot=copy.deepcopy(message),
-            request_headers=httpx.Headers({"some-header": "value"}),
+            request_headers=httpx2.Headers({"some-header": "value"}),
         )
 
         # With beta header (trailing strings mode)
         message_trailing = accumulate_event(
             event=event_incomplete,
             current_snapshot=copy.deepcopy(message),
-            request_headers=httpx.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
+            request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
         )
 
         # Get the tool use blocks
@@ -138,7 +138,7 @@ class TestPartialJson:
             accumulate_event(
                 event=event_invalid,
                 current_snapshot=copy.deepcopy(message),
-                request_headers=httpx.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
+                request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
             )
             raise AssertionError("Expected ValueError for invalid JSON, but no error was raised.")
         except ValueError as e:

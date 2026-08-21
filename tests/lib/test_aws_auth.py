@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from anthropic.lib.aws._auth import get_auth_headers
@@ -440,7 +440,7 @@ class TestGetAuthHeaders:
         headers = get_auth_headers(
             method="POST",
             url="https://gateway.us-east-1.api.aws/v1/messages",
-            headers=httpx.Headers({"content-type": "application/json"}),
+            headers=httpx2.Headers({"content-type": "application/json"}),
             aws_access_key="AKIAIOSFODNN7EXAMPLE",
             aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
             aws_session_token=None,
@@ -457,7 +457,7 @@ class TestGetAuthHeaders:
         headers = get_auth_headers(
             method="POST",
             url="https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages",
-            headers=httpx.Headers({"content-type": "application/json"}),
+            headers=httpx2.Headers({"content-type": "application/json"}),
             aws_access_key="AKIAIOSFODNN7EXAMPLE",
             aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
             aws_session_token=None,
@@ -474,7 +474,7 @@ class TestGetAuthHeaders:
         headers = get_auth_headers(
             method="POST",
             url="https://gateway.us-east-1.api.aws/v1/messages",
-            headers=httpx.Headers({"content-type": "application/json"}),
+            headers=httpx2.Headers({"content-type": "application/json"}),
             aws_access_key="AKIAIOSFODNN7EXAMPLE",
             aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
             aws_session_token=None,
@@ -491,7 +491,7 @@ class TestGetAuthHeaders:
         headers = get_auth_headers(
             method="POST",
             url="https://gateway.us-east-1.api.aws/v1/messages",
-            headers=httpx.Headers({"content-type": "application/json"}),
+            headers=httpx2.Headers({"content-type": "application/json"}),
             aws_access_key="AKIAIOSFODNN7EXAMPLE",
             aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
             aws_session_token="FwoGZXIvYXdzEBYaDH7example",
@@ -507,7 +507,7 @@ class TestGetAuthHeaders:
         headers = get_auth_headers(
             method="POST",
             url="https://gateway.us-east-1.api.aws/v1/messages",
-            headers=httpx.Headers({"content-type": "application/json", "connection": "keep-alive"}),
+            headers=httpx2.Headers({"content-type": "application/json", "connection": "keep-alive"}),
             aws_access_key="AKIAIOSFODNN7EXAMPLE",
             aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
             aws_session_token=None,
@@ -527,7 +527,7 @@ class TestGetAuthHeaders:
         headers = get_auth_headers(
             method="GET",
             url="https://gateway.us-east-1.api.aws/v1/models",
-            headers=httpx.Headers({}),
+            headers=httpx2.Headers({}),
             aws_access_key="AKIAIOSFODNN7EXAMPLE",
             aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
             aws_session_token=None,
@@ -543,7 +543,7 @@ class TestGetAuthHeaders:
         headers_with_query = get_auth_headers(
             method="GET",
             url="https://gateway.us-east-1.api.aws/v1/models?limit=10",
-            headers=httpx.Headers({}),
+            headers=httpx2.Headers({}),
             aws_access_key="AKIAIOSFODNN7EXAMPLE",
             aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
             aws_session_token=None,
@@ -555,7 +555,7 @@ class TestGetAuthHeaders:
         headers_without_query = get_auth_headers(
             method="GET",
             url="https://gateway.us-east-1.api.aws/v1/models",
-            headers=httpx.Headers({}),
+            headers=httpx2.Headers({}),
             aws_access_key="AKIAIOSFODNN7EXAMPLE",
             aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
             aws_session_token=None,
@@ -572,7 +572,7 @@ class TestGetAuthHeaders:
         headers = get_auth_headers(
             method="post",
             url="https://gateway.us-east-1.api.aws/v1/messages",
-            headers=httpx.Headers({}),
+            headers=httpx2.Headers({}),
             aws_access_key="AKIAIOSFODNN7EXAMPLE",
             aws_secret_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
             aws_session_token=None,
@@ -599,7 +599,7 @@ class TestGetAuthHeaders:
             get_auth_headers(
                 method="POST",
                 url="https://gateway.us-east-1.api.aws/v1/messages",
-                headers=httpx.Headers({}),
+                headers=httpx2.Headers({}),
                 aws_access_key=None,
                 aws_secret_key=None,
                 aws_session_token=None,

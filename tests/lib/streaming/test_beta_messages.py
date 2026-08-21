@@ -4,7 +4,7 @@ import os
 import json
 from typing import Any, Set, Dict, TypeVar, cast
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -340,7 +340,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("basic_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -360,7 +360,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("tool_use_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("tool_use_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -380,7 +380,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_server_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("server_tool_use_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("server_tool_use_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -393,7 +393,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
                 content=get_response("basic_response.txt"),
@@ -421,7 +421,7 @@ class TestSyncMessages:
     def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
         for deprecated_model in DEPRECATED_MODELS:
             respx_mock.post("/v1/messages").mock(
-                return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+                return_value=httpx2.Response(200, content=get_response("basic_response.txt"))
             )
 
             with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
@@ -436,7 +436,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("refusal_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("refusal_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -451,7 +451,7 @@ class TestSyncMessages:
     def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
         # trailing blank line terminates the final `message_stop` SSE so it is dispatched
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=iter([*get_response("basic_response.txt"), b"\n"]))
+            return_value=httpx2.Response(200, content=iter([*get_response("basic_response.txt"), b"\n"]))
         )
 
         with sync_client.beta.messages.stream(
@@ -470,7 +470,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_compaction(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("compaction_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("compaction_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -485,7 +485,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_fallback_relabels_model(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("fallback_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("fallback_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -500,7 +500,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_fallback_credit_usage_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("fallback_credit_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("fallback_credit_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -513,7 +513,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("message_delta_fields_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("message_delta_fields_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -526,7 +526,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_context_management_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("context_management_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("context_management_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -542,7 +542,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
         )
 
         async with async_client.beta.messages.stream(
@@ -563,7 +563,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
                 content=to_async_iter(get_response("basic_response.txt")),
@@ -592,7 +592,7 @@ class TestAsyncMessages:
     async def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
         for deprecated_model in DEPRECATED_MODELS:
             respx_mock.post("/v1/messages").mock(
-                return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+                return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
             )
 
             with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
@@ -608,7 +608,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("tool_use_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("tool_use_response.txt")))
         )
 
         async with async_client.beta.messages.stream(
@@ -629,7 +629,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_server_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("server_tool_use_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("server_tool_use_response.txt")))
         )
 
         async with async_client.beta.messages.stream(
@@ -643,7 +643,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_incomplete_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200, content=to_async_iter(get_response("incomplete_partial_json_response.txt"))
             )
         )
@@ -668,7 +668,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("refusal_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("refusal_response.txt")))
         )
 
         async with async_client.beta.messages.stream(
@@ -684,7 +684,7 @@ class TestAsyncMessages:
     async def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
         # trailing blank line terminates the final `message_stop` SSE so it is dispatched
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(iter([*get_response("basic_response.txt"), b"\n"])))
+            return_value=httpx2.Response(200, content=to_async_iter(iter([*get_response("basic_response.txt"), b"\n"])))
         )
 
         async with async_client.beta.messages.stream(
@@ -704,7 +704,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_compaction(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("compaction_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("compaction_response.txt")))
         )
 
         async with async_client.beta.messages.stream(
@@ -720,7 +720,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_fallback_relabels_model(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("fallback_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("fallback_response.txt")))
         )
 
         async with async_client.beta.messages.stream(
@@ -736,7 +736,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_fallback_credit_usage_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("fallback_credit_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("fallback_credit_response.txt")))
         )
 
         async with async_client.beta.messages.stream(
@@ -750,7 +750,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("message_delta_fields_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("message_delta_fields_response.txt")))
         )
 
         async with async_client.beta.messages.stream(
@@ -764,7 +764,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_context_management_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("context_management_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("context_management_response.txt")))
         )
 
         async with async_client.beta.messages.stream(

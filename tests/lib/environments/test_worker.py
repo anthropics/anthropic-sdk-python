@@ -31,7 +31,7 @@ from collections.abc import Awaitable, AsyncIterator
 from typing_extensions import override
 
 import anyio
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from anthropic import Anthropic, APIStatusError, AsyncAnthropic
@@ -56,8 +56,8 @@ def _encode_secret(payload: dict[str, Any]) -> str:
 
 
 def _api_status_error(code: int, body: object = None) -> APIStatusError:
-    request = httpx.Request("POST", "https://api.example/heartbeat")
-    response = httpx.Response(status_code=code, request=request, content=json.dumps(body).encode())
+    request = httpx2.Request("POST", "https://api.example/heartbeat")
+    response = httpx2.Response(status_code=code, request=request, content=json.dumps(body).encode())
     return APIStatusError("boom", response=response, body=body)
 
 

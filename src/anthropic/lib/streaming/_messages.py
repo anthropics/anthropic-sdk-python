@@ -4,7 +4,7 @@ from types import TracebackType
 from typing import TYPE_CHECKING, Any, Type, Generic, Callable, cast
 from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
 
-import httpx2 as httpx
+import httpx2
 from pydantic import BaseModel
 
 from anthropic.types.tool_use_block import ToolUseBlock
@@ -53,7 +53,7 @@ class MessageStream(Generic[ResponseFormatT]):
         self.__output_format = output_format
 
     @property
-    def response(self) -> httpx.Response:
+    def response(self) -> httpx2.Response:
         return self._raw_stream.response
 
     @property
@@ -205,7 +205,7 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
         self.__output_format = output_format
 
     @property
-    def response(self) -> httpx.Response:
+    def response(self) -> httpx2.Response:
         return self._raw_stream.response
 
     @property

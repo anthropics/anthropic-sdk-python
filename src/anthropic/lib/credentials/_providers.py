@@ -11,7 +11,7 @@ import tempfile
 from typing import TYPE_CHECKING, Any, Dict, Union, Optional, cast
 from typing_extensions import override
 
-import httpx2 as httpx
+import httpx2
 
 from ._types import AccessToken, IdentityTokenProvider
 from ._secrets import (
@@ -189,13 +189,13 @@ class CredentialsFile:
         self,
         profile: Optional[str] = None,
         *,
-        http_client: Optional[httpx.Client] = None,
+        http_client: Optional[httpx2.Client] = None,
     ) -> None:
         self._profile = profile if profile is not None else _active_profile()
         self._config_path = _config_file_path(self._profile)
         self._bound_base_url: Optional[str] = None
         self._http_client = http_client
-        self._owned_http_client: Optional[httpx.Client] = None
+        self._owned_http_client: Optional[httpx2.Client] = None
 
         # Populated on first __call__ — keeps construction cheap and exception-free
         # so the chain can construct us optimistically after an existence check.
@@ -426,16 +426,16 @@ class CredentialsFile:
             )
         return creds
 
-    def _get_http_client(self) -> httpx.Client:
-        """Return an ``httpx.Client``, lazily creating (and tracking) one we own."""
+    def _get_http_client(self) -> httpx2.Client:
+        """Return an ``httpx2.Client``, lazily creating (and tracking) one we own."""
         if self._http_client is not None:
             return self._http_client
         if self._owned_http_client is None:
-            self._owned_http_client = httpx.Client(timeout=TOKEN_EXCHANGE_TIMEOUT)
+            self._owned_http_client = httpx2.Client(timeout=TOKEN_EXCHANGE_TIMEOUT)
         return self._owned_http_client
 
     def close(self) -> None:
-        """Close the owned ``httpx.Client`` if we created one."""
+        """Close the owned ``httpx2.Client`` if we created one."""
         if self._owned_http_client is not None:
             self._owned_http_client.close()
             self._owned_http_client = None
@@ -578,7 +578,7 @@ class CredentialsFile:
                     "User-Agent": _user_agent(),
                 },
             )
-        except httpx.HTTPError as err:
+        except httpx2.HTTPError as err:
             raise WorkloadIdentityError(
                 f"user_oauth refresh failed to reach token endpoint: {err}"
             ) from _strip_traceback(err)
@@ -733,7 +733,7 @@ class CredentialsFile:
             identity_token_path = None
         provider = IdentityTokenFile(identity_token_path) if identity_token_path else IdentityTokenFile()
 
-        # The delegate borrows our owned httpx.Client: passing http_client=
+        # The delegate borrows our owned httpx2.Client: passing http_client=
         # sets _owns_http_client=False on the delegate so its close() is a
         # no-op. CredentialsFile.close() remains the single closer.
         delegate = WorkloadIdentityCredentials(
@@ -828,7 +828,7 @@ class InMemoryConfig(CredentialsFile):
         config: Dict[str, Any],
         *,
         identity_token_provider: Optional[IdentityTokenProvider] = None,
-        http_client: Optional[httpx.Client] = None,
+        http_client: Optional[httpx2.Client] = None,
     ) -> None:
         raw_auth = config.get("authentication")
         if not isinstance(raw_auth, dict):
@@ -859,7 +859,7 @@ class InMemoryConfig(CredentialsFile):
         self._config_path = self._IN_MEMORY_PATH
         self._bound_base_url: Optional[str] = None
         self._http_client = http_client
-        self._owned_http_client: Optional[httpx.Client] = None
+        self._owned_http_client: Optional[httpx2.Client] = None
         self._workload_delegate: Optional[WorkloadIdentityCredentials] = None
         self._identity_token_provider_override = identity_token_provider
 
