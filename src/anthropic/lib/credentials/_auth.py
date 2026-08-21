@@ -9,6 +9,7 @@ import httpx2 as httpx
 
 from ._cache import TokenCache
 from ..._utils import asyncify
+from ..._exceptions import AnthropicError
 from ._constants import OAUTH_API_BETA_HEADER
 
 __all__ = ["AccessTokenAuth"]
@@ -86,6 +87,12 @@ class AccessTokenAuth(httpx.Auth):
         return bool(request.headers.get("X-Api-Key") or request.headers.get("Authorization"))
 
     def _apply(self, request: httpx.Request, token: str) -> None:
+        if not isinstance(token, str) or not token or token != token.strip():
+            raise AnthropicError(
+                "Credentials provider returned an invalid access token; expected a non-empty string "
+                "without surrounding whitespace."
+            )
+
         request.headers["Authorization"] = f"Bearer {token}"
         existing_beta = request.headers.get("anthropic-beta", "")
         # Tokenize the comma-separated header so dedupe matches whole flag
