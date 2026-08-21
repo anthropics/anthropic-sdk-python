@@ -5,7 +5,7 @@ from types import TracebackType
 from typing import TYPE_CHECKING, Any, Type, Generic, Callable, cast
 from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
 
-import httpx2 as httpx
+import httpx2
 from pydantic import BaseModel
 
 from anthropic.types.beta.beta_tool_use_block import BetaToolUseBlock
@@ -56,7 +56,7 @@ class BetaMessageStream(Generic[ResponseFormatT]):
         self.__output_format = output_format
 
     @property
-    def response(self) -> httpx.Response:
+    def response(self) -> httpx2.Response:
         return self._raw_stream.response
 
     @property
@@ -209,7 +209,7 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
         self.__output_format = output_format
 
     @property
-    def response(self) -> httpx.Response:
+    def response(self) -> httpx2.Response:
         return self._raw_stream.response
 
     @property
@@ -458,7 +458,7 @@ def accumulate_event(
     *,
     event: BetaRawMessageStreamEvent,
     current_snapshot: ParsedBetaMessage[ResponseFormatT] | None,
-    request_headers: httpx.Headers,
+    request_headers: httpx2.Headers,
     output_format: ResponseFormatT | NotGiven = not_given,
 ) -> ParsedBetaMessage[ResponseFormatT]:
     if not isinstance(cast(Any, event), BaseModel):

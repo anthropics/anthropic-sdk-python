@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from typing import Iterator, AsyncIterator
 
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from anthropic import APIStatusError
@@ -33,7 +33,7 @@ def sync_client() -> Iterator[AnthropicGoogleCloud]:
     client = AnthropicGoogleCloud(
         location=LOCATION,
         max_retries=1,
-        http_client=httpx.Client(timeout=60.0),
+        http_client=httpx2.Client(timeout=60.0),
     )
     try:
         yield client
@@ -46,7 +46,7 @@ async def async_client() -> AsyncIterator[AsyncAnthropicGoogleCloud]:
     client = AsyncAnthropicGoogleCloud(
         location=LOCATION,
         max_retries=1,
-        http_client=httpx.AsyncClient(timeout=60.0),
+        http_client=httpx2.AsyncClient(timeout=60.0),
     )
     try:
         yield client

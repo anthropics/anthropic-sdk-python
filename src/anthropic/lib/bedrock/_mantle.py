@@ -4,7 +4,7 @@ import os
 from typing import Any, Union, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
-import httpx2 as httpx
+import httpx2
 
 from ... import _exceptions
 from ..._qs import Querystring
@@ -37,7 +37,7 @@ DEFAULT_SERVICE_NAME = "bedrock-mantle"
 
 _MANTLE_API_KEY_ENV_VARS = ("AWS_BEARER_TOKEN_BEDROCK", "ANTHROPIC_AWS_API_KEY")
 
-_HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncClient])
+_HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
@@ -66,7 +66,7 @@ class BaseMantleClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         err_msg: str,
         *,
         body: object,
-        response: httpx.Response,
+        response: httpx2.Response,
     ) -> APIStatusError:
         if response.status_code == 400:
             return _exceptions.BadRequestError(err_msg, response=response, body=body)
@@ -111,9 +111,9 @@ def _resolve_mantle_config(
     aws_region: str | None,
     aws_profile: str | None,
     skip_auth: bool,
-    base_url: str | httpx.URL | None,
+    base_url: str | httpx2.URL | None,
     default_headers: Mapping[str, str] | None,
-) -> tuple[str | None, str | httpx.URL, bool, dict[str, str]]:
+) -> tuple[str | None, str | httpx2.URL, bool, dict[str, str]]:
     """Resolve and validate all Mantle client configuration.
 
     Returns (resolved_api_key, resolved_base_url, use_sigv4, merged_headers).
@@ -161,7 +161,7 @@ def _resolve_mantle_config(
 # --- Sync client ---
 
 
-class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAPIClient):
+class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncAPIClient):
     messages: Messages
     beta: MantleBeta
 
@@ -184,12 +184,12 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         aws_profile: str | None = None,
         api_key: str | None = None,
         skip_auth: bool = False,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
@@ -256,11 +256,11 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         }
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         pass
 
     @override
-    def _prepare_request(self, request: httpx.Request) -> None:
+    def _prepare_request(self, request: httpx2.Request) -> None:
         if self.skip_auth or not self._use_sigv4:
             return
 
@@ -290,9 +290,9 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         aws_region: str | None = None,
         aws_profile: str | None = None,
         skip_auth: bool | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
@@ -357,7 +357,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
 # --- Async client ---
 
 
-class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
+class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
     messages: AsyncMessages
     beta: AsyncMantleBeta
 
@@ -380,12 +380,12 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         aws_profile: str | None = None,
         api_key: str | None = None,
         skip_auth: bool = False,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
@@ -452,11 +452,11 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         }
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         pass
 
     @override
-    async def _prepare_request(self, request: httpx.Request) -> None:
+    async def _prepare_request(self, request: httpx2.Request) -> None:
         if self.skip_auth or not self._use_sigv4:
             return
 
@@ -486,9 +486,9 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         aws_region: str | None = None,
         aws_profile: str | None = None,
         skip_auth: bool | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,

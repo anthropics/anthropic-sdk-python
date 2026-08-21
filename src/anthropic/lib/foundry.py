@@ -6,7 +6,7 @@ from typing import Any, Union, Mapping, TypeVar, Callable, Sequence, Awaitable, 
 from functools import cached_property
 from typing_extensions import Self, override
 
-import httpx2 as httpx
+import httpx2
 
 from .._types import Timeout, NotGiven, not_given
 from .._utils import is_given
@@ -27,7 +27,7 @@ from ..resources.beta.messages import Messages as BetaMessages, AsyncMessages as
 
 AzureADTokenProvider = Callable[[], str]
 AsyncAzureADTokenProvider = Callable[[], "str | Awaitable[str]"]
-_HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncClient])
+_HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
@@ -92,7 +92,7 @@ class AsyncBetaFoundry(AsyncBeta):
 # ==============================================================================
 
 
-class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
+class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic):
     @overload
     def __init__(
         self,
@@ -105,7 +105,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None: ...
@@ -122,7 +122,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None: ...
@@ -139,7 +139,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
@@ -211,9 +211,9 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         api_key: str | None = None,
         azure_ad_token_provider: AzureADTokenProvider | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
@@ -304,13 +304,13 @@ class AnthropicFoundry(BaseFoundryClient[httpx.Client, Stream[Any]], Anthropic):
         return {}
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         # Foundry attaches its own auth header in `_prepare_options`, so the base
         # requirement that `X-Api-Key`/`Authorization` already be present does not apply.
         return
 
 
-class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAnthropic):
+class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[Any]], AsyncAnthropic):
     @overload
     def __init__(
         self,
@@ -323,7 +323,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None: ...
@@ -340,7 +340,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None: ...
@@ -357,7 +357,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
@@ -429,9 +429,9 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         api_key: str | None = None,
         azure_ad_token_provider: AsyncAzureADTokenProvider | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
@@ -516,6 +516,6 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx.AsyncClient, AsyncStream[Any
         return {}
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         # Foundry attaches its own auth header in `_prepare_options`.
         return

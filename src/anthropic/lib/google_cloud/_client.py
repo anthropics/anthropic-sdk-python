@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Union, Mapping, TypeVar, Callable, Sequen
 from functools import partial
 from typing_extensions import Self, override
 
-import httpx2 as httpx
+import httpx2
 
 from ..._types import Timeout, NotGiven, not_given
 from ..._utils import asyncify, is_given
@@ -40,7 +40,7 @@ DEFAULT_LOCATION = "global"
 TokenProvider = Callable[[], str]
 AsyncTokenProvider = Callable[[], "str | Awaitable[str]"]
 
-_HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncClient])
+_HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
@@ -89,15 +89,15 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
 
     @property
     @override
-    def base_url(self) -> httpx.URL:
+    def base_url(self) -> httpx2.URL:
         return self._base_url
 
     @base_url.setter
-    def base_url(self, url: httpx.URL | str) -> None:
+    def base_url(self, url: httpx2.URL | str) -> None:
         # An explicit post-construction assignment wins over (and cancels) the
         # pending project back-fill.
         self._base_url_deferred = False
-        self._base_url = self._enforce_trailing_slash(url if isinstance(url, httpx.URL) else httpx.URL(url))
+        self._base_url = self._enforce_trailing_slash(url if isinstance(url, httpx2.URL) else httpx2.URL(url))
 
     @property
     def google_credentials(self) -> GoogleCredentials | None:
@@ -132,12 +132,12 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
 
 def _resolve_base_url(
     *,
-    base_url: str | httpx.URL | None,
+    base_url: str | httpx2.URL | None,
     project: str | None,
     location: str,
     workspace_id: str | None,
     allow_deferred_project: bool,
-) -> str | httpx.URL | None:
+) -> str | httpx2.URL | None:
     """base_url (arg or ``ANTHROPIC_GOOGLE_CLOUD_BASE_URL``, resolved by the caller)
     > derived template.
 
@@ -186,7 +186,7 @@ def _project_from_credentials(credentials: GoogleCredentials) -> str | None:
 # ==============================================================================
 
 
-class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Anthropic):
+class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], Anthropic):
     """Synchronous client for the first-party Anthropic API served through Google's
     gateway (Claude Platform on Google Cloud).
 
@@ -207,12 +207,12 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
         token_provider: TokenProvider | None = None,
         credentials: GoogleCredentials | None = None,
         skip_auth: bool = False,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
@@ -311,7 +311,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
         return {}
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         # The bearer token is attached per-request in `_prepare_request`, not via
         # default headers, so the base auth-presence check would false-negative.
         return
@@ -344,7 +344,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
         return options
 
     @override
-    def _prepare_request(self, request: httpx.Request) -> None:
+    def _prepare_request(self, request: httpx2.Request) -> None:
         if self._skip_auth:
             return
 
@@ -365,9 +365,9 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
         token_provider: TokenProvider | None | NotGiven = not_given,
         credentials: GoogleCredentials | None | NotGiven = not_given,
         skip_auth: bool | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
@@ -416,7 +416,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
         if base_url is None and not self._base_url_overridden:
             # The current URL is template-derived (or still pending); leave it unset
             # so __init__ re-derives from the new project/location.
-            new_base_url: str | httpx.URL | None = None
+            new_base_url: str | httpx2.URL | None = None
         else:
             new_base_url = base_url if base_url is not None else self.base_url
 
@@ -446,7 +446,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
     with_options = copy  # type: ignore[assignment]
 
 
-class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAnthropic):
+class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncStream[Any]], AsyncAnthropic):
     """Asynchronous client for the first-party Anthropic API served through Google's
     gateway (Claude Platform on Google Cloud). See ``AnthropicGoogleCloud``.
     """
@@ -463,12 +463,12 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx.AsyncClient, AsyncSt
         token_provider: AsyncTokenProvider | None = None,
         credentials: GoogleCredentials | None = None,
         skip_auth: bool = False,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
@@ -543,7 +543,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx.AsyncClient, AsyncSt
         return {}
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         return
 
     async def _get_token(self) -> str:
@@ -577,7 +577,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx.AsyncClient, AsyncSt
         return options
 
     @override
-    async def _prepare_request(self, request: httpx.Request) -> None:
+    async def _prepare_request(self, request: httpx2.Request) -> None:
         if self._skip_auth:
             return
 
@@ -598,9 +598,9 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx.AsyncClient, AsyncSt
         token_provider: AsyncTokenProvider | None | NotGiven = not_given,
         credentials: GoogleCredentials | None | NotGiven = not_given,
         skip_auth: bool | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
@@ -645,7 +645,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx.AsyncClient, AsyncSt
         if base_url is None and not self._base_url_overridden:
             # The current URL is template-derived (or still pending); leave it unset
             # so __init__ re-derives from the new project/location.
-            new_base_url: str | httpx.URL | None = None
+            new_base_url: str | httpx2.URL | None = None
         else:
             new_base_url = base_url if base_url is not None else self.base_url
 

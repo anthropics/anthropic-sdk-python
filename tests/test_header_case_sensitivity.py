@@ -1,5 +1,5 @@
 """Header names (and media types) are case-insensitive; the SDK carries headers as plain dicts
-until `BaseClient._build_headers`, and `httpx.Headers` keeps and sends both entries of a dict that
+until `BaseClient._build_headers`, and `httpx2.Headers` keeps and sends both entries of a dict that
 holds two case-variants of one name, so every merge / lookup / `Omit()` before that point must fold case.
 """
 
@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Any, Dict, Type, Union, Iterator, cast
 from unittest import mock
 
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
@@ -31,7 +31,7 @@ def make_client(client_cls: ClientClass, **kwargs: Any) -> Anthropic | AsyncAnth
     return client_cls(base_url=base_url, _strict_response_validation=True, **kwargs)
 
 
-def build(client: Anthropic | AsyncAnthropic, **options: Any) -> httpx.Request:
+def build(client: Anthropic | AsyncAnthropic, **options: Any) -> httpx2.Request:
     return client._build_request(FinalRequestOptions.construct(method="post", url="/foo", **options))
 
 
@@ -76,13 +76,13 @@ class TestBuildHeaders:
         assert request.headers.get_list("x-foo") == ["from-request"]
 
     def test_extra_headers_replace_generated_header_param_case_insensitively(self) -> None:
-        requests: list[httpx.Request] = []
+        requests: list[httpx2.Request] = []
 
-        def handler(request: httpx.Request) -> httpx.Response:
+        def handler(request: httpx2.Request) -> httpx2.Response:
             requests.append(request)
-            return httpx.Response(200, json={"data": [], "has_more": False, "first_id": None, "last_id": None})
+            return httpx2.Response(200, json={"data": [], "has_more": False, "first_id": None, "last_id": None})
 
-        client = make_client(Anthropic, http_client=httpx.Client(transport=httpx.MockTransport(handler)))
+        client = make_client(Anthropic, http_client=httpx2.Client(transport=httpx2.MockTransport(handler)))
 
         client.beta.models.list(betas=["from-betas-param"], extra_headers={"Anthropic-Beta": "from-extra-headers"})
 

@@ -3,7 +3,7 @@
 import json
 import warnings
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 from pydantic import BaseModel
@@ -23,7 +23,7 @@ class TestOutputFormatConversion:
             age: int
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -82,7 +82,7 @@ class TestOutputFormatNoDeprecationWarning:
             value: str
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -109,7 +109,7 @@ class TestOutputFormatNoDeprecationWarning:
     def test_stream_does_not_warn_for_type(self, client: Anthropic, respx_mock: MockRouter) -> None:
         """`.stream(output_format=Model)` is silent."""
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -143,7 +143,7 @@ class TestOutputFormatNoDeprecationWarning:
     def test_no_warning_when_output_format_not_provided(self, client: Anthropic, respx_mock: MockRouter) -> None:
         """Verify no deprecation warning when output_format is not used."""
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -169,7 +169,7 @@ class TestOutputFormatNoDeprecationWarning:
     def test_no_warning_when_using_output_config(self, client: Anthropic, respx_mock: MockRouter) -> None:
         """Verify no deprecation warning when using output_config.format directly."""
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -224,7 +224,7 @@ class TestStructuredOutputsBetaHeader:
             value: int
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -259,7 +259,7 @@ class TestStructuredOutputsBetaHeader:
             value: int
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -296,7 +296,7 @@ class TestStructuredOutputsBetaHeader:
             value: int
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -337,7 +337,7 @@ class TestAsyncOutputFormatConversion:
             name: str
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",

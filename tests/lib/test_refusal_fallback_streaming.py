@@ -7,7 +7,7 @@ import logging
 from typing import Any, List, Protocol, cast
 from pathlib import Path
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -90,15 +90,15 @@ def make_lenient_client(**kwargs: Any) -> Anthropic:
     return Anthropic(base_url=base_url, api_key=api_key, max_retries=0, **kwargs)
 
 
-def sse_response(body: str) -> httpx.Response:
-    return httpx.Response(200, headers={"content-type": "text/event-stream"}, content=body.encode("utf-8"))
+def sse_response(body: str) -> httpx2.Response:
+    return httpx2.Response(200, headers={"content-type": "text/event-stream"}, content=body.encode("utf-8"))
 
 
-def json_response(body: Any, status: int) -> httpx.Response:
-    return httpx.Response(status, json=body)
+def json_response(body: Any, status: int) -> httpx2.Response:
+    return httpx2.Response(status, json=body)
 
 
-def error_response(message: str, status: int) -> httpx.Response:
+def error_response(message: str, status: int) -> httpx2.Response:
     return json_response({"type": "error", "error": {"type": "invalid_request_error", "message": message}}, status)
 
 
@@ -155,7 +155,7 @@ def collect(stream: Stream[BetaRawMessageStreamEvent]) -> list[BetaRawMessageStr
 
 
 class MockRequestCall(Protocol):
-    request: httpx.Request
+    request: httpx2.Request
 
 
 def request_bodies(respx_mock: MockRouter) -> list[dict[str, Any]]:
@@ -492,7 +492,7 @@ class TestEdgeCases:
         self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture
     ) -> None:
         respx_mock.post("/v1/messages").mock(
-            side_effect=[sse_response(STREAM_A), httpx.ConnectError("connection reset")]
+            side_effect=[sse_response(STREAM_A), httpx2.ConnectError("connection reset")]
         )
         client = make_lenient_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
 
@@ -892,7 +892,7 @@ class TestFallbackChain:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
                 sse_response(STREAM_A),
-                httpx.ConnectError("connection reset"),
+                httpx2.ConnectError("connection reset"),
                 sse_response(STREAM_B),
             ]
         )

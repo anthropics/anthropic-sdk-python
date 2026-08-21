@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Set, cast
 from typing_extensions import get_args, get_origin
 
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from anthropic.types.beta import BetaFallbackBlock
@@ -85,7 +85,7 @@ def test_streamed_fallback_block_is_constructed_as_fallback_block() -> None:
     message = accumulate_event(
         event=cast(Any, event),
         current_snapshot=snapshot,
-        request_headers=httpx.Headers(),
+        request_headers=httpx2.Headers(),
     )
 
     block = message.content[0]

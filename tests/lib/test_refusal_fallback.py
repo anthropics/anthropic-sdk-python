@@ -6,7 +6,7 @@ import logging
 import threading
 from typing import Any, List, Protocol, cast
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -37,8 +37,8 @@ def make_async_client(**kwargs: Any) -> AsyncAnthropic:
     return AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=0, **kwargs)
 
 
-def message(model: str, **overrides: Any) -> httpx.Response:
-    return httpx.Response(
+def message(model: str, **overrides: Any) -> httpx2.Response:
+    return httpx2.Response(
         200,
         json={
             "id": "msg_1",
@@ -54,7 +54,7 @@ def message(model: str, **overrides: Any) -> httpx.Response:
     )
 
 
-def refusal(model: str, fallback_credit_token: str | None = None) -> httpx.Response:
+def refusal(model: str, fallback_credit_token: str | None = None) -> httpx2.Response:
     return message(
         model,
         stop_reason="refusal",
@@ -68,7 +68,7 @@ def refusal(model: str, fallback_credit_token: str | None = None) -> httpx.Respo
 
 
 class MockRequestCall(Protocol):
-    request: httpx.Request
+    request: httpx2.Request
 
 
 def create_message(
@@ -455,7 +455,7 @@ class TestRefusalFallback:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
                 refusal("primary-model", "credit-token"),
-                httpx.Response(
+                httpx2.Response(
                     400, json={"type": "error", "error": {"type": "invalid_request_error", "message": "nope"}}
                 ),
             ]

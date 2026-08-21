@@ -19,7 +19,7 @@ from typing import (
 from contextlib import contextmanager, asynccontextmanager
 from typing_extensions import TypedDict, override
 
-import httpx2 as httpx
+import httpx2
 
 from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
@@ -60,7 +60,7 @@ class RequestOptions(TypedDict, total=False):
     extra_headers: Headers | None
     extra_query: Query | None
     extra_body: Body | None
-    timeout: float | httpx.Timeout | None | NotGiven
+    timeout: float | httpx2.Timeout | None | NotGiven
 
 
 class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):

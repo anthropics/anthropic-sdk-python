@@ -4,7 +4,7 @@ import logging
 from typing import Any, Dict, List, Union, cast
 from typing_extensions import Literal
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 from inline_snapshot import external, snapshot
@@ -570,8 +570,8 @@ async def test_basic_call_async(async_snapshot_client: AsyncAnthropic) -> None:
     ).until_done()
 
 
-def _refusal_with_tool_use() -> httpx.Response:
-    return httpx.Response(
+def _refusal_with_tool_use() -> httpx2.Response:
+    return httpx2.Response(
         200,
         json={
             "id": "msg_refusal",
@@ -667,8 +667,8 @@ async def test_refusal_ends_runner_without_executing_tools_async(respx_mock: Moc
     assert len(respx_mock.calls) == 1
 
 
-def _tool_use_response(tool_name: str, tool_use_id: str, input: Union[Dict[str, Any], None] = None) -> httpx.Response:
-    return httpx.Response(
+def _tool_use_response(tool_name: str, tool_use_id: str, input: Union[Dict[str, Any], None] = None) -> httpx2.Response:
+    return httpx2.Response(
         200,
         json={
             "id": f"msg_{tool_use_id}",
@@ -690,8 +690,8 @@ def _tool_use_response(tool_name: str, tool_use_id: str, input: Union[Dict[str, 
     )
 
 
-def _end_turn_response() -> httpx.Response:
-    return httpx.Response(
+def _end_turn_response() -> httpx2.Response:
+    return httpx2.Response(
         200,
         json={
             "id": "msg_end_turn",

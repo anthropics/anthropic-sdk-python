@@ -4,7 +4,7 @@ import os
 from typing import TYPE_CHECKING, Any, Union, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
-import httpx2 as httpx
+import httpx2
 
 from ... import _exceptions
 from ._auth import load_auth, refresh_auth
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 DEFAULT_VERSION = "vertex-2023-10-16"
 
-_HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncClient])
+_HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
@@ -55,7 +55,7 @@ class BaseVertexClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         err_msg: str,
         *,
         body: object,
-        response: httpx.Response,
+        response: httpx2.Response,
     ) -> APIStatusError:
         if response.status_code == 400:
             return _exceptions.BadRequestError(err_msg, response=response, body=body)
@@ -89,7 +89,7 @@ class BaseVertexClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         return APIStatusError(err_msg, response=response, body=body)
 
 
-class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient):
+class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClient):
     messages: Messages
     beta: Beta
 
@@ -100,13 +100,13 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         project_id: str | NotGiven = not_given,
         access_token: str | None = None,
         credentials: GoogleCredentials | None = None,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        base_url: str | httpx2.URL | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
@@ -156,7 +156,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         return _prepare_options(options, project_id=self.project_id, region=self.region)
 
     @override
-    def _prepare_request(self, request: httpx.Request) -> None:
+    def _prepare_request(self, request: httpx2.Request) -> None:
         if request.headers.get("Authorization"):
             # already authenticated, nothing for us to do
             return
@@ -188,9 +188,9 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         project_id: str | NotGiven = not_given,
         access_token: str | None = None,
         credentials: GoogleCredentials | None = None,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-        http_client: httpx.Client | None = None,
+        base_url: str | httpx2.URL | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+        http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
@@ -253,7 +253,7 @@ class AnthropicVertex(BaseVertexClient[httpx.Client, Stream[Any]], SyncAPIClient
         return self.copy(middleware=[*self._middleware, *middleware])
 
 
-class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
+class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
     messages: AsyncMessages
     beta: AsyncBeta
 
@@ -264,13 +264,13 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         project_id: str | NotGiven = not_given,
         access_token: str | None = None,
         credentials: GoogleCredentials | None = None,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        base_url: str | httpx2.URL | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
@@ -320,7 +320,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         return _prepare_options(options, project_id=self.project_id, region=self.region)
 
     @override
-    async def _prepare_request(self, request: httpx.Request) -> None:
+    async def _prepare_request(self, request: httpx2.Request) -> None:
         if request.headers.get("Authorization"):
             # already authenticated, nothing for us to do
             return
@@ -352,9 +352,9 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx.AsyncClient, AsyncStream[Any]]
         project_id: str | NotGiven = not_given,
         access_token: str | None = None,
         credentials: GoogleCredentials | None = None,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-        http_client: httpx.AsyncClient | None = None,
+        base_url: str | httpx2.URL | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+        http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
