@@ -69,6 +69,10 @@ class TokenCache:
         # One-shot: invalidate() sets it; next provider call passes
         # force_refresh=True so on-disk providers don't re-serve a stale token.
         self._next_force = False
+        # Monotonic invalidation generation. A refresh snapshots this before it
+        # leaves the lock; if invalidate() advances it while the provider call
+        # is in flight, that result must not be published or returned.
+        self._invalidation_generation = 0
         # Time of last advisory-refresh failure (never reset on success —
         # only distance-from-now matters).
         self._last_advisory_failure_time: float = 0.0
@@ -85,28 +89,23 @@ class TokenCache:
                 raise
             return self._provider()  # type: ignore[call-arg]
 
-    def _call_provider(self) -> AccessToken:
+    def _call_provider(self, *, force: bool) -> AccessToken:
         """Call the provider, retrying once on a 401 from the token endpoint."""
-        # Read but don't clear yet — clearing only on success keeps the flag
-        # alive across a transient failure so the retry still forces.
-        with self._lock:
-            force = self._next_force
         try:
-            result = self._invoke_provider(force=force)
+            return self._invoke_provider(force=force)
         except WorkloadIdentityError as err:
             if err.status_code != 401:
                 raise
             log.debug("Token provider returned 401; retrying once")
-            result = self._invoke_provider(force=True)
-        with self._lock:
-            self._next_force = False
-        return result
+            return self._invoke_provider(force=True)
 
     def get_token(self) -> str:
         """Return a valid bearer token, refreshing if necessary."""
         while True:
             advisory_fallback: Optional[AccessToken] = None
             remaining_seconds = 0
+            refresh_generation: Optional[int] = None
+            force_refresh = False
             with self._lock:
                 cached = self._cached
                 if cached is not None:
@@ -132,9 +131,13 @@ class TokenCache:
                     # Mandatory-window caller with a refresh in flight: wait.
                     waiter_event: Optional[threading.Event] = self._refresh_event
                 else:
-                    # We're the leader.
+                    # We're the leader. Snapshot both invalidation state and the
+                    # one-shot force flag before leaving the lock for the
+                    # provider call.
                     self._refresh_event = threading.Event()
                     waiter_event = None
+                    refresh_generation = self._invalidation_generation
+                    force_refresh = self._next_force
 
             if waiter_event is not None:
                 waiter_event.wait()
@@ -143,19 +146,26 @@ class TokenCache:
                 # refresh ourselves), or been invalidated in between.
                 continue
 
+            assert refresh_generation is not None
+
             # Leader: run the provider outside the lock. The except catches
             # BaseException (not a narrow tuple) so the refresh event is
             # always released — a user-supplied provider raising e.g.
             # RuntimeError must not deadlock mandatory-window waiters.
             try:
-                fresh = self._call_provider()
+                fresh = self._call_provider(force=force_refresh)
             except BaseException as err:
                 with self._lock:
+                    invalidated = self._invalidation_generation != refresh_generation
                     released = self._refresh_event
                     self._refresh_event = None
                 assert released is not None
                 released.set()
-                if advisory_fallback is not None and isinstance(err, (AnthropicError, httpx.HTTPError)):
+                if (
+                    not invalidated
+                    and advisory_fallback is not None
+                    and isinstance(err, (AnthropicError, httpx.HTTPError))
+                ):
                     log.warning(
                         "Advisory token refresh failed (%ds remaining); serving cached token: %s",
                         remaining_seconds,
@@ -167,11 +177,22 @@ class TokenCache:
                 raise
 
             with self._lock:
-                self._cached = fresh
+                invalidated = self._invalidation_generation != refresh_generation
+                if not invalidated:
+                    self._cached = fresh
+                    # Consume the one-shot force only if this refresh still
+                    # belongs to the current invalidation generation.
+                    self._next_force = False
                 released = self._refresh_event
                 self._refresh_event = None
             assert released is not None
             released.set()
+            if invalidated:
+                log.debug("Discarding token refresh result invalidated while provider call was in flight")
+                # invalidate() cleared the cache and left _next_force set. Loop
+                # so this caller participates in the next single-flight forced
+                # refresh instead of returning the superseded token.
+                continue
             return fresh.token
 
     def invalidate(self) -> None:
@@ -179,7 +200,17 @@ class TokenCache:
 
         Also sets a one-shot ``force_refresh`` flag so on-disk providers skip
         their freshness short-circuit instead of re-serving the revoked token.
+        A refresh already in flight is invalidated as well: its result is
+        discarded when it returns and cannot consume the force flag.
+
+        Repeated invalidations are coalesced while the cache is already empty
+        and a forced refresh is pending. This prevents several requests that
+        all receive 401s for the same revoked token from invalidating the
+        replacement refresh over and over.
         """
         with self._lock:
+            already_invalidated = self._cached is None and self._next_force
             self._cached = None
             self._next_force = True
+            if not already_invalidated:
+                self._invalidation_generation += 1
