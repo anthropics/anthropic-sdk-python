@@ -258,7 +258,24 @@ async def download_session_skills(
     # ``skills_root`` is created lazily by the extraction below — don't create it
     # up front so an agent with no skills leaves no stray directory behind.
     downloaded: list[Path] = []
-    for skill in session.agent.skills:
+
+    # Collect skills from the coordinator and all roster agents in a multiagent setup.
+    all_skills = list(session.agent.skills)
+    multiagent = getattr(session.agent, "multiagent", None)
+    if multiagent is not None:
+        for entry in getattr(multiagent, "agents", []):
+            # Only thread agents have skills; advisors do not.
+            all_skills.extend(getattr(entry, "skills", []))
+
+    # Deduplicate by skill_id so we don't download the same skill multiple times.
+    seen_skills: set[str] = set()
+    unique_skills = []
+    for s in all_skills:
+        if s.skill_id not in seen_skills:
+            unique_skills.append(s)
+            seen_skills.add(s.skill_id)
+
+    for skill in unique_skills:
         try:
             version_id = await _resolve_skill_version(client, skill.skill_id, skill.version)
             version = await client.beta.skills.versions.retrieve(version_id, skill_id=skill.skill_id)
