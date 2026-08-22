@@ -274,9 +274,23 @@ async def download_session_skills(
             adest = anyio.Path(dest)
             if await adest.is_symlink():
                 await adest.unlink()
+            # If the directory already exists and contains the expected version,
+            # skip the download. This prevents race conditions and redundant
+            # work when multiple sessions share a workdir.
+            version_file = dest / ".version"
+            if await adest.is_dir() and await anyio.Path(version_file).exists():
+                try:
+                    if (await anyio.Path(version_file).read_text()).strip() == version_id:
+                        log.info("skill skill_id=%s version=%s already exists at %s; skipping", skill.skill_id, version_id, dest)
+                        downloaded.append(dest)
+                        continue
+                except Exception:
+                    pass
+
             # ``shutil.rmtree`` is blocking; keep it off the event loop.
             await run_sync(partial(shutil.rmtree, dest, ignore_errors=True))
             await _download_and_extract(client, skill.skill_id, version_id, dest)
+            await anyio.Path(version_file).write_text(version_id)
             downloaded.append(dest)
             log.info("downloaded skill skill_id=%s version=%s -> %s", skill.skill_id, version_id, dest)
         except Exception as e:
