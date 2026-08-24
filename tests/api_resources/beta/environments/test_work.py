@@ -501,7 +501,7 @@ class TestAsyncWork:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        work = response.parse()
+        work = await response.parse()
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
     @parametrize
@@ -561,7 +561,7 @@ class TestAsyncWork:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        work = response.parse()
+        work = await response.parse()
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
     @parametrize
@@ -623,7 +623,7 @@ class TestAsyncWork:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        work = response.parse()
+        work = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaSelfHostedWork], work, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -674,7 +674,7 @@ class TestAsyncWork:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        work = response.parse()
+        work = await response.parse()
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
     @parametrize
@@ -733,7 +733,7 @@ class TestAsyncWork:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        work = response.parse()
+        work = await response.parse()
         assert_matches_type(BetaSelfHostedWorkHeartbeatResponse, work, path=["response"])
 
     @parametrize
@@ -790,7 +790,7 @@ class TestAsyncWork:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        work = response.parse()
+        work = await response.parse()
         assert_matches_type(Optional[BetaSelfHostedWork], work, path=["response"])
 
     @parametrize
@@ -839,7 +839,7 @@ class TestAsyncWork:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        work = response.parse()
+        work = await response.parse()
         assert_matches_type(BetaSelfHostedWorkQueueStats, work, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -891,7 +891,7 @@ class TestAsyncWork:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        work = response.parse()
+        work = await response.parse()
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
     @parametrize

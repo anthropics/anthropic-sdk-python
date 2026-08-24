@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import random
 
-import httpx
+import httpx2 as httpx
 
 from .._exceptions import APIError, APIStatusError
 

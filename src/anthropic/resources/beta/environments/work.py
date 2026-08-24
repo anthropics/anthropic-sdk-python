@@ -3,25 +3,32 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, cast, overload
 from itertools import chain
+from typing_extensions import deprecated
 
-import httpx
+import httpx2
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from ...._client import AsyncAnthropic
+    from ....lib.tools._memories import MemoryDeleteMode
     from ....lib.environments._worker import EnvironmentWorker, EnvironmentWorkerTools
 
-from .... import _legacy_response
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
-from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ...._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
+from ....lib.tools._deprecations import UNRESTRICTED_PATHS_DEPRECATION, reject_unrestricted_paths
 from ....types.beta.environments import (
     work_list_params,
     work_poll_params,
@@ -68,7 +75,7 @@ class Work(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -128,7 +135,7 @@ class Work(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -192,7 +199,7 @@ class Work(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaSelfHostedWork]:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -260,7 +267,7 @@ class Work(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -322,7 +329,7 @@ class Work(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWorkHeartbeatResponse:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -400,7 +407,7 @@ class Work(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> Optional[BetaSelfHostedWork]:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -473,7 +480,7 @@ class Work(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWorkQueueStats:
         """
         Get statistics about the work queue for an environment.
@@ -522,7 +529,7 @@ class Work(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -605,7 +612,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -665,7 +672,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -729,7 +736,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaSelfHostedWork, AsyncPageCursor[BetaSelfHostedWork]]:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -797,7 +804,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -859,7 +866,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWorkHeartbeatResponse:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -937,7 +944,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> Optional[BetaSelfHostedWork]:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -1010,7 +1017,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWorkQueueStats:
         """
         Get statistics about the work queue for an environment.
@@ -1059,7 +1066,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
         Note: these endpoints are called automatically by the pre-built environment
@@ -1189,6 +1196,7 @@ class AsyncWork(AsyncAPIResource):
             extra_headers=extra_headers,
         )
 
+    @overload
     def worker(
         self,
         *,
@@ -1196,9 +1204,44 @@ class AsyncWork(AsyncAPIResource):
         environment_key: str | None = None,
         tools: EnvironmentWorkerTools | None = None,
         workdir: str | os.PathLike[str] | None = None,
-        unrestricted_paths: bool = False,
         max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None | NotGiven = not_given,
+        memory_sync_interval: float | None | NotGiven = not_given,
+        memory_sync_deletions: MemoryDeleteMode = "enabled",
+        worker_id: str | None = None,
+        extra_headers: Headers | None = None,
+    ) -> EnvironmentWorker: ...
+
+    @overload
+    @deprecated(UNRESTRICTED_PATHS_DEPRECATION)
+    def worker(
+        self,
+        *,
+        environment_id: str | None = None,
+        environment_key: str | None = None,
+        tools: EnvironmentWorkerTools | None = None,
+        workdir: str | os.PathLike[str] | None = None,
+        unrestricted_paths: bool,
+        max_file_bytes: int | None | NotGiven = not_given,
+        max_idle: float | None | NotGiven = not_given,
+        memory_sync_interval: float | None | NotGiven = not_given,
+        memory_sync_deletions: MemoryDeleteMode = "enabled",
+        worker_id: str | None = None,
+        extra_headers: Headers | None = None,
+    ) -> EnvironmentWorker: ...
+
+    def worker(
+        self,
+        *,
+        environment_id: str | None = None,
+        environment_key: str | None = None,
+        tools: EnvironmentWorkerTools | None = None,
+        workdir: str | os.PathLike[str] | None = None,
+        unrestricted_paths: bool | NotGiven = not_given,
+        max_file_bytes: int | None | NotGiven = not_given,
+        max_idle: float | None | NotGiven = not_given,
+        memory_sync_interval: float | None | NotGiven = not_given,
+        memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
         extra_headers: Headers | None = None,
     ) -> EnvironmentWorker:
@@ -1227,10 +1270,13 @@ class AsyncWork(AsyncAPIResource):
           tools: Tools to expose to each claimed session. Either a fixed list or
             a factory invoked once per session with that session's
             ``AgentToolContext``. Defaults to ``beta_agent_toolset_20260401(env)``.
+            Async tools share the event loop with the lease heartbeat, so keep
+            them non-blocking.
           workdir: Base directory for the per-session ``AgentToolContext``.
             Defaults to ``os.getcwd()`` captured when the worker is constructed
             (TS parity: ``process.cwd()`` at construction).
-          unrestricted_paths: Forwarded to the per-session ``AgentToolContext``.
+          unrestricted_paths: Deprecated and no longer accepted; passing either
+            value raises ``TypeError`` (see ``AgentToolContext``).
           max_file_bytes: Forwarded to the per-session ``AgentToolContext`` — the
             size cap (bytes) for the ``read``/``edit`` tools. ``not_given``
             (default) uses the built-in 256 KiB cap; a positive int sets a custom
@@ -1238,6 +1284,11 @@ class AsyncWork(AsyncAPIResource):
           max_idle: Seconds to keep running after the session goes idle with
             ``stop_reason`` ``end_turn``. Defaults to ``DEFAULT_MAX_IDLE`` (60s)
             when not given. ``None`` disables it.
+          memory_sync_interval: How often (seconds) to sync the session's
+            attached memory stores; ``None`` disables memory. Defaults to
+            ``DEFAULT_MEMORY_SYNC_INTERVAL`` (15s) when not given.
+          memory_sync_deletions: ``"enabled"`` (default), ``"log_only"``, or
+            ``"disabled"``.
           worker_id: Optional identifier sent on each poll. Defaults to a unique,
             hostname-prefixed id.
           extra_headers: Optional headers passed through per request on every
@@ -1254,11 +1305,14 @@ class AsyncWork(AsyncAPIResource):
         # DEFAULT_MAX_IDLE resolved here rather than as a literal signature
         # default so the value can't drift from the constant; the lazy import
         # also keeps the host-only environment lib out of ``import anthropic``.
-        from ....lib.environments._worker import EnvironmentWorker
+        from ....lib.environments._worker import DEFAULT_MEMORY_SYNC_INTERVAL, EnvironmentWorker
         from ....lib.tools._beta_session_runner import DEFAULT_MAX_IDLE
 
+        reject_unrestricted_paths(unrestricted_paths)
         if not is_given(max_idle):
             max_idle = DEFAULT_MAX_IDLE
+        if not is_given(memory_sync_interval):
+            memory_sync_interval = DEFAULT_MEMORY_SYNC_INTERVAL
 
         return EnvironmentWorker(
             cast("AsyncAnthropic", self._client),
@@ -1266,9 +1320,10 @@ class AsyncWork(AsyncAPIResource):
             environment_key=environment_key,
             tools=tools,
             workdir=workdir,
-            unrestricted_paths=unrestricted_paths,
             max_file_bytes=max_file_bytes,
             max_idle=max_idle,
+            memory_sync_interval=memory_sync_interval,
+            memory_sync_deletions=memory_sync_deletions,
             worker_id=worker_id,
             extra_headers=extra_headers,
         )
@@ -1278,28 +1333,28 @@ class WorkWithRawResponse:
     def __init__(self, work: Work) -> None:
         self._work = work
 
-        self.retrieve = _legacy_response.to_raw_response_wrapper(
+        self.retrieve = to_raw_response_wrapper(
             work.retrieve,
         )
-        self.update = _legacy_response.to_raw_response_wrapper(
+        self.update = to_raw_response_wrapper(
             work.update,
         )
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             work.list,
         )
-        self.ack = _legacy_response.to_raw_response_wrapper(
+        self.ack = to_raw_response_wrapper(
             work.ack,
         )
-        self.heartbeat = _legacy_response.to_raw_response_wrapper(
+        self.heartbeat = to_raw_response_wrapper(
             work.heartbeat,
         )
-        self.poll = _legacy_response.to_raw_response_wrapper(
+        self.poll = to_raw_response_wrapper(
             work.poll,
         )
-        self.stats = _legacy_response.to_raw_response_wrapper(
+        self.stats = to_raw_response_wrapper(
             work.stats,
         )
-        self.stop = _legacy_response.to_raw_response_wrapper(
+        self.stop = to_raw_response_wrapper(
             work.stop,
         )
 
@@ -1308,28 +1363,28 @@ class AsyncWorkWithRawResponse:
     def __init__(self, work: AsyncWork) -> None:
         self._work = work
 
-        self.retrieve = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve = async_to_raw_response_wrapper(
             work.retrieve,
         )
-        self.update = _legacy_response.async_to_raw_response_wrapper(
+        self.update = async_to_raw_response_wrapper(
             work.update,
         )
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             work.list,
         )
-        self.ack = _legacy_response.async_to_raw_response_wrapper(
+        self.ack = async_to_raw_response_wrapper(
             work.ack,
         )
-        self.heartbeat = _legacy_response.async_to_raw_response_wrapper(
+        self.heartbeat = async_to_raw_response_wrapper(
             work.heartbeat,
         )
-        self.poll = _legacy_response.async_to_raw_response_wrapper(
+        self.poll = async_to_raw_response_wrapper(
             work.poll,
         )
-        self.stats = _legacy_response.async_to_raw_response_wrapper(
+        self.stats = async_to_raw_response_wrapper(
             work.stats,
         )
-        self.stop = _legacy_response.async_to_raw_response_wrapper(
+        self.stop = async_to_raw_response_wrapper(
             work.stop,
         )
 

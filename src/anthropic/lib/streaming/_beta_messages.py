@@ -5,14 +5,14 @@ from types import TracebackType
 from typing import TYPE_CHECKING, Any, Type, Generic, Callable, cast
 from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
 
-import httpx
+import httpx2 as httpx
 from pydantic import BaseModel
 
 from anthropic.types.beta.beta_tool_use_block import BetaToolUseBlock
 from anthropic.types.beta.beta_mcp_tool_use_block import BetaMCPToolUseBlock
 from anthropic.types.beta.beta_server_tool_use_block import BetaServerToolUseBlock
 
-from ..._types import NOT_GIVEN, NotGiven
+from ..._types import NotGiven, not_given
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
 from ._beta_types import (
@@ -63,6 +63,10 @@ class BetaMessageStream(Generic[ResponseFormatT]):
     @property
     def request_id(self) -> str | None:
         return self.response.headers.get("request-id")  # type: ignore[no-any-return]
+
+    @property
+    def workspace_id(self) -> str | None:
+        return self.response.headers.get("anthropic-workspace-id")  # type: ignore[no-any-return]
 
     def __next__(self) -> ParsedBetaMessageStreamEvent[ResponseFormatT]:
         return self._iterator.__next__()
@@ -213,6 +217,10 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
     def request_id(self) -> str | None:
         return self.response.headers.get("request-id")  # type: ignore[no-any-return]
 
+    @property
+    def workspace_id(self) -> str | None:
+        return self.response.headers.get("anthropic-workspace-id")  # type: ignore[no-any-return]
+
     async def __anext__(self) -> ParsedBetaMessageStreamEvent[ResponseFormatT]:
         return await self._iterator.__anext__()
 
@@ -313,7 +321,7 @@ class BetaAsyncMessageStreamManager(Generic[ResponseFormatT]):
         self,
         api_request: Awaitable[AsyncStream[BetaRawMessageStreamEvent]],
         *,
-        output_format: ResponseFormatT | NotGiven = NOT_GIVEN,
+        output_format: ResponseFormatT | NotGiven = not_given,
     ) -> None:
         self.__stream: BetaAsyncMessageStream[ResponseFormatT] | None = None
         self.__api_request = api_request
@@ -366,7 +374,7 @@ def build_events(
                     )
                 )
         elif event.delta.type == "input_json_delta":
-            if content_block.type == "tool_use" or content_block.type == "mcp_tool_use":
+            if isinstance(content_block, TRACKS_TOOL_INPUT):
                 events_to_fire.append(
                     build(
                         BetaInputJsonEvent,
@@ -452,7 +460,7 @@ def accumulate_event(
     event: BetaRawMessageStreamEvent,
     current_snapshot: ParsedBetaMessage[ResponseFormatT] | None,
     request_headers: httpx.Headers,
-    output_format: ResponseFormatT | NotGiven = NOT_GIVEN,
+    output_format: ResponseFormatT | NotGiven = not_given,
 ) -> ParsedBetaMessage[ResponseFormatT]:
     if not isinstance(cast(Any, event), BaseModel):
         event = cast(  # pyright: ignore[reportUnnecessaryCast]
@@ -541,30 +549,40 @@ def accumulate_event(
         if content_block.type == "text" and is_given(output_format):
             content_block.parsed_output = parse_text(content_block.text, output_format)
     elif event.type == "message_delta":
-        current_snapshot.container = event.delta.container
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
         if event.delta.stop_details is not None:
             current_snapshot.stop_details = event.delta.stop_details
+        if event.delta.container is not None:
+            current_snapshot.container = event.delta.container
+
+        # Usage may be absent when message_start omitted it (#1806); the
+        # message_delta carries the first full usage object, so construct it
+        # before updating.
         if current_snapshot.usage is None:
             current_snapshot.usage = BetaUsage.construct(**event.usage.model_dump())
         else:
             current_snapshot.usage.output_tokens = event.usage.output_tokens
-        current_snapshot.context_management = event.context_management
 
-        if current_snapshot.usage is not None:
-            # Update other usage fields if they exist in the event
-            if event.usage.input_tokens is not None:
-                current_snapshot.usage.input_tokens = event.usage.input_tokens
-            if event.usage.cache_creation_input_tokens is not None:
-                current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
-            if event.usage.cache_read_input_tokens is not None:
-                current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
-            if event.usage.server_tool_use is not None:
-                current_snapshot.usage.server_tool_use = event.usage.server_tool_use
-            if event.usage.iterations is not None:
-                current_snapshot.usage.iterations = event.usage.iterations
-            if event.usage.fallback_credit is not None:
-                current_snapshot.usage.fallback_credit = event.usage.fallback_credit
+        if event.context_management is not None:
+            current_snapshot.context_management = event.context_management
+
+        # Usage counts on a message_delta are cumulative totals, so they
+        # overwrite rather than add; optional ones are omitted when not
+        # applicable, in which case the message_start value must survive.
+        if event.usage.input_tokens is not None:
+            current_snapshot.usage.input_tokens = event.usage.input_tokens
+        if event.usage.cache_creation_input_tokens is not None:
+            current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
+        if event.usage.cache_read_input_tokens is not None:
+            current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
+        if event.usage.server_tool_use is not None:
+            current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+        if event.usage.output_tokens_details is not None:
+            current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
+        if event.usage.iterations is not None:
+            current_snapshot.usage.iterations = event.usage.iterations
+        if event.usage.fallback_credit is not None:
+            current_snapshot.usage.fallback_credit = event.usage.fallback_credit
 
     return current_snapshot

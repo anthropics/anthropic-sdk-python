@@ -99,6 +99,7 @@ class TestMemoryVersions:
             memory_id="memory_id",
             operation="created",
             page="page",
+            service_account_id="service_account_id",
             session_id="session_id",
             view="basic",
             betas=["message-batches-2024-09-24"],
@@ -229,7 +230,7 @@ class TestAsyncMemoryVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory_version = response.parse()
+        memory_version = await response.parse()
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
     @parametrize
@@ -280,6 +281,7 @@ class TestAsyncMemoryVersions:
             memory_id="memory_id",
             operation="created",
             page="page",
+            service_account_id="service_account_id",
             session_id="session_id",
             view="basic",
             betas=["message-batches-2024-09-24"],
@@ -295,7 +297,7 @@ class TestAsyncMemoryVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory_version = response.parse()
+        memory_version = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -346,7 +348,7 @@ class TestAsyncMemoryVersions:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory_version = response.parse()
+        memory_version = await response.parse()
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
     @parametrize

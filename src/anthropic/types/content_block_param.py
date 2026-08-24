@@ -17,7 +17,6 @@ from .container_upload_block_param import ContainerUploadBlockParam
 from .redacted_thinking_block_param import RedactedThinkingBlockParam
 from .web_fetch_tool_result_block_param import WebFetchToolResultBlockParam
 from .web_search_tool_result_block_param import WebSearchToolResultBlockParam
-from .mid_conversation_system_block_param import MidConversationSystemBlockParam
 from .tool_search_tool_result_block_param import ToolSearchToolResultBlockParam
 from .code_execution_tool_result_block_param import CodeExecutionToolResultBlockParam
 from .bash_code_execution_tool_result_block_param import BashCodeExecutionToolResultBlockParam
@@ -42,5 +41,4 @@ ContentBlockParam: TypeAlias = Union[
     TextEditorCodeExecutionToolResultBlockParam,
     ToolSearchToolResultBlockParam,
     ContainerUploadBlockParam,
-    MidConversationSystemBlockParam,
 ]

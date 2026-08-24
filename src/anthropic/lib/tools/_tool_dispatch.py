@@ -15,7 +15,9 @@ import inspect
 from typing import Union, TypeVar, Iterable, Awaitable
 from typing_extensions import Protocol
 
-from ._beta_functions import ToolError, BetaFunctionToolResultType
+from anyio.to_thread import run_sync
+
+from ._beta_functions import ToolError, BetaFunctionTool, BetaBuiltinFunctionTool, BetaFunctionToolResultType
 from ...types.beta.beta_message_param import BetaMessageParam
 from ...types.beta.beta_content_block_param import BetaContentBlockParam
 from ...types.beta.beta_request_tool_removal_block_param import (
@@ -72,12 +74,7 @@ def available_tool_names(messages: Iterable[BetaMessageParam], tool_names: Itera
 
 
 def _apply_tool_change(block: BetaContentBlockParam, available: set[str]) -> None:
-    """Apply a single ``tool_removal`` / ``tool_addition`` block to ``available``.
-
-    A ``mid_conv_system`` block's ``content`` is limited by the API schema to
-    ``text`` / ``tool_addition`` / ``tool_removal``, so exactly one level is
-    walked (no deeper nesting exists); every other block type is a no-op.
-    """
+    """Apply a single ``tool_removal`` / ``tool_addition`` block to ``available``."""
     if not isinstance(block, dict):
         # ``BetaContentBlockParam`` also admits response-side content-block
         # models; ``tool_removal`` / ``tool_addition`` are request-only
@@ -85,13 +82,6 @@ def _apply_tool_change(block: BetaContentBlockParam, available: set[str]) -> Non
         return
     if block["type"] == "tool_removal" or block["type"] == "tool_addition":
         _apply_tool_reference_change(block, available)
-    elif block["type"] == "mid_conv_system":
-        for inner in block["content"]:
-            # schema-bounded to text/tool_addition/tool_removal: one level, no recursion
-            if inner["type"] == "tool_removal" or inner["type"] == "tool_addition":
-                _apply_tool_reference_change(inner, available)
-    else:
-        pass  # other/unknown block types are ignored (forward compatibility)
 
 
 def _apply_tool_reference_change(
@@ -134,10 +124,12 @@ def tool_error_content(exc: BaseException) -> BetaFunctionToolResultType:
 async def run_runnable_tool(tool: _CallableTool, input: dict[str, object]) -> BetaFunctionToolResultType:
     """Call ``tool`` with ``input``, awaiting the result if the tool is async.
 
-    Bridges the sync (:class:`~anthropic.lib.tools.BetaFunctionTool`) and async
-    (:class:`~anthropic.lib.tools.BetaAsyncFunctionTool`) runnable-tool shapes
-    behind a single ``await``.
+    Sync tools run on a worker thread. If the caller cancels (for example on a
+    timeout), the thread is left to finish on its own and its result is
+    dropped.
     """
+    if isinstance(tool, (BetaFunctionTool, BetaBuiltinFunctionTool)):
+        return await run_sync(tool.call, input, abandon_on_cancel=True)
     result = tool.call(input)
     if inspect.isawaitable(result):
         return await result

@@ -149,7 +149,7 @@ class TestAsyncDeploymentRuns:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        deployment_run = response.parse()
+        deployment_run = await response.parse()
         assert_matches_type(BetaManagedAgentsDeploymentRun, deployment_run, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -204,7 +204,7 @@ class TestAsyncDeploymentRuns:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        deployment_run = response.parse()
+        deployment_run = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsDeploymentRun], deployment_run, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")

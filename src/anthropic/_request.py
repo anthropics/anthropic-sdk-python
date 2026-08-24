@@ -4,7 +4,7 @@ import copy as _copy
 from typing import Any
 from typing_extensions import override
 
-import httpx
+import httpx2 as httpx
 
 from ._types import Body, Query, Headers, NotGiven, not_given
 from ._utils import is_given

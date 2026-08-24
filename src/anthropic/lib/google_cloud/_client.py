@@ -4,12 +4,12 @@ import os
 import inspect
 import threading
 from typing import TYPE_CHECKING, Any, Union, Mapping, TypeVar, Callable, Sequence, Awaitable, cast
-from functools import partial, cached_property
+from functools import partial
 from typing_extensions import Self, override
 
-import httpx
+import httpx2 as httpx
 
-from ..._types import NOT_GIVEN, Headers, Timeout, NotGiven
+from ..._types import Timeout, NotGiven, not_given
 from ..._utils import asyncify, is_given
 from ..._client import Anthropic, AsyncAnthropic
 from ..._models import FinalRequestOptions
@@ -192,7 +192,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
 
     The whole first-party surface is proxied verbatim (no URL or body rewriting), so
     this subclasses the full ``Anthropic`` client. Authentication is a GCP bearer
-    token; the deprecated Completions endpoint is not exposed.
+    token.
     """
 
     workspace_id: str | None
@@ -208,7 +208,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
         credentials: GoogleCredentials | None = None,
         skip_auth: bool = False,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -303,12 +303,6 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
         self.api_key = None
         self.auth_token = None
 
-    @cached_property
-    @override
-    def completions(self) -> None:  # type: ignore[override]
-        """Completions endpoint is deprecated and not supported for the Google Cloud client."""
-        return None
-
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
@@ -317,7 +311,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
         return {}
 
     @override
-    def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
+    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
         # The bearer token is attached per-request in `_prepare_request`, not via
         # default headers, so the base auth-presence check would false-negative.
         return
@@ -367,15 +361,15 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx.Client, Stream[Any]], Ant
         *,
         project: str | None = None,
         location: str | None = None,
-        workspace_id: str | None | NotGiven = NOT_GIVEN,
-        token_provider: TokenProvider | None | NotGiven = NOT_GIVEN,
-        credentials: GoogleCredentials | None | NotGiven = NOT_GIVEN,
+        workspace_id: str | None | NotGiven = not_given,
+        token_provider: TokenProvider | None | NotGiven = not_given,
+        credentials: GoogleCredentials | None | NotGiven = not_given,
         skip_auth: bool | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
-        max_retries: int | NotGiven = NOT_GIVEN,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
+        max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -470,7 +464,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx.AsyncClient, AsyncSt
         credentials: GoogleCredentials | None = None,
         skip_auth: bool = False,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -543,19 +537,13 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx.AsyncClient, AsyncSt
         self.api_key = None
         self.auth_token = None
 
-    @cached_property
-    @override
-    def completions(self) -> None:  # type: ignore[override]
-        """Completions endpoint is deprecated and not supported for the Google Cloud client."""
-        return None
-
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
         return {}
 
     @override
-    def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
+    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
         return
 
     async def _get_token(self) -> str:
@@ -606,15 +594,15 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx.AsyncClient, AsyncSt
         *,
         project: str | None = None,
         location: str | None = None,
-        workspace_id: str | None | NotGiven = NOT_GIVEN,
-        token_provider: AsyncTokenProvider | None | NotGiven = NOT_GIVEN,
-        credentials: GoogleCredentials | None | NotGiven = NOT_GIVEN,
+        workspace_id: str | None | NotGiven = not_given,
+        token_provider: AsyncTokenProvider | None | NotGiven = not_given,
+        credentials: GoogleCredentials | None | NotGiven = not_given,
         skip_auth: bool | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
-        max_retries: int | NotGiven = NOT_GIVEN,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
+        max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,

@@ -6,14 +6,18 @@ from typing import List, Union
 from datetime import datetime
 from itertools import chain
 
-import httpx
+import httpx2
 
-from .... import _legacy_response
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
-from ...._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ...._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.beta.memory_stores import (
@@ -64,7 +68,7 @@ class MemoryVersions(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
         Retrieve a memory version
@@ -124,6 +128,7 @@ class MemoryVersions(SyncAPIResource):
         memory_id: str | Omit = omit,
         operation: BetaManagedAgentsMemoryVersionOperation | Omit = omit,
         page: str | Omit = omit,
+        service_account_id: str | Omit = omit,
         session_id: str | Omit = omit,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -132,7 +137,7 @@ class MemoryVersions(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsMemoryVersion]:
         """
         List memory versions
@@ -151,6 +156,8 @@ class MemoryVersions(SyncAPIResource):
           operation: Query parameter for operation
 
           page: Query parameter for page
+
+          service_account_id: Query parameter for service_account_id
 
           session_id: Query parameter for session_id
 
@@ -198,6 +205,7 @@ class MemoryVersions(SyncAPIResource):
                         "memory_id": memory_id,
                         "operation": operation,
                         "page": page,
+                        "service_account_id": service_account_id,
                         "session_id": session_id,
                         "view": view,
                     },
@@ -218,7 +226,7 @@ class MemoryVersions(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
         Redact a memory version
@@ -294,7 +302,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
         Retrieve a memory version
@@ -356,6 +364,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         memory_id: str | Omit = omit,
         operation: BetaManagedAgentsMemoryVersionOperation | Omit = omit,
         page: str | Omit = omit,
+        service_account_id: str | Omit = omit,
         session_id: str | Omit = omit,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -364,7 +373,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsMemoryVersion, AsyncPageCursor[BetaManagedAgentsMemoryVersion]]:
         """
         List memory versions
@@ -383,6 +392,8 @@ class AsyncMemoryVersions(AsyncAPIResource):
           operation: Query parameter for operation
 
           page: Query parameter for page
+
+          service_account_id: Query parameter for service_account_id
 
           session_id: Query parameter for session_id
 
@@ -430,6 +441,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
                         "memory_id": memory_id,
                         "operation": operation,
                         "page": page,
+                        "service_account_id": service_account_id,
                         "session_id": session_id,
                         "view": view,
                     },
@@ -450,7 +462,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
         Redact a memory version
@@ -498,13 +510,13 @@ class MemoryVersionsWithRawResponse:
     def __init__(self, memory_versions: MemoryVersions) -> None:
         self._memory_versions = memory_versions
 
-        self.retrieve = _legacy_response.to_raw_response_wrapper(
+        self.retrieve = to_raw_response_wrapper(
             memory_versions.retrieve,
         )
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             memory_versions.list,
         )
-        self.redact = _legacy_response.to_raw_response_wrapper(
+        self.redact = to_raw_response_wrapper(
             memory_versions.redact,
         )
 
@@ -513,13 +525,13 @@ class AsyncMemoryVersionsWithRawResponse:
     def __init__(self, memory_versions: AsyncMemoryVersions) -> None:
         self._memory_versions = memory_versions
 
-        self.retrieve = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve = async_to_raw_response_wrapper(
             memory_versions.retrieve,
         )
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             memory_versions.list,
         )
-        self.redact = _legacy_response.async_to_raw_response_wrapper(
+        self.redact = async_to_raw_response_wrapper(
             memory_versions.redact,
         )
 

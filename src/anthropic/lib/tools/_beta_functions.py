@@ -80,7 +80,10 @@ class BetaBuiltinFunctionTool(ABC):
         raw = self.to_dict()
         if "mcp_server_name" in raw:
             return raw["mcp_server_name"]
-        return raw["name"]
+        name = raw.get("name")
+        if name is None:
+            raise ValueError(f"Tool of type {raw.get('type')!r} does not have a name")
+        return name
 
 
 class BetaAsyncBuiltinFunctionTool(ABC):
@@ -95,7 +98,10 @@ class BetaAsyncBuiltinFunctionTool(ABC):
         raw = self.to_dict()
         if "mcp_server_name" in raw:
             return raw["mcp_server_name"]
-        return raw["name"]
+        name = raw.get("name")
+        if name is None:
+            raise ValueError(f"Tool of type {raw.get('type')!r} does not have a name")
+        return name
 
 
 class BaseFunctionTool(Generic[CallableT]):
@@ -408,6 +414,11 @@ def beta_tool(
 
     @function_tool(name="custom_name")
     def my_func(x: int) -> str: ...
+
+    ``SessionToolRunner`` and ``EnvironmentWorker`` call the function on a
+    worker thread. A ``@contextmanager`` tool is entered at decoration time and
+    exited by the runner's cleanup, both off that thread, so avoid thread-bound
+    resources such as a default ``sqlite3`` connection in ``__enter__``.
     """
     if _compat.PYDANTIC_V1:
         raise RuntimeError("Tool functions are only supported with Pydantic v2")

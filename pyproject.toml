@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "0.121.0"
+version = "1.0.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "MIT"
@@ -9,21 +9,19 @@ authors = [
 ]
 
 dependencies = [
-    "httpx>=0.25.0, <1",
+  "httpx2>=2.0.0, <3",
   "pydantic>=1.9.0, <3",
   "typing-extensions>=4.14, <5",
   "anyio>=3.5.0, <5",
-  "distro>=1.7.0, <2",
   "sniffio>=1, <2",
     "jiter>=0.4.0, <1",
     "docstring-parser>=0.15,<1",
 ]
 
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 classifiers = [
   "Typing :: Typed",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -39,7 +37,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-aiohttp = ["aiohttp>=3, <4", "httpx_aiohttp>=0.1.9, <1"]
+aiohttp = ["aiohttp>=3.10.0, <4"]
 vertex = ["google-auth[requests] >=2, <3"]
 google_cloud = ["google-auth[requests] >=2, <3"]
 aws = ["boto3 >=1.28.57, <2", "botocore >=1.31.57, <2"]
@@ -89,6 +87,7 @@ dev = [
     "http-snapshot[httpx]==0.1.9",
     "packaging",
     "tomli; python_version < '3.11'",
+    "httpx2>=2.9",
 ]
 pydantic-v1 = [
     "pydantic>=1.9.0,<2",
@@ -118,7 +117,6 @@ include = [
   "/*.lock",
   "/*.md",
   "/mypy.ini",
-  "/noxfile.py",
   "bin/*",
   "examples/*",
   "src/*",
@@ -138,7 +136,8 @@ replacement = '[\1](https://github.com/anthropics/anthropic-sdk-python/tree/main
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--tb=short -n auto"
+addopts = "--tb=short -n auto -p tests._alias_httpx"
+pythonpath = ["."]
 xfail_strict = true
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
@@ -154,14 +153,13 @@ format-command="ruff format --stdin-filename {filename}"
 # there are a couple of flags that are still disabled by
 # default in strict mode as they are experimental and niche.
 typeCheckingMode = "strict"
-pythonVersion = "3.9"
+pythonVersion = "3.10"
 
 exclude = [
     ".git",
     "_dev",
     ".venv",
-    ".nox",
-    "examples/mcp_tool_runner.py",  # mcp requires Python 3.10+, lint runs on 3.9
+    "src/anthropic/_vendor",
 ]
 
 reportImplicitOverride = true
@@ -215,12 +213,6 @@ cache_fine_grained = true
 # and would not be worth it.
 disable_error_code = "func-returns-value,overload-cannot-match"
 
-# https://github.com/python/mypy/issues/12162
-[[tool.mypy.overrides]]
-module = "black.files.*"
-ignore_errors = true
-ignore_missing_imports = true
-
 [[tool.mypy.overrides]]
 module = "anthropic.lib.vertex._auth"
 disallow_untyped_calls = false
@@ -233,6 +225,7 @@ follow_imports = "skip"
 line-length = 120
 output-format = "grouped"
 target-version = "py38"
+extend-exclude = ["src/anthropic/_vendor"]
 
 [tool.ruff.format]
 docstring-code-format = true

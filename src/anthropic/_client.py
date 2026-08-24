@@ -6,20 +6,11 @@ import os
 from typing import TYPE_CHECKING, Any, Mapping, Sequence
 from typing_extensions import Self, override
 
-import httpx
+import httpx2
 
-from . import _constants, _exceptions
+from . import _exceptions
 from ._qs import Querystring
-from ._types import (
-    Omit,
-    Headers,
-    Timeout,
-    NotGiven,
-    Transport,
-    ProxiesTypes,
-    RequestOptions,
-    not_given,
-)
+from ._types import Omit, Timeout, NotGiven, RequestOptions, not_given
 from ._utils import (
     is_given,
     is_mapping_t,
@@ -44,6 +35,7 @@ from .lib.credentials import (
     AccessTokenAuth,
     CredentialsFile,
     AccessTokenProvider,
+    BaseURLBoundProvider,
     default_credentials,
 )
 from .lib.credentials._auth import (
@@ -70,18 +62,24 @@ def _close_credentials(credentials: object) -> None:
         close()
 
 
-def _bind_credentials_base_url(credentials: AccessTokenProvider | None, base_url: str) -> None:
-    """If the credential provider supports ``bind_base_url``, pass it the
-    client's resolved ``base_url`` so the token exchange and API calls hit
-    the same deployment without the caller passing the URL twice.
+def _bind_credentials_base_url(credentials: AccessTokenProvider | None, base_url: str) -> AccessTokenProvider | None:
+    """Return the provider this client should exchange tokens through.
 
-    Providers without the hook (plain callables, custom impls) are left
-    untouched and MUST resolve their own token-exchange ``base_url`` — the
-    client does not second-guess them.
+    See :class:`BaseURLBoundProvider`; any other provider (plain callables,
+    custom impls) is returned untouched and resolves its own exchange URL.
     """
-    bind = getattr(credentials, "bind_base_url", None)
-    if callable(bind):
-        bind(base_url)
+    if isinstance(credentials, BaseURLBoundProvider):
+        return credentials.for_base_url(base_url)
+    return credentials
+
+
+def _keeps_base_url(current: httpx2.URL, requested: str | httpx2.URL | None) -> bool:
+    """Whether a ``copy()`` stays on the parent's deployment.
+
+    Tokens are only valid for the deployment that minted them, so the parent's
+    :class:`TokenCache` is only shared in that case.
+    """
+    return requested is None or str(httpx2.URL(requested)).rstrip("/") == str(current).rstrip("/")
 
 
 def _warn_explicit_shadow(*, api_key: str | None, auth_token: str | None, credentials: object) -> None:
@@ -113,22 +111,14 @@ def _warn_env_shadow(*, api_key: str | None, auth_token: str | None) -> None:
 # --- end credentials support ---
 
 if TYPE_CHECKING:
-    from .resources import beta, models, messages, completions
+    from .resources import beta, files, models, skills, messages
+    from .resources.files import Files, AsyncFiles
     from .resources.models import Models, AsyncModels
     from .resources.beta.beta import Beta, AsyncBeta
-    from .resources.completions import Completions, AsyncCompletions
+    from .resources.skills.skills import Skills, AsyncSkills
     from .resources.messages.messages import Messages, AsyncMessages
 
-__all__ = [
-    "Timeout",
-    "Transport",
-    "ProxiesTypes",
-    "RequestOptions",
-    "Anthropic",
-    "AsyncAnthropic",
-    "Client",
-    "AsyncClient",
-]
+__all__ = ["Timeout", "RequestOptions", "Anthropic", "AsyncAnthropic", "Client", "AsyncClient"]
 
 
 class Anthropic(SyncAPIClient):
@@ -140,10 +130,6 @@ class Anthropic(SyncAPIClient):
     _token_cache: TokenCache | None
     _custom_auth: AccessTokenAuth | None
 
-    # constants
-    HUMAN_PROMPT = _constants.HUMAN_PROMPT
-    AI_PROMPT = _constants.AI_PROMPT
-
     def __init__(
         self,
         *,
@@ -153,15 +139,15 @@ class Anthropic(SyncAPIClient):
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        # Configure a custom httpx client.
+        # Configure a custom httpx2 client.
         # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
-        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
-        http_client: httpx.Client | None = None,
+        # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#client) for more details.
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         # Enable or disable schema validation for data returned by the API.
         # When enabled an error APIResponseValidationError is raised
@@ -211,8 +197,8 @@ class Anthropic(SyncAPIClient):
             or profile is not None
         )
         if not has_explicit_credential:
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
+            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
         self.api_key = api_key
         self.auth_token = auth_token
         # --- end credentials support ---
@@ -265,7 +251,7 @@ class Anthropic(SyncAPIClient):
                 credential_headers = result.extra_headers
                 if not base_url_is_explicit and result.base_url:
                     base_url = result.base_url
-        _bind_credentials_base_url(credentials, str(base_url))
+        credentials = _bind_credentials_base_url(credentials, str(base_url))
         self.credentials = credentials
         _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
         if _is_base_client(self):
@@ -296,12 +282,6 @@ class Anthropic(SyncAPIClient):
         self._default_stream_cls = Stream
 
     @cached_property
-    def completions(self) -> Completions:
-        from .resources.completions import Completions
-
-        return Completions(self)
-
-    @cached_property
     def messages(self) -> Messages:
         from .resources.messages import Messages
 
@@ -312,6 +292,18 @@ class Anthropic(SyncAPIClient):
         from .resources.models import Models
 
         return Models(self)
+
+    @cached_property
+    def files(self) -> Files:
+        from .resources.files import Files
+
+        return Files(self)
+
+    @cached_property
+    def skills(self) -> Skills:
+        from .resources.skills import Skills
+
+        return Skills(self)
 
     @cached_property
     def beta(self) -> Beta:
@@ -368,7 +360,7 @@ class Anthropic(SyncAPIClient):
         }
 
     @override
-    def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         # --- credentials support (hand-written, upstream to Stainless) ---
         # The token cache *may* inject an Authorization header per-request via
         # custom_auth, so validation that checks only default_headers would
@@ -383,10 +375,10 @@ class Anthropic(SyncAPIClient):
             # valid
             return
 
-        if headers.get("X-Api-Key") or isinstance(custom_headers.get("X-Api-Key"), Omit):
+        if headers.get("X-Api-Key") or "x-api-key" in omitted:
             return
 
-        if headers.get("Authorization") or isinstance(custom_headers.get("Authorization"), Omit):
+        if headers.get("Authorization") or "authorization" in omitted:
             return
 
         raise TypeError(
@@ -396,11 +388,11 @@ class Anthropic(SyncAPIClient):
     # --- credentials support (hand-written, upstream to Stainless) ---
     @property
     @override
-    def custom_auth(self) -> httpx.Auth | None:
+    def custom_auth(self) -> httpx2.Auth | None:
         return self._custom_auth
 
     @override
-    def _should_retry(self, response: httpx.Response) -> bool:
+    def _should_retry(self, response: httpx2.Response) -> bool:
         # On 401 with a token cache, invalidate and retry once so the request
         # is re-sent with a freshly minted Bearer token. The base-client retry
         # loop rebuilds the request from FinalRequestOptions on each attempt,
@@ -430,9 +422,9 @@ class Anthropic(SyncAPIClient):
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
@@ -476,10 +468,10 @@ class Anthropic(SyncAPIClient):
             resolved_credentials = self.credentials if isinstance(credentials, NotGiven) else credentials
             if resolved_credentials is not None and _is_base_client(self):
                 _extra_kwargs = {"credentials": resolved_credentials, **_extra_kwargs}
-                # Reuse the parent's TokenCache when the credentials provider is
-                # unchanged so with_options() copies don't trigger an independent
-                # token exchange. A new credentials= gets a fresh cache.
-                if isinstance(credentials, NotGiven):
+                # Share the parent's TokenCache only while the provider and
+                # deployment are unchanged; a new credentials= or base_url= gets
+                # its own cache.
+                if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
         return self.__class__(
@@ -517,7 +509,7 @@ class Anthropic(SyncAPIClient):
         err_msg: str,
         *,
         body: object,
-        response: httpx.Response,
+        response: httpx2.Response,
     ) -> APIStatusError:
         if response.status_code == 400:
             return _exceptions.BadRequestError(err_msg, response=response, body=body)
@@ -560,10 +552,6 @@ class AsyncAnthropic(AsyncAPIClient):
     _token_cache: TokenCache | None
     _custom_auth: AccessTokenAuth | None
 
-    # constants
-    HUMAN_PROMPT = _constants.HUMAN_PROMPT
-    AI_PROMPT = _constants.AI_PROMPT
-
     def __init__(
         self,
         *,
@@ -573,15 +561,15 @@ class AsyncAnthropic(AsyncAPIClient):
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        # Configure a custom httpx client.
+        # Configure a custom httpx2 client.
         # We provide a `DefaultAsyncHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
-        # See the [httpx documentation](https://www.python-httpx.org/api/#asyncclient) for more details.
-        http_client: httpx.AsyncClient | None = None,
+        # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#asyncclient) for more details.
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         # Enable or disable schema validation for data returned by the API.
         # When enabled an error APIResponseValidationError is raised
@@ -631,8 +619,8 @@ class AsyncAnthropic(AsyncAPIClient):
             or profile is not None
         )
         if not has_explicit_credential:
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
+            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
         self.api_key = api_key
         self.auth_token = auth_token
         # --- end credentials support ---
@@ -685,7 +673,7 @@ class AsyncAnthropic(AsyncAPIClient):
                 credential_headers = result.extra_headers
                 if not base_url_is_explicit and result.base_url:
                     base_url = result.base_url
-        _bind_credentials_base_url(credentials, str(base_url))
+        credentials = _bind_credentials_base_url(credentials, str(base_url))
         self.credentials = credentials
         _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
         if _is_base_client(self):
@@ -716,12 +704,6 @@ class AsyncAnthropic(AsyncAPIClient):
         self._default_stream_cls = AsyncStream
 
     @cached_property
-    def completions(self) -> AsyncCompletions:
-        from .resources.completions import AsyncCompletions
-
-        return AsyncCompletions(self)
-
-    @cached_property
     def messages(self) -> AsyncMessages:
         from .resources.messages import AsyncMessages
 
@@ -732,6 +714,18 @@ class AsyncAnthropic(AsyncAPIClient):
         from .resources.models import AsyncModels
 
         return AsyncModels(self)
+
+    @cached_property
+    def files(self) -> AsyncFiles:
+        from .resources.files import AsyncFiles
+
+        return AsyncFiles(self)
+
+    @cached_property
+    def skills(self) -> AsyncSkills:
+        from .resources.skills import AsyncSkills
+
+        return AsyncSkills(self)
 
     @cached_property
     def beta(self) -> AsyncBeta:
@@ -788,7 +782,7 @@ class AsyncAnthropic(AsyncAPIClient):
         }
 
     @override
-    def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         # --- credentials support (hand-written, upstream to Stainless) ---
         if self._token_cache is not None and not headers.get("X-Api-Key") and not headers.get("Authorization"):
             return
@@ -797,10 +791,10 @@ class AsyncAnthropic(AsyncAPIClient):
             # valid
             return
 
-        if headers.get("X-Api-Key") or isinstance(custom_headers.get("X-Api-Key"), Omit):
+        if headers.get("X-Api-Key") or "x-api-key" in omitted:
             return
 
-        if headers.get("Authorization") or isinstance(custom_headers.get("Authorization"), Omit):
+        if headers.get("Authorization") or "authorization" in omitted:
             return
 
         raise TypeError(
@@ -810,11 +804,11 @@ class AsyncAnthropic(AsyncAPIClient):
     # --- credentials support (hand-written, upstream to Stainless) ---
     @property
     @override
-    def custom_auth(self) -> httpx.Auth | None:
+    def custom_auth(self) -> httpx2.Auth | None:
         return self._custom_auth
 
     @override
-    def _should_retry(self, response: httpx.Response) -> bool:
+    def _should_retry(self, response: httpx2.Response) -> bool:
         # On 401 with a token cache, invalidate and retry once so the request
         # is re-sent with a freshly minted Bearer token. The base-client retry
         # loop rebuilds the request from FinalRequestOptions on each attempt,
@@ -832,7 +826,7 @@ class AsyncAnthropic(AsyncAPIClient):
     async def close(self) -> None:
         await super().close()
         # Credential providers expose a sync close() even from the async client —
-        # they own a sync httpx.Client for the token-exchange POST.
+        # they own a sync httpx2.Client for the token-exchange POST.
         _close_credentials(self.credentials)
 
     # --- end credentials support ---
@@ -846,9 +840,9 @@ class AsyncAnthropic(AsyncAPIClient):
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
@@ -892,10 +886,10 @@ class AsyncAnthropic(AsyncAPIClient):
             resolved_credentials = self.credentials if isinstance(credentials, NotGiven) else credentials
             if resolved_credentials is not None and _is_base_client(self):
                 _extra_kwargs = {"credentials": resolved_credentials, **_extra_kwargs}
-                # Reuse the parent's TokenCache when the credentials provider is
-                # unchanged so with_options() copies don't trigger an independent
-                # token exchange. A new credentials= gets a fresh cache.
-                if isinstance(credentials, NotGiven):
+                # Share the parent's TokenCache only while the provider and
+                # deployment are unchanged; a new credentials= or base_url= gets
+                # its own cache.
+                if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
         return self.__class__(
@@ -933,7 +927,7 @@ class AsyncAnthropic(AsyncAPIClient):
         err_msg: str,
         *,
         body: object,
-        response: httpx.Response,
+        response: httpx2.Response,
     ) -> APIStatusError:
         if response.status_code == 400:
             return _exceptions.BadRequestError(err_msg, response=response, body=body)
@@ -974,12 +968,6 @@ class AnthropicWithRawResponse:
         self._client = client
 
     @cached_property
-    def completions(self) -> completions.CompletionsWithRawResponse:
-        from .resources.completions import CompletionsWithRawResponse
-
-        return CompletionsWithRawResponse(self._client.completions)
-
-    @cached_property
     def messages(self) -> messages.MessagesWithRawResponse:
         from .resources.messages import MessagesWithRawResponse
 
@@ -990,6 +978,18 @@ class AnthropicWithRawResponse:
         from .resources.models import ModelsWithRawResponse
 
         return ModelsWithRawResponse(self._client.models)
+
+    @cached_property
+    def files(self) -> files.FilesWithRawResponse:
+        from .resources.files import FilesWithRawResponse
+
+        return FilesWithRawResponse(self._client.files)
+
+    @cached_property
+    def skills(self) -> skills.SkillsWithRawResponse:
+        from .resources.skills import SkillsWithRawResponse
+
+        return SkillsWithRawResponse(self._client.skills)
 
     @cached_property
     def beta(self) -> beta.BetaWithRawResponse:
@@ -1005,12 +1005,6 @@ class AsyncAnthropicWithRawResponse:
         self._client = client
 
     @cached_property
-    def completions(self) -> completions.AsyncCompletionsWithRawResponse:
-        from .resources.completions import AsyncCompletionsWithRawResponse
-
-        return AsyncCompletionsWithRawResponse(self._client.completions)
-
-    @cached_property
     def messages(self) -> messages.AsyncMessagesWithRawResponse:
         from .resources.messages import AsyncMessagesWithRawResponse
 
@@ -1021,6 +1015,18 @@ class AsyncAnthropicWithRawResponse:
         from .resources.models import AsyncModelsWithRawResponse
 
         return AsyncModelsWithRawResponse(self._client.models)
+
+    @cached_property
+    def files(self) -> files.AsyncFilesWithRawResponse:
+        from .resources.files import AsyncFilesWithRawResponse
+
+        return AsyncFilesWithRawResponse(self._client.files)
+
+    @cached_property
+    def skills(self) -> skills.AsyncSkillsWithRawResponse:
+        from .resources.skills import AsyncSkillsWithRawResponse
+
+        return AsyncSkillsWithRawResponse(self._client.skills)
 
     @cached_property
     def beta(self) -> beta.AsyncBetaWithRawResponse:
@@ -1036,12 +1042,6 @@ class AnthropicWithStreamedResponse:
         self._client = client
 
     @cached_property
-    def completions(self) -> completions.CompletionsWithStreamingResponse:
-        from .resources.completions import CompletionsWithStreamingResponse
-
-        return CompletionsWithStreamingResponse(self._client.completions)
-
-    @cached_property
     def messages(self) -> messages.MessagesWithStreamingResponse:
         from .resources.messages import MessagesWithStreamingResponse
 
@@ -1052,6 +1052,18 @@ class AnthropicWithStreamedResponse:
         from .resources.models import ModelsWithStreamingResponse
 
         return ModelsWithStreamingResponse(self._client.models)
+
+    @cached_property
+    def files(self) -> files.FilesWithStreamingResponse:
+        from .resources.files import FilesWithStreamingResponse
+
+        return FilesWithStreamingResponse(self._client.files)
+
+    @cached_property
+    def skills(self) -> skills.SkillsWithStreamingResponse:
+        from .resources.skills import SkillsWithStreamingResponse
+
+        return SkillsWithStreamingResponse(self._client.skills)
 
     @cached_property
     def beta(self) -> beta.BetaWithStreamingResponse:
@@ -1067,12 +1079,6 @@ class AsyncAnthropicWithStreamedResponse:
         self._client = client
 
     @cached_property
-    def completions(self) -> completions.AsyncCompletionsWithStreamingResponse:
-        from .resources.completions import AsyncCompletionsWithStreamingResponse
-
-        return AsyncCompletionsWithStreamingResponse(self._client.completions)
-
-    @cached_property
     def messages(self) -> messages.AsyncMessagesWithStreamingResponse:
         from .resources.messages import AsyncMessagesWithStreamingResponse
 
@@ -1083,6 +1089,18 @@ class AsyncAnthropicWithStreamedResponse:
         from .resources.models import AsyncModelsWithStreamingResponse
 
         return AsyncModelsWithStreamingResponse(self._client.models)
+
+    @cached_property
+    def files(self) -> files.AsyncFilesWithStreamingResponse:
+        from .resources.files import AsyncFilesWithStreamingResponse
+
+        return AsyncFilesWithStreamingResponse(self._client.files)
+
+    @cached_property
+    def skills(self) -> skills.AsyncSkillsWithStreamingResponse:
+        from .resources.skills import AsyncSkillsWithStreamingResponse
+
+        return AsyncSkillsWithStreamingResponse(self._client.skills)
 
     @cached_property
     def beta(self) -> beta.AsyncBetaWithStreamingResponse:

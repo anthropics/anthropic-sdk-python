@@ -1,15 +1,13 @@
 # Note: initially copied from https://github.com/florimondmanca/httpx-sse/blob/master/src/httpx_sse/_decoders.py
 from __future__ import annotations
 
-import abc
 import json
 import inspect
-import warnings
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, Iterator, Optional, AsyncIterator, cast
 from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, runtime_checkable
 
-import httpx
+import httpx2
 
 from ._utils import is_dict, extract_type_var_from_base
 
@@ -21,31 +19,10 @@ if TYPE_CHECKING:
 _T = TypeVar("_T")
 
 
-class _SyncStreamMeta(abc.ABCMeta):
-    @override
-    def __instancecheck__(self, instance: Any) -> bool:
-        # we override the `isinstance()` check for `Stream`
-        # as a previous version of the `MessageStream` class
-        # inherited from `Stream` & without this workaround,
-        # changing it to not inherit would be a breaking change.
-
-        from .lib.streaming import MessageStream
-
-        if isinstance(instance, MessageStream):
-            warnings.warn(
-                "Using `isinstance()` to check if a `MessageStream` object is an instance of `Stream` is deprecated & will be removed in the next major version",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            return True
-
-        return False
-
-
-class Stream(Generic[_T], metaclass=_SyncStreamMeta):
+class Stream(Generic[_T]):
     """Provides the core interface to iterate over a synchronous stream response."""
 
-    response: httpx.Response
+    response: httpx2.Response
     _options: Optional[FinalRequestOptions] = None
     _decoder: SSEBytesDecoder
 
@@ -53,7 +30,7 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
         self,
         *,
         cast_to: type[_T],
-        response: httpx.Response,
+        response: httpx2.Response,
         client: Anthropic,
         options: Optional[FinalRequestOptions] = None,
     ) -> None:
@@ -75,7 +52,7 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
         yield from self._decoder.iter_bytes(self.response.iter_bytes())
 
     @staticmethod
-    def raw_events(response: httpx.Response) -> Iterator[ServerSentEvent]:
+    def raw_events(response: httpx2.Response) -> Iterator[ServerSentEvent]:
         """Iterate the raw Server-Sent Events from `response`, before any JSON
         parsing or event-name filtering.
 
@@ -189,31 +166,10 @@ class Stream(Generic[_T], metaclass=_SyncStreamMeta):
         self.response.close()
 
 
-class _AsyncStreamMeta(abc.ABCMeta):
-    @override
-    def __instancecheck__(self, instance: Any) -> bool:
-        # we override the `isinstance()` check for `AsyncStream`
-        # as a previous version of the `AsyncMessageStream` class
-        # inherited from `AsyncStream` & without this workaround,
-        # changing it to not inherit would be a breaking change.
-
-        from .lib.streaming import AsyncMessageStream
-
-        if isinstance(instance, AsyncMessageStream):
-            warnings.warn(
-                "Using `isinstance()` to check if a `AsyncMessageStream` object is an instance of `AsyncStream` is deprecated & will be removed in the next major version",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            return True
-
-        return False
-
-
-class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
+class AsyncStream(Generic[_T]):
     """Provides the core interface to iterate over an asynchronous stream response."""
 
-    response: httpx.Response
+    response: httpx2.Response
     _options: Optional[FinalRequestOptions] = None
     _decoder: SSEDecoder | SSEBytesDecoder
 
@@ -221,7 +177,7 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
         self,
         *,
         cast_to: type[_T],
-        response: httpx.Response,
+        response: httpx2.Response,
         client: AsyncAnthropic,
         options: Optional[FinalRequestOptions] = None,
     ) -> None:
@@ -244,7 +200,7 @@ class AsyncStream(Generic[_T], metaclass=_AsyncStreamMeta):
             yield sse
 
     @staticmethod
-    def raw_events(response: httpx.Response) -> AsyncIterator[ServerSentEvent]:
+    def raw_events(response: httpx2.Response) -> AsyncIterator[ServerSentEvent]:
         """Iterate the raw Server-Sent Events from `response`, before any JSON
         parsing or event-name filtering.
 

@@ -7,7 +7,7 @@ import logging
 from typing import Any, List, Protocol, cast
 from pathlib import Path
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 

@@ -213,7 +213,7 @@ response = await client.beta.messages.create(
 from anthropic.lib.tools.mcp import mcp_resource_to_file
 
 resource = await mcp_client.read_resource(uri="file:///path/to/data.json")
-uploaded = await client.beta.files.upload(file=mcp_resource_to_file(resource))
+uploaded = await client.files.upload(file=mcp_resource_to_file(resource))
 ```
 
 ### Error handling
@@ -316,9 +316,10 @@ async for work in client.beta.environments.work.poller(
 ):
     if work.data.type != "session":
         continue
-    # Passing `client` and `session_id` makes `AgentToolContext` fetch the session's resolved agent
-    # on enter and download each of its skills into `{workdir}/skills/<name>/`.
-    async with AgentToolContext(workdir="/workspace", client=client, session_id=work.data.id) as env:
+    # Fetch the session once; passing `client` and `session` makes `AgentToolContext` download
+    # each of the session agent's skills into `{workdir}/skills/<name>/` on enter.
+    session = await client.beta.sessions.retrieve(work.data.id)
+    async with AgentToolContext(workdir="/workspace", client=client, session=session) as env:
         async for call in client.beta.sessions.events.tool_runner(
             work.data.id,
             tools=beta_agent_toolset_20260401(env),
@@ -345,6 +346,15 @@ tools = [t for t in beta_agent_toolset_20260401(env) if t.name != "bash"]
 > **not** call `close`, so handing it this toolset leaks one orphaned shell per run. Use the
 > session tool runner / environment worker for the agent toolset, or drop `bash` (as in the second
 > line above) before passing the toolset to the Messages tool runner.
+
+> **Keep async tools non-blocking.** The environment worker heartbeats the work-item lease on the
+> same event loop that runs your async tools (`@beta_async_tool`), so a blocking call inside one can
+> cost the worker its lease. Push blocking or CPU-bound work to `anyio.to_thread.run_sync`, or write
+> a sync tool instead (`@beta_tool`, `BetaBuiltinFunctionTool`). Sync tools run on a worker thread
+> and may block freely, but must use `anyio.from_thread.run` to call async code. Each call has a
+> 150 s limit. A sync tool that runs past it is reported to the agent as timed out while its thread
+> keeps running, so a long-running sync tool should tolerate being called again before an earlier
+> run has returned.
 
 The `bash` tool runs an unrestricted `/bin/bash` and executes file operations and shell commands
 directly on the host. Run the worker inside a container or other isolation boundary you control.

@@ -31,7 +31,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -45,12 +45,21 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
             },
-            container="container",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "pdf",
+                        "type": "anthropic",
+                        "version": "latest",
+                    }
+                ],
+            },
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -83,7 +92,6 @@ class TestMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -116,8 +124,6 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(Message, message, path=["response"])
@@ -132,7 +138,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         )
 
         assert response.is_closed is True
@@ -150,7 +156,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -170,7 +176,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             stream=True,
         )
         message_stream.response.close()
@@ -185,13 +191,22 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             stream=True,
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
             },
-            container="container",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "pdf",
+                        "type": "anthropic",
+                        "version": "latest",
+                    }
+                ],
+            },
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -223,7 +238,6 @@ class TestMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -256,8 +270,6 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="anthropic-user-profile-id",
         )
         message_stream.response.close()
@@ -272,7 +284,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             stream=True,
         )
 
@@ -290,7 +302,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -320,7 +332,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -333,7 +345,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -410,7 +422,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         )
 
         assert response.is_closed is True
@@ -427,7 +439,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -453,7 +465,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -467,12 +479,21 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
             },
-            container="container",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "pdf",
+                        "type": "anthropic",
+                        "version": "latest",
+                    }
+                ],
+            },
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -505,7 +526,6 @@ class TestAsyncMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -538,8 +558,6 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="anthropic-user-profile-id",
         )
         assert_matches_type(Message, message, path=["response"])
@@ -554,12 +572,12 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        message = response.parse()
+        message = await response.parse()
         assert_matches_type(Message, message, path=["response"])
 
     @parametrize
@@ -572,7 +590,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -592,7 +610,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             stream=True,
         )
         await message_stream.response.aclose()
@@ -607,13 +625,22 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             stream=True,
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
             },
-            container="container",
+            container={
+                "id": "id",
+                "skills": [
+                    {
+                        "skill_id": "pdf",
+                        "type": "anthropic",
+                        "version": "latest",
+                    }
+                ],
+            },
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -645,7 +672,6 @@ class TestAsyncMessages:
                     ],
                 }
             ],
-            temperature=1,
             thinking={
                 "type": "adaptive",
                 "display": "summarized",
@@ -678,8 +704,6 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
-            top_k=5,
-            top_p=0.7,
             user_profile_id="anthropic-user-profile-id",
         )
         await message_stream.response.aclose()
@@ -694,12 +718,12 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             stream=True,
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        stream = response.parse()
+        stream = await response.parse()
         await stream.close()
 
     @parametrize
@@ -712,7 +736,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -742,7 +766,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -755,7 +779,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -832,12 +856,12 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        message = response.parse()
+        message = await response.parse()
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
     @parametrize
@@ -849,7 +873,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-4-6",
+            model="claude-opus-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

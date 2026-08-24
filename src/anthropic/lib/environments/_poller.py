@@ -5,6 +5,7 @@ import socket
 import logging
 from uuid import uuid4
 from collections.abc import Iterator, AsyncIterator
+from typing_extensions import TypeGuard
 
 import anyio
 
@@ -23,6 +24,7 @@ __all__ = [
 # API caps block_ms at 999; rely on client-side jitter between empty polls.
 POLL_BLOCK_MS = 999
 _POLL_BACKOFF_CAP = 60.0
+_IDLE_REPORT_INTERVAL = 300.0
 
 log = logging.getLogger(__name__)
 
@@ -39,8 +41,36 @@ def _is_fatal_4xx(err: Exception) -> bool:
     return is_fatal_status_error(err)
 
 
-def _is_status(err: Exception, code: int) -> bool:
+def _is_status(err: Exception, code: int) -> TypeGuard[APIStatusError]:
     return isinstance(err, APIStatusError) and err.status_code == code
+
+
+class _IdleLog:
+    """Keeps an idle poll loop visible in the logs without an INFO line per poll.
+
+    The first empty poll after start-up or after a claim logs at INFO and later
+    ones at DEBUG, with an INFO reminder every ``_IDLE_REPORT_INTERVAL`` seconds
+    while the loop stays idle.
+    """
+
+    def __init__(self, environment_id: str) -> None:
+        self._environment_id = environment_id
+        self._idle_since: float | None = None
+        self._last_report = 0.0
+
+    def on_empty_poll(self) -> None:
+        now = time.monotonic()
+        if self._idle_since is None:
+            self._idle_since = self._last_report = now
+            log.info("idle; polling environment_id=%s for work", self._environment_id)
+        elif now - self._last_report >= _IDLE_REPORT_INTERVAL:
+            self._last_report = now
+            log.info("still polling environment_id=%s; idle for %.0fs", self._environment_id, now - self._idle_since)
+        else:
+            log.debug("poll returned no work environment_id=%s", self._environment_id)
+
+    def on_claim(self) -> None:
+        self._idle_since = None
 
 
 def _default_worker_id() -> str:
@@ -68,6 +98,12 @@ def iter_work(
     poller itself does not handle credentials. Use
     ``client.beta.environments.work.poller(...)`` for the user-facing entry
     point that constructs a scoped sub-client for you.
+
+    A yielded item may carry a per-item ``secret`` payload (populated only by
+    the poll response); the poller passes it through untouched — consumers
+    such as :class:`~anthropic.lib.environments.EnvironmentWorker` extract the
+    sessions token it carries and prefer that over the environment key for the
+    item's downstream calls. Treat it as opaque and never log it.
 
     Two consumption shapes are supported:
 
@@ -111,6 +147,7 @@ def iter_work(
     # reset on its own success, and the ``continue`` paths leave them untouched.
     poll_attempt = 0
     ack_attempt = 0
+    idle = _IdleLog(environment_id)
     while True:
         try:
             item = work.poll(
@@ -134,8 +171,10 @@ def iter_work(
             if drain:
                 log.info("queue drained environment_id=%s", environment_id)
                 return
+            idle.on_empty_poll()
             time.sleep(_jitter(1.0, 3.0))
             continue
+        idle.on_claim()
         log.info("claimed work work_id=%s work_type=%s", item.id, getattr(item.data, "type", None))
         try:
             work.ack(
@@ -204,6 +243,7 @@ async def aiter_work(
     log.info("poller starting environment_id=%s drain=%s auto_stop=%s", environment_id, drain, auto_stop)
     poll_attempt = 0
     ack_attempt = 0
+    idle = _IdleLog(environment_id)
     while True:
         try:
             item = await work.poll(
@@ -227,8 +267,10 @@ async def aiter_work(
             if drain:
                 log.info("queue drained environment_id=%s", environment_id)
                 return
+            idle.on_empty_poll()
             await anyio.sleep(_jitter(1.0, 3.0))
             continue
+        idle.on_claim()
         log.info("claimed work work_id=%s work_type=%s", item.id, getattr(item.data, "type", None))
         try:
             await work.ack(

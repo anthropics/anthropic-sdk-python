@@ -12,7 +12,8 @@
   (``client.beta.environments.work.worker(...)``) — the full composition: poll →
   set up the workdir + download the session agent's skills → run a
   :class:`SessionToolRunner` while heartbeating the work-item lease → force-stop
-  on exit → loop. Build it with ``client.beta.environments.work.worker(...)`` or
+  on exit (unless the lease was lost to another holder) → loop. Build it with
+  ``client.beta.environments.work.worker(...)`` or
   construct it directly: ``EnvironmentWorker(client, ...)``; use
   :meth:`EnvironmentWorker.handle_item` for the per-item flow when you already
   hold a claimed work item.
@@ -27,7 +28,13 @@ from ._poller import (
     iter_work,
     aiter_work,
 )
-from ._worker import EnvironmentWorker, EnvironmentWorkerTools
+from ._worker import (
+    MEMORY_FLUSH_TIMEOUT,
+    MIN_MEMORY_SYNC_INTERVAL,
+    DEFAULT_MEMORY_SYNC_INTERVAL,
+    EnvironmentWorker,
+    EnvironmentWorkerTools,
+)
 from ..tools._skills import download_session_skills
 from ..tools._beta_session_runner import (
     DEFAULT_MAX_IDLE,
@@ -45,6 +52,9 @@ __all__ = [
     "POLL_BLOCK_MS",
     "EnvironmentWorker",
     "EnvironmentWorkerTools",
+    "DEFAULT_MEMORY_SYNC_INTERVAL",
+    "MIN_MEMORY_SYNC_INTERVAL",
+    "MEMORY_FLUSH_TIMEOUT",
     "SessionToolRunner",
     "DispatchedToolCall",
     "DispatchedToolUseEvent",

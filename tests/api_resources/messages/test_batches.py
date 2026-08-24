@@ -5,7 +5,7 @@ import os
 import json
 from typing import Any, cast
 
-import httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -37,7 +37,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -58,12 +58,21 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                         "cache_control": {
                             "type": "ephemeral",
                             "ttl": "5m",
                         },
-                        "container": "container",
+                        "container": {
+                            "id": "id",
+                            "skills": [
+                                {
+                                    "skill_id": "pdf",
+                                    "type": "anthropic",
+                                    "version": "latest",
+                                }
+                            ],
+                        },
                         "inference_geo": "inference_geo",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
                         "output_config": {
@@ -96,7 +105,6 @@ class TestBatches:
                                 ],
                             }
                         ],
-                        "temperature": 1,
                         "thinking": {
                             "type": "adaptive",
                             "display": "summarized",
@@ -129,8 +137,6 @@ class TestBatches:
                                 "type": "custom",
                             }
                         ],
-                        "top_k": 5,
-                        "top_p": 0.7,
                     },
                 }
             ],
@@ -152,7 +158,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -177,7 +183,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -342,10 +348,10 @@ class TestBatches:
     @pytest.mark.parametrize("client", [False], indirect=True)
     def test_method_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/messages/batches/message_batch_id").mock(
-            return_value=httpx.Response(200, json={"results_url": "/v1/messages/batches/message_batch_id/results"})
+            return_value=httpx2.Response(200, json={"results_url": "/v1/messages/batches/message_batch_id/results"})
         )
         respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200, content="\n".join([json.dumps({"foo": "bar"}), json.dumps({"bar": "baz"})])
             )
         )
@@ -388,7 +394,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -409,12 +415,21 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                         "cache_control": {
                             "type": "ephemeral",
                             "ttl": "5m",
                         },
-                        "container": "container",
+                        "container": {
+                            "id": "id",
+                            "skills": [
+                                {
+                                    "skill_id": "pdf",
+                                    "type": "anthropic",
+                                    "version": "latest",
+                                }
+                            ],
+                        },
                         "inference_geo": "inference_geo",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
                         "output_config": {
@@ -447,7 +462,6 @@ class TestAsyncBatches:
                                 ],
                             }
                         ],
-                        "temperature": 1,
                         "thinking": {
                             "type": "adaptive",
                             "display": "summarized",
@@ -480,8 +494,6 @@ class TestAsyncBatches:
                                 "type": "custom",
                             }
                         ],
-                        "top_k": 5,
-                        "top_p": 0.7,
                     },
                 }
             ],
@@ -503,7 +515,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -511,7 +523,7 @@ class TestAsyncBatches:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        batch = response.parse()
+        batch = await response.parse()
         assert_matches_type(MessageBatch, batch, path=["response"])
 
     @parametrize
@@ -528,7 +540,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-4-6",
+                        "model": "claude-opus-5",
                     },
                 }
             ],
@@ -556,7 +568,7 @@ class TestAsyncBatches:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        batch = response.parse()
+        batch = await response.parse()
         assert_matches_type(MessageBatch, batch, path=["response"])
 
     @parametrize
@@ -599,7 +611,7 @@ class TestAsyncBatches:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        batch = response.parse()
+        batch = await response.parse()
         assert_matches_type(AsyncPage[MessageBatch], batch, path=["response"])
 
     @parametrize
@@ -628,7 +640,7 @@ class TestAsyncBatches:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        batch = response.parse()
+        batch = await response.parse()
         assert_matches_type(DeletedMessageBatch, batch, path=["response"])
 
     @parametrize
@@ -666,7 +678,7 @@ class TestAsyncBatches:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        batch = response.parse()
+        batch = await response.parse()
         assert_matches_type(MessageBatch, batch, path=["response"])
 
     @parametrize
@@ -693,10 +705,10 @@ class TestAsyncBatches:
     @pytest.mark.parametrize("async_client", [False], indirect=True)
     async def test_method_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
         respx_mock.get("/v1/messages/batches/message_batch_id").mock(
-            return_value=httpx.Response(200, json={"results_url": "/v1/messages/batches/message_batch_id/results"})
+            return_value=httpx2.Response(200, json={"results_url": "/v1/messages/batches/message_batch_id/results"})
         )
         respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200, content="\n".join([json.dumps({"foo": "bar"}), json.dumps({"bar": "baz"})])
             )
         )

@@ -4,7 +4,7 @@ import logging
 from typing import Any, Dict, List, Union, cast
 from typing_extensions import Literal
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 from inline_snapshot import external, snapshot
@@ -13,7 +13,6 @@ from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import BetaFunctionToolResultType
-from anthropic.lib.tools._tool_dispatch import available_tool_names
 from anthropic.types.beta.beta_message_param import BetaMessageParam
 from anthropic.types.beta.beta_content_block_param import BetaContentBlockParam
 from anthropic.types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
@@ -473,112 +472,6 @@ class TestSyncRunTools:
                 "message_stop",
                 "text",
             }
-        )
-
-    @pytest.mark.parametrize(
-        "http_snapshot",
-        [
-            cast(Any, external("uuid:956fa2fe-8752-4f7c-8f9a-33735e62b898.json")),
-        ],
-    )
-    def test_compaction_control(self, snapshot_client: Anthropic, caplog: pytest.LogCaptureFixture) -> None:
-        @beta_tool
-        def submit_analysis(summary: str) -> str:  # noqa: ARG001
-            """Call this LAST with your final analysis."""
-            return "Analysis submitted"
-
-        with pytest.warns(DeprecationWarning, match="compaction_control.*deprecated"):
-            runner = snapshot_client.beta.messages.tool_runner(
-                model="claude-sonnet-4-5",
-                max_tokens=4000,
-                tools=[submit_analysis],
-                messages=[
-                    {
-                        "role": "user",
-                        "content": (
-                            "Write a detailed 500 word essay about dogs, cats, and birds. "
-                            "Call the tool submit_analysis with the information about all three animals. "
-                            "Note that you should call it only once at the end of your essay."
-                        ),
-                    }
-                ],
-                betas=["structured-outputs-2025-12-15"],
-                compaction_control={"enabled": True, "context_token_threshold": 500},
-                max_iterations=1,
-            )
-
-        with caplog.at_level(logging.INFO, logger="anthropic.lib.tools._beta_runner"):
-            next(runner)
-            runner.until_done()
-
-        messages = list(runner._params["messages"])
-        assert len(messages) == 1
-        assert messages[0]["role"] == "user"
-
-        content = list(messages[0]["content"])[0]
-        assert isinstance(content, dict)
-        assert content["type"] == "text"
-        assert content["text"] == snapshot("""\
-<summary>
-## Task Overview
-The user requests a detailed 500-word essay about dogs, cats, and birds, followed by a single call to the `submit_analysis` tool at the end containing information about all three animals. \n\
-
-**Key Requirements:**
-- Essay must be 500 words in length
-- Cover dogs, cats, and birds
-- Call `submit_analysis` tool only once at the completion
-- The tool call should contain information about all three animals
-
-## Current State
-**Status:** Not started - no work has been completed yet.
-
-**Completed:**
-- None
-
-**Artifacts Produced:**
-- None
-
-## Important Discoveries
-**Unknown Information:**
-- The exact structure/parameters expected by the `submit_analysis` tool (need to determine what format the tool accepts)
-- Whether the tool requires specific data fields for each animal or free-form text
-- The level of detail expected in the analysis (scientific, casual, comparative, etc.)
-
-**Assumptions to Verify:**
-- The essay should likely compare/contrast the three animals as pets or discuss their characteristics
-- The `submit_analysis` tool probably accepts structured data about the animals
-
-## Next Steps
-1. **Write the 500-word essay** covering:
-   - Dogs (characteristics, behavior, role as pets)
-   - Cats (characteristics, behavior, role as pets)
-   - Birds (characteristics, behavior, role as pets)
-   - Potentially comparative elements between the three
-
-2. **Determine the `submit_analysis` tool structure** - check what parameters it accepts
-
-3. **Call `submit_analysis` once** with comprehensive information about all three animals in the appropriate format
-
-4. **Verify word count** is approximately 500 words before submitting
-
-## Context to Preserve
-- User emphasized calling the tool "only once at the end" - this is a specific constraint to respect
-- The tool should contain information about "all three animals" - comprehensive coverage required
-- Essay should be "detailed" - suggests substantive content rather than superficial treatment
-
-## Priority
-High priority on understanding the `submit_analysis` tool parameters before writing the essay, as the content may need to be structured to align with tool requirements.
-</summary>\
-""")
-        assert caplog.record_tuples == snapshot(
-            [
-                (
-                    "anthropic.lib.tools._beta_runner",
-                    20,
-                    "Token usage 1612 has exceeded the threshold of 500. Performing compaction.",
-                ),
-                ("anthropic.lib.tools._beta_runner", 20, "Compaction complete. New token usage: 486"),
-            ]
         )
 
     @pytest.mark.parametrize("snapshot_client", [False], indirect=True)
@@ -1236,44 +1129,6 @@ def test_tool_addition_via_append_messages_re_enables_removed_tool_sync(respx_mo
             ],
         }
     ]
-
-
-def test_tool_removal_nested_in_mid_conv_system_block() -> None:
-    # `mid_conv_system` content is schema-limited to text/tool_addition/tool_removal, so the
-    # one-level walk still applies a nested `tool_removal` (and ignores text).
-    messages: List[BetaMessageParam] = [
-        {
-            "role": "system",
-            "content": [
-                {
-                    "type": "mid_conv_system",
-                    "content": [
-                        {"type": "text", "text": "get_weather is no longer available."},
-                        {"type": "tool_removal", "tool": {"type": "tool_reference", "name": "get_weather"}},
-                    ],
-                }
-            ],
-        }
-    ]
-    assert available_tool_names(messages, ["get_weather", "get_time"]) == {"get_time"}
-
-
-def test_tool_addition_nested_in_mid_conv_system_block() -> None:
-    messages: List[BetaMessageParam] = [
-        {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]},
-        {
-            "role": "system",
-            "content": [
-                {
-                    "type": "mid_conv_system",
-                    "content": [
-                        {"type": "tool_addition", "tool": {"type": "tool_reference", "name": "get_weather"}},
-                    ],
-                }
-            ],
-        },
-    ]
-    assert available_tool_names(messages, ["get_weather"]) == {"get_weather"}
 
 
 def _get_weather(location: str, units: Literal["c", "f"]) -> Dict[str, Any]:

@@ -36,6 +36,9 @@ class MemoryVersionListParams(TypedDict, total=False):
     page: str
     """Query parameter for page"""
 
+    service_account_id: str
+    """Query parameter for service_account_id"""
+
     session_id: str
     """Query parameter for session_id"""
 

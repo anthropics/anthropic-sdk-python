@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
+import time
 import base64
 from typing import Any, cast
 from pathlib import Path
@@ -23,6 +25,7 @@ from anthropic.lib.tools.agent_toolset import (
     beta_grep_tool,
     beta_read_tool,
     beta_write_tool,
+    _reject_read_only,
     beta_agent_toolset_20260401,
 )
 from anthropic.types.beta.beta_base64_pdf_source_param import BetaBase64PDFSourceParam
@@ -32,22 +35,27 @@ needs_pydantic_v2 = pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are o
 
 
 @pytest.mark.parametrize(
-    ("description", "p", "unrestricted", "expect_error"),
+    ("description", "p", "expect_error"),
     [
-        ("relative path inside workdir resolves", "a/b.txt", False, False),
-        ("dot-dot that stays inside workdir resolves", "a/../b.txt", False, False),
-        ("dot-dot that escapes workdir is rejected", "../etc/passwd", False, True),
-        ("absolute path outside workdir is rejected by default", "/etc/passwd", False, True),
-        ("absolute path outside workdir is allowed when unrestricted_paths is set", "/etc/passwd", True, False),
+        ("relative path inside workdir resolves", "a/b.txt", False),
+        ("dot-dot that stays inside workdir resolves", "a/../b.txt", False),
+        ("dot-dot that escapes workdir is rejected", "../etc/passwd", True),
+        ("absolute path outside workdir is rejected", "/etc/passwd", True),
     ],
 )
-def test_resolve_path(tmp_path: Path, description: str, p: str, unrestricted: bool, expect_error: bool) -> None:
-    env = AgentToolContext(workdir=str(tmp_path), unrestricted_paths=unrestricted)
+def test_resolve_path(tmp_path: Path, description: str, p: str, expect_error: bool) -> None:
+    env = AgentToolContext(workdir=str(tmp_path))
     if expect_error:
         with pytest.raises(ValueError):
             resolve_path(env, p)
     else:
         assert resolve_path(env, p), description
+
+
+@pytest.mark.parametrize("value", [True, False])
+def test_unrestricted_paths_is_rejected_with_guidance(tmp_path: Path, value: bool) -> None:
+    with pytest.raises(TypeError, match="unrestricted_paths is no longer supported.*allowed_roots"):
+        AgentToolContext(workdir=str(tmp_path), unrestricted_paths=value)
 
 
 def test_resolve_path_absolute_inside_workdir(tmp_path: Path) -> None:
@@ -63,12 +71,104 @@ def test_resolve_path_absolute_inside_workdir(tmp_path: Path) -> None:
     sub.mkdir()
     assert resolve_path(env, str(sub / "b.txt")) == sub / "b.txt"
     # Still rejected: absolute outside, and absolute-that-symlinks-outside.
-    with pytest.raises(ValueError, match="escapes workdir"):
+    with pytest.raises(ValueError, match="outside the session's working directory"):
         resolve_path(env, "/etc/passwd")
     if sys.platform != "win32":
         (tmp_path / "out").symlink_to("/etc/passwd")
-        with pytest.raises(ValueError, match="escapes workdir"):
+        with pytest.raises(ValueError, match="outside the session's working directory"):
             resolve_path(env, str(tmp_path / "out"))
+
+
+needs_symlinks = pytest.mark.skipif(sys.platform == "win32", reason="symlink fixtures need a POSIX filesystem")
+
+
+def _symlink_fixture(tmp_path: Path) -> Path:
+    """Workdir with two symlink cycles, a link that escapes, and a link whose
+    target spells its way through a cycle to the escaping link."""
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "secret.txt").write_text("SECRET")
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "loop_a").symlink_to("loop_b")
+    (work / "loop_b").symlink_to("loop_a")
+    (work / "self").symlink_to("self")
+    (work / "evil_link").symlink_to(outside / "secret.txt")
+    (work / "L").symlink_to("loop_a/../evil_link")
+    return work
+
+
+_LOOP_INPUTS = ["loop_a", "loop_a/child.txt", "self", "self/x"]
+
+
+@needs_symlinks
+@pytest.mark.parametrize("p", _LOOP_INPUTS)
+def test_resolve_path_rejects_symlink_loop(tmp_path: Path, p: str) -> None:
+    work = _symlink_fixture(tmp_path)
+    env = AgentToolContext(workdir=str(work))
+    started = time.monotonic()
+    with pytest.raises(
+        ValueError, match=rf"^path {re.escape(repr(p))}: too many levels of symbolic links$"
+    ) as exc_info:
+        resolve_path(env, p)
+    assert time.monotonic() - started < 2
+    assert str(tmp_path) not in str(exc_info.value)
+
+
+@needs_symlinks
+def test_resolve_path_dotdot_is_lexical_before_symlinks(tmp_path: Path) -> None:
+    """``a/../b`` never touches ``a``, so a cycle at ``a`` cannot carry ``b``
+    past the containment check on any interpreter."""
+    work = _symlink_fixture(tmp_path)
+    env = AgentToolContext(workdir=str(work))
+    for p in ("loop_a/../evil_link", "self/../evil_link"):
+        with pytest.raises(ValueError, match="outside the session's working directory"):
+            resolve_path(env, p)
+    with pytest.raises(ValueError, match="too many levels of symbolic links|outside the session's working directory"):
+        resolve_path(env, "L")
+    (work / "ok.txt").write_text("ok")
+    assert resolve_path(env, "loop_a/../ok.txt") == work / "ok.txt"
+
+
+@needs_symlinks
+def test_resolve_path_rejects_symlink_escape_live_and_dangling(tmp_path: Path) -> None:
+    work = _symlink_fixture(tmp_path)
+    (work / "dangle_out").symlink_to(tmp_path / "outside" / "nope")
+    env = AgentToolContext(workdir=str(work))
+    for p in ("evil_link", "dangle_out"):
+        with pytest.raises(ValueError, match="outside the session's working directory"):
+            resolve_path(env, p)
+
+
+def test_resolve_path_allowed_roots(tmp_path: Path) -> None:
+    """A path inside an allowed root resolves; one outside the workdir and
+    every allowed root is refused, and the refusal names no internal options."""
+    work = tmp_path / "work"
+    work.mkdir()
+    mount = tmp_path / "mount"
+    mount.mkdir()
+    env = AgentToolContext(workdir=str(work), allowed_roots=[mount])
+    assert resolve_path(env, str(mount / "note.md")) == mount / "note.md"
+    assert resolve_path(env, "inside.txt") == work / "inside.txt"
+    with pytest.raises(ValueError, match="outside the session's working directory and its other permitted directories"):
+        resolve_path(env, str(tmp_path / "elsewhere" / "x"))
+    with pytest.raises(ValueError, match="outside the session's working directory and its other permitted directories"):
+        resolve_path(env, "../elsewhere/x")
+
+
+def test_resolve_path_symlink_out_of_allowed_root_is_rejected(tmp_path: Path) -> None:
+    """Symlinks are canonicalised before the containment check, so a link
+    inside an allowed root cannot reach outside it."""
+    if sys.platform == "win32":
+        pytest.skip("symlinks need privileges on windows")
+    work = tmp_path / "work"
+    work.mkdir()
+    mount = tmp_path / "mount"
+    mount.mkdir()
+    (mount / "leak").symlink_to("/etc/passwd")
+    env = AgentToolContext(workdir=str(work), allowed_roots=[mount])
+    with pytest.raises(ValueError, match="outside the session's working directory and its other permitted directories"):
+        resolve_path(env, str(mount / "leak"))
 
 
 def test_resolve_path_segment_aware_sibling(tmp_path: Path) -> None:
@@ -118,6 +218,32 @@ async def test_read_view_range(tmp_path: Path) -> None:
     env = AgentToolContext(workdir=str(tmp_path))
     out = await beta_read_tool(env).call({"file_path": "f.txt", "view_range": [2, 3]})
     assert out == "b\nc"
+
+
+@needs_pydantic_v2
+@pytest.mark.parametrize(
+    ("view_range", "want"),
+    [
+        ([2, 2], "line2"),
+        ([2, 0], "line2\nline3"),
+        ([10, 12], ""),
+        ([3, 1], ""),
+        ([], "line1\nline2\nline3"),
+    ],
+)
+async def test_read_view_range_edges(tmp_path: Path, view_range: list[int], want: str) -> None:
+    (tmp_path / "a.txt").write_text("line1\nline2\nline3")
+    env = AgentToolContext(workdir=str(tmp_path))
+    assert await beta_read_tool(env).call({"file_path": "a.txt", "view_range": view_range}) == want
+
+
+@needs_pydantic_v2
+async def test_read_view_range_wrong_arity_is_rejected(tmp_path: Path) -> None:
+    (tmp_path / "a.txt").write_text("line1\nline2\nline3")
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError) as exc_info:
+        await beta_read_tool(env).call({"file_path": "a.txt", "view_range": [2]})
+    assert str(exc_info.value) == "read: view_range must be [start_line, end_line]"
 
 
 @needs_pydantic_v2
@@ -553,8 +679,82 @@ async def test_read_through_symlink_escape_is_rejected(tmp_path: Path) -> None:
     work.mkdir()
     (work / "escape").symlink_to(outside)
     env = AgentToolContext(workdir=str(work))
-    with pytest.raises(ToolError, match="escapes workdir"):
+    with pytest.raises(ToolError, match="outside the session's working directory"):
         await beta_read_tool(env).call({"file_path": "escape/secret.txt"})
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_read_symlink_loop_is_rejected(tmp_path: Path) -> None:
+    work = _symlink_fixture(tmp_path)
+    env = AgentToolContext(workdir=str(work))
+    with pytest.raises(ToolError) as exc_info:
+        await beta_read_tool(env).call({"file_path": "loop_a"})
+    assert str(exc_info.value) == "read: path 'loop_a': too many levels of symbolic links"
+    for p in ("loop_a/../evil_link", "L"):
+        with pytest.raises(ToolError) as exc_info:
+            await beta_read_tool(env).call({"file_path": p})
+        assert "SECRET" not in str(exc_info.value)
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_write_under_symlink_loop_creates_nothing(tmp_path: Path) -> None:
+    work = _symlink_fixture(tmp_path)
+    before = sorted(os.listdir(work))
+    env = AgentToolContext(workdir=str(work))
+    with pytest.raises(ToolError, match="too many levels of symbolic links"):
+        await beta_write_tool(env).call({"file_path": "loop_a/child.txt", "content": "x"})
+    assert sorted(os.listdir(work)) == before
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_write_through_dangling_symlink_inside_workdir(tmp_path: Path) -> None:
+    """A dangling link whose target is inside the workdir is followed: the
+    target and its missing parent directory are created."""
+    env = AgentToolContext(workdir=str(tmp_path))
+    (tmp_path / "d").symlink_to(tmp_path / "newdir" / "f.txt")
+    await beta_write_tool(env).call({"file_path": "d", "content": "via link"})
+    assert (tmp_path / "newdir" / "f.txt").read_text() == "via link"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_read_follows_symlink_chain_inside_workdir(tmp_path: Path) -> None:
+    (tmp_path / "real.txt").write_text("payload")
+    (tmp_path / "c2").symlink_to("real.txt")
+    (tmp_path / "c1").symlink_to("c2")
+    (tmp_path / "c0").symlink_to("c1")
+    env = AgentToolContext(workdir=str(tmp_path))
+    assert await beta_read_tool(env).call({"file_path": "c0"}) == "payload"
+
+
+@needs_pydantic_v2
+async def test_write_creates_deeply_nested_missing_directories(tmp_path: Path) -> None:
+    """Missing path components are not symlink hops, so any depth is allowed."""
+    env = AgentToolContext(workdir=str(tmp_path))
+    rel = "/".join(f"d{i}" for i in range(50)) + "/f.txt"
+    await beta_write_tool(env).call({"file_path": rel, "content": "deep"})
+    assert (tmp_path / rel).read_text() == "deep"
+
+
+@needs_pydantic_v2
+async def test_read_under_unreadable_directory_reports_permission_denied(tmp_path: Path) -> None:
+    if os.name != "posix":
+        pytest.skip("chmod semantics only apply on POSIX")
+    if os.geteuid() == 0:
+        pytest.skip("root bypasses POSIX mode bits")
+    noperm = tmp_path / "noperm"
+    noperm.mkdir()
+    noperm.chmod(0)
+    env = AgentToolContext(workdir=str(tmp_path))
+    try:
+        with pytest.raises(ToolError) as exc_info:
+            await beta_read_tool(env).call({"file_path": "noperm/x"})
+    finally:
+        noperm.chmod(0o700)
+    assert str(exc_info.value) == "read: path 'noperm/x': permission denied"
 
 
 @needs_pydantic_v2
@@ -586,6 +786,17 @@ async def test_glob_post_filters_symlink_escape(tmp_path: Path) -> None:
 
 
 @needs_pydantic_v2
+@needs_symlinks
+async def test_glob_drops_matches_that_cannot_be_canonicalised(tmp_path: Path) -> None:
+    work = _symlink_fixture(tmp_path)
+    (work / "ok.txt").write_text("ok")
+    env = AgentToolContext(workdir=str(work))
+    res = await beta_glob_tool(env).call({"pattern": "*"})
+    assert isinstance(res, str)
+    assert [Path(line).name for line in res.splitlines()] == ["ok.txt"]
+
+
+@needs_pydantic_v2
 async def test_grep_skips_symlinked_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The fallback walker must not read through a symlink that escapes the workdir."""
     secret = tmp_path / "secret.txt"
@@ -598,3 +809,82 @@ async def test_grep_skips_symlinked_files(tmp_path: Path, monkeypatch: pytest.Mo
     monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
     res = await beta_grep_tool(env).call({"pattern": "TOPSECRET"})
     assert res == "no matches"
+
+
+@needs_pydantic_v2
+async def test_file_tools_confinement_matrix(tmp_path: Path) -> None:
+    """The full path policy through the real tools: the workdir works, a memory
+    folder mounted outside it works, a read-only memory folder reads but
+    refuses writes, and everywhere else is refused."""
+    work = tmp_path / "work"
+    work.mkdir()
+    mount = tmp_path / "mnt" / "notes"
+    mount.mkdir(parents=True)
+    ro = tmp_path / "mnt" / "facts"
+    ro.mkdir(parents=True)
+    (ro / "facts.md").write_text("immutable")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "secret.txt").write_text("secret")
+
+    env = AgentToolContext(workdir=str(work), allowed_roots=[mount, ro], read_only_roots=[ro.resolve()])
+    read = beta_read_tool(env)
+    write = beta_write_tool(env)
+    edit = beta_edit_tool(env)
+
+    await write.call({"file_path": "w.txt", "content": "in workdir"})
+    assert (work / "w.txt").read_text() == "in workdir"
+
+    await write.call({"file_path": str(mount / "note.md"), "content": "remembered"})
+    assert await read.call({"file_path": str(mount / "note.md")}) == "remembered"
+    await edit.call({"file_path": str(mount / "note.md"), "old_string": "remembered", "new_string": "edited"})
+    assert (mount / "note.md").read_text() == "edited"
+
+    assert await read.call({"file_path": str(ro / "facts.md")}) == "immutable"
+    with pytest.raises(ToolError, match="read-only"):
+        await write.call({"file_path": str(ro / "facts.md"), "content": "x"})
+    assert (ro / "facts.md").read_text() == "immutable"
+
+    with pytest.raises(ToolError, match="outside the session's working directory and its other permitted directories"):
+        await read.call({"file_path": str(outside / "secret.txt")})
+    with pytest.raises(ToolError, match="outside the session's working directory and its other permitted directories"):
+        await write.call({"file_path": str(outside / "new.txt"), "content": "x"})
+    assert not (outside / "new.txt").exists()
+
+
+@needs_pydantic_v2
+async def test_glob_and_grep_reach_an_allowed_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    work = tmp_path / "work"
+    work.mkdir()
+    mount = tmp_path / "mnt" / "notes"
+    mount.mkdir(parents=True)
+    (mount / "note.md").write_text("remembered fact")
+    env = AgentToolContext(workdir=str(work), allowed_roots=[mount])
+
+    res = await beta_glob_tool(env).call({"pattern": "*.md", "path": str(mount)})
+    assert res == str(mount / "note.md")
+
+    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    res = await beta_grep_tool(env).call({"pattern": "remembered", "path": str(mount)})
+    assert isinstance(res, str)
+    assert "note.md" in res
+
+
+def test_a_symlinked_read_only_root_still_refuses_writes(tmp_path: Path) -> None:
+    """allowed_roots entries resolve at check time, so read_only_roots must
+    too — the same symlinked path must not grant access on one side while
+    its write protection misses on the other."""
+    if sys.platform == "win32":
+        pytest.skip("symlinks need privileges on windows")
+    work = tmp_path / "work"
+    work.mkdir()
+    real = tmp_path / "real-store"
+    real.mkdir()
+    link = tmp_path / "link-store"
+    link.symlink_to(real)
+    env = AgentToolContext(workdir=str(work), allowed_roots=[link], read_only_roots=[link])
+
+    target = resolve_path(env, str(link / "note.md"))
+    assert target == real / "note.md"
+    with pytest.raises(ToolError, match="read-only"):
+        _reject_read_only(env, target, op="write", file_path=str(link / "note.md"))

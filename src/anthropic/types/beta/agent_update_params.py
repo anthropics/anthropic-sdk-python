@@ -45,7 +45,7 @@ class AgentUpdateParams(TypedDict, total=False):
 
     Accepts the
     [model string](https://platform.claude.com/docs/en/about-claude/models/overview#latest-models-comparison),
-    e.g. `claude-opus-4-6`, or a `model_config` object for additional configuration
+    e.g. `claude-opus-5`, or a `model_config` object for additional configuration
     control. Omit to preserve. Cannot be cleared.
     """
 

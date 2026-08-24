@@ -4,12 +4,12 @@ import os
 from typing import Any, Union, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
-import httpx
+import httpx2 as httpx
 
 from ... import _exceptions
 from ..._qs import Querystring
-from ..._types import NOT_GIVEN, Omit, Timeout, NotGiven
-from ..._utils import is_given
+from ..._types import Omit, Timeout, NotGiven, not_given
+from ..._utils import asyncify, is_given
 from ..._compat import cached_property
 from ..._version import __version__
 from ..aws._auth import get_auth_headers
@@ -185,7 +185,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         api_key: str | None = None,
         skip_auth: bool = False,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -256,7 +256,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         }
 
     @override
-    def _validate_headers(self, headers: Any, custom_headers: Any) -> None:
+    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
         pass
 
     @override
@@ -291,14 +291,14 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         aws_profile: str | None = None,
         skip_auth: bool | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
-        max_retries: int | NotGiven = NOT_GIVEN,
+        max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
@@ -381,7 +381,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         api_key: str | None = None,
         skip_auth: bool = False,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -452,7 +452,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         }
 
     @override
-    def _validate_headers(self, headers: Any, custom_headers: Any) -> None:
+    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
         pass
 
     @override
@@ -462,7 +462,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
 
         data = request.read().decode()
 
-        headers = get_auth_headers(
+        headers = await asyncify(get_auth_headers)(
             method=request.method,
             url=str(request.url),
             headers=request.headers,
@@ -487,14 +487,14 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         aws_profile: str | None = None,
         skip_auth: bool | None = None,
         base_url: str | httpx.URL | None = None,
-        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
+        timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
-        max_retries: int | NotGiven = NOT_GIVEN,
+        max_retries: int | NotGiven = not_given,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
         set_default_query: Mapping[str, object] | None = None,
-        middleware: Sequence[MiddlewareInput] | None | NotGiven = NOT_GIVEN,
+        middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """

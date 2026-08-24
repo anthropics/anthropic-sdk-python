@@ -10,7 +10,6 @@ from anthropic.types.beta.parsed_beta_message import ParsedBetaMessage
 
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 class TestAsyncMessages:
     @pytest.mark.parametrize(
         "http_snapshot",
@@ -28,11 +27,13 @@ class TestAsyncMessages:
                         "content": "Extract order IDs from the following text:\n\nOrder 12345\nOrder 67890",
                     }
                 ],
-                output_format={
-                    "type": "json_schema",
-                    "schema": {
-                        "type": "array",
-                        "items": {"type": "integer"},
+                output_config={
+                    "format": {
+                        "type": "json_schema",
+                        "schema": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                        },
                     },
                 },
                 betas=["structured-outputs-2025-12-15"],

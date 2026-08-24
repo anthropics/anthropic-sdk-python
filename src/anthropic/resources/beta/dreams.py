@@ -6,14 +6,18 @@ from typing import List, Union, Iterable, Optional
 from datetime import datetime
 from itertools import chain
 
-import httpx
+import httpx2
 
-from ... import _legacy_response
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ..._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ...pagination import SyncPageCursor, AsyncPageCursor
 from ...types.beta import dream_list_params, dream_create_params
 from ..._base_client import AsyncPaginator, make_request_options
@@ -21,6 +25,7 @@ from ...types.beta.beta_dream import BetaDream
 from ...types.anthropic_beta_param import AnthropicBetaParam
 from ...types.beta.beta_dream_status import BetaDreamStatus
 from ...types.beta.beta_dream_input_param import BetaDreamInputParam
+from ...types.beta.beta_output_behavior_param import BetaOutputBehaviorParam
 
 __all__ = ["Dreams", "AsyncDreams"]
 
@@ -51,19 +56,24 @@ class Dreams(SyncAPIResource):
         inputs: Iterable[BetaDreamInputParam],
         model: dream_create_params.Model,
         instructions: Optional[str] | Omit = omit,
+        output_behavior: BetaOutputBehaviorParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaDream:
         """
         Create a Dream
 
         Args:
           model: Model identifier and configuration applied to every pipeline stage.
+
+          output_behavior: The default destination: the job creates a new output memory store as a clone of
+              the memory_store input and writes the consolidated memories into it. The input
+              store is never mutated.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -93,6 +103,7 @@ class Dreams(SyncAPIResource):
                     "inputs": inputs,
                     "model": model,
                     "instructions": instructions,
+                    "output_behavior": output_behavior,
                 },
                 dream_create_params.DreamCreateParams,
             ),
@@ -112,7 +123,7 @@ class Dreams(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaDream:
         """
         Get a Dream
@@ -164,7 +175,7 @@ class Dreams(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaDream]:
         """
         List Dreams
@@ -239,7 +250,7 @@ class Dreams(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaDream:
         """
         Archive a Dream
@@ -286,7 +297,7 @@ class Dreams(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaDream:
         """
         Cancel a Dream
@@ -350,19 +361,24 @@ class AsyncDreams(AsyncAPIResource):
         inputs: Iterable[BetaDreamInputParam],
         model: dream_create_params.Model,
         instructions: Optional[str] | Omit = omit,
+        output_behavior: BetaOutputBehaviorParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaDream:
         """
         Create a Dream
 
         Args:
           model: Model identifier and configuration applied to every pipeline stage.
+
+          output_behavior: The default destination: the job creates a new output memory store as a clone of
+              the memory_store input and writes the consolidated memories into it. The input
+              store is never mutated.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -392,6 +408,7 @@ class AsyncDreams(AsyncAPIResource):
                     "inputs": inputs,
                     "model": model,
                     "instructions": instructions,
+                    "output_behavior": output_behavior,
                 },
                 dream_create_params.DreamCreateParams,
             ),
@@ -411,7 +428,7 @@ class AsyncDreams(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaDream:
         """
         Get a Dream
@@ -463,7 +480,7 @@ class AsyncDreams(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaDream, AsyncPageCursor[BetaDream]]:
         """
         List Dreams
@@ -538,7 +555,7 @@ class AsyncDreams(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaDream:
         """
         Archive a Dream
@@ -585,7 +602,7 @@ class AsyncDreams(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaDream:
         """
         Cancel a Dream
@@ -627,19 +644,19 @@ class DreamsWithRawResponse:
     def __init__(self, dreams: Dreams) -> None:
         self._dreams = dreams
 
-        self.create = _legacy_response.to_raw_response_wrapper(
+        self.create = to_raw_response_wrapper(
             dreams.create,
         )
-        self.retrieve = _legacy_response.to_raw_response_wrapper(
+        self.retrieve = to_raw_response_wrapper(
             dreams.retrieve,
         )
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             dreams.list,
         )
-        self.archive = _legacy_response.to_raw_response_wrapper(
+        self.archive = to_raw_response_wrapper(
             dreams.archive,
         )
-        self.cancel = _legacy_response.to_raw_response_wrapper(
+        self.cancel = to_raw_response_wrapper(
             dreams.cancel,
         )
 
@@ -648,19 +665,19 @@ class AsyncDreamsWithRawResponse:
     def __init__(self, dreams: AsyncDreams) -> None:
         self._dreams = dreams
 
-        self.create = _legacy_response.async_to_raw_response_wrapper(
+        self.create = async_to_raw_response_wrapper(
             dreams.create,
         )
-        self.retrieve = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve = async_to_raw_response_wrapper(
             dreams.retrieve,
         )
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             dreams.list,
         )
-        self.archive = _legacy_response.async_to_raw_response_wrapper(
+        self.archive = async_to_raw_response_wrapper(
             dreams.archive,
         )
-        self.cancel = _legacy_response.async_to_raw_response_wrapper(
+        self.cancel = async_to_raw_response_wrapper(
             dreams.cancel,
         )
 

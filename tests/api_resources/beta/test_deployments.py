@@ -585,7 +585,7 @@ class TestAsyncDeployments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        deployment = response.parse()
+        deployment = await response.parse()
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
@@ -640,7 +640,7 @@ class TestAsyncDeployments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        deployment = response.parse()
+        deployment = await response.parse()
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -724,7 +724,7 @@ class TestAsyncDeployments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        deployment = response.parse()
+        deployment = await response.parse()
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
@@ -775,7 +775,7 @@ class TestAsyncDeployments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        deployment = response.parse()
+        deployment = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsDeployment], deployment, path=["response"])
 
     @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
@@ -813,7 +813,7 @@ class TestAsyncDeployments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        deployment = response.parse()
+        deployment = await response.parse()
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
@@ -859,7 +859,7 @@ class TestAsyncDeployments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        deployment = response.parse()
+        deployment = await response.parse()
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize
@@ -905,7 +905,7 @@ class TestAsyncDeployments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        deployment = response.parse()
+        deployment = await response.parse()
         assert_matches_type(BetaManagedAgentsDeploymentRun, deployment, path=["response"])
 
     @parametrize
@@ -951,7 +951,7 @@ class TestAsyncDeployments:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        deployment = response.parse()
+        deployment = await response.parse()
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
     @parametrize

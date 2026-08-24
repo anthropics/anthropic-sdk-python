@@ -6,7 +6,7 @@ import os
 import logging
 from typing import TYPE_CHECKING, Any, Iterator, AsyncIterator
 
-import httpx
+import httpx2
 import pytest
 import inline_snapshot
 from http_snapshot import SnapshotSerializerOptions
@@ -114,7 +114,7 @@ async def async_client(request: FixtureRequest) -> AsyncIterator[AsyncAnthropic]
 
     # defaults
     strict = True
-    http_client: None | httpx.AsyncClient = None
+    http_client: None | httpx2.AsyncClient = None
 
     if isinstance(param, bool):
         strict = param

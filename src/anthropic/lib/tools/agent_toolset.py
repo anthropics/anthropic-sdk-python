@@ -26,9 +26,9 @@ it cannot consume this toolset.
    ``client.beta.sessions.events.tool_runner(...)`` / the environment worker,
    or drop ``bash`` from the toolset before using the Messages tool runner.
 
-Trust model: the file tools confine to ``workdir`` (symlink-aware) and are safe
-without a sandbox; ``bash`` is unrestricted and should run inside one. See
-:class:`AgentToolContext`.
+Trust model: the file tools confine to ``workdir`` plus any ``allowed_roots``
+(symlink-aware) and are safe without a sandbox; ``bash`` is unrestricted and
+should run inside one. See :class:`AgentToolContext`.
 """
 
 from __future__ import annotations
@@ -36,18 +36,19 @@ from __future__ import annotations
 import os
 import re
 import uuid
+import errno
 import base64
 import shutil
 import logging
 import subprocess
-from stat import S_ISREG
+from stat import S_ISLNK, S_ISREG
 from typing import TYPE_CHECKING, Any, List, Optional, NamedTuple, cast
 from pathlib import Path, PurePosixPath
 from functools import partial
 from itertools import islice
 from contextlib import asynccontextmanager
 from dataclasses import field, dataclass
-from collections.abc import Mapping, Callable, Awaitable, AsyncIterator
+from collections.abc import Mapping, Callable, Iterable, Iterator, Awaitable, AsyncIterator
 
 import anyio
 import anyio.abc
@@ -64,6 +65,7 @@ from ...types.beta import (
     BetaManagedAgentsAgentToolset20260401ReadInput,
     BetaManagedAgentsAgentToolset20260401WriteInput,
 )
+from ._deprecations import reject_unrestricted_paths
 from ._beta_functions import (
     ToolError,
     BetaContent,
@@ -74,6 +76,7 @@ from ._beta_functions import (
 
 if TYPE_CHECKING:
     from ..._client import AsyncAnthropic
+    from ...types.beta import BetaManagedAgentsSession
 
 __all__ = [
     "AgentToolContext",
@@ -92,7 +95,6 @@ __all__ = [
 BASH_OUTPUT_LIMIT = 100 * 1024
 BASH_DEFAULT_TIMEOUT = 120.0
 DEFAULT_MAX_FILE_BYTES = 256 * 1024
-READ_MAX_BYTES = DEFAULT_MAX_FILE_BYTES  # For backwards compat only.
 # Default image/PDF caps for the binary ``read`` path (overridable on
 # :class:`AgentToolContext`, same shape as ``max_file_bytes``). The API
 # enforces a per-image limit on the *encoded* (base64) form and a total
@@ -156,25 +158,30 @@ def _default_bash_env() -> dict[str, str]:
     return {k: v for k, v in os.environ.items() if not k.startswith("ANTHROPIC_")}
 
 
-def _fs_error(op: str, file_path: str, e: OSError) -> ToolError:
-    """Map a filesystem ``OSError`` to a consistent, runtime-independent message.
+def _fs_reason(e: OSError) -> str:
+    """Map a filesystem ``OSError`` to a consistent, runtime-independent phrase.
 
-    The raw ``OSError`` string is platform-specific (``[Errno 2] ENOENT: ...``);
-    normalise the common cases so the model sees the same wording everywhere.
+    The raw ``OSError`` string is platform-specific (``[Errno 2] ENOENT: ...``)
+    and can embed a host path; normalise the common cases so the model sees the
+    same wording everywhere and never the runner's absolute paths.
     """
     if isinstance(e, FileNotFoundError):
-        reason = "no such file or directory"
-    elif isinstance(e, NotADirectoryError):
-        reason = "not a directory"
-    elif isinstance(e, IsADirectoryError):
-        reason = "is a directory"
-    elif isinstance(e, PermissionError):
-        reason = "permission denied"
-    elif isinstance(e, FileExistsError):
-        reason = "file already exists"
-    else:
-        reason = (e.strerror or "i/o error").lower()
-    return ToolError(f"{op}: {file_path}: {reason}")
+        return "no such file or directory"
+    if isinstance(e, NotADirectoryError):
+        return "not a directory"
+    if isinstance(e, IsADirectoryError):
+        return "is a directory"
+    if isinstance(e, PermissionError):
+        return "permission denied"
+    if isinstance(e, FileExistsError):
+        return "file already exists"
+    if e.errno == errno.ELOOP:
+        return "too many levels of symbolic links"
+    return (e.strerror or "i/o error").lower()
+
+
+def _fs_error(op: str, file_path: str, e: OSError) -> ToolError:
+    return ToolError(f"{op}: {file_path}: {_fs_reason(e)}")
 
 
 def _empty_skill_dirs() -> list[Path]:
@@ -189,15 +196,15 @@ class AgentToolContext:
 
     - The file tools (:func:`beta_read_tool`, :func:`beta_write_tool`,
       :func:`beta_edit_tool`, :func:`beta_glob_tool`, :func:`beta_grep_tool`)
-      resolve paths against ``workdir`` and reject escapes unless
-      ``unrestricted_paths`` is set. :func:`resolve_path` follows every symlink
+      resolve paths against ``workdir`` and reject anything outside ``workdir``
+      and ``allowed_roots``. :func:`resolve_path` follows every symlink
       (including the leaf, even a dangling one) before the check and returns
       that canonical path for the operation, so a symlink inside the workdir
       that points outside it can neither pass the check nor be followed
       afterwards — a real boundary, consistent with the memory tool, so the
       file tools are safe to use without a sandbox.
     - :func:`beta_bash_tool` runs an unrestricted ``/bin/bash`` regardless of
-      ``unrestricted_paths``. Confinement for it must come from the OS layer
+      the path policy. Confinement for it must come from the OS layer
       (e.g. a self-hosted environment runner).
 
     Attributes:
@@ -206,9 +213,16 @@ class AgentToolContext:
             parity: ``process.cwd()`` at construction), so a ``chdir`` between
             constructing this context and the first tool call does not move
             where paths resolve. Pass an explicit path to override.
-        unrestricted_paths: When ``False`` (default), the file tools reject
-            paths that resolve outside ``workdir``. Does **not**
-            constrain :func:`beta_bash_tool`.
+        unrestricted_paths: Deprecated and no longer accepted. The file tools
+            are always confined to ``workdir`` plus ``allowed_roots``, which is
+            neither of the two behaviors this flag used to select, so passing
+            either value raises :class:`TypeError` explaining what to do
+            instead. The parameter itself will be removed in a future release.
+        allowed_roots: Directories outside ``workdir`` that the file tools may
+            also reach. The environment worker sets this to the session's
+            memory-store folders, so memories mounted outside the working
+            directory stay readable and writable. Does **not** constrain
+            :func:`beta_bash_tool`.
         env: Optional environment for the bash subprocess. When unset, the bash
             tool inherits the process environment with the runner's
             ``ANTHROPIC_*`` credentials scrubbed. When provided, it FULLY
@@ -241,20 +255,37 @@ class AgentToolContext:
     # *construction* time, not resolved lazily at first use — a chdir in
     # between must not change where tools resolve paths (TS parity).
     workdir: str | os.PathLike[str] = field(default_factory=os.getcwd)
-    unrestricted_paths: bool = False
-    # When ``client`` and ``session_id`` are both set, entering the context
-    # manager fetches the session's resolved agent and downloads each of its
-    # skills into ``{workdir}/skills/<name>/`` before any tool runs.
+    unrestricted_paths: bool | NotGiven = not_given
+    allowed_roots: list[Path] = field(default_factory=list[Path])
+    # When ``client`` and ``session`` are both set, entering the context
+    # manager downloads each of the session agent's skills into
+    # ``{workdir}/skills/<name>/`` before any tool runs.
     client: AsyncAnthropic | None = None
+    # The already-fetched session. A session's resources cannot change while it
+    # runs, so the caller fetches it once and shares that snapshot with the
+    # memory-store download; the two can then never disagree about them.
+    session: BetaManagedAgentsSession | None = None
+    # Deprecated: ``setup_skills`` fetches the session itself when given only
+    # an id, one extra round trip per context. Prefer ``session``. Kept for
+    # callers written before ``session`` existed; ignored when ``session`` is
+    # set.
     session_id: str | None = None
     env: Optional[Mapping[str, str]] = None
     max_file_bytes: int | None | NotGiven = not_given
     max_image_base64_bytes: int | None | NotGiven = not_given
     max_pdf_bytes: int | None | NotGiven = not_given
+    # Resolved directories the write and edit tools refuse to modify. The
+    # worker sets this to the roots of read-only memory stores so the agent
+    # sees the error at write time instead of the change silently never
+    # syncing; the mechanism is generic to any directory.
+    read_only_roots: list[Path] = field(default_factory=list[Path])
     _bash: BashSession | None = field(default=None, init=False, repr=False)
     # Skill directories downloaded by ``setup_skills``; removed again on
     # ``__aexit__`` so a context doesn't leave downloaded skills behind.
     _skill_dirs: list[Path] = field(default_factory=_empty_skill_dirs, init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        reject_unrestricted_paths(self.unrestricted_paths)
 
     async def bash(self) -> BashSession:
         if self._bash is None:
@@ -269,13 +300,15 @@ class AgentToolContext:
     async def setup_skills(self) -> None:
         """Download the session agent's skills into ``{workdir}/skills/<name>/``.
 
-        No-op unless both :attr:`client` and :attr:`session_id` are set. The
-        download + safe archive extraction lives in
-        :mod:`anthropic.lib.tools._skills`.
+        No-op unless :attr:`client` is set together with :attr:`session` (or
+        the deprecated :attr:`session_id`). The download + safe archive
+        extraction lives in :mod:`anthropic.lib.tools._skills`.
         """
-        if self.client is None or self.session_id is None:
+        if self.client is None or (self.session is None and self.session_id is None):
             return
-        self._skill_dirs = await download_session_skills(self.client, session_id=self.session_id, workdir=self.workdir)
+        self._skill_dirs = await download_session_skills(
+            self.client, session=self.session, session_id=self.session_id, workdir=self.workdir
+        )
 
     async def _cleanup_skills(self) -> None:
         """Remove the skill directories :meth:`setup_skills` downloaded.
@@ -302,25 +335,92 @@ class AgentToolContext:
             await self._cleanup_skills()
 
 
-def resolve_path(ctx: AgentToolContext, p: str) -> Path:
-    """Resolve ``p`` against the workdir; reject results that escape it.
+_MAX_SYMLINK_HOPS = 40
+_MISSING_ERRNOS = (errno.ENOENT, errno.ENOTDIR)
 
+
+def _symlink_loop_error() -> OSError:
+    return OSError(errno.ELOOP, os.strerror(errno.ELOOP))
+
+
+def _canonicalize(path: Path) -> Path:
+    """Return ``path`` with ``.``/``..`` collapsed lexically and every symlink
+    followed, or raise ``OSError`` — the same outcome on every supported Python,
+    and never a partly resolved path.
+
+    Trailing components that do not exist yet are kept as spelled, so a new
+    file under new directories still canonicalises; a dangling symlink met on
+    the way is read and followed by hand, and more than ``_MAX_SYMLINK_HOPS``
+    such hops count as a loop. Non-strict ``Path.resolve()`` is avoided because
+    its symlink-loop handling differs between CPython versions.
+    """
+    prefix = Path(os.path.normpath(str(path)))
+    missing_tail: list[str] = []
+    hops = 0
+    while True:
+        try:
+            return prefix.resolve(strict=True).joinpath(*reversed(missing_tail))
+        except RuntimeError:
+            # CPython < 3.13 reports a symlink loop from ``resolve(strict=True)`` this way.
+            raise _symlink_loop_error() from None
+        except OSError as e:
+            if e.errno not in _MISSING_ERRNOS:
+                raise
+            unresolved = e
+        try:
+            is_symlink = S_ISLNK(os.lstat(prefix).st_mode)
+        except OSError as e:
+            if e.errno not in _MISSING_ERRNOS or prefix.parent == prefix:
+                raise
+            missing_tail.append(prefix.name)
+            prefix = prefix.parent
+            continue
+        if not is_symlink:
+            raise unresolved
+        hops += 1
+        if hops > _MAX_SYMLINK_HOPS:
+            raise _symlink_loop_error()
+        prefix = Path(os.path.normpath(os.path.join(prefix.parent, os.readlink(prefix))))
+
+
+def resolve_path(ctx: AgentToolContext, p: str) -> Path:
+    """Resolve ``p`` against the workdir; reject results outside the permitted roots.
+
+    The permitted roots are ``workdir`` plus each entry of ``allowed_roots``.
     Absolute and relative inputs go through the same canonicalise-then-contain
-    check — an absolute path that lands inside the workdir is permitted, only
-    paths that resolve *outside* are rejected. ``Path.resolve()`` follows every
-    symlink (including the leaf, even a dangling one) before the containment
-    check, so a symlink under the workdir that targets ``/etc`` is rejected —
-    and the resolved path is what the tool then operates on, so it can't be
-    followed afterwards either. See the trust model on :class:`AgentToolContext`.
+    check — an absolute path that lands inside a permitted root is accepted,
+    only paths that resolve *outside* all of them are rejected. ``.`` and ``..``
+    components are collapsed lexically first; then every symlink (including the
+    leaf, even a dangling one) is followed before the containment check, so a
+    symlink under the workdir that targets ``/etc`` is rejected — and the
+    resolved path is what the tool then operates on, so it can't be followed
+    afterwards either. A symlink loop or an unreadable component rejects the
+    path outright rather than falling back to an unresolved path. See the trust
+    model on :class:`AgentToolContext`.
     """
     candidate = Path(p)
-    if ctx.unrestricted_paths and candidate.is_absolute():
-        return candidate.resolve()
     root = Path(ctx.workdir).resolve()
-    full = (candidate if candidate.is_absolute() else root / candidate).resolve()
-    if not ctx.unrestricted_paths and not _within(full, root):
-        raise ValueError(f"path {p!r} escapes workdir")
-    return full
+    try:
+        full = _canonicalize(candidate if candidate.is_absolute() else root / candidate)
+    except OSError as e:
+        raise ValueError(f"path {p!r}: {_fs_reason(e)}") from e
+    if _within(full, root) or any(_within(full, Path(r).resolve()) for r in ctx.allowed_roots):
+        return full
+    if ctx.allowed_roots:
+        raise ValueError(f"path {p!r} is outside the session's working directory and its other permitted directories")
+    raise ValueError(f"path {p!r} is outside the session's working directory")
+
+
+def _reject_read_only(ctx: AgentToolContext, target: Path, *, op: str, file_path: str) -> None:
+    """Raise :class:`ToolError` when ``target`` falls under a read-only root.
+
+    Roots resolve at check time, exactly like ``allowed_roots`` in
+    :func:`resolve_path` — a symlinked entry must not grant access on one
+    side while its write protection misses on the other.
+    """
+    for root in ctx.read_only_roots:
+        if _within(target, Path(root).resolve()):
+            raise ToolError(f"{op}: {file_path} is inside read-only directory {root}")
 
 
 class BashResult(NamedTuple):
@@ -624,6 +724,7 @@ def beta_write_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             target = resolve_path(ctx, file_path)
         except ValueError as e:
             raise ToolError(f"write: {e}") from e
+        _reject_read_only(ctx, target, op="write", file_path=file_path)
         try:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(content, encoding="utf-8")
@@ -642,6 +743,7 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             target = resolve_path(ctx, file_path)
         except ValueError as e:
             raise ToolError(f"edit: {e}") from e
+        _reject_read_only(ctx, target, op="edit", file_path=file_path)
         try:
             # stat() before any open(): the size cap stops a multi-GB file from
             # OOM'ing the runner, and is_file() rejects FIFOs/devices/dirs
@@ -685,43 +787,45 @@ def _mtime_or_zero(p: Path) -> float:
         return 0.0
 
 
+def _confined(matches: Iterable[Path], root: Path) -> Iterator[Path]:
+    """Yield the matches whose canonical path is inside ``root``; a match that
+    cannot be canonicalised (symlink loop, unreadable) is dropped, not raised."""
+    for match in matches:
+        try:
+            canonical = _canonicalize(match)
+        except OSError:
+            continue
+        if _within(canonical, root):
+            yield match
+
+
 def beta_glob_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
     @beta_async_tool(name="glob", input_schema=BetaManagedAgentsAgentToolset20260401GlobInput)
     async def glob(pattern: str, path: Optional[str] = None) -> str:
         """List files matching a glob pattern, newest first."""
-        confine: Optional[Path] = None
         if Path(pattern).is_absolute():
-            if not ctx.unrestricted_paths:
-                raise ToolError("glob: absolute pattern not permitted")
-            root = Path("/")
-            pat = pattern.lstrip("/")
+            raise ToolError("glob: absolute pattern not permitted; pass a relative pattern (and optionally path)")
+        # ``Path.glob`` honours literal ``..`` segments, so a pattern like
+        # ``../../etc/*`` would escape the workdir before resolve_path() is
+        # ever consulted — reject it up front.
+        if ".." in PurePosixPath(pattern).parts:
+            raise ToolError("glob: '..' is not permitted in the pattern")
+        if path:
+            try:
+                root = resolve_path(ctx, path)
+            except ValueError as e:
+                raise ToolError(f"glob: {e}") from e
         else:
-            # ``Path.glob`` honours literal ``..`` segments, so a pattern like
-            # ``../../etc/*`` would escape the workdir before resolve_path() is
-            # ever consulted — reject it up front.
-            if not ctx.unrestricted_paths and ".." in PurePosixPath(pattern).parts:
-                raise ToolError("glob: '..' is not permitted in the pattern")
-            if path:
-                try:
-                    root = resolve_path(ctx, path)
-                except ValueError as e:
-                    raise ToolError(f"glob: {e}") from e
-            else:
-                root = Path(ctx.workdir).resolve()
-            pat = pattern
-            if not ctx.unrestricted_paths:
-                confine = root
+            root = Path(ctx.workdir).resolve()
         try:
             # islice caps the materialised match list so a pattern that matches
             # an enormous tree can't OOM the runner.
-            matches = list(islice(root.glob(pat), WALK_MAX_ENTRIES))
+            matches = list(islice(root.glob(pattern), WALK_MAX_ENTRIES))
         except (ValueError, OSError) as e:
             raise ToolError(f"glob: {e}") from e
-        if confine is not None:
-            # Post-filter: a symlink traversed mid-pattern (glob follows
-            # symlinks for non-``**`` segments) must not let a result escape the
-            # confinement root. ``resolve()`` canonicalises symlinks.
-            matches = [m for m in matches if _within(m.resolve(), confine)]
+        # Post-filter: a symlink traversed mid-pattern (glob follows symlinks
+        # for non-``**`` segments) must not let a result escape the search root.
+        matches = list(_confined(matches, root))
         if not matches:
             return "no matches"
         matches.sort(key=_mtime_or_zero, reverse=True)

@@ -4,15 +4,19 @@ from __future__ import annotations
 
 from typing import List
 
-import httpx
+import httpx2
 
-from .. import _legacy_response
 from ..types import model_list_params
 from .._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from .._utils import is_given, path_template, maybe_transform, strip_not_given
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
-from .._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from .._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ..pagination import SyncPage, AsyncPage
 from .._base_client import AsyncPaginator, make_request_options
 from ..types.model_info import ModelInfo
@@ -51,7 +55,7 @@ class Models(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> ModelInfo:
         """
         Get a specific model.
@@ -98,7 +102,7 @@ class Models(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPage[ModelInfo]:
         """
         List available models.
@@ -182,7 +186,7 @@ class AsyncModels(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> ModelInfo:
         """
         Get a specific model.
@@ -229,7 +233,7 @@ class AsyncModels(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[ModelInfo, AsyncPage[ModelInfo]]:
         """
         List available models.
@@ -287,10 +291,10 @@ class ModelsWithRawResponse:
     def __init__(self, models: Models) -> None:
         self._models = models
 
-        self.retrieve = _legacy_response.to_raw_response_wrapper(
+        self.retrieve = to_raw_response_wrapper(
             models.retrieve,
         )
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             models.list,
         )
 
@@ -299,10 +303,10 @@ class AsyncModelsWithRawResponse:
     def __init__(self, models: AsyncModels) -> None:
         self._models = models
 
-        self.retrieve = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve = async_to_raw_response_wrapper(
             models.retrieve,
         )
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             models.list,
         )
 

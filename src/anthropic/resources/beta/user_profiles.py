@@ -6,14 +6,18 @@ from typing import Dict, List, Optional
 from itertools import chain
 from typing_extensions import Literal
 
-import httpx
+import httpx2
 
-from ... import _legacy_response
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import to_streamed_response_wrapper, async_to_streamed_response_wrapper
+from ..._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
 from ...pagination import SyncPageCursor, AsyncPageCursor
 from ...types.beta import user_profile_list_params, user_profile_create_params, user_profile_update_params
 from ..._base_client import AsyncPaginator, make_request_options
@@ -47,6 +51,7 @@ class UserProfiles(SyncAPIResource):
     def create(
         self,
         *,
+        access_type: Literal["application", "passthrough"] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -57,12 +62,18 @@ class UserProfiles(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Create User Profile
 
         Args:
+          access_type: How the platform uses the API on behalf of the entity this profile represents.
+              `application`: the platform sells a product that uses the API behind the scenes,
+              and the profile represents an individual end-user of that product.
+              `passthrough`: the platform resells raw inference, and the profile identifies
+              the resold-to company.
+
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
               characters.
 
@@ -70,8 +81,9 @@ class UserProfiles(SyncAPIResource):
               keys up to 64 characters and values up to 512 characters. Values must be
               non-empty strings.
 
-          name: Display name of the entity this profile represents. Required when relationship
-              is `resold` (the resold-to company's name); optional otherwise. Maximum 255
+          name: Optional for all profiles. Real-world name of the entity this profile represents
+              (company or individual); for a resold-to company (`relationship` `resold` /
+              `access_type` `passthrough`), that company's name where known. Maximum 255
               characters.
 
           relationship: How the entity behind a user profile relates to the platform that owns the API
@@ -91,18 +103,19 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             "/v1/user_profiles?beta=true",
             body=maybe_transform(
                 {
+                    "access_type": access_type,
                     "external_id": external_id,
                     "metadata": metadata,
                     "name": name,
@@ -126,7 +139,7 @@ class UserProfiles(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Get User Profile
@@ -147,14 +160,14 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             options=make_request_options(
@@ -167,6 +180,7 @@ class UserProfiles(SyncAPIResource):
         self,
         user_profile_id: str,
         *,
+        access_type: Optional[Literal["application", "passthrough"]] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -177,12 +191,18 @@ class UserProfiles(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Update User Profile
 
         Args:
+          access_type: How the platform uses the API on behalf of the entity this profile represents.
+              `application`: the platform sells a product that uses the API behind the scenes,
+              and the profile represents an individual end-user of that product.
+              `passthrough`: the platform resells raw inference, and the profile identifies
+              the resold-to company.
+
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
               255 characters.
 
@@ -213,18 +233,19 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             body=maybe_transform(
                 {
+                    "access_type": access_type,
                     "external_id": external_id,
                     "metadata": metadata,
                     "name": name,
@@ -250,7 +271,7 @@ class UserProfiles(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaUserProfile]:
         """
         List User Profiles
@@ -275,14 +296,14 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/user_profiles?beta=true",
             page=SyncPageCursor[BetaUserProfile],
@@ -313,7 +334,7 @@ class UserProfiles(SyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfileEnrollmentURL:
         """
         Create Enrollment URL
@@ -334,14 +355,14 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             path_template(
                 "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
@@ -376,6 +397,7 @@ class AsyncUserProfiles(AsyncAPIResource):
     async def create(
         self,
         *,
+        access_type: Literal["application", "passthrough"] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -386,12 +408,18 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Create User Profile
 
         Args:
+          access_type: How the platform uses the API on behalf of the entity this profile represents.
+              `application`: the platform sells a product that uses the API behind the scenes,
+              and the profile represents an individual end-user of that product.
+              `passthrough`: the platform resells raw inference, and the profile identifies
+              the resold-to company.
+
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
               characters.
 
@@ -399,8 +427,9 @@ class AsyncUserProfiles(AsyncAPIResource):
               keys up to 64 characters and values up to 512 characters. Values must be
               non-empty strings.
 
-          name: Display name of the entity this profile represents. Required when relationship
-              is `resold` (the resold-to company's name); optional otherwise. Maximum 255
+          name: Optional for all profiles. Real-world name of the entity this profile represents
+              (company or individual); for a resold-to company (`relationship` `resold` /
+              `access_type` `passthrough`), that company's name where known. Maximum 255
               characters.
 
           relationship: How the entity behind a user profile relates to the platform that owns the API
@@ -420,18 +449,19 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             "/v1/user_profiles?beta=true",
             body=await async_maybe_transform(
                 {
+                    "access_type": access_type,
                     "external_id": external_id,
                     "metadata": metadata,
                     "name": name,
@@ -455,7 +485,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Get User Profile
@@ -476,14 +506,14 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._get(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             options=make_request_options(
@@ -496,6 +526,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         self,
         user_profile_id: str,
         *,
+        access_type: Optional[Literal["application", "passthrough"]] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -506,12 +537,18 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfile:
         """
         Update User Profile
 
         Args:
+          access_type: How the platform uses the API on behalf of the entity this profile represents.
+              `application`: the platform sells a product that uses the API behind the scenes,
+              and the profile represents an individual end-user of that product.
+              `passthrough`: the platform resells raw inference, and the profile identifies
+              the resold-to company.
+
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
               255 characters.
 
@@ -542,18 +579,19 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             body=await async_maybe_transform(
                 {
+                    "access_type": access_type,
                     "external_id": external_id,
                     "metadata": metadata,
                     "name": name,
@@ -579,7 +617,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaUserProfile, AsyncPageCursor[BetaUserProfile]]:
         """
         List User Profiles
@@ -604,14 +642,14 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/user_profiles?beta=true",
             page=AsyncPageCursor[BetaUserProfile],
@@ -642,7 +680,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaUserProfileEnrollmentURL:
         """
         Create Enrollment URL
@@ -663,14 +701,14 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-03-24"]))
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
                     else not_given
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "user-profiles-2026-03-24", **(extra_headers or {})}
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             path_template(
                 "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
@@ -686,19 +724,19 @@ class UserProfilesWithRawResponse:
     def __init__(self, user_profiles: UserProfiles) -> None:
         self._user_profiles = user_profiles
 
-        self.create = _legacy_response.to_raw_response_wrapper(
+        self.create = to_raw_response_wrapper(
             user_profiles.create,
         )
-        self.retrieve = _legacy_response.to_raw_response_wrapper(
+        self.retrieve = to_raw_response_wrapper(
             user_profiles.retrieve,
         )
-        self.update = _legacy_response.to_raw_response_wrapper(
+        self.update = to_raw_response_wrapper(
             user_profiles.update,
         )
-        self.list = _legacy_response.to_raw_response_wrapper(
+        self.list = to_raw_response_wrapper(
             user_profiles.list,
         )
-        self.create_enrollment_url = _legacy_response.to_raw_response_wrapper(
+        self.create_enrollment_url = to_raw_response_wrapper(
             user_profiles.create_enrollment_url,
         )
 
@@ -707,19 +745,19 @@ class AsyncUserProfilesWithRawResponse:
     def __init__(self, user_profiles: AsyncUserProfiles) -> None:
         self._user_profiles = user_profiles
 
-        self.create = _legacy_response.async_to_raw_response_wrapper(
+        self.create = async_to_raw_response_wrapper(
             user_profiles.create,
         )
-        self.retrieve = _legacy_response.async_to_raw_response_wrapper(
+        self.retrieve = async_to_raw_response_wrapper(
             user_profiles.retrieve,
         )
-        self.update = _legacy_response.async_to_raw_response_wrapper(
+        self.update = async_to_raw_response_wrapper(
             user_profiles.update,
         )
-        self.list = _legacy_response.async_to_raw_response_wrapper(
+        self.list = async_to_raw_response_wrapper(
             user_profiles.list,
         )
-        self.create_enrollment_url = _legacy_response.async_to_raw_response_wrapper(
+        self.create_enrollment_url = async_to_raw_response_wrapper(
             user_profiles.create_enrollment_url,
         )
 

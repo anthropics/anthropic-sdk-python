@@ -2,14 +2,20 @@ from __future__ import annotations
 
 from typing import Dict, Callable, Optional, Protocol
 from dataclasses import field, dataclass
-from typing_extensions import override
+from typing_extensions import override, runtime_checkable
 
 
 def _empty_headers() -> Dict[str, str]:
     return {}
 
 
-__all__ = ["AccessToken", "AccessTokenProvider", "IdentityTokenProvider", "CredentialResult"]
+__all__ = [
+    "AccessToken",
+    "AccessTokenProvider",
+    "BaseURLBoundProvider",
+    "IdentityTokenProvider",
+    "CredentialResult",
+]
 
 
 @dataclass(frozen=True)
@@ -51,6 +57,25 @@ class AccessTokenProvider(Protocol):
     """
 
     def __call__(self, *, force_refresh: bool = False) -> AccessToken: ...
+
+
+@runtime_checkable
+class BaseURLBoundProvider(AccessTokenProvider, Protocol):
+    """A provider whose token exchange targets a specific deployment.
+
+    The client calls :meth:`for_base_url` with its own ``base_url`` at
+    construction. Providers that don't implement this resolve their own
+    exchange endpoint and are used as-is.
+    """
+
+    def for_base_url(self, base_url: str) -> AccessTokenProvider:
+        """Return the provider a client with ``base_url`` should exchange through.
+
+        Either ``self``, bound to ``base_url``, or — if another client already
+        bound ``self`` to a different deployment — a separate provider bound to
+        ``base_url``, so that client's binding is left alone.
+        """
+        ...
 
 
 # Innermost layer: returns the raw external JWT string (used as the

@@ -19,6 +19,7 @@ from .tool_choice_any_param import ToolChoiceAnyParam
 from .tool_choice_auto_param import ToolChoiceAutoParam
 from .tool_choice_tool_param import ToolChoiceToolParam
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
+from .message_create_params_container_param import MessageCreateParamsContainerParam
 
 __all__ = [
     "MessageCreateParamsBase",
@@ -130,7 +131,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     cacheable block in the request.
     """
 
-    container: Optional[str]
+    container: Optional[MessageCreateParamsContainerParam]
     """Container identifier for reuse across requests."""
 
     inference_geo: Optional[str]
@@ -173,17 +174,6 @@ class MessageCreateParamsBase(TypedDict, total=False):
     A system prompt is a way of providing context and instructions to Claude, such
     as specifying a particular goal or role. See our
     [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
-    """
-
-    temperature: float
-    """Amount of randomness injected into the response.
-
-    Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0`
-    for analytical / multiple choice, and closer to `1.0` for creative and
-    generative tasks.
-
-    Note that even with `temperature` of `0.0`, the results will not be fully
-    deterministic.
     """
 
     thinking: ThinkingConfigParam
@@ -283,25 +273,6 @@ class MessageCreateParamsBase(TypedDict, total=False):
     See our
     [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
     for more details.
-    """
-
-    top_k: int
-    """Only sample from the top K options for each subsequent token.
-
-    Used to remove "long tail" low probability responses.
-    [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-
-    Recommended for advanced use cases only.
-    """
-
-    top_p: float
-    """Use nucleus sampling.
-
-    In nucleus sampling, we compute the cumulative distribution over all the options
-    for each subsequent token in decreasing probability order and cut it off once it
-    reaches a particular probability specified by `top_p`.
-
-    Recommended for advanced use cases only.
     """
 
     user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]

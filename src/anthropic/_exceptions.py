@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Union, cast
 from typing_extensions import Literal
 
-import httpx
+import httpx2
 
 from ._utils import is_dict
 from .types.shared.error_type import ErrorType
@@ -19,6 +19,11 @@ __all__ = [
     "UnprocessableEntityError",
     "RateLimitError",
     "InternalServerError",
+    "RetryableError",
+    "RequestTooLargeError",
+    "ServiceUnavailableError",
+    "OverloadedError",
+    "DeadlineExceededError",
 ]
 
 
@@ -28,7 +33,7 @@ class AnthropicError(Exception):
 
 class APIError(AnthropicError):
     message: str
-    request: httpx.Request
+    request: httpx2.Request
 
     body: object | None
     """The API response body.
@@ -41,7 +46,7 @@ class APIError(AnthropicError):
     If there was no response associated with this error then it will be `None`.
     """
 
-    def __init__(self, message: str, request: httpx.Request, *, body: object | None) -> None:  # noqa: ARG002
+    def __init__(self, message: str, request: httpx2.Request, *, body: object | None) -> None:  # noqa: ARG002
         super().__init__(message)
         self.request = request
         self.message = message
@@ -49,10 +54,10 @@ class APIError(AnthropicError):
 
 
 class APIResponseValidationError(APIError):
-    response: httpx.Response
+    response: httpx2.Response
     status_code: int
 
-    def __init__(self, response: httpx.Response, body: object | None, *, message: str | None = None) -> None:
+    def __init__(self, response: httpx2.Response, body: object | None, *, message: str | None = None) -> None:
         super().__init__(message or "Data returned by API invalid for expected schema.", response.request, body=body)
         self.response = response
         self.status_code = response.status_code
@@ -65,16 +70,19 @@ class APIWebhookValidationError(APIError):
 class APIStatusError(APIError):
     """Raised when an API response has a status code of 4xx or 5xx."""
 
-    response: httpx.Response
+    response: httpx2.Response
     status_code: int
     request_id: str | None
     type: ErrorType | None
 
-    def __init__(self, message: str, *, response: httpx.Response, body: object | None) -> None:
+    workspace_id: str | None
+
+    def __init__(self, message: str, *, response: httpx2.Response, body: object | None) -> None:
         super().__init__(message, response.request, body=body)
         self.response = response
         self.status_code = response.status_code
         self.request_id = response.headers.get("request-id")
+        self.workspace_id = response.headers.get("anthropic-workspace-id")
 
         self.type = None
         if is_dict(body):
@@ -84,12 +92,12 @@ class APIStatusError(APIError):
 
 
 class APIConnectionError(APIError):
-    def __init__(self, *, message: str = "Connection error.", request: httpx.Request) -> None:
+    def __init__(self, *, message: str = "Connection error.", request: httpx2.Request) -> None:
         super().__init__(message, request, body=None)
 
 
 class APITimeoutError(APIConnectionError):
-    def __init__(self, request: httpx.Request) -> None:
+    def __init__(self, request: httpx2.Request) -> None:
         super().__init__(
             message="Request timed out or interrupted. This could be due to a network timeout, dropped connection, or request cancellation. See https://docs.anthropic.com/en/api/errors#long-requests for more details.",
             request=request,

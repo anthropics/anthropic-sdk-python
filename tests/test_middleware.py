@@ -5,10 +5,9 @@ import re
 import json
 from typing import Any, Protocol, cast
 from pathlib import Path
-from unittest import mock
 from typing_extensions import override
 
-import httpx
+import httpx2 as httpx
 import pytest
 from respx import MockRouter
 
@@ -36,8 +35,8 @@ from anthropic._models import FinalRequestOptions
 from anthropic.lib.aws import AnthropicAWS, AsyncAnthropicAWS
 from anthropic._response import BinaryAPIResponse, AsyncBinaryAPIResponse, StreamedBinaryAPIResponse
 from anthropic.lib.foundry import AnthropicFoundry, AsyncAnthropicFoundry
+from anthropic._base_client import BaseClient
 from anthropic.types.message import Message
-from anthropic._legacy_response import LegacyAPIResponse
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -743,9 +742,10 @@ class TestSyncMiddleware:
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert calls[0].request.headers["x-trace-id"] == "abc-123"
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_middleware_runs_per_attempt(self, respx_mock: MockRouter) -> None:
+    def test_middleware_runs_per_attempt(self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(
             side_effect=[
                 httpx.Response(500),
@@ -771,9 +771,10 @@ class TestSyncMiddleware:
         assert recorder.errors == []
         assert len(respx_mock.calls) == 3
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url, assert_all_called=False)
-    def test_middleware_error_is_not_retried(self, respx_mock: MockRouter) -> None:
+    def test_middleware_error_is_not_retried(self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
 
         recorder = AttemptRecorder()
@@ -790,9 +791,12 @@ class TestSyncMiddleware:
         assert recorder.attempts == [0]
         assert len(respx_mock.calls) == 0
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url, assert_all_called=False)
-    def test_retryable_error_is_retried_then_propagates(self, respx_mock: MockRouter) -> None:
+    def test_retryable_error_is_retried_then_propagates(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
 
         attempts: list[int] = []
@@ -813,9 +817,12 @@ class TestSyncMiddleware:
         assert attempts == [0, 1, 2]
         assert len(respx_mock.calls) == 0
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_error_with_retryable_cause_is_retried(self, respx_mock: MockRouter) -> None:
+    def test_error_with_retryable_cause_is_retried(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(
             side_effect=[
                 httpx.ConnectError("kaboom"),
@@ -841,9 +848,12 @@ class TestSyncMiddleware:
         assert isinstance(message, Message)
         assert len(respx_mock.calls) == 2
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_returned_error_response_raises_typed_error_for_caller(self, respx_mock: MockRouter) -> None:
+    def test_returned_error_response_raises_typed_error_for_caller(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(
             return_value=httpx.Response(400, json=error_body(type="invalid_request_error", message="bad request"))
         )
@@ -864,9 +874,12 @@ class TestSyncMiddleware:
         assert recorder.errors == []
         assert len(respx_mock.calls) == 1
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_request_modifications_do_not_persist_across_attempts(self, respx_mock: MockRouter) -> None:
+    def test_request_modifications_do_not_persist_across_attempts(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(
             side_effect=[
                 httpx.Response(500),
@@ -993,7 +1006,7 @@ class TestSyncMiddleware:
             model="claude-opus-4-6",
         )
 
-        assert isinstance(response, LegacyAPIResponse)
+        assert isinstance(response, APIResponse)
         assert isinstance(response.parse(), Message)
         assert len(recorder.requests) == 1
         assert recorder.requests[0].url == "/v1/messages"
@@ -1013,12 +1026,12 @@ class TestSyncMiddleware:
             model="claude-opus-4-6",
         )
 
-        # the middleware itself saw a true `APIResponse`
+        # the middleware itself saw the `APIResponse`
         assert len(middleware.responses) == 1
         assert isinstance(middleware.responses[0], APIResponse)
 
-        # the caller still receives the `LegacyAPIResponse` wrapper it expects
-        assert isinstance(response, LegacyAPIResponse)
+        # and the caller receives that same wrapper type
+        assert isinstance(response, APIResponse)
         assert response.status_code == 200
         assert response.headers["x-custom-header"] == "custom-value"
         message = response.parse()
@@ -1471,8 +1484,8 @@ class TestAsyncMiddleware:
             model="claude-opus-4-6",
         )
 
-        assert isinstance(response, LegacyAPIResponse)
-        assert isinstance(response.parse(), Message)
+        assert isinstance(response, AsyncAPIResponse)
+        assert isinstance(await response.parse(), Message)
         assert len(recorder.requests) == 1
         assert recorder.requests[0].url == "/v1/messages"
 
@@ -1491,15 +1504,15 @@ class TestAsyncMiddleware:
             model="claude-opus-4-6",
         )
 
-        # the middleware itself saw a true `AsyncAPIResponse`
+        # the middleware itself saw the `AsyncAPIResponse`
         assert len(middleware.responses) == 1
         assert isinstance(middleware.responses[0], AsyncAPIResponse)
 
-        # the caller still receives the `LegacyAPIResponse` wrapper it expects
-        assert isinstance(response, LegacyAPIResponse)
+        # and the caller receives that same wrapper type
+        assert isinstance(response, AsyncAPIResponse)
         assert response.status_code == 200
         assert response.headers["x-custom-header"] == "custom-value"
-        message = response.parse()
+        message = await response.parse()
         assert isinstance(message, Message)
         assert message.id == "msg_013Zva2CMHLNnXjNJJKqJ2EF"
 
@@ -1636,9 +1649,10 @@ class TestAsyncMiddleware:
 
         assert route.call_count == 0
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    async def test_middleware_runs_per_attempt(self, respx_mock: MockRouter) -> None:
+    async def test_middleware_runs_per_attempt(self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(
             side_effect=[
                 httpx.Response(500),
@@ -1664,9 +1678,12 @@ class TestAsyncMiddleware:
         assert recorder.errors == []
         assert len(respx_mock.calls) == 3
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url, assert_all_called=False)
-    async def test_retryable_error_is_retried_then_propagates(self, respx_mock: MockRouter) -> None:
+    async def test_retryable_error_is_retried_then_propagates(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
 
         attempts: list[int] = []
@@ -1687,9 +1704,12 @@ class TestAsyncMiddleware:
         assert attempts == [0, 1, 2]
         assert len(respx_mock.calls) == 0
 
-    @mock.patch("anthropic._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url, assert_all_called=False)
-    async def test_middleware_error_is_not_retried(self, respx_mock: MockRouter) -> None:
+    async def test_middleware_error_is_not_retried(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
         respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
 
         recorder = AttemptRecorder()

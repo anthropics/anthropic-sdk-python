@@ -15,9 +15,11 @@ from .beta_web_fetch_tool_20250910_param import BetaWebFetchTool20250910Param
 from .beta_web_fetch_tool_20260209_param import BetaWebFetchTool20260209Param
 from .beta_web_fetch_tool_20260309_param import BetaWebFetchTool20260309Param
 from .beta_web_fetch_tool_20260318_param import BetaWebFetchTool20260318Param
+from .beta_browser_toolset_20260801_param import BetaBrowserToolset20260801Param
 from .beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
 from .beta_web_search_tool_20260209_param import BetaWebSearchTool20260209Param
 from .beta_web_search_tool_20260318_param import BetaWebSearchTool20260318Param
+from .beta_computer_toolset_20260801_param import BetaComputerToolset20260801Param
 from .beta_tool_text_editor_20241022_param import BetaToolTextEditor20241022Param
 from .beta_tool_text_editor_20250124_param import BetaToolTextEditor20250124Param
 from .beta_tool_text_editor_20250429_param import BetaToolTextEditor20250429Param
@@ -42,11 +44,13 @@ BetaToolUnionParam: TypeAlias = Union[
     BetaCodeExecutionTool20250825Param,
     BetaCodeExecutionTool20260120Param,
     BetaCodeExecutionTool20260521Param,
+    BetaBrowserToolset20260801Param,
     BetaToolComputerUse20241022Param,
     BetaMemoryTool20250818Param,
     BetaToolComputerUse20250124Param,
     BetaToolTextEditor20241022Param,
     BetaToolComputerUse20251124Param,
+    BetaComputerToolset20260801Param,
     BetaToolTextEditor20250124Param,
     BetaToolTextEditor20250429Param,
     BetaToolTextEditor20250728Param,

@@ -9,16 +9,20 @@ the fake stream actually yields control to the event loop.
 
 from __future__ import annotations
 
+import time
 import asyncio
+import threading
 from typing import Any, Optional, cast
-from collections.abc import Callable, Awaitable, AsyncIterator
+from collections.abc import Callable, Sequence, Awaitable, AsyncIterator
+from typing_extensions import override
 
-import httpx
+import httpx2 as httpx
 import pytest
 
 from anthropic import APIStatusError
 from anthropic._compat import PYDANTIC_V1
-from anthropic.lib.tools import ToolError, _beta_session_runner as session_runner_mod
+from anthropic.lib.tools import ToolError, BetaBuiltinFunctionTool, _beta_session_runner as session_runner_mod
+from anthropic.types.beta import BetaToolParam
 from anthropic.lib.tools._beta_session_runner import (
     SessionToolRunner,
     DispatchedToolCall,
@@ -175,7 +179,7 @@ class FakeAsyncEvents:
         list_events: list[_StubEvent] | None = None,
         list_events_per_call: list[list[_StubEvent]] | None = None,
         list_raises: BaseException | None = None,
-        send_failures: list[BaseException | None] | None = None,
+        send_failures: Sequence[BaseException | None] | None = None,
     ) -> None:
         if streams is not None:
             self._streams: list[_FakeStream | BaseException] = list(streams)
@@ -241,6 +245,23 @@ class _FakeTool:
             self.close = close
 
     def call(self, input: dict[str, Any]) -> Any:
+        return self._fn(input)
+
+
+class _SyncTool(BetaBuiltinFunctionTool):
+    """A real ``BetaBuiltinFunctionTool``, unlike ``_FakeTool``, so ``run_runnable_tool``
+    takes its sync-tool branch."""
+
+    def __init__(self, name: str, fn: Callable[[object], str]) -> None:
+        self._name = name
+        self._fn = fn
+
+    @override
+    def to_dict(self) -> BetaToolParam:
+        return {"name": self._name, "input_schema": {"type": "object"}}
+
+    @override
+    def call(self, input: object) -> str:
         return self._fn(input)
 
 
@@ -1224,10 +1245,11 @@ async def test_awaits_async_tool_close_hook() -> None:
 
 
 @pytest.mark.asyncio()
-async def test_yields_with_posted_false_on_retry_exhaust() -> None:
-    """If ``events.send`` fails on every retry attempt, the consumer should
-    still receive the ``DispatchedToolCall`` with ``posted=False`` so they know
-    the tool ran but the session-side agent never saw the result."""
+async def test_send_retries_past_three_attempts(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A tool-result send that keeps failing transiently must keep retrying with
+    backoff (not give up after three attempts while an enclosing worker keeps
+    the lease alive) and land once the server recovers."""
+    monkeypatch.setattr(session_runner_mod, "SEND_BACKOFF_CAP", 0.02)
 
     async def echo(_input: dict[str, Any]) -> str:
         return "result"
@@ -1235,17 +1257,79 @@ async def test_yields_with_posted_false_on_retry_exhaust() -> None:
     tool = _FakeTool("echo", echo)
     events = FakeAsyncEvents(
         stream_events=[_tool_use("tu_1", "echo", {}), _terminated()],
-        send_failures=[_api_status_error(500), _api_status_error(500), _api_status_error(500)],
+        send_failures=[_api_status_error(503)] * 6,
     )
 
     items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert len(items) == 1
+    assert items[0].posted is True
+    assert len(events.send_calls) == 7
+
+
+@pytest.mark.asyncio()
+async def test_yields_with_posted_false_on_retry_window_exhaust(monkeypatch: pytest.MonkeyPatch) -> None:
+    """If ``events.send`` keeps failing for the whole retry window, the consumer
+    should still receive the ``DispatchedToolCall`` with ``posted=False`` so
+    they know the tool ran but the session-side agent never saw the result."""
+    monkeypatch.setattr(session_runner_mod, "SEND_BACKOFF_CAP", 0.05)
+    monkeypatch.setattr(session_runner_mod, "SEND_RETRY_WINDOW", 0.5)
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "result"
+
+    tool = _FakeTool("echo", echo)
+    events = FakeAsyncEvents(
+        stream_events=[_tool_use("tu_1", "echo", {}), _terminated()],
+        send_failures=[_api_status_error(500)] * 100,
+    )
+
+    start = time.monotonic()
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+    elapsed = time.monotonic() - start
 
     assert len(items) == 1
     assert items[0].posted is False
     # The tool itself succeeded — the failure is just the post-back.
     assert items[0].is_error is False
     assert _result_text(items[0]) == "result"
-    assert len(events.send_calls) == 3  # used all 3 retries
+    assert len(events.send_calls) >= 3
+    assert 0.5 <= elapsed < 5
+
+
+@pytest.mark.asyncio()
+async def test_send_retry_window_update_bounds_send_already_retrying(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A send retry window that changes while a send is already retrying bounds
+    that send — ``EnvironmentWorker`` keeps it equal to the lease TTL each
+    heartbeat reports (through ``_run_session_tools``)."""
+    monkeypatch.setattr(session_runner_mod, "SEND_BACKOFF_CAP", 0.05)
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "result"
+
+    tool = _FakeTool("echo", echo)
+    events = FakeAsyncEvents(
+        stream_events=[_tool_use("tu_1", "echo", {}), _terminated()],
+        send_failures=[_api_status_error(503)] * 10_000,
+    )
+    lease_ttl: Optional[float] = None
+
+    async def consume() -> list[DispatchedToolCall]:
+        async with session_runner_mod._run_session_tools(
+            cast(Any, _FakeClient(events)), "s_1", tools=cast(Any, [tool]), send_retry_window=lambda: lease_ttl
+        ) as calls:
+            return [item async for item in calls]
+
+    start = time.monotonic()
+    task = asyncio.ensure_future(consume())
+    await asyncio.sleep(0.3)
+    assert not task.done()  # still retrying under the 300s default
+    lease_ttl = 0.2  # e.g. a heartbeat reported a short lease TTL
+    items = await asyncio.wait_for(task, timeout=5)
+
+    assert len(items) == 1
+    assert items[0].posted is False
+    assert time.monotonic() - start < 2
 
 
 @pytest.mark.asyncio()
@@ -1290,6 +1374,50 @@ async def test_tool_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
     assert len(items) == 1
     assert items[0].is_error is True
     assert "timed out" in _result_text(items[0])
+
+
+@pytest.mark.asyncio()
+async def test_sync_tool_runs_off_the_event_loop() -> None:
+    """A sync tool runs on a worker thread: the event loop keeps running while its body blocks."""
+    loop = asyncio.get_running_loop()
+    release = threading.Event()
+
+    def blocking(_input: object) -> str:
+        loop.call_soon_threadsafe(release.set)
+        if not release.wait(timeout=2):
+            raise RuntimeError("the event loop did not run while the tool blocked")
+        return "released"
+
+    events = FakeAsyncEvents(stream_events=[_custom_tool_use("ctu_1", "blocking", {}), _terminated()])
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[_SyncTool("blocking", blocking)])]
+
+    assert len(items) == 1
+    assert items[0].is_error is False
+    assert _result_text(items[0]) == "released"
+
+
+@pytest.mark.asyncio()
+async def test_tool_timeout_fires_for_blocking_sync_tool(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A sync tool that blocks past ``TOOL_TIMEOUT`` is reported timed out at the
+    deadline; its thread is abandoned rather than awaited."""
+    monkeypatch.setattr(session_runner_mod, "TOOL_TIMEOUT", 0.05)
+    release = threading.Event()
+
+    def slow(_input: object) -> str:
+        release.wait(timeout=2)
+        return "late"
+
+    events = FakeAsyncEvents(stream_events=[_custom_tool_use("ctu_1", "slow", {}), _terminated()])
+    try:
+        items = [item async for item in _run_with_fakes(events=events, tools=[_SyncTool("slow", slow)])]
+    finally:
+        release.set()
+
+    assert len(items) == 1
+    assert items[0].is_error is True
+    assert "timed out" in _result_text(items[0])
+    assert len(events.send_calls) == 1
 
 
 def test_tool_timeout_exceeds_bash_default() -> None:

@@ -8,6 +8,14 @@ from .beta import (
     BetaWithStreamingResponse,
     AsyncBetaWithStreamingResponse,
 )
+from .files import (
+    Files,
+    AsyncFiles,
+    FilesWithRawResponse,
+    AsyncFilesWithRawResponse,
+    FilesWithStreamingResponse,
+    AsyncFilesWithStreamingResponse,
+)
 from .models import (
     Models,
     AsyncModels,
@@ -15,6 +23,14 @@ from .models import (
     AsyncModelsWithRawResponse,
     ModelsWithStreamingResponse,
     AsyncModelsWithStreamingResponse,
+)
+from .skills import (
+    Skills,
+    AsyncSkills,
+    SkillsWithRawResponse,
+    AsyncSkillsWithRawResponse,
+    SkillsWithStreamingResponse,
+    AsyncSkillsWithStreamingResponse,
 )
 from .messages import (
     Messages,
@@ -24,22 +40,8 @@ from .messages import (
     MessagesWithStreamingResponse,
     AsyncMessagesWithStreamingResponse,
 )
-from .completions import (
-    Completions,
-    AsyncCompletions,
-    CompletionsWithRawResponse,
-    AsyncCompletionsWithRawResponse,
-    CompletionsWithStreamingResponse,
-    AsyncCompletionsWithStreamingResponse,
-)
 
 __all__ = [
-    "Completions",
-    "AsyncCompletions",
-    "CompletionsWithRawResponse",
-    "AsyncCompletionsWithRawResponse",
-    "CompletionsWithStreamingResponse",
-    "AsyncCompletionsWithStreamingResponse",
     "Messages",
     "AsyncMessages",
     "MessagesWithRawResponse",
@@ -52,6 +54,18 @@ __all__ = [
     "AsyncModelsWithRawResponse",
     "ModelsWithStreamingResponse",
     "AsyncModelsWithStreamingResponse",
+    "Files",
+    "AsyncFiles",
+    "FilesWithRawResponse",
+    "AsyncFilesWithRawResponse",
+    "FilesWithStreamingResponse",
+    "AsyncFilesWithStreamingResponse",
+    "Skills",
+    "AsyncSkills",
+    "SkillsWithRawResponse",
+    "AsyncSkillsWithRawResponse",
+    "SkillsWithStreamingResponse",
+    "AsyncSkillsWithStreamingResponse",
     "Beta",
     "AsyncBeta",
     "BetaWithRawResponse",

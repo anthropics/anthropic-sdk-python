@@ -1,7 +1,7 @@
 import copy
 from typing import List, cast
 
-import httpx
+import httpx2 as httpx
 
 from anthropic.types.beta import BetaDirectCaller, BetaToolUseBlock, BetaInputJSONDelta, BetaRawContentBlockDeltaEvent
 from anthropic.types.tool_use_block import ToolUseBlock
