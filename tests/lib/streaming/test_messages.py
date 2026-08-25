@@ -371,7 +371,10 @@ class TestSyncMessages:
         ) as stream:
             message = stream.get_final_message()
             assert message.usage is not None
+            assert message.usage.input_tokens == 11
             assert message.usage.output_tokens == 1
+            assert message.usage.cache_creation_input_tokens == 3
+            assert message.usage.cache_read_input_tokens == 5
             assert message.stop_reason == "end_turn"
             assert len(message.content) == 1
             assert message.content[0].type == "text"
@@ -588,7 +591,10 @@ class TestAsyncMessages:
         ) as stream:
             message = await stream.get_final_message()
             assert message.usage is not None
+            assert message.usage.input_tokens == 11
             assert message.usage.output_tokens == 1
+            assert message.usage.cache_creation_input_tokens == 3
+            assert message.usage.cache_read_input_tokens == 5
             assert message.stop_reason == "end_turn"
             assert len(message.content) == 1
             assert message.content[0].type == "text"
