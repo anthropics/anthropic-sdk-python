@@ -14,6 +14,10 @@ on:
       - 'stl-preview-head/**'
       - 'stl-preview-base/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     timeout-minutes: 10
