@@ -127,8 +127,8 @@ class Versions(SyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          version: Identifies the skill version: a version ID, or — where the endpoint accepts it —
-              the literal `latest` for the skill's most recent version.
+          version: Identifies the skill version: a version ID, or the literal `latest` for the
+              skill's most recent version.
 
               Requests carrying the `skills-2025-10-02` beta header address versions by their
               Unix epoch timestamp instead (e.g., "1759178010641129").
@@ -229,8 +229,7 @@ class Versions(SyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          version: Identifies the skill version: a version ID, or — where the endpoint accepts it —
-              the literal `latest` for the skill's most recent version.
+          version: Identifies the skill version by its version ID.
 
               Requests carrying the `skills-2025-10-02` beta header address versions by their
               Unix epoch timestamp instead (e.g., "1759178010641129").
@@ -347,8 +346,8 @@ class AsyncVersions(AsyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          version: Identifies the skill version: a version ID, or — where the endpoint accepts it —
-              the literal `latest` for the skill's most recent version.
+          version: Identifies the skill version: a version ID, or the literal `latest` for the
+              skill's most recent version.
 
               Requests carrying the `skills-2025-10-02` beta header address versions by their
               Unix epoch timestamp instead (e.g., "1759178010641129").
@@ -449,8 +448,7 @@ class AsyncVersions(AsyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          version: Identifies the skill version: a version ID, or — where the endpoint accepts it —
-              the literal `latest` for the skill's most recent version.
+          version: Identifies the skill version by its version ID.
 
               Requests carrying the `skills-2025-10-02` beta header address versions by their
               Unix epoch timestamp instead (e.g., "1759178010641129").
