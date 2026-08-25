@@ -24,7 +24,7 @@ class BetaThinkingConfigEnabledParam(TypedDict, total=False):
 
     type: Required[Literal["enabled"]]
 
-    display: Optional[Literal["summarized", "omitted"]]
+    display: Optional[Literal["summarized", "omitted", "updates"]]
     """Controls how thinking content appears in the response.
 
     When set to `summarized`, thinking is returned normally. When set to `omitted`,
