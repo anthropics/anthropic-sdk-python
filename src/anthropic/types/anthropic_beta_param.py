@@ -44,5 +44,10 @@ AnthropicBetaParam: TypeAlias = Union[
         "fallback-credit-2026-07-01",
         "agent-memory-2026-07-22",
         "mid-conversation-tool-changes-2026-07-01",
+        "compact-2026-01-12",
+        "computer-use-2025-11-24",
+        "mcp-tunnels-2026-06-22",
+        "structured-outputs-2025-11-13",
+        "task-budgets-2026-03-13",
     ],
 ]
