@@ -40,7 +40,7 @@ def get_auth_headers(
     aws_session_token: str | None,
     region: str | None,
     profile: str | None,
-    data: str | None,
+    data: str | bytes | None,
 ) -> dict[str, str]:
     from botocore.auth import SigV4Auth
     from botocore.awsrequest import AWSRequest

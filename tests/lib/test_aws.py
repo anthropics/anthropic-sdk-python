@@ -332,6 +332,34 @@ def test_retries(respx_mock: MockRouter) -> None:
     assert len(calls) == 2
 
 
+# --- Request behavior (SigV4 mode) ---
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_sigv4_binary_file_upload(sync: bool, respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://aws-external-anthropic\.us-east-1\.api\.aws/.*")).mock(
+        return_value=httpx2.Response(200, json={"id": "file_123", "type": "file"})
+    )
+    png = b"\x89PNG\r\n\x1a\n\x00\xff\xfe"
+
+    if sync:
+        AnthropicAWS(
+            aws_access_key="AKID", aws_secret_key="secret", aws_region="us-east-1", workspace_id="ws-123"
+        ).files.upload(file=("x.png", png, "image/png"))
+    else:
+        await AsyncAnthropicAWS(
+            aws_access_key="AKID", aws_secret_key="secret", aws_region="us-east-1", workspace_id="ws-123"
+        ).files.upload(file=("x.png", png, "image/png"))
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert str(calls[0].request.url) == "https://aws-external-anthropic.us-east-1.api.aws/v1/files"
+    assert png in calls[0].request.content
+    assert calls[0].request.headers["Authorization"].startswith("AWS4-HMAC-SHA256 ")
+
+
 # --- copy / with_options ---
 
 

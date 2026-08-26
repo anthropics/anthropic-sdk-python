@@ -264,7 +264,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
         if self.skip_auth or not self._use_sigv4:
             return
 
-        data = request.read().decode()
+        data = request.read()
 
         headers = get_auth_headers(
             method=request.method,
@@ -460,7 +460,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
         if self.skip_auth or not self._use_sigv4:
             return
 
-        data = request.read().decode()
+        data = request.read()
 
         headers = await asyncify(get_auth_headers)(
             method=request.method,
