@@ -50,5 +50,6 @@ AnthropicBetaParam: TypeAlias = Union[
         "structured-outputs-2025-11-13",
         "task-budgets-2026-03-13",
         "thinking-display-updates-2026-08-18",
+        "ce-user-management-2026-07-13",
     ],
 ]
