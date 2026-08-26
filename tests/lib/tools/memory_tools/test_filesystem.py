@@ -372,6 +372,32 @@ class TestBetaLocalFilesystemMemoryTool:
                 )
             )
 
+    def test_insert_preserves_non_newline_line_boundaries(
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
+    ) -> None:
+        # U+2028 and form-feed are line boundaries for str.splitlines() but not for "\n".
+        # view()/str_replace() split on "\n", so insert() must too, otherwise these
+        # characters are silently rewritten to "\n" and the text lands at the wrong line.
+        sync_local_filesystem_tool.create(
+            BetaMemoryTool20250818CreateCommand(
+                command="create", file_text="alpha\u2028beta\x0cgamma", path="/memories/insert_unicode_test.txt"
+            )
+        )
+
+        view_result = sync_local_filesystem_tool.view(
+            BetaMemoryTool20250818ViewCommand(command="view", path="/memories/insert_unicode_test.txt")
+        )
+        assert len(view_result.split(":\n", 1)[1].split("\n")) == 1
+
+        sync_local_filesystem_tool.insert(
+            BetaMemoryTool20250818InsertCommand(
+                command="insert", path="/memories/insert_unicode_test.txt", insert_line=1, insert_text="INSERTED"
+            )
+        )
+
+        dir_snapshot = get_directory_snapshot(str(sync_local_filesystem_tool.base_path))
+        assert dir_snapshot == {"memories/insert_unicode_test.txt": "alpha\u2028beta\x0cgamma\nINSERTED\n"}
+
     def test_delete(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
         sync_local_filesystem_tool.create(
             BetaMemoryTool20250818CreateCommand(
@@ -861,6 +887,32 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
                     command="insert", path="/memories/insert_test.txt", insert_line=10, insert_text="text"
                 )
             )
+
+    async def test_insert_preserves_non_newline_line_boundaries(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+    ) -> None:
+        # U+2028 and form-feed are line boundaries for str.splitlines() but not for "\n".
+        # view()/str_replace() split on "\n", so insert() must too, otherwise these
+        # characters are silently rewritten to "\n" and the text lands at the wrong line.
+        await async_local_filesystem_tool.create(
+            BetaMemoryTool20250818CreateCommand(
+                command="create", file_text="alpha\u2028beta\x0cgamma", path="/memories/insert_unicode_test.txt"
+            )
+        )
+
+        view_result = await async_local_filesystem_tool.view(
+            BetaMemoryTool20250818ViewCommand(command="view", path="/memories/insert_unicode_test.txt")
+        )
+        assert len(view_result.split(":\n", 1)[1].split("\n")) == 1
+
+        await async_local_filesystem_tool.insert(
+            BetaMemoryTool20250818InsertCommand(
+                command="insert", path="/memories/insert_unicode_test.txt", insert_line=1, insert_text="INSERTED"
+            )
+        )
+
+        dir_snapshot = get_directory_snapshot(str(async_local_filesystem_tool.base_path))
+        assert dir_snapshot == {"memories/insert_unicode_test.txt": "alpha\u2028beta\x0cgamma\nINSERTED\n"}
 
     async def test_delete(self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool) -> None:
         await async_local_filesystem_tool.create(
