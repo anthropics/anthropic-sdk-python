@@ -393,7 +393,7 @@ class TestSyncMessages:
         # `usage`; the accumulator should initialize it from `message_delta`
         # instead of crashing on the missing value.
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("usage_omitted_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("usage_omitted_response.txt"))
         )
 
         # A default (non-strict) client mirrors how the docs' event sequence
@@ -410,6 +410,32 @@ class TestSyncMessages:
         assert message.usage is not None
         assert message.usage.input_tokens == 12
         assert message.usage.output_tokens == 6
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_usage_omitted_at_message_start_preserves_delta_optional_usage_fields(
+        self, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_response("usage_omitted_with_optional_fields_response.txt"))
+        )
+
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+
+        assert message.usage.input_tokens == 12
+        assert message.usage.output_tokens == 6
+        assert message.usage.cache_creation_input_tokens == 4
+        assert message.usage.cache_read_input_tokens == 3
+        assert message.usage.output_tokens_details is not None
+        assert message.usage.output_tokens_details.thinking_tokens == 2
+        assert message.usage.server_tool_use is not None
+        assert message.usage.server_tool_use.web_search_requests == 1
 
 
 class TestAsyncMessages:
@@ -618,7 +644,7 @@ class TestAsyncMessages:
         # `usage`; the accumulator should initialize it from `message_delta`
         # instead of crashing on the missing value.
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("usage_omitted_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("usage_omitted_response.txt")))
         )
 
         # A default (non-strict) client mirrors how the docs' event sequence

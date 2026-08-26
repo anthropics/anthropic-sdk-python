@@ -8,10 +8,10 @@ from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_n
 import httpx2
 from pydantic import BaseModel
 
+from anthropic.types.beta.beta_usage import BetaUsage
 from anthropic.types.beta.beta_tool_use_block import BetaToolUseBlock
 from anthropic.types.beta.beta_mcp_tool_use_block import BetaMCPToolUseBlock
 from anthropic.types.beta.beta_server_tool_use_block import BetaServerToolUseBlock
-from anthropic.types.usage import Usage
 
 from ..._types import NotGiven, not_given
 from ..._utils import consume_sync_iterator, consume_async_iterator
@@ -566,10 +566,10 @@ def accumulate_event(
             # case the snapshot has no usage yet. Initialize it from the delta
             # so the final message still carries token counts, and tolerate
             # streams that never supply usage.
-            current_snapshot.usage = Usage(
-                input_tokens=event.usage.input_tokens or 0,
-                output_tokens=event.usage.output_tokens,
-            )
+            usage = event.usage.to_dict()
+            if event.usage.input_tokens is None:
+                usage["input_tokens"] = 0
+            current_snapshot.usage = construct_type(type_=BetaUsage, value=usage)
         else:
             current_snapshot.usage.output_tokens = event.usage.output_tokens
 
