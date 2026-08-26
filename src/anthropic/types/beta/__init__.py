@@ -40,6 +40,7 @@ from .beta_fallback_info import BetaFallbackInfo as BetaFallbackInfo
 from .beta_file_metadata import BetaFileMetadata as BetaFileMetadata
 from .beta_message_param import BetaMessageParam as BetaMessageParam
 from .beta_text_citation import BetaTextCitation as BetaTextCitation
+from .beta_webhook_event import BetaWebhookEvent as BetaWebhookEvent
 from .file_upload_params import FileUploadParams as FileUploadParams
 from .tunnel_list_params import TunnelListParams as TunnelListParams
 from .agent_create_params import AgentCreateParams as AgentCreateParams

@@ -8,13 +8,32 @@ from typing import Mapping, cast
 from ..._models import construct_type
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._exceptions import AnthropicError
-from ...types.beta.unwrap_webhook_event import UnwrapWebhookEvent
+from ...types.beta.beta_webhook_event import BetaWebhookEvent
 
 __all__ = ["Webhooks", "AsyncWebhooks"]
 
 
 class Webhooks(SyncAPIResource):
-    def unwrap(self, payload: str, *, headers: Mapping[str, str], key: str | bytes | None = None) -> UnwrapWebhookEvent:
+    def parse_unverified(self, payload: str) -> BetaWebhookEvent:
+        """Parses a webhook payload into an event without verifying its signature.
+
+        Prefer
+        `unwrap()` unless you have already verified the signature yourself.
+        """
+        return cast(
+            BetaWebhookEvent,
+            construct_type(
+                type_=BetaWebhookEvent,
+                value=json.loads(payload),
+            ),
+        )
+
+    def unwrap(self, payload: str, *, headers: Mapping[str, str], key: str | bytes | None = None) -> BetaWebhookEvent:
+        """
+        Verifies the webhook signature from the `webhook-id`, `webhook-timestamp` and
+        `webhook-signature` headers using your webhook signing key, then parses the
+        payload into an event. Fails if the signature is missing or invalid.
+        """
         try:
             from standardwebhooks import Webhook
         except ImportError as exc:
@@ -33,16 +52,35 @@ class Webhooks(SyncAPIResource):
         Webhook(key).verify(payload, headers)
 
         return cast(
-            UnwrapWebhookEvent,
+            BetaWebhookEvent,
             construct_type(
-                type_=UnwrapWebhookEvent,
+                type_=BetaWebhookEvent,
                 value=json.loads(payload),
             ),
         )
 
 
 class AsyncWebhooks(AsyncAPIResource):
-    def unwrap(self, payload: str, *, headers: Mapping[str, str], key: str | bytes | None = None) -> UnwrapWebhookEvent:
+    def parse_unverified(self, payload: str) -> BetaWebhookEvent:
+        """Parses a webhook payload into an event without verifying its signature.
+
+        Prefer
+        `unwrap()` unless you have already verified the signature yourself.
+        """
+        return cast(
+            BetaWebhookEvent,
+            construct_type(
+                type_=BetaWebhookEvent,
+                value=json.loads(payload),
+            ),
+        )
+
+    def unwrap(self, payload: str, *, headers: Mapping[str, str], key: str | bytes | None = None) -> BetaWebhookEvent:
+        """
+        Verifies the webhook signature from the `webhook-id`, `webhook-timestamp` and
+        `webhook-signature` headers using your webhook signing key, then parses the
+        payload into an event. Fails if the signature is missing or invalid.
+        """
         try:
             from standardwebhooks import Webhook
         except ImportError as exc:
@@ -61,9 +99,9 @@ class AsyncWebhooks(AsyncAPIResource):
         Webhook(key).verify(payload, headers)
 
         return cast(
-            UnwrapWebhookEvent,
+            BetaWebhookEvent,
             construct_type(
-                type_=UnwrapWebhookEvent,
+                type_=BetaWebhookEvent,
                 value=json.loads(payload),
             ),
         )
