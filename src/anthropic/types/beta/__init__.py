@@ -26,6 +26,7 @@ from .beta_cloud_config import BetaCloudConfig as BetaCloudConfig
 from .beta_deleted_file import BetaDeletedFile as BetaDeletedFile
 from .beta_dream_output import BetaDreamOutput as BetaDreamOutput
 from .beta_dream_status import BetaDreamStatus as BetaDreamStatus
+from .beta_organization import BetaOrganization as BetaOrganization
 from .beta_skill_params import BetaSkillParams as BetaSkillParams
 from .beta_tunnel_token import BetaTunnelToken as BetaTunnelToken
 from .beta_user_profile import BetaUserProfile as BetaUserProfile
@@ -86,6 +87,7 @@ from .beta_dream_input_param import BetaDreamInputParam as BetaDreamInputParam
 from .beta_effort_capability import BetaEffortCapability as BetaEffortCapability
 from .beta_image_block_param import BetaImageBlockParam as BetaImageBlockParam
 from .beta_mcp_toolset_param import BetaMCPToolsetParam as BetaMCPToolsetParam
+from .beta_organization_role import BetaOrganizationRole as BetaOrganizationRole
 from .beta_plain_text_source import BetaPlainTextSource as BetaPlainTextSource
 from .beta_server_tool_usage import BetaServerToolUsage as BetaServerToolUsage
 from .beta_tool_choice_param import BetaToolChoiceParam as BetaToolChoiceParam
