@@ -149,7 +149,7 @@ class AnthropicAWS(Anthropic):
 
         from ._auth import get_auth_headers
 
-        data = request.read().decode()
+        data = request.read()
 
         headers = get_auth_headers(
             method=request.method,
@@ -357,7 +357,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
 
         from ._auth import get_auth_headers
 
-        data = request.read().decode()
+        data = request.read()
 
         headers = await asyncify(get_auth_headers)(
             method=request.method,

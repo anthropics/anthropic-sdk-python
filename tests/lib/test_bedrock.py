@@ -423,6 +423,26 @@ async def test_stream_skips_typeless_chunk_async(respx_mock: MockRouter) -> None
     assert events[1].to_dict()["amazon-bedrock-invocationMetrics"] == _INVOCATION_METRICS
 
 
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_sigv4_signs_binary_body(sync: bool, respx_mock: MockRouter) -> None:
+    respx_mock.post("https://bedrock-runtime.us-east-1.amazonaws.com/foo").mock(
+        return_value=httpx2.Response(200, json={})
+    )
+    content = b"\x89PNG\r\n\x1a\n\x00\xff\xfe"
+
+    if sync:
+        sync_client.post("/foo", content=content, cast_to=httpx2.Response)
+    else:
+        await async_client.post("/foo", content=content, cast_to=httpx2.Response)
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert calls[0].request.content == content
+    assert calls[0].request.headers["Authorization"].startswith("AWS4-HMAC-SHA256 ")
+
+
 def test_copy_x_stainless_helper_header_appends() -> None:
     # `x-stainless-helper` accumulates across copies instead of being clobbered
     client = sync_client.with_options(default_headers={"x-stainless-helper": "parent"})
