@@ -13,9 +13,9 @@ __all__ = ["VersionListParams"]
 
 class VersionListParams(TypedDict, total=False):
     limit: Optional[int]
-    """Number of items to return per page.
+    """Number of results to return per page.
 
-    Defaults to `20`. Ranges from `1` to `1000`.
+    Ranges from `1` to `1000`. Defaults to `20`.
     """
 
     page: Optional[str]
