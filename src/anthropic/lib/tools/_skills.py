@@ -258,7 +258,24 @@ async def download_session_skills(
     # ``skills_root`` is created lazily by the extraction below — don't create it
     # up front so an agent with no skills leaves no stray directory behind.
     downloaded: list[Path] = []
-    for skill in session.agent.skills:
+
+    # Collect skills from the coordinator and all roster agents in a multiagent setup.
+    all_skills = list(session.agent.skills)
+    multiagent = getattr(session.agent, "multiagent", None)
+    if multiagent is not None:
+        for entry in getattr(multiagent, "agents", []):
+            # Only thread agents have skills; advisors do not.
+            all_skills.extend(getattr(entry, "skills", []))
+
+    # Deduplicate by skill_id so we don't download the same skill multiple times.
+    seen_skills: set[str] = set()
+    unique_skills = []
+    for s in all_skills:
+        if s.skill_id not in seen_skills:
+            unique_skills.append(s)
+            seen_skills.add(s.skill_id)
+
+    for skill in unique_skills:
         try:
             version_id = await _resolve_skill_version(client, skill.skill_id, skill.version)
             version = await client.beta.skills.versions.retrieve(version_id, skill_id=skill.skill_id)
@@ -274,9 +291,23 @@ async def download_session_skills(
             adest = anyio.Path(dest)
             if await adest.is_symlink():
                 await adest.unlink()
+            # If the directory already exists and contains the expected version,
+            # skip the download. This prevents race conditions and redundant
+            # work when multiple sessions share a workdir.
+            version_file = dest / ".version"
+            if await adest.is_dir() and await anyio.Path(version_file).exists():
+                try:
+                    if (await anyio.Path(version_file).read_text()).strip() == version_id:
+                        log.info("skill skill_id=%s version=%s already exists at %s; skipping", skill.skill_id, version_id, dest)
+                        downloaded.append(dest)
+                        continue
+                except Exception:
+                    pass
+
             # ``shutil.rmtree`` is blocking; keep it off the event loop.
             await run_sync(partial(shutil.rmtree, dest, ignore_errors=True))
             await _download_and_extract(client, skill.skill_id, version_id, dest)
+            await anyio.Path(version_file).write_text(version_id)
             downloaded.append(dest)
             log.info("downloaded skill skill_id=%s version=%s -> %s", skill.skill_id, version_id, dest)
         except Exception as e:

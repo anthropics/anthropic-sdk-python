@@ -274,6 +274,10 @@ class AgentToolContext:
     max_file_bytes: int | None | NotGiven = not_given
     max_image_base64_bytes: int | None | NotGiven = not_given
     max_pdf_bytes: int | None | NotGiven = not_given
+    # Whether to keep skill directories on disk after the context exits.
+    # When True, ``_cleanup_skills`` is a no-op, allowing the workdir to
+    # serve as a persistent skills cache across sessions.
+    keep_skills: bool = False
     # Resolved directories the write and edit tools refuse to modify. The
     # worker sets this to the roots of read-only memory stores so the agent
     # sees the error at write time instead of the change silently never
@@ -316,6 +320,8 @@ class AgentToolContext:
         Only the directories this context created are removed — a pre-existing
         ``{workdir}/skills`` tree is left untouched.
         """
+        if self.keep_skills:
+            return
         for skill_dir in self._skill_dirs:
             try:
                 # ``shutil.rmtree`` is blocking; keep it off the event loop.
