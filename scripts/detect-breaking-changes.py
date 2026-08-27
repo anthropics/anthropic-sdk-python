@@ -10,7 +10,30 @@ from rich.text import Text
 from rich.style import Style
 
 
+def resolve_assignment_alias(obj: griffe.Object | griffe.Alias) -> griffe.Object | griffe.Alias:
+    # griffe models `Foo = Bar` (a deprecated alias for a renamed class) as an attribute
+    # with no members, so compare against the class it points to instead. Aliases can be
+    # chained (`Foo = Bar`, `Bar = Baz`), so keep following them until we reach a class.
+    target: griffe.Object | griffe.Alias | None = obj
+    seen: set[str] = set()
+    while isinstance(target, griffe.Attribute) and isinstance(target.value, griffe.ExprName):
+        if target.path in seen:  # `A = B; B = A`
+            return obj
+        seen.add(target.path)
+        try:
+            # annotated as `Module | Class` upstream, but a re-exported name resolves to an `Alias`
+            resolved: griffe.Object | griffe.Alias | None = target.value.resolved
+            if isinstance(resolved, griffe.Alias):
+                resolved = resolved.final_target
+            target = resolved
+        except Exception:
+            return obj
+
+    return target if isinstance(target, griffe.Class) else obj
+
+
 def public_members(obj: griffe.Object | griffe.Alias) -> dict[str, griffe.Object | griffe.Alias]:
+    obj = resolve_assignment_alias(obj)
     if isinstance(obj, griffe.Alias):
         # ignore imports for now, they're technically part of the public API
         # but we don't have good preventative measures in place to prevent
