@@ -198,25 +198,6 @@ def _extract_skill_archive(archive_path: Path, dest: Path) -> None:
             os.chmod(target, _archive_file_mode(member.mode))
 
 
-async def _resolve_skill_version(client: AsyncAnthropic, skill_id: str, version: str) -> str:
-    """Resolve ``version`` to the concrete numeric timestamp the
-    ``/v1/skills/{id}/versions/{version}`` endpoints require.
-
-    ``session.agent.skills[].version`` may be an alias such as ``"latest"``,
-    which those endpoints reject — so list the skill's versions and pick the
-    newest. Numeric versions are returned unchanged.
-    """
-    if version.isdigit():
-        return version
-    newest: str | None = None
-    async for v in client.beta.skills.versions.list(skill_id):
-        if v.version.isdigit() and (newest is None or int(v.version) > int(newest)):
-            newest = v.version
-    if newest is None:
-        raise ValueError(f"skill {skill_id!r} has no concrete version to resolve {version!r} against")
-    return newest
-
-
 async def download_session_skills(
     client: AsyncAnthropic,
     *,
@@ -260,8 +241,7 @@ async def download_session_skills(
     downloaded: list[Path] = []
     for skill in session.agent.skills:
         try:
-            version_id = await _resolve_skill_version(client, skill.skill_id, skill.version)
-            version = await client.beta.skills.versions.retrieve(version_id, skill_id=skill.skill_id)
+            version = await client.beta.skills.versions.retrieve(skill.version, skill_id=skill.skill_id)
             # The directory is the skill's name, but reduce it to a single safe
             # path component so a hostile name can't escape skills_root.
             dirname = os.path.basename(version.name.strip()) or skill.skill_id
@@ -276,9 +256,11 @@ async def download_session_skills(
                 await adest.unlink()
             # ``shutil.rmtree`` is blocking; keep it off the event loop.
             await run_sync(partial(shutil.rmtree, dest, ignore_errors=True))
-            await _download_and_extract(client, skill.skill_id, version_id, dest)
+            # ``skill.version`` may be the alias ``"latest"``, which only the
+            # retrieve endpoint resolves; download by the concrete id it returned.
+            await _download_and_extract(client, skill.skill_id, version.id, dest)
             downloaded.append(dest)
-            log.info("downloaded skill skill_id=%s version=%s -> %s", skill.skill_id, version_id, dest)
+            log.info("downloaded skill skill_id=%s version=%s -> %s", skill.skill_id, version.id, dest)
         except Exception as e:
             log.warning("failed to download skill skill_id=%s: %s", skill.skill_id, e)
     return downloaded

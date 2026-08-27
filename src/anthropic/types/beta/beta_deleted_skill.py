@@ -1,18 +1,20 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+from typing_extensions import Literal
+
 from ..._models import BaseModel
 
-__all__ = ["SkillDeleteResponse"]
+__all__ = ["BetaDeletedSkill"]
 
 
-class SkillDeleteResponse(BaseModel):
+class BetaDeletedSkill(BaseModel):
     id: str
     """Unique identifier for the skill.
 
     The format and length of IDs may change over time.
     """
 
-    type: str
+    type: Literal["skill_deleted"]
     """Deleted object type.
 
     For Skills, this is always `"skill_deleted"`.

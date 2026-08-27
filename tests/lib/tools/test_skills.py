@@ -13,7 +13,10 @@ import os
 import stat
 import tarfile
 import zipfile
+from types import SimpleNamespace
+from typing import Any, AsyncIterator, cast
 from pathlib import Path
+from contextlib import asynccontextmanager
 from collections.abc import Callable
 
 ArchiveMaker = Callable[[Path, dict[str, bytes]], None]
@@ -23,7 +26,12 @@ ArchiveModeMaker = Callable[[Path, "dict[str, tuple[bytes, int]]"], None]
 
 import pytest
 
-from anthropic.lib.tools._skills import _strip_top, _archive_top_dir, _extract_skill_archive
+from anthropic.lib.tools._skills import (
+    _strip_top,
+    _archive_top_dir,
+    _extract_skill_archive,
+    download_session_skills,
+)
 
 
 def _make_zip(path: Path, entries: dict[str, bytes]) -> None:
@@ -370,3 +378,44 @@ def test_tar_path_screen_applies_to_skipped_members(tmp_path: Path) -> None:
     assert not os.path.lexists(dest.parent / "x")
     assert not os.path.lexists(tmp_path / "sub" / "x")
     assert not os.path.lexists(tmp_path / "x")
+
+
+class _FakeVersions:
+    """Records the version each endpoint was addressed by; ``download`` streams a real archive."""
+
+    def __init__(self, archive: Path) -> None:
+        self.retrieves: list[str] = []
+        self.downloads: list[str] = []
+        self.with_streaming_response = SimpleNamespace(download=self._download)
+        self._archive = archive
+
+    async def retrieve(self, version: str, *, skill_id: str) -> Any:
+        self.retrieves.append(f"{skill_id}@{version}")
+        return SimpleNamespace(id="skillver_123", name="pdf")
+
+    @asynccontextmanager
+    async def _download(self, version: str, *, skill_id: str) -> AsyncIterator[Any]:
+        self.downloads.append(f"{skill_id}@{version}")
+        archive = self._archive
+
+        async def stream_to_file(dest: str) -> None:
+            Path(dest).write_bytes(archive.read_bytes())
+
+        yield SimpleNamespace(stream_to_file=stream_to_file)
+
+
+async def test_download_retrieves_by_configured_version_and_downloads_by_returned_id(tmp_path: Path) -> None:
+    archive = tmp_path / "skill.tar.gz"
+    _make_targz(archive, {"pdf/SKILL.md": b"# PDF"})
+    versions = _FakeVersions(archive)
+    client = cast(Any, SimpleNamespace(beta=SimpleNamespace(skills=SimpleNamespace(versions=versions))))
+    session = cast(
+        Any, SimpleNamespace(agent=SimpleNamespace(skills=[SimpleNamespace(skill_id="skill_01", version="latest")]))
+    )
+    work = tmp_path / "work"
+    work.mkdir()
+    created = await download_session_skills(client, workdir=work, session=session)
+    assert versions.retrieves == ["skill_01@latest"]
+    assert versions.downloads == ["skill_01@skillver_123"]
+    assert created == [(work / "skills" / "pdf").resolve()]
+    assert (work / "skills" / "pdf" / "SKILL.md").read_text() == "# PDF"
