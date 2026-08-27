@@ -23,7 +23,8 @@ ArchiveModeMaker = Callable[[Path, "dict[str, tuple[bytes, int]]"], None]
 
 import pytest
 
-from anthropic.lib.tools._skills import _strip_top, _archive_top_dir, _extract_skill_archive
+from anthropic.types.beta import BetaManagedAgentsSession
+from anthropic.lib.tools._skills import _strip_top, _session_skills, _archive_top_dir, _extract_skill_archive
 
 
 def _make_zip(path: Path, entries: dict[str, bytes]) -> None:
@@ -370,3 +371,88 @@ def test_tar_path_screen_applies_to_skipped_members(tmp_path: Path) -> None:
     assert not os.path.lexists(dest.parent / "x")
     assert not os.path.lexists(tmp_path / "sub" / "x")
     assert not os.path.lexists(tmp_path / "x")
+
+
+# ---------------------------------------------------------------------------
+# Which skills a session needs on disk (#1870).
+#
+# Subagent threads share the coordinator's container filesystem, so a roster
+# member's skills have to be extracted before its thread runs. Collecting only
+# ``session.agent.skills`` left them missing and raised nothing.
+# ---------------------------------------------------------------------------
+
+
+def _skill(skill_id: str, version: str | None = None) -> dict[str, object]:
+    return {"skill_id": skill_id, "version": version, "type": "skill"}
+
+
+def _thread_agent(*skill_ids: str) -> dict[str, object]:
+    return {
+        "id": "agt_worker",
+        "name": "worker",
+        "type": "agent",
+        "version": 1,
+        "mcp_servers": [],
+        "model": {"model": "claude-sonnet-4-5"},
+        "tools": [],
+        "skills": [_skill(sid) for sid in skill_ids],
+    }
+
+
+_ADVISOR: dict[str, object] = {"type": "advisor", "model": "claude-haiku-4-5"}
+
+
+def _session(
+    coordinator_skills: list[dict[str, object]],
+    roster: list[dict[str, object]] | None,
+) -> BetaManagedAgentsSession:
+    return BetaManagedAgentsSession.construct(
+        id="ses_1",
+        agent={
+            "id": "agt_coordinator",
+            "name": "coordinator",
+            "type": "agent",
+            "version": 1,
+            "mcp_servers": [],
+            "model": {"model": "claude-sonnet-4-5"},
+            "tools": [],
+            "skills": coordinator_skills,
+            "multiagent": None if roster is None else {"type": "coordinator", "agents": roster},
+        },
+    )
+
+
+def test_session_skills_without_a_roster() -> None:
+    """A single-agent session is unchanged: just the agent's own skills."""
+    session = _session([_skill("sk_a")], None)
+    assert [s.skill_id for s in _session_skills(session)] == ["sk_a"]
+
+
+def test_session_skills_includes_roster_members() -> None:
+    """Roster members' skills are downloaded too, or their threads run without them."""
+    session = _session([_skill("sk_a")], [_thread_agent("sk_b"), _thread_agent("sk_c")])
+    assert [s.skill_id for s in _session_skills(session)] == ["sk_a", "sk_b", "sk_c"]
+
+
+def test_session_skills_skips_advisors() -> None:
+    """Roster entries are a union and advisors carry no ``skills`` attribute."""
+    session = _session([_skill("sk_a")], [_ADVISOR, _thread_agent("sk_b")])
+    assert [s.skill_id for s in _session_skills(session)] == ["sk_a", "sk_b"]
+
+
+def test_session_skills_deduplicates_shared_skills() -> None:
+    """Each download rmtree's its destination, so a shared skill is yielded once."""
+    session = _session([_skill("sk_a")], [_thread_agent("sk_a"), _thread_agent("sk_b")])
+    assert [s.skill_id for s in _session_skills(session)] == ["sk_a", "sk_b"]
+
+
+def test_session_skills_treats_versions_as_distinct() -> None:
+    """Same skill pinned to different versions is not collapsed by the dedupe."""
+    session = _session([_skill("sk_a", "1")], [_thread_agent("sk_a")])
+    assert [(s.skill_id, s.version) for s in _session_skills(session)] == [("sk_a", "1"), ("sk_a", None)]
+
+
+def test_session_skills_with_an_empty_roster() -> None:
+    """A coordinator with no roster members behaves like a single-agent session."""
+    session = _session([_skill("sk_a")], [])
+    assert [s.skill_id for s in _session_skills(session)] == ["sk_a"]

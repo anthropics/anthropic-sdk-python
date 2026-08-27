@@ -17,14 +17,14 @@ import tempfile
 from typing import TYPE_CHECKING
 from pathlib import Path, PurePosixPath
 from functools import partial
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 
 import anyio
 from anyio.to_thread import run_sync
 
 if TYPE_CHECKING:
     from ..._client import AsyncAnthropic
-    from ...types.beta import BetaManagedAgentsSession
+    from ...types.beta import Skill, BetaManagedAgentsSession
 
 __all__ = ["download_session_skills"]
 
@@ -217,6 +217,33 @@ async def _resolve_skill_version(client: AsyncAnthropic, skill_id: str, version:
     return newest
 
 
+def _session_skills(session: BetaManagedAgentsSession) -> Iterator[Skill]:
+    """Every skill the session needs on disk: the agent's, plus each roster member's.
+
+    Subagent threads share the coordinator's container filesystem, so a roster
+    member's skills must already be extracted before its thread runs. Only the
+    coordinator's own skills were collected before, which left subagents running
+    without theirs and produced no error — just degraded output.
+
+    Roster entries are a union: thread agents carry skills, advisors do not, so
+    the discriminator is checked rather than the attribute. Skills shared by
+    several members are yielded once, because each download rmtree's its
+    destination and a repeat would redo work already done.
+    """
+    seen: set[tuple[str, str | None]] = set()
+    coordinator = session.agent.multiagent
+    roster = coordinator.agents if coordinator is not None else []
+    for skill in (
+        *session.agent.skills,
+        *(skill for agent in roster if agent.type == "agent" for skill in agent.skills),
+    ):
+        key = (skill.skill_id, skill.version)
+        if key in seen:
+            continue
+        seen.add(key)
+        yield skill
+
+
 async def download_session_skills(
     client: AsyncAnthropic,
     *,
@@ -224,7 +251,11 @@ async def download_session_skills(
     session: BetaManagedAgentsSession | None = None,
     session_id: str | None = None,
 ) -> list[Path]:
-    """Download the session agent's skills into ``{workdir}/skills/<name>/``.
+    """Download the session's skills into ``{workdir}/skills/<name>/``.
+
+    Covers the session agent's own skills and, for a multiagent session, those
+    of each roster member: subagent threads share this filesystem, so their
+    skills must be here before they run.
 
     Reads the resolved agent off ``session``, and for each skill fetches its
     files via ``client.beta.skills.versions.download`` and extracts the archive
@@ -258,7 +289,7 @@ async def download_session_skills(
     # ``skills_root`` is created lazily by the extraction below — don't create it
     # up front so an agent with no skills leaves no stray directory behind.
     downloaded: list[Path] = []
-    for skill in session.agent.skills:
+    for skill in _session_skills(session):
         try:
             version_id = await _resolve_skill_version(client, skill.skill_id, skill.version)
             version = await client.beta.skills.versions.retrieve(version_id, skill_id=skill.skill_id)
