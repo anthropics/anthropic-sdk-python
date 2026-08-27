@@ -560,7 +560,14 @@ def accumulate_event(
         # message_delta carries the first full usage object, so construct it
         # before updating.
         if current_snapshot.usage is None:
-            current_snapshot.usage = BetaUsage.construct(**event.usage.model_dump())
+            _usage_data = event.usage.model_dump()
+            # `BetaUsage.input_tokens` is a required int. When the delta omits it
+            # (e.g. `{"output_tokens": 1}` per #1806), `construct` would leave it
+            # as None on a non-optional field and break downstream arithmetic.
+            # Coerce a missing input_tokens to 0 so the snapshot stays valid.
+            if _usage_data.get("input_tokens") is None:
+                _usage_data["input_tokens"] = 0
+            current_snapshot.usage = BetaUsage.construct(**_usage_data)
         else:
             current_snapshot.usage.output_tokens = event.usage.output_tokens
 
