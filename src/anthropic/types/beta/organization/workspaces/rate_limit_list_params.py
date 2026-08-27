@@ -15,8 +15,8 @@ class RateLimitListParams(TypedDict, total=False):
     limit: Optional[int]
     """Maximum number of items to return per page. Ranges from `1` to `1000`.
 
-    Accepted for request-shape compatibility and currently ignored: every entry is
-    returned in a single page.
+    When omitted, every remaining entry is returned in a single page and `next_page`
+    is `null`.
     """
 
     page: Optional[str]
