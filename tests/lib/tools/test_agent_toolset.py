@@ -214,7 +214,7 @@ async def test_read_write_edit_roundtrip(tmp_path: Path) -> None:
 
 @needs_pydantic_v2
 async def test_read_view_range(tmp_path: Path) -> None:
-    (tmp_path / "f.txt").write_text("a\nb\nc\nd\n")
+    (tmp_path / "f.txt").write_bytes(b"a\nb\nc\nd\n")
     env = AgentToolContext(workdir=str(tmp_path))
     out = await beta_read_tool(env).call({"file_path": "f.txt", "view_range": [2, 3]})
     assert out == "b\nc"
@@ -232,7 +232,7 @@ async def test_read_view_range(tmp_path: Path) -> None:
     ],
 )
 async def test_read_view_range_edges(tmp_path: Path, view_range: list[int], want: str) -> None:
-    (tmp_path / "a.txt").write_text("line1\nline2\nline3")
+    (tmp_path / "a.txt").write_bytes(b"line1\nline2\nline3")
     env = AgentToolContext(workdir=str(tmp_path))
     assert await beta_read_tool(env).call({"file_path": "a.txt", "view_range": view_range}) == want
 
@@ -244,6 +244,40 @@ async def test_read_view_range_wrong_arity_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(ToolError) as exc_info:
         await beta_read_tool(env).call({"file_path": "a.txt", "view_range": [2]})
     assert str(exc_info.value) == "read: view_range must be [start_line, end_line]"
+
+
+@needs_pydantic_v2
+async def test_read_preserves_crlf_line_endings(tmp_path: Path) -> None:
+    (tmp_path / "crlf.txt").write_bytes(b"line1\r\nline2\r\nline3\r\n")
+    env = AgentToolContext(workdir=str(tmp_path))
+    assert await beta_read_tool(env).call({"file_path": "crlf.txt"}) == "line1\r\nline2\r\nline3\r\n"
+    out = await beta_read_tool(env).call({"file_path": "crlf.txt", "view_range": [1, 2]})
+    assert out == "line1\r\nline2\r"
+
+
+@needs_pydantic_v2
+async def test_read_preserves_lone_cr(tmp_path: Path) -> None:
+    (tmp_path / "cr.txt").write_bytes(b"a\rb\rc\r")
+    env = AgentToolContext(workdir=str(tmp_path))
+    assert await beta_read_tool(env).call({"file_path": "cr.txt"}) == "a\rb\rc\r"
+    assert await beta_read_tool(env).call({"file_path": "cr.txt", "view_range": [1, 1]}) == "a\rb\rc\r"
+    assert await beta_read_tool(env).call({"file_path": "cr.txt", "view_range": [2, 2]}) == ""
+
+
+@needs_pydantic_v2
+async def test_edit_preserves_crlf_line_endings(tmp_path: Path) -> None:
+    path = tmp_path / "crlf.txt"
+    path.write_bytes(b"line1\r\nline2\r\nline3\r\n")
+    env = AgentToolContext(workdir=str(tmp_path))
+    await beta_edit_tool(env).call({"file_path": "crlf.txt", "old_string": "line2", "new_string": "LINE2"})
+    assert path.read_bytes() == b"line1\r\nLINE2\r\nline3\r\n"
+
+
+@needs_pydantic_v2
+async def test_write_preserves_content_bytes(tmp_path: Path) -> None:
+    env = AgentToolContext(workdir=str(tmp_path))
+    await beta_write_tool(env).call({"file_path": "w.txt", "content": "a\r\nb\nc\r"})
+    assert (tmp_path / "w.txt").read_bytes() == b"a\r\nb\nc\r"
 
 
 @needs_pydantic_v2
