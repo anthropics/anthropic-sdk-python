@@ -54,7 +54,7 @@ import anyio
 import anyio.abc
 from anyio.to_thread import run_sync
 
-from ._files import read_text_exact, write_text_exact
+from ._files import read_line_range, read_text_exact, write_text_exact
 from ._skills import _within, download_session_skills
 from ..._types import NotGiven, not_given
 from ..._utils import is_given
@@ -231,8 +231,10 @@ class AgentToolContext:
             and is NOT merged with or added to the scrubbed process
             environment. To keep the defaults plus extra vars, build the
             combined mapping yourself before passing it.
-        max_file_bytes: Size cap for the ``read`` and ``edit`` tools, which both
-            load the whole file into memory. ``not_given`` (default) uses the
+        max_file_bytes: Size cap for a whole-file ``read`` and for ``edit``,
+            which both load the whole file into memory. A ``read`` with
+            ``view_range`` on a larger file streams it and applies the cap to
+            the selected lines instead. ``not_given`` (default) uses the
             built-in 256 KiB cap; a positive int sets a custom cap; ``None``
             disables the cap entirely. Disabling it reintroduces the OOM risk on
             a model-controlled path, so pass ``None`` only when the sandbox can
@@ -673,6 +675,8 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             target = resolve_path(ctx, file_path)
         except ValueError as e:
             raise ToolError(f"read: {e}") from e
+        if view_range and len(view_range) != 2:
+            raise ToolError("read: view_range must be [start_line, end_line]")
         try:
             # stat() before any open(): the size cap stops a multi-GB file from
             # OOM'ing the runner, and is_file() rejects FIFOs/devices/dirs
@@ -689,10 +693,12 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
                 return [_read_binary_block(target, file_path, st.st_size, media_type, ctx)]
             limit = _resolve_max_bytes(ctx.max_file_bytes)
             if limit is not None and st.st_size > limit:
-                raise ToolError(
-                    f"read: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
-                    "Use bash (head/tail/sed) to read a slice."
-                )
+                if not view_range:
+                    raise ToolError(
+                        f"read: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
+                        "Use the view_range parameter to read specific line ranges, e.g. view_range: [1, 500]."
+                    )
+                return await run_sync(partial(read_line_range, target, file_path, view_range[0], view_range[1], limit))
             # Explicit UTF-8: the locale default varies by host (ASCII under
             # LANG=C), which would mislabel valid UTF-8 as binary below.
             text = read_text_exact(target)
@@ -706,8 +712,6 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             raise _fs_error("read", file_path, e) from e
         if not view_range:
             return text
-        if len(view_range) != 2:
-            raise ToolError("read: view_range must be [start_line, end_line]")
         start_line, end_line = view_range
         lines = text.split("\n")
         start = max(0, start_line - 1)
@@ -757,7 +761,7 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             if limit is not None and st.st_size > limit:
                 raise ToolError(
                     f"edit: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
-                    "Use bash (sed/awk) to edit a large file."
+                    "The edit tool loads the whole file and cannot modify a file this large."
                 )
             text = read_text_exact(target)
         except ToolError:
