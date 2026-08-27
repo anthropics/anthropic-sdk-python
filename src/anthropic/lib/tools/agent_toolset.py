@@ -54,6 +54,7 @@ import anyio
 import anyio.abc
 from anyio.to_thread import run_sync
 
+from ._files import read_text_exact, write_text_exact
 from ._skills import _within, download_session_skills
 from ..._types import NotGiven, not_given
 from ..._utils import is_given
@@ -694,7 +695,7 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
                 )
             # Explicit UTF-8: the locale default varies by host (ASCII under
             # LANG=C), which would mislabel valid UTF-8 as binary below.
-            text = target.read_text(encoding="utf-8")
+            text = read_text_exact(target)
         except ToolError:
             raise
         except UnicodeDecodeError as e:
@@ -727,7 +728,7 @@ def beta_write_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
         _reject_read_only(ctx, target, op="write", file_path=file_path)
         try:
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(content, encoding="utf-8")
+            write_text_exact(target, content)
         except OSError as e:
             raise _fs_error("write", file_path, e) from e
         return f"wrote {len(content)} bytes to {file_path}"
@@ -758,7 +759,7 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
                     f"edit: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
                     "Use bash (sed/awk) to edit a large file."
                 )
-            text = target.read_text(encoding="utf-8")
+            text = read_text_exact(target)
         except ToolError:
             raise
         except UnicodeDecodeError as e:
@@ -772,7 +773,7 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             raise ToolError(f"edit: old_string appears {count} times in {file_path} (must be unique)")
         updated = text.replace(old_string, new_string) if replace_all else text.replace(old_string, new_string, 1)
         try:
-            target.write_text(updated, encoding="utf-8")
+            write_text_exact(target, updated)
         except OSError as e:
             raise _fs_error("edit", file_path, e) from e
         return f"edited {file_path} ({count if replace_all else 1} replacement(s))"
