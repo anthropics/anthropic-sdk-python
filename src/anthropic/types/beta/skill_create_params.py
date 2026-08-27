@@ -20,11 +20,11 @@ class SkillCreateParams(TypedDict, total=False):
     file at the root of that directory.
     """
 
-    display_title: Optional[str]
-    """Display title for the skill.
+    display_name: Optional[str]
+    """Human-readable, single-line label for the Skill.
 
-    This is a human-readable label that is not included in the prompt sent to the
-    model.
+    Maximum 255 characters. Always set: derived from the SKILL.md frontmatter `name`
+    when omitted at creation. Not unique.
     """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]

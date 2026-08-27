@@ -15,7 +15,7 @@ class SkillListParams(TypedDict, total=False):
     limit: int
     """Number of results to return per page.
 
-    Maximum value is 100. Defaults to 20.
+    Ranges from `1` to `1000`. Defaults to `20`.
     """
 
     page: Optional[str]

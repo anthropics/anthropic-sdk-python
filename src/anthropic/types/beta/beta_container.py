@@ -4,7 +4,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from ..._models import BaseModel
-from .beta_skill import BetaSkill
+from .beta_container_skill import BetaContainerSkill
 
 __all__ = ["BetaContainer"]
 
@@ -20,5 +20,5 @@ class BetaContainer(BaseModel):
     expires_at: datetime
     """The time at which the container will expire."""
 
-    skills: Optional[List[BetaSkill]] = None
+    skills: Optional[List[BetaContainerSkill]] = None
     """Skills loaded in the container"""
