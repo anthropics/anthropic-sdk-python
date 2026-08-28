@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Union, Optional
+from datetime import datetime
 from typing_extensions import Literal, Annotated, TypedDict
 
 from ..._utils import PropertyInfo
@@ -27,6 +28,9 @@ class UserProfileCreateParams(TypedDict, total=False):
     Not enforced unique. Maximum 255 characters.
     """
 
+    external_user_onboarded_at: Annotated[Union[str, datetime], PropertyInfo(format="iso8601")]
+    """A timestamp in RFC 3339 format"""
+
     metadata: Dict[str, str]
     """Free-form key-value data to attach to this user profile.
 
@@ -38,15 +42,8 @@ class UserProfileCreateParams(TypedDict, total=False):
     """Optional for all profiles.
 
     Real-world name of the entity this profile represents (company or individual);
-    for a resold-to company (`relationship` `resold` / `access_type` `passthrough`),
-    that company's name where known. Maximum 255 characters.
-    """
-
-    relationship: Literal["external", "resold", "internal"]
-    """
-    How the entity behind a user profile relates to the platform that owns the API
-    key. `external`: an individual end-user of the platform. `resold`: a company the
-    platform resells Claude access to. `internal`: the platform's own usage.
+    for a company the platform resells Claude access to (`access_type`
+    `passthrough`), that company's name where known. Maximum 255 characters.
     """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
