@@ -3,8 +3,7 @@
 from typing import Union, Optional
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
-from ..._models import BaseModel
+from ..._models import BaseModel, UnionDiscriminator
 from .beta_cache_miss_unavailable import BetaCacheMissUnavailable
 from .beta_cache_miss_model_changed import BetaCacheMissModelChanged
 from .beta_cache_miss_tools_changed import BetaCacheMissToolsChanged
@@ -24,7 +23,7 @@ CacheMissReason: TypeAlias = Annotated[
         BetaCacheMissUnavailable,
         None,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

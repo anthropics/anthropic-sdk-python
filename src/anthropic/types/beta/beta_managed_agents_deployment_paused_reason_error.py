@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
+from ..._models import UnionDiscriminator
 from .beta_managed_agents_unknown_deployment_paused_reason_error import (
     BetaManagedAgentsUnknownDeploymentPausedReasonError,
 )
@@ -66,5 +66,5 @@ BetaManagedAgentsDeploymentPausedReasonError: TypeAlias = Annotated[
         BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError,
         BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonError,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

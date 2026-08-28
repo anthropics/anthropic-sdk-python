@@ -4,8 +4,7 @@ from typing import Union
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_billing_error import BetaManagedAgentsBillingError
 from .beta_managed_agents_unknown_error import BetaManagedAgentsUnknownError
 from .beta_managed_agents_model_overloaded_error import BetaManagedAgentsModelOverloadedError
@@ -28,7 +27,7 @@ Error: TypeAlias = Annotated[
         BetaManagedAgentsBillingError,
         BetaManagedAgentsCredentialHostUnreachableError,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

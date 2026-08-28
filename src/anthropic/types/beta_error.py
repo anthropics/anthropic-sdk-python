@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from .._utils import PropertyInfo
+from .._models import UnionDiscriminator
 from .beta_api_error import BetaAPIError
 from .beta_billing_error import BetaBillingError
 from .beta_not_found_error import BetaNotFoundError
@@ -28,5 +28,5 @@ BetaError: TypeAlias = Annotated[
         BetaAPIError,
         BetaOverloadedError,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

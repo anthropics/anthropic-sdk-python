@@ -4,15 +4,14 @@ from typing import List, Union
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_text_block import BetaManagedAgentsTextBlock
 from .beta_managed_agents_redacted_block import BetaManagedAgentsRedactedBlock
 
 __all__ = ["BetaManagedAgentsAgentMessageEvent", "Content"]
 
 Content: TypeAlias = Annotated[
-    Union[BetaManagedAgentsTextBlock, BetaManagedAgentsRedactedBlock], PropertyInfo(discriminator="type")
+    Union[BetaManagedAgentsTextBlock, BetaManagedAgentsRedactedBlock], UnionDiscriminator("type")
 ]
 
 

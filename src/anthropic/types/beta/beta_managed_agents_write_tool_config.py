@@ -3,15 +3,14 @@
 from typing import Union
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
-from ..._models import BaseModel
+from ..._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_always_ask_policy import BetaManagedAgentsAlwaysAskPolicy
 from .beta_managed_agents_always_allow_policy import BetaManagedAgentsAlwaysAllowPolicy
 
 __all__ = ["BetaManagedAgentsWriteToolConfig", "PermissionPolicy"]
 
 PermissionPolicy: TypeAlias = Annotated[
-    Union[BetaManagedAgentsAlwaysAllowPolicy, BetaManagedAgentsAlwaysAskPolicy], PropertyInfo(discriminator="type")
+    Union[BetaManagedAgentsAlwaysAllowPolicy, BetaManagedAgentsAlwaysAskPolicy], UnionDiscriminator("type")
 ]
 
 

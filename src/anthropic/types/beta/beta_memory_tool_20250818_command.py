@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
+from ..._models import UnionDiscriminator
 from .beta_memory_tool_20250818_view_command import BetaMemoryTool20250818ViewCommand
 from .beta_memory_tool_20250818_create_command import BetaMemoryTool20250818CreateCommand
 from .beta_memory_tool_20250818_delete_command import BetaMemoryTool20250818DeleteCommand
@@ -22,5 +22,5 @@ BetaMemoryTool20250818Command: TypeAlias = Annotated[
         BetaMemoryTool20250818DeleteCommand,
         BetaMemoryTool20250818RenameCommand,
     ],
-    PropertyInfo(discriminator="command"),
+    UnionDiscriminator("command"),
 ]

@@ -3,8 +3,7 @@
 from typing import Union
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from .._utils import PropertyInfo
-from .._models import BaseModel
+from .._models import BaseModel, UnionDiscriminator
 from .text_block import TextBlock
 from .thinking_block import ThinkingBlock
 from .tool_use_block import ToolUseBlock
@@ -35,7 +34,7 @@ ContentBlock: TypeAlias = Annotated[
         ToolSearchToolResultBlock,
         ContainerUploadBlock,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

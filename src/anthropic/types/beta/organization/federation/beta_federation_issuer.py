@@ -4,8 +4,7 @@ from typing import Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ....._utils import PropertyInfo
-from ....._models import BaseModel
+from ....._models import BaseModel, UnionDiscriminator
 from .beta_jwks_inline import BetaJWKSInline
 from .beta_jwks_discovery import BetaJWKSDiscovery
 from .beta_jwks_explicit_url import BetaJWKSExplicitURL
@@ -13,9 +12,7 @@ from .beta_federation_issuer_poll_status import BetaFederationIssuerPollStatus
 
 __all__ = ["BetaFederationIssuer", "JWKS"]
 
-JWKS: TypeAlias = Annotated[
-    Union[BetaJWKSDiscovery, BetaJWKSExplicitURL, BetaJWKSInline], PropertyInfo(discriminator="type")
-]
+JWKS: TypeAlias = Annotated[Union[BetaJWKSDiscovery, BetaJWKSExplicitURL, BetaJWKSInline], UnionDiscriminator("type")]
 
 
 class BetaFederationIssuer(BaseModel):
