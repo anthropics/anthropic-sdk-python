@@ -9,6 +9,7 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
+from anthropic._utils import parse_datetime
 from anthropic.pagination import SyncPageCursor, AsyncPageCursor
 from anthropic.types.beta import (
     BetaUserProfile,
@@ -31,9 +32,9 @@ class TestUserProfiles:
         user_profile = client.beta.user_profiles.create(
             access_type="application",
             external_id="user_12345",
+            external_user_onboarded_at=parse_datetime("2024-11-02T08:15:00Z"),
             metadata={},
             name="x",
-            relationship="external",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
@@ -117,9 +118,9 @@ class TestUserProfiles:
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             access_type="application",
             external_id="user_12345",
+            external_user_onboarded_at=parse_datetime("2019-12-27T18:11:19.117Z"),
             metadata={"foo": "string"},
             name="x",
-            relationship="external",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
@@ -252,9 +253,9 @@ class TestAsyncUserProfiles:
         user_profile = await async_client.beta.user_profiles.create(
             access_type="application",
             external_id="user_12345",
+            external_user_onboarded_at=parse_datetime("2024-11-02T08:15:00Z"),
             metadata={},
             name="x",
-            relationship="external",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
@@ -338,9 +339,9 @@ class TestAsyncUserProfiles:
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             access_type="application",
             external_id="user_12345",
+            external_user_onboarded_at=parse_datetime("2019-12-27T18:11:19.117Z"),
             metadata={"foo": "string"},
             name="x",
-            relationship="external",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
