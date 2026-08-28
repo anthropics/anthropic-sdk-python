@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
+from ..._models import UnionDiscriminator
 from .beta_text_block import BetaTextBlock
 from .beta_fallback_block import BetaFallbackBlock
 from .beta_thinking_block import BetaThinkingBlock
@@ -44,5 +44,5 @@ BetaContentBlock: TypeAlias = Annotated[
         BetaCompactionBlock,
         BetaFallbackBlock,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

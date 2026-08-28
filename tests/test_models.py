@@ -10,7 +10,7 @@ from pydantic import Field
 
 from anthropic._utils import PropertyInfo
 from anthropic._compat import PYDANTIC_V1, parse_obj, model_dump, model_json
-from anthropic._models import DISCRIMINATOR_CACHE, BaseModel, EagerIterable, construct_type
+from anthropic._models import DISCRIMINATOR_CACHE, BaseModel, EagerIterable, UnionDiscriminator, construct_type
 
 
 class BasicModel(BaseModel):
@@ -668,6 +668,40 @@ def test_discriminated_unions_invalid_data() -> None:
 
     m = construct_type(
         value={"type": "b", "data": "foo"},
+        type_=cast(Any, Annotated[Union[A, B], UnionDiscriminator("type")]),
+    )
+    assert isinstance(m, B)
+    assert m.type == "b"
+    assert m.data == "foo"  # type: ignore[comparison-overlap]
+
+    m = construct_type(
+        value={"type": "a", "data": 100},
+        type_=cast(Any, Annotated[Union[A, B], UnionDiscriminator("type")]),
+    )
+    assert isinstance(m, A)
+    assert m.type == "a"
+    if PYDANTIC_V1:
+        # pydantic v1 automatically converts inputs to strings
+        # if the expected type is a str
+        assert m.data == "100"
+    else:
+        assert m.data == 100  # type: ignore[comparison-overlap]
+
+
+def test_discriminated_unions_property_info_marker() -> None:
+    # `PropertyInfo(discriminator=...)` is still accepted as the union marker
+    class A(BaseModel):
+        type: Literal["a"]
+
+        data: str
+
+    class B(BaseModel):
+        type: Literal["b"]
+
+        data: int
+
+    m = construct_type(
+        value={"type": "b", "data": "foo"},
         type_=cast(Any, Annotated[Union[A, B], PropertyInfo(discriminator="type")]),
     )
     assert isinstance(m, B)
@@ -701,7 +735,7 @@ def test_discriminated_unions_unknown_variant() -> None:
 
     m = construct_type(
         value={"type": "c", "data": None, "new_thing": "bar"},
-        type_=cast(Any, Annotated[Union[A, B], PropertyInfo(discriminator="type")]),
+        type_=cast(Any, Annotated[Union[A, B], UnionDiscriminator("type")]),
     )
 
     # just chooses the first variant
@@ -729,7 +763,7 @@ def test_discriminated_unions_invalid_data_nested_unions() -> None:
 
     m = construct_type(
         value={"type": "b", "data": "foo"},
-        type_=cast(Any, Annotated[Union[Union[A, B], C], PropertyInfo(discriminator="type")]),
+        type_=cast(Any, Annotated[Union[Union[A, B], C], UnionDiscriminator("type")]),
     )
     assert isinstance(m, B)
     assert m.type == "b"
@@ -737,7 +771,7 @@ def test_discriminated_unions_invalid_data_nested_unions() -> None:
 
     m = construct_type(
         value={"type": "c", "data": "foo"},
-        type_=cast(Any, Annotated[Union[Union[A, B], C], PropertyInfo(discriminator="type")]),
+        type_=cast(Any, Annotated[Union[Union[A, B], C], UnionDiscriminator("type")]),
     )
     assert isinstance(m, C)
     assert m.type == "c"
@@ -757,7 +791,7 @@ def test_discriminated_unions_with_aliases_invalid_data() -> None:
 
     m = construct_type(
         value={"type": "b", "data": "foo"},
-        type_=cast(Any, Annotated[Union[A, B], PropertyInfo(discriminator="foo_type")]),
+        type_=cast(Any, Annotated[Union[A, B], UnionDiscriminator("foo_type")]),
     )
     assert isinstance(m, B)
     assert m.foo_type == "b"
@@ -765,7 +799,7 @@ def test_discriminated_unions_with_aliases_invalid_data() -> None:
 
     m = construct_type(
         value={"type": "a", "data": 100},
-        type_=cast(Any, Annotated[Union[A, B], PropertyInfo(discriminator="foo_type")]),
+        type_=cast(Any, Annotated[Union[A, B], UnionDiscriminator("foo_type")]),
     )
     assert isinstance(m, A)
     assert m.foo_type == "a"
@@ -790,7 +824,7 @@ def test_discriminated_unions_overlapping_discriminators_invalid_data() -> None:
 
     m = construct_type(
         value={"type": "a", "data": "foo"},
-        type_=cast(Any, Annotated[Union[A, B], PropertyInfo(discriminator="type")]),
+        type_=cast(Any, Annotated[Union[A, B], UnionDiscriminator("type")]),
     )
     assert isinstance(m, B)
     assert m.type == "a"
@@ -813,7 +847,7 @@ def test_discriminated_unions_invalid_data_uses_cache() -> None:
     assert not DISCRIMINATOR_CACHE.get(UnionType)
 
     m = construct_type(
-        value={"type": "b", "data": "foo"}, type_=cast(Any, Annotated[UnionType, PropertyInfo(discriminator="type")])
+        value={"type": "b", "data": "foo"}, type_=cast(Any, Annotated[UnionType, UnionDiscriminator("type")])
     )
     assert isinstance(m, B)
     assert m.type == "b"
@@ -823,7 +857,7 @@ def test_discriminated_unions_invalid_data_uses_cache() -> None:
     assert discriminator is not None
 
     m = construct_type(
-        value={"type": "b", "data": "foo"}, type_=cast(Any, Annotated[UnionType, PropertyInfo(discriminator="type")])
+        value={"type": "b", "data": "foo"}, type_=cast(Any, Annotated[UnionType, UnionDiscriminator("type")])
     )
     assert isinstance(m, B)
     assert m.type == "b"
@@ -886,7 +920,7 @@ def test_discriminated_union_case() -> None:
     # when constructing ModelA | ModelB, value data doesn't match ModelB exactly - missing `required`
     m = construct_type(
         value={"type": "modelB", "data": {"type": "a", "data": True}},
-        type_=cast(Any, Annotated[Union[ModelA, ModelB], PropertyInfo(discriminator="type")]),
+        type_=cast(Any, Annotated[Union[ModelA, ModelB], UnionDiscriminator("type")]),
     )
 
     assert isinstance(m, ModelB)
@@ -910,7 +944,7 @@ def test_nested_discriminated_union() -> None:
                 InnerType1,
                 InnerType2,
             ],
-            PropertyInfo(discriminator="type"),
+            UnionDiscriminator("type"),
         ]
 
     class Type2(BaseModel):
@@ -921,7 +955,7 @@ def test_nested_discriminated_union() -> None:
             Type1,
             Type2,
         ],
-        PropertyInfo(discriminator="base_type"),
+        UnionDiscriminator("base_type"),
     ]
 
     model = construct_type(

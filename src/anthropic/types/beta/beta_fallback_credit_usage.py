@@ -3,15 +3,14 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
-from ..._models import BaseModel
+from ..._models import BaseModel, UnionDiscriminator
 from .beta_fallback_credit_redeemed import BetaFallbackCreditRedeemed
 from .beta_fallback_credit_not_applied import BetaFallbackCreditNotApplied
 
 __all__ = ["BetaFallbackCreditUsage", "Status"]
 
 Status: TypeAlias = Annotated[
-    Union[BetaFallbackCreditRedeemed, BetaFallbackCreditNotApplied], PropertyInfo(discriminator="type")
+    Union[BetaFallbackCreditRedeemed, BetaFallbackCreditNotApplied], UnionDiscriminator("type")
 ]
 
 

@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
+from ...._models import UnionDiscriminator
 from .beta_message_batch_errored_result import BetaMessageBatchErroredResult
 from .beta_message_batch_expired_result import BetaMessageBatchExpiredResult
 from .beta_message_batch_canceled_result import BetaMessageBatchCanceledResult
@@ -18,5 +18,5 @@ BetaMessageBatchResult: TypeAlias = Annotated[
         BetaMessageBatchCanceledResult,
         BetaMessageBatchExpiredResult,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

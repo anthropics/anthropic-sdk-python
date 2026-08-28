@@ -3,8 +3,7 @@
 from typing import Union
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_injection_location_response import BetaManagedAgentsInjectionLocationResponse
 from .beta_managed_agents_limited_credential_networking_response import (
     BetaManagedAgentsLimitedCredentialNetworkingResponse,
@@ -19,7 +18,7 @@ Networking: TypeAlias = Annotated[
     Union[
         BetaManagedAgentsUnrestrictedCredentialNetworkingResponse, BetaManagedAgentsLimitedCredentialNetworkingResponse
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

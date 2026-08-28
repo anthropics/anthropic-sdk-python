@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from .._utils import PropertyInfo
+from .._models import UnionDiscriminator
 from .citation_char_location import CitationCharLocation
 from .citation_page_location import CitationPageLocation
 from .citation_content_block_location import CitationContentBlockLocation
@@ -20,5 +20,5 @@ TextCitation: TypeAlias = Annotated[
         CitationsWebSearchResultLocation,
         CitationsSearchResultLocation,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from .._utils import PropertyInfo
+from .._models import UnionDiscriminator
 from .raw_message_stop_event import RawMessageStopEvent
 from .raw_message_delta_event import RawMessageDeltaEvent
 from .raw_message_start_event import RawMessageStartEvent
@@ -22,5 +22,5 @@ RawMessageStreamEvent: TypeAlias = Annotated[
         RawContentBlockDeltaEvent,
         RawContentBlockStopEvent,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

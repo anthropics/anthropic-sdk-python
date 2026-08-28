@@ -3,8 +3,7 @@
 from typing import List, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
-from ..._models import BaseModel
+from ..._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_user_location import BetaManagedAgentsUserLocation
 from .beta_managed_agents_always_ask_policy import BetaManagedAgentsAlwaysAskPolicy
 from .beta_managed_agents_always_allow_policy import BetaManagedAgentsAlwaysAllowPolicy
@@ -12,7 +11,7 @@ from .beta_managed_agents_always_allow_policy import BetaManagedAgentsAlwaysAllo
 __all__ = ["BetaManagedAgentsWebSearchToolConfig", "PermissionPolicy"]
 
 PermissionPolicy: TypeAlias = Annotated[
-    Union[BetaManagedAgentsAlwaysAllowPolicy, BetaManagedAgentsAlwaysAskPolicy], PropertyInfo(discriminator="type")
+    Union[BetaManagedAgentsAlwaysAllowPolicy, BetaManagedAgentsAlwaysAskPolicy], UnionDiscriminator("type")
 ]
 
 

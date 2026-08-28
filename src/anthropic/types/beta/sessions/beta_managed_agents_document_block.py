@@ -3,8 +3,7 @@
 from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_url_document_source import BetaManagedAgentsURLDocumentSource
 from .beta_managed_agents_file_document_source import BetaManagedAgentsFileDocumentSource
 from .beta_managed_agents_base64_document_source import BetaManagedAgentsBase64DocumentSource
@@ -19,7 +18,7 @@ Source: TypeAlias = Annotated[
         BetaManagedAgentsURLDocumentSource,
         BetaManagedAgentsFileDocumentSource,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

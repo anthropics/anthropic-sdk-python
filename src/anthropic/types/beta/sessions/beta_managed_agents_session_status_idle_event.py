@@ -4,8 +4,7 @@ from typing import Union
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_session_end_turn import BetaManagedAgentsSessionEndTurn
 from .beta_managed_agents_session_budget_reached import BetaManagedAgentsSessionBudgetReached
 from .beta_managed_agents_session_requires_action import BetaManagedAgentsSessionRequiresAction
@@ -20,7 +19,7 @@ StopReason: TypeAlias = Annotated[
         BetaManagedAgentsSessionRetriesExhausted,
         BetaManagedAgentsSessionBudgetReached,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

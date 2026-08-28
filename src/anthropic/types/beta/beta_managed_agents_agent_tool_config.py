@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
+from ..._models import UnionDiscriminator
 from .beta_managed_agents_bash_tool_config import BetaManagedAgentsBashToolConfig
 from .beta_managed_agents_edit_tool_config import BetaManagedAgentsEditToolConfig
 from .beta_managed_agents_glob_tool_config import BetaManagedAgentsGlobToolConfig
@@ -26,5 +26,5 @@ BetaManagedAgentsAgentToolConfig: TypeAlias = Annotated[
         BetaManagedAgentsWebFetchToolConfig,
         BetaManagedAgentsWebSearchToolConfig,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
