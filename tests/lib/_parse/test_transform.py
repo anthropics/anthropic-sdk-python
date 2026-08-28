@@ -229,3 +229,41 @@ def test_original_schema_not_mutated():
     transform_schema(original_schema)
 
     assert original_schema == original_schema_backup
+
+
+def test_type_array():
+    schema = {
+        "type": ["string", "null"],
+        "description": "Optional text",
+    }
+    result = transform_schema(schema)
+    assert result == {
+        "anyOf": [{"type": "string"}, {"type": "null"}],
+        "description": "Optional text",
+    }
+
+
+def test_type_array_in_object():
+    schema = {
+        "type": "object",
+        "properties": {
+            "name": {
+                "type": ["string", "null"],
+                "description": "Optional name",
+            }
+        },
+        "required": ["name"],
+    }
+    result = transform_schema(schema)
+    assert result == {
+        "type": "object",
+        "properties": {
+            "name": {
+                "anyOf": [{"type": "string"}, {"type": "null"}],
+                "description": "Optional name",
+            }
+        },
+        "required": ["name"],
+        "additionalProperties": False,
+    }
+

@@ -96,7 +96,7 @@ def transform_schema(
         strict_schema["$ref"] = ref
         return strict_schema
 
-    type_: Optional[SupportedTypes] = json_schema.pop("type", None)
+    type_: Optional[SupportedTypes | list[SupportedTypes]] = json_schema.pop("type", None)
     any_of = json_schema.pop("anyOf", None)
     one_of = json_schema.pop("oneOf", None)
     all_of = json_schema.pop("allOf", None)
@@ -107,6 +107,8 @@ def transform_schema(
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in one_of]
     elif is_list(all_of):
         strict_schema["allOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in all_of]
+    elif is_list(type_):
+        strict_schema["anyOf"] = [transform_schema({"type": t}) for t in type_]
     else:
         if type_ is None:
             raise ValueError("Schema must have a 'type', 'anyOf', 'oneOf', or 'allOf' field.")
@@ -155,7 +157,7 @@ def transform_schema(
             # add it back so its treated as an extra property and appended to the description
             json_schema["minItems"] = min_items
 
-    elif type_ == "boolean" or type_ == "integer" or type_ == "number" or type_ == "null" or type_ is None:
+    elif type_ == "boolean" or type_ == "integer" or type_ == "number" or type_ == "null" or type_ is None or is_list(type_):
         pass
     else:
         assert_never(type_)
