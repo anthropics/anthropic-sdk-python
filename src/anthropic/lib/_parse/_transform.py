@@ -160,7 +160,7 @@ def transform_schema(
     else:
         assert_never(type_)
 
-    # if there are any propes leftover then they aren't supported, so we add them to the description
+    # if there are any props leftover then they aren't supported, so we add them to the description
     # so that the model *might* follow them.
     if json_schema:
         description = strict_schema.get("description")
