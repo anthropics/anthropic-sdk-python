@@ -13,9 +13,8 @@ from ...types import (
     ContentBlockStartEvent as RawContentBlockStartEvent,
     RawContentBlockStopEvent,
 )
-from ..._models import BaseModel, GenericModel
+from ..._models import BaseModel, GenericModel, UnionDiscriminator
 from .._parse._response import ResponseFormatT
-from ..._utils._transform import PropertyInfo
 from ...types.parsed_message import ParsedMessage, ParsedContentBlock
 from ...types.citations_delta import Citation
 
@@ -103,7 +102,7 @@ MessageStreamEvent = Annotated[
         RawContentBlockDeltaEvent,
         ContentBlockStopEvent,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 
@@ -139,5 +138,5 @@ ParsedMessageStreamEvent = Annotated[
         RawContentBlockDeltaEvent,
         ParsedContentBlockStopEvent[ResponseFormatT],
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
