@@ -461,9 +461,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         # lowest precedence first; any of these can be overridden or `Omit`-ted by the layers after it
         headers, omitted = build_headers(
             {
-                "x-stainless-timeout": str(options.timeout.read)
-                if isinstance(options.timeout, Timeout)
-                else str(options.timeout),
+                "x-stainless-timeout": str(timeout.read) if isinstance(timeout, Timeout) else str(timeout),
                 "x-stainless-retry-count": str(retries_taken),
                 **({"x-stainless-read-timeout": str(read_timeout)} if read_timeout is not None else {}),
                 **({idempotency_header: idempotency_key} if idempotency_header and idempotency_key else {}),

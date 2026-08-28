@@ -328,6 +328,7 @@ class TestAnthropic:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
         assert timeout == DEFAULT_TIMEOUT
+        assert request.headers["x-stainless-timeout"] == str(DEFAULT_TIMEOUT.read)
 
         request = client._build_request(FinalRequestOptions(method="get", url="/foo", timeout=httpx2.Timeout(100.0)))
         timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
@@ -1497,6 +1498,7 @@ class TestAsyncAnthropic:
         request = async_client._build_request(FinalRequestOptions(method="get", url="/foo"))
         timeout = httpx2.Timeout(**request.extensions["timeout"])  # type: ignore
         assert timeout == DEFAULT_TIMEOUT
+        assert request.headers["x-stainless-timeout"] == str(DEFAULT_TIMEOUT.read)
 
         request = async_client._build_request(
             FinalRequestOptions(method="get", url="/foo", timeout=httpx2.Timeout(100.0))
