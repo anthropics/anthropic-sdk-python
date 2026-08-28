@@ -4,8 +4,7 @@ from typing import Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from ..beta_managed_agents_advisor import BetaManagedAgentsAdvisor
 from .beta_managed_agents_session_thread_stats import BetaManagedAgentsSessionThreadStats
 from .beta_managed_agents_session_thread_usage import BetaManagedAgentsSessionThreadUsage
@@ -15,7 +14,7 @@ from .beta_managed_agents_session_thread_status import BetaManagedAgentsSessionT
 __all__ = ["BetaManagedAgentsSessionThread", "Agent"]
 
 Agent: TypeAlias = Annotated[
-    Union[BetaManagedAgentsSessionThreadAgent, BetaManagedAgentsAdvisor], PropertyInfo(discriminator="type")
+    Union[BetaManagedAgentsSessionThreadAgent, BetaManagedAgentsAdvisor], UnionDiscriminator("type")
 ]
 
 

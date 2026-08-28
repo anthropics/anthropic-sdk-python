@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
+from ..._models import UnionDiscriminator
 from .billing_error import BillingError
 from .not_found_error import NotFoundError
 from .api_error_object import APIErrorObject
@@ -28,5 +28,5 @@ ErrorObject: TypeAlias = Annotated[
         APIErrorObject,
         OverloadedError,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

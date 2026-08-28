@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
+from ...._models import UnionDiscriminator
 from .beta_managed_agents_api_actor import BetaManagedAgentsAPIActor
 from .beta_managed_agents_user_actor import BetaManagedAgentsUserActor
 from .beta_managed_agents_session_actor import BetaManagedAgentsSessionActor
@@ -18,5 +18,5 @@ BetaManagedAgentsActor: TypeAlias = Annotated[
         BetaManagedAgentsUserActor,
         BetaManagedAgentsServiceAccountActor,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

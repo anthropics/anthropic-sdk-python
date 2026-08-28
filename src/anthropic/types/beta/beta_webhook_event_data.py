@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
+from ..._models import UnionDiscriminator
 from .beta_webhook_agent_created_event_data import BetaWebhookAgentCreatedEventData
 from .beta_webhook_agent_deleted_event_data import BetaWebhookAgentDeletedEventData
 from .beta_webhook_agent_updated_event_data import BetaWebhookAgentUpdatedEventData
@@ -98,5 +98,5 @@ BetaWebhookEventData: TypeAlias = Annotated[
         BetaWebhookMemoryStoreDeletedEventData,
         BetaWebhookSessionBudgetReachedEventData,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

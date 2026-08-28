@@ -3,8 +3,7 @@
 from typing import Union
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_retry_status_retrying import BetaManagedAgentsRetryStatusRetrying
 from .beta_managed_agents_retry_status_terminal import BetaManagedAgentsRetryStatusTerminal
 from .beta_managed_agents_retry_status_exhausted import BetaManagedAgentsRetryStatusExhausted
@@ -17,7 +16,7 @@ RetryStatus: TypeAlias = Annotated[
         BetaManagedAgentsRetryStatusExhausted,
         BetaManagedAgentsRetryStatusTerminal,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

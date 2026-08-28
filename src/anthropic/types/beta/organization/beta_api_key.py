@@ -4,8 +4,7 @@ from typing import Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_api_key_created_by import BetaAPIKeyCreatedBy
 from .beta_api_key_user_actor import BetaAPIKeyUserActor
 from .beta_api_key_workspace_scope import BetaAPIKeyWorkspaceScope
@@ -15,12 +14,10 @@ from .beta_api_key_service_account_actor import BetaAPIKeyServiceAccountActor
 __all__ = ["BetaAPIKey", "Principal", "Scope"]
 
 Principal: TypeAlias = Annotated[
-    Union[BetaAPIKeyUserActor, BetaAPIKeyServiceAccountActor, None], PropertyInfo(discriminator="type")
+    Union[BetaAPIKeyUserActor, BetaAPIKeyServiceAccountActor, None], UnionDiscriminator("type")
 ]
 
-Scope: TypeAlias = Annotated[
-    Union[BetaAPIKeyOrganizationScope, BetaAPIKeyWorkspaceScope], PropertyInfo(discriminator="type")
-]
+Scope: TypeAlias = Annotated[Union[BetaAPIKeyOrganizationScope, BetaAPIKeyWorkspaceScope], UnionDiscriminator("type")]
 
 
 class BetaAPIKey(BaseModel):

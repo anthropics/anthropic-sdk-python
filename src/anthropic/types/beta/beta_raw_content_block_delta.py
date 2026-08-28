@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
+from ..._models import UnionDiscriminator
 from .beta_text_delta import BetaTextDelta
 from .beta_thinking_delta import BetaThinkingDelta
 from .beta_citations_delta import BetaCitationsDelta
@@ -22,5 +22,5 @@ BetaRawContentBlockDelta: TypeAlias = Annotated[
         BetaSignatureDelta,
         BetaCompactionContentBlockDelta,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

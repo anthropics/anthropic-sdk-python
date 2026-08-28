@@ -3,12 +3,12 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
+from ...._models import UnionDiscriminator
 from .beta_managed_agents_memory import BetaManagedAgentsMemory
 from .beta_managed_agents_memory_prefix import BetaManagedAgentsMemoryPrefix
 
 __all__ = ["BetaManagedAgentsMemoryListItem"]
 
 BetaManagedAgentsMemoryListItem: TypeAlias = Annotated[
-    Union[BetaManagedAgentsMemory, BetaManagedAgentsMemoryPrefix], PropertyInfo(discriminator="type")
+    Union[BetaManagedAgentsMemory, BetaManagedAgentsMemoryPrefix], UnionDiscriminator("type")
 ]

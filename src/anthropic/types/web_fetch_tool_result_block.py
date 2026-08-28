@@ -3,8 +3,7 @@
 from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from .._utils import PropertyInfo
-from .._models import BaseModel
+from .._models import BaseModel, UnionDiscriminator
 from .direct_caller import DirectCaller
 from .web_fetch_block import WebFetchBlock
 from .server_tool_caller import ServerToolCaller
@@ -14,7 +13,7 @@ from .web_fetch_tool_result_error_block import WebFetchToolResultErrorBlock
 __all__ = ["WebFetchToolResultBlock", "Caller", "Content"]
 
 Caller: TypeAlias = Annotated[
-    Union[DirectCaller, ServerToolCaller, ServerToolCaller20260120], PropertyInfo(discriminator="type")
+    Union[DirectCaller, ServerToolCaller, ServerToolCaller20260120], UnionDiscriminator("type")
 ]
 
 Content: TypeAlias = Union[WebFetchToolResultErrorBlock, WebFetchBlock]

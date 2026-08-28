@@ -3,8 +3,7 @@
 from typing import Union
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
-from ..._models import BaseModel
+from ..._models import BaseModel, UnionDiscriminator
 from .beta_citation_char_location import BetaCitationCharLocation
 from .beta_citation_page_location import BetaCitationPageLocation
 from .beta_citation_content_block_location import BetaCitationContentBlockLocation
@@ -21,7 +20,7 @@ Citation: TypeAlias = Annotated[
         BetaCitationsWebSearchResultLocation,
         BetaCitationSearchResultLocation,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

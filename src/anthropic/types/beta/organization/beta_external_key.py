@@ -4,8 +4,7 @@ from typing import Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_aws_external_key_config import BetaAWSExternalKeyConfig
 from .beta_gcp_external_key_config import BetaGCPExternalKeyConfig
 from .beta_azure_external_key_config import BetaAzureExternalKeyConfig
@@ -15,12 +14,11 @@ from .beta_external_key_unattached_attachment import BetaExternalKeyUnattachedAt
 __all__ = ["BetaExternalKey", "Attachment", "ProviderConfig"]
 
 Attachment: TypeAlias = Annotated[
-    Union[BetaExternalKeyAttachedAttachment, BetaExternalKeyUnattachedAttachment], PropertyInfo(discriminator="type")
+    Union[BetaExternalKeyAttachedAttachment, BetaExternalKeyUnattachedAttachment], UnionDiscriminator("type")
 ]
 
 ProviderConfig: TypeAlias = Annotated[
-    Union[BetaAWSExternalKeyConfig, BetaGCPExternalKeyConfig, BetaAzureExternalKeyConfig],
-    PropertyInfo(discriminator="type"),
+    Union[BetaAWSExternalKeyConfig, BetaGCPExternalKeyConfig, BetaAzureExternalKeyConfig], UnionDiscriminator("type")
 ]
 
 

@@ -3,8 +3,7 @@
 from typing import List, Union, Optional
 from typing_extensions import Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_user_message_event import BetaManagedAgentsUserMessageEvent
 from .beta_managed_agents_user_interrupt_event import BetaManagedAgentsUserInterruptEvent
 from ..beta_managed_agents_system_message_event import BetaManagedAgentsSystemMessageEvent
@@ -25,7 +24,7 @@ Data: TypeAlias = Annotated[
         BetaManagedAgentsUserToolResultEvent,
         BetaManagedAgentsSystemMessageEvent,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

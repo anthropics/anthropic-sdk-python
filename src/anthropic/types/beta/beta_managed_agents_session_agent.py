@@ -3,8 +3,7 @@
 from typing import List, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
-from ..._models import BaseModel
+from ..._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_custom_tool import BetaManagedAgentsCustomTool
 from .beta_managed_agents_mcp_toolset import BetaManagedAgentsMCPToolset
 from .beta_managed_agents_custom_skill import BetaManagedAgentsCustomSkill
@@ -17,12 +16,12 @@ from .beta_managed_agents_session_multiagent_coordinator import BetaManagedAgent
 __all__ = ["BetaManagedAgentsSessionAgent", "Skill", "Tool"]
 
 Skill: TypeAlias = Annotated[
-    Union[BetaManagedAgentsAnthropicSkill, BetaManagedAgentsCustomSkill], PropertyInfo(discriminator="type")
+    Union[BetaManagedAgentsAnthropicSkill, BetaManagedAgentsCustomSkill], UnionDiscriminator("type")
 ]
 
 Tool: TypeAlias = Annotated[
     Union[BetaManagedAgentsAgentToolset20260401, BetaManagedAgentsMCPToolset, BetaManagedAgentsCustomTool],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

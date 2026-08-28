@@ -3,7 +3,7 @@
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
+from ..._models import UnionDiscriminator
 from .beta_managed_agents_error_deployment_paused_reason import BetaManagedAgentsErrorDeploymentPausedReason
 from .beta_managed_agents_manual_deployment_paused_reason import BetaManagedAgentsManualDeploymentPausedReason
 
@@ -11,5 +11,5 @@ __all__ = ["BetaManagedAgentsDeploymentPausedReason"]
 
 BetaManagedAgentsDeploymentPausedReason: TypeAlias = Annotated[
     Union[BetaManagedAgentsManualDeploymentPausedReason, BetaManagedAgentsErrorDeploymentPausedReason],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

@@ -3,8 +3,7 @@
 from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
-from ..._models import BaseModel
+from ..._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_model import BetaManagedAgentsModel
 from .beta_managed_agents_effort_low import BetaManagedAgentsEffortLow
 from .beta_managed_agents_effort_max import BetaManagedAgentsEffortMax
@@ -22,7 +21,7 @@ Effort: TypeAlias = Annotated[
         BetaManagedAgentsEffortXhigh,
         BetaManagedAgentsEffortMax,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 
