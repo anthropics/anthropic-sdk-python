@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List, Union, Generic, Optional
 from typing_extensions import TypeVar, Annotated, TypeAlias
 
-from .._utils import PropertyInfo
 from .message import Message
+from .._models import UnionDiscriminator
 from .text_block import TextBlock
 from .thinking_block import ThinkingBlock
 from .tool_use_block import ToolUseBlock
@@ -50,7 +50,7 @@ ParsedContentBlock: TypeAlias = Annotated[
         ToolSearchToolResultBlock,
         ContainerUploadBlock,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 
