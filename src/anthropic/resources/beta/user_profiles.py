@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Union, Optional
+from datetime import datetime
 from itertools import chain
 from typing_extensions import Literal
 
@@ -53,9 +54,9 @@ class UserProfiles(SyncAPIResource):
         *,
         access_type: Literal["application", "passthrough"] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
-        relationship: Literal["external", "resold", "internal"] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -77,18 +78,16 @@ class UserProfiles(SyncAPIResource):
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
               characters.
 
+          external_user_onboarded_at: A timestamp in RFC 3339 format
+
           metadata: Free-form key-value data to attach to this user profile. Maximum 16 keys, with
               keys up to 64 characters and values up to 512 characters. Values must be
               non-empty strings.
 
           name: Optional for all profiles. Real-world name of the entity this profile represents
-              (company or individual); for a resold-to company (`relationship` `resold` /
-              `access_type` `passthrough`), that company's name where known. Maximum 255
+              (company or individual); for a company the platform resells Claude access to
+              (`access_type` `passthrough`), that company's name where known. Maximum 255
               characters.
-
-          relationship: How the entity behind a user profile relates to the platform that owns the API
-              key. `external`: an individual end-user of the platform. `resold`: a company the
-              platform resells Claude access to. `internal`: the platform's own usage.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -117,9 +116,9 @@ class UserProfiles(SyncAPIResource):
                 {
                     "access_type": access_type,
                     "external_id": external_id,
+                    "external_user_onboarded_at": external_user_onboarded_at,
                     "metadata": metadata,
                     "name": name,
-                    "relationship": relationship,
                 },
                 user_profile_create_params.UserProfileCreateParams,
             ),
@@ -182,9 +181,9 @@ class UserProfiles(SyncAPIResource):
         *,
         access_type: Optional[Literal["application", "passthrough"]] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
-        relationship: Optional[Literal["external", "resold", "internal"]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -206,6 +205,8 @@ class UserProfiles(SyncAPIResource):
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
               255 characters.
 
+          external_user_onboarded_at: A timestamp in RFC 3339 format
+
           metadata: Key-value pairs to merge into the stored metadata. Keys provided overwrite
               existing values. To remove a key, set its value to an empty string. Keys not
               provided are left unchanged. Maximum 16 keys, with keys up to 64 characters and
@@ -213,10 +214,6 @@ class UserProfiles(SyncAPIResource):
 
           name: If present, replaces the stored name. Omit to leave unchanged. Maximum 255
               characters.
-
-          relationship: How the entity behind a user profile relates to the platform that owns the API
-              key. `external`: an individual end-user of the platform. `resold`: a company the
-              platform resells Claude access to. `internal`: the platform's own usage.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -247,9 +244,9 @@ class UserProfiles(SyncAPIResource):
                 {
                     "access_type": access_type,
                     "external_id": external_id,
+                    "external_user_onboarded_at": external_user_onboarded_at,
                     "metadata": metadata,
                     "name": name,
-                    "relationship": relationship,
                 },
                 user_profile_update_params.UserProfileUpdateParams,
             ),
@@ -399,9 +396,9 @@ class AsyncUserProfiles(AsyncAPIResource):
         *,
         access_type: Literal["application", "passthrough"] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
-        relationship: Literal["external", "resold", "internal"] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -423,18 +420,16 @@ class AsyncUserProfiles(AsyncAPIResource):
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
               characters.
 
+          external_user_onboarded_at: A timestamp in RFC 3339 format
+
           metadata: Free-form key-value data to attach to this user profile. Maximum 16 keys, with
               keys up to 64 characters and values up to 512 characters. Values must be
               non-empty strings.
 
           name: Optional for all profiles. Real-world name of the entity this profile represents
-              (company or individual); for a resold-to company (`relationship` `resold` /
-              `access_type` `passthrough`), that company's name where known. Maximum 255
+              (company or individual); for a company the platform resells Claude access to
+              (`access_type` `passthrough`), that company's name where known. Maximum 255
               characters.
-
-          relationship: How the entity behind a user profile relates to the platform that owns the API
-              key. `external`: an individual end-user of the platform. `resold`: a company the
-              platform resells Claude access to. `internal`: the platform's own usage.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -463,9 +458,9 @@ class AsyncUserProfiles(AsyncAPIResource):
                 {
                     "access_type": access_type,
                     "external_id": external_id,
+                    "external_user_onboarded_at": external_user_onboarded_at,
                     "metadata": metadata,
                     "name": name,
-                    "relationship": relationship,
                 },
                 user_profile_create_params.UserProfileCreateParams,
             ),
@@ -528,9 +523,9 @@ class AsyncUserProfiles(AsyncAPIResource):
         *,
         access_type: Optional[Literal["application", "passthrough"]] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
-        relationship: Optional[Literal["external", "resold", "internal"]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -552,6 +547,8 @@ class AsyncUserProfiles(AsyncAPIResource):
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
               255 characters.
 
+          external_user_onboarded_at: A timestamp in RFC 3339 format
+
           metadata: Key-value pairs to merge into the stored metadata. Keys provided overwrite
               existing values. To remove a key, set its value to an empty string. Keys not
               provided are left unchanged. Maximum 16 keys, with keys up to 64 characters and
@@ -559,10 +556,6 @@ class AsyncUserProfiles(AsyncAPIResource):
 
           name: If present, replaces the stored name. Omit to leave unchanged. Maximum 255
               characters.
-
-          relationship: How the entity behind a user profile relates to the platform that owns the API
-              key. `external`: an individual end-user of the platform. `resold`: a company the
-              platform resells Claude access to. `internal`: the platform's own usage.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -593,9 +586,9 @@ class AsyncUserProfiles(AsyncAPIResource):
                 {
                     "access_type": access_type,
                     "external_id": external_id,
+                    "external_user_onboarded_at": external_user_onboarded_at,
                     "metadata": metadata,
                     "name": name,
-                    "relationship": relationship,
                 },
                 user_profile_update_params.UserProfileUpdateParams,
             ),

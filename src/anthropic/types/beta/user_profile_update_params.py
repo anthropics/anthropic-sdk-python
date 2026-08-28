@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Union, Optional
+from datetime import datetime
 from typing_extensions import Literal, Annotated, TypedDict
 
 from ..._utils import PropertyInfo
@@ -27,6 +28,9 @@ class UserProfileUpdateParams(TypedDict, total=False):
     Omit to leave unchanged. Maximum 255 characters.
     """
 
+    external_user_onboarded_at: Annotated[Union[str, datetime], PropertyInfo(format="iso8601")]
+    """A timestamp in RFC 3339 format"""
+
     metadata: Dict[str, str]
     """Key-value pairs to merge into the stored metadata.
 
@@ -39,13 +43,6 @@ class UserProfileUpdateParams(TypedDict, total=False):
     """If present, replaces the stored name.
 
     Omit to leave unchanged. Maximum 255 characters.
-    """
-
-    relationship: Optional[Literal["external", "resold", "internal"]]
-    """
-    How the entity behind a user profile relates to the platform that owns the API
-    key. `external`: an individual end-user of the platform. `resold`: a company the
-    platform resells Claude access to. `internal`: the platform's own usage.
     """
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]

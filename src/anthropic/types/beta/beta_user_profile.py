@@ -47,16 +47,12 @@ class BetaUserProfile(BaseModel):
     external_id: Optional[str] = None
     """Platform's own identifier for this user. Not enforced unique."""
 
+    external_user_onboarded_at: Optional[datetime] = None
+    """A timestamp in RFC 3339 format"""
+
     name: Optional[str] = None
     """Real-world name of the entity this profile represents (company or individual).
 
-    For a resold-to company (`access_type` `passthrough`, or `relationship` `resold`
-    under the `user-profiles-2026-03-24` header) this is that company's name.
-    """
-
-    relationship: Optional[Literal["external", "resold", "internal"]] = None
-    """
-    How the entity behind a user profile relates to the platform that owns the API
-    key. `external`: an individual end-user of the platform. `resold`: a company the
-    platform resells Claude access to. `internal`: the platform's own usage.
+    For a company the platform resells Claude access to (`access_type`
+    `passthrough`) this is that company's name.
     """
