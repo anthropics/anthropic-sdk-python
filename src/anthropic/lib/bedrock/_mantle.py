@@ -25,6 +25,7 @@ from ..._base_client import (
     merge_headers,
 )
 from ..aws._credentials import (
+    AuthMode,
     resolve_region,
     resolve_api_key,
     resolve_auth_mode,
@@ -111,6 +112,7 @@ def _resolve_mantle_config(
     aws_region: str | None,
     aws_profile: str | None,
     skip_auth: bool,
+    auth_mode: AuthMode,
     base_url: str | httpx2.URL | None,
     default_headers: Mapping[str, str] | None,
 ) -> tuple[str | None, str | httpx2.URL, bool, dict[str, str]]:
@@ -129,6 +131,7 @@ def _resolve_mantle_config(
             aws_access_key=aws_access_key,
             aws_secret_key=aws_secret_key,
             aws_profile=aws_profile,
+            auth_mode=auth_mode,
             api_key_env_vars=_MANTLE_API_KEY_ENV_VARS,
         )
 
@@ -171,6 +174,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
     aws_session_token: str | None
     aws_profile: str | None
     skip_auth: bool
+    auth_mode: AuthMode
 
     _use_sigv4: bool
 
@@ -184,6 +188,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
         aws_profile: str | None = None,
         api_key: str | None = None,
         skip_auth: bool = False,
+        auth_mode: AuthMode = "auto",
         base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -200,6 +205,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
             aws_region=aws_region,
             aws_profile=aws_profile,
             skip_auth=skip_auth,
+            auth_mode=auth_mode,
             base_url=base_url,
             default_headers=default_headers,
         )
@@ -225,6 +231,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
         self.aws_session_token = aws_session_token
         self.aws_profile = aws_profile
         self.skip_auth = skip_auth
+        self.auth_mode = auth_mode
         self._use_sigv4 = use_sigv4
 
         self.messages = Messages(self)
@@ -290,6 +297,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
         aws_region: str | None = None,
         aws_profile: str | None = None,
         skip_auth: bool | None = None,
+        auth_mode: AuthMode | None = None,
         base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.Client | None = None,
@@ -330,6 +338,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
             aws_region=aws_region or self.aws_region,
             aws_profile=aws_profile or self.aws_profile,
             skip_auth=skip_auth if skip_auth is not None else self.skip_auth,
+            auth_mode=auth_mode if auth_mode is not None else self.auth_mode,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
@@ -367,6 +376,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
     aws_session_token: str | None
     aws_profile: str | None
     skip_auth: bool
+    auth_mode: AuthMode
 
     _use_sigv4: bool
 
@@ -380,6 +390,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
         aws_profile: str | None = None,
         api_key: str | None = None,
         skip_auth: bool = False,
+        auth_mode: AuthMode = "auto",
         base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -396,6 +407,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
             aws_region=aws_region,
             aws_profile=aws_profile,
             skip_auth=skip_auth,
+            auth_mode=auth_mode,
             base_url=base_url,
             default_headers=default_headers,
         )
@@ -421,6 +433,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
         self.aws_session_token = aws_session_token
         self.aws_profile = aws_profile
         self.skip_auth = skip_auth
+        self.auth_mode = auth_mode
         self._use_sigv4 = use_sigv4
 
         self.messages = AsyncMessages(self)
@@ -486,6 +499,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
         aws_region: str | None = None,
         aws_profile: str | None = None,
         skip_auth: bool | None = None,
+        auth_mode: AuthMode | None = None,
         base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.AsyncClient | None = None,
@@ -526,6 +540,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
             aws_region=aws_region or self.aws_region,
             aws_profile=aws_profile or self.aws_profile,
             skip_auth=skip_auth if skip_auth is not None else self.skip_auth,
+            auth_mode=auth_mode if auth_mode is not None else self.auth_mode,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,

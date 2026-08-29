@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import os
-from typing import Sequence
+from typing import Literal, Sequence
+
+AuthMode = Literal["auto", "api_key", "sigv4"]
 
 
 def validate_credentials(
@@ -34,6 +36,7 @@ def resolve_auth_mode(
     aws_access_key: str | None,
     aws_secret_key: str | None,
     aws_profile: str | None,
+    auth_mode: AuthMode = "auto",
     api_key_env_vars: Sequence[str] = ("ANTHROPIC_AWS_API_KEY",),
 ) -> bool:
     """Determine whether to use SigV4 auth. Returns True for SigV4, False for API key.
@@ -45,6 +48,15 @@ def resolve_auth_mode(
     4. API key env var(s) → API key mode (checked in order; first match wins)
     5. Default AWS credential chain → SigV4
     """
+    if auth_mode not in ("auto", "api_key", "sigv4"):
+        raise ValueError("`auth_mode` must be one of 'auto', 'api_key', or 'sigv4'")
+
+    if auth_mode == "api_key":
+        return False
+
+    if auth_mode == "sigv4":
+        return True
+
     if api_key is not None:
         return False
 

@@ -202,6 +202,30 @@ class TestAuthPrecedence:
         )
         assert client.auth_headers == {}
 
+    def test_explicit_sigv4_mode_ignores_api_key_environment(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "env-key")
+        client = AnthropicBedrockMantle(
+            auth_mode="sigv4",
+            aws_region="us-east-1",
+        )
+        assert client._use_sigv4 is True
+        assert client.api_key is None
+
+    def test_explicit_api_key_mode_uses_environment_over_aws_credentials(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "env-key")
+        client = AnthropicBedrockMantle(
+            auth_mode="api_key",
+            aws_access_key="AKID",
+            aws_secret_key="secret",
+            aws_region="us-east-1",
+        )
+        assert client._use_sigv4 is False
+        assert client.api_key == "env-key"
+
+    def test_invalid_auth_mode_raises(self) -> None:
+        with pytest.raises(ValueError, match="auth_mode"):
+            AnthropicBedrockMantle(auth_mode="invalid", base_url="https://example.com")  # type: ignore[arg-type]
+
 
 class TestSkipAuth:
     def test_skip_auth_does_not_sign_request(self, get_auth_headers_recorder: GetAuthHeadersRecorder) -> None:
@@ -296,6 +320,22 @@ class TestCopy:
         )
         copied = client.copy(aws_region="us-west-2")
         assert copied.aws_region == "us-west-2"
+
+    def test_copy_preserves_auth_mode(self) -> None:
+        client = AnthropicBedrockMantle(auth_mode="sigv4", aws_region="us-east-1")
+        copied = client.copy()
+        assert copied.auth_mode == "sigv4"
+
+    def test_copy_overrides_auth_mode(self) -> None:
+        client = AnthropicBedrockMantle(api_key="test-key", aws_region="us-east-1")
+        copied = client.copy(auth_mode="sigv4")
+        assert copied.auth_mode == "sigv4"
+        assert copied._use_sigv4 is True
+
+    def test_async_copy_preserves_auth_mode(self) -> None:
+        client = AsyncAnthropicBedrockMantle(auth_mode="sigv4", aws_region="us-east-1")
+        copied = client.copy()
+        assert copied.auth_mode == "sigv4"
 
     def test_copy_x_stainless_helper_header_appends(self) -> None:
         # `x-stainless-helper` accumulates across copies instead of being clobbered
