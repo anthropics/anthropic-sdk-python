@@ -55,7 +55,6 @@ class PropertyInfo:
     alias: str | None
     format: PropertyFormat | None
     format_template: str | None
-    discriminator: str | None
 
     def __init__(
         self,
@@ -63,16 +62,14 @@ class PropertyInfo:
         alias: str | None = None,
         format: PropertyFormat | None = None,
         format_template: str | None = None,
-        discriminator: str | None = None,
     ) -> None:
         self.alias = alias
         self.format = format
         self.format_template = format_template
-        self.discriminator = discriminator
 
     @override
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(alias='{self.alias}', format={self.format}, format_template='{self.format_template}', discriminator='{self.discriminator}')"
+        return f"{self.__class__.__name__}(alias='{self.alias}', format={self.format}, format_template='{self.format_template}')"
 
 
 def maybe_transform(

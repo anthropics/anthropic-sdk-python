@@ -8,7 +8,6 @@ import pytest
 import pydantic
 from pydantic import Field
 
-from anthropic._utils import PropertyInfo
 from anthropic._compat import PYDANTIC_V1, parse_obj, model_dump, model_json
 from anthropic._models import DISCRIMINATOR_CACHE, BaseModel, EagerIterable, UnionDiscriminator, construct_type
 
@@ -677,40 +676,6 @@ def test_discriminated_unions_invalid_data() -> None:
     m = construct_type(
         value={"type": "a", "data": 100},
         type_=cast(Any, Annotated[Union[A, B], UnionDiscriminator("type")]),
-    )
-    assert isinstance(m, A)
-    assert m.type == "a"
-    if PYDANTIC_V1:
-        # pydantic v1 automatically converts inputs to strings
-        # if the expected type is a str
-        assert m.data == "100"
-    else:
-        assert m.data == 100  # type: ignore[comparison-overlap]
-
-
-def test_discriminated_unions_property_info_marker() -> None:
-    # `PropertyInfo(discriminator=...)` is still accepted as the union marker
-    class A(BaseModel):
-        type: Literal["a"]
-
-        data: str
-
-    class B(BaseModel):
-        type: Literal["b"]
-
-        data: int
-
-    m = construct_type(
-        value={"type": "b", "data": "foo"},
-        type_=cast(Any, Annotated[Union[A, B], PropertyInfo(discriminator="type")]),
-    )
-    assert isinstance(m, B)
-    assert m.type == "b"
-    assert m.data == "foo"  # type: ignore[comparison-overlap]
-
-    m = construct_type(
-        value={"type": "a", "data": 100},
-        type_=cast(Any, Annotated[Union[A, B], PropertyInfo(discriminator="type")]),
     )
     assert isinstance(m, A)
     assert m.type == "a"
