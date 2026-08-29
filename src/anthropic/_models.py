@@ -50,7 +50,6 @@ from ._types import (
     HttpxRequestFiles,
 )
 from ._utils import (
-    PropertyInfo,
     is_list,
     is_given,
     json_safe,
@@ -759,9 +758,6 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
     for annotation in meta_annotations:
         if isinstance(annotation, UnionDiscriminator):
             discriminator_field_name = annotation.field_name
-            break
-        if isinstance(annotation, PropertyInfo) and annotation.discriminator is not None:
-            discriminator_field_name = annotation.discriminator
             break
 
     if not discriminator_field_name:
