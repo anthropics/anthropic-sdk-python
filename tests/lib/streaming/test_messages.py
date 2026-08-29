@@ -387,6 +387,68 @@ class TestSyncMessages:
             assert message.content[0].type == "text"
             assert message.content[0].text == "hi"
 
+    def test_message_start_without_usage_preserves_delta_optional_usage_fields(
+        self, respx_mock: MockRouter
+    ) -> None:
+        """When message_start omits usage, every field the delta carries must survive.
+
+        Complements `test_message_start_without_usage`, which covers #1806's literal
+        stream (a delta carrying only `output_tokens`). That shape cannot pin the
+        rest of the snapshot, so the two are deliberately kept apart rather than
+        merged: a rich delta here, the reported shape there.
+
+        Killing test: building the snapshot from the two counters alone (dropping
+        cache fields, `server_tool_use` and anything else on the delta) passes the
+        reported-shape suite but fails this one.
+        """
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("missing_usage_rich_delta_response.txt"))
+        )
+
+        # Non-strict client: strict validation rejects a usage-less message_start
+        # before the accumulator sees it (see test_message_start_without_usage).
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+            assert message.usage is not None
+            assert message.usage.input_tokens == 11
+            assert message.usage.output_tokens == 1
+            assert message.usage.cache_creation_input_tokens == 3
+            assert message.usage.cache_read_input_tokens == 5
+            # nested objects on the delta survive as models, not raw dicts
+            assert message.usage.server_tool_use is not None
+            assert message.usage.server_tool_use.web_search_requests == 2
+
+    def test_stop_details_from_message_start_survives_null_delta(
+        self, respx_mock: MockRouter
+    ) -> None:
+        """A `stop_details: null` on message_delta must not erase the start's value.
+
+        The accumulator assigns `stop_details` under an `is not None` guard, so a
+        value carried by message_start is sticky across a delta that clears it. Pins
+        that behaviour: present-then-null keeps it.
+        """
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("stop_details_response.txt"))
+        )
+
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+            assert message.stop_details is not None
+            assert message.stop_details.type == "refusal"
+            assert message.stop_reason == "end_turn"
+
 
     def test_message_delta_omitted_usage_keeps_message_start(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
