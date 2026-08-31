@@ -8,6 +8,15 @@ Full Changelog: [v1.1.0...v1.2.0](https://github.com/anthropics/anthropic-sdk-py
 
 * **api:** beta files/skills namespaces use GA shapes; drop dated beta header pins ([9df4565](https://github.com/anthropics/anthropic-sdk-python/commit/9df4565fdfe4eec941809a0a3d1615ee11e16b68))
 
+  The beta Files and Skills namespaces (`client.beta.files`, `client.beta.skills`) no longer send the `files-api-2025-04-14` / `skills-2025-10-02` headers and return the same shapes as `client.files` / `client.skills` (with `Beta`-prefixed type names under `anthropic.types.beta`). Requests that still send those headers on raw HTTP keep receiving the beta shapes.
+
+  Changes in the beta namespaces:
+  - `client.beta.skills.delete()` now deletes a Skill together with all of its versions (previously refused while any version existed). It returns `BetaDeletedSkill` (was `SkillDeleteResponse`).
+  - Beta Messages type `BetaSkill` (container skill reference with `skill_id`, `type`, `version`) is renamed `BetaContainerSkill`; the request-side `BetaSkillParams` keeps its name. `BetaSkill` now names the Skill object returned by `client.beta.skills.create()` / `retrieve()` / `list()` (replacing `SkillCreateResponse` / `SkillRetrieveResponse` / `SkillListResponse`), and skill versions are `BetaSkillVersion` / `BetaDeletedSkillVersion` (replacing `Version*Response`).
+  - `client.beta.files.list()` returns `SyncPageCursor[BetaFileMetadata]` / `AsyncPageCursor[BetaFileMetadata]` (with `data` / `next_page`) and paginates with `page=` / `ids=` (was `SyncPage` / `AsyncPage` with `data`, `has_more`, `first_id`, `last_id` and `before_id=` / `after_id=`); iterating the result for auto-pagination is unchanged. `BetaSkill` uses `display_name` (was `display_title`, also the `create()` keyword) and `latest_version_id` (was `latest_version`), and `BetaSkillVersion` is addressed by its `skver_…` `id` (the Unix-timestamp `version` field is gone).
+
+  Migration guides: [Migrate from `files-api-2025-04-14`](https://platform.claude.com/docs/en/build-with-claude/files#migrate-from-files-api-2025-04-14) · [Migrate from `skills-2025-10-02`](https://platform.claude.com/docs/en/build-with-claude/skills-guide#migrate-from-skills-2025-10-02)
+
 
 ### Bug Fixes
 
