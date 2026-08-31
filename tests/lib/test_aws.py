@@ -1,6 +1,6 @@
 import re
 import threading
-from typing import Dict, List, cast
+from typing import Dict, List, Type, Union, cast
 from typing_extensions import Protocol
 
 import httpx2
@@ -14,6 +14,10 @@ from anthropic.lib.credentials import StaticToken
 
 class MockRequestCall(Protocol):
     request: httpx2.Request
+
+
+_AWSClientClass = Union[Type[AnthropicAWS], Type[AsyncAnthropicAWS]]
+_aws_client_classes = pytest.mark.parametrize("client_cls", [AnthropicAWS, AsyncAnthropicAWS], ids=["sync", "async"])
 
 
 # --- Initialization ---
@@ -119,12 +123,61 @@ def test_skip_auth_no_workspace_required(monkeypatch: pytest.MonkeyPatch) -> Non
     assert client.workspace_id is None
 
 
-def test_skip_auth_no_region_or_base_url_required(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("AWS_REGION", raising=False)
-    monkeypatch.delenv("ANTHROPIC_AWS_BASE_URL", raising=False)
-    monkeypatch.delenv("ANTHROPIC_AWS_WORKSPACE_ID", raising=False)
-    client = AnthropicAWS(skip_auth=True)
-    assert client._skip_auth is True
+def _clear_aws_url_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    for var in (
+        "AWS_REGION",
+        "AWS_DEFAULT_REGION",
+        "AWS_PROFILE",
+        "ANTHROPIC_AWS_BASE_URL",
+        "ANTHROPIC_AWS_WORKSPACE_ID",
+        "ANTHROPIC_BASE_URL",
+    ):
+        monkeypatch.delenv(var, raising=False)
+
+
+def _set_ambient_first_party_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "ambient-key")
+    monkeypatch.setenv("ANTHROPIC_AUTH_TOKEN", "ambient-token")
+
+
+@_aws_client_classes
+def test_skip_auth_requires_region_or_base_url(client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch) -> None:
+    _clear_aws_url_env(monkeypatch)
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://first-party.example.com")
+    with pytest.raises(AnthropicError, match="No AWS region was provided and no base_url"):
+        client_cls(skip_auth=True)
+
+
+@_aws_client_classes
+def test_skip_auth_base_url_from_region_arg(client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch) -> None:
+    _clear_aws_url_env(monkeypatch)
+    client = client_cls(skip_auth=True, aws_region="eu-west-1")
+    assert client.aws_region == "eu-west-1"
+    assert str(client.base_url).rstrip("/") == "https://aws-external-anthropic.eu-west-1.api.aws"
+
+
+@_aws_client_classes
+def test_skip_auth_base_url_from_region_env(client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch) -> None:
+    _clear_aws_url_env(monkeypatch)
+    monkeypatch.setenv("AWS_REGION", "ap-southeast-1")
+    client = client_cls(skip_auth=True)
+    assert str(client.base_url).rstrip("/") == "https://aws-external-anthropic.ap-southeast-1.api.aws"
+
+
+@_aws_client_classes
+def test_skip_auth_base_url_env_overrides_region(client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch) -> None:
+    _clear_aws_url_env(monkeypatch)
+    monkeypatch.setenv("ANTHROPIC_AWS_BASE_URL", "https://custom-gateway.example.com")
+    client = client_cls(skip_auth=True, aws_region="eu-west-1")
+    assert str(client.base_url).rstrip("/") == "https://custom-gateway.example.com"
+
+
+@_aws_client_classes
+def test_skip_auth_explicit_base_url_wins(client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch) -> None:
+    _clear_aws_url_env(monkeypatch)
+    monkeypatch.setenv("ANTHROPIC_AWS_BASE_URL", "https://custom-gateway.example.com")
+    client = client_cls(skip_auth=True, aws_region="eu-west-1", base_url="https://custom.example.com")
+    assert str(client.base_url).rstrip("/") == "https://custom.example.com"
 
 
 def test_skip_auth_async(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -136,7 +189,8 @@ def test_skip_auth_async(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
-def test_skip_auth_no_auth_headers(respx_mock: MockRouter) -> None:
+def test_skip_auth_no_auth_headers(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
+    _set_ambient_first_party_credentials(monkeypatch)
     respx_mock.post(re.compile(r"https://custom\.example\.com/.*")).mock(
         return_value=httpx2.Response(200, json={"foo": "bar"})
     )
@@ -154,6 +208,84 @@ def test_skip_auth_no_auth_headers(respx_mock: MockRouter) -> None:
     assert "Authorization" not in calls[0].request.headers
     assert "X-Amz-Date" not in calls[0].request.headers
     assert "anthropic-workspace-id" not in calls[0].request.headers
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_skip_auth_region_request_url(
+    sync: bool, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_aws_url_env(monkeypatch)
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://first-party.example.com")
+    _set_ambient_first_party_credentials(monkeypatch)
+    respx_mock.post(re.compile(r"https://aws-external-anthropic\.eu-west-1\.api\.aws/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+
+    if sync:
+        AnthropicAWS(skip_auth=True, aws_region="eu-west-1", workspace_id="ws-123").messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude-sonnet-4-20250514",
+        )
+    else:
+        await AsyncAnthropicAWS(skip_auth=True, aws_region="eu-west-1", workspace_id="ws-123").messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude-sonnet-4-20250514",
+        )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert str(calls[0].request.url) == "https://aws-external-anthropic.eu-west-1.api.aws/v1/messages"
+    assert calls[0].request.headers["anthropic-workspace-id"] == "ws-123"
+    assert "X-Api-Key" not in calls[0].request.headers
+    assert "Authorization" not in calls[0].request.headers
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("via", ["copy", "scoped_helper"])
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_skip_auth_explicit_auth_token_on_copy_is_sent(
+    sync: bool, via: str, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from anthropic.lib._scoped_client import _copy_client_with_bearer_auth
+
+    _clear_aws_url_env(monkeypatch)
+    _set_ambient_first_party_credentials(monkeypatch)
+    respx_mock.post(re.compile(r"https://aws-external-anthropic\.eu-west-1\.api\.aws/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+
+    if sync:
+        client = AnthropicAWS(skip_auth=True, aws_region="eu-west-1", workspace_id="ws-123")
+        scoped = (
+            client.copy(auth_token="scoped-token")
+            if via == "copy"
+            else _copy_client_with_bearer_auth(client, auth_token="scoped-token", helper="environments-worker")
+        )
+        scoped.messages.create(
+            max_tokens=1024, messages=[{"role": "user", "content": "Hello"}], model="claude-sonnet-4-20250514"
+        )
+    else:
+        async_client = AsyncAnthropicAWS(skip_auth=True, aws_region="eu-west-1", workspace_id="ws-123")
+        async_scoped = (
+            async_client.copy(auth_token="scoped-token")
+            if via == "copy"
+            else _copy_client_with_bearer_auth(async_client, auth_token="scoped-token", helper="environments-worker")
+        )
+        await async_scoped.messages.create(
+            max_tokens=1024, messages=[{"role": "user", "content": "Hello"}], model="claude-sonnet-4-20250514"
+        )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert calls[0].request.headers["Authorization"] == "Bearer scoped-token"
+    assert "X-Api-Key" not in calls[0].request.headers
 
 
 # --- Environment Variables ---
@@ -360,6 +492,47 @@ async def test_sigv4_binary_file_upload(sync: bool, respx_mock: MockRouter) -> N
     assert calls[0].request.headers["Authorization"].startswith("AWS4-HMAC-SHA256 ")
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_sigv4_with_options_ignores_ambient_first_party_credentials(
+    sync: bool, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_aws_url_env(monkeypatch)
+    _set_ambient_first_party_credentials(monkeypatch)
+    respx_mock.post(re.compile(r"https://aws-external-anthropic\.us-west-2\.api\.aws/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+
+    if sync:
+        client = AnthropicAWS(
+            aws_access_key="AKID", aws_secret_key="secret", aws_region="eu-west-1", workspace_id="ws-123"
+        )
+        assert client.api_key is None
+        assert client.auth_token is None
+        client.with_options(aws_region="us-west-2").messages.create(
+            max_tokens=1024, messages=[{"role": "user", "content": "Hello"}], model="claude-sonnet-4-20250514"
+        )
+    else:
+        async_client = AsyncAnthropicAWS(
+            aws_access_key="AKID", aws_secret_key="secret", aws_region="eu-west-1", workspace_id="ws-123"
+        )
+        assert async_client.api_key is None
+        assert async_client.auth_token is None
+        await async_client.with_options(aws_region="us-west-2").messages.create(
+            max_tokens=1024, messages=[{"role": "user", "content": "Hello"}], model="claude-sonnet-4-20250514"
+        )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert str(calls[0].request.url) == "https://aws-external-anthropic.us-west-2.api.aws/v1/messages"
+    authorization = calls[0].request.headers["Authorization"]
+    assert authorization.startswith("AWS4-HMAC-SHA256 ")
+    assert "/us-west-2/" in authorization
+    assert "X-Api-Key" not in calls[0].request.headers
+
+
 # --- copy / with_options ---
 
 
@@ -388,16 +561,107 @@ def test_copy_overrides_aws_options() -> None:
         aws_region="us-east-1",
         workspace_id="ws-123",
     )
-    copied = client.copy(aws_region="eu-west-1")
-    assert copied.aws_region == "eu-west-1"
-    # base_url is not re-derived from region on copy — must be overridden explicitly
+    copied = client.copy(aws_access_key="AKID2", aws_secret_key="secret2", workspace_id="ws-456")
+    assert copied.aws_access_key == "AKID2"
+    assert copied.aws_secret_key == "secret2"
+    assert copied.workspace_id == "ws-456"
+    assert copied.aws_region == "us-east-1"
     assert str(copied.base_url).rstrip("/") == "https://aws-external-anthropic.us-east-1.api.aws"
 
-    copied2 = client.copy(
+
+@_aws_client_classes
+def test_copy_region_change_rederives_base_url(client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch) -> None:
+    _clear_aws_url_env(monkeypatch)
+    _set_ambient_first_party_credentials(monkeypatch)
+    client = client_cls(aws_access_key="AKID", aws_secret_key="secret", aws_region="eu-west-1", workspace_id="ws-123")
+    assert str(client.base_url).rstrip("/") == "https://aws-external-anthropic.eu-west-1.api.aws"
+
+    copied = client.with_options(aws_region="us-west-2")
+    assert copied.aws_region == "us-west-2"
+    assert str(copied.base_url).rstrip("/") == "https://aws-external-anthropic.us-west-2.api.aws"
+    assert copied.api_key is None and copied.auth_token is None
+    assert client.aws_region == "eu-west-1"
+    assert str(client.base_url).rstrip("/") == "https://aws-external-anthropic.eu-west-1.api.aws"
+
+    chained = copied.with_options(aws_region="ap-northeast-1")
+    assert str(chained.base_url).rstrip("/") == "https://aws-external-anthropic.ap-northeast-1.api.aws"
+
+
+@_aws_client_classes
+def test_copy_region_change_rederives_base_url_api_key_mode(
+    client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_aws_url_env(monkeypatch)
+    client = client_cls(api_key="test-key", aws_region="eu-west-1", workspace_id="ws-123")
+    copied = client.with_options(aws_region="us-west-2")
+    assert str(copied.base_url).rstrip("/") == "https://aws-external-anthropic.us-west-2.api.aws"
+
+
+@_aws_client_classes
+def test_copy_region_change_rederives_base_url_skip_auth(
+    client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_aws_url_env(monkeypatch)
+    _set_ambient_first_party_credentials(monkeypatch)
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://first-party.example.com")
+    client = client_cls(skip_auth=True, aws_region="eu-west-1")
+    copied = client.with_options(aws_region="us-west-2")
+    assert copied.aws_region == "us-west-2"
+    assert str(copied.base_url).rstrip("/") == "https://aws-external-anthropic.us-west-2.api.aws"
+    assert copied.api_key is None and copied.auth_token is None
+
+
+@_aws_client_classes
+def test_copy_region_change_explicit_base_url_wins(
+    client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_aws_url_env(monkeypatch)
+    client = client_cls(aws_access_key="AKID", aws_secret_key="secret", aws_region="eu-west-1", workspace_id="ws-123")
+    copied = client.with_options(aws_region="us-west-2", base_url="https://custom.example.com")
+    assert copied.aws_region == "us-west-2"
+    assert str(copied.base_url).rstrip("/") == "https://custom.example.com"
+
+    chained = copied.with_options(aws_region="ap-northeast-1")
+    assert chained.aws_region == "ap-northeast-1"
+    assert str(chained.base_url).rstrip("/") == "https://custom.example.com"
+
+
+@_aws_client_classes
+def test_copy_region_change_keeps_custom_base_url(client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch) -> None:
+    _clear_aws_url_env(monkeypatch)
+    client = client_cls(
+        aws_access_key="AKID",
+        aws_secret_key="secret",
         aws_region="eu-west-1",
-        base_url="https://aws-external-anthropic.eu-west-1.api.aws",
+        base_url="https://custom.example.com",
+        workspace_id="ws-123",
     )
-    assert str(copied2.base_url).rstrip("/") == "https://aws-external-anthropic.eu-west-1.api.aws"
+    copied = client.with_options(aws_region="us-west-2")
+    assert copied.aws_region == "us-west-2"
+    assert str(copied.base_url).rstrip("/") == "https://custom.example.com"
+    assert str(client.with_options(workspace_id="ws-456").base_url).rstrip("/") == "https://custom.example.com"
+
+
+@_aws_client_classes
+def test_copy_region_change_keeps_env_base_url(client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch) -> None:
+    _clear_aws_url_env(monkeypatch)
+    monkeypatch.setenv("ANTHROPIC_AWS_BASE_URL", "https://custom-gateway.example.com")
+    client = client_cls(aws_access_key="AKID", aws_secret_key="secret", aws_region="eu-west-1", workspace_id="ws-123")
+    copied = client.with_options(aws_region="us-west-2")
+    assert copied.aws_region == "us-west-2"
+    assert str(copied.base_url).rstrip("/") == "https://custom-gateway.example.com"
+
+
+@_aws_client_classes
+def test_copy_region_change_keeps_base_url_assigned_after_construction(
+    client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _clear_aws_url_env(monkeypatch)
+    client = client_cls(aws_access_key="AKID", aws_secret_key="secret", aws_region="eu-west-1", workspace_id="ws-123")
+    client.base_url = "https://gateway.example.com"
+    copied = client.with_options(aws_region="us-west-2")
+    assert copied.aws_region == "us-west-2"
+    assert str(copied.base_url).rstrip("/") == "https://gateway.example.com"
 
 
 def test_copy_accepts_credentials_none_noop() -> None:
