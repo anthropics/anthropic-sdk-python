@@ -1444,9 +1444,11 @@ from anthropic.types.beta import (
     BetaDreamSessionsInput,
     BetaDreamStatus,
     BetaDreamUsage,
+    BetaDreamingError,
     BetaOutputBehavior,
     BetaOutputBehaviorCreateNew,
     BetaOutputBehaviorUpdateExisting,
+    BetaTargetStoreHeldError,
 )
 ```
 
@@ -1755,3 +1757,22 @@ from anthropic.types.beta.organization import (
 Methods:
 
 - <code title="get /v1/organizations/rate_limits?beta=true">client.beta.organization.rate_limits.<a href="./src/anthropic/resources/beta/organization/rate_limits.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/rate_limit_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_rate_limit.py">SyncPageCursor[BetaOrganizationRateLimit]</a></code>
+
+### ComplianceSettings
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaComplianceSettings,
+    BetaComplianceSettingsStateDisabled,
+    BetaComplianceSettingsStateDisabledParam,
+    BetaComplianceSettingsStateEnabled,
+    BetaComplianceSettingsStateEnabledParam,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/compliance_settings?beta=true">client.beta.organization.compliance_settings.<a href="./src/anthropic/resources/beta/organization/compliance_settings.py">retrieve</a>() -> <a href="./src/anthropic/types/beta/organization/beta_compliance_settings.py">BetaComplianceSettings</a></code>
+- <code title="post /v1/organizations/compliance_settings?beta=true">client.beta.organization.compliance_settings.<a href="./src/anthropic/resources/beta/organization/compliance_settings.py">update</a>(\*\*<a href="src/anthropic/types/beta/organization/compliance_setting_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_compliance_settings.py">BetaComplianceSettings</a></code>

@@ -17,7 +17,7 @@ class SessionListParams(TypedDict, total=False):
     """Filter sessions created with this agent ID."""
 
     agent_version: int
-    """Filter by agent version. Only applies when agent_id is also set."""
+    """Filter by agent version. Only applies when `agent_id` is also set."""
 
     created_at_gt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gt]", format="iso8601")]
     """Return sessions created after this time (exclusive)."""
@@ -42,14 +42,14 @@ class SessionListParams(TypedDict, total=False):
 
     memory_store_id: str
     """
-    Filter sessions whose resources contain a memory_store with this memory store
+    Filter sessions whose resources contain a `memory_store` with this memory store
     ID.
     """
 
     order: Literal["asc", "desc"]
-    """Sort direction for results, ordered by created_at.
+    """Sort direction for results, ordered by `created_at`.
 
-    Defaults to desc (newest first).
+    Defaults to `desc` (newest first).
     """
 
     page: str

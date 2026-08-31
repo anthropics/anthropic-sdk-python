@@ -33,9 +33,9 @@ class DeploymentListParams(TypedDict, total=False):
     """Opaque pagination cursor."""
 
     status: BetaManagedAgentsDeploymentStatus
-    """Filter by status: active or paused.
+    """Filter by status: `active` or `paused`.
 
-    Omit for both. To include archived deployments, use include_archived instead;
+    Omit for both. To include archived deployments, use `include_archived` instead;
     the two cannot be combined.
     """
 

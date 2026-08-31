@@ -79,7 +79,7 @@ class BetaManagedAgentsDeploymentRun(BaseModel):
     session_id: Optional[str] = None
     """Populated on success.
 
-    Null on creation failure. Exactly one of session_id or error is non-null.
+    Null on creation failure. Exactly one of `session_id` or `error` is non-null.
     """
 
     trigger_context: BetaManagedAgentsTriggerContext

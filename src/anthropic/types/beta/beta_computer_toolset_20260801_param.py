@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
@@ -24,10 +24,6 @@ class BetaComputerToolset20260801Param(TypedDict, total=False):
     """
 
     type: Required[Literal["computer_toolset_20260801"]]
-
-    allowed_callers: List[
-        Literal["direct", "code_execution_20250825", "code_execution_20260120", "code_execution_20260521"]
-    ]
 
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""

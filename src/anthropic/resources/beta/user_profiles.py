@@ -261,6 +261,7 @@ class UserProfiles(SyncAPIResource):
         *,
         limit: int | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
+        order_by: Literal["created_at", "name"] | Omit = omit,
         page: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -277,6 +278,8 @@ class UserProfiles(SyncAPIResource):
           limit: Query parameter for limit
 
           order: Query parameter for order
+
+          order_by: Query parameter for order_by
 
           page: Query parameter for page
 
@@ -313,6 +316,7 @@ class UserProfiles(SyncAPIResource):
                     {
                         "limit": limit,
                         "order": order,
+                        "order_by": order_by,
                         "page": page,
                     },
                     user_profile_list_params.UserProfileListParams,
@@ -603,6 +607,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         *,
         limit: int | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
+        order_by: Literal["created_at", "name"] | Omit = omit,
         page: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -619,6 +624,8 @@ class AsyncUserProfiles(AsyncAPIResource):
           limit: Query parameter for limit
 
           order: Query parameter for order
+
+          order_by: Query parameter for order_by
 
           page: Query parameter for page
 
@@ -655,6 +662,7 @@ class AsyncUserProfiles(AsyncAPIResource):
                     {
                         "limit": limit,
                         "order": order,
+                        "order_by": order_by,
                         "page": page,
                     },
                     user_profile_list_params.UserProfileListParams,

@@ -92,9 +92,9 @@ class Events(SyncAPIResource):
           limit: Query parameter for limit
 
           order: Sort direction for results, ordered by the event's `processed_at`. Defaults to
-              asc (chronological).
+              `asc` (chronological).
 
-          page: Opaque pagination cursor from a previous response's next_page.
+          page: Opaque pagination cursor from a previous response's `next_page`.
 
           types: Filter by event type. Values match the `type` field on returned events (for
               example, `user.message` or `agent.tool_use`). Omit to return all event types.
@@ -327,9 +327,9 @@ class AsyncEvents(AsyncAPIResource):
           limit: Query parameter for limit
 
           order: Sort direction for results, ordered by the event's `processed_at`. Defaults to
-              asc (chronological).
+              `asc` (chronological).
 
-          page: Opaque pagination cursor from a previous response's next_page.
+          page: Opaque pagination cursor from a previous response's `next_page`.
 
           types: Filter by event type. Values match the `type` field on returned events (for
               example, `user.message` or `agent.tool_use`). Omit to return all event types.

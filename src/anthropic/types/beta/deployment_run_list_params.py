@@ -30,13 +30,13 @@ class DeploymentRunListParams(TypedDict, total=False):
     """Filter to a specific deployment.
 
     Omit to list across all deployments in the workspace. Filtering by a
-    non-existent deployment_id returns 200 with empty data.
+    non-existent `deployment_id` returns 200 with empty data.
     """
 
     has_error: bool
     """
-    Filter: true for runs with non-null error, false for runs with non-null
-    session_id. Omit for all.
+    Filter: true for runs with non-null `error`, false for runs with non-null
+    `session_id`. Omit for all.
     """
 
     limit: int
@@ -45,7 +45,7 @@ class DeploymentRunListParams(TypedDict, total=False):
     page: str
     """Opaque pagination cursor.
 
-    Pass next_page from the previous response. Invalid or expired cursors
+    Pass `next_page` from the previous response. Invalid or expired cursors
     return 400.
     """
 

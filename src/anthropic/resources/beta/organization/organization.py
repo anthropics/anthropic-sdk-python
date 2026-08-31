@@ -54,6 +54,14 @@ from .external_keys import (
     AsyncExternalKeysWithStreamingResponse,
 )
 from ...._base_client import make_request_options
+from .compliance_settings import (
+    ComplianceSettings,
+    AsyncComplianceSettings,
+    ComplianceSettingsWithRawResponse,
+    AsyncComplianceSettingsWithRawResponse,
+    ComplianceSettingsWithStreamingResponse,
+    AsyncComplianceSettingsWithStreamingResponse,
+)
 from .federation.federation import (
     Federation,
     AsyncFederation,
@@ -115,6 +123,10 @@ class Organization(SyncAPIResource):
     @cached_property
     def rate_limits(self) -> RateLimits:
         return RateLimits(self._client)
+
+    @cached_property
+    def compliance_settings(self) -> ComplianceSettings:
+        return ComplianceSettings(self._client)
 
     @cached_property
     def with_raw_response(self) -> OrganizationWithRawResponse:
@@ -190,6 +202,10 @@ class AsyncOrganization(AsyncAPIResource):
     @cached_property
     def rate_limits(self) -> AsyncRateLimits:
         return AsyncRateLimits(self._client)
+
+    @cached_property
+    def compliance_settings(self) -> AsyncComplianceSettings:
+        return AsyncComplianceSettings(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncOrganizationWithRawResponse:
@@ -273,6 +289,10 @@ class OrganizationWithRawResponse:
     def rate_limits(self) -> RateLimitsWithRawResponse:
         return RateLimitsWithRawResponse(self._organization.rate_limits)
 
+    @cached_property
+    def compliance_settings(self) -> ComplianceSettingsWithRawResponse:
+        return ComplianceSettingsWithRawResponse(self._organization.compliance_settings)
+
 
 class AsyncOrganizationWithRawResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -313,6 +333,10 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def rate_limits(self) -> AsyncRateLimitsWithRawResponse:
         return AsyncRateLimitsWithRawResponse(self._organization.rate_limits)
+
+    @cached_property
+    def compliance_settings(self) -> AsyncComplianceSettingsWithRawResponse:
+        return AsyncComplianceSettingsWithRawResponse(self._organization.compliance_settings)
 
 
 class OrganizationWithStreamingResponse:
@@ -355,6 +379,10 @@ class OrganizationWithStreamingResponse:
     def rate_limits(self) -> RateLimitsWithStreamingResponse:
         return RateLimitsWithStreamingResponse(self._organization.rate_limits)
 
+    @cached_property
+    def compliance_settings(self) -> ComplianceSettingsWithStreamingResponse:
+        return ComplianceSettingsWithStreamingResponse(self._organization.compliance_settings)
+
 
 class AsyncOrganizationWithStreamingResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -395,3 +423,7 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def rate_limits(self) -> AsyncRateLimitsWithStreamingResponse:
         return AsyncRateLimitsWithStreamingResponse(self._organization.rate_limits)
+
+    @cached_property
+    def compliance_settings(self) -> AsyncComplianceSettingsWithStreamingResponse:
+        return AsyncComplianceSettingsWithStreamingResponse(self._organization.compliance_settings)
