@@ -4,10 +4,10 @@ import sys
 from typing import Iterator
 from pathlib import Path
 
-import rich
 import griffe
 from rich.text import Text
 from rich.style import Style
+from rich.console import Console
 
 
 def resolve_assignment_alias(obj: griffe.Object | griffe.Alias) -> griffe.Object | griffe.Alias:
@@ -90,11 +90,13 @@ def main() -> None:
 
     output = list(find_breaking_changes(package, old_package, path=["anthropic"]))
     if output:
-        rich.print(Text("Breaking changes detected!", style=Style(color="rgb(165, 79, 87)")))
-        rich.print()
+        # soft_wrap: CI stdout is not a TTY, so rich would otherwise hard-wrap long symbol paths at 80 columns
+        console = Console(soft_wrap=True)
+        console.print(Text("Breaking changes detected!", style=Style(color="rgb(165, 79, 87)")))
+        console.print()
 
         for text in output:
-            rich.print(text, end="")
+            console.print(text, end="")
 
         sys.exit(1)
 
