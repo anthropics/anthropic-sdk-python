@@ -15,6 +15,7 @@ from anthropic.pagination import SyncPage, AsyncPage
 from anthropic.types.messages import (
     MessageBatch,
     DeletedMessageBatch,
+    MessageBatchIndividualResponse,
 )
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
@@ -374,6 +375,40 @@ class TestBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
+    @parametrize
+    @pytest.mark.skip(reason="somehow hitting prod endpoint")
+    def test_raw_response_results(self, client: Anthropic) -> None:
+        response = client.messages.batches.with_raw_response.results(
+            "message_batch_id",
+        )
+
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        stream = response.parse()
+        for item in stream:
+            assert_matches_type(MessageBatchIndividualResponse, item, path=["line"])
+
+    @parametrize
+    @pytest.mark.skip(reason="somehow hitting prod endpoint")
+    def test_streaming_response_results(self, client: Anthropic) -> None:
+        with client.messages.batches.with_streaming_response.results(
+            "message_batch_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            stream = response.parse()
+            for item in stream:
+                assert_matches_type(MessageBatchIndividualResponse, item, path=["item"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    def test_path_params_results(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
+            client.messages.batches.with_raw_response.results(
+                "",
+            )
+
 
 class TestAsyncBatches:
     parametrize = pytest.mark.parametrize(
@@ -730,3 +765,37 @@ class TestAsyncBatches:
 
         assert i == 1
         assert results.http_response.is_stream_consumed
+
+    @parametrize
+    @pytest.mark.skip(reason="somehow hitting prod endpoint")
+    async def test_raw_response_results(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.messages.batches.with_raw_response.results(
+            "message_batch_id",
+        )
+
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        stream = await response.parse()
+        async for item in stream:
+            assert_matches_type(MessageBatchIndividualResponse, item, path=["line"])
+
+    @parametrize
+    @pytest.mark.skip(reason="somehow hitting prod endpoint")
+    async def test_streaming_response_results(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.messages.batches.with_streaming_response.results(
+            "message_batch_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            stream = await response.parse()
+            async for item in stream:
+                assert_matches_type(MessageBatchIndividualResponse, item, path=["item"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_path_params_results(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
+            await async_client.messages.batches.with_raw_response.results(
+                "",
+            )

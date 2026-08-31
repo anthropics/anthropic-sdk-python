@@ -667,6 +667,9 @@ class BatchesWithRawResponse:
         self.cancel = to_raw_response_wrapper(
             batches.cancel,
         )
+        self.results = to_raw_response_wrapper(
+            batches.results,
+        )
 
 
 class AsyncBatchesWithRawResponse:
@@ -687,6 +690,9 @@ class AsyncBatchesWithRawResponse:
         )
         self.cancel = async_to_raw_response_wrapper(
             batches.cancel,
+        )
+        self.results = async_to_raw_response_wrapper(
+            batches.results,
         )
 
 
@@ -709,6 +715,9 @@ class BatchesWithStreamingResponse:
         self.cancel = to_streamed_response_wrapper(
             batches.cancel,
         )
+        self.results = to_streamed_response_wrapper(
+            batches.results,
+        )
 
 
 class AsyncBatchesWithStreamingResponse:
@@ -729,4 +738,7 @@ class AsyncBatchesWithStreamingResponse:
         )
         self.cancel = async_to_streamed_response_wrapper(
             batches.cancel,
+        )
+        self.results = async_to_streamed_response_wrapper(
+            batches.results,
         )
