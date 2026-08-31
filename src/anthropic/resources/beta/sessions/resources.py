@@ -197,7 +197,7 @@ class Resources(SyncAPIResource):
           limit: Maximum number of resources to return per page (max 1000). If omitted, returns
               all resources.
 
-          page: Opaque cursor from a previous response's next_page field.
+          page: Opaque cursor from a previous response's `next_page` field.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -526,7 +526,7 @@ class AsyncResources(AsyncAPIResource):
           limit: Maximum number of resources to return per page (max 1000). If omitted, returns
               all resources.
 
-          page: Opaque cursor from a previous response's next_page field.
+          page: Opaque cursor from a previous response's `next_page` field.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

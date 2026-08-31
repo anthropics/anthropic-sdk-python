@@ -11,7 +11,7 @@ class BetaManagedAgentsSessionStats(BaseModel):
     """Timing statistics for a session."""
 
     active_seconds: Optional[float] = None
-    """Cumulative time in seconds the session spent in running status.
+    """Cumulative time in seconds the session spent in `running` status.
 
     Excludes idle time.
     """

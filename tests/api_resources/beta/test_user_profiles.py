@@ -166,6 +166,7 @@ class TestUserProfiles:
         user_profile = client.beta.user_profiles.list(
             limit=0,
             order="asc",
+            order_by="created_at",
             page="page",
             betas=["message-batches-2024-09-24"],
         )
@@ -387,6 +388,7 @@ class TestAsyncUserProfiles:
         user_profile = await async_client.beta.user_profiles.list(
             limit=0,
             order="asc",
+            order_by="created_at",
             page="page",
             betas=["message-batches-2024-09-24"],
         )

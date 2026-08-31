@@ -18,6 +18,9 @@ class UserProfileListParams(TypedDict, total=False):
     order: Literal["asc", "desc"]
     """Query parameter for order"""
 
+    order_by: Literal["created_at", "name"]
+    """Query parameter for order_by"""
+
     page: str
     """Query parameter for page"""
 

@@ -128,16 +128,16 @@ class DeploymentRuns(SyncAPIResource):
           created_at_lte: Return runs created at or before this time (inclusive).
 
           deployment_id: Filter to a specific deployment. Omit to list across all deployments in the
-              workspace. Filtering by a non-existent deployment_id returns 200 with empty
+              workspace. Filtering by a non-existent `deployment_id` returns 200 with empty
               data.
 
-          has_error: Filter: true for runs with non-null error, false for runs with non-null
-              session_id. Omit for all.
+          has_error: Filter: true for runs with non-null `error`, false for runs with non-null
+              `session_id`. Omit for all.
 
           limit: Maximum results per page. Default 20, maximum 1000.
 
-          page: Opaque pagination cursor. Pass next_page from the previous response. Invalid or
-              expired cursors return 400.
+          page: Opaque pagination cursor. Pass `next_page` from the previous response. Invalid
+              or expired cursors return 400.
 
           trigger_type: Filter runs by what triggered them. Omit to return all runs.
 
@@ -289,16 +289,16 @@ class AsyncDeploymentRuns(AsyncAPIResource):
           created_at_lte: Return runs created at or before this time (inclusive).
 
           deployment_id: Filter to a specific deployment. Omit to list across all deployments in the
-              workspace. Filtering by a non-existent deployment_id returns 200 with empty
+              workspace. Filtering by a non-existent `deployment_id` returns 200 with empty
               data.
 
-          has_error: Filter: true for runs with non-null error, false for runs with non-null
-              session_id. Omit for all.
+          has_error: Filter: true for runs with non-null `error`, false for runs with non-null
+              `session_id`. Omit for all.
 
           limit: Maximum results per page. Default 20, maximum 1000.
 
-          page: Opaque pagination cursor. Pass next_page from the previous response. Invalid or
-              expired cursors return 400.
+          page: Opaque pagination cursor. Pass `next_page` from the previous response. Invalid
+              or expired cursors return 400.
 
           trigger_type: Filter runs by what triggered them. Omit to return all runs.
 

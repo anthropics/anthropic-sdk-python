@@ -19,7 +19,7 @@ class ResourceListParams(TypedDict, total=False):
     """
 
     page: str
-    """Opaque cursor from a previous response's next_page field."""
+    """Opaque cursor from a previous response's `next_page` field."""
 
     betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
     """Optional header to specify the beta version(s) you want to use."""

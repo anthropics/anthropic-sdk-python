@@ -131,7 +131,7 @@ class Threads(SyncAPIResource):
 
         Defaults to 1000.
 
-          page: Opaque pagination cursor from a previous response's next_page. Forward-only.
+          page: Opaque pagination cursor from a previous response's `next_page`. Forward-only.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -327,7 +327,7 @@ class AsyncThreads(AsyncAPIResource):
 
         Defaults to 1000.
 
-          page: Opaque pagination cursor from a previous response's next_page. Forward-only.
+          page: Opaque pagination cursor from a previous response's `next_page`. Forward-only.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

@@ -44,11 +44,11 @@ class EventListParams(TypedDict, total=False):
     order: Literal["asc", "desc"]
     """Sort direction for results, ordered by the event's `processed_at`.
 
-    Defaults to asc (chronological).
+    Defaults to `asc` (chronological).
     """
 
     page: str
-    """Opaque pagination cursor from a previous response's next_page."""
+    """Opaque pagination cursor from a previous response's `next_page`."""
 
     types: SequenceNotStr[str]
     """Filter by event type.
