@@ -342,8 +342,8 @@ class Deployments(SyncAPIResource):
 
           page: Opaque pagination cursor.
 
-          status: Filter by status: active or paused. Omit for both. To include archived
-              deployments, use include_archived instead; the two cannot be combined.
+          status: Filter by status: `active` or `paused`. Omit for both. To include archived
+              deployments, use `include_archived` instead; the two cannot be combined.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -881,8 +881,8 @@ class AsyncDeployments(AsyncAPIResource):
 
           page: Opaque pagination cursor.
 
-          status: Filter by status: active or paused. Omit for both. To include archived
-              deployments, use include_archived instead; the two cannot be combined.
+          status: Filter by status: `active` or `paused`. Omit for both. To include archived
+              deployments, use `include_archived` instead; the two cannot be combined.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

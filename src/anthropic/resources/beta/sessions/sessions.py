@@ -332,7 +332,7 @@ class Sessions(SyncAPIResource):
         Args:
           agent_id: Filter sessions created with this agent ID.
 
-          agent_version: Filter by agent version. Only applies when agent_id is also set.
+          agent_version: Filter by agent version. Only applies when `agent_id` is also set.
 
           created_at_gt: Return sessions created after this time (exclusive).
 
@@ -348,10 +348,10 @@ class Sessions(SyncAPIResource):
 
           limit: Maximum number of results to return.
 
-          memory_store_id: Filter sessions whose resources contain a memory_store with this memory store
+          memory_store_id: Filter sessions whose resources contain a `memory_store` with this memory store
               ID.
 
-          order: Sort direction for results, ordered by created_at. Defaults to desc (newest
+          order: Sort direction for results, ordered by `created_at`. Defaults to `desc` (newest
               first).
 
           page: Opaque pagination cursor from a previous response.
@@ -778,7 +778,7 @@ class AsyncSessions(AsyncAPIResource):
         Args:
           agent_id: Filter sessions created with this agent ID.
 
-          agent_version: Filter by agent version. Only applies when agent_id is also set.
+          agent_version: Filter by agent version. Only applies when `agent_id` is also set.
 
           created_at_gt: Return sessions created after this time (exclusive).
 
@@ -794,10 +794,10 @@ class AsyncSessions(AsyncAPIResource):
 
           limit: Maximum number of results to return.
 
-          memory_store_id: Filter sessions whose resources contain a memory_store with this memory store
+          memory_store_id: Filter sessions whose resources contain a `memory_store` with this memory store
               ID.
 
-          order: Sort direction for results, ordered by created_at. Defaults to desc (newest
+          order: Sort direction for results, ordered by `created_at`. Defaults to `desc` (newest
               first).
 
           page: Opaque pagination cursor from a previous response.

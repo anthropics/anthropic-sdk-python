@@ -10,7 +10,7 @@ __all__ = ["BetaManagedAgentsOutcomeEvaluationResource"]
 
 
 class BetaManagedAgentsOutcomeEvaluationResource(BaseModel):
-    """Evaluation state for a single outcome defined via a define_outcome event."""
+    """Evaluation state for a single outcome defined via a `define_outcome` event."""
 
     completed_at: Optional[datetime] = None
     """A timestamp in RFC 3339 format"""
@@ -21,8 +21,8 @@ class BetaManagedAgentsOutcomeEvaluationResource(BaseModel):
     explanation: Optional[str] = None
     """Grader's verdict text from the most recent evaluation.
 
-    For satisfied, explains why criteria are met; for needs_revision (intermediate),
-    what's missing; for failed, why unrecoverable.
+    For `satisfied`, explains why criteria are met; for `needs_revision`
+    (intermediate), what's missing; for `failed`, why unrecoverable.
     """
 
     iteration: int
