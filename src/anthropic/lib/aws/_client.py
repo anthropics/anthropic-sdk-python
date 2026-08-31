@@ -94,18 +94,17 @@ class AnthropicAWS(Anthropic):
                 )
             self.workspace_id = resolved_workspace_id
 
-        if not skip_auth:
-            resolved_base_url = resolve_base_url(
-                str(base_url) if base_url is not None else None,
-                region=resolved_region,
+        resolved_base_url = resolve_base_url(
+            str(base_url) if base_url is not None else None,
+            region=resolved_region,
+        )
+        if resolved_base_url is None:
+            raise AnthropicError(
+                "No AWS region was provided and no base_url was given. "
+                "Set the `aws_region` argument, the `AWS_REGION`/`AWS_DEFAULT_REGION` environment variable, "
+                "or provide a `base_url` directly."
             )
-            if resolved_base_url is None:
-                raise AnthropicError(
-                    "No AWS region was provided and no base_url was given. "
-                    "Set the `aws_region` argument, the `AWS_REGION`/`AWS_DEFAULT_REGION` environment variable, "
-                    "or provide a `base_url` directly."
-                )
-            base_url = resolved_base_url
+        base_url = resolved_base_url
 
         super().__init__(
             api_key=resolved_api_key,
@@ -120,6 +119,10 @@ class AnthropicAWS(Anthropic):
             middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
+
+        # Undo the base client's ambient ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN fallback; only explicit ones apply.
+        self.api_key = resolved_api_key
+        self.auth_token = auth_token
 
     @property
     @override
@@ -199,14 +202,17 @@ class AnthropicAWS(Anthropic):
         if credentials is not None:
             raise TypeError("AnthropicAWS does not support a `credentials` provider (it authenticates with AWS SigV4).")
 
-        # If region is changing and no explicit base_url, let __init__ derive it
-        resolved_base_url = base_url or (None if aws_region else self.base_url)
+        # A region-derived host must follow the region (SigV4 signs for it); a custom base_url is kept.
+        if base_url is None and aws_region is not None:
+            derived = resolve_base_url(None, region=self.aws_region)
+            if derived is not None and self.base_url == self._enforce_trailing_slash(httpx2.URL(derived)):
+                base_url = resolve_base_url(None, region=aws_region)
 
         return super().copy(
             api_key=api_key or self.api_key,
             auth_token=auth_token,
             webhook_key=webhook_key,
-            base_url=resolved_base_url,
+            base_url=base_url,
             timeout=timeout,
             http_client=http_client,
             max_retries=max_retries,
@@ -302,18 +308,17 @@ class AsyncAnthropicAWS(AsyncAnthropic):
                 )
             self.workspace_id = resolved_workspace_id
 
-        if not skip_auth:
-            resolved_base_url = resolve_base_url(
-                str(base_url) if base_url is not None else None,
-                region=resolved_region,
+        resolved_base_url = resolve_base_url(
+            str(base_url) if base_url is not None else None,
+            region=resolved_region,
+        )
+        if resolved_base_url is None:
+            raise AnthropicError(
+                "No AWS region was provided and no base_url was given. "
+                "Set the `aws_region` argument, the `AWS_REGION`/`AWS_DEFAULT_REGION` environment variable, "
+                "or provide a `base_url` directly."
             )
-            if resolved_base_url is None:
-                raise AnthropicError(
-                    "No AWS region was provided and no base_url was given. "
-                    "Set the `aws_region` argument, the `AWS_REGION`/`AWS_DEFAULT_REGION` environment variable, "
-                    "or provide a `base_url` directly."
-                )
-            base_url = resolved_base_url
+        base_url = resolved_base_url
 
         super().__init__(
             api_key=resolved_api_key,
@@ -328,6 +333,10 @@ class AsyncAnthropicAWS(AsyncAnthropic):
             middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
+
+        # Undo the base client's ambient ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN fallback; only explicit ones apply.
+        self.api_key = resolved_api_key
+        self.auth_token = auth_token
 
     @property
     @override
@@ -407,14 +416,17 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         if credentials is not None:
             raise TypeError("AnthropicAWS does not support a `credentials` provider (it authenticates with AWS SigV4).")
 
-        # If region is changing and no explicit base_url, let __init__ derive it
-        resolved_base_url = base_url or (None if aws_region else self.base_url)
+        # A region-derived host must follow the region (SigV4 signs for it); a custom base_url is kept.
+        if base_url is None and aws_region is not None:
+            derived = resolve_base_url(None, region=self.aws_region)
+            if derived is not None and self.base_url == self._enforce_trailing_slash(httpx2.URL(derived)):
+                base_url = resolve_base_url(None, region=aws_region)
 
         return super().copy(
             api_key=api_key or self.api_key,
             auth_token=auth_token,
             webhook_key=webhook_key,
-            base_url=resolved_base_url,
+            base_url=base_url,
             timeout=timeout,
             http_client=http_client,
             max_retries=max_retries,
