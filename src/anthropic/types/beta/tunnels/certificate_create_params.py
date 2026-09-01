@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import List
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Required, TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["CertificateCreateParams"]
@@ -18,5 +17,5 @@ class CertificateCreateParams(TypedDict, total=False):
     Must contain exactly one certificate and no private-key material. Maximum 8KB.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

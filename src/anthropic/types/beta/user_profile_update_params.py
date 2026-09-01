@@ -45,5 +45,5 @@ class UserProfileUpdateParams(TypedDict, total=False):
     Omit to leave unchanged. Maximum 255 characters.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

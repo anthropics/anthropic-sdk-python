@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import List, Union, Optional
-from typing_extensions import Required, Annotated, TypeAlias, TypedDict
+from typing_extensions import Required, TypeAlias, TypedDict
 
-from ....._utils import PropertyInfo
 from .beta_jwks_inline_param import BetaJWKSInlineParam
 from ....anthropic_beta_param import AnthropicBetaParam
 from .beta_jwks_discovery_param import BetaJWKSDiscoveryParam
@@ -41,7 +40,7 @@ class IssuerCreateParams(TypedDict, total=False):
     `iat` and `exp`; a missing `iat` is rejected.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
 
 

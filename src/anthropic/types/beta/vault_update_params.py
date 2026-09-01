@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import Dict, List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["VaultUpdateParams"]
@@ -22,5 +21,5 @@ class VaultUpdateParams(TypedDict, total=False):
     preserved.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

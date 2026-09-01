@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import List, Iterable
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Required, TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_event_params import BetaManagedAgentsEventParams
 
@@ -16,5 +15,5 @@ class EventSendParams(TypedDict, total=False):
     events: Required[Iterable[BetaManagedAgentsEventParams]]
     """Events to send to the `session`."""
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

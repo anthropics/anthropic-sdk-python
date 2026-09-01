@@ -44,5 +44,5 @@ class MemoryStoreListParams(TypedDict, total=False):
     for the first page.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

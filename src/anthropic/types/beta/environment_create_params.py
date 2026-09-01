@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import Dict, List, Union, Optional
-from typing_extensions import Literal, Required, Annotated, TypeAlias, TypedDict
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_cloud_config_params import BetaCloudConfigParams
 from .beta_self_hosted_config_params import BetaSelfHostedConfigParams
@@ -34,7 +33,7 @@ class EnvironmentCreateParams(TypedDict, total=False):
     environments. If not specified, defaults based on organization type.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
 
 

@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
 from ..._types import SequenceNotStr
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["FileListParams"]
@@ -40,5 +39,5 @@ class FileListParams(TypedDict, total=False):
     Only returns files associated with the specified scope (e.g., a session ID).
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

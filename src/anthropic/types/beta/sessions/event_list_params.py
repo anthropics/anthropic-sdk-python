@@ -57,5 +57,5 @@ class EventListParams(TypedDict, total=False):
     `agent.tool_use`). Omit to return all event types.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

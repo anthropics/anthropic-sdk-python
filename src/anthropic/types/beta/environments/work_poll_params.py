@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["WorkPollParams"]
@@ -25,10 +24,10 @@ class WorkPollParams(TypedDict, total=False):
     If omitted, uses the default (5000ms).
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
 
-    anthropic_worker_id: Annotated[str, PropertyInfo(alias="Anthropic-Worker-ID")]
+    anthropic_worker_id: str
     """
     Unique identifier for the specific worker polling, used to track aggregated
     environment-level work metrics in Console
