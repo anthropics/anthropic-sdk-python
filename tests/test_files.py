@@ -62,6 +62,28 @@ async def test_async_pathlib_in_file_tuple() -> None:
     assert result == IsDict({"file": IsTuple("custom.md", IsBytes(), "text/markdown", {"X-Custom": "1"})})
 
 
+def test_unnamed_file_tuple_uses_base_name() -> None:
+    with open(readme_path, "rb") as f:
+        result = to_httpx_files({"file": (None, f, "text/markdown")})
+        assert result == IsDict({"file": IsTuple("README.md", f, "text/markdown")})
+
+    result = to_httpx_files({"file": (None, readme_path)})
+    assert result == IsDict({"file": IsTuple("README.md", IsBytes())})
+
+    result = to_httpx_files({"file": (None, b"content")})
+    assert result == IsDict({"file": IsTuple(None, b"content")})
+
+
+@pytest.mark.asyncio
+async def test_async_unnamed_file_tuple_uses_base_name() -> None:
+    with open(readme_path, "rb") as f:
+        result = await async_to_httpx_files({"file": (None, f, "text/markdown")})
+        assert result == IsDict({"file": IsTuple("README.md", f, "text/markdown")})
+
+    result = await async_to_httpx_files({"file": (None, anyio.Path(readme_path))})
+    assert result == IsDict({"file": IsTuple("README.md", IsBytes())})
+
+
 def test_string_not_allowed() -> None:
     with pytest.raises(TypeError, match="Expected file types input to be a FileContent type or to be a tuple"):
         to_httpx_files(
