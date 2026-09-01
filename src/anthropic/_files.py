@@ -69,9 +69,16 @@ def _transform_file(file: FileTypes) -> HttpxFileTypes:
         return file
 
     if is_tuple_t(file):
-        return (file[0], read_file_content(file[1]), *file[2:])
+        return (file[0] or file_name(file[1]), read_file_content(file[1]), *file[2:])
 
     raise TypeError(f"Expected file types input to be a FileContent type or to be a tuple")
+
+
+def file_name(file: FileContent) -> str | None:
+    name = os.fspath(file) if isinstance(file, os.PathLike) else getattr(file, "name", None)
+    if isinstance(name, (str, bytes)):
+        return pathlib.Path(os.fsdecode(name)).name
+    return None
 
 
 def read_file_content(file: FileContent) -> HttpxFileContent:
@@ -111,7 +118,7 @@ async def _async_transform_file(file: FileTypes) -> HttpxFileTypes:
         return file
 
     if is_tuple_t(file):
-        return (file[0], await async_read_file_content(file[1]), *file[2:])
+        return (file[0] or file_name(file[1]), await async_read_file_content(file[1]), *file[2:])
 
     raise TypeError(f"Expected file types input to be a FileContent type or to be a tuple")
 
