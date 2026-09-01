@@ -12,6 +12,7 @@ from .beta_stop_reason import BetaStopReason
 from .beta_content_block import BetaContentBlock, BetaContentBlock as BetaContentBlock
 from .beta_refusal_stop_details import BetaRefusalStopDetails
 from .beta_context_management_response import BetaContextManagementResponse
+from .beta_thinking_dropped_input_transformation import BetaThinkingDroppedInputTransformation
 
 __all__ = ["BetaMessage"]
 
@@ -141,4 +142,23 @@ class BetaMessage(BaseModel):
 
     Total input tokens in a request is the summation of `input_tokens`,
     `cache_creation_input_tokens`, and `cache_read_input_tokens`.
+    """
+
+    input_transformations: Optional[List[BetaThinkingDroppedInputTransformation]] = None
+    """
+    Changes the API made to the request's input before showing it to the model: one
+    entry per change, in request order. Today the only entry type is
+    `thinking_dropped` — a `thinking`, `redacted_thinking` or `connector_text` block
+    from the request's `messages` that was removed from the prompt instead of being
+    shown to the model because it failed a binding check. More entry types may be
+    added over time; ignore types you do not recognize.
+
+    Requires `anthropic-beta: thinking-binding-controls-2026-08-01`. Present on
+    every such response from a model that supports extended thinking, as `[]` when
+    nothing was changed; without the beta, blocks are removed all the same but
+    nothing is reported. Removed blocks contribute nothing to `usage.input_tokens`.
+    When streaming, the array is final in `message_start`; the final `message_delta`
+    event carries it only when a server-side model fallback happened mid-stream, in
+    which case it holds the serving model's entries and replaces the one in
+    `message_start`.
     """
