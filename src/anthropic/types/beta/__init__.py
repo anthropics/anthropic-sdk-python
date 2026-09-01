@@ -265,6 +265,7 @@ from .beta_managed_agents_user_location import BetaManagedAgentsUserLocation as 
 from .beta_memory_tool_20250818_command import BetaMemoryTool20250818Command as BetaMemoryTool20250818Command
 from .beta_raw_content_block_stop_event import BetaRawContentBlockStopEvent as BetaRawContentBlockStopEvent
 from .beta_request_document_block_param import BetaRequestDocumentBlockParam as BetaRequestDocumentBlockParam
+from .beta_thinking_block_binding_param import BetaThinkingBlockBindingParam as BetaThinkingBlockBindingParam
 from .beta_web_search_tool_result_block import BetaWebSearchToolResultBlock as BetaWebSearchToolResultBlock
 from .beta_web_search_tool_result_error import BetaWebSearchToolResultError as BetaWebSearchToolResultError
 from .beta_advisor_redacted_result_block import BetaAdvisorRedactedResultBlock as BetaAdvisorRedactedResultBlock
@@ -419,6 +420,9 @@ from .beta_request_tool_addition_block_param import (
 from .beta_server_tool_caller_20260120_param import (
     BetaServerToolCaller20260120Param as BetaServerToolCaller20260120Param,
 )
+from .beta_thinking_prefix_mismatch_behavior import (
+    BetaThinkingPrefixMismatchBehavior as BetaThinkingPrefixMismatchBehavior,
+)
 from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam as BetaWebFetchToolResultBlockParam
 from .beta_web_fetch_tool_result_error_block import BetaWebFetchToolResultErrorBlock as BetaWebFetchToolResultErrorBlock
 from .beta_web_search_tool_result_error_code import BetaWebSearchToolResultErrorCode as BetaWebSearchToolResultErrorCode
@@ -481,6 +485,9 @@ from .beta_managed_agents_start_event_preview import (
 )
 from .beta_managed_agents_user_location_param import (
     BetaManagedAgentsUserLocationParam as BetaManagedAgentsUserLocationParam,
+)
+from .beta_system_message_output_config_param import (
+    BetaSystemMessageOutputConfigParam as BetaSystemMessageOutputConfigParam,
 )
 from .beta_web_search_tool_result_block_param import (
     BetaWebSearchToolResultBlockParam as BetaWebSearchToolResultBlockParam,
@@ -664,6 +671,9 @@ from .beta_managed_agents_web_search_tool_config import (
 )
 from .beta_output_behavior_update_existing_param import (
     BetaOutputBehaviorUpdateExistingParam as BetaOutputBehaviorUpdateExistingParam,
+)
+from .beta_thinking_dropped_input_transformation import (
+    BetaThinkingDroppedInputTransformation as BetaThinkingDroppedInputTransformation,
 )
 from .beta_tool_search_tool_regex_20251119_param import (
     BetaToolSearchToolRegex20251119Param as BetaToolSearchToolRegex20251119Param,

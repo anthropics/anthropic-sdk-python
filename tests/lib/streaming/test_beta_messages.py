@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import json
-from typing import Any, Set, Dict, TypeVar, cast
+from typing import Any, Set, Dict, List, Tuple, TypeVar, cast
 
 import httpx2
 import pytest
@@ -10,7 +10,7 @@ from respx import MockRouter
 
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._utils import assert_overloads_in_sync, assert_signatures_in_sync
-from anthropic._compat import PYDANTIC_V1
+from anthropic._compat import PYDANTIC_V1, get_model_fields
 from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_types import (
     BetaInputJsonEvent,
@@ -19,6 +19,8 @@ from anthropic.lib.streaming._beta_types import (
 )
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
 from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
+from anthropic.types.beta.beta_message_delta_usage import BetaMessageDeltaUsage
+from anthropic.types.beta.beta_raw_message_delta_event import Delta as BetaRawMessageDelta, BetaRawMessageDeltaEvent
 
 from .helpers import get_response, to_async_iter
 
@@ -336,6 +338,26 @@ def assert_context_management_response(message: BetaMessage) -> None:
     assert applied_edit.cleared_input_tokens == 1500
 
 
+# a `message_delta` array (mid-stream fallback) replaces the `message_start` value, even
+# when empty, while a delta without the key must leave the `message_start` value in place
+INPUT_TRANSFORMATIONS_CASES: List[Tuple[str, List[Dict[str, str]]]] = [
+    (
+        "input_transformations_delta_response.txt",
+        [{"type": "thinking_dropped", "path": "messages.0.content.0", "reason": "model_binding_mismatch"}],
+    ),
+    (
+        "input_transformations_start_only_response.txt",
+        [{"type": "thinking_dropped", "path": "messages.0.content.0", "reason": "model_binding_mismatch"}],
+    ),
+    ("input_transformations_empty_delta_response.txt", []),
+]
+
+
+def assert_input_transformations_response(message: BetaMessage, expected: List[Dict[str, str]]) -> None:
+    assert message.input_transformations is not None
+    assert [entry.to_dict() for entry in message.input_transformations] == expected
+
+
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
@@ -535,6 +557,20 @@ class TestSyncMessages:
             model="claude-sonnet-4-5",
         ) as stream:
             assert_context_management_response(stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("fixture, expected", INPUT_TRANSFORMATIONS_CASES)
+    def test_input_transformations_propagated(
+        self, respx_mock: MockRouter, fixture: str, expected: List[Dict[str, str]]
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, content=get_response(fixture)))
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_input_transformations_response(stream.get_final_message(), expected)
 
 
 class TestAsyncMessages:
@@ -773,6 +809,50 @@ class TestAsyncMessages:
             model="claude-sonnet-4-5",
         ) as stream:
             assert_context_management_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("fixture, expected", INPUT_TRANSFORMATIONS_CASES)
+    async def test_input_transformations_propagated(
+        self, respx_mock: MockRouter, fixture: str, expected: List[Dict[str, str]]
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=to_async_iter(get_response(fixture)))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            assert_input_transformations_response(await stream.get_final_message(), expected)
+
+
+def test_message_delta_fields_are_all_accumulated() -> None:
+    # tripwire: handle a new field in accumulate_event, then list it here
+    assert set(get_model_fields(BetaRawMessageDeltaEvent)) == {
+        "context_management",
+        "delta",
+        "input_transformations",
+        "type",
+        "usage",
+    }
+    assert set(get_model_fields(BetaRawMessageDelta)) == {
+        "container",
+        "stop_details",
+        "stop_reason",
+        "stop_sequence",
+    }
+    assert set(get_model_fields(BetaMessageDeltaUsage)) == {
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "fallback_credit",
+        "input_tokens",
+        "iterations",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+    }
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
