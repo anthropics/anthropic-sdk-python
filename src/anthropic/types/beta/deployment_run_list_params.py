@@ -52,5 +52,5 @@ class DeploymentRunListParams(TypedDict, total=False):
     trigger_type: BetaManagedAgentsTriggerType
     """Filter runs by what triggered them. Omit to return all runs."""
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

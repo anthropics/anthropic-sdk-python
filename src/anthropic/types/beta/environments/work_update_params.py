@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import Dict, List, Optional
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Required, TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["WorkUpdateParams"]
@@ -21,5 +20,5 @@ class WorkUpdateParams(TypedDict, total=False):
     preserve existing metadata.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import List
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 from ..beta_managed_agents_delta_type import BetaManagedAgentsDeltaType
 
@@ -27,5 +26,5 @@ class EventStreamParams(TypedDict, total=False):
     are sent.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

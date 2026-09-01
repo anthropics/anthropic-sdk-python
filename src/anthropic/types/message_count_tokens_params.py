@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import Union, Iterable, Optional
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Required, TypedDict
 
-from .._utils import PropertyInfo
 from .model_param import ModelParam
 from .message_param import MessageParam
 from .text_block_param import TextBlockParam
@@ -211,7 +210,7 @@ class MessageCountTokensParams(TypedDict, total=False):
     for more details.
     """
 
-    user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]
+    user_profile_id: str
     """The user profile ID to attribute this request to.
 
     Use when acting on behalf of a party other than your organization. Requires the

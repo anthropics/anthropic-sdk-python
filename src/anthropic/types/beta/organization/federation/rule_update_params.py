@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import Dict, List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ....._utils import PropertyInfo
 from ....anthropic_beta_param import AnthropicBetaParam
 from .beta_federation_rule_match_param import BetaFederationRuleMatchParam
 from .beta_service_account_target_param import BetaServiceAccountTargetParam
@@ -74,5 +73,5 @@ class RuleUpdateParams(TypedDict, total=False):
     `/federation_rules/{federation_rule_id}/workspaces` sub-resource instead.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

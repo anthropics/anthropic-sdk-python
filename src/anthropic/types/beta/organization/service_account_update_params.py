@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Literal, Annotated, TypedDict
+from typing_extensions import Literal, TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["ServiceAccountUpdateParams"]
@@ -22,5 +21,5 @@ class ServiceAccountUpdateParams(TypedDict, total=False):
     organization_role: Optional[Literal["admin", "developer"]]
     """Replaces the org-level role. Omit or send `null` to leave unchanged."""
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

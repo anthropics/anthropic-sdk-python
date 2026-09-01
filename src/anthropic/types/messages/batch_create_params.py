@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import Iterable
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Required, TypedDict
 
-from ..._utils import PropertyInfo
 from ..message_create_params import MessageCreateParamsNonStreaming
 
 __all__ = ["BatchCreateParams", "Request"]
@@ -18,7 +17,7 @@ class BatchCreateParams(TypedDict, total=False):
     Each is an individual request to create a Message.
     """
 
-    user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]
+    user_profile_id: str
     """The user profile ID to attribute the requests in this batch to.
 
     Use when acting on behalf of a party other than your organization. Requires the

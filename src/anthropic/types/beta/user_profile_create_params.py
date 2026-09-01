@@ -46,5 +46,5 @@ class UserProfileCreateParams(TypedDict, total=False):
     `passthrough`), that company's name where known. Maximum 255 characters.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
