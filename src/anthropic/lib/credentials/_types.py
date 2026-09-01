@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Callable, Optional, Protocol
+from typing import Dict, Callable, Optional, Protocol, Union, Awaitable
 from dataclasses import field, dataclass
 from typing_extensions import override, runtime_checkable
 
@@ -80,7 +80,7 @@ class BaseURLBoundProvider(AccessTokenProvider, Protocol):
 
 # Innermost layer: returns the raw external JWT string (used as the
 # ``identity_token_provider`` argument to :class:`WorkloadIdentityCredentials`).
-IdentityTokenProvider = Callable[[], str]
+IdentityTokenProvider = Union[Callable[[], str], Callable[[], Awaitable[str]]]
 
 
 @dataclass(frozen=True)

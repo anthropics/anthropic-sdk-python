@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import copy
 import time
+import asyncio
+import inspect
 import logging
 from types import TracebackType
 from typing import Any, Dict, Type, Union, NoReturn, Optional
@@ -135,6 +137,22 @@ class WorkloadIdentityError(AnthropicError):
         return base
 
 
+def _resolve_identity_token(provider: IdentityTokenProvider) -> str:
+    raw = provider()
+    if inspect.isawaitable(raw):
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+        if loop and loop.is_running():
+            import concurrent.futures
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                return str(pool.submit(asyncio.run, raw).result())
+        return str(asyncio.run(raw))
+    return str(raw)
+
+
 class WorkloadIdentityCredentials:
     """Exchanges an external OIDC JWT for an Anthropic access token via the
     RFC 7523 ``jwt-bearer`` grant.
@@ -251,7 +269,7 @@ class WorkloadIdentityCredentials:
         # file (e.g. a k8s projected SA token) may have rotated. force_refresh
         # is a no-op: this provider has no cache to bypass.
         del force_refresh
-        jwt = SecretStr(self._identity_token_provider())
+        jwt = SecretStr(_resolve_identity_token(self._identity_token_provider))
 
         assertion_bytes = len(jwt.get_secret_value().encode("utf-8"))
         if assertion_bytes > _MAX_ASSERTION_BYTES:
