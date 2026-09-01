@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Literal, Required, Annotated, TypedDict
+from typing_extensions import Literal, Required, TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["ServiceAccountCreateParams"]
@@ -24,5 +23,5 @@ class ServiceAccountCreateParams(TypedDict, total=False):
     organization_role: Literal["admin", "developer"]
     """Org-level role. Defaults to `developer`."""
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

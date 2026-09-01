@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import Dict, List, Union, Optional
-from typing_extensions import Required, Annotated, TypeAlias, TypedDict
+from typing_extensions import Required, TypeAlias, TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_mcp_oauth_create_params import BetaManagedAgentsMCPOAuthCreateParams
 from .beta_managed_agents_static_bearer_create_params import BetaManagedAgentsStaticBearerCreateParams
@@ -27,7 +26,7 @@ class CredentialCreateParams(TypedDict, total=False):
     Maximum 16 pairs, keys up to 64 chars, values up to 512 chars.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
 
 

@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import List, Iterable
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Required, TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 from ..message_create_params import MessageCreateParamsNonStreaming
 
@@ -19,10 +18,10 @@ class BatchCreateParams(TypedDict, total=False):
     Each is an individual request to create a Message.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
 
-    user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]
+    user_profile_id: str
     """The user profile ID to attribute the requests in this batch to.
 
     Use when acting on behalf of a party other than your organization. Requires the

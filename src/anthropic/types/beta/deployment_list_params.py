@@ -39,5 +39,5 @@ class DeploymentListParams(TypedDict, total=False):
     the two cannot be combined.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

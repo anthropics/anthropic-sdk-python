@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["ServiceAccountListParams"]
@@ -21,5 +20,5 @@ class ServiceAccountListParams(TypedDict, total=False):
     page: Optional[str]
     """Opaque cursor from a previous response's `next_page`."""
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

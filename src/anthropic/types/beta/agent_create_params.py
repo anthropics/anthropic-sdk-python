@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from typing import Dict, List, Union, Iterable, Optional
-from typing_extensions import Required, Annotated, TypeAlias, TypedDict
+from typing_extensions import Required, TypeAlias, TypedDict
 
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_model_param import BetaManagedAgentsModelParam
 from .beta_managed_agents_skill_params import BetaManagedAgentsSkillParams
@@ -68,7 +67,7 @@ class AgentCreateParams(TypedDict, total=False):
     Maximum of 128 tools across all toolsets allowed.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
 
 
