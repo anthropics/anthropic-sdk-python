@@ -731,6 +731,15 @@ def beta_write_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             raise ToolError(f"write: {e}") from e
         _reject_read_only(ctx, target, op="write", file_path=file_path)
         try:
+            # stat() before any open(): reject FIFOs/devices/directories without
+            # opening them (open() on an unconnected FIFO blocks). A missing
+            # target is a normal new-file write, so it is allowed here.
+            try:
+                st: Optional[os.stat_result] = target.stat()
+            except FileNotFoundError:
+                st = None
+            if st is not None and not S_ISREG(st.st_mode):
+                raise ToolError(f"write: {file_path}: not a regular file")
             target.parent.mkdir(parents=True, exist_ok=True)
             write_text_exact(target, content)
         except OSError as e:
