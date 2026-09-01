@@ -183,9 +183,6 @@ def _project_from_credentials(credentials: GoogleCredentials) -> str | None:
     return None
 
 
-# ==============================================================================
-
-
 class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], Anthropic):
     """Synchronous client for the first-party Anthropic API served through Google's
     gateway (Claude Platform on Google Cloud).

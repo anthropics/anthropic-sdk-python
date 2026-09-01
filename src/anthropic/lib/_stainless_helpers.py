@@ -113,7 +113,6 @@ def collect_helpers(
         for message in messages:
             _add(get_helper_tag(message))
 
-            # Check content blocks within messages
             if isinstance(message, dict):
                 blocks: Any = cast(dict[str, Any], message).get("content")
             else:

@@ -722,9 +722,6 @@ class BetaRefusalFallbackMiddleware(Middleware):
                 await current.aclose()
 
 
-# --- hop consumption ---------------------------------------------------------
-
-
 class _Refusal(BaseModel):
     token: Optional[str]
     """The minted credit token; `None` for a token-less start-of-stream refusal."""
@@ -1311,9 +1308,6 @@ class _BlockTracker:
         self._open.clear()
 
 
-# --- block accumulation & prefill conversion -------------------------------
-
-
 def _apply_delta(blocks: list[tuple[int, dict[str, Any]]], index: int, delta: dict[str, Any]) -> None:
     """Apply a content_block_delta to the accumulating block at `index`."""
     block = next((block for block_index, block in blocks if block_index == index), None)
@@ -1364,9 +1358,6 @@ def _to_prefill_blocks(response_blocks: list[dict[str, Any]]) -> list[Any]:
     while out and out[-1].get("type") in ("thinking", "redacted_thinking"):
         out.pop()
     return out
-
-
-# --- helpers --------------------------------------------------------------
 
 
 def _strip_seam_blocks(body: dict[str, Any]) -> dict[str, Any]:

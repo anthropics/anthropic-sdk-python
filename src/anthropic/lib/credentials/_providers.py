@@ -301,8 +301,6 @@ class CredentialsFile:
                 headers["anthropic-workspace-id"] = str(workspace_id)
         return headers
 
-    # -- file IO -----------------------------------------------------------
-
     def _load_config(self) -> Dict[str, Any]:
         """Read and cache the config file, resolving ``base_url`` and ``credentials_path``."""
         if self._config is not None:
@@ -496,8 +494,6 @@ class CredentialsFile:
         except OSError:
             pass
 
-    # -- dispatch ----------------------------------------------------------
-
     def _auth_block(self) -> Dict[str, Any]:
         """Return the cached ``authentication`` sub-object from the config file."""
         config = self._load_config()
@@ -517,8 +513,6 @@ class CredentialsFile:
             f"Unknown authentication.type {auth_type!r} at {self._config_path}. "
             f"Expected {AUTH_TYPE_OIDC_FEDERATION!r} or {AUTH_TYPE_USER_OAUTH!r}."
         )
-
-    # -- "user_oauth" -----------------------------------------------------
 
     def _call_user_oauth(self, auth: Dict[str, Any], *, force_refresh: bool = False) -> AccessToken:
         """Interactive-login profile. With a ``client_id`` in the auth block,
@@ -629,8 +623,6 @@ class CredentialsFile:
         self._atomic_write_credentials(creds)
 
         return AccessToken(token=_unwrap_secret(new_access), expires_at=new_expires_at)
-
-    # -- "oidc_federation" ------------------------------------------------
 
     def _read_credentials_if_exists(self) -> Optional[Dict[str, Any]]:
         """``_read_credentials`` variant that returns ``None`` on absence

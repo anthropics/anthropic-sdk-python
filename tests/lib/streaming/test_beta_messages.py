@@ -888,7 +888,6 @@ def test_tool_runner_method_definition_in_sync(sync: bool) -> None:
 # go through all the ContentBlock types to make sure the type alias is up to date
 # with any type that has an input property of type object
 def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
-    # only run this on Pydantic v2
     if PYDANTIC_V1:
         pytest.skip("This test is only applicable for Pydantic v2")
     from typing import get_args
@@ -897,24 +896,18 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
 
     from anthropic.types.beta.beta_content_block import BetaContentBlock
 
-    # Get the content block union type
     content_block_union = get_args(BetaContentBlock)[0]
 
-    # Get all types from BetaContentBlock union
     content_block_types = get_args(content_block_union)
 
-    # Types that should have an input property
     types_with_input: Set[Any] = set()
 
-    # Check each type to see if it has an input property in its model_fields
     for block_type in content_block_types:
         if issubclass(block_type, BaseModel) and "input" in block_type.model_fields:
             types_with_input.add(block_type)
 
-    # Get the types included in TRACKS_TOOL_INPUT
     tracked_types = TRACKS_TOOL_INPUT
 
-    # Make sure all types with input are tracked
     for block_type in types_with_input:
         assert block_type in tracked_types, (
             f"ContentBlock type {block_type.__name__} has an input property, "

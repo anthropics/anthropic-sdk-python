@@ -481,8 +481,6 @@ class SessionToolRunner:
         async for _ in self:
             pass
 
-    # -- run lifecycle ------------------------------------------------------
-
     @contextlib.asynccontextmanager
     async def _run(self) -> AsyncIterator[AsyncIterator[DispatchedToolCall]]:
         """Drive the session tool loop, yielding an iterator of
@@ -570,8 +568,6 @@ class SessionToolRunner:
             with anyio.CancelScope(shield=True):
                 for tool in self.tools:
                     await aclose_runnable_tool(tool)
-
-    # -- event-stream + reconcile ------------------------------------------
 
     async def _reconcile(self) -> None:
         """Read full history and enqueue every tool-call event still unanswered.
@@ -696,8 +692,6 @@ class SessionToolRunner:
                 await self._stop.wait()
             backoff = min(backoff * 2, STREAM_BACKOFF_CAP)
 
-    # -- confirmation gating (always_ask tools) ------------------------------
-
     async def _route_tool_event(self, ev: DispatchedToolUseEvent) -> None:
         """Enqueue ``ev`` for dispatch, honoring its evaluated permission.
 
@@ -811,8 +805,6 @@ class SessionToolRunner:
             await self._send_results.send(call)
         except (anyio.BrokenResourceError, anyio.ClosedResourceError):
             pass
-
-    # -- tool dispatch ------------------------------------------------------
 
     async def _dispatch_loop(self) -> None:
         try:
@@ -947,8 +939,6 @@ class SessionToolRunner:
                 await anyio.sleep(wait)
         log.error("failed to send tool result tool_use_id=%s attempts=%d error=%s", tool_use_id, attempt, last_err)
         return False
-
-    # -- background watchers -----------------------------------------------
 
     async def _idle_watchdog(self) -> None:
         """Stop the runner once the session has been idle (``end_turn``) for

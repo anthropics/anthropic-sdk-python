@@ -89,9 +89,6 @@ class AsyncBetaFoundry(AsyncBeta):
         return AsyncBetaFoundryMessages(self._client)
 
 
-# ==============================================================================
-
-
 class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic):
     @overload
     def __init__(
