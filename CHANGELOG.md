@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.3.0 (2026-09-01)
+
+Full Changelog: [v1.2.0...v1.3.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.2.0...v1.3.0)
+
+### Features
+
+* **api:** beta user profiles: add external_user_onboarded_at, remove relationship in favor of access_type ([74080c3](https://github.com/anthropics/anthropic-sdk-python/commit/74080c35d6e4f3e5e7fd47454ecce2350cbfdd2b))
+* **api:** manual updates ([1dc3ce0](https://github.com/anthropics/anthropic-sdk-python/commit/1dc3ce0709a9bca146b045dfb0787971e747b1f5))
+* **api:** organization compliance settings, user-profile order_by, memory-store and toolset schema updates ([429e719](https://github.com/anthropics/anthropic-sdk-python/commit/429e719f84bd78db51c9fd0442ccb0ca63e614ba))
+
+
+### Bug Fixes
+
+* **aws:** resolve base_url from aws_region under skip_auth and with_options ([#564](https://github.com/anthropics/anthropic-sdk-python/issues/564)) ([b6d1732](https://github.com/anthropics/anthropic-sdk-python/commit/b6d1732cc89eb743b4d40e33c6cd3f7ecfb3d0ab))
+* **batches:** add results to GA raw/streaming response wrappers ([cbf9715](https://github.com/anthropics/anthropic-sdk-python/commit/cbf9715a461b4c5deec7a669b2b6e211faaf8827))
+* **ci:** don't hard-wrap detect-breaking-changes output ([b5be779](https://github.com/anthropics/anthropic-sdk-python/commit/b5be779c110e68f6c884091b3524083733f3f8a9))
+* **client:** derive multipart filename for file tuples passed without one ([a9f3fb4](https://github.com/anthropics/anthropic-sdk-python/commit/a9f3fb40abdd2f5842054a96e08afeee35fb932a))
+* **types:** remove unused wire aliases from header and path params ([dc0a9ab](https://github.com/anthropics/anthropic-sdk-python/commit/dc0a9ab4360c7fc28f7326c39876f18ad04d2c26))
+
+
+### Chores
+
+* **internal:** drop the unused discriminator argument from PropertyInfo ([3dae6fd](https://github.com/anthropics/anthropic-sdk-python/commit/3dae6fd196cb2fe658029e8eec60551dfa847949))
+* **internal:** drop the unused distro dependency ([a47d85f](https://github.com/anthropics/anthropic-sdk-python/commit/a47d85f6a740e3a38610c5239ac8c2c7b12ead55))
+
+
+### Documentation
+
+* **changelog:** detail the beta files/skills GA-shape change ([#1900](https://github.com/anthropics/anthropic-sdk-python/issues/1900)) ([7c84e13](https://github.com/anthropics/anthropic-sdk-python/commit/7c84e133570991589c90d888790d536ca943568d))
+
+
+### Refactors
+
+* **types:** mark discriminated unions with UnionDiscriminator instead of PropertyInfo ([17df0bf](https://github.com/anthropics/anthropic-sdk-python/commit/17df0bf37c875598b49b2909c58aa48e17a1b25a))
+* **types:** use UnionDiscriminator for more discriminated unions ([b44af2c](https://github.com/anthropics/anthropic-sdk-python/commit/b44af2c625703ba1c0ed2e81871ac14dc572665e))
+
 ## 1.2.0 (2026-08-27)
 
 Full Changelog: [v1.1.0...v1.2.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.1.0...v1.2.0)
