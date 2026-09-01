@@ -42,6 +42,8 @@ class TestMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -135,6 +137,7 @@ class TestMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -231,6 +234,8 @@ class TestMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -324,6 +329,7 @@ class TestMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -418,6 +424,8 @@ class TestMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -493,6 +501,7 @@ class TestMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -591,6 +600,8 @@ class TestAsyncMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -684,6 +695,7 @@ class TestAsyncMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -780,6 +792,8 @@ class TestAsyncMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -873,6 +887,7 @@ class TestAsyncMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -967,6 +982,8 @@ class TestAsyncMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -1042,6 +1059,7 @@ class TestAsyncMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={

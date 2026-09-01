@@ -249,6 +249,11 @@ class TestShapeBContinuation:
         assert len([e for e in events if e.type == "message_stop"]) == 1
         assert len([e for e in events if e.type == "message_delta"]) == 1
 
+        # B's message_start (not re-emitted) has no `input_transformations`, so
+        # the emitted message_delta gains none.
+        delta = next(e for e in events if e.type == "message_delta")
+        assert "input_transformations" not in delta.to_dict()
+
     @pytest.mark.respx(base_url=base_url)
     def test_usage_iterations_is_the_two_entry_server_shape(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(STREAM_B)])
@@ -958,6 +963,51 @@ def serving_stream(model: str = FALLBACK_MODEL, message_id: str = "msg_b") -> st
     )
 
 
+TRANSFORMS: List[dict[str, Any]] = [
+    {"type": "thinking_dropped", "path": "messages.1.content.0", "reason": "model_binding_mismatch"}
+]
+
+
+def transforming_stream(
+    *, delta_transformations: List[dict[str, Any]] | None = None, terminal: str | None = None
+) -> str:
+    """A hop whose message_start reports `input_transformations`. It serves —
+    its terminal message_delta carrying `delta_transformations` only when given —
+    unless `terminal` supplies the closing message_delta frame instead."""
+    delta: dict[str, Any] = {
+        "type": "message_delta",
+        "delta": {"stop_reason": "end_turn", "stop_sequence": None},
+        "usage": {"output_tokens": 9},
+    }
+    if delta_transformations is not None:
+        delta["input_transformations"] = delta_transformations
+    return "".join(
+        [
+            ev(
+                {
+                    "type": "message_start",
+                    "message": {
+                        "id": "msg_b",
+                        "type": "message",
+                        "role": "assistant",
+                        "model": FALLBACK_MODEL,
+                        "content": [],
+                        "stop_reason": None,
+                        "stop_sequence": None,
+                        "input_transformations": TRANSFORMS,
+                        "usage": {"input_tokens": 12, "output_tokens": 1},
+                    },
+                }
+            ),
+            ev({"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}}),
+            ev({"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "Happy to help."}}),
+            ev({"type": "content_block_stop", "index": 0}),
+            terminal if terminal is not None else ev(delta),
+            ev({"type": "message_stop"}),
+        ]
+    )
+
+
 class TestPreStreamRefusals:
     """A refusal that arrives before any output streamed: the retry is free and
     invisible, so it fires even without a credit token, and the serving hop's
@@ -1039,6 +1089,78 @@ class TestPreStreamRefusals:
 
 
 # --- history seam replay ------------------------------------------------------
+
+
+class TestSplicedInputTransformations:
+    """A mid-stream fallback's message_start is not re-emitted, so its
+    `input_transformations` are copied onto the emitted message_delta, matching
+    what a server-side fallback sends. A list already on the delta is kept."""
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_the_suppressed_starts_list_is_forwarded_on_the_terminal(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(transforming_stream())])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        events = collect(create_stream(client))
+
+        assert len([e for e in events if e.type == "message_start"]) == 1
+        delta = next(e for e in events if e.type == "message_delta")
+        assert delta.to_dict()["input_transformations"] == TRANSFORMS
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_a_list_already_on_the_delta_is_kept(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[sse_response(STREAM_A), sse_response(transforming_stream(delta_transformations=[]))]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        events = collect(create_stream(client))
+
+        delta = next(e for e in events if e.type == "message_delta")
+        assert delta.to_dict()["input_transformations"] == []
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_the_list_is_forwarded_on_a_degraded_chains_replayed_refusal(
+        self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        # the spliced fallback refuses with a token and every later entry fails
+        # over HTTP: its held-back refusal is replayed as the final message_delta,
+        # with the list on it
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                sse_response(STREAM_A),
+                sse_response(transforming_stream(terminal=refusal_delta("tok_b", False))),
+                error_response("down", 503),
+            ]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(TWO_FALLBACKS)])
+
+        events = collect(create_stream(client))
+
+        assert len(respx_mock.calls) == 3
+        assert len(error_logs(caplog)) == 1
+        assert len([e for e in events if e.type == "message_start"]) == 1
+        delta = next(e for e in events if e.type == "message_delta")
+        assert delta.delta.stop_reason == "refusal"
+        assert delta.to_dict()["input_transformations"] == TRANSFORMS
+        assert events[-1].type == "message_stop"
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_an_emitted_start_leaves_the_delta_untouched(self, respx_mock: MockRouter) -> None:
+        # a pre-stream refusal: the fallback's message_start is emitted itself,
+        # so nothing is copied onto the message_delta
+        pre_stream_refusal = "".join([message_start(), refusal_delta("tok_abc", False), ev({"type": "message_stop"})])
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[sse_response(pre_stream_refusal), sse_response(transforming_stream())]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        events = collect(create_stream(client))
+
+        start = next(e for e in events if e.type == "message_start")
+        assert start.message.to_dict()["input_transformations"] == TRANSFORMS
+        delta = next(e for e in events if e.type == "message_delta")
+        assert "input_transformations" not in delta.to_dict()
 
 
 class TestHistorySeamReplay:
@@ -1488,6 +1610,19 @@ class TestAsyncSplicing:
         appended = bodies[1]["messages"][1]
         assert appended["role"] == "assistant"
         assert [block["type"] for block in appended["content"]] == ["thinking", "text"]
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_the_suppressed_starts_input_transformations_are_forwarded_on_the_terminal(
+        self, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(transforming_stream())])
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        stream = await create_stream_async(client)
+        events: List[BetaRawMessageStreamEvent] = [event async for event in stream]
+
+        delta = next(e for e in events if e.type == "message_delta")
+        assert delta.to_dict()["input_transformations"] == TRANSFORMS
 
     @pytest.mark.respx(base_url=base_url)
     async def test_a_refused_hop_splices_its_partial_and_chains_to_the_next_entry(self, respx_mock: MockRouter) -> None:
