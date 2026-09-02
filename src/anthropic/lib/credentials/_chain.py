@@ -32,7 +32,7 @@ def _build_federation_result(*, base_url: str) -> Optional[CredentialResult]:
     isn't fully set."""
     federation_rule_id = os.environ.get(ENV_FEDERATION_RULE_ID)
     organization_id = os.environ.get(ENV_ORGANIZATION_ID)
-    has_literal_token = ENV_IDENTITY_TOKEN in os.environ
+    has_literal_token = bool(os.environ.get(ENV_IDENTITY_TOKEN))
     identity_token_path = resolve_identity_token_path()
 
     if not federation_rule_id or not organization_id:
@@ -48,11 +48,11 @@ def _build_federation_result(*, base_url: str) -> Optional[CredentialResult]:
         # at the next token exchange (don't capture into a closure).
         def _read_env_token() -> str:
             value = os.environ.get(ENV_IDENTITY_TOKEN)
-            if value is None:
+            if not value:
                 raise AnthropicError(
-                    f"{ENV_IDENTITY_TOKEN} is not set; the workload-identity chain "
-                    f"selected this provider at construction time but the env var "
-                    f"is no longer present."
+                    f"{ENV_IDENTITY_TOKEN} is not set or is empty; the workload-identity chain "
+                    f"selected this provider at construction time but the env var no longer "
+                    f"contains an identity token."
                 )
             return value
 
