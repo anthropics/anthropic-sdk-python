@@ -139,7 +139,7 @@ class WorkloadIdentityError(AnthropicError):
 
 def _resolve_identity_token(provider: IdentityTokenProvider) -> str:
     raw = provider()
-    if inspect.isawaitable(raw):
+    if inspect.iscoroutine(raw):
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:
