@@ -119,8 +119,8 @@ def validate_async_middleware(middleware: Iterable[MiddlewareInput]) -> None:
                 )
         elif not callable(entry):
             raise TypeError(f"middleware {_middleware_name(entry)} is not callable")
-        elif not _is_async_callable(entry):
-            raise TypeError(
-                f"middleware {_middleware_name(entry)} is not an async function; "
-                "the asynchronous client requires async middleware functions"
-            )
+        # Function-style async middleware is typed as Callable[..., Awaitable],
+        # not specifically as a coroutine function. A synchronous wrapper may
+        # therefore validly return an awaitable; the async middleware chain
+        # awaits that result at invocation time. Do not reject that supported
+        # shape based only on inspect.iscoroutinefunction().
