@@ -4,6 +4,7 @@ import os
 import sys
 import pathlib
 from typing import Optional
+from urllib.parse import urlsplit
 
 from ..._exceptions import AnthropicError
 
@@ -114,18 +115,21 @@ def _active_profile() -> str:  # pyright: ignore[reportUnusedFunction] — used 
 
 
 def _require_https(url: str, *, field: str) -> None:  # pyright: ignore[reportUnusedFunction] — used by _workload/_providers
-    """Reject non-``https://`` token-endpoint URLs.
+    """Reject non-HTTPS token-endpoint URLs except actual loopback hosts.
 
     Localhost is allowed for testing so ``base_url="http://localhost:8080"``
     works against a local ``oauth_server`` instance; everything else must be
     TLS-encrypted because the body of these POSTs carries the assertion JWT
     or a long-lived refresh token.
     """
-    lowered = url.lower().rstrip("/")
-    if lowered.startswith("https://"):
+    parsed = urlsplit(url)
+    if parsed.scheme.lower() == "https":
         return
-    if lowered.startswith(("http://localhost", "http://127.0.0.1", "http://[::1]")):
+
+    hostname = (parsed.hostname or "").rstrip(".").lower()
+    if parsed.scheme.lower() == "http" and hostname in {"localhost", "127.0.0.1", "::1"}:
         return
+
     raise AnthropicError(
         f"{field} must use https (got {url!r}); the token-exchange endpoint "
         f"carries secret material and cannot be used over cleartext HTTP."
