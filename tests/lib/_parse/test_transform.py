@@ -229,3 +229,55 @@ def test_original_schema_not_mutated():
     transform_schema(original_schema)
 
     assert original_schema == original_schema_backup
+
+
+@pytest.mark.parametrize(
+    ("keyword", "constraint"),
+    [
+        ("patternProperties", {"^S_": {"type": "string"}}),
+        ("propertyNames", {"pattern": "^S_"}),
+        ("unevaluatedProperties", {"type": "string"}),
+    ],
+)
+def test_dynamic_object_schema_without_properties_raises(keyword: str, constraint: object):
+    schema = {"type": "object", keyword: constraint}
+
+    with pytest.raises(ValueError, match=keyword):
+        transform_schema(schema)
+
+
+def test_pattern_properties_with_explicit_properties_keeps_existing_demotion_behavior():
+    schema = {
+        "type": "object",
+        "properties": {"fixed": {"type": "string"}},
+        "required": ["fixed"],
+        "patternProperties": {"^S_": {"type": "string"}},
+    }
+
+    result = transform_schema(schema)
+
+    assert result == {
+        "type": "object",
+        "properties": {"fixed": {"type": "string"}},
+        "additionalProperties": False,
+        "required": ["fixed"],
+        "description": "{patternProperties: {'^S_': {'type': 'string'}}}",
+    }
+
+
+def test_closed_empty_object_is_not_rejected():
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "propertyNames": {"pattern": "^S_"},
+        "unevaluatedProperties": False,
+    }
+
+    result = transform_schema(schema)
+
+    assert result == {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": False,
+        "description": "{propertyNames: {'pattern': '^S_'}, unevaluatedProperties: False}",
+    }
