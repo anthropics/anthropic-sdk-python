@@ -23,14 +23,17 @@ import time
 import logging
 import itertools
 import contextlib
-from typing import TYPE_CHECKING, Union, Literal, cast
+from typing import TYPE_CHECKING, Any, Dict, Union, Literal, Optional, cast
+from datetime import datetime, timedelta
 from dataclasses import dataclass
 from collections.abc import Callable, Sequence, AsyncIterator
 
 import anyio
+import anyio.abc
 
 from .._retry import TRANSIENT_ERRORS, jitter, backoff, is_fatal_status_error
 from ..._types import Headers
+from ..._streaming import AsyncStream
 from ._tool_dispatch import tool_registry, run_runnable_tool, tool_error_content
 from .._scoped_client import _copy_client_with_bearer_auth
 from ._beta_functions import (
@@ -43,6 +46,7 @@ from ._beta_functions import (
 from .._stainless_helpers import helper_header
 from ...types.beta.sessions import (
     BetaManagedAgentsAgentToolUseEvent,
+    BetaManagedAgentsStreamSessionEvents,
     BetaManagedAgentsAgentCustomToolUseEvent,
     BetaManagedAgentsUserToolConfirmationEvent,
 )
@@ -107,6 +111,16 @@ MANAGED_AGENTS_BETA = "managed-agents-2026-04-01"
 
 STREAM_BACKOFF_START = 0.5
 STREAM_BACKOFF_CAP = 10.0
+# After the first complete history read, a reconnect only re-reads events at or
+# after the newest ``processed_at`` already seen, minus this allowance for
+# events stamped slightly out of order around the disconnect. Everything older
+# was already accounted for in memory (``_seen``/``_answered``/``_confirmations``).
+RECONCILE_WINDOW_SKEW = timedelta(seconds=30)
+# On a reconnect the windowed history read normally finishes well inside this
+# budget and is applied before any live event, exactly as on first attach. A
+# read that takes longer keeps running, but the live stream is consumed
+# alongside it instead of waiting behind it indefinitely.
+RECONCILE_ATTACH_BUDGET = 10.0
 # Outer per-tool-call timeout. This MUST stay strictly greater than the bash
 # tool's own ``agent_toolset.BASH_DEFAULT_TIMEOUT`` (120s). The bash tool wraps
 # its read in its own ``anyio.fail_after(BASH_DEFAULT_TIMEOUT)`` and, on
@@ -502,6 +516,12 @@ class SessionToolRunner:
         # actually landed, so a failed post is retried on the next reconcile.
         self._seen: set[str] = set()
         self._answered: set[str] = set()
+        # Newest ``processed_at`` observed on any event, and whether one full
+        # history read has completed. Together they let every reconcile after
+        # the first read only the window a disconnect could have hidden.
+        self._newest_processed_at: Optional[datetime] = None
+        self._history_complete = False
+        self._reconciling: Optional[anyio.Event] = None
         # Confirmation gating (``always_ask`` tools): ``_confirmations`` records
         # every ``user.tool_confirmation`` verdict by ``tool_use_id``;
         # ``_awaiting_confirmation`` holds the tool-call events whose
@@ -535,6 +555,7 @@ class SessionToolRunner:
             # consumer as ``Cancelled``.
             with anyio.CancelScope():
                 async with anyio.create_task_group() as tg:
+                    self._task_group: anyio.abc.TaskGroup = tg
                     # The stop watcher closes ``_send_work`` when ``_stop`` is
                     # set so the dispatch loop's ``receive()`` raises
                     # EndOfStream and the loop exits cleanly without us having
@@ -584,8 +605,27 @@ class SessionToolRunner:
         pending: list[DispatchedToolUseEvent] = []
         last_was_end_turn = False
         list_failed = False
+        # First pass: the whole history. Later passes: only the window since
+        # the newest event already seen — the rest is already reflected in
+        # ``_seen``/``_answered``/``_confirmations``, and re-reading it made
+        # every reconnect cost the full history.
+        window: Dict[str, Any] = {}
+        if self._history_complete and self._newest_processed_at is not None:
+            window["created_at_gte"] = self._newest_processed_at - RECONCILE_WINDOW_SKEW
+        ids_this_pass: set[str] = set()
         try:
-            async for ev in self._events.list(self.session_id, limit=1000, extra_headers=self.extra_headers):
+            async for ev in self._events.list(self.session_id, limit=1000, extra_headers=self.extra_headers, **window):
+                # A listing whose pages wrap around would otherwise never end,
+                # and this pass runs where nothing else can proceed until it
+                # does. An id repeating within one pass means every reachable
+                # page has been read: stop and work with the complete set.
+                ev_id = getattr(ev, "id", None)
+                if isinstance(ev_id, str):
+                    if ev_id in ids_this_pass:
+                        log.warning("reconcile listing repeated event %s; treating history as complete", ev_id)
+                        break
+                    ids_this_pass.add(ev_id)
+                self._note_processed_at(ev)
                 if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
                     # Mark the event seen so the live stream doesn't re-enqueue it, but
                     # decide whether it still needs executing from ``_answered``, not
@@ -626,6 +666,7 @@ class SessionToolRunner:
             for ev in pending:
                 self._seen.discard(ev.id)
             return
+        self._history_complete = True
         unanswered = [ev for ev in pending if ev.id not in self._answered]
         # Disarm before routing: enqueuing below can block on a full work
         # buffer while the clock may still be armed from before the reconnect.
@@ -660,28 +701,22 @@ class SessionToolRunner:
                 # and the attach is delivered live instead of lost. ``_seen``
                 # dedups any overlap between the history and the live stream.
                 async with await self._events.stream(self.session_id, extra_headers=self.extra_headers) as stream:
-                    await self._reconcile()
-                    async for ev in stream:
-                        backoff = STREAM_BACKOFF_START
-                        # Arm/disarm the idle clock: an ``end_turn`` idle starts
-                        # the grace countdown, any other event cancels it. The
-                        # clock itself defers the countdown while gated calls
-                        # are held or in flight (see ``_IdleClock.hold``).
-                        self._idle_clock.note_event(ev)
-                        if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
-                            if ev.id not in self._seen:
-                                self._seen.add(ev.id)
-                                await self._route_tool_event(ev)
-                        elif ev.type == "user.tool_result":
-                            self._answered.add(ev.tool_use_id)
-                        elif ev.type == "user.custom_tool_result":
-                            self._answered.add(ev.custom_tool_use_id)
-                        elif ev.type == "user.tool_confirmation":
-                            await self._note_confirmation(ev)
-                        elif ev.type in ("session.status_terminated", "session.deleted"):
-                            log.info("session terminated")
-                            self._stop.set()
-                            return
+                    backoff = STREAM_BACKOFF_START
+                    if self._history_complete:
+                        # A reconnect: what a disconnect can have hidden is a
+                        # small window and ``_answered`` is already complete.
+                        # Apply it before live events when it is quick, but
+                        # never hold the live stream behind a slow read.
+                        reconciled = self._start_background_reconcile()
+                        with anyio.move_on_after(RECONCILE_ATTACH_BUDGET):
+                            await reconciled.wait()
+                    else:
+                        # First attach: nothing may dispatch until the whole
+                        # history says which calls are already answered.
+                        await self._reconcile()
+                    await self._consume_stream(stream)
+                    if self._stop.is_set():
+                        return
             except TRANSIENT_ERRORS as e:
                 if self._stop.is_set():
                     return
@@ -695,6 +730,59 @@ class SessionToolRunner:
             with anyio.move_on_after(backoff):
                 await self._stop.wait()
             backoff = min(backoff * 2, STREAM_BACKOFF_CAP)
+
+    async def _consume_stream(self, stream: AsyncStream[BetaManagedAgentsStreamSessionEvents]) -> None:
+        """Route live events until the stream ends or the session terminates."""
+        async for ev in stream:
+            self._note_processed_at(ev)
+            # Arm/disarm the idle clock: an ``end_turn`` idle starts
+            # the grace countdown, any other event cancels it. The
+            # clock itself defers the countdown while gated calls
+            # are held or in flight (see ``_IdleClock.hold``).
+            self._idle_clock.note_event(ev)
+            if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
+                if ev.id not in self._seen:
+                    self._seen.add(ev.id)
+                    await self._route_tool_event(ev)
+            elif ev.type == "user.tool_result":
+                self._answered.add(ev.tool_use_id)
+            elif ev.type == "user.custom_tool_result":
+                self._answered.add(ev.custom_tool_use_id)
+            elif ev.type == "user.tool_confirmation":
+                await self._note_confirmation(ev)
+            elif ev.type in ("session.status_terminated", "session.deleted"):
+                log.info("session terminated")
+                self._stop.set()
+                return
+
+    def _start_background_reconcile(self) -> anyio.Event:
+        """Run one windowed reconcile on the runner's task group and return an
+        event set when it finishes. A burst of reconnects shares the pass
+        already reading rather than starting another."""
+        if self._reconciling is not None:
+            return self._reconciling
+        done = anyio.Event()
+        self._reconciling = done
+
+        async def run() -> None:
+            try:
+                await self._reconcile()
+            except (anyio.BrokenResourceError, anyio.ClosedResourceError):
+                # The runner is shutting down; the work stream is gone.
+                pass
+            finally:
+                self._reconciling = None
+                done.set()
+
+        self._task_group.start_soon(run)
+        return done
+
+    def _note_processed_at(self, ev: object) -> None:
+        """Track the newest ``processed_at`` seen, the lower bound of the next
+        reconcile window."""
+        ts = getattr(ev, "processed_at", None)
+        if isinstance(ts, datetime) and (self._newest_processed_at is None or ts > self._newest_processed_at):
+            self._newest_processed_at = ts
 
     # -- confirmation gating (always_ask tools) ------------------------------
 
