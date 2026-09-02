@@ -32,6 +32,7 @@ class TestCertificates:
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -85,6 +86,7 @@ class TestCertificates:
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -148,6 +150,7 @@ class TestCertificates:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
@@ -199,6 +202,7 @@ class TestCertificates:
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -262,6 +266,7 @@ class TestAsyncCertificates:
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -315,6 +320,7 @@ class TestAsyncCertificates:
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -378,6 +384,7 @@ class TestAsyncCertificates:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
@@ -429,6 +436,7 @@ class TestAsyncCertificates:
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 

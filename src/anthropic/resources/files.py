@@ -9,7 +9,7 @@ import httpx2
 from ..types import file_list_params, file_upload_params
 from .._files import deepcopy_with_paths
 from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, SequenceNotStr, omit, not_given
-from .._utils import extract_files, path_template, maybe_transform, async_maybe_transform
+from .._utils import extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
@@ -65,6 +65,7 @@ class Files(SyncAPIResource):
         ids: Optional[SequenceNotStr[str]] | Omit = omit,
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -97,6 +98,7 @@ class Files(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
             "/v1/files",
             page=SyncPageCursor[FileMetadata],
@@ -121,6 +123,7 @@ class Files(SyncAPIResource):
         self,
         file_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -144,6 +147,7 @@ class Files(SyncAPIResource):
         """
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._delete(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
@@ -156,6 +160,7 @@ class Files(SyncAPIResource):
         self,
         file_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -180,6 +185,7 @@ class Files(SyncAPIResource):
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get(
             path_template("/v1/files/{file_id}/content", file_id=file_id),
             options=make_request_options(
@@ -192,6 +198,7 @@ class Files(SyncAPIResource):
         self,
         file_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -215,6 +222,7 @@ class Files(SyncAPIResource):
         """
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
@@ -228,6 +236,7 @@ class Files(SyncAPIResource):
         *,
         file: FileTypes,
         expires_in_seconds: int | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -252,7 +261,7 @@ class Files(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = merge_headers(_stainless_helper_header_from_file(file), extra_headers or {})
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         body = deepcopy_with_paths(
             {
                 "file": file,
@@ -302,6 +311,7 @@ class AsyncFiles(AsyncAPIResource):
         ids: Optional[SequenceNotStr[str]] | Omit = omit,
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -334,6 +344,7 @@ class AsyncFiles(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
             "/v1/files",
             page=AsyncPageCursor[FileMetadata],
@@ -358,6 +369,7 @@ class AsyncFiles(AsyncAPIResource):
         self,
         file_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -381,6 +393,7 @@ class AsyncFiles(AsyncAPIResource):
         """
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._delete(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
@@ -393,6 +406,7 @@ class AsyncFiles(AsyncAPIResource):
         self,
         file_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -417,6 +431,7 @@ class AsyncFiles(AsyncAPIResource):
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._get(
             path_template("/v1/files/{file_id}/content", file_id=file_id),
             options=make_request_options(
@@ -429,6 +444,7 @@ class AsyncFiles(AsyncAPIResource):
         self,
         file_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -452,6 +468,7 @@ class AsyncFiles(AsyncAPIResource):
         """
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._get(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
@@ -465,6 +482,7 @@ class AsyncFiles(AsyncAPIResource):
         *,
         file: FileTypes,
         expires_in_seconds: int | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -489,7 +507,7 @@ class AsyncFiles(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = merge_headers(_stainless_helper_header_from_file(file), extra_headers or {})
+
         body = deepcopy_with_paths(
             {
                 "file": file,

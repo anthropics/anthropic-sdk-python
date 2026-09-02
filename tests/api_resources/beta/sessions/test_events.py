@@ -43,7 +43,8 @@ class TestEvents:
             order="asc",
             page="page",
             types=["string"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -114,7 +115,8 @@ class TestEvents:
                     "type": "user.message",
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSendSessionEvents, event, path=["response"])
 
@@ -194,7 +196,8 @@ class TestEvents:
         event_stream = client.beta.sessions.events.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             event_deltas=["agent.message"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         event_stream.response.close()
 
@@ -255,7 +258,8 @@ class TestAsyncEvents:
             order="asc",
             page="page",
             types=["string"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -326,7 +330,8 @@ class TestAsyncEvents:
                     "type": "user.message",
                 }
             ],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSendSessionEvents, event, path=["response"])
 
@@ -406,7 +411,8 @@ class TestAsyncEvents:
         event_stream = await async_client.beta.sessions.events.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             event_deltas=["agent.message"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         await event_stream.response.aclose()
 

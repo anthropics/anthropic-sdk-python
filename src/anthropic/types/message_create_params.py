@@ -281,6 +281,8 @@ class MessageCreateParamsBase(TypedDict, total=False):
     `user-profiles` beta header.
     """
 
+    workspace_id: str
+
 
 Metadata: TypeAlias = MetadataParam
 """This is deprecated, `MetadataParam` should be used instead"""

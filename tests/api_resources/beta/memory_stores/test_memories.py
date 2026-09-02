@@ -39,6 +39,7 @@ class TestMemories:
             path="xx",
             view="basic",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -94,6 +95,7 @@ class TestMemories:
             memory_store_id="memory_store_id",
             view="basic",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -158,6 +160,7 @@ class TestMemories:
                 "content_sha256": "content_sha256",
             },
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -220,6 +223,7 @@ class TestMemories:
             path_prefix="path_prefix",
             view="basic",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryListItem], memory, path=["response"])
 
@@ -272,6 +276,7 @@ class TestMemories:
             memory_store_id="memory_store_id",
             expected_content_sha256="expected_content_sha256",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedMemory, memory, path=["response"])
 
@@ -338,6 +343,7 @@ class TestAsyncMemories:
             path="xx",
             view="basic",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -393,6 +399,7 @@ class TestAsyncMemories:
             memory_store_id="memory_store_id",
             view="basic",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -457,6 +464,7 @@ class TestAsyncMemories:
                 "content_sha256": "content_sha256",
             },
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -519,6 +527,7 @@ class TestAsyncMemories:
             path_prefix="path_prefix",
             view="basic",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryListItem], memory, path=["response"])
 
@@ -571,6 +580,7 @@ class TestAsyncMemories:
             memory_store_id="memory_store_id",
             expected_content_sha256="expected_content_sha256",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedMemory, memory, path=["response"])
 

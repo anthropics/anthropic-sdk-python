@@ -125,6 +125,7 @@ class TestMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -271,6 +272,7 @@ class TestMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         message_stream.response.close()
 
@@ -410,6 +412,7 @@ class TestMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -559,6 +562,7 @@ class TestAsyncMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -705,6 +709,7 @@ class TestAsyncMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         await message_stream.response.aclose()
 
@@ -844,6 +849,7 @@ class TestAsyncMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 

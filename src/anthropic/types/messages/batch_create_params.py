@@ -26,6 +26,8 @@ class BatchCreateParams(TypedDict, total=False):
     is errored.
     """
 
+    workspace_id: str
+
 
 class Request(TypedDict, total=False):
     custom_id: Required[str]

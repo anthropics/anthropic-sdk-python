@@ -267,6 +267,8 @@ class MessageCountTokensParams(TypedDict, total=False):
     `user-profiles` beta header.
     """
 
+    workspace_id: str
+
 
 Tool: TypeAlias = Union[
     BetaToolParam,

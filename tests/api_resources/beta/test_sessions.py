@@ -63,7 +63,8 @@ class TestSessions:
             ],
             title="Order #1234 inquiry",
             vault_ids=["string"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
@@ -104,7 +105,8 @@ class TestSessions:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         session = client.beta.sessions.retrieve(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
@@ -186,7 +188,8 @@ class TestSessions:
             metadata={"foo": "string"},
             title="Order #1234 inquiry",
             vault_ids=["string"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
@@ -244,7 +247,8 @@ class TestSessions:
             order="asc",
             page="page",
             statuses=["rescheduling"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
@@ -281,7 +285,8 @@ class TestSessions:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         session = client.beta.sessions.delete(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedSession, session, path=["response"])
 
@@ -327,7 +332,8 @@ class TestSessions:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         session = client.beta.sessions.archive(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
@@ -409,7 +415,8 @@ class TestAsyncSessions:
             ],
             title="Order #1234 inquiry",
             vault_ids=["string"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
@@ -450,7 +457,8 @@ class TestAsyncSessions:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.retrieve(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
@@ -532,7 +540,8 @@ class TestAsyncSessions:
             metadata={"foo": "string"},
             title="Order #1234 inquiry",
             vault_ids=["string"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 
@@ -590,7 +599,8 @@ class TestAsyncSessions:
             order="asc",
             page="page",
             statuses=["rescheduling"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
@@ -627,7 +637,8 @@ class TestAsyncSessions:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.delete(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedSession, session, path=["response"])
 
@@ -673,7 +684,8 @@ class TestAsyncSessions:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.archive(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSession, session, path=["response"])
 

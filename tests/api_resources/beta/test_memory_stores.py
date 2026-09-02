@@ -36,6 +36,7 @@ class TestMemoryStores:
             description="description",
             metadata={"foo": "string"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
@@ -75,6 +76,7 @@ class TestMemoryStores:
         memory_store = client.beta.memory_stores.retrieve(
             memory_store_id="memory_store_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
@@ -124,6 +126,7 @@ class TestMemoryStores:
             metadata={"foo": "string"},
             name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
@@ -174,6 +177,7 @@ class TestMemoryStores:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryStore], memory_store, path=["response"])
 
@@ -211,6 +215,7 @@ class TestMemoryStores:
         memory_store = client.beta.memory_stores.delete(
             memory_store_id="memory_store_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedMemoryStore, memory_store, path=["response"])
 
@@ -257,6 +262,7 @@ class TestMemoryStores:
         memory_store = client.beta.memory_stores.archive(
             memory_store_id="memory_store_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
@@ -311,6 +317,7 @@ class TestAsyncMemoryStores:
             description="description",
             metadata={"foo": "string"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
@@ -350,6 +357,7 @@ class TestAsyncMemoryStores:
         memory_store = await async_client.beta.memory_stores.retrieve(
             memory_store_id="memory_store_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
@@ -399,6 +407,7 @@ class TestAsyncMemoryStores:
             metadata={"foo": "string"},
             name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 
@@ -449,6 +458,7 @@ class TestAsyncMemoryStores:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryStore], memory_store, path=["response"])
 
@@ -486,6 +496,7 @@ class TestAsyncMemoryStores:
         memory_store = await async_client.beta.memory_stores.delete(
             memory_store_id="memory_store_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedMemoryStore, memory_store, path=["response"])
 
@@ -532,6 +543,7 @@ class TestAsyncMemoryStores:
         memory_store = await async_client.beta.memory_stores.archive(
             memory_store_id="memory_store_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryStore, memory_store, path=["response"])
 

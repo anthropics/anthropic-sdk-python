@@ -30,3 +30,5 @@ class SkillListParams(TypedDict, total=False):
     - `"custom"`: only return user-created skills
     - `"anthropic"`: only return Anthropic-created skills
     """
+
+    workspace_id: str

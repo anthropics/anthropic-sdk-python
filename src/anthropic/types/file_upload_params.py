@@ -18,3 +18,5 @@ class FileUploadParams(TypedDict, total=False):
     Seconds from upload until the file expires and its bytes become permanently
     unavailable. Must be between 3600 (one hour) and 7776000 (ninety days).
     """
+
+    workspace_id: str

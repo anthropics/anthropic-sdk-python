@@ -73,6 +73,7 @@ class TestAgents:
                 }
             ],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -117,6 +118,7 @@ class TestAgents:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             version=0,
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -212,6 +214,7 @@ class TestAgents:
             ],
             version=1,
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -262,6 +265,7 @@ class TestAgents:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsAgent], agent, path=["response"])
 
@@ -299,6 +303,7 @@ class TestAgents:
         agent = client.beta.agents.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -391,6 +396,7 @@ class TestAsyncAgents:
                 }
             ],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -435,6 +441,7 @@ class TestAsyncAgents:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             version=0,
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -530,6 +537,7 @@ class TestAsyncAgents:
             ],
             version=1,
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -580,6 +588,7 @@ class TestAsyncAgents:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsAgent], agent, path=["response"])
 
@@ -617,6 +626,7 @@ class TestAsyncAgents:
         agent = await async_client.beta.agents.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 

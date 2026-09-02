@@ -340,6 +340,8 @@ class MessageCreateParamsBase(TypedDict, total=False):
     `user-profiles` beta header.
     """
 
+    workspace_id: str
+
 
 Container: TypeAlias = Union[BetaContainerParams, str]
 

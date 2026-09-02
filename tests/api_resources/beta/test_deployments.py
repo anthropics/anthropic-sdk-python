@@ -82,6 +82,7 @@ class TestDeployments:
             },
             vault_ids=["string"],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -149,6 +150,7 @@ class TestDeployments:
         deployment = client.beta.deployments.retrieve(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -234,6 +236,7 @@ class TestDeployments:
             },
             vault_ids=["string"],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -286,6 +289,7 @@ class TestDeployments:
             page="page",
             status="active",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsDeployment], deployment, path=["response"])
 
@@ -323,6 +327,7 @@ class TestDeployments:
         deployment = client.beta.deployments.archive(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -369,6 +374,7 @@ class TestDeployments:
         deployment = client.beta.deployments.pause(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -415,6 +421,7 @@ class TestDeployments:
         deployment = client.beta.deployments.run(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeploymentRun, deployment, path=["response"])
 
@@ -461,6 +468,7 @@ class TestDeployments:
         deployment = client.beta.deployments.unpause(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -561,6 +569,7 @@ class TestAsyncDeployments:
             },
             vault_ids=["string"],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -628,6 +637,7 @@ class TestAsyncDeployments:
         deployment = await async_client.beta.deployments.retrieve(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -713,6 +723,7 @@ class TestAsyncDeployments:
             },
             vault_ids=["string"],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -765,6 +776,7 @@ class TestAsyncDeployments:
             page="page",
             status="active",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsDeployment], deployment, path=["response"])
 
@@ -802,6 +814,7 @@ class TestAsyncDeployments:
         deployment = await async_client.beta.deployments.archive(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -848,6 +861,7 @@ class TestAsyncDeployments:
         deployment = await async_client.beta.deployments.pause(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 
@@ -894,6 +908,7 @@ class TestAsyncDeployments:
         deployment = await async_client.beta.deployments.run(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeploymentRun, deployment, path=["response"])
 
@@ -940,6 +955,7 @@ class TestAsyncDeployments:
         deployment = await async_client.beta.deployments.unpause(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
 

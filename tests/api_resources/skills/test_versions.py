@@ -27,6 +27,15 @@ class TestVersions:
         assert_matches_type(SkillVersion, version, path=["response"])
 
     @parametrize
+    def test_method_create_with_all_params(self, client: Anthropic) -> None:
+        version = client.skills.versions.create(
+            skill_id="skill_id",
+            files=[b"Example data"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+        )
+        assert_matches_type(SkillVersion, version, path=["response"])
+
+    @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.skills.versions.with_raw_response.create(
             skill_id="skill_id",
@@ -65,6 +74,15 @@ class TestVersions:
         version = client.skills.versions.retrieve(
             version="version",
             skill_id="skill_id",
+        )
+        assert_matches_type(SkillVersion, version, path=["response"])
+
+    @parametrize
+    def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
+        version = client.skills.versions.retrieve(
+            version="version",
+            skill_id="skill_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SkillVersion, version, path=["response"])
 
@@ -121,6 +139,7 @@ class TestVersions:
             skill_id="skill_id",
             limit=1,
             page="page",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[SkillVersion], version, path=["response"])
 
@@ -160,6 +179,15 @@ class TestVersions:
         version = client.skills.versions.delete(
             version="version",
             skill_id="skill_id",
+        )
+        assert_matches_type(DeletedSkillVersion, version, path=["response"])
+
+    @parametrize
+    def test_method_delete_with_all_params(self, client: Anthropic) -> None:
+        version = client.skills.versions.delete(
+            version="version",
+            skill_id="skill_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(DeletedSkillVersion, version, path=["response"])
 
@@ -218,6 +246,15 @@ class TestAsyncVersions:
         assert_matches_type(SkillVersion, version, path=["response"])
 
     @parametrize
+    async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        version = await async_client.skills.versions.create(
+            skill_id="skill_id",
+            files=[b"Example data"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+        )
+        assert_matches_type(SkillVersion, version, path=["response"])
+
+    @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.skills.versions.with_raw_response.create(
             skill_id="skill_id",
@@ -256,6 +293,15 @@ class TestAsyncVersions:
         version = await async_client.skills.versions.retrieve(
             version="version",
             skill_id="skill_id",
+        )
+        assert_matches_type(SkillVersion, version, path=["response"])
+
+    @parametrize
+    async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        version = await async_client.skills.versions.retrieve(
+            version="version",
+            skill_id="skill_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SkillVersion, version, path=["response"])
 
@@ -312,6 +358,7 @@ class TestAsyncVersions:
             skill_id="skill_id",
             limit=1,
             page="page",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[SkillVersion], version, path=["response"])
 
@@ -351,6 +398,15 @@ class TestAsyncVersions:
         version = await async_client.skills.versions.delete(
             version="version",
             skill_id="skill_id",
+        )
+        assert_matches_type(DeletedSkillVersion, version, path=["response"])
+
+    @parametrize
+    async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        version = await async_client.skills.versions.delete(
+            version="version",
+            skill_id="skill_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(DeletedSkillVersion, version, path=["response"])
 

@@ -25,3 +25,5 @@ class BatchListParams(TypedDict, total=False):
 
     Defaults to `20`. Ranges from `1` to `1000`.
     """
+
+    workspace_id: str

@@ -33,7 +33,8 @@ class TestVersions:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsAgent], version, path=["response"])
 
@@ -92,7 +93,8 @@ class TestAsyncVersions:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsAgent], version, path=["response"])
 

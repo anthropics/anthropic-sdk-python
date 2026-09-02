@@ -24,3 +24,5 @@ class SkillCreateParams(TypedDict, total=False):
     Maximum 255 characters. Always set: derived from the SKILL.md frontmatter `name`
     when omitted at creation. Not unique.
     """
+
+    workspace_id: str
