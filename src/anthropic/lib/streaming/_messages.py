@@ -406,7 +406,6 @@ def build_events(
                         signature=content_block.signature,
                     )
                 )
-            pass
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
