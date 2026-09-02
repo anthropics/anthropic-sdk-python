@@ -63,6 +63,6 @@ class ParsedMessage(Message, Generic[ResponseFormatT]):
     @property
     def parsed_output(self) -> Optional[ResponseFormatT]:
         for content in self.content:
-            if content.type == "text" and content.parsed_output:
+            if content.type == "text" and content.parsed_output is not None:
                 return content.parsed_output
         return None
