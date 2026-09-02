@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import os
 from typing import Sequence
+from typing_extensions import Literal
+
+AuthMode = Literal["auto", "api_key", "sigv4"]
 
 
 def validate_credentials(
@@ -30,12 +33,17 @@ def _read_env(*env_vars: str) -> str | None:
 
 def resolve_auth_mode(
     *,
+    auth_mode: AuthMode | None = "auto",
     api_key: str | None,
     aws_access_key: str | None,
     aws_secret_key: str | None,
     aws_profile: str | None,
     api_key_env_vars: Sequence[str] = ("ANTHROPIC_AWS_API_KEY",),
 ) -> bool:
+    if auth_mode == "sigv4":
+        return True
+    if auth_mode == "api_key":
+        return False
     """Determine whether to use SigV4 auth. Returns True for SigV4, False for API key.
 
     Auth precedence:
