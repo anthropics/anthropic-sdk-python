@@ -36,6 +36,7 @@ class TestWork:
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
@@ -95,6 +96,7 @@ class TestWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             metadata={"foo": "string"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
@@ -374,6 +376,7 @@ class TestWork:
         work = client.beta.environments.work.stats(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWorkQueueStats, work, path=["response"])
 
@@ -426,6 +429,7 @@ class TestWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             force=True,
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
@@ -489,6 +493,7 @@ class TestAsyncWork:
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
@@ -548,6 +553,7 @@ class TestAsyncWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             metadata={"foo": "string"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
@@ -827,6 +833,7 @@ class TestAsyncWork:
         work = await async_client.beta.environments.work.stats(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWorkQueueStats, work, path=["response"])
 
@@ -879,6 +886,7 @@ class TestAsyncWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             force=True,
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 

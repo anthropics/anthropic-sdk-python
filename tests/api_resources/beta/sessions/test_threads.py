@@ -32,6 +32,7 @@ class TestThreads:
             thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -91,6 +92,7 @@ class TestThreads:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
@@ -142,6 +144,7 @@ class TestThreads:
             thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -205,6 +208,7 @@ class TestAsyncThreads:
             thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -264,6 +268,7 @@ class TestAsyncThreads:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
@@ -315,6 +320,7 @@ class TestAsyncThreads:
             thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 

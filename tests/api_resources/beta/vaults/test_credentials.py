@@ -47,6 +47,7 @@ class TestCredentials:
             display_name="Example credential",
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -110,6 +111,7 @@ class TestCredentials:
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -182,6 +184,7 @@ class TestCredentials:
             display_name="Example credential",
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -242,6 +245,7 @@ class TestCredentials:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
@@ -293,6 +297,7 @@ class TestCredentials:
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
@@ -350,6 +355,7 @@ class TestCredentials:
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -409,6 +415,7 @@ class TestCredentials:
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
@@ -485,6 +492,7 @@ class TestAsyncCredentials:
             display_name="Example credential",
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -548,6 +556,7 @@ class TestAsyncCredentials:
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -620,6 +629,7 @@ class TestAsyncCredentials:
             display_name="Example credential",
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -680,6 +690,7 @@ class TestAsyncCredentials:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
@@ -731,6 +742,7 @@ class TestAsyncCredentials:
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
@@ -788,6 +800,7 @@ class TestAsyncCredentials:
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -847,6 +860,7 @@ class TestAsyncCredentials:
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 

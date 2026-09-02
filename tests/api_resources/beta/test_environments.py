@@ -54,6 +54,7 @@ class TestEnvironments:
             metadata={"foo": "string"},
             scope="organization",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -93,6 +94,7 @@ class TestEnvironments:
         environment = client.beta.environments.retrieve(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -161,6 +163,7 @@ class TestEnvironments:
             name="x",
             scope="organization",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -207,6 +210,7 @@ class TestEnvironments:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaEnvironment], environment, path=["response"])
 
@@ -242,6 +246,7 @@ class TestEnvironments:
         environment = client.beta.environments.delete(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaEnvironmentDeleteResponse, environment, path=["response"])
 
@@ -288,6 +293,7 @@ class TestEnvironments:
         environment = client.beta.environments.archive(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -361,6 +367,7 @@ class TestAsyncEnvironments:
             metadata={"foo": "string"},
             scope="organization",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -400,6 +407,7 @@ class TestAsyncEnvironments:
         environment = await async_client.beta.environments.retrieve(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -468,6 +476,7 @@ class TestAsyncEnvironments:
             name="x",
             scope="organization",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 
@@ -514,6 +523,7 @@ class TestAsyncEnvironments:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaEnvironment], environment, path=["response"])
 
@@ -549,6 +559,7 @@ class TestAsyncEnvironments:
         environment = await async_client.beta.environments.delete(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaEnvironmentDeleteResponse, environment, path=["response"])
 
@@ -595,6 +606,7 @@ class TestAsyncEnvironments:
         environment = await async_client.beta.environments.archive(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaEnvironment, environment, path=["response"])
 

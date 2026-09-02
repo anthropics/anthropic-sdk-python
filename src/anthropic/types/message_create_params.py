@@ -269,6 +269,8 @@ class MessageCreateParamsBase(TypedDict, total=False):
     `user-profiles` beta header.
     """
 
+    workspace_id: str
+
 
 class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
     stream: Literal[False]

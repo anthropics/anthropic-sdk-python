@@ -43,6 +43,7 @@ class TestVersions:
             skill_id="skill_id",
             files=[b"Example data"],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -94,6 +95,7 @@ class TestVersions:
             version="version",
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -151,6 +153,7 @@ class TestVersions:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaSkillVersion], version, path=["response"])
 
@@ -199,6 +202,7 @@ class TestVersions:
             version="version",
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDeletedSkillVersion, version, path=["response"])
 
@@ -267,6 +271,7 @@ class TestVersions:
             version="version",
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert version.is_closed
         assert version.json() == {"foo": "bar"}
@@ -344,6 +349,7 @@ class TestAsyncVersions:
             skill_id="skill_id",
             files=[b"Example data"],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -395,6 +401,7 @@ class TestAsyncVersions:
             version="version",
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -452,6 +459,7 @@ class TestAsyncVersions:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaSkillVersion], version, path=["response"])
 
@@ -500,6 +508,7 @@ class TestAsyncVersions:
             version="version",
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDeletedSkillVersion, version, path=["response"])
 
@@ -568,6 +577,7 @@ class TestAsyncVersions:
             version="version",
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert version.is_closed
         assert await version.json() == {"foo": "bar"}

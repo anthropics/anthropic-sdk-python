@@ -216,3 +216,5 @@ class MessageCountTokensParams(TypedDict, total=False):
     Use when acting on behalf of a party other than your organization. Requires the
     `user-profiles` beta header.
     """
+
+    workspace_id: str

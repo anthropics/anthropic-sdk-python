@@ -30,3 +30,5 @@ class EventStreamParams(TypedDict, total=False):
 
     betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
+
+    workspace_id: str

@@ -40,6 +40,7 @@ class TestResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(ResourceRetrieveResponse, resource, path=["response"])
 
@@ -104,6 +105,7 @@ class TestResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             authorization_token="ghp_exampletoken",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(ResourceUpdateResponse, resource, path=["response"])
 
@@ -170,6 +172,7 @@ class TestResources:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionResource], resource, path=["response"])
 
@@ -223,6 +226,7 @@ class TestResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeleteSessionResource, resource, path=["response"])
 
@@ -288,6 +292,7 @@ class TestResources:
             type="file",
             mount_path="/uploads/receipt.pdf",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsFileResource, resource, path=["response"])
 
@@ -353,6 +358,7 @@ class TestAsyncResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(ResourceRetrieveResponse, resource, path=["response"])
 
@@ -417,6 +423,7 @@ class TestAsyncResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             authorization_token="ghp_exampletoken",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(ResourceUpdateResponse, resource, path=["response"])
 
@@ -483,6 +490,7 @@ class TestAsyncResources:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionResource], resource, path=["response"])
 
@@ -536,6 +544,7 @@ class TestAsyncResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeleteSessionResource, resource, path=["response"])
 
@@ -601,6 +610,7 @@ class TestAsyncResources:
             type="file",
             mount_path="/uploads/receipt.pdf",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsFileResource, resource, path=["response"])
 

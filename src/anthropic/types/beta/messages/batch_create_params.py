@@ -51,6 +51,8 @@ class BatchCreateParams(TypedDict, total=False):
     is errored.
     """
 
+    workspace_id: str
+
 
 RequestParamsContainer: TypeAlias = Union[BetaContainerParams, str]
 

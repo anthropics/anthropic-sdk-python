@@ -36,6 +36,7 @@ class TestMemoryVersions:
             memory_store_id="memory_store_id",
             view="basic",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -103,6 +104,7 @@ class TestMemoryVersions:
             session_id="session_id",
             view="basic",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
@@ -154,6 +156,7 @@ class TestMemoryVersions:
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -218,6 +221,7 @@ class TestAsyncMemoryVersions:
             memory_store_id="memory_store_id",
             view="basic",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -285,6 +289,7 @@ class TestAsyncMemoryVersions:
             session_id="session_id",
             view="basic",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
@@ -336,6 +341,7 @@ class TestAsyncMemoryVersions:
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 

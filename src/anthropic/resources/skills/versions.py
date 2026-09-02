@@ -18,7 +18,7 @@ from ..._types import (
     omit,
     not_given,
 )
-from ..._utils import extract_files, path_template, maybe_transform, async_maybe_transform
+from ..._utils import extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -61,6 +61,7 @@ class Versions(SyncAPIResource):
         skill_id: str,
         *,
         files: SequenceNotStr[FileTypes],
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -91,6 +92,7 @@ class Versions(SyncAPIResource):
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         body = deepcopy_with_paths({"files": files}, [["files", "<array>"]])
         extracted_files = extract_files(cast(Mapping[str, object], body), paths=[["files", "<array>"]])
         # It should be noted that the actual Content-Type header that will be
@@ -112,6 +114,7 @@ class Versions(SyncAPIResource):
         version: str,
         *,
         skill_id: str,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -145,6 +148,7 @@ class Versions(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         if not version:
             raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get(
             path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
@@ -159,6 +163,7 @@ class Versions(SyncAPIResource):
         *,
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -190,6 +195,7 @@ class Versions(SyncAPIResource):
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
             path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
             page=SyncPageCursor[SkillVersion],
@@ -214,6 +220,7 @@ class Versions(SyncAPIResource):
         version: str,
         *,
         skill_id: str,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -246,6 +253,7 @@ class Versions(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         if not version:
             raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._delete(
             path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
@@ -280,6 +288,7 @@ class AsyncVersions(AsyncAPIResource):
         skill_id: str,
         *,
         files: SequenceNotStr[FileTypes],
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -310,6 +319,7 @@ class AsyncVersions(AsyncAPIResource):
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         body = deepcopy_with_paths({"files": files}, [["files", "<array>"]])
         extracted_files = extract_files(cast(Mapping[str, object], body), paths=[["files", "<array>"]])
         # It should be noted that the actual Content-Type header that will be
@@ -331,6 +341,7 @@ class AsyncVersions(AsyncAPIResource):
         version: str,
         *,
         skill_id: str,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -364,6 +375,7 @@ class AsyncVersions(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         if not version:
             raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._get(
             path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
@@ -378,6 +390,7 @@ class AsyncVersions(AsyncAPIResource):
         *,
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -409,6 +422,7 @@ class AsyncVersions(AsyncAPIResource):
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
             path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
             page=AsyncPageCursor[SkillVersion],
@@ -433,6 +447,7 @@ class AsyncVersions(AsyncAPIResource):
         version: str,
         *,
         skill_id: str,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -465,6 +480,7 @@ class AsyncVersions(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         if not version:
             raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._delete(
             path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(

@@ -17,3 +17,5 @@ class VersionListParams(TypedDict, total=False):
 
     page: Optional[str]
     """Optionally set to the `next_page` token from the previous response."""
+
+    workspace_id: str

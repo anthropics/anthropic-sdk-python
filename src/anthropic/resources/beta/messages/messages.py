@@ -107,6 +107,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -422,6 +423,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -737,6 +739,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1052,6 +1055,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1066,6 +1070,7 @@ class Messages(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -1124,6 +1129,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[message_count_tokens_params.Tool] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1344,6 +1350,7 @@ class Messages(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -1424,6 +1431,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1739,6 +1747,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2054,6 +2063,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2369,6 +2379,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaToolUnionParam] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2383,6 +2394,7 @@ class AsyncMessages(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -2441,6 +2453,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[message_count_tokens_params.Tool] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2661,6 +2674,7 @@ class AsyncMessages(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),

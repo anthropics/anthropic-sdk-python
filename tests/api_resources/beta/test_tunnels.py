@@ -31,6 +31,7 @@ class TestTunnels:
         tunnel = client.beta.tunnels.create(
             display_name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -68,6 +69,7 @@ class TestTunnels:
         tunnel = client.beta.tunnels.retrieve(
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -119,6 +121,7 @@ class TestTunnels:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaTunnel], tunnel, path=["response"])
 
@@ -156,6 +159,7 @@ class TestTunnels:
         tunnel = client.beta.tunnels.archive(
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -202,6 +206,7 @@ class TestTunnels:
         tunnel = client.beta.tunnels.reveal_token(
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -249,6 +254,7 @@ class TestTunnels:
             tunnel_id="tunnel_id",
             reason="reason",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -299,6 +305,7 @@ class TestAsyncTunnels:
         tunnel = await async_client.beta.tunnels.create(
             display_name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -336,6 +343,7 @@ class TestAsyncTunnels:
         tunnel = await async_client.beta.tunnels.retrieve(
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -387,6 +395,7 @@ class TestAsyncTunnels:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaTunnel], tunnel, path=["response"])
 
@@ -424,6 +433,7 @@ class TestAsyncTunnels:
         tunnel = await async_client.beta.tunnels.archive(
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -470,6 +480,7 @@ class TestAsyncTunnels:
         tunnel = await async_client.beta.tunnels.reveal_token(
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -517,6 +528,7 @@ class TestAsyncTunnels:
             tunnel_id="tunnel_id",
             reason="reason",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 

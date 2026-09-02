@@ -35,6 +35,7 @@ class TestDeploymentRuns:
         deployment_run = client.beta.deployment_runs.retrieve(
             deployment_run_id="deployment_run_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeploymentRun, deployment_run, path=["response"])
 
@@ -92,6 +93,7 @@ class TestDeploymentRuns:
             page="page",
             trigger_type="schedule",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsDeploymentRun], deployment_run, path=["response"])
 
@@ -137,6 +139,7 @@ class TestAsyncDeploymentRuns:
         deployment_run = await async_client.beta.deployment_runs.retrieve(
             deployment_run_id="deployment_run_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeploymentRun, deployment_run, path=["response"])
 
@@ -194,6 +197,7 @@ class TestAsyncDeploymentRuns:
             page="page",
             trigger_type="schedule",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsDeploymentRun], deployment_run, path=["response"])
 

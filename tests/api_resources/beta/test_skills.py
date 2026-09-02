@@ -31,6 +31,7 @@ class TestSkills:
             files=[b"Example data"],
             display_name="display_name",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -70,6 +71,7 @@ class TestSkills:
         skill = client.beta.skills.retrieve(
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -116,6 +118,7 @@ class TestSkills:
             page="page",
             source="source",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaSkill], skill, path=["response"])
 
@@ -151,6 +154,7 @@ class TestSkills:
         skill = client.beta.skills.delete(
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDeletedSkill, skill, path=["response"])
 
@@ -204,6 +208,7 @@ class TestAsyncSkills:
             files=[b"Example data"],
             display_name="display_name",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -243,6 +248,7 @@ class TestAsyncSkills:
         skill = await async_client.beta.skills.retrieve(
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -289,6 +295,7 @@ class TestAsyncSkills:
             page="page",
             source="source",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaSkill], skill, path=["response"])
 
@@ -324,6 +331,7 @@ class TestAsyncSkills:
         skill = await async_client.beta.skills.delete(
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDeletedSkill, skill, path=["response"])
 

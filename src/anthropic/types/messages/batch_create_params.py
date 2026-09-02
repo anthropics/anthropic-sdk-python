@@ -36,6 +36,8 @@ class BatchCreateParams(TypedDict, total=False):
     is errored.
     """
 
+    workspace_id: str
+
 
 class RequestParams(TypedDict, total=False):
     """Messages API creation parameters for the individual request.
