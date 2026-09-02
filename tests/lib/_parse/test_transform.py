@@ -61,6 +61,30 @@ def test_anyof_schema():
     )
 
 
+def test_type_array_schema():
+    assert transform_schema({"type": ["string", "null"]}) == snapshot(
+        {"anyOf": [{"type": "string"}, {"type": "null"}]}
+    )
+    assert transform_schema({"type": ["string"]}) == {"anyOf": [{"type": "string"}]}
+    with pytest.raises(ValueError, match="must contain at least one type"):
+        transform_schema({"type": []})
+
+
+def test_type_array_schema_with_composition():
+    union = {"anyOf": [{"type": "string"}, {"type": "null"}]}
+    for keyword in ("anyOf", "oneOf", "allOf"):
+        schema = {"type": ["string", "null"], keyword: [{"type": "string"}]}
+        assert transform_schema(schema)["allOf"][0] == union
+
+
+def test_nested_type_array_schema():
+    constraints = {"properties": {"name": {"type": "string"}}, "required": ["name"]}
+    schema = {"type": "object", "properties": {"profile": {"type": ["object", "null"], **constraints}}}
+    object_branch = {"type": "object", **constraints, "additionalProperties": False}
+    expected = {"type": "object", "properties": {"profile": {"anyOf": [object_branch, {"type": "null"}]}}, "additionalProperties": False}
+    assert transform_schema(schema) == snapshot(expected)
+
+
 def test_enum_schema():
     schema = {
         "type": "string",
