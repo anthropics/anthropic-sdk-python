@@ -1028,6 +1028,7 @@ class Messages(SyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1051,7 +1052,12 @@ class Messages(SyncAPIResource):
             )
 
         extra_headers = {
-            **strip_not_given({"anthropic-user-profile-id": user_profile_id}),
+            **strip_not_given(
+                {
+                    "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
             _STAINLESS_STREAM_HELPER_HEADER: "messages",
             **(extra_headers or {}),
@@ -1447,12 +1453,6 @@ class Messages(SyncAPIResource):
 
           extra_headers: Send extra headers
 
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
           extra_query: Add additional query parameters to the request
 
           extra_body: Add additional JSON properties to the request
@@ -2457,6 +2457,7 @@ class AsyncMessages(AsyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2480,7 +2481,12 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         extra_headers = {
-            **strip_not_given({"anthropic-user-profile-id": user_profile_id}),
+            **strip_not_given(
+                {
+                    "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
             _STAINLESS_STREAM_HELPER_HEADER: "messages",
             **(extra_headers or {}),
@@ -2875,12 +2881,6 @@ class AsyncMessages(AsyncAPIResource):
 
           extra_headers: Send extra headers
 
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
           extra_query: Add additional query parameters to the request
 
           extra_body: Add additional JSON properties to the request

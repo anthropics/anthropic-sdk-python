@@ -2279,9 +2279,16 @@ class TestAnthropicCredentials:
 
         client = Anthropic()
         _send_message(client)
+        client.messages.create(
+            max_tokens=1,
+            model="claude-opus-4-5",
+            messages=[{"role": "user", "content": "hi"}],
+            workspace_id="wrkspc_req",
+        )
 
-        req = cast("list[MockRequestCall]", respx_mock.calls)[0].request
-        assert req.headers["anthropic-workspace-id"] == "wrkspc_01abc"
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_01abc"
+        assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_req"
 
     @pytest.mark.respx()
     def test_401_invalidates_cache_and_retries_once(self, respx_mock: MockRouter) -> None:
@@ -2818,6 +2825,34 @@ async def _send_message_async(client: AsyncAnthropic) -> None:
 
 @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
 class TestAsyncAnthropicCredentials:
+    @pytest.mark.respx()
+    async def test_workspace_id_header_from_config(
+        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        clean_env.setenv("ANTHROPIC_CONFIG_DIR", str(tmp_path))
+        _write_profile(
+            tmp_path,
+            "default",
+            {"type": "external", "workspace_id": "wrkspc_01abc"},
+            {"access_token": "sk-ant-oat01-file"},
+        )
+
+        _mock_messages_endpoint(respx_mock)
+
+        client = AsyncAnthropic()
+        await _send_message_async(client)
+        await client.messages.create(
+            max_tokens=1,
+            model="claude-opus-4-5",
+            messages=[{"role": "user", "content": "hi"}],
+            workspace_id="wrkspc_req",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_01abc"
+        assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_req"
+
     @pytest.mark.respx()
     async def test_async_static_token(self, respx_mock: MockRouter) -> None:
         _mock_messages_endpoint(respx_mock)

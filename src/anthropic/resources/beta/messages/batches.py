@@ -409,7 +409,7 @@ class Batches(SyncAPIResource):
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
 
-        batch = self.retrieve(message_batch_id=message_batch_id)
+        batch = self.retrieve(message_batch_id=message_batch_id, workspace_id=workspace_id)
         if not batch.results_url:
             raise AnthropicError(
                 f"No `results_url` for the given batch; Has it finished processing? {batch.processing_status}"
@@ -817,7 +817,7 @@ class AsyncBatches(AsyncAPIResource):
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
 
-        batch = await self.retrieve(message_batch_id=message_batch_id)
+        batch = await self.retrieve(message_batch_id=message_batch_id, workspace_id=workspace_id)
         if not batch.results_url:
             raise AnthropicError(
                 f"No `results_url` for the given batch; Has it finished processing? {batch.processing_status}"

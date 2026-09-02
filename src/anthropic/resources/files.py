@@ -262,6 +262,7 @@ class Files(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
+        extra_headers = merge_headers(_stainless_helper_header_from_file(file), extra_headers or {})
         body = deepcopy_with_paths(
             {
                 "file": file,
@@ -507,7 +508,8 @@ class AsyncFiles(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
+        extra_headers = merge_headers(_stainless_helper_header_from_file(file), extra_headers or {})
         body = deepcopy_with_paths(
             {
                 "file": file,

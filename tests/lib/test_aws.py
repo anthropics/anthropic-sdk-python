@@ -1,13 +1,13 @@
 import re
 import threading
-from typing import Dict, List, Type, Union, cast
+from typing import Dict, List, Type, Union, Optional, cast
 from typing_extensions import Protocol
 
 import httpx2
 import pytest
 from respx import MockRouter
 
-from anthropic import AnthropicAWS, AsyncAnthropicAWS
+from anthropic import AnthropicAWS, AsyncAnthropicAWS, omit
 from anthropic._exceptions import AnthropicError
 from anthropic.lib.credentials import StaticToken
 
@@ -441,6 +441,55 @@ async def test_api_key_request_async(respx_mock: MockRouter) -> None:
     assert len(calls) == 1
     assert str(calls[0].request.url) == "https://aws-external-anthropic.us-east-1.api.aws/v1/messages"
     assert calls[0].request.headers["X-Api-Key"] == "test-key"
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+@pytest.mark.parametrize(
+    "request_workspace_id, expected",
+    [(None, "ws-client"), ("ws-request", "ws-request")],
+)
+def test_workspace_id_header(respx_mock: MockRouter, request_workspace_id: Optional[str], expected: str) -> None:
+    respx_mock.post(re.compile(r"https://aws-external-anthropic\.us-east-1\.api\.aws/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+
+    client = AnthropicAWS(api_key="test-key", aws_region="us-east-1", workspace_id="ws-client")
+    client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Hello"}],
+        model="claude-sonnet-4-20250514",
+        workspace_id=request_workspace_id if request_workspace_id is not None else omit,
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert calls[0].request.headers.get("anthropic-workspace-id") == expected
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize(
+    "request_workspace_id, expected",
+    [(None, "ws-client"), ("ws-request", "ws-request")],
+)
+async def test_workspace_id_header_async(
+    respx_mock: MockRouter, request_workspace_id: Optional[str], expected: str
+) -> None:
+    respx_mock.post(re.compile(r"https://aws-external-anthropic\.us-east-1\.api\.aws/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+
+    client = AsyncAnthropicAWS(api_key="test-key", aws_region="us-east-1", workspace_id="ws-client")
+    await client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Hello"}],
+        model="claude-sonnet-4-20250514",
+        workspace_id=request_workspace_id if request_workspace_id is not None else omit,
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert calls[0].request.headers.get("anthropic-workspace-id") == expected
 
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")

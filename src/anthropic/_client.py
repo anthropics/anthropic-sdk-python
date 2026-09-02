@@ -16,7 +16,8 @@ from ._utils import (
     is_mapping_t,
     get_async_library,
 )
-from ._compat import cached_property
+from ._compat import model_copy, cached_property
+from ._models import FinalRequestOptions
 from ._version import __version__
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
@@ -119,6 +120,28 @@ if TYPE_CHECKING:
     from .resources.messages.messages import Messages, AsyncMessages
 
 __all__ = ["Timeout", "RequestOptions", "Anthropic", "AsyncAnthropic", "Client", "AsyncClient"]
+
+
+_CLIENT_LEVEL_HEADER_PARAMS = frozenset(("anthropic-workspace-id", "anthropic-user-profile-id"))
+
+
+def _keep_client_header_params(options: FinalRequestOptions) -> FinalRequestOptions:
+    """Per-request header params arrive as `Omit` when unset, which would strip a value the
+    client itself sends (e.g. `AnthropicAWS(workspace_id=...)`, a credentials profile's
+    `workspace_id`, or `default_headers`). Drop those so the client-level header survives."""
+    headers = options.headers
+    if not is_given(headers) or not any(
+        name.lower() in _CLIENT_LEVEL_HEADER_PARAMS and isinstance(value, Omit) for name, value in headers.items()
+    ):
+        return options
+
+    options = model_copy(options)
+    options.headers = {
+        name: value
+        for name, value in headers.items()
+        if not (name.lower() in _CLIENT_LEVEL_HEADER_PARAMS and isinstance(value, Omit))
+    }
+    return options
 
 
 class Anthropic(SyncAPIClient):
@@ -358,6 +381,10 @@ class Anthropic(SyncAPIClient):
             "anthropic-version": "2023-06-01",
             **self._custom_headers,
         }
+
+    @override
+    def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        return _keep_client_header_params(super()._prepare_options(options))
 
     @override
     def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
@@ -780,6 +807,10 @@ class AsyncAnthropic(AsyncAPIClient):
             "anthropic-version": "2023-06-01",
             **self._custom_headers,
         }
+
+    @override
+    async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        return _keep_client_header_params(await super()._prepare_options(options))
 
     @override
     def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
