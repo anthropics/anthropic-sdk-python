@@ -472,7 +472,9 @@ class CredentialsFile:
         fd, tmp = tempfile.mkstemp(dir=parent, prefix=f".{self._credentials_path.name}.", suffix=".tmp")
         try:
             try:
-                os.fchmod(fd, 0o600)
+                fchmod = getattr(os, "fchmod", None)
+                if fchmod is not None:
+                    fchmod(fd, 0o600)
                 os.write(fd, _json_dumps_secrets(data, indent=2))
                 os.fsync(fd)
             finally:
