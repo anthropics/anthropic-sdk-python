@@ -20,6 +20,11 @@ class BetaCompactionBlock(BaseModel):
     """Summary of compacted content, or null if compaction failed"""
 
     encrypted_content: Optional[str] = None
-    """Opaque metadata from prior compaction, to be round-tripped verbatim"""
+    """Opaque metadata returned on compaction response blocks.
+
+    The Messages API rejects this field on request compaction blocks, so the SDK
+    omits it when serializing requests. Clients can still append ``response.content``
+    verbatim; the field is dropped on the wire, not on the response object.
+    """
 
     type: Literal["compaction"]
