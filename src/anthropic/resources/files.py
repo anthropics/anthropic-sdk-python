@@ -239,11 +239,14 @@ class Files(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> FileMetadata:
-        """
-        Upload File
+        """Upload File
 
         Args:
-          file: The file to upload
+          file: The file to upload.
+
+        Only the final path component of the part's `filename` is
+              kept; an absent or empty `filename` is replaced with `unnamed` plus the
+              extension for the file's stored `mime_type`, when known.
 
           expires_in_seconds: Seconds from upload until the file expires and its bytes become permanently
               unavailable. Must be between 3600 (one hour) and 7776000 (ninety days).
@@ -485,11 +488,14 @@ class AsyncFiles(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> FileMetadata:
-        """
-        Upload File
+        """Upload File
 
         Args:
-          file: The file to upload
+          file: The file to upload.
+
+        Only the final path component of the part's `filename` is
+              kept; an absent or empty `filename` is replaced with `unnamed` plus the
+              extension for the file's stored `mime_type`, when known.
 
           expires_in_seconds: Seconds from upload until the file expires and its bytes become permanently
               unavailable. Must be between 3600 (one hour) and 7776000 (ninety days).
