@@ -1002,6 +1002,31 @@ class TestWorkloadIdentityCredentials:
         assert "scope" not in body
 
     @pytest.mark.respx()
+    def test_exchange_with_async_identity_token_provider(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOKEN_URL).mock(
+            return_value=httpx2.Response(
+                200,
+                json={"access_token": "sk-ant-oat01-async", "token_type": "Bearer", "expires_in": 600},
+            )
+        )
+
+        async def async_provider() -> str:
+            return "ext.jwt.async.value"
+
+        creds = WorkloadIdentityCredentials(
+            identity_token_provider=async_provider,
+            federation_rule_id="fdrl_01abc",
+            organization_id="00000000-0000-0000-0000-000000000000",
+        )
+
+        token = creds()
+        assert token.token == "sk-ant-oat01-async"
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 1
+        body = json.loads(calls[0].request.content)
+        assert body["assertion"] == "ext.jwt.async.value"
+
+    @pytest.mark.respx()
     def test_service_account_included(self, respx_mock: MockRouter) -> None:
         respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         creds = WorkloadIdentityCredentials(
