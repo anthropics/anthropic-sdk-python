@@ -575,7 +575,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
     def delete(self, command: BetaMemoryTool20250818DeleteCommand) -> str:
         full_path = self._validate_path(command.path)
 
-        if command.path == "/memories":
+        if full_path == self.memory_root.resolve():
             raise ToolError("Cannot delete the /memories directory itself")
 
         try:
@@ -877,7 +877,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         await self._ensure_memory_root()
         full_path = await self._validate_path(command.path)
 
-        if command.path == "/memories":
+        if Path(str(full_path)) == Path(str(self.memory_root)).resolve():
             raise ToolError("Cannot delete the /memories directory itself")
 
         try:

@@ -449,6 +449,19 @@ class TestBetaLocalFilesystemMemoryTool:
         with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
             sync_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories"))
 
+    @pytest.mark.parametrize("path", ["/memories/", "/memories//", "/memories/.", "/memories/subdir/.."])
+    def test_delete_not_allow_deleting_memories_directory_via_alias(
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool, temp_directory: str, path: str
+    ) -> None:
+        sync_local_filesystem_tool.create(
+            BetaMemoryTool20250818CreateCommand(command="create", file_text="keep me", path="/memories/subdir/a.txt")
+        )
+
+        with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
+            sync_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path=path))
+
+        assert get_directory_snapshot(temp_directory) == {"memories/subdir/a.txt": "keep me"}
+
     def test_rename(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
         sync_local_filesystem_tool.create(
             BetaMemoryTool20250818CreateCommand(
@@ -987,6 +1000,19 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
             await async_local_filesystem_tool.delete(
                 BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories")
             )
+
+    @pytest.mark.parametrize("path", ["/memories/", "/memories//", "/memories/.", "/memories/subdir/.."])
+    async def test_delete_not_allow_deleting_memories_directory_via_alias(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool, temp_directory: str, path: str
+    ) -> None:
+        await async_local_filesystem_tool.create(
+            BetaMemoryTool20250818CreateCommand(command="create", file_text="keep me", path="/memories/subdir/a.txt")
+        )
+
+        with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
+            await async_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path=path))
+
+        assert get_directory_snapshot(temp_directory) == {"memories/subdir/a.txt": "keep me"}
 
     async def test_rename(self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool) -> None:
         await async_local_filesystem_tool.create(
