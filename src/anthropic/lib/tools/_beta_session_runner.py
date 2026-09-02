@@ -510,6 +510,12 @@ class SessionToolRunner:
         # by :meth:`_note_confirmation` / the next reconcile pass. Like ``_seen``
         # and ``_answered``, ``_confirmations`` is per-session O(tool calls):
         # recorded verdicts persist for the life of the run.
+        # ``_executed`` holds the computed (unconfirmed) result for an id whose
+        # tool has already run: reconcile re-enqueues anything not yet in
+        # ``_answered``, and a call already in ``_executed`` must only have its
+        # result re-posted, never re-run the tool itself (see ``_dispatch_loop``
+        # / ``_resend``).
+        self._executed: dict[str, tuple[DispatchedToolResultParams, bool, Literal["allow"] | None]] = {}
         self._confirmations: dict[str, Literal["allow", "deny"]] = {}
         self._awaiting_confirmation: dict[str, DispatchedToolUseEvent] = {}
         self._stop = anyio.Event()
@@ -798,6 +804,28 @@ class SessionToolRunner:
             )
         )
 
+    async def _resend(self, ev: DispatchedToolUseEvent) -> None:
+        """Retry posting an already-computed result without re-running the tool.
+
+        Reached from :meth:`_dispatch_loop` when reconcile re-enqueues a call
+        whose tool already ran but whose result was not yet confirmed posted.
+        """
+        tool_result, is_error, confirmation = self._executed[ev.id]
+        sent = await self._send_result(tool_result, ev.id)
+        if sent:
+            self._executed.pop(ev.id, None)
+        await self._surface_call(
+            DispatchedToolCall(
+                event=ev,
+                result=tool_result,
+                tool_use_id=ev.id,
+                name=ev.name,
+                is_error=is_error,
+                posted=sent,
+                confirmation=confirmation,
+            )
+        )
+
     async def _surface_call(self, call: DispatchedToolCall) -> None:
         """Yield ``call`` to the consumer, tolerating a consumer that left early.
 
@@ -830,7 +858,16 @@ class SessionToolRunner:
                         # posted and the DispatchedToolCall enqueued before the
                         # cancel propagates.
                         with anyio.CancelScope(shield=True):
-                            await self._execute(ev, confirmation)
+                            if ev.id in self._executed:
+                                # Reconcile re-enqueued a call whose tool already
+                                # ran (the earlier post failed or was never
+                                # confirmed). Retry posting the result we already
+                                # have; never call _execute again, which would
+                                # re-run the tool itself and is unsafe for a
+                                # side-effecting tool such as bash or a file write.
+                                await self._resend(ev)
+                            else:
+                                await self._execute(ev, confirmation)
                 finally:
                     if confirmation == "allow":
                         # The user-approved call is fully disposed of (executed,
@@ -895,7 +932,13 @@ class SessionToolRunner:
                 content = tool_error_content(e)
                 is_error = True
             tool_result = _build_result_event(ev, content, is_error)
+            # Recorded before the send attempt: the tool has now run, so a later
+            # reconcile must never dispatch this id through _execute again,
+            # regardless of whether the send below succeeds.
+            self._executed[ev.id] = (tool_result, is_error, confirmation)
             sent = await self._send_result(tool_result, ev.id)
+            if sent:
+                self._executed.pop(ev.id, None)
         await self._surface_call(
             DispatchedToolCall(
                 event=ev,
