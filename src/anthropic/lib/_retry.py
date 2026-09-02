@@ -40,9 +40,22 @@ def jitter(low: float, high: float) -> float:
 
 
 def is_fatal_status_error(err: Exception) -> bool:
-    """True for a 4xx that retrying will not fix (bad key, missing resource).
+    """True for a status error that retrying will not fix (bad key, missing resource).
 
-    Aligns with the core client's ``_should_retry`` policy: 408 / 409 / 429 are
-    transient and worth retrying; every other 4xx is fatal.
+    Aligns with the core client's ``_should_retry`` policy:
+
+    * the server's explicit ``x-should-retry`` header wins — ``true`` is never
+      fatal, ``false`` is always fatal, regardless of the status code;
+    * otherwise 408 / 409 / 429 are transient and worth retrying, and every
+      other 4xx is fatal.
     """
-    return isinstance(err, APIStatusError) and 400 <= err.status_code < 500 and err.status_code not in _RETRYABLE_4XX
+    if not isinstance(err, APIStatusError):
+        return False
+
+    should_retry_header = err.response.headers.get("x-should-retry")
+    if should_retry_header == "true":
+        return False
+    if should_retry_header == "false":
+        return True
+
+    return 400 <= err.status_code < 500 and err.status_code not in _RETRYABLE_4XX
