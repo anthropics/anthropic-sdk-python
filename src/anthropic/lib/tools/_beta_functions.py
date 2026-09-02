@@ -49,6 +49,9 @@ class ToolError(Exception):
         if isinstance(content, str):
             message = content
         else:
+            # Materialize once so one-shot iterables (for example generators)
+            # remain available when the runner later serializes ``exc.content``.
+            content = list(content)
             parts: list[str] = []
             for block in content:
                 text = block.get("text")
