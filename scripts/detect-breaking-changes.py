@@ -22,9 +22,10 @@ def resolve_assignment_alias(obj: griffe.Object | griffe.Alias) -> griffe.Object
         seen.add(target.path)
         try:
             # annotated as `Module | Class` upstream, but a re-exported name resolves to an `Alias`
-            target = target.value.resolved
-            if isinstance(target, griffe.Alias):
-                target = target.final_target
+            resolved: griffe.Object | griffe.Alias | None = target.value.resolved
+            if isinstance(resolved, griffe.Alias):
+                resolved = resolved.final_target
+            target = resolved
         except Exception:
             return obj
 
