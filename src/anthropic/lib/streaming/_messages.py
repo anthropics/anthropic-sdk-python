@@ -525,11 +525,11 @@ def accumulate_event(
             # `message_start` may omit usage (see the streaming docs), in which
             # case the snapshot has no usage yet. Initialize it from the delta
             # so the final message still carries token counts, and tolerate
-            # streams that never supply usage.
-            usage = event.usage.to_dict()
-            if event.usage.input_tokens is None:
-                usage["input_tokens"] = 0
-            current_snapshot.usage = construct_type(type_=Usage, value=usage)
+            # streams that never supply usage. Anything the delta leaves out
+            # (e.g. `input_tokens`) stays unset instead of being fabricated
+            # as 0 so an unknown count is never reported to callers; a later
+            # delta that does supply it fills it in below.
+            current_snapshot.usage = construct_type(type_=Usage, value=event.usage.to_dict())
         else:
             current_snapshot.usage.output_tokens = event.usage.output_tokens
 

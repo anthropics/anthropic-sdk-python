@@ -591,6 +591,29 @@ class TestSyncMessages:
         assert message.usage.fallback_credit.status.type == "redeemed"
 
     @pytest.mark.respx(base_url=base_url)
+    def test_usage_omitted_at_message_start_preserves_unknown_input_tokens(self, respx_mock: MockRouter) -> None:
+        # If both `message_start` and `message_delta` omit the input count then
+        # it is genuinely unknown; the accumulator must preserve that rather
+        # than fabricate `input_tokens=0`, which would under-report accounting.
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_response("beta_usage_omitted_input_tokens_response.txt"))
+        )
+
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+
+        assert isinstance(message.usage, BetaUsage)
+        # unknown counts stay unset instead of being reported as 0
+        assert message.usage.input_tokens is None  # pyright: ignore[reportUnnecessaryComparison]
+        assert message.usage.output_tokens == 6
+
+    @pytest.mark.respx(base_url=base_url)
     @pytest.mark.parametrize("fixture, expected", INPUT_TRANSFORMATIONS_CASES)
     def test_input_transformations_propagated(
         self, respx_mock: MockRouter, fixture: str, expected: List[Dict[str, str]]
