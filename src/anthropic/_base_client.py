@@ -132,6 +132,16 @@ else:
         HTTPX_DEFAULT_TIMEOUT = Timeout(5.0)
 
 
+def _reject_httpx_object(name: str, value: object) -> None:
+    """`httpx` objects don't work with `httpx2`, and would otherwise fail deep inside a request."""
+    for cls in type(value).__mro__:
+        module = getattr(cls, "__module__", None)
+        if isinstance(module, str) and module.partition(".")[0] == "httpx":
+            raise TypeError(
+                f"Invalid `{name}` argument; `httpx.{cls.__name__}` is from the `httpx` package, but this SDK uses `httpx2`. Use `httpx2.{cls.__name__}` instead."
+            )
+
+
 class PageInfo:
     """Stores the necessary information to build the request to retrieve the next page.
 
@@ -400,6 +410,8 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         custom_query: Mapping[str, object] | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
     ) -> None:
+        _reject_httpx_object("timeout", timeout)
+
         self._version = version
         self._base_url = self._enforce_trailing_slash(URL(base_url))
         self.max_retries = max_retries
@@ -500,6 +512,8 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         *,
         retries_taken: int = 0,
     ) -> httpx2.Request:
+        _reject_httpx_object("timeout", options.timeout)
+
         if log.isEnabledFor(logging.DEBUG):
             log.debug(
                 "Request options: %s",
@@ -884,6 +898,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
 class _DefaultHttpxClient(httpx2.Client):
     def __init__(self, **kwargs: Any) -> None:
+        _reject_httpx_object("transport", kwargs.get("transport"))
         kwargs.setdefault("timeout", DEFAULT_TIMEOUT)
         kwargs.setdefault("limits", DEFAULT_CONNECTION_LIMITS)
         kwargs.setdefault("follow_redirects", True)
@@ -973,6 +988,8 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool,
     ) -> None:
+        _reject_httpx_object("http_client", http_client)
+
         if not is_given(timeout):
             # if the user passed in a custom http client with a non-default
             # timeout set then we use that timeout.
@@ -1557,6 +1574,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
 
 class _DefaultAsyncHttpxClient(httpx2.AsyncClient):
     def __init__(self, **kwargs: Any) -> None:
+        _reject_httpx_object("transport", kwargs.get("transport"))
         kwargs.setdefault("timeout", DEFAULT_TIMEOUT)
         kwargs.setdefault("limits", DEFAULT_CONNECTION_LIMITS)
         kwargs.setdefault("follow_redirects", True)
@@ -1669,6 +1687,8 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         custom_query: Mapping[str, object] | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
     ) -> None:
+        _reject_httpx_object("http_client", http_client)
+
         if not is_given(timeout):
             # if the user passed in a custom http client with a non-default
             # timeout set then we use that timeout.

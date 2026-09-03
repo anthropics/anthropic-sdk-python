@@ -391,6 +391,36 @@ class TestAnthropic:
                     http_client=cast(Any, http_client),
                 )
 
+    def test_httpx_objects_rejected(self, client: Anthropic) -> None:
+        # `import httpx` resolves to `httpx2` in this test suite, so fake the `httpx` classes
+        class Timeout:
+            __module__ = "httpx"
+
+        class HTTPTransport:
+            __module__ = "httpx._transports.default"
+
+        class Client:
+            __module__ = "httpx"
+
+        class MyClient(Client):
+            pass
+
+        timeout: Any = Timeout()
+        transport: Any = HTTPTransport()
+        http_client: Any = MyClient()
+
+        with pytest.raises(TypeError, match="Use `httpx2.Client` instead"):
+            Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client)
+
+        with pytest.raises(TypeError, match="Use `httpx2.Timeout` instead"):
+            Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+
+        with pytest.raises(TypeError, match="Use `httpx2.Timeout` instead"):
+            client.post("/foo", cast_to=httpx2.Response, options={"timeout": timeout})
+
+        with pytest.raises(TypeError, match="Use `httpx2.HTTPTransport` instead"):
+            DefaultHttpxClient(transport=transport)
+
     def test_default_headers_option(self) -> None:
         test_client = Anthropic(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
@@ -1561,6 +1591,38 @@ class TestAsyncAnthropic:
                     _strict_response_validation=True,
                     http_client=cast(Any, http_client),
                 )
+
+    async def test_httpx_objects_rejected(self, async_client: AsyncAnthropic) -> None:
+        # `import httpx` resolves to `httpx2` in this test suite, so fake the `httpx` classes
+        class Timeout:
+            __module__ = "httpx"
+
+        class HTTPTransport:
+            __module__ = "httpx._transports.default"
+
+        class Client:
+            __module__ = "httpx"
+
+        class MyClient(Client):
+            pass
+
+        timeout: Any = Timeout()
+        transport: Any = HTTPTransport()
+        http_client: Any = MyClient()
+
+        with pytest.raises(TypeError, match="Use `httpx2.Client` instead"):
+            AsyncAnthropic(
+                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
+            )
+
+        with pytest.raises(TypeError, match="Use `httpx2.Timeout` instead"):
+            AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+
+        with pytest.raises(TypeError, match="Use `httpx2.Timeout` instead"):
+            await async_client.post("/foo", cast_to=httpx2.Response, options={"timeout": timeout})
+
+        with pytest.raises(TypeError, match="Use `httpx2.HTTPTransport` instead"):
+            DefaultAsyncHttpxClient(transport=transport)
 
     async def test_default_headers_option(self) -> None:
         test_client = AsyncAnthropic(
