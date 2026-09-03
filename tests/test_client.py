@@ -1270,7 +1270,6 @@ class TestAnthropic:
         assert len(mounts) == 1
         assert mounts[0][0].pattern == "https://"
 
-    @pytest.mark.filterwarnings("ignore:.*deprecated.*:DeprecationWarning")
     def test_default_client_creation(self) -> None:
         # Ensure that the client can be initialized without any exceptions
         DefaultHttpxClient(
@@ -2509,7 +2508,6 @@ class TestAsyncAnthropic:
         assert len(mounts) == 1
         assert mounts[0][0].pattern == "https://"
 
-    @pytest.mark.filterwarnings("ignore:.*deprecated.*:DeprecationWarning")
     async def test_default_client_creation(self) -> None:
         # Ensure that the client can be initialized without any exceptions
         DefaultAsyncHttpxClient(
