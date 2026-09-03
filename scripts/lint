@@ -16,7 +16,7 @@ echo "==> Checking dependency version caps"
 uv run python scripts/utils/check-dependency-caps.py
 
 echo "==> Running pyright"
-uv run pyright
+uv run pyright --project .
 
 echo "==> Running mypy"
 uv run mypy .

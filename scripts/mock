@@ -7,14 +7,15 @@ cd "$(dirname "$0")/.."
 if [[ -n "$1" && "$1" != '--'* ]]; then
   URL="$1"
   shift
+elif [ -n "$STAINLESS_OPENAPI_SPEC_URL" ]; then
+  URL="$STAINLESS_OPENAPI_SPEC_URL"
 else
-  URL="$(grep 'openapi_spec_url' .stats.yml | cut -d' ' -f2)"
-fi
-
-# Check if the URL is empty
-if [ -z "$URL" ]; then
-  echo "Error: No OpenAPI spec path/url provided or found in .stats.yml"
-  exit 1
+  # The generator writes the gzip'd spec next to this script; the
+  # cd at the top of scripts/mock puts CWD at the SDK root.
+  SPEC_TMPFILE="$(mktemp)"
+  trap 'rm -f "$SPEC_TMPFILE"' EXIT
+  gunzip -c scripts/mock-spec.json.gz > "$SPEC_TMPFILE"
+  URL="$SPEC_TMPFILE"
 fi
 
 echo "==> Starting mock server with URL ${URL}"

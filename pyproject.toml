@@ -82,6 +82,7 @@ dev = [
     "boto3-stubs >= 1",
     "rich>=13.7.1",
     "pytest-xdist>=3.6.1",
+    "hypothesis",
     "inline-snapshot>=0.28.0",
     "griffe>=1",
     "http-snapshot[httpx]==0.1.9",
