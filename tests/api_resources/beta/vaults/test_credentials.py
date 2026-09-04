@@ -46,7 +46,8 @@ class TestCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -109,7 +110,8 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -181,7 +183,8 @@ class TestCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -225,7 +228,7 @@ class TestCredentials:
                 vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.list(
@@ -233,7 +236,7 @@ class TestCredentials:
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.list(
@@ -241,11 +244,12 @@ class TestCredentials:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.vaults.credentials.with_raw_response.list(
@@ -257,7 +261,7 @@ class TestCredentials:
         credential = response.parse()
         assert_matches_type(SyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.vaults.credentials.with_streaming_response.list(
@@ -271,7 +275,7 @@ class TestCredentials:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_path_params_list(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
@@ -292,7 +296,8 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
@@ -349,7 +354,8 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -409,6 +415,7 @@ class TestCredentials:
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
@@ -484,7 +491,8 @@ class TestAsyncCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -547,7 +555,8 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -619,7 +628,8 @@ class TestAsyncCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -663,7 +673,7 @@ class TestAsyncCredentials:
                 vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.list(
@@ -671,7 +681,7 @@ class TestAsyncCredentials:
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.list(
@@ -679,11 +689,12 @@ class TestAsyncCredentials:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.credentials.with_raw_response.list(
@@ -695,7 +706,7 @@ class TestAsyncCredentials:
         credential = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.credentials.with_streaming_response.list(
@@ -709,7 +720,7 @@ class TestAsyncCredentials:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_path_params_list(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
@@ -730,7 +741,8 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
@@ -787,7 +799,8 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -847,6 +860,7 @@ class TestAsyncCredentials:
             credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 

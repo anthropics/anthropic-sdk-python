@@ -71,6 +71,7 @@ class Versions(SyncAPIResource):
         *,
         files: SequenceNotStr[FileTypes],
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -104,7 +105,12 @@ class Versions(SyncAPIResource):
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         body = deepcopy_with_paths({"files": files}, [["files", "<array>"]])
@@ -129,6 +135,7 @@ class Versions(SyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -165,7 +172,12 @@ class Versions(SyncAPIResource):
         if not version:
             raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return self._get(
@@ -183,6 +195,7 @@ class Versions(SyncAPIResource):
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -217,7 +230,12 @@ class Versions(SyncAPIResource):
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return self._get_api_list(
@@ -245,6 +263,7 @@ class Versions(SyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -280,7 +299,12 @@ class Versions(SyncAPIResource):
         if not version:
             raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return self._delete(
@@ -297,6 +321,7 @@ class Versions(SyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -333,7 +358,12 @@ class Versions(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return self._get(
@@ -373,6 +403,7 @@ class AsyncVersions(AsyncAPIResource):
         *,
         files: SequenceNotStr[FileTypes],
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -406,7 +437,12 @@ class AsyncVersions(AsyncAPIResource):
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         body = deepcopy_with_paths({"files": files}, [["files", "<array>"]])
@@ -431,6 +467,7 @@ class AsyncVersions(AsyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -467,7 +504,12 @@ class AsyncVersions(AsyncAPIResource):
         if not version:
             raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return await self._get(
@@ -485,6 +527,7 @@ class AsyncVersions(AsyncAPIResource):
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -519,7 +562,12 @@ class AsyncVersions(AsyncAPIResource):
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return self._get_api_list(
@@ -547,6 +595,7 @@ class AsyncVersions(AsyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -582,7 +631,12 @@ class AsyncVersions(AsyncAPIResource):
         if not version:
             raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return await self._delete(
@@ -599,6 +653,7 @@ class AsyncVersions(AsyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -635,7 +690,12 @@ class AsyncVersions(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `version` but received {version!r}")
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return await self._get(

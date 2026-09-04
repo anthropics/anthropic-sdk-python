@@ -1,3 +1,8 @@
+#!/usr/bin/env -S uv run python
+
+# Note: you must have installed `anthropic` with the `vertex` extra
+# e.g. `pip install -U anthropic[vertex]`
+
 import asyncio
 
 from anthropic import AnthropicVertex, AsyncAnthropicVertex
@@ -9,7 +14,7 @@ def sync_client() -> None:
     client = AnthropicVertex()
 
     message = client.messages.create(
-        model="claude-sonnet-4@20250514",
+        model="claude-sonnet-5",
         max_tokens=100,
         messages=[
             {
@@ -27,7 +32,7 @@ async def async_client() -> None:
     client = AsyncAnthropicVertex()
 
     message = await client.messages.create(
-        model="claude-sonnet-4@20250514",
+        model="claude-sonnet-5",
         max_tokens=1024,
         messages=[
             {

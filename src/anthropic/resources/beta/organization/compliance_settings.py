@@ -15,8 +15,9 @@ from ...._response import (
     async_to_streamed_response_wrapper,
 )
 from ...._base_client import make_request_options
-from ....types.beta.organization import compliance_setting_update_params
+from ....types.beta.organization import BetaComplianceSettingsStateParam, compliance_setting_update_params
 from ....types.beta.organization.beta_compliance_settings import BetaComplianceSettings
+from ....types.beta.organization.beta_compliance_settings_state_param import BetaComplianceSettingsStateParam
 
 __all__ = ["ComplianceSettings", "AsyncComplianceSettings"]
 
@@ -70,7 +71,7 @@ class ComplianceSettings(SyncAPIResource):
     def update(
         self,
         *,
-        state: compliance_setting_update_params.State,
+        state: BetaComplianceSettingsStateParam,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -164,7 +165,7 @@ class AsyncComplianceSettings(AsyncAPIResource):
     async def update(
         self,
         *,
-        state: compliance_setting_update_params.State,
+        state: BetaComplianceSettingsStateParam,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,

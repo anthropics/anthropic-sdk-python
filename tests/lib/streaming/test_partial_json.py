@@ -52,7 +52,6 @@ class TestPartialJson:
             request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
         )
 
-        # Both should parse complete JSON correctly
         assert cast(ToolUseBlock, message1.content[0]).input == {"key": "value"}
         assert cast(ToolUseBlock, message2.content[0]).input == {"key": "value"}
 
@@ -79,7 +78,6 @@ class TestPartialJson:
             request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
         )
 
-        # Get the tool use blocks
         standard_tool = cast(ToolUseBlock, message_standard.content[0])
         trailing_tool = cast(ToolUseBlock, message_trailing.content[0])
 
@@ -90,7 +88,6 @@ class TestPartialJson:
         standard_input = standard_tool.input  # type: ignore
         trailing_input = trailing_tool.input  # type: ignore
 
-        # The input should have the items array in both cases
         items_standard = cast(List[str], standard_input["items"])
         items_trailing = cast(List[str], trailing_input["items"])
         assert items_standard == ["item1", "item2"]
@@ -104,7 +101,6 @@ class TestPartialJson:
         assert "unfinished_field" in trailing_input
         assert trailing_input["unfinished_field"] == "incomplete value"
 
-    # test that with invalid JSON we throw the correct error
     def test_partial_json_with_invalid_json(self) -> None:
         """Test that invalid JSON raises an error."""
         message = ParsedBetaMessage(
@@ -126,14 +122,12 @@ class TestPartialJson:
             usage=BetaUsage(input_tokens=10, output_tokens=10),
         )
 
-        # Invalid JSON input
         invalid_json = '{"key": "value", "incomplete_field": bad_value'
         event_invalid = BetaRawContentBlockDeltaEvent(
             type="content_block_delta",
             index=0,
             delta=BetaInputJSONDelta(type="input_json_delta", partial_json=invalid_json),
         )
-        # Expect an error when trying to accumulate the invalid JSON
         try:
             accumulate_event(
                 event=event_invalid,

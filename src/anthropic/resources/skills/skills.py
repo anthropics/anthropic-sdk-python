@@ -19,7 +19,7 @@ from ..._types import (
     omit,
     not_given,
 )
-from ..._utils import extract_files, path_template, maybe_transform, async_maybe_transform
+from ..._utils import extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
 from .versions import (
     Versions,
     AsyncVersions,
@@ -73,6 +73,7 @@ class Skills(SyncAPIResource):
         *,
         files: SequenceNotStr[FileTypes],
         display_name: Optional[str] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -101,6 +102,7 @@ class Skills(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         body = deepcopy_with_paths(
             {
                 "files": files,
@@ -127,6 +129,7 @@ class Skills(SyncAPIResource):
         self,
         skill_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -152,6 +155,7 @@ class Skills(SyncAPIResource):
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get(
             path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
@@ -166,6 +170,7 @@ class Skills(SyncAPIResource):
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
         source: Optional[str] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -201,6 +206,7 @@ class Skills(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
             "/v1/skills",
             page=SyncPageCursor[Skill],
@@ -225,6 +231,7 @@ class Skills(SyncAPIResource):
         self,
         skill_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -250,6 +257,7 @@ class Skills(SyncAPIResource):
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._delete(
             path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
@@ -288,6 +296,7 @@ class AsyncSkills(AsyncAPIResource):
         *,
         files: SequenceNotStr[FileTypes],
         display_name: Optional[str] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -316,6 +325,7 @@ class AsyncSkills(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         body = deepcopy_with_paths(
             {
                 "files": files,
@@ -342,6 +352,7 @@ class AsyncSkills(AsyncAPIResource):
         self,
         skill_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -367,6 +378,7 @@ class AsyncSkills(AsyncAPIResource):
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._get(
             path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
@@ -381,6 +393,7 @@ class AsyncSkills(AsyncAPIResource):
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
         source: Optional[str] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -416,6 +429,7 @@ class AsyncSkills(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
             "/v1/skills",
             page=AsyncPageCursor[Skill],
@@ -440,6 +454,7 @@ class AsyncSkills(AsyncAPIResource):
         self,
         skill_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -465,6 +480,7 @@ class AsyncSkills(AsyncAPIResource):
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._delete(
             path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(

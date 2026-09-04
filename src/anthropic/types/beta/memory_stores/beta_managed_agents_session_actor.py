@@ -15,7 +15,7 @@ class BetaManagedAgentsSessionActor(BaseModel):
     session_id: str
     """ID of the session that performed the write (a `sesn_...` value).
 
-    Look up the session via [Retrieve a session](/en/api/sessions-retrieve) for
+    Look up the session via [Retrieve a session](/en/api/beta/sessions/retrieve) for
     further provenance.
     """
 

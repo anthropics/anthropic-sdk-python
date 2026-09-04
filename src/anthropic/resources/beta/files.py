@@ -78,6 +78,7 @@ class Files(SyncAPIResource):
         page: Optional[str] | Omit = omit,
         scope_id: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -116,7 +117,12 @@ class Files(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return self._get_api_list(
@@ -145,6 +151,7 @@ class Files(SyncAPIResource):
         file_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -171,7 +178,12 @@ class Files(SyncAPIResource):
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return self._delete(
@@ -187,6 +199,7 @@ class Files(SyncAPIResource):
         file_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -214,7 +227,12 @@ class Files(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return self._get(
@@ -230,6 +248,7 @@ class Files(SyncAPIResource):
         file_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -256,7 +275,12 @@ class Files(SyncAPIResource):
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return self._get(
@@ -273,6 +297,7 @@ class Files(SyncAPIResource):
         file: FileTypes,
         expires_in_seconds: int | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -280,11 +305,14 @@ class Files(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaFileMetadata:
-        """
-        Upload File
+        """Upload File
 
         Args:
-          file: The file to upload
+          file: The file to upload.
+
+        Only the final path component of the part's `filename` is
+              kept; an absent or empty `filename` is replaced with `unnamed` plus the
+              extension for the file's stored `mime_type`, when known.
 
           expires_in_seconds: Seconds from upload until the file expires and its bytes become permanently
               unavailable. Must be between 3600 (one hour) and 7776000 (ninety days).
@@ -300,7 +328,12 @@ class Files(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = merge_headers(_stainless_helper_header_from_file(file), extra_headers)
@@ -355,6 +388,7 @@ class AsyncFiles(AsyncAPIResource):
         page: Optional[str] | Omit = omit,
         scope_id: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -393,7 +427,12 @@ class AsyncFiles(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return self._get_api_list(
@@ -422,6 +461,7 @@ class AsyncFiles(AsyncAPIResource):
         file_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -448,7 +488,12 @@ class AsyncFiles(AsyncAPIResource):
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return await self._delete(
@@ -464,6 +509,7 @@ class AsyncFiles(AsyncAPIResource):
         file_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -491,7 +537,12 @@ class AsyncFiles(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return await self._get(
@@ -507,6 +558,7 @@ class AsyncFiles(AsyncAPIResource):
         file_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -533,7 +585,12 @@ class AsyncFiles(AsyncAPIResource):
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         return await self._get(
@@ -550,6 +607,7 @@ class AsyncFiles(AsyncAPIResource):
         file: FileTypes,
         expires_in_seconds: int | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -557,11 +615,14 @@ class AsyncFiles(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaFileMetadata:
-        """
-        Upload File
+        """Upload File
 
         Args:
-          file: The file to upload
+          file: The file to upload.
+
+        Only the final path component of the part's `filename` is
+              kept; an absent or empty `filename` is replaced with `unnamed` plus the
+              extension for the file's stored `mime_type`, when known.
 
           expires_in_seconds: Seconds from upload until the file expires and its bytes become permanently
               unavailable. Must be between 3600 (one hour) and 7776000 (ninety days).
@@ -577,7 +638,12 @@ class AsyncFiles(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {
-            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             **(extra_headers or {}),
         }
         extra_headers = merge_headers(_stainless_helper_header_from_file(file), extra_headers)

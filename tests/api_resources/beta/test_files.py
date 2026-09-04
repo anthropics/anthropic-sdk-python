@@ -38,7 +38,8 @@ class TestFiles:
             limit=1,
             page="page",
             scope_id="scope_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaFileMetadata], file, path=["response"])
 
@@ -73,7 +74,8 @@ class TestFiles:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         file = client.beta.files.delete(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDeletedFile, file, path=["response"])
 
@@ -130,7 +132,8 @@ class TestFiles:
         )
         file = client.beta.files.download(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert file.is_closed
         assert file.json() == {"foo": "bar"}
@@ -190,7 +193,8 @@ class TestFiles:
     def test_method_retrieve_metadata_with_all_params(self, client: Anthropic) -> None:
         file = client.beta.files.retrieve_metadata(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaFileMetadata, file, path=["response"])
 
@@ -237,7 +241,8 @@ class TestFiles:
         file = client.beta.files.upload(
             file=b"Example data",
             expires_in_seconds=3600,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaFileMetadata, file, path=["response"])
 
@@ -283,7 +288,8 @@ class TestAsyncFiles:
             limit=1,
             page="page",
             scope_id="scope_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaFileMetadata], file, path=["response"])
 
@@ -318,7 +324,8 @@ class TestAsyncFiles:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         file = await async_client.beta.files.delete(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDeletedFile, file, path=["response"])
 
@@ -375,7 +382,8 @@ class TestAsyncFiles:
         )
         file = await async_client.beta.files.download(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert file.is_closed
         assert await file.json() == {"foo": "bar"}
@@ -435,7 +443,8 @@ class TestAsyncFiles:
     async def test_method_retrieve_metadata_with_all_params(self, async_client: AsyncAnthropic) -> None:
         file = await async_client.beta.files.retrieve_metadata(
             file_id="file_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaFileMetadata, file, path=["response"])
 
@@ -482,7 +491,8 @@ class TestAsyncFiles:
         file = await async_client.beta.files.upload(
             file=b"Example data",
             expires_in_seconds=3600,
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaFileMetadata, file, path=["response"])
 

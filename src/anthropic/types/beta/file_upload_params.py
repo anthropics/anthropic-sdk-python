@@ -13,7 +13,12 @@ __all__ = ["FileUploadParams"]
 
 class FileUploadParams(TypedDict, total=False):
     file: Required[FileTypes]
-    """The file to upload"""
+    """The file to upload.
+
+    Only the final path component of the part's `filename` is kept; an absent or
+    empty `filename` is replaced with `unnamed` plus the extension for the file's
+    stored `mime_type`, when known.
+    """
 
     expires_in_seconds: int
     """
@@ -23,3 +28,5 @@ class FileUploadParams(TypedDict, total=False):
 
     betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
+
+    workspace_id: str

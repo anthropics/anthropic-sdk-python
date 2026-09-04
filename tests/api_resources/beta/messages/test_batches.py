@@ -189,6 +189,7 @@ class TestBatches:
             ],
             betas=["string"],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -652,6 +653,7 @@ class TestAsyncBatches:
             ],
             betas=["string"],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 

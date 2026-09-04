@@ -1,21 +1,15 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import Union
-from typing_extensions import Literal, Annotated, TypeAlias
+from typing_extensions import Literal
 
-from ...._models import BaseModel, UnionDiscriminator
-from .beta_compliance_settings_state_enabled import BetaComplianceSettingsStateEnabled
-from .beta_compliance_settings_state_disabled import BetaComplianceSettingsStateDisabled
+from ...._models import BaseModel
+from .beta_compliance_settings_state import BetaComplianceSettingsState
 
-__all__ = ["BetaComplianceSettings", "State"]
-
-State: TypeAlias = Annotated[
-    Union[BetaComplianceSettingsStateEnabled, BetaComplianceSettingsStateDisabled], UnionDiscriminator("type")
-]
+__all__ = ["BetaComplianceSettings"]
 
 
 class BetaComplianceSettings(BaseModel):
-    state: State
+    state: BetaComplianceSettingsState
     """Whether the Compliance API is enabled for this organization."""
 
     type: Literal["compliance_settings"]

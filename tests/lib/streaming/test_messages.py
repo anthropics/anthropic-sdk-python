@@ -629,24 +629,18 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
 
     from anthropic.types.content_block import ContentBlock
 
-    # Get the content block union type
     content_block_union = get_args(ContentBlock)[0]
 
-    # Get all types from ContentBlock union
     content_block_types = get_args(content_block_union)
 
-    # Types that should have an input property
     types_with_input: Set[Any] = set()
 
-    # Check each type to see if it has an input property in its model_fields
     for block_type in content_block_types:
         if issubclass(block_type, BaseModel) and "input" in block_type.model_fields:
             types_with_input.add(block_type)
 
-    # Get the types included in TRACKS_TOOL_INPUT
     tracked_types = TRACKS_TOOL_INPUT
 
-    # Make sure all types with input are tracked
     for block_type in types_with_input:
         assert block_type in tracked_types, (
             f"ContentBlock type {block_type.__name__} has an input property, "

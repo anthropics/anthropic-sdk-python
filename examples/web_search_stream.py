@@ -21,9 +21,7 @@ async def main() -> None:
             }
         ],
     ) as stream:
-        # Process streaming events
         async for chunk in stream:
-            # Print text deltas as they arrive
             if chunk.type == "content_block_delta" and chunk.delta.type == "text_delta":
                 print(chunk.delta.text, end="", flush=True)
 
@@ -34,7 +32,6 @@ async def main() -> None:
             elif chunk.type == "content_block_stop" and chunk.content_block.type == "web_search_tool_result":
                 print("[Web search completed]", end="\n\n", flush=True)
 
-        # Get the final complete message
         message = await stream.get_final_message()
 
     print("\n\nFinal usage statistics:")
@@ -52,7 +49,6 @@ async def main() -> None:
     for i, block in enumerate(message.content):
         print(f"Content Block {i + 1}: Type = {block.type}")
 
-    # Show the entire message structure as JSON for debugging
     print("\nComplete message structure (JSON):")
     print(message.model_dump_json(indent=2))
 

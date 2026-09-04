@@ -36,6 +36,7 @@ class TestWork:
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
@@ -95,6 +96,7 @@ class TestWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             metadata={"foo": "string"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
@@ -142,7 +144,7 @@ class TestWork:
                 metadata={"foo": "string"},
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         work = client.beta.environments.work.list(
@@ -150,7 +152,7 @@ class TestWork:
         )
         assert_matches_type(SyncPageCursor[BetaSelfHostedWork], work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         work = client.beta.environments.work.list(
@@ -161,7 +163,7 @@ class TestWork:
         )
         assert_matches_type(SyncPageCursor[BetaSelfHostedWork], work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.environments.work.with_raw_response.list(
@@ -173,7 +175,7 @@ class TestWork:
         work = response.parse()
         assert_matches_type(SyncPageCursor[BetaSelfHostedWork], work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.environments.work.with_streaming_response.list(
@@ -187,7 +189,7 @@ class TestWork:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_path_params_list(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `environment_id` but received ''"):
@@ -360,7 +362,7 @@ class TestWork:
                 environment_id="",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_stats(self, client: Anthropic) -> None:
         work = client.beta.environments.work.stats(
@@ -368,16 +370,17 @@ class TestWork:
         )
         assert_matches_type(BetaSelfHostedWorkQueueStats, work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_stats_with_all_params(self, client: Anthropic) -> None:
         work = client.beta.environments.work.stats(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWorkQueueStats, work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_stats(self, client: Anthropic) -> None:
         response = client.beta.environments.work.with_raw_response.stats(
@@ -389,7 +392,7 @@ class TestWork:
         work = response.parse()
         assert_matches_type(BetaSelfHostedWorkQueueStats, work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_stats(self, client: Anthropic) -> None:
         with client.beta.environments.work.with_streaming_response.stats(
@@ -403,7 +406,7 @@ class TestWork:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_path_params_stats(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `environment_id` but received ''"):
@@ -426,6 +429,7 @@ class TestWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             force=True,
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
@@ -489,6 +493,7 @@ class TestAsyncWork:
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
@@ -548,6 +553,7 @@ class TestAsyncWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             metadata={"foo": "string"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 
@@ -595,7 +601,7 @@ class TestAsyncWork:
                 metadata={"foo": "string"},
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         work = await async_client.beta.environments.work.list(
@@ -603,7 +609,7 @@ class TestAsyncWork:
         )
         assert_matches_type(AsyncPageCursor[BetaSelfHostedWork], work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         work = await async_client.beta.environments.work.list(
@@ -614,7 +620,7 @@ class TestAsyncWork:
         )
         assert_matches_type(AsyncPageCursor[BetaSelfHostedWork], work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.environments.work.with_raw_response.list(
@@ -626,7 +632,7 @@ class TestAsyncWork:
         work = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaSelfHostedWork], work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.environments.work.with_streaming_response.list(
@@ -640,7 +646,7 @@ class TestAsyncWork:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_path_params_list(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `environment_id` but received ''"):
@@ -813,7 +819,7 @@ class TestAsyncWork:
                 environment_id="",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_stats(self, async_client: AsyncAnthropic) -> None:
         work = await async_client.beta.environments.work.stats(
@@ -821,16 +827,17 @@ class TestAsyncWork:
         )
         assert_matches_type(BetaSelfHostedWorkQueueStats, work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_stats_with_all_params(self, async_client: AsyncAnthropic) -> None:
         work = await async_client.beta.environments.work.stats(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWorkQueueStats, work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_stats(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.environments.work.with_raw_response.stats(
@@ -842,7 +849,7 @@ class TestAsyncWork:
         work = await response.parse()
         assert_matches_type(BetaSelfHostedWorkQueueStats, work, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_stats(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.environments.work.with_streaming_response.stats(
@@ -856,7 +863,7 @@ class TestAsyncWork:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_path_params_stats(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `environment_id` but received ''"):
@@ -879,6 +886,7 @@ class TestAsyncWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             force=True,
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
 

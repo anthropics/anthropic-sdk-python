@@ -37,14 +37,12 @@ class TestOutputFormatConversion:
             )
         )
 
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            client.beta.messages.parse(
-                max_tokens=1024,
-                messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
-                output_format=User,
-            )
+        client.beta.messages.parse(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Test"}],
+            model="claude-sonnet-4-5",
+            output_format=User,
+        )
 
         request = respx_mock.calls.last.request
         body = json.loads(request.content)
@@ -238,14 +236,12 @@ class TestStructuredOutputsBetaHeader:
             )
         )
 
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            client.beta.messages.parse(
-                max_tokens=1024,
-                messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
-                output_format=DataModel,
-            )
+        client.beta.messages.parse(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Test"}],
+            model="claude-sonnet-4-5",
+            output_format=DataModel,
+        )
 
         request = respx_mock.calls.last.request
         assert "anthropic-beta" in request.headers
@@ -273,15 +269,13 @@ class TestStructuredOutputsBetaHeader:
             )
         )
 
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            client.beta.messages.parse(
-                max_tokens=1024,
-                messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
-                output_format=DataModel,
-                betas=["some-other-beta-feature"],
-            )
+        client.beta.messages.parse(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Test"}],
+            model="claude-sonnet-4-5",
+            output_format=DataModel,
+            betas=["some-other-beta-feature"],
+        )
 
         request = respx_mock.calls.last.request
         beta_header = request.headers["anthropic-beta"]
@@ -310,15 +304,13 @@ class TestStructuredOutputsBetaHeader:
             )
         )
 
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            client.beta.messages.parse(
-                max_tokens=1024,
-                messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
-                output_format=DataModel,
-                betas=["structured-outputs-2025-12-15"],
-            )
+        client.beta.messages.parse(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Test"}],
+            model="claude-sonnet-4-5",
+            output_format=DataModel,
+            betas=["structured-outputs-2025-12-15"],
+        )
 
         request = respx_mock.calls.last.request
         beta_header = request.headers["anthropic-beta"]
@@ -351,14 +343,12 @@ class TestAsyncOutputFormatConversion:
             )
         )
 
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            await async_client.beta.messages.parse(
-                max_tokens=1024,
-                messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
-                output_format=User,
-            )
+        await async_client.beta.messages.parse(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Test"}],
+            model="claude-sonnet-4-5",
+            output_format=User,
+        )
 
         request = respx_mock.calls.last.request
         body = json.loads(request.content)

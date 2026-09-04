@@ -41,9 +41,6 @@ _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.Async
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
-# --- Beta resources (messages-only) ---
-
-
 class MantleBeta(SyncAPIResource):
     @cached_property
     def messages(self) -> BetaMessages:
@@ -54,9 +51,6 @@ class AsyncMantleBeta(AsyncAPIResource):
     @cached_property
     def messages(self) -> AsyncBetaMessages:
         return AsyncBetaMessages(self._client)
-
-
-# --- Base ---
 
 
 class BaseMantleClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
@@ -98,9 +92,6 @@ class BaseMantleClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         if response.status_code >= 500:
             return _exceptions.InternalServerError(err_msg, response=response, body=body)
         return APIStatusError(err_msg, response=response, body=body)
-
-
-# --- Shared init logic ---
 
 
 def _resolve_mantle_config(
@@ -156,9 +147,6 @@ def _resolve_mantle_config(
         merged_headers.update(default_headers)
 
     return resolved_api_key, base_url, use_sigv4, merged_headers
-
-
-# --- Sync client ---
 
 
 class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncAPIClient):
@@ -352,9 +340,6 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
         ```
         """
         return self.copy(middleware=[*self._middleware, *middleware])
-
-
-# --- Async client ---
 
 
 class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStream[Any]], AsyncAPIClient):

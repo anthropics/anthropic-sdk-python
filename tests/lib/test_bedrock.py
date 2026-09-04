@@ -70,7 +70,6 @@ def mock_aws_config(
         yield
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 def test_messages_retries(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
@@ -105,7 +104,6 @@ def test_messages_retries(respx_mock: MockRouter) -> None:
     )
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 @pytest.mark.asyncio()
 async def test_messages_retries_async(respx_mock: MockRouter) -> None:
@@ -141,7 +139,6 @@ async def test_messages_retries_async(respx_mock: MockRouter) -> None:
     )
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 def test_application_inference_profile(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
@@ -185,7 +182,6 @@ async_api_key_client = AsyncAnthropicBedrock(
 )
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 def test_api_key_auth(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
@@ -203,7 +199,6 @@ def test_api_key_auth(respx_mock: MockRouter) -> None:
     assert calls[0].request.headers["Authorization"] == "Bearer test-api-key"
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 @pytest.mark.asyncio()
 async def test_api_key_auth_async(respx_mock: MockRouter) -> None:
@@ -503,7 +498,6 @@ def _assert_tool_runner_calls(calls: t.List[MockRequestCall]) -> None:
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 def test_beta_tool_runner_routes_through_invoke(respx_mock: MockRouter) -> None:
     @beta_tool
@@ -531,7 +525,6 @@ def test_beta_tool_runner_routes_through_invoke(respx_mock: MockRouter) -> None:
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 @pytest.mark.asyncio()
 async def test_beta_tool_runner_routes_through_invoke_async(respx_mock: MockRouter) -> None:
@@ -559,7 +552,6 @@ async def test_beta_tool_runner_routes_through_invoke_async(respx_mock: MockRout
     _assert_tool_runner_calls(cast("list[MockRequestCall]", respx_mock.calls))
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_beta_messages_helpers_are_bound() -> None:
     for client in (sync_client, async_client):
         for name in ("create", "parse", "stream", "tool_runner"):
@@ -601,7 +593,6 @@ def test_prepare_options_lifts_anthropic_beta_header_case_insensitively() -> Non
     ]
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 def test_betas_param_and_extra_headers_case_variant(respx_mock: MockRouter) -> None:
     # `extra_headers` overrides the header written by `betas`, on the wire and in the body

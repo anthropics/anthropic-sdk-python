@@ -31,3 +31,5 @@ class FileListParams(TypedDict, total=False):
 
     Prefixed `page_`.
     """
+
+    workspace_id: str

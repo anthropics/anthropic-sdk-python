@@ -126,7 +126,6 @@ class BetaMessageStream(Generic[ResponseFormatT]):
         """Blocks until the stream has been consumed"""
         consume_sync_iterator(self)
 
-    # properties
     @property
     def current_message_snapshot(self) -> ParsedBetaMessage[ResponseFormatT]:
         assert self.__final_message_snapshot is not None
@@ -279,7 +278,6 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
         """Waits until the stream has been consumed"""
         await consume_async_iterator(self)
 
-    # properties
     @property
     def current_message_snapshot(self) -> ParsedBetaMessage[ResponseFormatT]:
         assert self.__final_message_snapshot is not None

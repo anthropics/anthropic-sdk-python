@@ -73,7 +73,6 @@ def conversation_loop():
 
     messages: list[BetaMessageParam] = []
 
-    # Initialize tracking for debug
     last_response_id: Optional[str] = None
     last_usage = None
 
@@ -85,7 +84,6 @@ def conversation_loop():
     print("  /memory_clear - Delete all memory")
     print("  /debug - View conversation history and token usage")
 
-    # Display context management settings
     print(f"\n🧹 Context Management")
     print("=" * 60)
 
@@ -115,11 +113,9 @@ def conversation_loop():
         elif user_input.lower() == "/debug":
             print("\n🔍 Conversation history:")
 
-            # Show last response ID if available
             if last_response_id:
                 print(f"📌 Last response ID: {last_response_id}")
 
-            # Show token usage if available
             if last_usage:
                 usage = last_usage
                 input_tokens = usage.get("input_tokens", 0)
@@ -170,7 +166,6 @@ def conversation_loop():
         spinner = Spinner("Thinking")
         spinner.start()
 
-        # Use tool_runner with memory tool
         try:
             runner = client.beta.messages.tool_runner(
                 betas=["context-management-2025-06-27"],
@@ -185,22 +180,18 @@ def conversation_loop():
             spinner.stop()
             raise
 
-        # Process all messages from the runner
         for message in runner:
             spinner.stop()
 
-            # Store response ID and usage for debug display
             last_response_id = message.id
 
             if hasattr(message, "usage") and message.usage:
                 last_usage = message.usage.model_dump() if hasattr(message.usage, "model_dump") else dict(message.usage)
 
-            # Check for context management actions
             if message.context_management:
                 for edit in message.context_management.applied_edits:
                     print(f"\n🧹 [Context Management: {edit.type} applied]")
 
-            # Process content blocks
             assistant_content: list[BetaContentBlockParam] = []
             for content in message.content:
                 if content.type == "text":
@@ -222,14 +213,11 @@ def conversation_loop():
                         }
                     )
 
-            # Store assistant message
             if assistant_content:
                 messages.append({"role": "assistant", "content": assistant_content})
 
-            # Generate tool response automatically
             tool_response = runner.generate_tool_call_response()
             if tool_response and tool_response["content"]:
-                # Add tool results to messages
                 messages.append({"role": "user", "content": tool_response["content"]})
 
                 for result in tool_response["content"]:

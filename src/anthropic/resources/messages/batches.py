@@ -53,6 +53,7 @@ class Batches(SyncAPIResource):
         *,
         requests: Iterable[batch_create_params.Request],
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -87,7 +88,15 @@ class Batches(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
+            **(extra_headers or {}),
+        }
         return self._post(
             "/v1/messages/batches",
             body=maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
@@ -101,6 +110,7 @@ class Batches(SyncAPIResource):
         self,
         message_batch_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -130,6 +140,7 @@ class Batches(SyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -144,6 +155,7 @@ class Batches(SyncAPIResource):
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
         limit: int | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -178,6 +190,7 @@ class Batches(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
             "/v1/messages/batches",
             page=SyncPage[MessageBatch],
@@ -202,6 +215,7 @@ class Batches(SyncAPIResource):
         self,
         message_batch_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -231,6 +245,7 @@ class Batches(SyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._delete(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -243,6 +258,7 @@ class Batches(SyncAPIResource):
         self,
         message_batch_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -278,6 +294,7 @@ class Batches(SyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._post(
             path_template("/v1/messages/batches/{message_batch_id}/cancel", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -290,6 +307,7 @@ class Batches(SyncAPIResource):
         self,
         message_batch_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -321,13 +339,14 @@ class Batches(SyncAPIResource):
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
 
-        batch = self.retrieve(message_batch_id=message_batch_id)
+        batch = self.retrieve(message_batch_id=message_batch_id, workspace_id=workspace_id)
         if not batch.results_url:
             raise AnthropicError(
                 f"No `results_url` for the given batch; Has it finished processing? {batch.processing_status}"
             )
 
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get(
             path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(
@@ -363,6 +382,7 @@ class AsyncBatches(AsyncAPIResource):
         *,
         requests: Iterable[batch_create_params.Request],
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -397,7 +417,15 @@ class AsyncBatches(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
+            **(extra_headers or {}),
+        }
         return await self._post(
             "/v1/messages/batches",
             body=await async_maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
@@ -411,6 +439,7 @@ class AsyncBatches(AsyncAPIResource):
         self,
         message_batch_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -440,6 +469,7 @@ class AsyncBatches(AsyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._get(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -454,6 +484,7 @@ class AsyncBatches(AsyncAPIResource):
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
         limit: int | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -488,6 +519,7 @@ class AsyncBatches(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
             "/v1/messages/batches",
             page=AsyncPage[MessageBatch],
@@ -512,6 +544,7 @@ class AsyncBatches(AsyncAPIResource):
         self,
         message_batch_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -541,6 +574,7 @@ class AsyncBatches(AsyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._delete(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -553,6 +587,7 @@ class AsyncBatches(AsyncAPIResource):
         self,
         message_batch_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -588,6 +623,7 @@ class AsyncBatches(AsyncAPIResource):
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._post(
             path_template("/v1/messages/batches/{message_batch_id}/cancel", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -600,6 +636,7 @@ class AsyncBatches(AsyncAPIResource):
         self,
         message_batch_id: str,
         *,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -631,13 +668,14 @@ class AsyncBatches(AsyncAPIResource):
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
 
-        batch = await self.retrieve(message_batch_id=message_batch_id)
+        batch = await self.retrieve(message_batch_id=message_batch_id, workspace_id=workspace_id)
         if not batch.results_url:
             raise AnthropicError(
                 f"No `results_url` for the given batch; Has it finished processing? {batch.processing_status}"
             )
 
         extra_headers = {"Accept": "application/binary", **(extra_headers or {})}
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._get(
             path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(

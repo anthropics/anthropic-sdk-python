@@ -70,7 +70,7 @@ class BetaManagedAgentsMemoryVersion(BaseModel):
     Captured at write time on the `memory_version` row. The API key that created a
     session is not recorded on agent writes; attribution answers who made the write,
     not who is ultimately responsible. Look up session provenance separately via the
-    [Sessions API](/en/api/sessions-retrieve).
+    [Sessions API](/en/api/beta/sessions/retrieve).
     """
 
     path: Optional[str] = None
@@ -88,5 +88,5 @@ class BetaManagedAgentsMemoryVersion(BaseModel):
     Captured at write time on the `memory_version` row. The API key that created a
     session is not recorded on agent writes; attribution answers who made the write,
     not who is ultimately responsible. Look up session provenance separately via the
-    [Sessions API](/en/api/sessions-retrieve).
+    [Sessions API](/en/api/beta/sessions/retrieve).
     """

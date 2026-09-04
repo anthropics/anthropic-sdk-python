@@ -137,6 +137,7 @@ class Messages(SyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -404,6 +405,7 @@ class Messages(SyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -671,6 +673,7 @@ class Messages(SyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -938,6 +941,7 @@ class Messages(SyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -964,7 +968,15 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
-        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
+            **(extra_headers or {}),
+        }
         return self._post(
             "/v1/messages",
             body=maybe_transform(
@@ -1016,6 +1028,7 @@ class Messages(SyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1039,7 +1052,12 @@ class Messages(SyncAPIResource):
             )
 
         extra_headers = {
-            **strip_not_given({"anthropic-user-profile-id": user_profile_id}),
+            **strip_not_given(
+                {
+                    "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
             _STAINLESS_STREAM_HELPER_HEADER: "messages",
             **(extra_headers or {}),
@@ -1237,6 +1255,7 @@ class Messages(SyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[MessageCountTokensToolParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1440,7 +1459,15 @@ class Messages(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
+            **(extra_headers or {}),
+        }
 
         # Transform output_format if provided
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = not_given
@@ -1539,6 +1566,7 @@ class AsyncMessages(AsyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1806,6 +1834,7 @@ class AsyncMessages(AsyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2073,6 +2102,7 @@ class AsyncMessages(AsyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2340,6 +2370,7 @@ class AsyncMessages(AsyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2366,7 +2397,15 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
-        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
+            **(extra_headers or {}),
+        }
         return await self._post(
             "/v1/messages",
             body=await async_maybe_transform(
@@ -2418,6 +2457,7 @@ class AsyncMessages(AsyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[ToolUnionParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2441,7 +2481,12 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         extra_headers = {
-            **strip_not_given({"anthropic-user-profile-id": user_profile_id}),
+            **strip_not_given(
+                {
+                    "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
             _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
             _STAINLESS_STREAM_HELPER_HEADER: "messages",
             **(extra_headers or {}),
@@ -2638,6 +2683,7 @@ class AsyncMessages(AsyncAPIResource):
         tool_choice: ToolChoiceParam | Omit = omit,
         tools: Iterable[MessageCountTokensToolParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -2841,7 +2887,15 @@ class AsyncMessages(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {**strip_not_given({"anthropic-user-profile-id": user_profile_id}), **(extra_headers or {})}
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
+            **(extra_headers or {}),
+        }
 
         # Transform output_format if provided
         transformed_output_format: Optional[JSONOutputFormatParam] | NotGiven = not_given
