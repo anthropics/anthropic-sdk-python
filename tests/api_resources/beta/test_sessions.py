@@ -224,13 +224,13 @@ class TestSessions:
                 session_id="",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         session = client.beta.sessions.list()
         assert_matches_type(SyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         session = client.beta.sessions.list(
@@ -252,7 +252,7 @@ class TestSessions:
         )
         assert_matches_type(SyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.sessions.with_raw_response.list()
@@ -262,7 +262,7 @@ class TestSessions:
         session = response.parse()
         assert_matches_type(SyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.sessions.with_streaming_response.list() as response:
@@ -576,13 +576,13 @@ class TestAsyncSessions:
                 session_id="",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.list()
         assert_matches_type(AsyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.list(
@@ -604,7 +604,7 @@ class TestAsyncSessions:
         )
         assert_matches_type(AsyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.sessions.with_raw_response.list()
@@ -614,7 +614,7 @@ class TestAsyncSessions:
         session = await response.parse()
         assert_matches_type(AsyncBidirectionalPageCursor[BetaManagedAgentsSession], session, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.sessions.with_streaming_response.list() as response:
