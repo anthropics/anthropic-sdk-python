@@ -195,6 +195,40 @@ EXPECTED_COMPACTION_EVENT_TYPES = [
     "message_delta",
 ]
 
+# A compaction summary long enough to be split across more than one `compaction_delta`
+# event, the way `text_delta`/`thinking_delta` are chunked for any other long content.
+EXPECTED_COMPACTION_MULTI_DELTA_MESSAGE = {
+    "id": "msg_01CompactionMultiDelta0001",
+    "model": "claude-opus-4-7",
+    "role": "assistant",
+    "stop_reason": "end_turn",
+    "type": "message",
+    "content": [
+        {
+            "type": "compaction",
+            "content": "Earlier conversation summarized in full.",
+            "encrypted_content": "EpwBCioIDxgCEAEYASJALd_opaque_chunk_two",
+        },
+        {"type": "text", "text": "Hello there!"},
+    ],
+    "usage": {"input_tokens": 30, "output_tokens": 8},
+}
+
+EXPECTED_COMPACTION_MULTI_DELTA_EVENT_TYPES = [
+    "message_start",
+    "content_block_start",
+    "content_block_delta",
+    "compaction",
+    "content_block_delta",
+    "compaction",
+    "content_block_stop",
+    "content_block_start",
+    "content_block_delta",
+    "text",
+    "content_block_stop",
+    "message_delta",
+]
+
 
 def assert_message_matches(message: BetaMessage, expected: Dict[str, Any]) -> None:
     actual_message_json = message.model_dump_json(
@@ -227,6 +261,29 @@ def assert_compaction_response(events: list[ParsedBetaMessageStreamEvent], messa
     compaction_events = [e for e in events if isinstance(e, BetaCompactionEvent)]
     assert len(compaction_events) == 1
     assert compaction_events[0].encrypted_content == "EpwBCioIDxgCEAEYASJALd_opaque_compaction_payload"
+
+
+def assert_compaction_multi_delta_response(events: list[ParsedBetaMessageStreamEvent], message: BetaMessage) -> None:
+    assert_message_matches(message, EXPECTED_COMPACTION_MULTI_DELTA_MESSAGE)
+    assert [e.type for e in events] == EXPECTED_COMPACTION_MULTI_DELTA_EVENT_TYPES
+
+    # every `compaction_delta` chunk must be concatenated onto the block's `content`, not
+    # replace it outright -- each successive event's snapshot should keep growing, mirroring
+    # how `text`/`thinking` events expose a running snapshot rather than just the latest delta
+    compaction_events = [e for e in events if isinstance(e, BetaCompactionEvent)]
+    assert len(compaction_events) == 2
+    assert compaction_events[0].content == "Earlier conversation "
+    assert compaction_events[1].content == "Earlier conversation summarized in full."
+
+    # `encrypted_content` is an opaque, self-contained checkpoint from the server rather than
+    # text to be concatenated, so the most recent delta's value should win outright
+    assert compaction_events[0].encrypted_content == "EpwBCioIDxgCEAEYASJALd_opaque_chunk_one"
+    assert compaction_events[1].encrypted_content == "EpwBCioIDxgCEAEYASJALd_opaque_chunk_two"
+
+    final_block = message.content[0]
+    assert final_block.type == "compaction"
+    assert final_block.content == "Earlier conversation summarized in full."
+    assert final_block.encrypted_content == "EpwBCioIDxgCEAEYASJALd_opaque_chunk_two"
 
 
 def assert_refusal_response(message: BetaMessage) -> None:
@@ -505,6 +562,21 @@ class TestSyncMessages:
             assert_compaction_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
+    def test_compaction_multi_delta(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("compaction_multi_delta_response.txt"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaMessageStream)
+
+            assert_compaction_multi_delta_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
     def test_fallback_relabels_model(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(200, content=get_response("fallback_response.txt"))
@@ -751,6 +823,22 @@ class TestAsyncMessages:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_compaction_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_compaction_multi_delta(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("compaction_multi_delta_response.txt")))
+        )
+
+        async with async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
+
+            assert_compaction_multi_delta_response([event async for event in stream], await stream.get_final_message())
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
