@@ -380,6 +380,100 @@ class TestSyncMessages:
             assert_basic_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
+    def test_message_start_without_usage(self, respx_mock: MockRouter) -> None:
+        """Beta accumulator: message_start omitting usage must not crash the stream.
+
+        The beta path carries its own copy of the accumulator, so the sync path's
+        coverage does not exercise it. Same contract as the non-beta test: usage is
+        built from the first message_delta, and a delta carrying only `output_tokens`
+        (#1806's reported shape) must leave `input_tokens` an int, coerced, not None.
+        """
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("missing_usage_response.txt"))
+        )
+
+        # Non-strict client: strict validation rejects a usage-less message_start
+        # before the accumulator sees it.
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+            assert message.usage is not None
+            assert isinstance(message.usage.input_tokens, int)
+            assert message.usage.output_tokens == 1
+            assert message.stop_reason == "end_turn"
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_message_start_without_usage_preserves_delta_optional_usage_fields(
+        self, respx_mock: MockRouter
+    ) -> None:
+        """The beta accumulator must preserve the delta's optional fields too.
+
+        `test_message_start_without_usage` covers the beta path's coercion, but the
+        coercion is only half of what the accumulator does: the same missing-usage
+        branch also has to carry every remaining field of the delta into the
+        snapshot. Driving the rich fixture through the beta manager pins that here
+        as it is pinned on the sync path.
+
+        Killing test: on the beta copy, building the missing-usage snapshot from the
+        two counters alone still satisfies the coercion assertions — the beta
+        accumulator re-heals the four enumerated fields outside the branch — but it
+        drops `cache_creation`, which is what this asserts on.
+        """
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("missing_usage_rich_delta_response.txt"))
+        )
+
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+            assert message.usage is not None
+            assert message.usage.input_tokens == 11
+            assert message.usage.output_tokens == 1
+            assert message.usage.cache_creation_input_tokens == 3
+            assert message.usage.cache_read_input_tokens == 5
+            # nested objects on the delta survive as models, not raw dicts
+            assert message.usage.server_tool_use is not None
+            assert message.usage.server_tool_use.web_search_requests == 2
+            assert message.usage.cache_creation is not None
+            assert message.usage.cache_creation.ephemeral_5m_input_tokens == 3
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_stop_details_from_message_start_survives_null_delta(
+        self, respx_mock: MockRouter
+    ) -> None:
+        """Beta: a `stop_details: null` on message_delta must not erase the start's value.
+
+        Mirrors the sync-path test of the same name. The beta accumulator carries its
+        own copy of the `is not None` guard, so the sync test does not pin this one;
+        reverting the guard on the beta file alone leaves the whole suite green.
+        """
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("stop_details_response.txt"))
+        )
+
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+            assert message.stop_details is not None
+            assert message.stop_details.type == "refusal"
+            assert message.stop_reason == "end_turn"
+
+    @pytest.mark.respx(base_url=base_url)
     def test_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(200, content=get_response("tool_use_response.txt"))

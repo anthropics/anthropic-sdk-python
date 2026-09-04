@@ -354,6 +354,104 @@ class TestSyncMessages:
             assert_message_delta_fields_response(stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.respx(base_url=base_url)
+    def test_message_start_without_usage(self, respx_mock: MockRouter) -> None:
+        """Test that streaming works when message_start omits usage.
+
+        Reproduces https://github.com/anthropics/anthropic-sdk-python/issues/1806
+        Per Anthropic's streaming docs, message_start can omit usage (e.g. thinking streams).
+        The accumulator should not crash and should initialize usage from message_delta.
+        """
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("missing_usage_response.txt"))
+        )
+
+        # The module-level `sync_client` is built with `_strict_response_validation=True`,
+        # which rejects a `message_start` without `usage` before the accumulator ever
+        # sees it. Use a non-strict client so the stream reaches the code under test —
+        # mirroring how the issue's repro drives the raw event sequence (#1806).
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+            assert message.usage is not None
+            # The delta carries only `output_tokens` (#1806's reported shape);
+            # `input_tokens` is a required int, so the accumulator must coerce it
+            # (to 0) rather than leave it None and break downstream arithmetic.
+            assert isinstance(message.usage.input_tokens, int)
+            assert message.usage.output_tokens == 1
+            assert message.stop_reason == "end_turn"
+            assert len(message.content) == 1
+            assert message.content[0].type == "text"
+            assert message.content[0].text == "hi"
+
+    def test_message_start_without_usage_preserves_delta_optional_usage_fields(
+        self, respx_mock: MockRouter
+    ) -> None:
+        """When message_start omits usage, every field the delta carries must survive.
+
+        Complements `test_message_start_without_usage`, which covers #1806's literal
+        stream (a delta carrying only `output_tokens`). That shape cannot pin the
+        rest of the snapshot, so the two are deliberately kept apart rather than
+        merged: a rich delta here, the reported shape there.
+
+        Killing test: building the snapshot from the two counters alone (dropping
+        cache fields, `server_tool_use` and anything else on the delta) passes the
+        reported-shape suite but fails this one.
+        """
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("missing_usage_rich_delta_response.txt"))
+        )
+
+        # Non-strict client: strict validation rejects a usage-less message_start
+        # before the accumulator sees it (see test_message_start_without_usage).
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+            assert message.usage is not None
+            assert message.usage.input_tokens == 11
+            assert message.usage.output_tokens == 1
+            assert message.usage.cache_creation_input_tokens == 3
+            assert message.usage.cache_read_input_tokens == 5
+            # nested objects on the delta survive as models, not raw dicts
+            assert message.usage.server_tool_use is not None
+            assert message.usage.server_tool_use.web_search_requests == 2
+
+    def test_stop_details_from_message_start_survives_null_delta(
+        self, respx_mock: MockRouter
+    ) -> None:
+        """A `stop_details: null` on message_delta must not erase the start's value.
+
+        The accumulator assigns `stop_details` under an `is not None` guard, so a
+        value carried by message_start is sticky across a delta that clears it. Pins
+        that behaviour: present-then-null keeps it.
+        """
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=get_response("stop_details_response.txt"))
+        )
+
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+            assert message.stop_details is not None
+            assert message.stop_details.type == "refusal"
+            assert message.stop_reason == "end_turn"
+
+
     def test_message_delta_omitted_usage_keeps_message_start(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(200, content=get_response("message_delta_omitted_usage_response.txt"))
@@ -549,6 +647,81 @@ class TestAsyncMessages:
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_message_start_without_usage(self, respx_mock: MockRouter) -> None:
+        """Async version: test that streaming works when message_start omits usage."""
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx.Response(200, content=to_async_iter(get_response("missing_usage_response.txt")))
+        )
+
+        # See the sync test: use a non-strict client so the fixture reaches the
+        # accumulator instead of being rejected by response validation (#1806).
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key)
+
+        async with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            model="claude-test",
+        ) as stream:
+            message = await stream.get_final_message()
+            assert message.usage is not None
+            # `input_tokens` is a required int; on #1806's reported shape (delta
+            # carries only `output_tokens`) the accumulator must coerce it to 0
+            # rather than leave it None and break downstream arithmetic.
+            assert isinstance(message.usage.input_tokens, int)
+            assert message.usage.output_tokens == 1
+            assert message.stop_reason == "end_turn"
+            assert len(message.content) == 1
+            assert message.content[0].type == "text"
+            assert message.content[0].text == "hi"
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+def test_stream_method_definition_in_sync(sync: bool) -> None:
+    client: Anthropic | AsyncAnthropic = sync_client if sync else async_client
+    assert_signatures_in_sync(
+        client.messages.create,
+        client.messages.stream,
+        exclude_params={"stream"},
+    )
+
+
+# go through all the ContentBlock types to make sure the type alias is up to date
+# with any type that has an input property of type object
+@pytest.mark.skipif(PYDANTIC_V1, reason="only applicable in pydantic v2")
+def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
+    from typing import get_args
+
+    from pydantic import BaseModel
+
+    from anthropic.types.content_block import ContentBlock
+
+    # Get the content block union type
+    content_block_union = get_args(ContentBlock)[0]
+
+    # Get all types from ContentBlock union
+    content_block_types = get_args(content_block_union)
+
+    # Types that should have an input property
+    types_with_input: Set[Any] = set()
+
+    # Check each type to see if it has an input property in its model_fields
+    for block_type in content_block_types:
+        if issubclass(block_type, BaseModel) and "input" in block_type.model_fields:
+            types_with_input.add(block_type)
+
+    # Get the types included in TRACKS_TOOL_INPUT
+    tracked_types = TRACKS_TOOL_INPUT
+
+    # Make sure all types with input are tracked
+    for block_type in types_with_input:
+        assert block_type in tracked_types, (
+            f"ContentBlock type {block_type.__name__} has an input property, "
+            f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
+        )
+
+
     async def test_message_delta_omitted_usage_keeps_message_start(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(

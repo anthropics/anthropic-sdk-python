@@ -28,6 +28,7 @@ from ._beta_types import (
 )
 from ..._streaming import Stream, AsyncStream
 from ...types.beta import BetaRawMessageStreamEvent
+from ...types.beta.beta_usage import BetaUsage
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
 from ...types.beta.parsed_beta_message import ParsedBetaMessage, ParsedBetaContentBlock
@@ -548,10 +549,26 @@ def accumulate_event(
     elif event.type == "message_delta":
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
-        current_snapshot.stop_details = event.delta.stop_details
+        if event.delta.stop_details is not None:
+            current_snapshot.stop_details = event.delta.stop_details
         if event.delta.container is not None:
             current_snapshot.container = event.delta.container
-        current_snapshot.usage.output_tokens = event.usage.output_tokens
+
+        # Usage may be absent when message_start omitted it (#1806); the
+        # message_delta carries the first full usage object, so construct it
+        # before updating.
+        if current_snapshot.usage is None:
+            _usage_data = event.usage.model_dump()
+            # `BetaUsage.input_tokens` is a required int. When the delta omits it
+            # (e.g. `{"output_tokens": 1}` per #1806), `construct` would leave it
+            # as None on a non-optional field and break downstream arithmetic.
+            # Coerce a missing input_tokens to 0 so the snapshot stays valid.
+            if _usage_data.get("input_tokens") is None:
+                _usage_data["input_tokens"] = 0
+            current_snapshot.usage = BetaUsage.construct(**_usage_data)
+        else:
+            current_snapshot.usage.output_tokens = event.usage.output_tokens
+
         if event.context_management is not None:
             current_snapshot.context_management = event.context_management
         # only sent on `message_delta` after a mid-stream fallback, in which case it
@@ -559,9 +576,9 @@ def accumulate_event(
         if event.input_transformations is not None:
             current_snapshot.input_transformations = event.input_transformations
 
-        # Usage counts on a message_delta are cumulative totals, so they overwrite rather
-        # than add; optional ones are omitted when not applicable, in which case the
-        # message_start value must survive.
+        # Usage counts on a message_delta are cumulative totals, so they
+        # overwrite rather than add; optional ones are omitted when not
+        # applicable, in which case the message_start value must survive.
         if event.usage.input_tokens is not None:
             current_snapshot.usage.input_tokens = event.usage.input_tokens
         if event.usage.cache_creation_input_tokens is not None:
