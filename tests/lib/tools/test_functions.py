@@ -440,6 +440,77 @@ class TestFunctionTool:
 
         assert function_tool.input_schema == expected_schema
 
+    def test_positional_only_parameters(self) -> None:
+        """Positional-only parameters are exposed as named properties and routed back positionally."""
+
+        def lookup(user_id: int, /, field: str = "name") -> str:
+            """Look up a field on a user record."""
+            return f"{user_id}:{field}"
+
+        function_tool = beta_tool(lookup)
+
+        # pydantic's own JSON schema for this signature is the positional `type: array`
+        # form, which is not a valid tool `input_schema`.
+        assert function_tool.input_schema == {
+            "additionalProperties": False,
+            "type": "object",
+            "properties": {
+                "user_id": {"title": "User Id", "type": "integer"},
+                "field": {"title": "Field", "type": "string", "default": "name"},
+            },
+            "required": ["user_id"],
+        }
+        assert function_tool.call({"user_id": 7, "field": "email"}) == "7:email"
+        assert function_tool.call({"user_id": 7}) == "7:name"
+
+        with pytest.raises(ValueError, match="Invalid arguments for function lookup"):
+            function_tool.call({"field": "email"})
+        with pytest.raises(ValueError, match="Invalid arguments for function lookup"):
+            function_tool.call({"user_id": "seven"})
+
+    def test_positional_only_with_keyword_only_parameters(self) -> None:
+        def combine(a: int, /, *, b: str) -> str:
+            """Combine two values."""
+            return f"{a}{b}"
+
+        function_tool = beta_tool(combine)
+
+        assert function_tool.input_schema == {
+            "additionalProperties": False,
+            "type": "object",
+            "properties": {"a": {"title": "A", "type": "integer"}, "b": {"title": "B", "type": "string"}},
+            "required": ["a", "b"],
+        }
+        assert function_tool.call({"a": 1, "b": "z"}) == "1z"
+
+    async def test_async_positional_only_parameters(self) -> None:
+        from anthropic.lib.tools._beta_functions import beta_async_tool
+
+        async def lookup(user_id: int, /, field: str = "name") -> str:
+            """Look up a field on a user record."""
+            return f"{user_id}:{field}"
+
+        function_tool = beta_async_tool(lookup)
+
+        assert function_tool.input_schema == {
+            "additionalProperties": False,
+            "type": "object",
+            "properties": {
+                "user_id": {"title": "User Id", "type": "integer"},
+                "field": {"title": "Field", "type": "string", "default": "name"},
+            },
+            "required": ["user_id"],
+        }
+        assert await function_tool.call({"user_id": 3, "field": "email"}) == "3:email"
+
+    def test_var_positional_parameter_raises(self) -> None:
+        def collect(*values: int) -> str:
+            """Sum values."""
+            return str(sum(values))
+
+        with pytest.raises(TypeError, match=r"declares \*values"):
+            beta_tool(collect)
+
 
 def _get_parameters_info(fn: BaseFunctionTool[Any]) -> dict[str, str]:
     param_info: dict[str, str] = {}
