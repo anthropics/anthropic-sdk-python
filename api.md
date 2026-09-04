@@ -1770,10 +1770,12 @@ Types:
 ```python
 from anthropic.types.beta.organization import (
     BetaComplianceSettings,
+    BetaComplianceSettingsState,
     BetaComplianceSettingsStateDisabled,
     BetaComplianceSettingsStateDisabledParam,
     BetaComplianceSettingsStateEnabled,
     BetaComplianceSettingsStateEnabledParam,
+    BetaComplianceSettingsStateParam,
 )
 ```
 

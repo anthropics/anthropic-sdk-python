@@ -2,22 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Union
-from typing_extensions import Required, TypeAlias, TypedDict
+from typing_extensions import Required, TypedDict
 
-from .beta_compliance_settings_state_enabled_param import BetaComplianceSettingsStateEnabledParam
-from .beta_compliance_settings_state_disabled_param import BetaComplianceSettingsStateDisabledParam
+from .beta_compliance_settings_state_param import BetaComplianceSettingsStateParam
 
-__all__ = ["ComplianceSettingUpdateParams", "State"]
+__all__ = ["ComplianceSettingUpdateParams"]
 
 
 class ComplianceSettingUpdateParams(TypedDict, total=False):
-    state: Required[State]
+    state: Required[BetaComplianceSettingsStateParam]
     """Desired state.
 
     Accepts the string shorthand "enabled" or "disabled" in place of the object
     form; the response always returns the canonical object form.
     """
-
-
-State: TypeAlias = Union[BetaComplianceSettingsStateEnabledParam, BetaComplianceSettingsStateDisabledParam]
