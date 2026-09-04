@@ -1,5 +1,38 @@
 # Changelog
 
+## 1.4.0 (2026-09-04)
+
+Full Changelog: [v1.3.0...v1.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.3.0...v1.4.0)
+
+### Features
+
+* **api:** add Claude Tag category and user breakdowns to usage reports ([9fce1e4](https://github.com/anthropics/anthropic-sdk-python/commit/9fce1e4994e113c35f4a7116d0c5eb90367b9c66))
+* **api:** add named types for organization compliance settings state ([1de1957](https://github.com/anthropics/anthropic-sdk-python/commit/1de1957334e7491979ddb21a1d673fa4e56d5459))
+* **api:** add support for sending a workspace ID on more endpoints ([d1d2c01](https://github.com/anthropics/anthropic-sdk-python/commit/d1d2c01d8aa128080dea3d711e12cb3df95a2149))
+
+
+### Bug Fixes
+
+* **client:** raise a clear error when an httpx object is passed instead of an httpx2 one ([9447099](https://github.com/anthropics/anthropic-sdk-python/commit/94470992f0f00ed331f2faa585cfda2cb8412a08))
+* repair custom-code merge in messages resources ([#580](https://github.com/anthropics/anthropic-sdk-python/issues/580)) ([85454ca](https://github.com/anthropics/anthropic-sdk-python/commit/85454cab9a323801b76500707b84c1992c1c0ee4))
+
+
+### Chores
+
+* **examples:** refresh platform model IDs ([#499](https://github.com/anthropics/anthropic-sdk-python/issues/499)) ([182abb5](https://github.com/anthropics/anthropic-sdk-python/commit/182abb51cdb5dda815b0b2498dc4adaab6dde469))
+* **internal:** bundle the mock server spec and update dev tooling ([f9b0cf2](https://github.com/anthropics/anthropic-sdk-python/commit/f9b0cf281932512e6b40cd1a887a44542c883468))
+* **internal:** clean up code comments ([#578](https://github.com/anthropics/anthropic-sdk-python/issues/578)) ([d202327](https://github.com/anthropics/anthropic-sdk-python/commit/d2023274f69dd0609ddabbf8f6af08041f868d8b))
+* **internal:** fix mypy unreachable error in detect-breaking-changes script ([07834f6](https://github.com/anthropics/anthropic-sdk-python/commit/07834f601fb4a81958f15e2129ca091cb9d1c646))
+* **internal:** narrower codeowners scope ([daca8f1](https://github.com/anthropics/anthropic-sdk-python/commit/daca8f13032311676ed30a6e0527ee304e1419c9))
+* **internal:** revert codeowners change ([41aa767](https://github.com/anthropics/anthropic-sdk-python/commit/41aa767464881bb51937f42fe9c426ae3081fd9f))
+* **tests:** remove stale warning filters ([ba9bf35](https://github.com/anthropics/anthropic-sdk-python/commit/ba9bf356ed60fa2eb206e266c86c0202dd005616))
+* **tests:** reword the skip reason on the path-level query param tests ([6b5046a](https://github.com/anthropics/anthropic-sdk-python/commit/6b5046ad29999ec887226aecff67db9feb2d1972))
+
+
+### Documentation
+
+* **api:** update a few doc strings ([26c509d](https://github.com/anthropics/anthropic-sdk-python/commit/26c509d66192f2b40150b481fa89da97e532612c))
+
 ## 1.3.0 (2026-09-01)
 
 Full Changelog: [v1.2.0...v1.3.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.2.0...v1.3.0)
