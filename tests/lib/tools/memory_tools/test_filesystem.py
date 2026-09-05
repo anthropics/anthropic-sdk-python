@@ -462,6 +462,24 @@ class TestBetaLocalFilesystemMemoryTool:
 
         assert get_directory_snapshot(temp_directory) == {"memories/subdir/a.txt": "keep me"}
 
+    def test_delete_not_allow_deleting_memories_directory_via_symlink(
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
+    ) -> None:
+        """A symlink inside the store that points at the store root resolves to the
+        root, so it reaches the guard as a real path rather than as a spelling."""
+        sync_local_filesystem_tool.create(
+            BetaMemoryTool20250818CreateCommand(command="create", file_text="keep me", path="/memories/subdir/a.txt")
+        )
+        memories_path = sync_local_filesystem_tool.memory_root
+        os.symlink(memories_path, memories_path / "self", target_is_directory=True)
+
+        with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
+            sync_local_filesystem_tool.delete(
+                BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories/self")
+            )
+
+        assert (memories_path / "subdir" / "a.txt").read_text(encoding="utf-8") == "keep me"
+
     def test_rename(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
         sync_local_filesystem_tool.create(
             BetaMemoryTool20250818CreateCommand(
@@ -1013,6 +1031,24 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
             await async_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path=path))
 
         assert get_directory_snapshot(temp_directory) == {"memories/subdir/a.txt": "keep me"}
+
+    async def test_delete_not_allow_deleting_memories_directory_via_symlink(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+    ) -> None:
+        """A symlink inside the store that points at the store root resolves to the
+        root, so it reaches the guard as a real path rather than as a spelling."""
+        await async_local_filesystem_tool.create(
+            BetaMemoryTool20250818CreateCommand(command="create", file_text="keep me", path="/memories/subdir/a.txt")
+        )
+        memories_path = Path(str(async_local_filesystem_tool.memory_root))
+        os.symlink(memories_path, memories_path / "self", target_is_directory=True)
+
+        with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
+            await async_local_filesystem_tool.delete(
+                BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories/self")
+            )
+
+        assert (memories_path / "subdir" / "a.txt").read_text(encoding="utf-8") == "keep me"
 
     async def test_rename(self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool) -> None:
         await async_local_filesystem_tool.create(
