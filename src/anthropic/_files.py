@@ -17,7 +17,7 @@ from ._types import (
     HttpxFileContent,
     HttpxRequestFiles,
 )
-from ._utils import is_list, is_mapping, is_tuple_t, is_mapping_t, is_sequence_t
+from ._utils import is_list, is_tuple, is_mapping, is_tuple_t, is_mapping_t, is_sequence_t
 
 _T = TypeVar("_T")
 
@@ -168,11 +168,14 @@ def _deepcopy_with_paths(item: _T, paths: Sequence[Sequence[str]], index: int) -
             if key in result:
                 result[key] = _deepcopy_with_paths(result[key], subpaths, index + 1)
         return cast(_T, result)
-    if is_list(item):
+    if is_list(item) or is_tuple(item):
         array_paths = [path for path in paths if index < len(path) and path[index] == "<array>"]
 
-        # if no path expects a list here, nothing will be mutated inside it - return by reference
+        # if no path expects an array here, nothing will be mutated inside it - return by reference
         if not array_paths:
             return cast(_T, item)
-        return cast(_T, [_deepcopy_with_paths(entry, array_paths, index + 1) for entry in item])
+        copied_entries = [_deepcopy_with_paths(entry, array_paths, index + 1) for entry in item]
+        if is_tuple(item):
+            return cast(_T, tuple(copied_entries))
+        return cast(_T, copied_entries)
     return item
