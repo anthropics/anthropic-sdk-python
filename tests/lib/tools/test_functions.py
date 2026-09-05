@@ -562,6 +562,7 @@ class TestContextManagerTool:
             beta_async_tool(name="noschema")(cast(Any, noschema_cm))
 
 
+@pytest.mark.skipif(PYDANTIC_V1, reason="only applicable in pydantic v2")
 @pytest.mark.parametrize("description", ["", "Replacement description", None])
 def test_explicit_tool_description(description: str | None) -> None:
     def example() -> str:
