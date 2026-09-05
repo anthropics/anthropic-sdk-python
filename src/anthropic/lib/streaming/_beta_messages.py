@@ -8,6 +8,7 @@ from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_n
 import httpx2
 from pydantic import BaseModel
 
+from anthropic.types.beta.beta_usage import BetaUsage
 from anthropic.types.beta.beta_tool_use_block import BetaToolUseBlock
 from anthropic.types.beta.beta_mcp_tool_use_block import BetaMCPToolUseBlock
 from anthropic.types.beta.beta_server_tool_use_block import BetaServerToolUseBlock
@@ -551,7 +552,6 @@ def accumulate_event(
         current_snapshot.stop_details = event.delta.stop_details
         if event.delta.container is not None:
             current_snapshot.container = event.delta.container
-        current_snapshot.usage.output_tokens = event.usage.output_tokens
         if event.context_management is not None:
             current_snapshot.context_management = event.context_management
         # only sent on `message_delta` after a mid-stream fallback, in which case it
@@ -559,22 +559,31 @@ def accumulate_event(
         if event.input_transformations is not None:
             current_snapshot.input_transformations = event.input_transformations
 
-        # Usage counts on a message_delta are cumulative totals, so they overwrite rather
-        # than add; optional ones are omitted when not applicable, in which case the
-        # message_start value must survive.
-        if event.usage.input_tokens is not None:
-            current_snapshot.usage.input_tokens = event.usage.input_tokens
-        if event.usage.cache_creation_input_tokens is not None:
-            current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
-        if event.usage.cache_read_input_tokens is not None:
-            current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
-        if event.usage.server_tool_use is not None:
-            current_snapshot.usage.server_tool_use = event.usage.server_tool_use
-        if event.usage.output_tokens_details is not None:
-            current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
-        if event.usage.iterations is not None:
-            current_snapshot.usage.iterations = event.usage.iterations
-        if event.usage.fallback_credit is not None:
-            current_snapshot.usage.fallback_credit = event.usage.fallback_credit
+        if current_snapshot.usage is None:  # pyright: ignore[reportUnnecessaryComparison]  # noqa: E501
+            # `message_start` may omit usage (see the streaming docs), in which
+            # case the snapshot has no usage yet. Initialize it from the delta
+            # so the final message still carries token counts, and tolerate
+            # streams that never supply usage. Anything the delta leaves out
+            # (e.g. `input_tokens`) stays unset instead of being fabricated
+            # as 0 so an unknown count is never reported to callers; a later
+            # delta that does supply it fills it in below.
+            current_snapshot.usage = construct_type(type_=BetaUsage, value=event.usage.to_dict())
+        else:
+            current_snapshot.usage.output_tokens = event.usage.output_tokens
 
+            # Update other usage fields if they exist in the event
+            if event.usage.input_tokens is not None:
+                current_snapshot.usage.input_tokens = event.usage.input_tokens
+            if event.usage.cache_creation_input_tokens is not None:
+                current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
+            if event.usage.cache_read_input_tokens is not None:
+                current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
+            if event.usage.server_tool_use is not None:
+                current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+            if event.usage.output_tokens_details is not None:
+                current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
+            if event.usage.iterations is not None:
+                current_snapshot.usage.iterations = event.usage.iterations
+            if event.usage.fallback_credit is not None:
+                current_snapshot.usage.fallback_credit = event.usage.fallback_credit
     return current_snapshot

@@ -387,6 +387,81 @@ class TestSyncMessages:
         stop_event.model_dump()
         stop_event.model_dump_json()
 
+    @pytest.mark.respx(base_url=base_url)
+    def test_usage_omitted_at_message_start(self, respx_mock: MockRouter) -> None:
+        # The streaming docs show a sequence where `message_start` omits
+        # `usage`; the accumulator should initialize it from `message_delta`
+        # instead of crashing on the missing value.
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_response("usage_omitted_response.txt"))
+        )
+
+        # A default (non-strict) client mirrors how the docs' event sequence
+        # reaches the accumulator without response-validation rejecting it.
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+
+        assert message.usage is not None
+        assert message.usage.input_tokens == 12
+        assert message.usage.output_tokens == 6
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_usage_omitted_at_message_start_preserves_unknown_input_tokens(self, respx_mock: MockRouter) -> None:
+        # If both `message_start` and `message_delta` omit the input count then
+        # it is genuinely unknown; the accumulator must preserve that rather
+        # than fabricate `input_tokens=0`, which would under-report accounting.
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_response("usage_omitted_input_tokens_response.txt"))
+        )
+
+        # A default (non-strict) client mirrors how the docs' event sequence
+        # reaches the accumulator without response-validation rejecting it.
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+
+        assert message.usage is not None
+        # unknown counts stay unset instead of being reported as 0
+        assert message.usage.input_tokens is None  # pyright: ignore[reportUnnecessaryComparison]
+        assert message.usage.output_tokens == 6
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_usage_omitted_at_message_start_preserves_delta_optional_usage_fields(
+        self, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_response("usage_omitted_with_optional_fields_response.txt"))
+        )
+
+        client = Anthropic(base_url=base_url, api_key=api_key)
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-test",
+        ) as stream:
+            message = stream.get_final_message()
+
+        assert message.usage.input_tokens == 12
+        assert message.usage.output_tokens == 6
+        assert message.usage.cache_creation_input_tokens == 4
+        assert message.usage.cache_read_input_tokens == 3
+        assert message.usage.output_tokens_details is not None
+        assert message.usage.output_tokens_details.thinking_tokens == 2
+        assert message.usage.server_tool_use is not None
+        assert message.usage.server_tool_use.web_search_requests == 1
+
 
 class TestAsyncMessages:
     @pytest.mark.asyncio
@@ -535,6 +610,8 @@ class TestAsyncMessages:
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
     async def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(200, content=to_async_iter(get_response("message_delta_fields_response.txt")))
@@ -584,6 +661,59 @@ class TestAsyncMessages:
         # must not emit `PydanticSerializationUnexpectedValue` warnings
         stop_event.model_dump()
         stop_event.model_dump_json()
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_usage_omitted_at_message_start(self, respx_mock: MockRouter) -> None:
+        # The streaming docs show a sequence where `message_start` omits
+        # `usage`; the accumulator should initialize it from `message_delta`
+        # instead of crashing on the missing value.
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("usage_omitted_response.txt")))
+        )
+
+        # A default (non-strict) client mirrors how the docs' event sequence
+        # reaches the accumulator without response-validation rejecting it.
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key)
+
+        async with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-test",
+        ) as stream:
+            message = await stream.get_final_message()
+
+        assert message.usage is not None
+        assert message.usage.input_tokens == 12
+        assert message.usage.output_tokens == 6
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_usage_omitted_at_message_start_preserves_unknown_input_tokens(self, respx_mock: MockRouter) -> None:
+        # If both `message_start` and `message_delta` omit the input count then
+        # it is genuinely unknown; the accumulator must preserve that rather
+        # than fabricate `input_tokens=0`, which would under-report accounting.
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(
+                200, content=to_async_iter(get_response("usage_omitted_input_tokens_response.txt"))
+            )
+        )
+
+        # A default (non-strict) client mirrors how the docs' event sequence
+        # reaches the accumulator without response-validation rejecting it.
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key)
+
+        async with client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-test",
+        ) as stream:
+            message = await stream.get_final_message()
+
+        assert message.usage is not None
+        # unknown counts stay unset instead of being reported as 0
+        assert message.usage.input_tokens is None  # pyright: ignore[reportUnnecessaryComparison]
+        assert message.usage.output_tokens == 6
 
 
 def test_message_delta_fields_are_all_accumulated() -> None:
