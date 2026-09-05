@@ -4,7 +4,7 @@ import sys
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Union, Generic, TypeVar, Callable, Iterable, Coroutine, cast, overload
-from inspect import isawaitable, isasyncgenfunction, iscoroutinefunction, isgeneratorfunction
+from inspect import Parameter, signature, isawaitable, isasyncgenfunction, iscoroutinefunction, isgeneratorfunction
 from collections.abc import Awaitable
 from typing_extensions import Literal, TypeAlias, override
 
@@ -59,6 +59,28 @@ class ToolError(Exception):
             message = " ".join(parts) if parts else "Tool error"
         super().__init__(message)
         self.content = content
+
+
+def _positional_only_parameter_names(func: Callable[..., Any]) -> list[str]:
+    """Return the positional-only parameter names of ``func``, in declaration order.
+
+    Tool inputs arrive as JSON objects and are handed to the function by name, so
+    ``*args`` cannot be expressed at all and is rejected up front; positional-only
+    parameters are routed back into positional slots by :meth:`BaseFunctionTool._split_input`.
+    """
+    try:
+        parameters = signature(func).parameters.values()
+    except (TypeError, ValueError):
+        return []
+
+    for parameter in parameters:
+        if parameter.kind is Parameter.VAR_POSITIONAL:
+            raise TypeError(
+                f"Tool function {getattr(func, '__name__', func)!r} declares *{parameter.name}; "
+                "tool inputs are JSON objects passed by name, so variadic positional parameters are not supported"
+            )
+
+    return [parameter.name for parameter in parameters if parameter.kind is Parameter.POSITIONAL_ONLY]
 
 
 Function = Callable[..., BetaFunctionToolResultType]
@@ -163,6 +185,7 @@ class BaseFunctionTool(Generic[CallableT]):
             raise RuntimeError("Tool functions are only supported with Pydantic v2")
 
         self.func = func
+        self._positional_only_params = _positional_only_parameter_names(func)
         self._func_with_validate = pydantic.validate_call(func)
         self.name = name or func.__name__
         self._defer_loading = defer_loading
@@ -185,6 +208,24 @@ class BaseFunctionTool(Generic[CallableT]):
     @property
     def __call__(self) -> CallableT:
         return self.func
+
+    def _split_input(self, input: dict[object, object]) -> tuple[list[object], dict[object, object]]:
+        """Split a tool input object into the positional and keyword arguments for ``func``.
+
+        Positional-only parameters cannot be passed by keyword, so their values are
+        pulled out of the input by name and forwarded positionally. Anything missing
+        or unexpected is left for ``validate_call`` to report.
+        """
+        if not self._positional_only_params:
+            return [], input
+
+        kwargs = dict(input)
+        positional: list[object] = []
+        for param_name in self._positional_only_params:
+            if param_name not in kwargs:
+                break
+            positional.append(kwargs.pop(param_name))
+        return positional, kwargs
 
     def to_dict(self) -> BetaToolParam:
         defn: BetaToolParam = {
@@ -224,7 +265,7 @@ class BaseFunctionTool(Generic[CallableT]):
 
         from pydantic_core import CoreSchema
         from pydantic.json_schema import JsonSchemaValue, GenerateJsonSchema
-        from pydantic_core.core_schema import ArgumentsParameter
+        from pydantic_core.core_schema import ArgumentsSchema, ArgumentsParameter
 
         class CustomGenerateJsonSchema(GenerateJsonSchema):
             def __init__(self, *, func: Callable[..., Any], parsed_docstring: Any) -> None:
@@ -234,6 +275,19 @@ class BaseFunctionTool(Generic[CallableT]):
 
             def __call__(self, *_args: Any, **_kwds: Any) -> "CustomGenerateJsonSchema":  # noqa: ARG002
                 return self
+
+            @override
+            def arguments_schema(self, schema: ArgumentsSchema) -> JsonSchemaValue:
+                # Tool inputs are JSON objects passed by name, so positional-only parameters
+                # must become named properties. Left alone, pydantic renders them (and only
+                # them) in its positional form: a `type: array` schema the API cannot accept.
+                arguments = [
+                    cast(ArgumentsParameter, {**argument, "mode": "positional_or_keyword"})
+                    if argument.get("mode") == "positional_only"
+                    else argument
+                    for argument in schema["arguments_schema"]
+                ]
+                return super().arguments_schema(cast(ArgumentsSchema, {**schema, "arguments_schema": arguments}))
 
             @override
             def kw_arguments_schema(
@@ -275,8 +329,9 @@ class BetaFunctionTool(BaseFunctionTool[FunctionT]):
         if not is_dict(input):
             raise TypeError(f"Input must be a dictionary, got {type(input).__name__}")
 
+        args, kwargs = self._split_input(input)
         try:
-            return self._func_with_validate(**cast(Any, input))
+            return self._func_with_validate(*args, **cast(Any, kwargs))
         except pydantic.ValidationError as e:
             raise ValueError(f"Invalid arguments for function {self.name}") from e
 
@@ -289,8 +344,9 @@ class BetaAsyncFunctionTool(BaseFunctionTool[AsyncFunctionT]):
         if not is_dict(input):
             raise TypeError(f"Input must be a dictionary, got {type(input).__name__}")
 
+        args, kwargs = self._split_input(input)
         try:
-            return await self._func_with_validate(**cast(Any, input))
+            return await self._func_with_validate(*args, **cast(Any, kwargs))
         except pydantic.ValidationError as e:
             raise ValueError(f"Invalid arguments for function {self.name}") from e
 
