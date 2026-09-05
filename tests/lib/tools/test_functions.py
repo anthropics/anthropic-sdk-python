@@ -560,3 +560,15 @@ class TestContextManagerTool:
 
         with pytest.raises(TypeError, match="needs an explicit input_schema"):
             beta_async_tool(name="noschema")(cast(Any, noschema_cm))
+
+
+@pytest.mark.parametrize("description", ["", "Replacement description", None])
+def test_explicit_tool_description(description: str | None) -> None:
+    def example() -> str:
+        """Original description."""
+        return "ok"
+
+    tool = beta_tool(example, description=description)
+    expected = "Original description." if description is None else description
+    assert tool.description == expected
+    assert tool.to_dict()["description"] == expected
