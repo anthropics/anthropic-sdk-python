@@ -229,3 +229,117 @@ def test_original_schema_not_mutated():
     transform_schema(original_schema)
 
     assert original_schema == original_schema_backup
+
+
+def test_type_array_nullable_string():
+    # what z.string().nullable() and Optional[str] emit
+    schema = {"type": ["string", "null"]}
+    result = transform_schema(schema)
+    assert result == snapshot({"anyOf": [{"type": "string"}, {"type": "null"}]})
+
+
+def test_type_array_matches_the_any_of_spelling():
+    # the two spellings mean the same thing, so they should transform alike
+    assert transform_schema({"type": ["string", "null"]}) == transform_schema(
+        {"anyOf": [{"type": "string"}, {"type": "null"}]}
+    )
+
+
+def test_type_array_union_without_null():
+    schema = {"type": ["string", "number"]}
+    result = transform_schema(schema)
+    assert result == snapshot({"anyOf": [{"type": "string"}, {"type": "number"}]})
+
+
+def test_type_array_keeps_description_on_the_parent():
+    # description belongs to the schema, not to one branch of it; an
+    # unsupported sibling keyword is described once rather than per branch
+    schema = {"type": ["string", "null"], "description": "A query", "minLength": 2}
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "anyOf": [{"type": "string"}, {"type": "null"}],
+            "description": "A query\n\n{minLength: 2}",
+        }
+    )
+
+
+def test_type_array_object_keeps_properties_out_of_the_null_branch():
+    schema = {
+        "type": ["object", "null"],
+        "properties": {"name": {"type": "string"}},
+        "required": ["name"],
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "properties": {"name": {"type": "string"}},
+                    "additionalProperties": False,
+                    "required": ["name"],
+                },
+                {"type": "null"},
+            ]
+        }
+    )
+
+
+def test_type_array_array_branch_keeps_items():
+    schema = {"type": ["array", "null"], "items": {"type": "integer"}, "minItems": 1}
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "anyOf": [
+                {"type": "array", "items": {"type": "integer"}, "minItems": 1},
+                {"type": "null"},
+            ]
+        }
+    )
+
+
+def test_type_array_nested_in_a_property():
+    schema = {
+        "type": "object",
+        "properties": {"cursor": {"type": ["string", "null"]}},
+        "required": ["cursor"],
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "type": "object",
+            "properties": {"cursor": {"anyOf": [{"type": "string"}, {"type": "null"}]}},
+            "additionalProperties": False,
+            "required": ["cursor"],
+        }
+    )
+
+
+@pytest.mark.parametrize(
+    "type_",
+    [
+        pytest.param([], id="empty"),
+        pytest.param(["string", 7], id="non-string member"),
+        pytest.param(["string", "banana"], id="unknown type name"),
+        pytest.param(["string", "string"], id="repeated member"),
+    ],
+)
+def test_type_array_malformed_raises_value_error(type_: object) -> None:
+    # a malformed array is the caller's input being wrong, so it should read as
+    # a ValueError rather than as an SDK invariant breaking
+    with pytest.raises(ValueError):
+        transform_schema({"type": type_})
+
+
+def test_type_array_does_not_mutate_the_original_schema():
+    original_schema = {
+        "type": "object",
+        "properties": {"cursor": {"type": ["string", "null"], "minLength": 2}},
+        "required": ["cursor"],
+    }
+    original_schema_backup = deepcopy(original_schema)
+
+    transform_schema(original_schema)
+
+    assert original_schema == original_schema_backup
