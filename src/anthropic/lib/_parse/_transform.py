@@ -96,10 +96,82 @@ def transform_schema(
         strict_schema["$ref"] = ref
         return strict_schema
 
+    def _normalize_type_array(type_list: list[str]) -> list[dict[str, Any]]:
+        """
+        Convert a type array (e.g., ["string", "null"]) to an anyOf array.
+        
+        Each type in the array is converted to a simple schema with that type.
+        """
+        normalized: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        for t in type_list:
+            if not isinstance(t, str):
+                raise ValueError(f"Type array members must be strings, got {type(t).__name__}")
+            if t not in SupportedTypes.__args__:
+                raise ValueError(f"Unsupported type in type array: {t}")
+            if t in seen:
+                raise ValueError(f"Duplicate type in type array: {t}")
+            seen.add(t)
+            normalized.append({"type": t})
+        return normalized
+
+
+def transform_schema(
+    json_schema: type[pydantic.BaseModel] | dict[str, Any],
+) -> dict[str, Any]:
+    """
+    Transforms a JSON schema to ensure it conforms to the API's expectations.
+
+    Args:
+        json_schema (Dict[str, Any]): The original JSON schema.
+
+    Returns:
+        The transformed JSON schema.
+
+    Examples:
+        >>> transform_schema(
+        ...     {
+        ...         "type": "integer",
+        ...         "minimum": 1,
+        ...         "maximum": 10,
+        ...         "description": "A number",
+        ...     }
+        ... )
+        {'type': 'integer', 'description': 'A number\n\n{minimum: 1, maximum: 10}'}
+    """
+    if inspect.isclass(json_schema) and issubclass(json_schema, pydantic.BaseModel):  # pyright: ignore[reportUnnecessaryIsInstance]
+        json_schema = json_schema.model_json_schema()
+
+    strict_schema: dict[str, Any] = {}
+    json_schema = {**json_schema}
+
+    # $defs must be processed before the $ref early-return below, so that a
+    # root-level `{"$ref": "#/$defs/X", "$defs": {...}}` (valid JSON Schema,
+    # and what pydantic RootModel emits) keeps its definitions.
+    defs = json_schema.pop("$defs", None)
+    if defs is not None:
+        strict_defs: dict[str, Any] = {}
+        strict_schema["$defs"] = strict_defs
+
+        for name, schema in defs.items():
+            strict_defs[name] = transform_schema(schema)
+
+    ref = json_schema.pop("$ref", None)
+    if ref is not None:
+        strict_schema["$ref"] = ref
+        return strict_schema
+
     type_: Optional[SupportedTypes] = json_schema.pop("type", None)
     any_of = json_schema.pop("anyOf", None)
     one_of = json_schema.pop("oneOf", None)
     all_of = json_schema.pop("allOf", None)
+
+    # Handle type arrays (e.g., ["string", "null"]) by converting to anyOf
+    if is_list(type_):
+        if not type_:
+            raise ValueError("Type array cannot be empty")
+        any_of = _normalize_type_array(type_)
+        type_ = None
 
     if is_list(any_of):
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in any_of]
