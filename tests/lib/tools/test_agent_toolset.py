@@ -22,6 +22,7 @@ from anthropic.lib.tools.agent_toolset import (
 )
 
 needs_pydantic_v2 = pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
+needs_symlinks = pytest.mark.skipif(sys.platform == "win32", reason="symlink fixtures need a POSIX filesystem")
 
 
 @pytest.mark.parametrize(
@@ -373,6 +374,7 @@ async def test_bash_outer_cancel_closes_subprocess_no_stale_state(tmp_path: Path
         await s.close()
 
 
+@needs_symlinks
 @needs_pydantic_v2
 async def test_read_through_symlink_escape_is_rejected(tmp_path: Path) -> None:
     """resolve_path realpaths, so a symlink that escapes the workdir is caught."""
@@ -401,6 +403,7 @@ async def test_glob_rejects_dotdot_pattern(tmp_path: Path) -> None:
         await beta_glob_tool(env).call({"pattern": "../outside/*.txt"})
 
 
+@needs_symlinks
 @needs_pydantic_v2
 async def test_glob_post_filters_symlink_escape(tmp_path: Path) -> None:
     """A symlink traversed mid-pattern must not let a glob result escape the workdir."""
@@ -415,6 +418,7 @@ async def test_glob_post_filters_symlink_escape(tmp_path: Path) -> None:
     assert res == "no matches"
 
 
+@needs_symlinks
 @needs_pydantic_v2
 async def test_grep_skips_symlinked_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The fallback walker must not read through a symlink that escapes the workdir."""
