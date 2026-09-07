@@ -10,10 +10,45 @@ from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, r
 import httpx2
 
 from ._utils import is_dict, extract_type_var_from_base
+from ._exceptions import (
+    NotFoundError,
+    APIStatusError,
+    RateLimitError,
+    BadRequestError,
+    OverloadedError,
+    AuthenticationError,
+    InternalServerError,
+    PermissionDeniedError,
+)
 
 if TYPE_CHECKING:
     from ._client import Anthropic, AsyncAnthropic
     from ._models import FinalRequestOptions
+
+
+# An error event inside a stream arrives on the stream's own HTTP response, whose status is 200,
+# so the status code cannot pick the exception class the way it does for a failed request.
+# The error type in the body can; the status code and the response stay the real ones.
+_STREAM_ERROR_TYPE_TO_CLASS: dict[str, type[APIStatusError]] = {
+    "invalid_request_error": BadRequestError,
+    "authentication_error": AuthenticationError,
+    "permission_error": PermissionDeniedError,
+    "not_found_error": NotFoundError,
+    "rate_limit_error": RateLimitError,
+    "overloaded_error": OverloadedError,
+    "api_error": InternalServerError,
+}
+
+
+def _make_stream_status_error(
+    client: Anthropic | AsyncAnthropic, err_msg: str, *, body: object, response: httpx2.Response
+) -> APIStatusError:
+    error = body.get("error") if is_dict(body) else None
+    error_type = error.get("type") if is_dict(error) else None
+    error_class = _STREAM_ERROR_TYPE_TO_CLASS.get(error_type) if isinstance(error_type, str) else None
+    if error_class is not None:
+        return error_class(err_msg, response=response, body=body)
+    return client._make_status_error(err_msg, body=body, response=response)
 
 
 _T = TypeVar("_T")
@@ -137,7 +172,8 @@ class Stream(Generic[_T]):
                     except Exception:
                         err_msg = sse.data or f"Error code: {response.status_code}"
 
-                    raise self._client._make_status_error(
+                    raise _make_stream_status_error(
+                        self._client,
                         err_msg,
                         body=body,
                         response=self.response,
@@ -285,7 +321,8 @@ class AsyncStream(Generic[_T]):
                     except Exception:
                         err_msg = sse.data or f"Error code: {response.status_code}"
 
-                    raise self._client._make_status_error(
+                    raise _make_stream_status_error(
+                        self._client,
                         err_msg,
                         body=body,
                         response=self.response,
