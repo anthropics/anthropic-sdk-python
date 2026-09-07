@@ -595,6 +595,9 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
         old_full_path = self._validate_path(command.old_path)
         new_full_path = self._validate_path(command.new_path)
 
+        if old_full_path == self.memory_root.resolve():
+            raise ToolError("Cannot rename the /memories directory itself")
+
         if new_full_path.exists():
             raise ToolError(f"The destination {command.new_path} already exists")
 
@@ -900,6 +903,11 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         await self._ensure_memory_root()
         old_full_path = await self._validate_path(command.old_path)
         new_full_path = await self._validate_path(command.new_path)
+
+        # AsyncPath.resolve() is a coroutine, so the comparison drops to Path here
+        # the way _validate_path already does.
+        if Path(str(old_full_path)) == Path(str(self.memory_root)).resolve():
+            raise ToolError("Cannot rename the /memories directory itself")
 
         if await new_full_path.exists():
             raise ToolError(f"The destination {command.new_path} already exists")
