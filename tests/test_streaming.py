@@ -7,7 +7,7 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._streaming import Stream, AsyncStream, ServerSentEvent
-from anthropic._exceptions import APIStatusError
+from anthropic._exceptions import APIStatusError, APITimeoutError, APIConnectionError
 
 _T = TypeVar("_T")
 
@@ -236,6 +236,37 @@ async def test_error_type(
 
     assert exc_info.value.type == "overloaded_error"
     assert "Overloaded" in str(exc_info.value)
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize(
+    ("transport_error", "api_error"),
+    [
+        (httpx2.ReadTimeout, APITimeoutError),
+        (httpx2.RemoteProtocolError, APIConnectionError),
+    ],
+    ids=["timeout", "connection"],
+)
+async def test_transport_error_type(
+    sync: bool,
+    transport_error: type[Exception],
+    api_error: type[APIConnectionError],
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+) -> None:
+    def body() -> Iterator[bytes]:
+        yield b"event: completion\n"
+        yield b'data: {"foo":true}\n\n'
+        raise transport_error("stream interrupted")
+
+    iterator = make_stream_iterator(content=body(), sync=sync, client=client, async_client=async_client)
+
+    assert await iter_next(iterator) == {"foo": True}
+
+    with pytest.raises(api_error) as exc_info:
+        await iter_next(iterator)
+
+    assert isinstance(exc_info.value.__cause__, transport_error)
 
 
 def test_isinstance_check(client: Anthropic, async_client: AsyncAnthropic) -> None:
