@@ -772,7 +772,6 @@ from anthropic.types.beta import (
     BetaManagedAgentsAlwaysAskPolicy,
     BetaManagedAgentsAnthropicSkill,
     BetaManagedAgentsAnthropicSkillParams,
-    BetaManagedAgentsAutoPolicy,
     BetaManagedAgentsBashToolConfig,
     BetaManagedAgentsBashToolConfigParams,
     BetaManagedAgentsCustomSkill,
@@ -947,10 +946,6 @@ Types:
 
 ```python
 from anthropic.types.beta.sessions import (
-    BetaManagedAgentsAgentAutoEvaluatedPermission,
-    BetaManagedAgentsAgentAutoEvaluatedPermissionAllow,
-    BetaManagedAgentsAgentAutoEvaluatedPermissionAsk,
-    BetaManagedAgentsAgentAutoEvaluatedPermissionDeny,
     BetaManagedAgentsAgentCustomToolUseEvent,
     BetaManagedAgentsAgentMCPToolResultEvent,
     BetaManagedAgentsAgentMCPToolUseEvent,
@@ -959,10 +954,6 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsAgentThreadContextCompactedEvent,
     BetaManagedAgentsAgentThreadMessageReceivedEvent,
     BetaManagedAgentsAgentThreadMessageSentEvent,
-    BetaManagedAgentsAgentToolEvaluation,
-    BetaManagedAgentsAgentToolEvaluationAlwaysAllow,
-    BetaManagedAgentsAgentToolEvaluationAlwaysAsk,
-    BetaManagedAgentsAgentToolEvaluationAuto,
     BetaManagedAgentsAgentToolResultEvent,
     BetaManagedAgentsAgentToolUseEvent,
     BetaManagedAgentsBase64DocumentSource,
