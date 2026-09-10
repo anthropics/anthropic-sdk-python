@@ -3,6 +3,7 @@ from datetime import datetime
 from typing_extensions import Literal
 
 from ...._models import BaseModel
+from .beta_managed_agents_agent_tool_evaluation import BetaManagedAgentsAgentToolEvaluation
 
 __all__ = ["BetaManagedAgentsAgentMCPToolUseEvent"]
 
@@ -29,6 +30,13 @@ class BetaManagedAgentsAgentMCPToolUseEvent(BaseModel):
 
     evaluated_permission: Optional[Literal["allow", "ask", "deny"]] = None
     """AgentEvaluatedPermission enum"""
+
+    evaluation: Optional[BetaManagedAgentsAgentToolEvaluation] = None
+    """
+    Names the resolved permission_policy that produced evaluated_permission, and
+    under auto carries the judgement. Open union: clients must tolerate unknown
+    variants.
+    """
 
     session_thread_id: Optional[str] = None
     """

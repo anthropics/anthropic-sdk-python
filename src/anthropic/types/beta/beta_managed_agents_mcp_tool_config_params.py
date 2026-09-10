@@ -3,12 +3,15 @@ from __future__ import annotations
 from typing import Union, Optional
 from typing_extensions import Required, TypeAlias, TypedDict
 
+from .beta_managed_agents_auto_policy_param import BetaManagedAgentsAutoPolicyParam
 from .beta_managed_agents_always_ask_policy_param import BetaManagedAgentsAlwaysAskPolicyParam
 from .beta_managed_agents_always_allow_policy_param import BetaManagedAgentsAlwaysAllowPolicyParam
 
 __all__ = ["BetaManagedAgentsMCPToolConfigParams", "PermissionPolicy"]
 
-PermissionPolicy: TypeAlias = Union[BetaManagedAgentsAlwaysAllowPolicyParam, BetaManagedAgentsAlwaysAskPolicyParam]
+PermissionPolicy: TypeAlias = Union[
+    BetaManagedAgentsAlwaysAllowPolicyParam, BetaManagedAgentsAlwaysAskPolicyParam, BetaManagedAgentsAutoPolicyParam
+]
 
 
 class BetaManagedAgentsMCPToolConfigParams(TypedDict, total=False):

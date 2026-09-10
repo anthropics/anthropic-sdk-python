@@ -79,6 +79,9 @@ from .beta_managed_agents_session_thread_usage import (
 from .beta_managed_agents_user_interrupt_event import (
     BetaManagedAgentsUserInterruptEvent as BetaManagedAgentsUserInterruptEvent,
 )
+from .beta_managed_agents_agent_tool_evaluation import (
+    BetaManagedAgentsAgentToolEvaluation as BetaManagedAgentsAgentToolEvaluation,
+)
 from .beta_managed_agents_memory_store_resource import (
     BetaManagedAgentsMemoryStoreResource as BetaManagedAgentsMemoryStoreResource,
 )
@@ -160,6 +163,9 @@ from .beta_managed_agents_user_define_outcome_event import (
 from .beta_managed_agents_user_message_event_params import (
     BetaManagedAgentsUserMessageEventParams as BetaManagedAgentsUserMessageEventParams,
 )
+from .beta_managed_agents_agent_tool_evaluation_auto import (
+    BetaManagedAgentsAgentToolEvaluationAuto as BetaManagedAgentsAgentToolEvaluationAuto,
+)
 from .beta_managed_agents_file_document_source_param import (
     BetaManagedAgentsFileDocumentSourceParam as BetaManagedAgentsFileDocumentSourceParam,
 )
@@ -220,6 +226,9 @@ from .beta_managed_agents_user_tool_result_event_params import (
 from .beta_managed_agents_span_model_request_start_event import (
     BetaManagedAgentsSpanModelRequestStartEvent as BetaManagedAgentsSpanModelRequestStartEvent,
 )
+from .beta_managed_agents_agent_auto_evaluated_permission import (
+    BetaManagedAgentsAgentAutoEvaluatedPermission as BetaManagedAgentsAgentAutoEvaluatedPermission,
+)
 from .beta_managed_agents_agent_thread_message_sent_event import (
     BetaManagedAgentsAgentThreadMessageSentEvent as BetaManagedAgentsAgentThreadMessageSentEvent,
 )
@@ -228,6 +237,9 @@ from .beta_managed_agents_mcp_authentication_failed_error import (
 )
 from .beta_managed_agents_session_status_terminated_event import (
     BetaManagedAgentsSessionStatusTerminatedEvent as BetaManagedAgentsSessionStatusTerminatedEvent,
+)
+from .beta_managed_agents_agent_tool_evaluation_always_ask import (
+    BetaManagedAgentsAgentToolEvaluationAlwaysAsk as BetaManagedAgentsAgentToolEvaluationAlwaysAsk,
 )
 from .beta_managed_agents_plain_text_document_source_param import (
     BetaManagedAgentsPlainTextDocumentSourceParam as BetaManagedAgentsPlainTextDocumentSourceParam,
@@ -247,6 +259,12 @@ from .beta_managed_agents_credential_host_unreachable_error import (
 from .beta_managed_agents_span_outcome_evaluation_end_event import (
     BetaManagedAgentsSpanOutcomeEvaluationEndEvent as BetaManagedAgentsSpanOutcomeEvaluationEndEvent,
 )
+from .beta_managed_agents_agent_tool_evaluation_always_allow import (
+    BetaManagedAgentsAgentToolEvaluationAlwaysAllow as BetaManagedAgentsAgentToolEvaluationAlwaysAllow,
+)
+from .beta_managed_agents_agent_auto_evaluated_permission_ask import (
+    BetaManagedAgentsAgentAutoEvaluatedPermissionAsk as BetaManagedAgentsAgentAutoEvaluatedPermissionAsk,
+)
 from .beta_managed_agents_agent_thread_message_received_event import (
     BetaManagedAgentsAgentThreadMessageReceivedEvent as BetaManagedAgentsAgentThreadMessageReceivedEvent,
 )
@@ -259,11 +277,17 @@ from .beta_managed_agents_span_outcome_evaluation_start_event import (
 from .beta_managed_agents_user_tool_confirmation_event_params import (
     BetaManagedAgentsUserToolConfirmationEventParams as BetaManagedAgentsUserToolConfirmationEventParams,
 )
+from .beta_managed_agents_agent_auto_evaluated_permission_deny import (
+    BetaManagedAgentsAgentAutoEvaluatedPermissionDeny as BetaManagedAgentsAgentAutoEvaluatedPermissionDeny,
+)
 from .beta_managed_agents_agent_thread_context_compacted_event import (
     BetaManagedAgentsAgentThreadContextCompactedEvent as BetaManagedAgentsAgentThreadContextCompactedEvent,
 )
 from .beta_managed_agents_user_custom_tool_result_event_params import (
     BetaManagedAgentsUserCustomToolResultEventParams as BetaManagedAgentsUserCustomToolResultEventParams,
+)
+from .beta_managed_agents_agent_auto_evaluated_permission_allow import (
+    BetaManagedAgentsAgentAutoEvaluatedPermissionAllow as BetaManagedAgentsAgentAutoEvaluatedPermissionAllow,
 )
 from .beta_managed_agents_span_outcome_evaluation_ongoing_event import (
     BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent as BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent,
