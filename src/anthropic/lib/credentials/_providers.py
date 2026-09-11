@@ -597,7 +597,7 @@ class CredentialsFile:
         raw_expires_in = payload.get("expires_in", 3600)
         try:
             expires_in = int(raw_expires_in)
-        except (TypeError, ValueError) as err:
+        except (TypeError, ValueError, OverflowError) as err:
             raise WorkloadIdentityError(
                 f"user_oauth refresh response has invalid 'expires_in' {raw_expires_in!r}; "
                 f"expected an integer number of seconds."

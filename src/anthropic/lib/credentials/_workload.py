@@ -353,7 +353,7 @@ class WorkloadIdentityCredentials:
             token = data["access_token"]
             # ``expires_in`` is a JSON number per RFC 6749 §5.1; coerce to int seconds.
             expires_in = int(data["expires_in"])
-        except (KeyError, TypeError, ValueError) as err:
+        except (KeyError, TypeError, ValueError, OverflowError) as err:
             raise WorkloadIdentityError(
                 "Token endpoint response missing required fields (access_token / expires_in).",
                 status_code=resp.status_code,

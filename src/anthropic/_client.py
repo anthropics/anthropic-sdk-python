@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
 import httpx2
@@ -35,12 +35,15 @@ from .lib.credentials import (
     CredentialsFile,
     AccessTokenProvider,
     BaseURLBoundProvider,
+    AsyncAccessTokenProvider,
     default_credentials,
 )
 from .lib.credentials._auth import (
     warn_env_static_shadows_auto_discovery,
     warn_explicit_static_shadows_credentials,
 )
+from .lib.credentials._close import has_async_close, close_credentials, async_close_credentials
+from .lib.credentials._types import is_async_token_provider
 from .lib.credentials._constants import _has_auto_discoverable_credentials
 
 
@@ -54,14 +57,12 @@ def _is_base_client(client: object) -> bool:
     return type(client) in (Anthropic, AsyncAnthropic)
 
 
-def _close_credentials(credentials: object) -> None:
-    """Release any resources owned by a credential provider, if it exposes ``close()``."""
-    close = getattr(credentials, "close", None)
-    if close is not None:
-        close()
+_ProviderT = TypeVar(
+    "_ProviderT", "AccessTokenProvider | None", "AccessTokenProvider | AsyncAccessTokenProvider | None"
+)
 
 
-def _bind_credentials_base_url(credentials: AccessTokenProvider | None, base_url: str) -> AccessTokenProvider | None:
+def _bind_credentials_base_url(credentials: _ProviderT, base_url: str) -> _ProviderT:
     """Return the provider this client should exchange tokens through.
 
     See :class:`BaseURLBoundProvider`; any other provider (plain callables,
@@ -272,6 +273,14 @@ class Anthropic(SyncAPIClient):
                 credential_headers = result.extra_headers
                 if not base_url_is_explicit and result.base_url:
                     base_url = result.base_url
+
+        if is_async_token_provider(credentials):
+            raise TypeError("`Anthropic` cannot await an async `credentials` provider; use `AsyncAnthropic` instead.")
+        if has_async_close(credentials):
+            raise TypeError(
+                "`Anthropic` cannot await this `credentials` provider's `async def close()`; use `AsyncAnthropic` instead."
+            )
+
         credentials = _bind_credentials_base_url(credentials, str(base_url))
         self.credentials = credentials
         _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
@@ -434,7 +443,7 @@ class Anthropic(SyncAPIClient):
     @override
     def close(self) -> None:
         super().close()
-        _close_credentials(self.credentials)
+        close_credentials(self.credentials)
 
     # --- end credentials support ---
 
@@ -573,7 +582,7 @@ class AsyncAnthropic(AsyncAPIClient):
     api_key: str | None
     auth_token: str | None
     webhook_key: str | None
-    credentials: AccessTokenProvider | None
+    credentials: AccessTokenProvider | AsyncAccessTokenProvider | None
     _token_cache: TokenCache | None
     _custom_auth: AccessTokenAuth | None
 
@@ -582,7 +591,7 @@ class AsyncAnthropic(AsyncAPIClient):
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
-        credentials: AccessTokenProvider | None = None,
+        credentials: AccessTokenProvider | AsyncAccessTokenProvider | None = None,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
         webhook_key: str | None = None,
@@ -854,9 +863,7 @@ class AsyncAnthropic(AsyncAPIClient):
     @override
     async def close(self) -> None:
         await super().close()
-        # Credential providers expose a sync close() even from the async client —
-        # they own a sync httpx2.Client for the token-exchange POST.
-        _close_credentials(self.credentials)
+        await async_close_credentials(self.credentials)
 
     # --- end credentials support ---
 
@@ -865,7 +872,7 @@ class AsyncAnthropic(AsyncAPIClient):
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
-        credentials: AccessTokenProvider | None | NotGiven = not_given,
+        credentials: AccessTokenProvider | AsyncAccessTokenProvider | None | NotGiven = not_given,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
         webhook_key: str | None = None,

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import inspect
+import functools
 from typing import Dict, Callable, Optional, Protocol
 from dataclasses import field, dataclass
-from typing_extensions import override, runtime_checkable
+from typing_extensions import TypeIs, override, runtime_checkable
 
 
 def _empty_headers() -> Dict[str, str]:
@@ -12,6 +14,7 @@ def _empty_headers() -> Dict[str, str]:
 __all__ = [
     "AccessToken",
     "AccessTokenProvider",
+    "AsyncAccessTokenProvider",
     "BaseURLBoundProvider",
     "IdentityTokenProvider",
     "CredentialResult",
@@ -24,6 +27,9 @@ class AccessToken:
 
     ``expires_at`` is unix seconds; ``None`` means no expiry information
     (the token will be treated as never-expires by :class:`TokenCache`).
+    Exactly ``0`` means the provider does its own caching, so the client asks it
+    again before every request, concurrently if requests are concurrent. Any
+    other past value is an expired token and is refreshed one call at a time.
 
     ``repr()`` masks the token (at most its last four characters) so a frame
     or log line holding an ``AccessToken`` never exposes the raw value —
@@ -57,6 +63,30 @@ class AccessTokenProvider(Protocol):
     """
 
     def __call__(self, *, force_refresh: bool = False) -> AccessToken: ...
+
+
+class AsyncAccessTokenProvider(Protocol):
+    """Async twin of :class:`AccessTokenProvider`, with the same ``force_refresh`` contract.
+
+    It must be an ``async def`` function, or an object whose ``__call__`` is one;
+    ``AsyncAnthropic`` awaits it on the event loop and caches the result like a
+    sync provider's.
+    """
+
+    async def __call__(self, *, force_refresh: bool = False) -> AccessToken: ...
+
+
+def unwrap_partial(obj: object) -> object:
+    while isinstance(obj, functools.partial):
+        obj = obj.func
+    return obj
+
+
+def is_async_token_provider(provider: object) -> TypeIs[AsyncAccessTokenProvider]:
+    """True for an ``async def`` function, an object whose ``__call__`` is one, or a ``functools.partial`` of either."""
+    # iscoroutinefunction looks through a partial of a function but not of a callable object.
+    provider = unwrap_partial(provider)
+    return inspect.iscoroutinefunction(provider) or inspect.iscoroutinefunction(getattr(provider, "__call__", None))  # noqa: B004
 
 
 @runtime_checkable

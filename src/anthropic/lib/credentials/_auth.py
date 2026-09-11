@@ -8,7 +8,6 @@ from typing_extensions import override
 import httpx2
 
 from ._cache import TokenCache
-from ..._utils import asyncify
 from ._constants import OAUTH_API_BETA_HEADER
 
 __all__ = ["AccessTokenAuth"]
@@ -115,9 +114,6 @@ class AccessTokenAuth(httpx2.Auth):
         if self._has_static_credential(request):
             yield request
             return
-        # TokenCache.get_token is sync (and may make a blocking HTTP call); run it
-        # in a worker thread to avoid blocking the event loop. Uses the same
-        # ``asyncify`` helper as the rest of the SDK (see lib/vertex).
-        token = await asyncify(self._token_cache.get_token)()
+        token = await self._token_cache.async_get_token()
         self._apply(request, token)
         yield request
