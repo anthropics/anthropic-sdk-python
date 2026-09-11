@@ -1,18 +1,18 @@
-"""Tests for :class:`EnvironmentWorker`.
+"""Tests for `EnvironmentWorker`.
 
 The worker composes the control-plane poller, the per-session
-``AgentToolContext`` / skill download, the lease heartbeat, and the session tool
-runner. We stub ``aiter_work``, the session tool runner, and the worker's
-``_copy_client_with_bearer_auth`` helper so each test can drive a single
+`AgentToolContext` / skill download, the lease heartbeat, and the session tool
+runner. We stub `aiter_work`, the session tool runner, and the worker's
+`_copy_client_with_bearer_auth` helper so each test can drive a single
 claimed work item and assert the surrounding plumbing (skip non-session work,
-heartbeat the lease, force-stop on exit) — via both the ``run()`` poll loop
-and the single-item ``handle_item()`` entry point.
+heartbeat the lease, force-stop on exit) — via both the `run()` poll loop
+and the single-item `handle_item()` entry point.
 
 After the auth refactor, heartbeat / force-stop traffic flows through a
 Bearer-only sub-client the worker constructs via the shared
-``_copy_client_with_bearer_auth`` util. The tests intercept that helper so they
+`_copy_client_with_bearer_auth` util. The tests intercept that helper so they
 can route those calls to a recording fake without spinning up a real
-``AsyncAnthropic`` (and the httpx pool that comes with it).
+`AsyncAnthropic` (and the httpx pool that comes with it).
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ from ..tools.test_session_runner import _SyncTool
 
 
 def _encode_secret(payload: dict[str, Any]) -> str:
-    """Build a work-item ``secret`` the way the control plane does: URL-safe
+    """Build a work-item `secret` the way the control plane does: URL-safe
     base64 of a JSON payload, without padding."""
     return base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
 
@@ -212,7 +212,7 @@ def _install_run_session_tools(
         }
 
         async def _iter() -> AsyncIterator[Any]:
-            # With no ``serve`` the session completes on its own (no tool
+            # With no `serve` the session completes on its own (no tool
             # calls) once the lease heartbeat has had a chance to land, and
             # the run ends via the normal session-completion path; the
             # heartbeat keeps the lease alive throughout and is stopped on the
@@ -268,8 +268,8 @@ async def test_environment_worker_serves_session(monkeypatch: pytest.MonkeyPatch
     assert work.stop_calls[0]["work_id"] == "w_1"
     assert work.stop_calls[0]["force"] is True
     # Auth flows through scoped sub-clients tagged with the right helper.
-    # ``run()`` builds an ``environments-work-poller``-tagged client for ``aiter_work``;
-    # each handled item builds an ``environments-worker``-tagged client for the
+    # `run()` builds an `environments-work-poller`-tagged client for `aiter_work`;
+    # each handled item builds an `environments-worker`-tagged client for the
     # heartbeat and force-stop. The environment key flows into both.
     assert scoped_calls == [
         {"auth_token": "env_key", "helper": "environments-work-poller"},
@@ -333,7 +333,7 @@ async def test_environment_worker_accepts_tools_factory(monkeypatch: pytest.Monk
 async def test_environment_worker_prefers_work_item_secret(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """A claimed item carrying a per-item ``secret`` payload authenticates that
+    """A claimed item carrying a per-item `secret` payload authenticates that
     item's heartbeat / force-stop / session-runner calls with the sessions
     token extracted from it; polling stays on the environment key. Neither the
     payload nor the token ever reaches the logs."""
@@ -522,7 +522,7 @@ async def test_heartbeat_412_releases_item_without_stopping_it(
 async def test_control_plane_stop_still_force_stops(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """A heartbeat reporting ``state == "stopped"`` ends the run and the item
+    """A heartbeat reporting `state == "stopped"` ends the run and the item
     is still force-stopped on the way out — only a *lost* lease skips that."""
     work = _FakeWorkResource(heartbeat_state="stopped")
     sessions = _FakeSessions()
@@ -647,8 +647,8 @@ async def test_handle_item_services_a_single_claimed_item(monkeypatch: pytest.Mo
     assert len(work.stop_calls) == 1
     assert work.stop_calls[0]["work_id"] == "w_1"
     assert work.stop_calls[0]["force"] is True
-    # ``handle_item`` doesn't poll, so only the heartbeat/force-stop scoped
-    # client is built — tagged ``environments-worker``.
+    # `handle_item` doesn't poll, so only the heartbeat/force-stop scoped
+    # client is built — tagged `environments-worker`.
     assert scoped_calls == [{"auth_token": "env_key", "helper": "environments-worker"}]
 
 
@@ -686,7 +686,7 @@ async def test_handle_item_falls_back_to_env_vars(monkeypatch: pytest.MonkeyPatc
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
 @pytest.mark.asyncio()
 async def test_handle_item_uses_constructor_environment_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    """``environment_key`` resolves to the worker's own key when not passed and
+    """`environment_key` resolves to the worker's own key when not passed and
     no env var is set."""
     work = _FakeWorkResource(heartbeat_state="running")
     sessions = _FakeSessions()
@@ -711,8 +711,8 @@ async def test_handle_item_uses_constructor_environment_key(monkeypatch: pytest.
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
 @pytest.mark.asyncio()
 async def test_handle_item_uses_work_secret_argument(monkeypatch: pytest.MonkeyPatch) -> None:
-    """An explicit ``work_secret`` payload supplies the per-item Bearer
-    credential (its sessions token); an ``environment_key`` passed alongside it
+    """An explicit `work_secret` payload supplies the per-item Bearer
+    credential (its sessions token); an `environment_key` passed alongside it
     is only the fallback."""
     secret = _encode_secret({"sessions_token": "sessions-token-arg"})
     work = _FakeWorkResource(heartbeat_state="running")
@@ -741,10 +741,10 @@ async def test_handle_item_uses_work_secret_argument(monkeypatch: pytest.MonkeyP
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
 @pytest.mark.asyncio()
 async def test_handle_item_falls_back_to_work_secret_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
-    """``work_secret`` falls back to ``ANTHROPIC_WORK_SECRET`` (the env var the
-    ``worker poll --on-work`` command sets alongside the others); when neither
+    """`work_secret` falls back to `ANTHROPIC_WORK_SECRET` (the env var the
+    `worker poll --on-work` command sets alongside the others); when neither
     is present the environment key is used — the existing
-    ``test_handle_item_*`` cases cover that path."""
+    `test_handle_item_*` cases cover that path."""
     secret = _encode_secret({"sessions_token": "sessions-token-env"})
     work = _FakeWorkResource(heartbeat_state="running")
     sessions = _FakeSessions()
@@ -851,14 +851,14 @@ async def test_handle_item_keyless_with_a_tokenless_secret_raises(monkeypatch: p
 async def test_worker_threads_extra_headers_into_poll_heartbeat_stop_and_runner(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """A worker-level ``extra_headers`` is threaded, unchanged, into every
+    """A worker-level `extra_headers` is threaded, unchanged, into every
     per-request call the worker drives: the poll loop (forwarded to
-    ``aiter_work``), the lease heartbeat, the force-stop, and the session
+    `aiter_work`), the lease heartbeat, the force-stop, and the session
     tool runner.
 
     The worker does no header munging — it passes the caller's mapping
-    through to each call's ``extra_headers=``. Auth stays on the scoped
-    sub-clients the worker builds (``env_key`` Bearer), independent of this
+    through to each call's `extra_headers=`. Auth stays on the scoped
+    sub-clients the worker builds (`env_key` Bearer), independent of this
     passthrough.
     """
     work = _FakeWorkResource(heartbeat_state="running")
@@ -905,8 +905,8 @@ async def test_worker_threads_extra_headers_into_poll_heartbeat_stop_and_runner(
 
 
 def test_work_resource_worker_builds_environment_worker() -> None:
-    """``client.beta.environments.work.worker(...)`` builds an ``EnvironmentWorker``
-    bound to the client, with the options threaded through (mirrors ``poller``)."""
+    """`client.beta.environments.work.worker(...)` builds an `EnvironmentWorker`
+    bound to the client, with the options threaded through (mirrors `poller`)."""
     client = AsyncAnthropic(api_key="x")
     worker = client.beta.environments.work.worker(
         environment_id="e_1",
@@ -954,9 +954,9 @@ def test_work_resource_worker_defaults() -> None:
 
 
 def test_work_resource_worker_and_poller_async_only() -> None:
-    """``worker()`` / ``poller()`` build an async-only ``EnvironmentWorker`` /
-    ``aiter_work`` generator, so they live on ``AsyncWork`` and are NOT exposed
-    on the sync ``Work`` resource (calling them from the sync client would hand
+    """`worker()` / `poller()` build an async-only `EnvironmentWorker` /
+    `aiter_work` generator, so they live on `AsyncWork` and are NOT exposed
+    on the sync `Work` resource (calling them from the sync client would hand
     back coroutines/async iterators that can't run without an event loop)."""
     async_work = AsyncAnthropic(api_key="x").beta.environments.work
     assert hasattr(async_work, "worker")
@@ -973,7 +973,7 @@ async def test_heartbeat_starts_before_skill_download(monkeypatch: pytest.Monkey
     """Regression: the lease heartbeat must already be running while skills are
     downloaded.
 
-    Skill setup (``AgentToolContext.__aenter__``) can take longer than the
+    Skill setup (`AgentToolContext.__aenter__`) can take longer than the
     lease TTL. If the first heartbeat only fired *after* that download (the old
     ordering) the lease could lapse mid-download and another worker would
     reclaim the item — both then serve the same session (split-brain). We make
@@ -1047,9 +1047,9 @@ async def test_heartbeat_starts_before_skill_download(monkeypatch: pytest.Monkey
 
 # ---------- heartbeat loop ---------------------------------------------------
 #
-# ``_heartbeat_loop`` is driven directly with a scripted ``work`` fake and a
+# `_heartbeat_loop` is driven directly with a scripted `work` fake and a
 # fake clock, so the lease-staleness ceiling can be crossed without real
-# waiting. The first scripted beat reports ``ttl_seconds=0`` so the loop keeps
+# waiting. The first scripted beat reports `ttl_seconds=0` so the loop keeps
 # the (patched, tiny) default interval instead of the 1 s floor it applies to
 # a server-provided ttl.
 
@@ -1067,8 +1067,8 @@ class _FakeClock:
 
 
 class _ScriptedHeartbeatWork:
-    """``heartbeat`` pops ``(clock_advance, outcome)`` per call: an exception is
-    raised, ``_HANG`` never returns, anything else is the response."""
+    """`heartbeat` pops `(clock_advance, outcome)` per call: an exception is
+    raised, `_HANG` never returns, anything else is the response."""
 
     def __init__(self, clock: _FakeClock, script: list[tuple[float, Any]]) -> None:
         self._clock = clock
@@ -1152,7 +1152,7 @@ async def test_heartbeat_permanent_4xx_stops_immediately(
 
 @pytest.mark.asyncio()
 async def test_heartbeat_keeps_beating_while_a_sync_tool_blocks(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Heartbeat loop and tool call share one task group, as they do in ``_handle_item``."""
+    """Heartbeat loop and tool call share one task group, as they do in `_handle_item`."""
     monkeypatch.setattr(worker_mod, "_HEARTBEAT_DEFAULT", _FAST_INTERVAL)
     in_tool, release = threading.Event(), threading.Event()
 

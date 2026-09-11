@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Streams a session with ``event_deltas`` enabled and folds the ``event_start``
-/ ``event_delta`` previews into ``agent.message`` snapshots with
-``accumulate_managed_agents_event`` — for callers who want to own the preview
+"""Streams a session with `event_deltas` enabled and folds the `event_start`
+/ `event_delta` previews into `agent.message` snapshots with
+`accumulate_managed_agents_event` — for callers who want to own the preview
 lifecycle themselves.
 """
 
@@ -50,8 +50,8 @@ def main() -> None:
         ],
     )
 
-    # Open the event stream with ``event_deltas`` enabled so ``agent.message``
-    # text arrives incrementally as ``event_start`` / ``event_delta`` previews
+    # Open the event stream with `event_deltas` enabled so `agent.message`
+    # text arrives incrementally as `event_start` / `event_delta` previews
     # before the buffered final event.
     print("\nStreaming:")
     with client.beta.sessions.events.stream(
@@ -73,7 +73,7 @@ def main() -> None:
             prev = previews.get(event_id) if event_id is not None else None
             if ev.type == "event_delta" and prev is None:
                 # The preview was already closed (e.g. dropped below at
-                # ``span.model_request_end``) — ignore the stray delta.
+                # `span.model_request_end`) — ignore the stray delta.
                 continue
             preview = accumulate_managed_agents_event(prev, ev)
             if event_id is not None and preview is not None:

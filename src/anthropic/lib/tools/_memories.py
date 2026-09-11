@@ -1,9 +1,9 @@
 """Session-level memory-store download and sync.
 
 A session may have several memory stores attached. This module resolves
-where each store's folder goes on disk, opens a :class:`LocalFileStore`
+where each store's folder goes on disk, opens a `LocalFileStore`
 there, and reconciles each folder with its remote store — the merge rules
-live on :class:`SessionMemoryStores`.
+live on `SessionMemoryStores`.
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ __all__ = [
     "MARKER_PATH",
 ]
 
-#: Whether a locally deleted file may delete its server memory — ``"log_only"`` is the dry run.
+#: Whether a locally deleted file may delete its server memory — `"log_only"` is the dry run.
 MemoryDeleteMode = Literal["enabled", "log_only", "disabled"]
 
 #: How often (seconds) the worker syncs the session's memory stores back
@@ -53,8 +53,8 @@ MIN_MEMORY_SYNC_INTERVAL = 5.0
 
 
 def _check_sync_interval(interval: float) -> None:
-    # Phrased so NaN fails: ``NaN < floor`` is False, so the inverse test
-    # ``interval < floor`` would wave NaN through — and a NaN interval makes
+    # Phrased so NaN fails: `NaN < floor` is False, so the inverse test
+    # `interval < floor` would wave NaN through — and a NaN interval makes
     # every cadence check due, the exact hammering the floor exists to stop.
     if not interval >= MIN_MEMORY_SYNC_INTERVAL:
         raise ValueError(f"sync interval must be at least {MIN_MEMORY_SYNC_INTERVAL} seconds, got {interval}")
@@ -64,8 +64,8 @@ def _check_sync_interval(interval: float) -> None:
 #: sync, then the flush — so a slow server cannot stall teardown.
 MEMORY_FLUSH_TIMEOUT = 30.0
 
-#: Reserved marker at every store root — two lines: ``version <n>`` and the
-#: store's ``memory_store_id``; a sync trusts the folder only when both match.
+#: Reserved marker at every store root — two lines: `version <n>` and the
+#: store's `memory_store_id`; a sync trusts the folder only when both match.
 #: Never itself synced.
 MARKER_PATH = ".anthropic-memory-store"
 
@@ -79,8 +79,8 @@ def _marker_sha(memory_store_id: str) -> str:
 #: How long (seconds) a file must stay missing before its server delete goes out.
 DELETE_CORROBORATION_SECONDS = 30.0
 
-#: Page sizes for memory listings — the API's maximum per view: ``basic``
-#: pages carry up to 100 items, ``full`` pages are capped by the server.
+#: Page sizes for memory listings — the API's maximum per view: `basic`
+#: pages carry up to 100 items, `full` pages are capped by the server.
 _LIST_PAGE_SIZE = 100
 _FULL_LIST_PAGE_SIZE = 20
 
@@ -92,7 +92,7 @@ _FETCH_CONCURRENCY = 16
 
 #: How many uploads one store's flush keeps in flight. At ~0.3s per upload,
 #: 32 clears the server's 2000-memories-per-store cap inside
-#: :data:`MEMORY_FLUSH_TIMEOUT`; eight stores at once stay far below the
+#: `MEMORY_FLUSH_TIMEOUT`; eight stores at once stay far below the
 #: client's connection limit.
 _UPLOAD_CONCURRENCY = 32
 
@@ -110,30 +110,30 @@ class _MarkerScan(NamedTuple):
     files: dict[str, str]
     #: The scan found a marker naming this store — the only state that may drive uploads or deletes.
     marker_ok: bool
-    #: Why the marker check failed; ``None`` when it passed.
+    #: Why the marker check failed; `None` when it passed.
     distrust_reason: str | None
 
 
 class SessionMemoryError(Exception):
     """A memory store could not be materialised on disk.
 
-    Raised by :meth:`SessionMemoryStores.download`; the worker lets it fail
+    Raised by `SessionMemoryStores.download`; the worker lets it fail
     the work item.
     """
 
 
 @dataclass
 class _AttachedStore:
-    """One attached store: its :class:`FileStore` on disk plus the sync baseline."""
+    """One attached store: its `FileStore` on disk plus the sync baseline."""
 
     memory_store_id: str
     files: FileStore
     read_only: bool
-    #: ``{rel_path → content sha}`` as of the last download or successful sync.
+    #: `{rel_path → content sha}` as of the last download or successful sync.
     baseline: dict[str, str] = field(default_factory=dict[str, str])
-    #: ``{rel_path → sha}`` the server refused; retried only after the file changes.
+    #: `{rel_path → sha}` the server refused; retried only after the file changes.
     refused_shas: dict[str, str] = field(default_factory=dict[str, str])
-    #: ``{rel_path → monotonic time first seen missing}``; the server delete waits for a later sync.
+    #: `{rel_path → monotonic time first seen missing}`; the server delete waits for a later sync.
     pending_deletes: dict[str, float] = field(default_factory=dict[str, float])
 
 
@@ -160,29 +160,29 @@ class _DeletePass:
 class SessionMemoryStores:
     """The memory stores attached to one session, materialised on disk.
 
-    :meth:`download` opens a :class:`~._file_store.LocalFileStore` at each
-    attached store's directory (its ``mount_path``, or a workdir fallback
-    — see :meth:`download`), pulls its memories,
-    and records each one's ``content_sha256`` as the sync baseline. Each
-    sync (:meth:`sync_if_due` on the worker's cadence, :meth:`finish` once
+    `download` opens a `._file_store.LocalFileStore` at each
+    attached store's directory (its `mount_path`, or a workdir fallback
+    — see `download`), pulls its memories,
+    and records each one's `content_sha256` as the sync baseline. Each
+    sync (`sync_if_due` on the worker's cadence, `finish` once
     at the end) reconciles disk against server, per store and per path:
 
     - a memory changed only remotely is written to disk;
     - a file changed only locally is uploaded — an update with a
-      ``content_sha256`` precondition, or a create for a new file;
+      `content_sha256` precondition, or a create for a new file;
     - a file changed on both sides logs a warning and takes the server
       version;
     - a file the server refuses (too large, invalid content) is skipped —
       warned once and retried only after the file changes; other files keep
       syncing;
     - a file deleted locally is deleted on the server, guarded by an
-      ``expected_content_sha256`` precondition — a concurrent server-side
+      `expected_content_sha256` precondition — a concurrent server-side
       edit wins and the file is restored instead. The delete never goes
       out on the first sync that sees the file missing: it waits
-      :data:`DELETE_CORROBORATION_SECONDS`, re-checks the file and the
+      `DELETE_CORROBORATION_SECONDS`, re-checks the file and the
       marker, and each sync sends a bounded number — the rest wait.
-      ``sync_deletions="log_only"`` runs the same checks and only logs;
-      ``"disabled"`` turns server deletes off;
+      `sync_deletions="log_only"` runs the same checks and only logs;
+      `"disabled"` turns server deletes off;
     - a memory deleted on the server is deleted on disk — unless the file
       holds an un-pushed edit, making it the only copy: a writable store
       re-creates the memory, a read-only store keeps the file unsynced;
@@ -200,7 +200,7 @@ class SessionMemoryStores:
     and the next sync's scan finds whatever is at the path by then — nothing
     (re-downloaded) or someone else's files (left alone) — under the rules below.
 
-    :meth:`download` stamps :data:`MARKER_PATH` into the folder, and every
+    `download` stamps `MARKER_PATH` into the folder, and every
     sync checks it in the same directory scan it syncs from:
 
     - the folder or marker gone with no files left, or the marker intact
@@ -209,13 +209,13 @@ class SessionMemoryStores:
     - the marker gone or naming another store while files remain: the sync
       does nothing — those files never upload and never drive deletes.
 
-    :meth:`download` raises :class:`SessionMemoryError` on the first store it
+    `download` raises `SessionMemoryError` on the first store it
     cannot materialise. The syncs never raise: mid-session, one bad store
     or one bad file is logged and the rest continue. Instances are not safe for
     concurrent use. The worker builds one on its token-scoped sub-client (the
-    memory endpoints reject the environment key): ``sync_if_due`` after each
-    tool call, ``finish`` once at a clean end, a bounded
-    :meth:`flush_writes` in every teardown, ``dispose`` last.
+    memory endpoints reject the environment key): `sync_if_due` after each
+    tool call, `finish` once at a clean end, a bounded
+    `flush_writes` in every teardown, `dispose` last.
     """
 
     def __init__(
@@ -255,8 +255,8 @@ class SessionMemoryStores:
     def _store_root(self, resource: BetaManagedAgentsMemoryStoreResource) -> Path:
         """Where one store's files land on disk.
 
-        The store's files land at its ``mount_path`` — the very location the
-        agent's system prompt tells it to read. A ``mount_path`` we cannot use
+        The store's files land at its `mount_path` — the very location the
+        agent's system prompt tells it to read. A `mount_path` we cannot use
         verbatim is refused rather than quietly relocated: the agent would read
         an empty folder at the path it was told about, and write notes somewhere
         the next session looks for nothing.
@@ -275,7 +275,7 @@ class SessionMemoryStores:
     async def download(self, session: BetaManagedAgentsSession) -> None:
         """Download every attached store's memories to disk.
 
-        ``session`` arrives already fetched — one snapshot shared with the
+        `session` arrives already fetched — one snapshot shared with the
         skills download.
         """
         plan = [(r, self._store_root(r)) for r in session.resources if r.type == "memory_store"]
@@ -288,7 +288,7 @@ class SessionMemoryStores:
                     files=await LocalFileStore.open(root, utf8_only=True),
                     read_only=resource.access == "read_only",
                 )
-                # A root ``open`` did not create is a dead run's leftovers;
+                # A root `open` did not create is a dead run's leftovers;
                 # the first sync would upload them into the customer's store.
                 if not store.files.root().removed_on_dispose:
                     # The configured path, not root().path — that one is
@@ -316,7 +316,7 @@ class SessionMemoryStores:
                 )
                 self._stores.append(store)
             except Exception as e:
-                # A half-downloaded folder self-destructs; ``dispose`` leaves
+                # A half-downloaded folder self-destructs; `dispose` leaves
                 # a refused pre-existing directory exactly as found.
                 if store is not None:
                     try:
@@ -431,7 +431,7 @@ class SessionMemoryStores:
             log.warning("memory sync failed memory_store_id=%s: %s", store.memory_store_id, e)
 
     async def sync_if_due(self) -> None:
-        """Run one sync when ``sync_interval`` has elapsed since the last.
+        """Run one sync when `sync_interval` has elapsed since the last.
 
         Stores sync in parallel; a store's own paths reconcile in a
         deterministic order. Never raises — a failure on one store is
@@ -522,10 +522,10 @@ class SessionMemoryStores:
             raise
 
     async def dispose(self) -> None:
-        """Remove every store directory that :meth:`download` created.
+        """Remove every store directory that `download` created.
 
         Pre-existing directories are left alone — that is
-        :meth:`FileStore.dispose`'s own rule. A folder that holds files
+        `FileStore.dispose`'s own rule. A folder that holds files
         but fails the marker check is also kept — sync promised to leave
         it as found, and the next download refuses it visibly.
         """
@@ -671,9 +671,9 @@ class SessionMemoryStores:
         return remote_sha
 
     async def _remove_local(self, store: _AttachedStore, rel: str, expect_sha: str) -> str | None:
-        """Remove the file for a memory the server no longer has, if it still holds ``expect_sha``.
+        """Remove the file for a memory the server no longer has, if it still holds `expect_sha`.
 
-        Returns ``None`` when the file is gone from disk, ``expect_sha`` when it must
+        Returns `None` when the file is gone from disk, `expect_sha` when it must
         stay in the baseline (I/O error, remove failed), or the file's fresh sha when
         it was edited since the scan.
         """
@@ -698,10 +698,10 @@ class SessionMemoryStores:
         return None
 
     async def _write(self, store: _AttachedStore, rel: str, content: str) -> bool:
-        """Write a memory's content to disk; ``False`` (and a warning) on failure.
+        """Write a memory's content to disk; `False` (and a warning) on failure.
 
-        A ``..`` component in the wire path reaches here as
-        :class:`FileStoreError` — that is the escape guard.
+        A `..` component in the wire path reaches here as
+        `FileStoreError` — that is the escape guard.
         """
         try:
             await store.files.put(rel, content)
@@ -711,7 +711,7 @@ class SessionMemoryStores:
         return True
 
     async def _pull_all(self, store: _AttachedStore, pulls: list[tuple[str, BetaManagedAgentsMemory]]) -> None:
-        """Fetch and write the given memories, :data:`_FETCH_CONCURRENCY` at a time.
+        """Fetch and write the given memories, `_FETCH_CONCURRENCY` at a time.
 
         The sync's content pass: the listing carried no content, so each
         memory is fetched individually and written as it arrives. On
@@ -748,9 +748,9 @@ class SessionMemoryStores:
     async def _list_memories(
         self, memory_store_id: str, *, view: BetaManagedAgentsMemoryView = "basic"
     ) -> AsyncIterator[BetaManagedAgentsMemory]:
-        """The store's memories — ``basic`` view (shas, no content) at
-        :data:`_LIST_PAGE_SIZE` per page unless the caller needs ``full``
-        pages. ``memory_prefix`` rollups and the reserved marker path are
+        """The store's memories — `basic` view (shas, no content) at
+        `_LIST_PAGE_SIZE` per page unless the caller needs `full`
+        pages. `memory_prefix` rollups and the reserved marker path are
         skipped."""
         limit = _LIST_PAGE_SIZE if view == "basic" else _FULL_LIST_PAGE_SIZE
         async for item in self._client.beta.memory_stores.memories.list(memory_store_id, view=view, limit=limit):
@@ -768,10 +768,10 @@ class SessionMemoryStores:
     async def _upload(
         self, store: _AttachedStore, rel: str, local_sha: str | None, *, existing: BetaManagedAgentsMemory | None
     ) -> str | None:
-        """Push one local file; ``None`` keeps the old baseline so the next pass retries.
+        """Push one local file; `None` keeps the old baseline so the next pass retries.
 
         A refusal the server would repeat (400/413, the utf-8 gate) enters
-        ``refused_shas``: warned once, retried only after the file changes.
+        `refused_shas`: warned once, retried only after the file changes.
         """
         try:
             data = await store.files.get(rel)

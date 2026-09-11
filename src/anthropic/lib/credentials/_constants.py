@@ -54,9 +54,9 @@ ENV_BASE_URL = "ANTHROPIC_BASE_URL"
 
 
 def _user_agent() -> str:  # pyright: ignore[reportUnusedFunction] — used by _workload/_providers
-    """``User-Agent`` value sent on token-endpoint POSTs.
+    """`User-Agent` value sent on token-endpoint POSTs.
 
-    Computed lazily so this module doesn't need to import ``_version`` at
+    Computed lazily so this module doesn't need to import `_version` at
     module load time (the credentials package is otherwise import-light).
     """
     from ..._version import __version__
@@ -67,13 +67,13 @@ def _user_agent() -> str:  # pyright: ignore[reportUnusedFunction] — used by _
 def _config_dir() -> pathlib.Path:
     """Resolve the config directory.
 
-    ``ANTHROPIC_CONFIG_DIR`` env var → platform default.
+    `ANTHROPIC_CONFIG_DIR` env var → platform default.
 
     Platform defaults:
-      * Linux & macOS: ``~/.config/anthropic/`` — XDG-style on both platforms
+      * Linux & macOS: `~/.config/anthropic/` — XDG-style on both platforms
         for consistency across SDKs (macOS does **not** use
-        ``~/Library/Application Support/``).
-      * Windows: ``%APPDATA%\\Anthropic\\``
+        `~/Library/Application Support/`).
+      * Windows: `%APPDATA%\\Anthropic\\`
     """
     env = os.environ.get(ENV_CONFIG_DIR)
     if env:
@@ -86,7 +86,7 @@ def _config_dir() -> pathlib.Path:
 
 
 def _read_active_config_pointer() -> Optional[str]:
-    """Return the stripped contents of ``<config_dir>/active_config``, or ``None``
+    """Return the stripped contents of `<config_dir>/active_config`, or `None`
     if the pointer file is missing or empty."""
     try:
         name = (_config_dir() / "active_config").read_text(encoding="utf-8").strip()
@@ -98,8 +98,8 @@ def _read_active_config_pointer() -> Optional[str]:
 def _active_profile() -> str:  # pyright: ignore[reportUnusedFunction] — used by _providers
     """Resolve the active profile name.
 
-    ``ANTHROPIC_PROFILE`` env var → ``<config_dir>/active_config`` pointer file
-    → ``"default"`` literal. The resolved name is validated against path-
+    `ANTHROPIC_PROFILE` env var → `<config_dir>/active_config` pointer file
+    → `"default"` literal. The resolved name is validated against path-
     traversal patterns before being returned.
     """
     env = os.environ.get(ENV_PROFILE)
@@ -114,10 +114,10 @@ def _active_profile() -> str:  # pyright: ignore[reportUnusedFunction] — used 
 
 
 def _require_https(url: str, *, field: str) -> None:  # pyright: ignore[reportUnusedFunction] — used by _workload/_providers
-    """Reject non-``https://`` token-endpoint URLs.
+    """Reject non-`https://` token-endpoint URLs.
 
-    Localhost is allowed for testing so ``base_url="http://localhost:8080"``
-    works against a local ``oauth_server`` instance; everything else must be
+    Localhost is allowed for testing so `base_url="http://localhost:8080"`
+    works against a local `oauth_server` instance; everything else must be
     TLS-encrypted because the body of these POSTs carries the assertion JWT
     or a long-lived refresh token.
     """
@@ -135,11 +135,11 @@ def _require_https(url: str, *, field: str) -> None:  # pyright: ignore[reportUn
 def _validate_profile_name(profile: str, *, source: str = "profile name") -> None:
     """Reject profile names that could escape the config directory.
 
-    Profile names come from user-controlled sources (``ANTHROPIC_PROFILE``,
-    the ``active_config`` pointer file, ``CredentialsFile(profile=...)``) and
-    are interpolated into filesystem paths. A value like ``"../../etc/shadow"``
-    would otherwise let a read of ``configs/<profile>.json`` escape the config
-    root entirely. Pass ``source=`` so the error message names where the bad
+    Profile names come from user-controlled sources (`ANTHROPIC_PROFILE`,
+    the `active_config` pointer file, `CredentialsFile(profile=...)`) and
+    are interpolated into filesystem paths. A value like `"../../etc/shadow"`
+    would otherwise let a read of `configs/<profile>.json` escape the config
+    root entirely. Pass `source=` so the error message names where the bad
     value came from.
     """
     if not profile:
@@ -159,13 +159,13 @@ def _validate_profile_name(profile: str, *, source: str = "profile name") -> Non
 
 
 def _resolve_under(base: pathlib.Path, candidate: pathlib.Path) -> pathlib.Path:
-    """Assert ``candidate`` resolves to a descendant of ``base``, return it verbatim.
+    """Assert `candidate` resolves to a descendant of `base`, return it verbatim.
 
-    The containment check uses ``resolve(strict=False)`` on both sides so
-    symlinks and ``..`` segments are normalized for the purposes of escape
+    The containment check uses `resolve(strict=False)` on both sides so
+    symlinks and `..` segments are normalized for the purposes of escape
     detection. The returned path is the *original* (unresolved) candidate —
     callers that care about symlink following must handle it themselves
-    (e.g. ``os.stat(follow_symlinks=False)``).
+    (e.g. `os.stat(follow_symlinks=False)`).
     """
     base_resolved = base.resolve(strict=False)
     candidate_resolved = candidate.resolve(strict=False)
@@ -177,14 +177,14 @@ def _resolve_under(base: pathlib.Path, candidate: pathlib.Path) -> pathlib.Path:
 
 
 def _config_file_path(profile: str) -> pathlib.Path:  # pyright: ignore[reportUnusedFunction] — used by _providers
-    """Path to ``<config_dir>/configs/<profile>.json`` (non-secret, 0644)."""
+    """Path to `<config_dir>/configs/<profile>.json` (non-secret, 0644)."""
     _validate_profile_name(profile)
     base = _config_dir()
     return _resolve_under(base, base / "configs" / f"{profile}.json")
 
 
 def _credentials_file_path(profile: str) -> pathlib.Path:  # pyright: ignore[reportUnusedFunction] — used by _providers
-    """Path to ``<config_dir>/credentials/<profile>.json`` (secret, 0600)."""
+    """Path to `<config_dir>/credentials/<profile>.json` (secret, 0600)."""
     _validate_profile_name(profile)
     base = _config_dir()
     return _resolve_under(base, base / "credentials" / f"{profile}.json")
@@ -193,11 +193,11 @@ def _credentials_file_path(profile: str) -> pathlib.Path:  # pyright: ignore[rep
 def _has_active_profile_config() -> bool:  # pyright: ignore[reportUnusedFunction] — used by _chain
     """Tighter auto-discover check for the tier-1 credential chain.
 
-    Returns ``True`` only if the *active* profile's config file exists. The
-    previous version returned ``True`` for any ``.json`` under ``configs/``,
-    which meant a stray ``configs/work.json`` on disk was enough to steer
-    ``default_credentials()`` into reading ``configs/default.json`` and
-    failing because ``default.json`` wasn't there.
+    Returns `True` only if the *active* profile's config file exists. The
+    previous version returned `True` for any `.json` under `configs/`,
+    which meant a stray `configs/work.json` on disk was enough to steer
+    `default_credentials()` into reading `configs/default.json` and
+    failing because `default.json` wasn't there.
     """
     try:
         return _config_file_path(_active_profile()).is_file()
@@ -206,19 +206,19 @@ def _has_active_profile_config() -> bool:  # pyright: ignore[reportUnusedFunctio
 
 
 def _has_explicit_active_config() -> bool:  # pyright: ignore[reportUnusedFunction] — used by _chain
-    """True if the user wrote a non-empty ``active_config`` pointer file.
+    """True if the user wrote a non-empty `active_config` pointer file.
 
-    This is an explicit opt-in signal equivalent to setting ``ANTHROPIC_PROFILE``:
+    This is an explicit opt-in signal equivalent to setting `ANTHROPIC_PROFILE`:
     the user has told us which profile to load. If the target config file is
     missing or malformed, the chain should surface that error rather than
-    silently falling through — matching how ``ANTHROPIC_PROFILE=missing``
+    silently falling through — matching how `ANTHROPIC_PROFILE=missing`
     behaves today.
     """
     return _read_active_config_pointer() is not None
 
 
 def resolve_identity_token_path(path: str | os.PathLike[str] | None = None) -> pathlib.Path | None:
-    """ctor arg → ``ANTHROPIC_IDENTITY_TOKEN_FILE`` → ``None``."""
+    """ctor arg → `ANTHROPIC_IDENTITY_TOKEN_FILE` → `None`."""
     if path is not None:
         return pathlib.Path(path)
     env = os.environ.get(ENV_IDENTITY_TOKEN_FILE)
@@ -230,10 +230,10 @@ def resolve_identity_token_path(path: str | os.PathLike[str] | None = None) -> p
 def _has_auto_discoverable_credentials() -> bool:  # pyright: ignore[reportUnusedFunction] — used by _client
     """True if the environment / filesystem contains signals that would
     normally drive the tier-1 (profile) or tier-2 (env federation) paths of
-    :func:`default_credentials`.
+    `default_credentials`.
 
     Used by the shadow-warning detection in the client constructor: if a
-    static ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` is set alongside
+    static `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` is set alongside
     any of these signals, the auto-discovery would have yielded a credential
     but got silently shadowed — and the user should know.
     """

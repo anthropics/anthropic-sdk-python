@@ -14,7 +14,7 @@ from anthropic.types.beta.memory_stores import BetaManagedAgentsMemory
 
 
 class Clock:
-    """A settable stand-in for the module's ``monotonic``."""
+    """A settable stand-in for the module's `monotonic`."""
 
     def __init__(self) -> None:
         self.now = 0.0
@@ -33,7 +33,7 @@ def clock(monkeypatch: pytest.MonkeyPatch) -> Clock:
 async def run_sync(stores: SessionMemoryStores) -> None:
     """Drive one reconcile pass without clock bookkeeping.
 
-    The public cadence path (``sync_if_due`` plus the clock) is exercised
+    The public cadence path (`sync_if_due` plus the clock) is exercised
     by the worker tests; unit tests call the pass directly.
     """
     await stores._sync_all(final=False)  # pyright: ignore[reportPrivateUsage] -- the suite's one deterministic driver
@@ -43,9 +43,9 @@ async def run_sync(stores: SessionMemoryStores) -> None:
 def listing_interrupted_by(
     stores: SessionMemoryStores, interrupt: Callable[[], object], *, after_items: int | None = None
 ) -> Iterator[None]:
-    """Run ``interrupt`` once while a sync's server listing is being consumed:
-    right after the sync has processed ``after_items`` listed memories, or
-    once the listing is exhausted when ``None``. This lands a change on disk
+    """Run `interrupt` once while a sync's server listing is being consumed:
+    right after the sync has processed `after_items` listed memories, or
+    once the listing is exhausted when `None`. This lands a change on disk
     after the sync's directory scan and before whatever it does next."""
     real_list = stores._list_memories
 

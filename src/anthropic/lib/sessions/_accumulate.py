@@ -36,24 +36,24 @@ def accumulate_managed_agents_event(
     accumulated: AccumulatedEvent | None,
     event: BetaManagedAgentsStreamSessionEvents,
 ) -> AccumulatedEvent | None:
-    """Fold one preview event into an ``agent.message`` snapshot. Returns a fresh
-    snapshot — the ``accumulated`` argument is never mutated.
+    """Fold one preview event into an `agent.message` snapshot. Returns a fresh
+    snapshot — the `accumulated` argument is never mutated.
 
-    - ``event_start`` opens the preview: a new snapshot with empty content is
-      returned (so ``accumulated`` may be ``None``). Its ``processed_at`` is an
+    - `event_start` opens the preview: a new snapshot with empty content is
+      returned (so `accumulated` may be `None`). Its `processed_at` is an
       epoch placeholder that the buffered final event's server timestamp
-      replaces. ``accumulated`` is passed through unchanged when the
-      previewed event is not an ``agent.message`` — this helper only tracks
-      ``agent.message`` previews.
-    - ``event_delta`` is folded into ``accumulated``: a new ``delta.index``
+      replaces. `accumulated` is passed through unchanged when the
+      previewed event is not an `agent.message` — this helper only tracks
+      `agent.message` previews.
+    - `event_delta` is folded into `accumulated`: a new `delta.index`
       inserts the fragment as a fresh content entry; an existing index returns
       a copy with that entry appended to. An unrecognised fragment type on an
       existing index passes the entry through unchanged — deltas are
       best-effort and the buffered final event is canonical.
-    - ``agent.message`` is the buffered final event: a copy of it is returned,
+    - `agent.message` is the buffered final event: a copy of it is returned,
       replacing whatever the preview had accumulated.
     - Any other event, including types this SDK version does not know about,
-      passes ``accumulated`` through unchanged.
+      passes `accumulated` through unchanged.
     """
     if event.type == "event_start":
         if event.event.type == "agent.message":

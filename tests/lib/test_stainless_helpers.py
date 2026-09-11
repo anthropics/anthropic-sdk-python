@@ -19,14 +19,14 @@ from ..conftest import base_url
 
 
 class _Tool:
-    """Stands in for a ``@beta_tool`` / toolset object: ``tools=`` takes anything with a ``to_dict()``."""
+    """Stands in for a `@beta_tool` / toolset object: `tools=` takes anything with a `to_dict()`."""
 
     def to_dict(self) -> BetaToolParam:
         return {"name": "t", "description": "d", "input_schema": {"type": "object"}}
 
 
 class _TaggedTuple(tuple):  # type: ignore[type-arg]
-    """Same for file tuples, mirroring ``mcp_resource_to_file``'s return value."""
+    """Same for file tuples, mirroring `mcp_resource_to_file`'s return value."""
 
 
 def test_helper_header() -> None:
@@ -34,7 +34,7 @@ def test_helper_header() -> None:
 
 
 def test_helper_header_is_an_append_header() -> None:
-    # ``merge_headers`` only appends keys it knows about — keep this aligned
+    # `merge_headers` only appends keys it knows about — keep this aligned
     assert STAINLESS_HELPER_HEADER in _APPEND_HEADERS
 
 

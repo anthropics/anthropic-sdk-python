@@ -44,14 +44,14 @@ def _request(*, extra: str = "vertex") -> Any:
 
 
 def load_default_credentials(*, extra: str = "vertex") -> tuple[GoogleCredentials, str | None]:
-    """Load Application Default Credentials with the ``cloud-platform`` scope and
+    """Load Application Default Credentials with the `cloud-platform` scope and
     mint an initial access token.
 
-    Returns the credentials object and the project they resolve to (``None`` for
-    plain user ADC). Blocking — async callers wrap with :func:`anthropic._utils.asyncify`.
+    Returns the credentials object and the project they resolve to (`None` for
+    plain user ADC). Blocking — async callers wrap with `anthropic._utils.asyncify`.
 
-    ``extra`` names the pip extra that the install hint in :class:`MissingDependencyError`
-    points at when ``google-auth`` isn't installed; callers pass the extra for their client.
+    `extra` names the pip extra that the install hint in `MissingDependencyError`
+    points at when `google-auth` isn't installed; callers pass the extra for their client.
     """
     try:
         import google.auth  # type: ignore
@@ -64,8 +64,8 @@ def load_default_credentials(*, extra: str = "vertex") -> tuple[GoogleCredential
 
 
 def refresh_credentials(credentials: GoogleCredentials, *, extra: str = "vertex") -> None:
-    """Refresh ``credentials`` in place via ``google.auth.transport.requests``.
+    """Refresh `credentials` in place via `google.auth.transport.requests`.
 
-    Blocking — async callers wrap with :func:`anthropic._utils.asyncify`.
+    Blocking — async callers wrap with `anthropic._utils.asyncify`.
     """
     cast(Any, credentials).refresh(_request(extra=extra))

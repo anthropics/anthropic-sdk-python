@@ -76,9 +76,9 @@ _STOP_REASON_STEPS: dict[BetaStopReason, _Step] = {
 def _determine_next_step_from_stop_reason(stop_reason: BetaStopReason | None) -> _Step:
     """Decide how the runner loop treats a finished assistant turn.
 
-    - ``run_tools``: run the turn's client tool calls, append their results and continue; stop if there are none.
-    - ``resume``: the turn is not finished; send it back unchanged, running no tool calls, so the server continues it.
-    - ``stop``: terminal; the turn is the final message and its tool_use blocks must not be executed.
+    - `run_tools`: run the turn's client tool calls, append their results and continue; stop if there are none.
+    - `resume`: the turn is not finished; send it back unchanged, running no tool calls, so the server continues it.
+    - `stop`: terminal; the turn is the final message and its tool_use blocks must not be executed.
     """
     if stop_reason is not None and stop_reason in _STOP_REASON_STEPS:
         return _STOP_REASON_STEPS[stop_reason]
@@ -155,9 +155,9 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
 
     def _available_tool_names(self) -> set[str]:
         """The tool names currently available, after applying any
-        mid-conversation ``tool_removal`` / ``tool_addition`` blocks.
+        mid-conversation `tool_removal` / `tool_addition` blocks.
 
-        Removal is only a hint to the model, which can still emit a ``tool_use``
+        Removal is only a hint to the model, which can still emit a `tool_use`
         for a withdrawn tool; a name absent from this set routes that call down
         the same unknown-tool path as a tool that was never declared.
         """

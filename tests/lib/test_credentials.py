@@ -86,8 +86,8 @@ def no_default_creds_file(monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Pat
     """Point the config directory at an empty location so a real
     ~/.config/anthropic/ on the dev machine doesn't leak into tests.
 
-    Patches ``_config_dir`` directly rather than setting ``ANTHROPIC_CONFIG_DIR``
-    so that ``clean_env`` (which deletes that env var) can't clobber the isolation.
+    Patches `_config_dir` directly rather than setting `ANTHROPIC_CONFIG_DIR`
+    so that `clean_env` (which deletes that env var) can't clobber the isolation.
     """
     empty = tmp_path / "empty-config-dir"
     empty.mkdir()
@@ -95,7 +95,7 @@ def no_default_creds_file(monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Pat
 
 
 # Field names that live at the top level of the new nested config shape
-# (outside the ``authentication`` object).
+# (outside the `authentication` object).
 _TOP_LEVEL_CONFIG_KEYS = {"base_url", "organization_id", "workspace_id"}
 
 
@@ -103,10 +103,10 @@ def _migrate_legacy_config(flat: Dict[str, Any]) -> Dict[str, Any]:
     """Adapter: convert a flat legacy config dict into the new nested shape.
 
     Many tests in this file predate the schema migration and pass legacy
-    flat configs like ``{"type": "workload_identity", "federation_rule_id": ...}``.
+    flat configs like `{"type": "workload_identity", "federation_rule_id": ...}`.
     Rather than churn every caller, this helper translates at the test-helper
     layer — tests that want to assert against the new shape directly can
-    pass a config dict that already contains an ``"authentication"`` key.
+    pass a config dict that already contains an `"authentication"` key.
     """
     result: Dict[str, Any] = {}
     auth: Dict[str, Any] = {}
@@ -139,17 +139,17 @@ def _write_profile(
     config: Dict[str, Any],
     credentials: Optional[Dict[str, Any]] = None,
 ) -> None:
-    """Test helper: lay out ``configs/<profile>.json`` and optionally
-    ``credentials/<profile>.json`` under ``config_dir``.
+    """Test helper: lay out `configs/<profile>.json` and optionally
+    `credentials/<profile>.json` under `config_dir`.
 
-    Accepts either the new nested ``{"authentication": {...}}`` shape or a
-    legacy flat shape (``{"type": "workload_identity", ...}``) for backwards
+    Accepts either the new nested `{"authentication": {...}}` shape or a
+    legacy flat shape (`{"type": "workload_identity", ...}`) for backwards
     compatibility with the tests that predate the schema migration. Legacy
-    inputs are translated via :func:`_migrate_legacy_config` before being
+    inputs are translated via `_migrate_legacy_config` before being
     written to disk.
 
-    Prepends ``"type": "oauth_token"`` to the credentials dict unless the
-    caller already supplied a ``type`` key (so negative tests can override).
+    Prepends `"type": "oauth_token"` to the credentials dict unless the
+    caller already supplied a `type` key (so negative tests can override).
     """
     if "type" in config and "authentication" not in config:
         config = _migrate_legacy_config(config)
@@ -244,8 +244,8 @@ class TestIdentityTokenFile:
 
 
 class TestCredentialsFile:
-    """All tests use ``ANTHROPIC_CONFIG_DIR`` to point at a tmp directory laid
-    out as ``configs/<profile>.json`` + ``credentials/<profile>.json``."""
+    """All tests use `ANTHROPIC_CONFIG_DIR` to point at a tmp directory laid
+    out as `configs/<profile>.json` + `credentials/<profile>.json`."""
 
     @pytest.fixture(autouse=True)
     def _isolate(self, monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
@@ -300,7 +300,7 @@ class TestCredentialsFile:
             CredentialsFile()()
 
     def test_credentials_file_absent_type_is_lenient(self, tmp_path: pathlib.Path) -> None:
-        """Hand-written credentials files without ``type`` are accepted."""
+        """Hand-written credentials files without `type` are accepted."""
         _write_profile(tmp_path, "default", {"type": "external"})
         # Write credentials directly (bypass helper's type injection).
         (tmp_path / "credentials").mkdir(exist_ok=True)
@@ -384,7 +384,7 @@ class TestCredentialsFile:
 
     @pytest.mark.respx()
     def test_bind_base_url_precedence(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """``bind_base_url`` slots between the config file's own ``base_url``
+        """`bind_base_url` slots between the config file's own `base_url`
         field and the hard-coded default: config → bound → default."""
         jwt_path = tmp_path / "jwt"
         jwt_path.write_text("j")
@@ -478,7 +478,7 @@ class TestCredentialsFile:
 
     def test_for_base_url_returns_self_when_bind_is_moot(self, tmp_path: pathlib.Path) -> None:
         """No per-host provider is made when the bind can't change where the
-        tokens come from: the profile pins its own ``base_url``, or it is a
+        tokens come from: the profile pins its own `base_url`, or it is a
         user_oauth profile whose refresh token is tied to the issuing host."""
         _write_profile(
             tmp_path,
@@ -699,7 +699,7 @@ class TestCredentialsFile:
             CredentialsFile()()
 
     def test_user_oauth_without_client_id_is_static(self, tmp_path: pathlib.Path) -> None:
-        """user_oauth without a client_id is the ``external`` pattern: the
+        """user_oauth without a client_id is the `external` pattern: the
         credentials file is externally rotated, the SDK re-reads it on every
         call, no refresh grant is attempted. The spec merged this use case
         into user_oauth — a client_id is the opt-in signal for refresh."""
@@ -919,7 +919,7 @@ class TestCredentialsFile:
         assert CredentialsFile()().token == "env-tok"
 
     def test_credentials_path_override(self, tmp_path: pathlib.Path) -> None:
-        """Config's ``credentials_path`` field redirects to a custom location."""
+        """Config's `credentials_path` field redirects to a custom location."""
         custom = tmp_path / "elsewhere" / "secrets.json"
         custom.parent.mkdir()
         custom.write_text(json.dumps({"access_token": "redirected"}))
@@ -930,7 +930,7 @@ class TestCredentialsFile:
 
     @pytest.mark.respx(base_url="https://from-config.example.com")
     def test_base_url_from_config(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """Config ``base_url`` is used when no ctor override is given."""
+        """Config `base_url` is used when no ctor override is given."""
         jwt_path = tmp_path / "jwt"
         jwt_path.write_text("x")
         _write_profile(
@@ -1058,7 +1058,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_scope_is_display_only(self, respx_mock: MockRouter) -> None:
-        """``scope`` is stored on the provider for parity but never sent on the
+        """`scope` is stored on the provider for parity but never sent on the
         wire — the server derives effective scope from the federation rule."""
         respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         creds = WorkloadIdentityCredentials(
@@ -1092,7 +1092,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_bind_base_url(self, respx_mock: MockRouter) -> None:
-        """``bind_base_url`` sets the token-exchange URL; unbound → ``DEFAULT_BASE_URL``."""
+        """`bind_base_url` sets the token-exchange URL; unbound → `DEFAULT_BASE_URL`."""
         bound = "https://bound.example"
 
         # No bind → DEFAULT_BASE_URL
@@ -1326,7 +1326,7 @@ class TestWorkloadIdentityCredentials:
 
 class TestProfileEnvFill:
     """PY-01: profile fields left empty are filled from ANTHROPIC_* env vars,
-    matching Go's ``fillMissingFromEnv`` precedence (file wins, env fills gaps)."""
+    matching Go's `fillMissingFromEnv` precedence (file wins, env fills gaps)."""
 
     @pytest.fixture(autouse=True)
     def _isolate(self, monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
@@ -1396,10 +1396,10 @@ class TestProfileEnvFill:
         assert delegate._workspace_id == "wrkspc_from_env"  # pyright: ignore[reportPrivateUsage]
 
     def test_env_workspace_id_fills_user_oauth(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """``ANTHROPIC_WORKSPACE_ID`` fills ``workspace_id`` uniformly across
+        """`ANTHROPIC_WORKSPACE_ID` fills `workspace_id` uniformly across
         profile types — not just federation. This pins the precedence model:
-        ctor override > env var > profile, regardless of ``auth.type``. For
-        ``user_oauth`` the filled value surfaces as the ``anthropic-workspace-id``
+        ctor override > env var > profile, regardless of `auth.type`. For
+        `user_oauth` the filled value surfaces as the `anthropic-workspace-id`
         request header (federation routes it into the exchange body instead)."""
         monkeypatch.setenv("ANTHROPIC_WORKSPACE_ID", "wrkspc_env")
         creds_path = tmp_path / "creds.json"
@@ -1683,7 +1683,7 @@ class TestTokenCache:
 
     @pytest.mark.parametrize("expires_at", [1, 1000 - 5], ids=["epoch-plus-one", "just-expired"])
     def test_expired_but_nonzero_expiry_keeps_single_flight(self, expires_at: int) -> None:
-        """Only exactly ``expires_at=0`` opts out of single-flight; any other past value is an expired token."""
+        """Only exactly `expires_at=0` opts out of single-flight; any other past value is an expired token."""
         calls = itertools.count(1)
         release = threading.Event()
 
@@ -1707,7 +1707,7 @@ class TestTokenCache:
         assert sorted(tokens) == ["tok-2", "tok-3", "tok-3"]
 
     def test_zero_expiry_token_is_not_reused(self) -> None:
-        """A token with ``expires_at=0`` is not reused, so the provider is called again until it returns a later expiry."""
+        """A token with `expires_at=0` is not reused, so the provider is called again until it returns a later expiry."""
         clock = FakeClock(1000)
         provider = CountingProvider(
             [AccessToken("a", expires_at=0), AccessToken("b", expires_at=0), AccessToken("c", expires_at=1000 + 600)]
@@ -1802,8 +1802,8 @@ class TestTokenCache:
 
     def test_zero_arg_provider_backward_compat(self) -> None:
         """Providers from before the force_refresh kwarg was added (the old
-        ``Callable[[], AccessToken]`` shape) must still work — their signature
-        has no ``force_refresh``, so they are called without it."""
+        `Callable[[], AccessToken]` shape) must still work — their signature
+        has no `force_refresh`, so they are called without it."""
         calls: List[int] = []
 
         def legacy_provider() -> AccessToken:
@@ -1895,7 +1895,7 @@ def provider({signature}) -> OnlyForTypeCheckers:
         assert force_seen == [False, True, True]
 
     def test_per_request_mode_still_forces_after_invalidate(self) -> None:
-        """invalidate() still makes the next call pass ``force_refresh=True`` when nothing is cached."""
+        """invalidate() still makes the next call pass `force_refresh=True` when nothing is cached."""
         force_seen: List[bool] = []
 
         def provider(*, force_refresh: bool = False) -> AccessToken:
@@ -2103,8 +2103,8 @@ class TestDefaultCredentials:
     def test_workload_identity_workspace_id_env_empty_treated_unset(
         self, clean_env: pytest.MonkeyPatch, respx_mock: MockRouter
     ) -> None:
-        """``ANTHROPIC_WORKSPACE_ID=""`` (a defaulted-but-empty CI variable) is
-        treated as unset — never put ``"workspace_id": ""`` on the wire."""
+        """`ANTHROPIC_WORKSPACE_ID=""` (a defaulted-but-empty CI variable) is
+        treated as unset — never put `"workspace_id": ""` on the wire."""
         clean_env.setenv("ANTHROPIC_IDENTITY_TOKEN", "literal-jwt")
         clean_env.setenv("ANTHROPIC_FEDERATION_RULE_ID", "fdrl_01abc")
         clean_env.setenv("ANTHROPIC_ORGANIZATION_ID", "org-uuid")
@@ -2145,9 +2145,9 @@ class TestDefaultCredentials:
     ) -> None:
         """Step 4 (env federation trio) sits above step 5 (fallback on-disk
         profile) in the precedence spec: a machine with WIF env vars wired
-        up must use WIF even if a leftover ``default`` profile exists on
+        up must use WIF even if a leftover `default` profile exists on
         disk. A user who wants the on-disk profile must set
-        ``ANTHROPIC_PROFILE`` explicitly (step 3), which would win.
+        `ANTHROPIC_PROFILE` explicitly (step 3), which would win.
         """
         clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
         _write_profile(tmp_path, "default", {"type": "external"}, {"access_token": "from-on-disk-profile"})
@@ -2220,8 +2220,8 @@ def _mock_token_exchange(respx_mock: MockRouter, base_url: str, token: str) -> N
 
 
 def _mock_deployment(respx_mock: MockRouter, base_url: str, token: str) -> None:
-    """Mock one deployment: its token endpoint mints ``token`` and its
-    messages endpoint accepts anything. Pair with :func:`_requests_to` to
+    """Mock one deployment: its token endpoint mints `token` and its
+    messages endpoint accepts anything. Pair with `_requests_to` to
     check that a client only ever talks to (and presents tokens from) the
     deployment it was built for."""
     _mock_token_exchange(respx_mock, base_url, token)
@@ -2234,7 +2234,7 @@ def _requests_to(respx_mock: MockRouter, base_url: str) -> List[httpx2.Request]:
 
 
 def _assert_exchanged_and_called_own_deployment(respx_mock: MockRouter, base_url: str, token: str) -> None:
-    """The traffic seen by ``base_url`` is exactly one exchange followed by
+    """The traffic seen by `base_url` is exactly one exchange followed by
     one request bearing the token that exchange minted."""
     requests = _requests_to(respx_mock, base_url)
     assert [str(r.url) for r in requests] == [f"{base_url}{TOKEN_ENDPOINT}", f"{base_url}/v1/messages"]
@@ -2289,8 +2289,8 @@ class TestAnthropicCredentials:
 
     @pytest.mark.respx()
     def test_workload_identity_inherits_client_base_url(self, respx_mock: MockRouter) -> None:
-        """An explicitly-passed WorkloadIdentityCredentials with no ``base_url``
-        adopts the client's ``base_url`` for the token exchange, so the user
+        """An explicitly-passed WorkloadIdentityCredentials with no `base_url`
+        adopts the client's `base_url` for the token exchange, so the user
         doesn't have to pass the same URL twice."""
         custom_base = "https://api-staging.example"
         respx_mock.post(f"{custom_base}{TOKEN_ENDPOINT}").mock(
@@ -2444,9 +2444,9 @@ class TestAnthropicCredentials:
         assert req.headers["Authorization"] == "Bearer sk-ant-oat01-file"
 
     def test_profile_base_url_adopted_by_client(self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
-        """Outbound: a zero-arg ``Anthropic()`` adopts the active profile's
-        ``base_url`` when the user supplied neither ``base_url=`` nor
-        ``ANTHROPIC_BASE_URL``. Precedence: kwarg > env > profile > default."""
+        """Outbound: a zero-arg `Anthropic()` adopts the active profile's
+        `base_url` when the user supplied neither `base_url=` nor
+        `ANTHROPIC_BASE_URL`. Precedence: kwarg > env > profile > default."""
         clean_env.delenv("ANTHROPIC_BASE_URL", raising=False)
         clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
         clean_env.setenv("ANTHROPIC_CONFIG_DIR", str(tmp_path))
@@ -2481,8 +2481,8 @@ class TestAnthropicCredentials:
     def test_config_dict_base_url_adopted_by_client(
         self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
     ) -> None:
-        """Outbound, ``config=`` path: ``Anthropic(config={"base_url": ...})``
-        adopts the dict's ``base_url`` for API requests when no kwarg/env is
+        """Outbound, `config=` path: `Anthropic(config={"base_url": ...})`
+        adopts the dict's `base_url` for API requests when no kwarg/env is
         set, mirroring the disk-profile behaviour."""
         clean_env.delenv("ANTHROPIC_BASE_URL", raising=False)
         creds_path = tmp_path / "creds.json"
@@ -2685,7 +2685,7 @@ class TestAnthropicCredentials:
 
     @pytest.mark.respx()
     def test_copy_with_different_base_url_exchanges_per_client(self, respx_mock: MockRouter) -> None:
-        """``copy(base_url=...)`` must not move the parent's token exchange:
+        """`copy(base_url=...)` must not move the parent's token exchange:
         each client exchanges its assertion at its own host and only ever
         presents the token that host minted."""
         _mock_deployment(respx_mock, BASE_URL, "tok-primary")
@@ -2798,8 +2798,8 @@ class TestAnthropicCredentials:
 
     @pytest.mark.respx()
     def test_config_param_builds_in_memory_federation(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """``Anthropic(config={...})`` accepts a config-file-shaped dict and
-        wires it through to a federation provider, including ``workspace_id``
+        """`Anthropic(config={...})` accepts a config-file-shaped dict and
+        wires it through to a federation provider, including `workspace_id`
         as a default header."""
         jwt_path = tmp_path / "jwt"
         jwt_path.write_text("ext-jwt-value")
@@ -2834,7 +2834,7 @@ class TestAnthropicCredentials:
             )
 
     def test_explicit_api_key_shadows_explicit_config(self, tmp_path: pathlib.Path) -> None:
-        """Explicit ``api_key=`` + explicit ``config=`` is an explicit-explicit
+        """Explicit `api_key=` + explicit `config=` is an explicit-explicit
         shadow case: the static api_key wins at the header level and the
         config-derived credentials provider is silently disabled.
         """
@@ -2853,7 +2853,7 @@ class TestAnthropicCredentials:
         assert isinstance(explicit.credentials, InMemoryConfig)
 
     def test_explicit_config_beats_env_api_key(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Explicit ``config=`` is step 1 and beats env ``ANTHROPIC_API_KEY``
+        """Explicit `config=` is step 1 and beats env `ANTHROPIC_API_KEY`
         (step 2). The env api_key is ignored entirely and the config-derived
         credentials provider wins.
         """
@@ -2874,8 +2874,8 @@ class TestAnthropicCredentials:
         assert isinstance(client.credentials, InMemoryConfig)
 
     def test_profile_param_loads_named_profile(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """``Anthropic(profile="staging")`` loads ``configs/staging.json`` from
-        the config directory, equivalent to setting ``ANTHROPIC_PROFILE``."""
+        """`Anthropic(profile="staging")` loads `configs/staging.json` from
+        the config directory, equivalent to setting `ANTHROPIC_PROFILE`."""
         monkeypatch.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
         _write_profile(
             tmp_path,
@@ -2897,8 +2897,8 @@ class TestAnthropicCredentials:
             Anthropic(profile="x", credentials=StaticToken("a"))
 
     def test_explicit_profile_beats_env_api_key(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Explicit ``profile=`` is a constructor argument and beats env
-        ``ANTHROPIC_API_KEY`` — the env var is not consulted."""
+        """Explicit `profile=` is a constructor argument and beats env
+        `ANTHROPIC_API_KEY` — the env var is not consulted."""
         monkeypatch.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-from-env")
         _write_profile(tmp_path, "dev", config={"type": "external"}, credentials={"access_token": "sk-ant-oat01-dev"})
@@ -3000,7 +3000,7 @@ class TestInMemoryConfig:
     def test_oidc_federation_no_credentials_path_no_disk_cache(
         self, respx_mock: MockRouter, tmp_path: pathlib.Path
     ) -> None:
-        """Without ``authentication.credentials_path``, every call exchanges
+        """Without `authentication.credentials_path`, every call exchanges
         fresh — nothing is written to disk."""
         token_route = respx_mock.post(TOKEN_URL).mock(
             return_value=httpx2.Response(200, json={"access_token": "tok", "expires_in": 600})
@@ -3021,7 +3021,7 @@ class TestInMemoryConfig:
     def test_oidc_federation_with_credentials_path_disk_cache(
         self, respx_mock: MockRouter, tmp_path: pathlib.Path
     ) -> None:
-        """With ``authentication.credentials_path`` set, the exchanged token is
+        """With `authentication.credentials_path` set, the exchanged token is
         written to that path and a second call returns it without re-exchanging."""
         creds_path = tmp_path / "cache.json"
         token_route = respx_mock.post(TOKEN_URL).mock(
@@ -3055,9 +3055,9 @@ class TestInMemoryConfig:
 
     @pytest.mark.respx()
     def test_user_oauth_refresh_and_writeback(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """user_oauth with ``credentials_path`` runs the refresh-token grant on
+        """user_oauth with `credentials_path` runs the refresh-token grant on
         expiry and writes the new tokens back, exactly like a file-backed
-        ``CredentialsFile`` profile."""
+        `CredentialsFile` profile."""
         creds_path = tmp_path / "creds.json"
         creds_path.write_text(
             json.dumps(
@@ -3191,7 +3191,7 @@ class TestAsyncAnthropicCredentials:
 
     @pytest.mark.respx()
     async def test_async_copy_with_different_base_url_exchanges_per_client(self, respx_mock: MockRouter) -> None:
-        """Async mirror of the sync test: ``copy(base_url=...)`` leaves the
+        """Async mirror of the sync test: `copy(base_url=...)` leaves the
         parent exchanging at, and presenting tokens from, its own host."""
         _mock_deployment(respx_mock, BASE_URL, "tok-primary")
         _mock_deployment(respx_mock, OTHER_BASE_URL, "tok-other")
@@ -3823,9 +3823,9 @@ class TestAsyncAccessTokenProvider:
 
 @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
 class TestTypedCredentialErrors:
-    """Every exit point in the credentials subsystem raises an ``AnthropicError``
+    """Every exit point in the credentials subsystem raises an `AnthropicError`
     (or subclass). Anything outside that hierarchy is wrapped as
-    ``APIConnectionError`` and retried by the base client's ``except Exception``
+    `APIConnectionError` and retried by the base client's `except Exception`
     handler, hiding the real cause and amplifying load.
     """
 
@@ -3912,7 +3912,7 @@ class TestTypedCredentialErrors:
     def test_user_oauth_malformed_expires_at_raises_anthropic_error(
         self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
     ) -> None:
-        """An ISO8601 string in ``expires_at`` must raise AnthropicError naming the expected shape."""
+        """An ISO8601 string in `expires_at` must raise AnthropicError naming the expected shape."""
         clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
         _write_profile(
             tmp_path,
@@ -3926,8 +3926,8 @@ class TestTypedCredentialErrors:
 
 class TestTokenCacheDeadlock:
     def test_non_anthropic_error_from_provider_releases_waiters(self) -> None:
-        """A non-``AnthropicError`` / non-``httpx2.HTTPError`` from the leader
-        provider must still release ``_refresh_event`` so concurrent waiters
+        """A non-`AnthropicError` / non-`httpx2.HTTPError` from the leader
+        provider must still release `_refresh_event` so concurrent waiters
         don't deadlock."""
         import threading as _threading
 
@@ -3984,7 +3984,7 @@ class TestTokenCacheDeadlock:
         assert cache.get_token() == "fresh"
 
     def test_value_error_from_provider_propagates_cleanly(self) -> None:
-        """A ``ValueError`` (e.g. from a provider that parses a JWT) escapes
+        """A `ValueError` (e.g. from a provider that parses a JWT) escapes
         but the cache state is clean — the next call succeeds without hanging."""
 
         class P:
@@ -4010,12 +4010,12 @@ class TestCredentialPrecedence:
 
     A static env credential (step 2) shadows auto-discovery (steps 3-5),
     silently disabling profile / federation — we warn about that. It does
-    NOT shadow an explicit ``credentials=`` argument (step 1): an explicit
-    credentials provider wins over env ``ANTHROPIC_API_KEY`` /
-    ``ANTHROPIC_AUTH_TOKEN`` outright.
+    NOT shadow an explicit `credentials=` argument (step 1): an explicit
+    credentials provider wins over env `ANTHROPIC_API_KEY` /
+    `ANTHROPIC_AUTH_TOKEN` outright.
 
-    Passing an explicit ``api_key=`` or ``auth_token=`` *argument* alongside
-    an explicit ``credentials=`` is a separate shadow case: the static
+    Passing an explicit `api_key=` or `auth_token=` *argument* alongside
+    an explicit `credentials=` is a separate shadow case: the static
     credential wins at the header level and we warn.
     """
 
@@ -4044,8 +4044,8 @@ class TestCredentialPrecedence:
     def test_explicit_credentials_beats_env_api_key(
         self, clean_env: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
     ) -> None:
-        """Per spec, explicit ``credentials=`` is step 1 and beats env
-        ``ANTHROPIC_API_KEY`` (step 2). The credentials provider wins, env
+        """Per spec, explicit `credentials=` is step 1 and beats env
+        `ANTHROPIC_API_KEY` (step 2). The credentials provider wins, env
         api_key is ignored entirely, no X-Api-Key on the wire, no warning."""
         clean_env.setenv("ANTHROPIC_API_KEY", "sk-from-env")
         with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
@@ -4073,7 +4073,7 @@ class TestCredentialPrecedence:
     def test_explicit_config_beats_env_api_key(
         self, clean_env: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: pathlib.Path
     ) -> None:
-        """Explicit ``config=`` is also step 1 and beats env api_key."""
+        """Explicit `config=` is also step 1 and beats env api_key."""
         jwt = tmp_path / "jwt"
         jwt.write_text("ext-jwt.ext-jwt.ext-jwt")
         clean_env.setenv("ANTHROPIC_API_KEY", "sk-from-env")
@@ -4094,7 +4094,7 @@ class TestCredentialPrecedence:
     # -- step 1 ∩ step 1: explicit static arg + explicit credentials= --------
 
     def test_explicit_api_key_shadows_explicit_credentials_with_warning(self, caplog: pytest.LogCaptureFixture) -> None:
-        """When both explicit ``api_key=`` AND explicit ``credentials=`` are
+        """When both explicit `api_key=` AND explicit `credentials=` are
         passed, the static api_key wins at the header level and credentials
         is silently disabled. Warn."""
         with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
@@ -4122,8 +4122,8 @@ class TestCredentialPrecedence:
         assert any("`api_key=`" in r.message for r in caplog.records)
 
     def test_copy_with_explicit_api_key_shadows_inherited_credentials(self, caplog: pytest.LogCaptureFixture) -> None:
-        """Reviewer ask: copy() should warn when a new explicit ``api_key=``
-        shadows an inherited ``credentials=`` provider from the parent."""
+        """Reviewer ask: copy() should warn when a new explicit `api_key=`
+        shadows an inherited `credentials=` provider from the parent."""
         parent = Anthropic(credentials=StaticToken("bearer-parent"))
         assert parent.api_key is None
         with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
@@ -4140,7 +4140,7 @@ class TestCredentialPrecedence:
     def test_env_api_key_shadows_env_federation_trio_with_warning(
         self, clean_env: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: pathlib.Path
     ) -> None:
-        """Env ``ANTHROPIC_API_KEY`` + env federation trio → api_key wins
+        """Env `ANTHROPIC_API_KEY` + env federation trio → api_key wins
         (step 2 beats step 4), warn so the user knows WIF is being shadowed."""
         jwt = tmp_path / "jwt"
         jwt.write_text("ext-jwt.ext-jwt.ext-jwt")
@@ -4182,8 +4182,8 @@ class TestCredentialPrecedence:
     def test_empty_env_auth_token_is_unset(
         self, clean_env: pytest.MonkeyPatch, client_cls: type[Anthropic] | type[AsyncAnthropic]
     ) -> None:
-        """``ANTHROPIC_AUTH_TOKEN=`` (present but empty) must not produce a
-        malformed ``Authorization: Bearer `` header alongside the api key."""
+        """`ANTHROPIC_AUTH_TOKEN=` (present but empty) must not produce a
+        malformed `Authorization: Bearer ` header alongside the api key."""
         clean_env.setenv("ANTHROPIC_API_KEY", "sk-from-env")
         clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
         client = client_cls()
@@ -4197,7 +4197,7 @@ class TestCredentialPrecedence:
         self, clean_env: pytest.MonkeyPatch, client_cls: type[Anthropic] | type[AsyncAnthropic]
     ) -> None:
         """Both env vars empty → same "no auth configured" error as unset,
-        rather than sending empty ``X-Api-Key`` / ``Authorization: Bearer ``."""
+        rather than sending empty `X-Api-Key` / `Authorization: Bearer `."""
         clean_env.setenv("ANTHROPIC_API_KEY", "")
         clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
         client = client_cls()
@@ -4235,8 +4235,8 @@ class TestCredentialPrecedence:
 
 @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
 class TestDanglingActiveConfig:
-    """``active_config`` pointer file naming a profile with no matching
-    ``configs/<profile>.json`` should surface a clear error rather than
+    """`active_config` pointer file naming a profile with no matching
+    `configs/<profile>.json` should surface a clear error rather than
     silently falling through to "no auth configured".
     """
 
@@ -4298,7 +4298,7 @@ class TestAccessTokenReprMasking:
 
 class TestEmptySecretFieldFalsiness:
     """The missing-token guards test truthiness of SecretStr-wrapped values,
-    which rides on ``SecretStr.__len__`` (present across the supported
+    which rides on `SecretStr.__len__` (present across the supported
     pydantic range) — pin empty-string behavior through the public path so a
     pydantic regression can't silently turn the guards into passes."""
 
@@ -4329,7 +4329,7 @@ class TestEmptySecretFieldFalsiness:
 
 def _sdk_frame_locals(exc: BaseException) -> List["tuple[str, Dict[str, Any]]"]:
     """(code name, locals) for every traceback frame owned by the anthropic
-    package, across the full ``__context__`` / ``__cause__`` chain."""
+    package, across the full `__context__` / `__cause__` chain."""
     pkg_root = str(pathlib.Path(anthropic.__file__).parent)
     out: List["tuple[str, Dict[str, Any]]"] = []
     seen: "set[int]" = set()
@@ -4362,11 +4362,11 @@ def _assert_not_in_sdk_frame_locals(exc: BaseException, *secrets: str) -> None:
 
 class TestNoSecretsInTracebackFrameLocals:
     """Exceptions from the token-exchange paths must not retain credential
-    material in traceback frame locals (across the ``__traceback__`` /
-    ``__context__`` / ``__cause__`` chain). Plain ``logging.exception`` never
+    material in traceback frame locals (across the `__traceback__` /
+    `__context__` / `__cause__` chain). Plain `logging.exception` never
     prints locals, but crash reporters that capture them — stdlib
-    ``TracebackException(..., capture_locals=True)``, rich tracebacks,
-    Sentry's default local-variable capture — render each local's ``repr``,
+    `TracebackException(..., capture_locals=True)`, rich tracebacks,
+    Sentry's default local-variable capture — render each local's `repr`,
     which is why SecretStr-wrapped locals are safe to retain."""
 
     def _workload_provider(self, handler: Callable[[httpx2.Request], httpx2.Response]) -> WorkloadIdentityCredentials:
@@ -4494,7 +4494,7 @@ class TestNoSecretsInTracebackFrameLocals:
         self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
     ) -> None:
         """A non-JSON refresh response raises WorkloadIdentityError (it
-        previously escaped as a raw json ValueError whose ``.doc`` carries the
+        previously escaped as a raw json ValueError whose `.doc` carries the
         full response body) and retains no secrets."""
         self._write_refresh_profile(clean_env, tmp_path)
         respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx2.Response(200, text="<html>gateway error</html>"))
@@ -4625,9 +4625,9 @@ class TestNoSecretsInTracebackFrameLocals:
     def test_corrupt_expires_at_does_not_retain_tokens(
         self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
     ) -> None:
-        """``_coerce_expires_at`` raises in a secret-free frame, but the error
-        propagates through ``_call_user_oauth`` whose locals hold the creds
-        dict — those locals must render redacted. The ``id_token`` field pins
+        """`_coerce_expires_at` raises in a secret-free frame, but the error
+        propagates through `_call_user_oauth` whose locals hold the creds
+        dict — those locals must render redacted. The `id_token` field pins
         the secret-by-default rule: string fields the SDK doesn't know about
         are wrapped too."""
         clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
@@ -4688,7 +4688,7 @@ class TestNoSecretsInTracebackFrameLocals:
         )
 
     def test_oneshot_exchange_failure_does_not_retain_assertion(self) -> None:
-        """``exchange_federation_assertion`` holds the caller's assertion as a
+        """`exchange_federation_assertion` holds the caller's assertion as a
         parameter in its own (SDK-owned) frame; it is rebound to SecretStr on
         entry so a failed exchange renders it redacted. The caller's own frame
         is beyond the SDK's reach."""

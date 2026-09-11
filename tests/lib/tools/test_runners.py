@@ -1028,7 +1028,7 @@ def _run_sync_tool_use(
     tools: List[Any],
     messages: List[BetaMessageParam],
 ) -> List[BetaMessageParam]:
-    """Drive a tool runner over ``messages`` and collect the tool_result
+    """Drive a tool runner over `messages` and collect the tool_result
     messages it generated."""
     runner = client.beta.messages.tool_runner(
         max_tokens=1024,

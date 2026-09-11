@@ -4,9 +4,9 @@ An agent keeps a folder of notes on disk. The same folder lives on the
 server. Each sync makes the two agree: each side gets
 the other's changes, and when both changed the same file the server wins.
 
-Each test tells one story with two actors — ``local`` is the agent's
-folder on disk, ``server`` is the remote copy. Paths are the same string
-on both sides. ``server.received`` holds only what the sync sent;
+Each test tells one story with two actors — `local` is the agent's
+folder on disk, `server` is the remote copy. Paths are the same string
+on both sides. `server.received` holds only what the sync sent;
 arranging remote state never touches it.
 """
 
@@ -31,7 +31,7 @@ LOGGER = "anthropic.lib.tools.agent_toolset"
 async def _downloaded(
     tmp_path: Path, initial: dict[str, str], *, access: str | None = None
 ) -> tuple[Path, MemoryServer, SessionMemoryStores]:
-    """A ``SessionMemoryStores`` with one store already downloaded to disk."""
+    """A `SessionMemoryStores` with one store already downloaded to disk."""
     client, server = fake_anthropic(initial, access=access)
     stores = SessionMemoryStores(client, workdir=tmp_path)
     await stores.download(await client.beta.sessions.retrieve("s1"))
@@ -410,8 +410,8 @@ async def test_an_unclean_mount_path_fails_the_download(tmp_path: Path, bad: str
 
 @pytest.mark.asyncio()
 async def test_prefix_items_and_foreign_resources_leave_no_trace(tmp_path: Path) -> None:
-    """Only ``memory_store`` resources are downloaded and only ``memory``
-    items carry content — a ``file`` resource and ``memory_prefix`` rollups
+    """Only `memory_store` resources are downloaded and only `memory`
+    items carry content — a `file` resource and `memory_prefix` rollups
     pass through without touching the disk or the server."""
     client, server = fake_anthropic({"ok.md": "fine"}, noise=True)
     stores = SessionMemoryStores(client, workdir=tmp_path)
@@ -717,7 +717,7 @@ async def test_stores_sync_in_parallel_and_one_failure_spares_the_rest(
 
 def test_sync_intervals_below_the_floor_are_rejected(tmp_path: Path) -> None:
     client, _server = fake_anthropic({})
-    # NaN fails every comparison, so a validator phrased as ``< floor`` would
+    # NaN fails every comparison, so a validator phrased as `< floor` would
     # accept it — and a NaN interval makes every cadence check due.
     for interval in (4.9, 1.0, 0, -1.0, float("nan")):
         with pytest.raises(ValueError, match="at least"):

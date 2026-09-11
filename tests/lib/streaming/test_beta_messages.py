@@ -35,7 +35,7 @@ _T = TypeVar("_T")
 
 
 class WeatherTool:
-    """Stands in for a ``@beta_tool`` / toolset object: ``tools=`` takes anything with a ``to_dict()``."""
+    """Stands in for a `@beta_tool` / toolset object: `tools=` takes anything with a `to_dict()`."""
 
     def to_dict(self) -> BetaToolParam:
         return {"name": "get_weather", "description": "Weather lookup.", "input_schema": {"type": "object"}}

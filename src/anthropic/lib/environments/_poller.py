@@ -49,7 +49,7 @@ class _IdleLog:
     """Keeps an idle poll loop visible in the logs without an INFO line per poll.
 
     The first empty poll after start-up or after a claim logs at INFO and later
-    ones at DEBUG, with an INFO reminder every ``_IDLE_REPORT_INTERVAL`` seconds
+    ones at DEBUG, with an INFO reminder every `_IDLE_REPORT_INTERVAL` seconds
     while the loop stays idle.
     """
 
@@ -93,49 +93,49 @@ def iter_work(
 ) -> Iterator[BetaSelfHostedWork]:
     """Iterate work items claimed from a self-hosted environment.
 
-    Each yielded :class:`BetaSelfHostedWork` has already been ack'd. The ``work``
+    Each yielded `BetaSelfHostedWork` has already been ack'd. The `work`
     resource must be bound to a client authenticated for the environment — the
     poller itself does not handle credentials. Use
-    ``client.beta.environments.work.poller(...)`` for the user-facing entry
+    `client.beta.environments.work.poller(...)` for the user-facing entry
     point that constructs a scoped sub-client for you.
 
-    A yielded item may carry a per-item ``secret`` payload (populated only by
+    A yielded item may carry a per-item `secret` payload (populated only by
     the poll response); the poller passes it through untouched — consumers
-    such as :class:`~anthropic.lib.environments.EnvironmentWorker` extract the
+    such as `anthropic.lib.environments.EnvironmentWorker` extract the
     sessions token it carries and prefer that over the environment key for the
     item's downstream calls. Treat it as opaque and never log it.
 
     Two consumption shapes are supported:
 
-    - **Long-running runner** (``drain=False, auto_stop=True``, the default):
-      loops forever, sleeps with jitter on empty polls, and calls ``work.stop``
+    - **Long-running runner** (`drain=False, auto_stop=True`, the default):
+      loops forever, sleeps with jitter on empty polls, and calls `work.stop`
       when the consuming for-loop body returns or raises. The poller owns the
       whole work-item lifecycle.
-    - **Drain-and-dispatch** (``drain=True, auto_stop=False``): returns as soon
-      as the queue is empty and never calls ``work.stop`` — use this when each
+    - **Drain-and-dispatch** (`drain=True, auto_stop=False`): returns as soon
+      as the queue is empty and never calls `work.stop` — use this when each
       yielded item is handed off to another process (e.g. a webhook handler
-      that spawns a sandbox per work item) and that process owns ``stop``.
+      that spawns a sandbox per work item) and that process owns `stop`.
 
     Args:
       block_ms: How long the server holds an empty poll open (long-poll).
-        Pass ``None`` to omit the param for a non-blocking poll — the server
-        rejects ``0``. Drain callers usually want ``None`` so the final empty
+        Pass `None` to omit the param for a non-blocking poll — the server
+        rejects `0`. Drain callers usually want `None` so the final empty
         poll returns immediately.
       drain: When True, return after the first empty poll instead of sleeping
         and re-polling. Lets a webhook-driven dispatcher drain the queue and
         respond.
-      auto_stop: When True (default), call ``work.stop`` after the consumer's
+      auto_stop: When True (default), call `work.stop` after the consumer's
         loop body completes. Set False when the work item is handed off to
         another process that owns the stop call — otherwise the lease is
         terminated out from under it.
-      reclaim_older_than_ms: Forwarded to ``work.poll``. Reclaim un-ack'd work
+      reclaim_older_than_ms: Forwarded to `work.poll`. Reclaim un-ack'd work
         older than this many ms. Useful in drain mode so a dead runner's
         work re-surfaces on the next webhook delivery.
       extra_headers: Optional headers passed through per request on every
         poll / ack / stop call (including the force-stop of an unprocessable
-        item). They are threaded into each call's ``extra_headers=`` and are
+        item). They are threaded into each call's `extra_headers=` and are
         never assigned onto the client, so client state is not mutated.
-        Credentials and ``x-stainless-helper`` come from the bound client,
+        Credentials and `x-stainless-helper` come from the bound client,
         not this argument; a header given here overrides the bound client's
         same-named default for that one request, so use it for caller
         passthrough (e.g. trace ids), not to set auth.
@@ -144,7 +144,7 @@ def iter_work(
     log.info("poller starting environment_id=%s drain=%s auto_stop=%s", environment_id, drain, auto_stop)
     # Poll and ack each get their own backoff counter so a run of ack failures
     # can't inflate the next poll failure's backoff (and vice versa) — each is
-    # reset on its own success, and the ``continue`` paths leave them untouched.
+    # reset on its own success, and the `continue` paths leave them untouched.
     poll_attempt = 0
     ack_attempt = 0
     idle = _IdleLog(environment_id)
@@ -213,7 +213,7 @@ def iter_work(
 
 
 def _force_stop_quietly(work: Work, work_id: str, *, environment_id: str, extra_headers: Headers | None = None) -> None:
-    """Best-effort ``work.stop(force=True)`` for an item that can't be processed.
+    """Best-effort `work.stop(force=True)` for an item that can't be processed.
 
     A 409 just means the work already stopped; anything else is logged but not
     raised, since the poll loop must keep going regardless.
@@ -236,8 +236,8 @@ async def aiter_work(
     auto_stop: bool = True,
     extra_headers: Headers | None = None,
 ) -> AsyncIterator[BetaSelfHostedWork]:
-    """Async version of :func:`iter_work`. See its docstring for semantics,
-    including how ``extra_headers`` is passed through per request.
+    """Async version of `iter_work`. See its docstring for semantics,
+    including how `extra_headers` is passed through per request.
     """
     worker_id = worker_id or _default_worker_id()
     log.info("poller starting environment_id=%s drain=%s auto_stop=%s", environment_id, drain, auto_stop)
@@ -311,7 +311,7 @@ async def aiter_work(
 async def _aforce_stop_quietly(
     work: AsyncWork, work_id: str, *, environment_id: str, extra_headers: Headers | None = None
 ) -> None:
-    """Async version of :func:`_force_stop_quietly`."""
+    """Async version of `_force_stop_quietly`."""
     try:
         await work.stop(work_id, environment_id=environment_id, force=True, extra_headers=extra_headers)
     except Exception as e:

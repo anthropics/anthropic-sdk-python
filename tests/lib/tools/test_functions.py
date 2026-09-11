@@ -448,11 +448,11 @@ def _get_parameters_info(fn: BaseFunctionTool[Any]) -> dict[str, str]:
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions need pydantic v2")
 class TestContextManagerTool:
-    """``@beta_tool`` / ``@beta_async_tool`` over an (async) context manager that
+    """`@beta_tool` / `@beta_async_tool` over an (async) context manager that
     yields the tool callable: the decorator enters it to obtain the callable and
-    drives its ``__exit__`` / ``__aexit__`` on the cleanup path.
+    drives its `__exit__` / `__aexit__` on the cleanup path.
 
-    The ``cast(Any, ...)`` call form mirrors how the SDK's own ``beta_bash_tool``
+    The `cast(Any, ...)` call form mirrors how the SDK's own `beta_bash_tool`
     adopts this; bare decorator syntax works the same at runtime.
     """
 

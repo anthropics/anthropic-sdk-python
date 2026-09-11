@@ -2,8 +2,8 @@
 """End-to-end self-hosted environment worker demo.
 
 Creates an agent with the built-in agent_toolset_20260401 plus a custom
-``current_time`` tool, opens a session against your self-hosted environment,
-sends a prompt, runs an ``EnvironmentWorker`` in-process to service the tool
+`current_time` tool, opens a session against your self-hosted environment,
+sends a prompt, runs an `EnvironmentWorker` in-process to service the tool
 calls locally, then prints the resulting transcript and cleans up.
 
 Required env vars:

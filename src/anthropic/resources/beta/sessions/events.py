@@ -531,56 +531,58 @@ class AsyncEvents(AsyncAPIResource):
     ) -> SessionToolRunner:
         """Dispatch a self-hosted session's tool-call events.
 
-        The sessions-side counterpart to ``client.beta.messages.tool_runner``:
-        returns a :class:`~anthropic.lib.environments.SessionToolRunner` — an
+        The sessions-side counterpart to `client.beta.messages.tool_runner`:
+        returns a `anthropic.lib.environments.SessionToolRunner` — an
         async iterable that attaches to the session's event stream, reconciles
-        against the events-list endpoint, runs the matching tool from ``tools``
+        against the events-list endpoint, runs the matching tool from `tools`
         for each tool-call event, posts the matching result event back, and
-        yields one :class:`~anthropic.lib.environments.DispatchedToolCall` per
-        completed call. It handles both tool-call kinds: ``agent.tool_use``
-        (built-in agent-toolset tools) answered with ``user.tool_result``, and
-        ``agent.custom_tool_use`` (custom, user-defined tools) answered with
-        ``user.custom_tool_result``. A call the server gated behind user
-        confirmation (``evaluated_permission`` ``ask``, e.g. a tool configured
-        with the ``always_ask`` permission policy) is held until the matching
-        ``user.tool_confirmation`` event arrives — executed on ``allow``,
-        never executed on ``deny`` (the denied call is still yielded with
-        ``confirmation="deny"`` so it can be observed). Internally drives
+        yields one `anthropic.lib.environments.DispatchedToolCall` per
+        completed call. It handles both tool-call kinds: `agent.tool_use`
+        (built-in agent-toolset tools) answered with `user.tool_result`, and
+        `agent.custom_tool_use` (custom, user-defined tools) answered with
+        `user.custom_tool_result`. A call the server gated behind user
+        confirmation (`evaluated_permission` `ask`, e.g. a tool configured
+        with the `always_ask` permission policy) is held until the matching
+        `user.tool_confirmation` event arrives — executed on `allow`,
+        never executed on `deny` (the denied call is still yielded with
+        `confirmation="deny"` so it can be observed). Internally drives
         event-stream reconnect (with capped backoff) via an anyio task group
-        so it works under both ``asyncio`` and ``trio``.
+        so it works under both `asyncio` and `trio`.
 
-        Iteration ends when the session terminates (``session.status_terminated``
-        / ``session.deleted``), when the consumer breaks out of the loop, or —
-        once the session has gone idle with ``stop_reason`` ``end_turn`` —
-        ``max_idle`` seconds elapse with no new event (any new event resets that
-        countdown; it re-arms on the next ``end_turn`` idle). ``max_idle=None``
+        Iteration ends when the session terminates (`session.status_terminated`
+        / `session.deleted`), when the consumer breaks out of the loop, or —
+        once the session has gone idle with `stop_reason` `end_turn` —
+        `max_idle` seconds elapse with no new event (any new event resets that
+        countdown; it re-arms on the next `end_turn` idle). `max_idle=None`
         disables that last condition. It does **not** touch the work-item lease —
-        wrap it in an :class:`~anthropic.lib.environments.EnvironmentWorker` if
+        wrap it in an `anthropic.lib.environments.EnvironmentWorker` if
         you need heartbeating / force-stop.
 
-        Usage::
+        Usage:
 
-            from anthropic.lib.tools.agent_toolset import AgentToolContext, beta_agent_toolset_20260401
+        ```py
+        from anthropic.lib.tools.agent_toolset import AgentToolContext, beta_agent_toolset_20260401
 
-            async with AgentToolContext(workdir=...) as env:
-                async for call in client.beta.sessions.events.tool_runner(
-                    work.data.id,
-                    tools=[*beta_agent_toolset_20260401(env), my_tool],
-                ):
-                    ...
+        async with AgentToolContext(workdir=...) as env:
+            async for call in client.beta.sessions.events.tool_runner(
+                work.data.id,
+                tools=[*beta_agent_toolset_20260401(env), my_tool],
+            ):
+                ...
+        ```
 
         Args:
           session_id: The session whose events stream we attach to. Passed
-            positionally, matching ``list`` / ``send`` / ``stream`` on this
+            positionally, matching `list` / `send` / `stream` on this
             resource.
           tools: Registry of tool callables the runner will execute when the
-            agent emits matching ``agent.tool_use`` / ``agent.custom_tool_use``
-            events — the same :class:`~anthropic.lib.tools.BetaAsyncFunctionTool`
-            shape ``client.beta.messages.tool_runner`` accepts.
+            agent emits matching `agent.tool_use` / `agent.custom_tool_use`
+            events — the same `anthropic.lib.tools.BetaAsyncFunctionTool`
+            shape `client.beta.messages.tool_runner` accepts.
           max_idle: Seconds to keep running after the session goes idle with
-            ``stop_reason`` ``end_turn`` before stopping; any new event resets
-            the countdown. Defaults to ``DEFAULT_MAX_IDLE`` (60s) when not
-            given. ``None`` disables it.
+            `stop_reason` `end_turn` before stopping; any new event resets
+            the countdown. Defaults to `DEFAULT_MAX_IDLE` (60s) when not
+            given. `None` disables it.
           environment_key: The self-hosted environment key. When set, the
             runner builds a Bearer-only scoped sub-client keyed to that
             environment for the event stream / list / send calls; leave it
@@ -588,17 +590,17 @@ class AsyncEvents(AsyncAPIResource):
             credentials.
           extra_headers: Optional headers passed through per request on every
             call the runner makes (event stream / list / send). They are
-            threaded into each call's ``extra_headers=`` and never assigned
+            threaded into each call's `extra_headers=` and never assigned
             onto the client, so client state is not mutated. Auth and
-            ``x-stainless-helper`` are supplied by the runner's scoped
-            sub-client (and the parent client's ``default_headers`` propagate
-            via its ``client.copy()``); a header given here overrides the
+            `x-stainless-helper` are supplied by the runner's scoped
+            sub-client (and the parent client's `default_headers` propagate
+            via its `client.copy()`); a header given here overrides the
             scoped client's same-named default for that request, so use it for
             caller passthrough (e.g. trace ids), not to set auth.
         """
         # DEFAULT_MAX_IDLE resolved here rather than as a literal signature
         # default so the value can't drift from the constant; the lazy import
-        # also keeps the host-only environment lib out of ``import anthropic``.
+        # also keeps the host-only environment lib out of `import anthropic`.
         from ....lib.tools._beta_session_runner import DEFAULT_MAX_IDLE, SessionToolRunner
 
         if not is_given(max_idle):

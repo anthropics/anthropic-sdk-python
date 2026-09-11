@@ -48,11 +48,11 @@ from .lib.credentials._constants import _has_auto_discoverable_credentials
 
 
 def _is_base_client(client: object) -> bool:
-    """True only for the base ``Anthropic`` / ``AsyncAnthropic`` classes, not subclasses.
+    """True only for the base `Anthropic` / `AsyncAnthropic` classes, not subclasses.
 
-    Subclasses (``AnthropicAWS``, ``AnthropicFoundry``) have their own auth paths
-    and must not run the credential chain or forward ``credentials`` through their
-    ``__init__`` (which doesn't accept the kwarg).
+    Subclasses (`AnthropicAWS`, `AnthropicFoundry`) have their own auth paths
+    and must not run the credential chain or forward `credentials` through their
+    `__init__` (which doesn't accept the kwarg).
     """
     return type(client) in (Anthropic, AsyncAnthropic)
 
@@ -65,7 +65,7 @@ _ProviderT = TypeVar(
 def _bind_credentials_base_url(credentials: _ProviderT, base_url: str) -> _ProviderT:
     """Return the provider this client should exchange tokens through.
 
-    See :class:`BaseURLBoundProvider`; any other provider (plain callables,
+    See `BaseURLBoundProvider`; any other provider (plain callables,
     custom impls) is returned untouched and resolves its own exchange URL.
     """
     if isinstance(credentials, BaseURLBoundProvider):
@@ -74,17 +74,17 @@ def _bind_credentials_base_url(credentials: _ProviderT, base_url: str) -> _Provi
 
 
 def _keeps_base_url(current: httpx2.URL, requested: str | httpx2.URL | None) -> bool:
-    """Whether a ``copy()`` stays on the parent's deployment.
+    """Whether a `copy()` stays on the parent's deployment.
 
     Tokens are only valid for the deployment that minted them, so the parent's
-    :class:`TokenCache` is only shared in that case.
+    `TokenCache` is only shared in that case.
     """
     return requested is None or str(httpx2.URL(requested)).rstrip("/") == str(current).rstrip("/")
 
 
 def _warn_explicit_shadow(*, api_key: str | None, auth_token: str | None, credentials: object) -> None:
-    """Warn when an explicit ``api_key=`` / ``auth_token=`` argument shadows
-    an explicit ``credentials=`` provider. Call *after* any copy-inheritance
+    """Warn when an explicit `api_key=` / `auth_token=` argument shadows
+    an explicit `credentials=` provider. Call *after* any copy-inheritance
     merging so the params reflect the resolved values."""
     if credentials is None:
         return
@@ -95,9 +95,9 @@ def _warn_explicit_shadow(*, api_key: str | None, auth_token: str | None, creden
 
 
 def _warn_env_shadow(*, api_key: str | None, auth_token: str | None) -> None:
-    """Warn when an ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` from the
+    """Warn when an `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` from the
     environment is set alongside signals that would normally drive profile /
-    federation auto-discovery (``ANTHROPIC_PROFILE``, a ``configs/`` directory,
+    federation auto-discovery (`ANTHROPIC_PROFILE`, a `configs/` directory,
     or the workload-identity env trio). Per the credential-precedence spec,
     the static credential wins and auto-discovery is silently skipped."""
     if not _has_auto_discoverable_credentials():
@@ -186,26 +186,26 @@ class Anthropic(SyncAPIClient):
 
         Credentials are resolved in the following order (first match wins):
 
-        1. Explicit constructor arguments — ``api_key=``, ``auth_token=``,
-           ``credentials=``, ``config=``, or ``profile=``. When any of these
+        1. Explicit constructor arguments — `api_key=`, `auth_token=`,
+           `credentials=`, `config=`, or `profile=`. When any of these
            is passed, environment variables are not consulted for credentials.
-        2. ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` environment
+        2. `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` environment
            variables.
-        3. ``ANTHROPIC_PROFILE`` environment variable — loads the named
-           profile from ``<config_dir>/configs/<profile>.json``.
+        3. `ANTHROPIC_PROFILE` environment variable — loads the named
+           profile from `<config_dir>/configs/<profile>.json`.
         4. Workload identity federation environment variables —
-           ``ANTHROPIC_IDENTITY_TOKEN[_FILE]`` +
-           ``ANTHROPIC_FEDERATION_RULE_ID`` + ``ANTHROPIC_ORGANIZATION_ID``.
+           `ANTHROPIC_IDENTITY_TOKEN[_FILE]` +
+           `ANTHROPIC_FEDERATION_RULE_ID` + `ANTHROPIC_ORGANIZATION_ID`.
         5. The active profile on disk — the profile named by
-           ``<config_dir>/active_config``, or ``default``.
+           `<config_dir>/active_config`, or `default`.
 
-        ``credentials=``, ``config=``, and ``profile=`` are mutually exclusive.
+        `credentials=`, `config=`, and `profile=` are mutually exclusive.
 
         If a static credential is supplied alongside a credentials provider
-        (``credentials=`` / ``config=`` / ``profile=``), or if
-        ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` is set alongside a
+        (`credentials=` / `config=` / `profile=`), or if
+        `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` is set alongside a
         profile or federation configuration, the static credential takes
-        precedence and a one-shot warning is logged on the ``anthropic``
+        precedence and a one-shot warning is logged on the `anthropic`
         logger.
         """
         # --- credentials support (hand-written, upstream to Stainless) ---
@@ -431,7 +431,7 @@ class Anthropic(SyncAPIClient):
         # is re-sent with a freshly minted Bearer token. The base-client retry
         # loop rebuilds the request from FinalRequestOptions on each attempt,
         # so body replay is handled for us. The single-shot guard relies on
-        # ``x-stainless-retry-count`` being ``"0"`` on the first attempt
+        # `x-stainless-retry-count` being `"0"` on the first attempt
         # (see _base_client.py); if a caller Omit()s that header the guard
         # silently no-ops, which fails safe (no retry, surface the 401).
         if response.status_code == 401 and self._token_cache is not None:
@@ -620,26 +620,26 @@ class AsyncAnthropic(AsyncAPIClient):
 
         Credentials are resolved in the following order (first match wins):
 
-        1. Explicit constructor arguments — ``api_key=``, ``auth_token=``,
-           ``credentials=``, ``config=``, or ``profile=``. When any of these
+        1. Explicit constructor arguments — `api_key=`, `auth_token=`,
+           `credentials=`, `config=`, or `profile=`. When any of these
            is passed, environment variables are not consulted for credentials.
-        2. ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` environment
+        2. `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` environment
            variables.
-        3. ``ANTHROPIC_PROFILE`` environment variable — loads the named
-           profile from ``<config_dir>/configs/<profile>.json``.
+        3. `ANTHROPIC_PROFILE` environment variable — loads the named
+           profile from `<config_dir>/configs/<profile>.json`.
         4. Workload identity federation environment variables —
-           ``ANTHROPIC_IDENTITY_TOKEN[_FILE]`` +
-           ``ANTHROPIC_FEDERATION_RULE_ID`` + ``ANTHROPIC_ORGANIZATION_ID``.
+           `ANTHROPIC_IDENTITY_TOKEN[_FILE]` +
+           `ANTHROPIC_FEDERATION_RULE_ID` + `ANTHROPIC_ORGANIZATION_ID`.
         5. The active profile on disk — the profile named by
-           ``<config_dir>/active_config``, or ``default``.
+           `<config_dir>/active_config`, or `default`.
 
-        ``credentials=``, ``config=``, and ``profile=`` are mutually exclusive.
+        `credentials=`, `config=`, and `profile=` are mutually exclusive.
 
         If a static credential is supplied alongside a credentials provider
-        (``credentials=`` / ``config=`` / ``profile=``), or if
-        ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` is set alongside a
+        (`credentials=` / `config=` / `profile=`), or if
+        `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` is set alongside a
         profile or federation configuration, the static credential takes
-        precedence and a one-shot warning is logged on the ``anthropic``
+        precedence and a one-shot warning is logged on the `anthropic`
         logger.
         """
         # --- credentials support (hand-written, upstream to Stainless) ---
@@ -851,7 +851,7 @@ class AsyncAnthropic(AsyncAPIClient):
         # is re-sent with a freshly minted Bearer token. The base-client retry
         # loop rebuilds the request from FinalRequestOptions on each attempt,
         # so body replay is handled for us. The single-shot guard relies on
-        # ``x-stainless-retry-count`` being ``"0"`` on the first attempt
+        # `x-stainless-retry-count` being `"0"` on the first attempt
         # (see _base_client.py); if a caller Omit()s that header the guard
         # silently no-ops, which fails safe (no retry, surface the 401).
         if response.status_code == 401 and self._token_cache is not None:

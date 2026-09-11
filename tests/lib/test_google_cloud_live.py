@@ -1,7 +1,7 @@
 """Live integration tests against the real gateway.
 
-Gated on ``ANTHROPIC_LIVE=1``; the regular suite never hits the network. Expects
-``ANTHROPIC_GOOGLE_CLOUD_{PROJECT,WORKSPACE_ID}`` (or ``..._BASE_URL``) and
+Gated on `ANTHROPIC_LIVE=1`; the regular suite never hits the network. Expects
+`ANTHROPIC_GOOGLE_CLOUD_{PROJECT,WORKSPACE_ID}` (or `..._BASE_URL`) and
 Application Default Credentials in the environment.
 """
 

@@ -1,17 +1,17 @@
 """The sessions-side tool runner — the managed-agents counterpart to
-``client.beta.messages.tool_runner``.
+`client.beta.messages.tool_runner`.
 
-:class:`SessionToolRunner` attaches to a managed-agents session's event stream,
-reconciles against the events-list endpoint, dispatches every ``agent.tool_use``
-*and* ``agent.custom_tool_use`` event against a local tool registry, posts the
-matching result event back (``user.tool_result`` / ``user.custom_tool_result``),
-and yields one :class:`DispatchedToolCall` per completed call. A call the
-server gated behind user confirmation (``evaluated_permission`` ``ask``, e.g.
-an ``always_ask`` tool) is held until its ``user.tool_confirmation`` event
-arrives — executed on ``allow``, never executed on ``deny``. It also stops
-itself once the session has been idle (``stop_reason`` ``end_turn``) for
-``max_idle`` seconds. It does **not** touch the work-item lease — wrap it in
-:class:`anthropic.lib.environments.EnvironmentWorker` if you need heartbeating /
+`SessionToolRunner` attaches to a managed-agents session's event stream,
+reconciles against the events-list endpoint, dispatches every `agent.tool_use`
+*and* `agent.custom_tool_use` event against a local tool registry, posts the
+matching result event back (`user.tool_result` / `user.custom_tool_result`),
+and yields one `DispatchedToolCall` per completed call. A call the
+server gated behind user confirmation (`evaluated_permission` `ask`, e.g.
+an `always_ask` tool) is held until its `user.tool_confirmation` event
+arrives — executed on `allow`, never executed on `deny`. It also stops
+itself once the session has been idle (`stop_reason` `end_turn`) for
+`max_idle` seconds. It does **not** touch the work-item lease — wrap it in
+`anthropic.lib.environments.EnvironmentWorker` if you need heartbeating /
 force-stop.
 """
 
@@ -66,14 +66,14 @@ __all__ = [
     "BetaAnyRunnableTool",
     "MANAGED_AGENTS_BETA",
     "DEFAULT_MAX_IDLE",
-    # Re-exported for ``anthropic.lib.environments._worker``, which drives the
+    # Re-exported for `anthropic.lib.environments._worker`, which drives the
     # runner as an async context manager inside its own task group.
     "_run_session_tools",
 ]
 
 # Either sync or async runnable tool — the union the session-side runners
-# accept. ``Beta``-prefixed for consistency with the released
-# ``BetaRunnableTool`` (sync) / ``BetaAsyncRunnableTool`` (async) members it
+# accept. `Beta`-prefixed for consistency with the released
+# `BetaRunnableTool` (sync) / `BetaAsyncRunnableTool` (async) members it
 # unions; those two are unchanged.
 BetaAnyRunnableTool = Union[BetaRunnableTool, BetaAsyncRunnableTool]
 
@@ -83,7 +83,7 @@ BetaAnyRunnableTool = Union[BetaRunnableTool, BetaAsyncRunnableTool]
 #   agent.tool_use         -> user.tool_result          (builtin agent_toolset tools)
 #   agent.custom_tool_use  -> user.custom_tool_result   (custom, user-defined tools)
 #
-# ``agent.mcp_tool_use`` is intentionally absent — MCP tools run server-side and
+# `agent.mcp_tool_use` is intentionally absent — MCP tools run server-side and
 # the runner never sees a result to post for them.
 DispatchedToolUseEvent = Union[BetaManagedAgentsAgentToolUseEvent, BetaManagedAgentsAgentCustomToolUseEvent]
 DispatchedToolResultParams = Union[
@@ -92,28 +92,28 @@ DispatchedToolResultParams = Union[
 ]
 
 # A dispatch-queue item: the tool-call event paired with the confirmation
-# verdict that released it — ``"allow"`` for an ask-gated call the user
-# approved, ``None`` for a call that needed no confirmation. (Denied calls
+# verdict that released it — `"allow"` for an ask-gated call the user
+# approved, `None` for a call that needed no confirmation. (Denied calls
 # never reach the queue.) Threading the verdict with the event keeps the
-# yielded ``DispatchedToolCall.confirmation`` tied to the verdict that actually
-# released the call rather than whatever ``_confirmations`` holds by the time
+# yielded `DispatchedToolCall.confirmation` tied to the verdict that actually
+# released the call rather than whatever `_confirmations` holds by the time
 # the tool finishes.
 _WorkItem = tuple[DispatchedToolUseEvent, Union[Literal["allow"], None]]
 
 # anthropic-beta gating Sessions access to self-hosted environments. The Sessions
 # resource auto-injects this header on its own requests; this constant is kept
-# for the work-item ``stop`` call the worker issues against the Work resource.
+# for the work-item `stop` call the worker issues against the Work resource.
 MANAGED_AGENTS_BETA = "managed-agents-2026-04-01"
 
 STREAM_BACKOFF_START = 0.5
 STREAM_BACKOFF_CAP = 10.0
 # Outer per-tool-call timeout. This MUST stay strictly greater than the bash
-# tool's own ``agent_toolset.BASH_DEFAULT_TIMEOUT`` (120s). The bash tool wraps
-# its read in its own ``anyio.fail_after(BASH_DEFAULT_TIMEOUT)`` and, on
-# ``TimeoutError``, tears down the subprocess. If this outer deadline equalled
+# tool's own `agent_toolset.BASH_DEFAULT_TIMEOUT` (120s). The bash tool wraps
+# its read in its own `anyio.fail_after(BASH_DEFAULT_TIMEOUT)` and, on
+# `TimeoutError`, tears down the subprocess. If this outer deadline equalled
 # the inner one, the *outer* fail_after could win the race; anyio then raises
-# the parent scope's cancel as a plain ``Cancelled`` (NOT ``TimeoutError``), so
-# the bash tool's ``except TimeoutError`` cleanup never runs and its subprocess
+# the parent scope's cancel as a plain `Cancelled` (NOT `TimeoutError`), so
+# the bash tool's `except TimeoutError` cleanup never runs and its subprocess
 # is left alive with the timed-out command still queued — the next bash call
 # then reads stale output. The 30s margin gives the inner fail_after room to
 # fire and clean up before this one. (BashSession also now closes on any
@@ -126,39 +126,39 @@ TOOL_TIMEOUT = 150.0
 SEND_BACKOFF_CAP = 30.0
 # How long, in seconds, a transiently failing tool-result send keeps retrying
 # when the runner is used on its own: the server's default work-item lease TTL.
-# ``EnvironmentWorker`` overrides it with the live TTL from each lease heartbeat
-# (through ``_run_session_tools``), so a send is only abandoned once the lease
+# `EnvironmentWorker` overrides it with the live TTL from each lease heartbeat
+# (through `_run_session_tools`), so a send is only abandoned once the lease
 # can no longer be ours.
 SEND_RETRY_WINDOW = 300.0
 # Grace period, in seconds, that the runner keeps running after the session goes
-# idle with stop_reason ``end_turn`` before it stops; any new event in that
-# window resets it. ``max_idle=None`` disables it (run until the session ends).
+# idle with stop_reason `end_turn` before it stops; any new event in that
+# window resets it. `max_idle=None` disables it (run until the session ends).
 DEFAULT_MAX_IDLE = 60.0
 
 log = logging.getLogger(__name__)
 
 
 class _IdleClock:
-    """Tracks how long the session has been idle after an ``end_turn`` stop.
+    """Tracks how long the session has been idle after an `end_turn` stop.
 
-    :attr:`end_turn_at` is the monotonic timestamp of the most recent
-    ``session.status_idle`` event with ``stop_reason.type == "end_turn"`` for
-    which no newer event has since arrived; ``None`` whenever the session is not
-    in that state. :meth:`SessionToolRunner._idle_watchdog` stops the runner
-    once it has been set for ``max_idle`` seconds.
+    `end_turn_at` is the monotonic timestamp of the most recent
+    `session.status_idle` event with `stop_reason.type == "end_turn"` for
+    which no newer event has since arrived; `None` whenever the session is not
+    in that state. `SessionToolRunner._idle_watchdog` stops the runner
+    once it has been set for `max_idle` seconds.
 
     Confirmation-gated calls pause the clock while they are unresolved:
-    :meth:`hold` / :meth:`release` count them — from the moment a call is held
+    `hold` / `release` count them — from the moment a call is held
     awaiting its verdict until it is denied or, when allowed, until the dispatch
-    loop has finished with it — and an :meth:`arm` landing while any are
-    outstanding is deferred rather than applied. The last :meth:`release`
+    loop has finished with it — and an `arm` landing while any are
+    outstanding is deferred rather than applied. The last `release`
     applies a still-pending deferral so the runner can time out once nothing
     gated remains in flight.
 
     The clock is event-driven, not polled: every armed-state change signals the
-    :attr:`wake` event so the watchdog wakes immediately instead of waiting out
-    a poll interval. The watchdog captures :attr:`wake` *before* it reads
-    :attr:`end_turn_at`, so a change landing between the read and the wait still
+    `wake` event so the watchdog wakes immediately instead of waiting out
+    a poll interval. The watchdog captures `wake` *before* it reads
+    `end_turn_at`, so a change landing between the read and the wait still
     wakes it.
     """
 
@@ -176,11 +176,11 @@ class _IdleClock:
         self.wake = anyio.Event()
 
     def note_event(self, ev: object) -> None:
-        """Arm the clock on an ``end_turn`` idle, disarm it on anything else.
+        """Arm the clock on an `end_turn` idle, disarm it on anything else.
 
-        ``user.tool_confirmation`` events are neutral: they signal neither agent
+        `user.tool_confirmation` events are neutral: they signal neither agent
         activity nor an idle, and their effect on the clock flows through
-        :meth:`hold` / :meth:`release` instead — disarming here would discard
+        `hold` / `release` instead — disarming here would discard
         the deferred arm the verdict is about to settle.
         """
         ev_type = getattr(ev, "type", None)
@@ -224,7 +224,7 @@ class _IdleClock:
     def release(self) -> None:
         """Drop one hold; the last release applies any deferred arm.
 
-        Once nothing gated is held or in flight, a deferred ``end_turn``
+        Once nothing gated is held or in flight, a deferred `end_turn`
         countdown starts now (with a fresh grace window) so the runner can
         still time out — any newer event disarms it again as usual.
         """
@@ -235,71 +235,71 @@ class _IdleClock:
 
 @dataclass(frozen=True)
 class DispatchedToolCall:
-    """One tool call observed by :class:`SessionToolRunner`.
+    """One tool call observed by `SessionToolRunner`.
 
-    Covers both tool-call event kinds — a builtin ``agent.tool_use`` and a
-    custom ``agent.custom_tool_use``. The originating event is in :attr:`event`
-    (with its input) and the posted-back result in :attr:`result`; ``name`` and
-    ``tool_use_id`` are flat conveniences mirroring ``event``.
+    Covers both tool-call event kinds — a builtin `agent.tool_use` and a
+    custom `agent.custom_tool_use`. The originating event is in `event`
+    (with its input) and the posted-back result in `result`; `name` and
+    `tool_use_id` are flat conveniences mirroring `event`.
     """
 
     event: DispatchedToolUseEvent
-    """The full ``agent.tool_use`` / ``agent.custom_tool_use`` event the agent
-    emitted. The tool input is ``event.input``."""
+    """The full `agent.tool_use` / `agent.custom_tool_use` event the agent
+    emitted. The tool input is `event.input`."""
 
     result: DispatchedToolResultParams | None
     """The result event the runner computed and attempted to post back to the
-    session — ``user.tool_result`` for an ``agent.tool_use`` call,
-    ``user.custom_tool_result`` for an ``agent.custom_tool_use`` call. The
-    computed content is ``result["content"]``.
+    session — `user.tool_result` for an `agent.tool_use` call,
+    `user.custom_tool_result` for an `agent.custom_tool_use` call. The
+    computed content is `result["content"]`.
 
-    ``None`` when the runner deliberately posted nothing: the tool name is not
-    one this runner owns, so the ``tool_use_id`` was left pending for its
-    owner, or the call was denied and never executed (see ``confirmation``).
-    ``posted`` is ``False`` in either case."""
+    `None` when the runner deliberately posted nothing: the tool name is not
+    one this runner owns, so the `tool_use_id` was left pending for its
+    owner, or the call was denied and never executed (see `confirmation`).
+    `posted` is `False` in either case."""
 
     tool_use_id: str
     """Convenience: the id of the originating tool-call event — the same value
-    as ``event.id`` for both event kinds."""
+    as `event.id` for both event kinds."""
 
     name: str
-    """Convenience: the tool name — the same value as ``event.name``."""
+    """Convenience: the tool name — the same value as `event.name`."""
 
     is_error: bool
     """Convenience: whether the result is an error — the same value as
-    ``result["is_error"]``. Always ``False`` for a skipped unowned call (the
-    runner reaches no verdict on a tool it does not own; ``result`` is
-    ``None``) and for a denied call (nothing ran, so there is no error to
-    report; see ``confirmation``)."""
+    `result["is_error"]`. Always `False` for a skipped unowned call (the
+    runner reaches no verdict on a tool it does not own; `result` is
+    `None`) and for a denied call (nothing ran, so there is no error to
+    report; see `confirmation`)."""
 
     posted: bool = True
-    """``True`` if the result event made it to the session. ``False`` if all
+    """`True` if the result event made it to the session. `False` if all
     retries were exhausted or the server returned a permanent 4xx — in which
     case the session-side agent will *not* see this result and the consumer may
-    want to surface that or retry at a higher level — and also ``False``, with
-    ``result`` left ``None``, when the tool name is not one this runner owns and
-    it deliberately posted nothing, leaving the ``tool_use_id`` pending for its
+    want to surface that or retry at a higher level — and also `False`, with
+    `result` left `None`, when the tool name is not one this runner owns and
+    it deliberately posted nothing, leaving the `tool_use_id` pending for its
     owner (the split-client partial-fulfillment behavior), or when the call was
-    denied and never executed (see ``confirmation``)."""
+    denied and never executed (see `confirmation`)."""
 
     confirmation: Literal["allow", "deny"] | None = None
     """The confirmation verdict that gated this call, if any.
 
-    ``"allow"`` — the call required user confirmation (the server evaluated its
-    permission to ``ask``, e.g. under an ``always_ask`` policy) and the matching
-    ``user.tool_confirmation`` event approved it before the tool ran.
-    ``"deny"`` — the user denied it, or the server itself evaluated the
-    permission to ``deny``; the tool was never executed and nothing was posted
-    (``result=None``, ``posted=False``, ``is_error=False``).
-    ``None`` — the call needed no confirmation."""
+    `"allow"` — the call required user confirmation (the server evaluated its
+    permission to `ask`, e.g. under an `always_ask` policy) and the matching
+    `user.tool_confirmation` event approved it before the tool ran.
+    `"deny"` — the user denied it, or the server itself evaluated the
+    permission to `deny`; the tool was never executed and nothing was posted
+    (`result=None`, `posted=False`, `is_error=False`).
+    `None` — the call needed no confirmation."""
 
 
 def _scoped_client(client: AsyncAnthropic, environment_key: str | None) -> AsyncAnthropic:
     """Build the runner's request client.
 
-    With an environment key, defer to :func:`_copy_client_with_bearer_auth`
+    With an environment key, defer to `_copy_client_with_bearer_auth`
     for a Bearer-only sub-client. Without one, layer the helper-telemetry
-    header onto the caller's client via ``with_options`` (parent is not
+    header onto the caller's client via `with_options` (parent is not
     mutated).
     """
     if environment_key is not None:
@@ -334,12 +334,12 @@ def _build_result_event(
     content: BetaFunctionToolResultType,
     is_error: bool,
 ) -> DispatchedToolResultParams:
-    """Build the result-event params matching ``ev``'s tool-call kind.
+    """Build the result-event params matching `ev`'s tool-call kind.
 
-    A custom tool call (``agent.custom_tool_use``) is answered with a
-    ``user.custom_tool_result`` keyed by ``custom_tool_use_id``; a builtin tool
-    call (``agent.tool_use``) with a ``user.tool_result`` keyed by
-    ``tool_use_id``. Both use the codegen'd event-params TypedDicts.
+    A custom tool call (`agent.custom_tool_use`) is answered with a
+    `user.custom_tool_result` keyed by `custom_tool_use_id`; a builtin tool
+    call (`agent.tool_use`) with a `user.tool_result` keyed by
+    `tool_use_id`. Both use the codegen'd event-params TypedDicts.
     """
     session_content = _to_session_content(content)
     if ev.type == "agent.custom_tool_use":
@@ -362,76 +362,78 @@ def _build_result_event(
 class SessionToolRunner:
     """Attach to a managed-agents session and dispatch its tool calls locally.
 
-    The sessions-side counterpart to ``client.beta.messages.tool_runner``: an
-    async iterable that, for each ``agent.tool_use`` or ``agent.custom_tool_use``
-    event the agent emits, executes the matching tool from ``tools``, posts the
-    matching result event back (``user.tool_result`` for a builtin tool call,
-    ``user.custom_tool_result`` for a custom one), and yields one
-    :class:`DispatchedToolCall`. Internally drives event-stream reconnect (with
-    capped backoff) and result posting via an ``anyio`` task group, so it works
-    under both ``asyncio`` and ``trio``.
+    The sessions-side counterpart to `client.beta.messages.tool_runner`: an
+    async iterable that, for each `agent.tool_use` or `agent.custom_tool_use`
+    event the agent emits, executes the matching tool from `tools`, posts the
+    matching result event back (`user.tool_result` for a builtin tool call,
+    `user.custom_tool_result` for a custom one), and yields one
+    `DispatchedToolCall`. Internally drives event-stream reconnect (with
+    capped backoff) and result posting via an `anyio` task group, so it works
+    under both `asyncio` and `trio`.
 
-    Iteration ends when the session terminates (``session.status_terminated`` /
-    ``session.deleted``), when the consumer breaks out of the loop, or — once
-    the session has gone idle with ``stop_reason`` ``end_turn`` — when
-    ``max_idle`` seconds elapse with no new event (any new event resets the
-    countdown; it re-arms on the next ``end_turn`` idle). ``max_idle=None``
+    Iteration ends when the session terminates (`session.status_terminated` /
+    `session.deleted`), when the consumer breaks out of the loop, or — once
+    the session has gone idle with `stop_reason` `end_turn` — when
+    `max_idle` seconds elapse with no new event (any new event resets the
+    countdown; it re-arms on the next `end_turn` idle). `max_idle=None`
     disables that last condition. On exit it runs each tool's optional cleanup:
-    the ``close`` hook and, for tools defined as an (async) context manager, its
-    ``__exit__`` / ``__aexit__``. It does **not** touch the work-item lease —
+    the `close` hook and, for tools defined as an (async) context manager, its
+    `__exit__` / `__aexit__`. It does **not** touch the work-item lease —
     wrap it in an
-    :class:`~anthropic.lib.environments.EnvironmentWorker` for heartbeating /
+    `anthropic.lib.environments.EnvironmentWorker` for heartbeating /
     force-stop.
 
-    Tool calls run one at a time and each is bounded by ``TOOL_TIMEOUT``,
-    after which the runner posts an ``is_error`` "timed out" result. Async
+    Tool calls run one at a time and each is bounded by `TOOL_TIMEOUT`,
+    after which the runner posts an `is_error` "timed out" result. Async
     tools are awaited on the event loop, so keep them non-blocking. Sync tools
-    (``@beta_tool``, :class:`~anthropic.lib.tools.BetaBuiltinFunctionTool`)
+    (`@beta_tool`, `anthropic.lib.tools.BetaBuiltinFunctionTool`)
     run on a worker thread so they cannot stall the loop, and should use
-    ``anyio.from_thread.run`` if they need to call async code. A timed-out
+    `anyio.from_thread.run` if they need to call async code. A timed-out
     sync tool's thread is not joined, so its body may still be running during
     later calls and the exit-time cleanup.
 
-    Pass ``environment_key`` to authenticate the event stream / list / send
+    Pass `environment_key` to authenticate the event stream / list / send
     calls with the self-hosted environment key (bearered, with the client's
-    default ``x-api-key`` dropped); leave it unset to use the client's own
-    credentials. :class:`~anthropic.lib.environments.EnvironmentWorker` may
+    default `x-api-key` dropped); leave it unset to use the client's own
+    credentials. `anthropic.lib.environments.EnvironmentWorker` may
     pass a per-item sessions token here instead when the claimed work item
     carried one — any Bearer credential the session endpoints accept works.
 
     A self-hosted session is commonly serviced by **two** clients at once: this
     runner inside the customer's sandbox (registered with the file/shell sandbox
-    tools) and the customer's app backend (handling the agent's ``custom``
+    tools) and the customer's app backend (handling the agent's `custom`
     function tools). The Sessions API has a partial-fulfillment contract: when a
-    session pauses on ``requires_action`` the pending tool-call ids can mix both
+    session pauses on `requires_action` the pending tool-call ids can mix both
     kinds, and each client must post results **only** for the ids it owns and
     leave the rest pending for the other client. A tool-call event whose name is
-    not in ``tools`` is therefore assumed to belong to the other client: the
+    not in `tools` is therefore assumed to belong to the other client: the
     runner posts no result for it, does not mark it answered, and leaves the
-    ``tool_use_id`` pending — but still yields a :class:`DispatchedToolCall`
-    (``posted=False``, ``is_error=False``, ``result=None``) so the caller can
+    `tool_use_id` pending — but still yields a `DispatchedToolCall`
+    (`posted=False`, `is_error=False`, `result=None`) so the caller can
     observe the unowned dispatch.
 
     Tool calls the server gated behind user confirmation are **not** executed
-    on arrival: an ``agent.tool_use`` event whose ``evaluated_permission`` is
-    ``ask`` (e.g. a tool configured with the ``always_ask`` permission policy)
-    is held until the matching ``user.tool_confirmation`` event arrives. An
-    ``allow`` verdict releases the call to execute as normal; a ``deny``
-    verdict — or a call the server already evaluated to ``deny`` — is never
+    on arrival: an `agent.tool_use` event whose `evaluated_permission` is
+    `ask` (e.g. a tool configured with the `always_ask` permission policy)
+    is held until the matching `user.tool_confirmation` event arrives. An
+    `allow` verdict releases the call to execute as normal; a `deny`
+    verdict — or a call the server already evaluated to `deny` — is never
     executed and nothing is posted for it (the denial itself resolves the call
-    server-side), but it is still yielded (``confirmation="deny"``,
-    ``posted=False``, ``result=None``) so the caller can observe it.
+    server-side), but it is still yielded (`confirmation="deny"`,
+    `posted=False`, `result=None`) so the caller can observe it.
 
-    Usage::
+    Usage:
 
-        from anthropic.lib.tools.agent_toolset import AgentToolContext, beta_agent_toolset_20260401
+    ```py
+    from anthropic.lib.tools.agent_toolset import AgentToolContext, beta_agent_toolset_20260401
 
-        async with AgentToolContext(workdir="/workspace") as env:
-            async for call in client.beta.sessions.events.tool_runner(
-                work.data.id,
-                tools=[*beta_agent_toolset_20260401(env), my_tool],
-            ):
-                print(f"{call.name} -> {'error' if call.is_error else 'ok'}")
+    async with AgentToolContext(workdir="/workspace") as env:
+        async for call in client.beta.sessions.events.tool_runner(
+            work.data.id,
+            tools=[*beta_agent_toolset_20260401(env), my_tool],
+        ):
+            print(f"{call.name} -> {'error' if call.is_error else 'ok'}")
+    ```
     """
 
     def __init__(
@@ -452,18 +454,18 @@ class SessionToolRunner:
         # caller's own client with the helper-telemetry header layered on.
         self._scoped = _scoped_client(client, environment_key)
         # Per-request passthrough headers: threaded into every event stream /
-        # list / send via that call's ``extra_headers=`` (make_request_options)
+        # list / send via that call's `extra_headers=` (make_request_options)
         # — never assigned onto the client, so client state is not mutated.
-        # Auth and ``x-stainless-helper`` come from the scoped sub-client and
-        # the parent client's ``default_headers`` propagate via its
-        # ``client.copy()``; per the SDK's standard ``extra_headers``
+        # Auth and `x-stainless-helper` come from the scoped sub-client and
+        # the parent client's `default_headers` propagate via its
+        # `client.copy()`; per the SDK's standard `extra_headers`
         # precedence a caller header overrides the scoped client's same-named
-        # default for that request (``x-stainless-helper`` is the exception —
+        # default for that request (`x-stainless-helper` is the exception —
         # a caller value appends to the runner's tag rather than replacing it),
         # so this is for caller passthrough (trace ids etc.), not auth.
         self.extra_headers = extra_headers
         # Override for SEND_RETRY_WINDOW, re-read before every send retry;
-        # ``_run_session_tools`` installs EnvironmentWorker's live lease TTL.
+        # `_run_session_tools` installs EnvironmentWorker's live lease TTL.
         self._send_retry_window: Callable[[], float | None] = lambda: None
 
     async def __aiter__(self) -> AsyncIterator[DispatchedToolCall]:
@@ -474,8 +476,8 @@ class SessionToolRunner:
     async def until_done(self) -> None:
         """Drive the runner to completion, discarding the per-call observations.
 
-        Named to match ``BetaToolRunner.until_done`` (and to avoid colliding
-        with :meth:`EnvironmentWorker.run`, which is a forever-loop): it returns
+        Named to match `BetaToolRunner.until_done` (and to avoid colliding
+        with `EnvironmentWorker.run`, which is a forever-loop): it returns
         once the session ends / goes idle, rather than running until cancelled.
         """
         async for _ in self:
@@ -484,29 +486,29 @@ class SessionToolRunner:
     @contextlib.asynccontextmanager
     async def _run(self) -> AsyncIterator[AsyncIterator[DispatchedToolCall]]:
         """Drive the session tool loop, yielding an iterator of
-        :class:`DispatchedToolCall`. :meth:`__aiter__` (and the module-level
-        :func:`_run_session_tools` shim used by ``EnvironmentWorker``) wrap this.
+        `DispatchedToolCall`. `__aiter__` (and the module-level
+        `_run_session_tools` shim used by `EnvironmentWorker`) wrap this.
 
-        Per-run state lives on ``self`` as private attributes so the loops below
-        — :meth:`_stream_loop`, :meth:`_dispatch_loop`, :meth:`_reconcile`,
-        :meth:`_idle_watchdog`, :meth:`_stop_watcher` — can mutate it as methods
+        Per-run state lives on `self` as private attributes so the loops below
+        — `_stream_loop`, `_dispatch_loop`, `_reconcile`,
+        `_idle_watchdog`, `_stop_watcher` — can mutate it as methods
         rather than threading a shared state object through free functions.
         """
         self._events: AsyncEvents = self._scoped.beta.sessions.events
         log.info("session tool runner starting session_id=%s", self.session_id)
         self._tools_by_name: dict[str, BetaAnyRunnableTool] = tool_registry(self.tools)
-        # ``_seen`` dedups tool-call events across the stream and the reconcile
-        # pass (by event id); ``_answered`` holds the ids whose result post has
+        # `_seen` dedups tool-call events across the stream and the reconcile
+        # pass (by event id); `_answered` holds the ids whose result post has
         # actually landed, so a failed post is retried on the next reconcile.
         self._seen: set[str] = set()
         self._answered: set[str] = set()
-        # Confirmation gating (``always_ask`` tools): ``_confirmations`` records
-        # every ``user.tool_confirmation`` verdict by ``tool_use_id``;
-        # ``_awaiting_confirmation`` holds the tool-call events whose
-        # ``evaluated_permission`` is ``ask`` and whose verdict has not arrived
+        # Confirmation gating (`always_ask` tools): `_confirmations` records
+        # every `user.tool_confirmation` verdict by `tool_use_id`;
+        # `_awaiting_confirmation` holds the tool-call events whose
+        # `evaluated_permission` is `ask` and whose verdict has not arrived
         # yet — they are released to the dispatch loop (or resolved as denied)
-        # by :meth:`_note_confirmation` / the next reconcile pass. Like ``_seen``
-        # and ``_answered``, ``_confirmations`` is per-session O(tool calls):
+        # by `_note_confirmation` / the next reconcile pass. Like `_seen`
+        # and `_answered`, `_confirmations` is per-session O(tool calls):
         # recorded verdicts persist for the life of the run.
         self._confirmations: dict[str, Literal["allow", "deny"]] = {}
         self._awaiting_confirmation: dict[str, DispatchedToolUseEvent] = {}
@@ -521,20 +523,20 @@ class SessionToolRunner:
         )
 
         async def iterator() -> AsyncIterator[DispatchedToolCall]:
-            # ``_recv_results`` is explicitly closed in the outer ``finally`` to
+            # `_recv_results` is explicitly closed in the outer `finally` to
             # keep cleanup deterministic regardless of whether the consumer
-            # iterated at all (e.g. ``async with runner._run(): pass``).
+            # iterated at all (e.g. `async with runner._run(): pass`).
             async for call in self._recv_results:
                 yield call
 
         try:
-            # The outer ``CancelScope`` absorbs the task-group cancellation we
-            # trigger in the ``finally`` below, so it doesn't surface to the
-            # consumer as ``Cancelled``.
+            # The outer `CancelScope` absorbs the task-group cancellation we
+            # trigger in the `finally` below, so it doesn't surface to the
+            # consumer as `Cancelled`.
             with anyio.CancelScope():
                 async with anyio.create_task_group() as tg:
-                    # The stop watcher closes ``_send_work`` when ``_stop`` is
-                    # set so the dispatch loop's ``receive()`` raises
+                    # The stop watcher closes `_send_work` when `_stop` is
+                    # set so the dispatch loop's `receive()` raises
                     # EndOfStream and the loop exits cleanly without us having
                     # to inject a sentinel or race two awaitables.
                     tg.start_soon(self._stop_watcher)
@@ -546,15 +548,15 @@ class SessionToolRunner:
                         yield iterator()
                     finally:
                         # Signal every loop to exit. Most exit voluntarily on
-                        # ``_stop``; cancelling the task group's scope wakes
+                        # `_stop`; cancelling the task group's scope wakes
                         # anything still blocked on an unrelated await (e.g. an
                         # uncancellable test fake). anyio absorbs the resulting
-                        # cancel via the outer ``CancelScope``.
+                        # cancel via the outer `CancelScope`.
                         self._stop.set()
                         tg.cancel_scope.cancel()
         finally:
             # Explicitly close every stream so anyio doesn't warn on GC.
-            # ``aclose`` is idempotent, so it's fine if the producer already
+            # `aclose` is idempotent, so it's fine if the producer already
             # closed its end during normal shutdown.
             with anyio.CancelScope(shield=True):
                 for stream in (self._recv_results, self._send_results, self._recv_work, self._send_work):
@@ -562,8 +564,8 @@ class SessionToolRunner:
                         await stream.aclose()
                     except Exception:
                         pass
-            # Run each tool's optional cleanup (``close`` hook and, for
-            # context-manager tools, ``__exit__`` / ``__aexit__``). Shielded so
+            # Run each tool's optional cleanup (`close` hook and, for
+            # context-manager tools, `__exit__` / `__aexit__`). Shielded so
             # the hooks survive the surrounding cancellation.
             with anyio.CancelScope(shield=True):
                 for tool in self.tools:
@@ -574,8 +576,8 @@ class SessionToolRunner:
 
         Two-pass: read the whole history before emitting so a tool-call whose
         result appears later in the same history is not re-dispatched. Pairs
-        ``agent.tool_use`` with ``user.tool_result`` and ``agent.custom_tool_use``
-        with ``user.custom_tool_result`` when computing which calls are answered.
+        `agent.tool_use` with `user.tool_result` and `agent.custom_tool_use`
+        with `user.custom_tool_result` when computing which calls are answered.
         """
         pending: list[DispatchedToolUseEvent] = []
         last_was_end_turn = False
@@ -584,8 +586,8 @@ class SessionToolRunner:
             async for ev in self._events.list(self.session_id, limit=1000, extra_headers=self.extra_headers):
                 if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
                     # Mark the event seen so the live stream doesn't re-enqueue it, but
-                    # decide whether it still needs executing from ``_answered``, not
-                    # ``_seen``: a call whose result post failed is seen-but-unanswered
+                    # decide whether it still needs executing from `_answered`, not
+                    # `_seen`: a call whose result post failed is seen-but-unanswered
                     # and must be retried on the next reconcile pass rather than dropped.
                     self._seen.add(ev.id)
                     pending.append(ev)
@@ -608,15 +610,15 @@ class SessionToolRunner:
                     and getattr(getattr(ev, "stop_reason", None), "type", None) == "end_turn"
                 )
         except Exception as e:
-            # Pagination may have failed partway through; the ``_answered`` set
-            # could be incomplete, so dispatching ``pending`` now would risk
+            # Pagination may have failed partway through; the `_answered` set
+            # could be incomplete, so dispatching `pending` now would risk
             # re-running a tool whose result was on a page we never reached.
-            # The next reconnect will retry the reconcile. Leave ``_idle_clock``
+            # The next reconnect will retry the reconcile. Leave `_idle_clock`
             # untouched since the history we read may be incomplete.
             log.warning("reconcile list failed; skipping pending enqueue error=%s", e)
             list_failed = True
         if list_failed:
-            # Roll back the ids we added to ``_seen`` so the live stream can
+            # Roll back the ids we added to `_seen` so the live stream can
             # re-process them rather than silently dedup what we never finished
             # reading.
             for ev in pending:
@@ -634,13 +636,13 @@ class SessionToolRunner:
         for held in [ev for ev in self._awaiting_confirmation.values() if ev.id in self._confirmations]:
             await self._apply_verdict(held, self._confirmations[held.id])
         # Routing resolves denied calls in place (marking them answered) and
-        # holds ask-gated calls for their ``user.tool_confirmation``. If the
-        # most recent event in history is an ``end_turn`` idle and no tool work
+        # holds ask-gated calls for their `user.tool_confirmation`. If the
+        # most recent event in history is an `end_turn` idle and no tool work
         # is outstanding, the session is done — arm the idle clock so the
-        # watchdog counts down even if that ``end_turn`` arrived during a
+        # watchdog counts down even if that `end_turn` arrived during a
         # disconnect. Gated calls don't count as outstanding here whether still
         # held or just released to the dispatch queue: the clock holds them
-        # (``_IdleClock.hold``), so this ``arm`` is deferred until they resolve.
+        # (`_IdleClock.hold`), so this `arm` is deferred until they resolve.
         outstanding = [
             ev for ev in unanswered if ev.id not in self._answered and ev.id not in self._awaiting_confirmation
         ]
@@ -653,16 +655,16 @@ class SessionToolRunner:
             try:
                 # Open the stream *before* reconciling: with the stream already
                 # attached, an event emitted in the gap between the list call
-                # and the attach is delivered live instead of lost. ``_seen``
+                # and the attach is delivered live instead of lost. `_seen`
                 # dedups any overlap between the history and the live stream.
                 async with await self._events.stream(self.session_id, extra_headers=self.extra_headers) as stream:
                     await self._reconcile()
                     async for ev in stream:
                         backoff = STREAM_BACKOFF_START
-                        # Arm/disarm the idle clock: an ``end_turn`` idle starts
+                        # Arm/disarm the idle clock: an `end_turn` idle starts
                         # the grace countdown, any other event cancels it. The
                         # clock itself defers the countdown while gated calls
-                        # are held or in flight (see ``_IdleClock.hold``).
+                        # are held or in flight (see `_IdleClock.hold`).
                         self._idle_clock.note_event(ev)
                         if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
                             if ev.id not in self._seen:
@@ -693,23 +695,23 @@ class SessionToolRunner:
             backoff = min(backoff * 2, STREAM_BACKOFF_CAP)
 
     async def _route_tool_event(self, ev: DispatchedToolUseEvent) -> None:
-        """Enqueue ``ev`` for dispatch, honoring its evaluated permission.
+        """Enqueue `ev` for dispatch, honoring its evaluated permission.
 
         A builtin call the server gated behind user confirmation
-        (``evaluated_permission == "ask"``, e.g. the ``always_ask`` policy) is
-        held until the matching ``user.tool_confirmation`` event arrives
+        (`evaluated_permission == "ask"`, e.g. the `always_ask` policy) is
+        held until the matching `user.tool_confirmation` event arrives
         instead of executing immediately. The gate fails closed: only an
-        explicit ``allow`` verdict releases a gated call, a call the server
-        already evaluated to ``deny`` is never executed regardless of any
-        verdict, a stray ``deny`` verdict recorded for a call that never needed
+        explicit `allow` verdict releases a gated call, a call the server
+        already evaluated to `deny` is never executed regardless of any
+        verdict, a stray `deny` verdict recorded for a call that never needed
         confirmation also resolves it as denied (any deny signal wins), and —
         because the wire can carry values newer than this SDK's types — an
-        unrecognised permission is held like ``ask`` and an unrecognised
+        unrecognised permission is held like `ask` and an unrecognised
         verdict is treated as a denial, never dispatched.
         """
-        # ``getattr`` rather than an event-type check: today only
-        # ``agent.tool_use`` carries ``evaluated_permission``, but if the field
-        # ever lands on ``agent.custom_tool_use`` the gate must keep failing
+        # `getattr` rather than an event-type check: today only
+        # `agent.tool_use` carries `evaluated_permission`, but if the field
+        # ever lands on `agent.custom_tool_use` the gate must keep failing
         # closed rather than dispatch a gated call by event type.
         permission = getattr(ev, "evaluated_permission", None)
         verdict = self._confirmations.get(ev.id)
@@ -742,8 +744,8 @@ class SessionToolRunner:
         held = self._awaiting_confirmation.get(ev.tool_use_id)
         if held is None:
             # Nothing held: the verdict gates a call this runner has not seen
-            # yet (or one it never gates, e.g. an ``agent.mcp_tool_use``).
-            # Keeping it in ``_confirmations`` lets a later route of that call
+            # yet (or one it never gates, e.g. an `agent.mcp_tool_use`).
+            # Keeping it in `_confirmations` lets a later route of that call
             # resolve instantly.
             return
         await self._apply_verdict(held, ev.result)
@@ -793,10 +795,10 @@ class SessionToolRunner:
         )
 
     async def _surface_call(self, call: DispatchedToolCall) -> None:
-        """Yield ``call`` to the consumer, tolerating a consumer that left early.
+        """Yield `call` to the consumer, tolerating a consumer that left early.
 
-        ``BrokenResourceError`` — the consumer broke out of the iterator;
-        ``ClosedResourceError`` — the dispatch loop already closed the send
+        `BrokenResourceError` — the consumer broke out of the iterator;
+        `ClosedResourceError` — the dispatch loop already closed the send
         side (possible for the deny path, which runs from the stream loop and
         can outlive the dispatch loop). Either way the underlying work already
         happened; only the observability event is lost.
@@ -812,7 +814,7 @@ class SessionToolRunner:
                 try:
                     ev, confirmation = await self._recv_work.receive()
                 except anyio.EndOfStream:
-                    # Producer side closed — usually because ``_stop`` was set
+                    # Producer side closed — usually because `_stop` was set
                     # (the idle watchdog or stream loop signalled it).
                     return
                 try:
@@ -827,7 +829,7 @@ class SessionToolRunner:
                     if confirmation == "allow":
                         # The user-approved call is fully disposed of (executed,
                         # or moot because it was answered elsewhere); drop the
-                        # idle-clock hold ``_apply_verdict`` kept on it.
+                        # idle-clock hold `_apply_verdict` kept on it.
                         self._idle_clock.release()
         finally:
             # Closing the results stream signals the iterator that no more
@@ -837,12 +839,12 @@ class SessionToolRunner:
                 await self._send_results.aclose()
 
     async def _execute(self, ev: DispatchedToolUseEvent, confirmation: Literal["allow"] | None) -> None:
-        """Run ``ev``'s tool, post its result, and surface the dispatched call.
+        """Run `ev`'s tool, post its result, and surface the dispatched call.
 
-        ``confirmation`` is the verdict that released the call onto the work
-        queue — ``"allow"`` for an ask-gated call the user approved, ``None``
+        `confirmation` is the verdict that released the call onto the work
+        queue — `"allow"` for an ask-gated call the user approved, `None`
         for a call that needed no confirmation. (Denied calls never reach this
-        method; ``_resolve_denied`` surfaces them.)
+        method; `_resolve_denied` surfaces them.)
         """
         log.info("executing tool tool=%s tool_use_id=%s", ev.name, ev.id)
         tool = self._tools_by_name.get(ev.name)
@@ -857,7 +859,7 @@ class SessionToolRunner:
             # implemented" as the tool output while the real result from the
             # other client arrives afterwards). Still yield the call so the
             # caller can observe the unowned dispatch; nothing was sent, so
-            # ``posted`` and ``is_error`` stay False and ``result`` is None.
+            # `posted` and `is_error` stay False and `result` is None.
             # The id stays unanswered, so reconcile keeps it out of the
             # idle/end-turn accounting and re-surfaces it after a reconnect
             # until its owner answers it.
@@ -901,12 +903,12 @@ class SessionToolRunner:
         )
 
     async def _send_result(self, tool_result: DispatchedToolResultParams, tool_use_id: str) -> bool:
-        """Post ``tool_result`` back to the session, retrying transient failures
+        """Post `tool_result` back to the session, retrying transient failures
         with jittered exponential backoff until the send retry window elapses.
 
-        ``tool_use_id`` is the originating tool-call event id — passed
+        `tool_use_id` is the originating tool-call event id — passed
         explicitly because the result params key it differently
-        (``tool_use_id`` vs ``custom_tool_use_id``) depending on the kind.
+        (`tool_use_id` vs `custom_tool_use_id`) depending on the kind.
         """
         start = time.monotonic()
         last_err: Exception | None = None
@@ -941,11 +943,11 @@ class SessionToolRunner:
         return False
 
     async def _idle_watchdog(self) -> None:
-        """Stop the runner once the session has been idle (``end_turn``) for
-        ``max_idle`` seconds with no new events.
+        """Stop the runner once the session has been idle (`end_turn`) for
+        `max_idle` seconds with no new events.
 
         Event-driven: it blocks on the idle clock's wake event rather than
-        polling. Capturing ``clock.wake`` *before* reading ``clock.end_turn_at``
+        polling. Capturing `clock.wake` *before* reading `clock.end_turn_at`
         closes the race where the clock changes between the read and the wait.
         """
         max_idle = self.max_idle
@@ -970,13 +972,13 @@ class SessionToolRunner:
                 await _wait_first(wake, self._stop)
 
     async def _stop_watcher(self) -> None:
-        """When ``_stop`` is set, close the work stream so :meth:`_dispatch_loop` exits."""
+        """When `_stop` is set, close the work stream so `_dispatch_loop` exits."""
         await self._stop.wait()
         await self._send_work.aclose()
 
 
 async def _wait_first(*events: anyio.Event) -> None:
-    """Return as soon as any of ``events`` is set."""
+    """Return as soon as any of `events` is set."""
     async with anyio.create_task_group() as tg:
 
         async def _waiter(ev: anyio.Event) -> None:
@@ -998,15 +1000,15 @@ async def _run_session_tools(
     extra_headers: Headers | None = None,
     send_retry_window: Callable[[], float | None] | None = None,
 ) -> AsyncIterator[AsyncIterator[DispatchedToolCall]]:
-    """Internal: drive a :class:`SessionToolRunner` as an async context manager.
+    """Internal: drive a `SessionToolRunner` as an async context manager.
 
     Kept as a thin module-level shim because
-    :class:`~anthropic.lib.environments.EnvironmentWorker` enters the runner
+    `anthropic.lib.environments.EnvironmentWorker` enters the runner
     inside its own task group and wants the context-manager shape for
     deterministic cleanup, and feeds it the work-item lease TTL as the
-    tool-result send retry window via ``send_retry_window`` (re-read before
-    every retry; ``None`` until the first heartbeat means the default). New
-    code should iterate :class:`SessionToolRunner` directly.
+    tool-result send retry window via `send_retry_window` (re-read before
+    every retry; `None` until the first heartbeat means the default). New
+    code should iterate `SessionToolRunner` directly.
     """
     runner = SessionToolRunner(
         client,

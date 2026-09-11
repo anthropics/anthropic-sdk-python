@@ -27,8 +27,8 @@ __all__ = ["default_credentials"]
 
 
 def _build_federation_result(*, base_url: str) -> Optional[CredentialResult]:
-    """Build a :class:`CredentialResult` for the env-var federation path
-    (step 4 in the precedence spec). Returns ``None`` if the required trio
+    """Build a `CredentialResult` for the env-var federation path
+    (step 4 in the precedence spec). Returns `None` if the required trio
     isn't fully set."""
     federation_rule_id = os.environ.get(ENV_FEDERATION_RULE_ID)
     organization_id = os.environ.get(ENV_ORGANIZATION_ID)
@@ -64,8 +64,8 @@ def _build_federation_result(*, base_url: str) -> Optional[CredentialResult]:
         organization_id=organization_id,
         service_account_id=os.environ.get(ENV_SERVICE_ACCOUNT_ID),
         # Coerce empty string to None so a defaulted-but-empty CI variable
-        # doesn't put ``"workspace_id": ""`` on the wire — matches the falsy
-        # skip in :func:`._providers._fill_missing_from_env`.
+        # doesn't put `"workspace_id": ""` on the wire — matches the falsy
+        # skip in `._providers._fill_missing_from_env`.
         workspace_id=os.environ.get(ENV_WORKSPACE_ID) or None,
         scope=os.environ.get(ENV_SCOPE),
     )
@@ -74,34 +74,34 @@ def _build_federation_result(*, base_url: str) -> Optional[CredentialResult]:
 
 
 def default_credentials(*, base_url: str = "https://api.anthropic.com") -> Optional[CredentialResult]:
-    """Resolve a :class:`CredentialResult` from the environment per the
+    """Resolve a `CredentialResult` from the environment per the
     credential-resolution spec. First match wins.
 
     Implements steps 2-5 of the spec precedence chain (step 1 is handled at
     the client constructor level, above this function):
 
-    Step 2a: ``ANTHROPIC_API_KEY`` → return ``None`` so the client uses its
-             existing ``X-Api-Key`` header path. (API keys are not Bearer
+    Step 2a: `ANTHROPIC_API_KEY` → return `None` so the client uses its
+             existing `X-Api-Key` header path. (API keys are not Bearer
              tokens, so they can't flow through this chain.)
-    Step 2b: ``ANTHROPIC_AUTH_TOKEN`` → :class:`StaticToken` (Bearer).
-    Step 3:  ``ANTHROPIC_PROFILE`` / ``ANTHROPIC_CONFIG_DIR`` set, or the
-             ``active_config`` pointer file exists → load that profile.
+    Step 2b: `ANTHROPIC_AUTH_TOKEN` → `StaticToken` (Bearer).
+    Step 3:  `ANTHROPIC_PROFILE` / `ANTHROPIC_CONFIG_DIR` set, or the
+             `active_config` pointer file exists → load that profile.
              This is *explicit profile selection*; failures propagate.
-    Step 4:  ``ANTHROPIC_FEDERATION_RULE_ID`` + ``ANTHROPIC_ORGANIZATION_ID``
-             + ``ANTHROPIC_IDENTITY_TOKEN[_FILE]`` → direct jwt-bearer
-             exchange via :class:`WorkloadIdentityCredentials`. Critically,
+    Step 4:  `ANTHROPIC_FEDERATION_RULE_ID` + `ANTHROPIC_ORGANIZATION_ID`
+             + `ANTHROPIC_IDENTITY_TOKEN[_FILE]` → direct jwt-bearer
+             exchange via `WorkloadIdentityCredentials`. Critically,
              step 4 sits **between** explicit profile (step 3) and
              fallback profile (step 5): a machine with WIF env vars wired
-             up must use WIF even if a leftover ``default`` profile exists
-             on disk, but a user who explicitly ``ANTHROPIC_PROFILE=dev``
+             up must use WIF even if a leftover `default` profile exists
+             on disk, but a user who explicitly `ANTHROPIC_PROFILE=dev`
              still gets their profile.
-    Step 5:  Fallback active profile from disk (``configs/default.json``
-             or whatever ``active_config`` points at). Errors at this step
+    Step 5:  Fallback active profile from disk (`configs/default.json`
+             or whatever `active_config` points at). Errors at this step
              are swallowed and the chain falls through — a corrupt
              unselected profile shouldn't break an otherwise-explicit
              api_key= path.
 
-    Returns ``None`` when nothing matches — the client will fall back to
+    Returns `None` when nothing matches — the client will fall back to
     its normal "no auth configured" error.
     """
     # Step 2a — env api_key: return None so the base client handles X-Api-Key.
@@ -130,7 +130,7 @@ def default_credentials(*, base_url: str = "https://api.anthropic.com") -> Optio
 
     # Step 4 — env-var workload identity federation. Sits above the
     # fallback on-disk profile so a machine with WIF env vars uses WIF
-    # even if a leftover ``default`` profile exists on disk.
+    # even if a leftover `default` profile exists on disk.
     federation_result = _build_federation_result(base_url=base_url)
     if federation_result is not None:
         return federation_result
