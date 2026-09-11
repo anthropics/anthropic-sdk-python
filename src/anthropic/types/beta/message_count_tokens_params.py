@@ -1,11 +1,8 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Union, Iterable, Optional
-from typing_extensions import Literal, Required, Annotated, TypeAlias, TypedDict
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
-from ..._utils import PropertyInfo
 from ..model_param import ModelParam
 from .beta_tool_param import BetaToolParam
 from .beta_message_param import BetaMessageParam
@@ -258,15 +255,17 @@ class MessageCountTokensParams(TypedDict, total=False):
     for more details.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
 
-    user_profile_id: Annotated[str, PropertyInfo(alias="anthropic-user-profile-id")]
+    user_profile_id: str
     """The user profile ID to attribute this request to.
 
     Use when acting on behalf of a party other than your organization. Requires the
     `user-profiles` beta header.
     """
+
+    workspace_id: str
 
 
 Tool: TypeAlias = Union[

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing_extensions import TypedDict
@@ -25,3 +23,5 @@ class BatchListParams(TypedDict, total=False):
 
     Defaults to `20`. Ranges from `1` to `1000`.
     """
+
+    workspace_id: str

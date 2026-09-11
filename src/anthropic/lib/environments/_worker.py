@@ -263,9 +263,10 @@ def _sessions_token_from_secret(secret: str | None) -> str | None:
     is a URL-safe base64 JSON payload bundling the per-item material — the
     ``sessions_token`` (the bearer for this item's work lifecycle and
     session-level calls) plus ingress / source tokens this worker does not
-    consume. Returns the sessions token, or ``None`` (meaning: fall back to
-    the environment key) when the payload is missing, doesn't decode, or
-    carries no token. Never log the payload or anything extracted from it.
+    consume. Returns the sessions token, or ``None`` (the caller then falls
+    back to the environment key, or fails the item when there is none) when
+    the payload is missing, doesn't decode, or carries no token. Never log
+    the payload or anything extracted from it.
     """
     if not secret:
         return None
@@ -309,6 +310,8 @@ class EnvironmentWorker:
     always uses it, and per-session calls fall back to it when a work item's
     ``secret`` doesn't yield a sessions token (every request rides a
     Bearer-only scoped sub-client, never the parent client's ``X-Api-Key``).
+    :meth:`handle_item` can run without it when the work item's ``secret``
+    carries a sessions token — that token then authorizes every per-item call.
 
     Async only — :meth:`run` loops forever, so bound it (cancel the task or wrap
     it in :func:`asyncio.wait_for`) when you want it to stop.
@@ -353,7 +356,8 @@ class EnvironmentWorker:
         (events stream / list / send + heartbeat / force-stop) calls, except
         where a claimed item's own ``secret`` takes precedence (see the class
         docstring). Required by :meth:`run`; :meth:`handle_item` falls back to
-        it (then to ``ANTHROPIC_ENVIRONMENT_KEY``) when not passed one.
+        it (then to ``ANTHROPIC_ENVIRONMENT_KEY``) when not passed one, and
+        requires it only when the work item carries no ``work_secret``.
       tools: Tools to expose to each claimed session. Either a fixed list, or a
         factory invoked once per session with that session's
         :class:`AgentToolContext`. Defaults to
@@ -555,21 +559,27 @@ class EnvironmentWorker:
         passed; ``environment_key`` resolves in order: the explicit argument,
         then this worker's own ``environment_key``, then
         ``ANTHROPIC_ENVIRONMENT_KEY`` — so with no arguments inside that command
-        it just works.
+        it just works. It is required only when no ``work_secret`` is present:
+        a sandbox that hands the process only the work secret (e.g. a pod that
+        must never hold the environment key) runs on the secret's sessions
+        token alone.
 
         ``work_secret`` is the work item's per-item ``secret`` payload from the
         poll response, falling back to ``ANTHROPIC_WORK_SECRET``. Unlike the
         others it is optional. When present, the sessions token extracted from
         it is preferred as the Bearer credential for this item's heartbeat,
-        force-stop, and session calls. When absent or undecodable, those calls
-        use ``environment_key``.
+        force-stop, and session calls. When it yields no token, those calls use
+        ``environment_key`` — and with no ``environment_key`` either, the item
+        fails rather than run unauthenticated.
 
         Non-session work items are ignored (but still force-stopped so the
         lease doesn't sit until TTL).
 
         Raises:
           ValueError: if any of ``work_id`` / ``environment_id`` / ``session_id``
-            / ``environment_key`` is still empty after the fallbacks.
+            is still empty after the fallbacks; if ``environment_key`` is, while
+            no ``work_secret`` is present; or if the ``work_secret`` yields no
+            sessions token and there is no ``environment_key`` to fall back to.
           SessionMemoryError: if the session has memory stores attached but
             they cannot be mounted — the work item carried no
             ``sessions_token``, or a store failed to download. May arrive
@@ -578,17 +588,19 @@ class EnvironmentWorker:
         work_id = _require(work_id, name="work_id", env_var="ANTHROPIC_WORK_ID")
         environment_id = _require(environment_id, name="environment_id", env_var="ANTHROPIC_ENVIRONMENT_ID")
         session_id = _require(session_id, name="session_id", env_var="ANTHROPIC_SESSION_ID")
-        # environment_key resolves: explicit arg -> this worker's own key ->
-        # ANTHROPIC_ENVIRONMENT_KEY -> a clear "required" error.
-        environment_key = _require(
-            environment_key or self._environment_key,
-            name="environment_key",
-            env_var="ANTHROPIC_ENVIRONMENT_KEY",
-        )
 
         # The per-item secret is optional: explicit arg -> ANTHROPIC_WORK_SECRET
         # -> None (use the environment key).
         work_secret = work_secret or os.environ.get("ANTHROPIC_WORK_SECRET")
+
+        # environment_key resolves: explicit arg -> this worker's own key ->
+        # ANTHROPIC_ENVIRONMENT_KEY. Required only when there is no work
+        # secret; a secret's sessions token can carry the item on its own.
+        environment_key = (
+            environment_key or self._environment_key or os.environ.get("ANTHROPIC_ENVIRONMENT_KEY") or None
+        )
+        if environment_key is None and work_secret is None:
+            raise ValueError("handle_item: environment_key is required — pass it or set ANTHROPIC_ENVIRONMENT_KEY")
 
         # The per-item flow only reads work.id / work.environment_id /
         # work.secret / work.data.type / work.data.id, so a minimally populated
@@ -601,7 +613,7 @@ class EnvironmentWorker:
         )
         await self._handle_item(work_item, environment_key)
 
-    async def _handle_item(self, work_item: BetaSelfHostedWork, environment_key: str) -> None:
+    async def _handle_item(self, work_item: BetaSelfHostedWork, environment_key: str | None) -> None:
         """The per-item body shared by :meth:`run`'s poll loop and :meth:`handle_item`.
 
         Runs a :class:`SessionToolRunner` for the work item's session while
@@ -614,8 +626,9 @@ class EnvironmentWorker:
         When the poll response carried a per-item ``secret`` (a short-lived
         payload scoped to this work item), the sessions token extracted from
         it is preferred over ``environment_key`` as the Bearer credential for
-        those per-item calls; a missing/undecodable secret falls back to
-        ``environment_key`` unchanged.
+        those per-item calls. A secret that yields no token falls back to
+        ``environment_key``; with no key available either, the item fails
+        rather than run unauthenticated.
         """
         # Lazy import: keeps the host-only ``agent_toolset`` module out of this
         # module's import graph (see the note next to the imports).
@@ -627,13 +640,19 @@ class EnvironmentWorker:
         # callers (or test fakes) may predate the field. Never log this value.
         secret = getattr(work_item, "secret", None)
         sessions_token = _sessions_token_from_secret(secret)
+        item_credential = sessions_token or environment_key
+        if item_credential is None:
+            raise ValueError(
+                "the work item's secret payload yielded no sessions token and no environment key "
+                "is available; provide a secret whose payload carries a sessions_token, or an "
+                f"environment key (pass one or set ANTHROPIC_ENVIRONMENT_KEY) work_id={work_item.id}"
+            )
         if secret and sessions_token is None:
             log.warning(
                 "work item carried a secret payload but no sessions token could be extracted; "
                 "falling back to the environment key work_id=%s",
                 work_item.id,
             )
-        item_credential = sessions_token or environment_key
 
         # ``environments-worker``-scoped sub-client for the heartbeat and
         # force-stop calls this item drives. The session tool runner is given

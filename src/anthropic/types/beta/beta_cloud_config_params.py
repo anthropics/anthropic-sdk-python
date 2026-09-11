@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Optional
@@ -33,4 +31,7 @@ class BetaCloudConfigParams(TypedDict, total=False):
     When versioning, use the version semantics relevant for the package manager,
     e.g. for `pip` use `package==1.0.0`. You are responsible for validating the
     package and version exist. Unversioned installs the latest.
+
+    Under `limited` networking, requires `networking.allow_package_managers` to be
+    `true`.
     """

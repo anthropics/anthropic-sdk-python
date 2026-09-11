@@ -119,6 +119,7 @@ class RequestOptions(TypedDict, total=False):
     params: Query
     extra_json: AnyMapping
     idempotency_key: str
+    """Deprecated: this option has no effect and will be removed in a future major version."""
     follow_redirects: bool
 
 

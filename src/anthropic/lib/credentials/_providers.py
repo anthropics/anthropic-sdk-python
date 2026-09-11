@@ -11,7 +11,7 @@ import tempfile
 from typing import TYPE_CHECKING, Any, Dict, Union, Optional, cast
 from typing_extensions import override
 
-import httpx2 as httpx
+import httpx2
 
 from ._types import AccessToken, IdentityTokenProvider
 from ._secrets import (
@@ -46,7 +46,7 @@ from ._constants import (
     _credentials_file_path,
     resolve_identity_token_path,
 )
-from ..._exceptions import AnthropicError
+from ..._exceptions import AnthropicError, CredentialsError, IdentityTokenFileError
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ def _coerce_expires_at(value: Any, source: Optional[pathlib.Path]) -> Optional[i
         return int(value)
     except (TypeError, ValueError) as err:
         where = f"credentials file at {source}" if source is not None else "credentials"
-        raise AnthropicError(
+        raise CredentialsError(
             f"{where} has invalid 'expires_at' {value!r}; expected an integer "
             f"Unix timestamp in seconds. The SDK does not parse ISO8601 — convert "
             f"with int(datetime.timestamp()) before writing the file."
@@ -136,7 +136,7 @@ class EnvToken:
         del force_refresh
         value = os.environ.get(self._env_var)
         if value is None:
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Environment variable {self._env_var} is not set. "
                 f"Set it or pass an explicit `credentials=` provider to the client."
             )
@@ -189,13 +189,13 @@ class CredentialsFile:
         self,
         profile: Optional[str] = None,
         *,
-        http_client: Optional[httpx.Client] = None,
+        http_client: Optional[httpx2.Client] = None,
     ) -> None:
         self._profile = profile if profile is not None else _active_profile()
         self._config_path = _config_file_path(self._profile)
         self._bound_base_url: Optional[str] = None
         self._http_client = http_client
-        self._owned_http_client: Optional[httpx.Client] = None
+        self._owned_http_client: Optional[httpx2.Client] = None
 
         # Populated on first __call__ — keeps construction cheap and exception-free
         # so the chain can construct us optimistically after an existence check.
@@ -301,8 +301,6 @@ class CredentialsFile:
                 headers["anthropic-workspace-id"] = str(workspace_id)
         return headers
 
-    # -- file IO -----------------------------------------------------------
-
     def _load_config(self) -> Dict[str, Any]:
         """Read and cache the config file, resolving ``base_url`` and ``credentials_path``."""
         if self._config is not None:
@@ -311,27 +309,27 @@ class CredentialsFile:
         try:
             raw = self._config_path.read_text(encoding="utf-8")
         except FileNotFoundError as err:
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Config file not found at {self._config_path} (profile {self._profile!r}). "
                 f"Set {ENV_PROFILE} to select a different profile, or set {ENV_CONFIG_DIR} "
                 f"to relocate the config directory."
             ) from err
         except (OSError, UnicodeDecodeError) as err:
-            raise AnthropicError(f"Config file at {self._config_path} could not be read: {err}") from err
+            raise CredentialsError(f"Config file at {self._config_path} could not be read: {err}") from err
         try:
             raw_config: Any = json.loads(raw)
         except json.JSONDecodeError as err:
-            raise AnthropicError(f"Config file at {self._config_path} is not valid JSON: {err}") from err
+            raise CredentialsError(f"Config file at {self._config_path} is not valid JSON: {err}") from err
 
         if not isinstance(raw_config, dict):
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Config file at {self._config_path} must contain a JSON object, not {type(raw_config).__name__}."
             )
         config = cast("Dict[str, Any]", raw_config)
 
         raw_auth = config.get("authentication")
         if not isinstance(raw_auth, dict):
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Config file at {self._config_path} is missing the 'authentication' object. "
                 f'Expected shape: {{"authentication": {{"type": '
                 f'"{AUTH_TYPE_OIDC_FEDERATION}"|"{AUTH_TYPE_USER_OAUTH}", ...}}, ...}}'
@@ -362,10 +360,9 @@ class CredentialsFile:
         with ``_unwrap_secret`` at the point of use. Writing the dict back
         through :meth:`_atomic_write_credentials` unwraps automatically.
 
-        On Unix, verifies the file is not group/world-readable. World-readable
-        credentials files are refused outright; group-readable files log a
-        warning but are accepted. The check is skipped on Windows where POSIX
-        mode bits don't carry the same meaning.
+        On Unix, refuses symlinks and any file readable or writable by group
+        or others (``mode & 0o077``). The check is skipped on Windows where
+        POSIX mode bits don't carry the same meaning.
         """
         assert self._credentials_path is not None  # set by _load_config
         path = self._credentials_path
@@ -373,26 +370,19 @@ class CredentialsFile:
             try:
                 file_stat = os.stat(path, follow_symlinks=False)
             except FileNotFoundError as err:
-                raise AnthropicError(f"Credentials file not found at {path} (profile {self._profile!r}).") from err
+                raise CredentialsError(f"Credentials file not found at {path} (profile {self._profile!r}).") from err
             except OSError as err:
-                raise AnthropicError(f"Credentials file at {path} could not be accessed: {err}") from err
+                raise CredentialsError(f"Credentials file at {path} could not be accessed: {err}") from err
             if stat.S_ISLNK(file_stat.st_mode):
-                raise AnthropicError(
+                raise CredentialsError(
                     f"Credentials file at {path} is a symlink; refusing to follow "
                     f"(move the real file into place to keep secret material on the expected filesystem)."
                 )
             mode = stat.S_IMODE(file_stat.st_mode)
-            if mode & 0o004:
-                raise AnthropicError(
-                    f"Credentials file at {path} is world-readable (mode {mode:#o}); "
+            if mode & 0o077:
+                raise CredentialsError(
+                    f"Credentials file at {path} is accessible by group or others (mode {mode:#o}); "
                     f"run `chmod 600 {path}` before retrying."
-                )
-            if mode & 0o070:
-                log.warning(
-                    "Credentials file at %s is group-readable (mode %#o); consider `chmod 600 %s`.",
-                    path,
-                    mode,
-                    path,
                 )
         try:
             # Read → parse → wrap in one expression: neither the raw file text
@@ -401,18 +391,18 @@ class CredentialsFile:
             # material on every error path in and below this method.
             creds: Dict[str, Any] = _wrap_secret_fields(json.loads(path.read_text(encoding="utf-8")))
         except FileNotFoundError as err:
-            raise AnthropicError(f"Credentials file not found at {path} (profile {self._profile!r}).") from err
+            raise CredentialsError(f"Credentials file not found at {path} (profile {self._profile!r}).") from err
         except json.JSONDecodeError as err:
             # The JSONDecodeError message carries only position info.
-            raise AnthropicError(f"Credentials file at {path} is not valid JSON: {err}") from _strip_traceback(err)
+            raise CredentialsError(f"Credentials file at {path} is not valid JSON: {err}") from _strip_traceback(err)
         except _NonObjectPayloadError as err:
             # Rejected inside the helper with the payload unbound — a scalar
             # credentials file is still secret material (e.g. a bare token).
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Credentials file at {path} must contain a JSON object, not {err.type_name}."
             ) from None
         except (OSError, UnicodeDecodeError) as err:
-            raise AnthropicError(f"Credentials file at {path} could not be read: {err}") from err
+            raise CredentialsError(f"Credentials file at {path} could not be read: {err}") from err
 
         # Validate discriminator if present; lenient if absent so hand-written
         # or older files keep working. Catches config/credentials drift early.
@@ -420,22 +410,22 @@ class CredentialsFile:
         if actual is not None and actual != CREDENTIALS_FILE_TYPE:
             assert self._config is not None  # _load_config always precedes _read_credentials
             auth_type = self._config["authentication"].get("type")
-            raise AnthropicError(
+            raise CredentialsError(
                 f"credentials file has type {actual!r}; expected {CREDENTIALS_FILE_TYPE!r} "
                 f"for authentication.type {auth_type!r}"
             )
         return creds
 
-    def _get_http_client(self) -> httpx.Client:
-        """Return an ``httpx.Client``, lazily creating (and tracking) one we own."""
+    def _get_http_client(self) -> httpx2.Client:
+        """Return an ``httpx2.Client``, lazily creating (and tracking) one we own."""
         if self._http_client is not None:
             return self._http_client
         if self._owned_http_client is None:
-            self._owned_http_client = httpx.Client(timeout=TOKEN_EXCHANGE_TIMEOUT)
+            self._owned_http_client = httpx2.Client(timeout=TOKEN_EXCHANGE_TIMEOUT)
         return self._owned_http_client
 
     def close(self) -> None:
-        """Close the owned ``httpx.Client`` if we created one."""
+        """Close the owned ``httpx2.Client`` if we created one."""
         if self._owned_http_client is not None:
             self._owned_http_client.close()
             self._owned_http_client = None
@@ -498,8 +488,6 @@ class CredentialsFile:
         except OSError:
             pass
 
-    # -- dispatch ----------------------------------------------------------
-
     def _auth_block(self) -> Dict[str, Any]:
         """Return the cached ``authentication`` sub-object from the config file."""
         config = self._load_config()
@@ -515,12 +503,10 @@ class CredentialsFile:
         if auth_type == AUTH_TYPE_USER_OAUTH:
             return self._call_user_oauth(auth, force_refresh=force_refresh)
 
-        raise AnthropicError(
+        raise CredentialsError(
             f"Unknown authentication.type {auth_type!r} at {self._config_path}. "
             f"Expected {AUTH_TYPE_OIDC_FEDERATION!r} or {AUTH_TYPE_USER_OAUTH!r}."
         )
-
-    # -- "user_oauth" -----------------------------------------------------
 
     def _call_user_oauth(self, auth: Dict[str, Any], *, force_refresh: bool = False) -> AccessToken:
         """Interactive-login profile. With a ``client_id`` in the auth block,
@@ -532,7 +518,7 @@ class CredentialsFile:
         creds = self._read_credentials()
         access_token = creds.get("access_token")
         if not access_token:
-            raise AnthropicError(f"Credentials file at {self._credentials_path} is missing 'access_token'.")
+            raise CredentialsError(f"Credentials file at {self._credentials_path} is missing 'access_token'.")
 
         client_id = auth.get("client_id")
         if not client_id:
@@ -580,7 +566,7 @@ class CredentialsFile:
                     "User-Agent": _user_agent(),
                 },
             )
-        except httpx.HTTPError as err:
+        except httpx2.HTTPError as err:
             raise WorkloadIdentityError(
                 f"user_oauth refresh failed to reach token endpoint: {err}"
             ) from _strip_traceback(err)
@@ -631,8 +617,6 @@ class CredentialsFile:
         self._atomic_write_credentials(creds)
 
         return AccessToken(token=_unwrap_secret(new_access), expires_at=new_expires_at)
-
-    # -- "oidc_federation" ------------------------------------------------
 
     def _read_credentials_if_exists(self) -> Optional[Dict[str, Any]]:
         """``_read_credentials`` variant that returns ``None`` on absence
@@ -719,7 +703,7 @@ class CredentialsFile:
         if identity_token_cfg is not None:
             source = identity_token_cfg.get("source")
             if source != "file":
-                raise AnthropicError(f"identity_token source {source!r} is not supported; only 'file' is implemented")
+                raise CredentialsError(f"identity_token source {source!r} is not supported; only 'file' is implemented")
             identity_token_path = identity_token_cfg.get("path")
             if not identity_token_path:
                 # Empty/missing path is a config bug, not an env-var fallback
@@ -727,7 +711,7 @@ class CredentialsFile:
                 # meaning without a path. Without this check we'd silently
                 # fall through to ANTHROPIC_IDENTITY_TOKEN_FILE and override
                 # user intent.
-                raise AnthropicError(
+                raise CredentialsError(
                     f"identity_token source 'file' requires a non-empty path; "
                     f"profile {self._profile!r} at {self._config_path} has identity_token={identity_token_cfg!r}."
                 )
@@ -735,7 +719,7 @@ class CredentialsFile:
             identity_token_path = None
         provider = IdentityTokenFile(identity_token_path) if identity_token_path else IdentityTokenFile()
 
-        # The delegate borrows our owned httpx.Client: passing http_client=
+        # The delegate borrows our owned httpx2.Client: passing http_client=
         # sets _owns_http_client=False on the delegate so its close() is a
         # no-op. CredentialsFile.close() remains the single closer.
         delegate = WorkloadIdentityCredentials(
@@ -761,7 +745,7 @@ class IdentityTokenFile:
     def __init__(self, path: Union[str, "os.PathLike[str]", None] = None) -> None:
         resolved = resolve_identity_token_path(path)
         if resolved is None:
-            raise AnthropicError(
+            raise CredentialsError(
                 f"No identity token file path given. Pass `path=` or set the {ENV_IDENTITY_TOKEN_FILE} "
                 f"environment variable."
             )
@@ -775,24 +759,29 @@ class IdentityTokenFile:
         try:
             content = self._path.read_text(encoding="utf-8").strip()
         except FileNotFoundError as err:
-            raise AnthropicError(f"Identity token file not found at {self._path}.") from err
+            raise IdentityTokenFileError(f"Identity token file not found at {self._path}.", path=self._path) from err
         except PermissionError as err:
-            raise AnthropicError(
+            raise IdentityTokenFileError(
                 f"Identity token file at {self._path} is not readable by this process: {err}. "
-                f"Check the file mode and the effective uid of the process."
+                f"Check the file mode and the effective uid of the process.",
+                path=self._path,
             ) from err
         except IsADirectoryError as err:
-            raise AnthropicError(
+            raise IdentityTokenFileError(
                 f"Identity token path {self._path} is a directory, not a file. "
-                f"Point at the projected token file itself."
+                f"Point at the projected token file itself.",
+                path=self._path,
             ) from err
         except (OSError, UnicodeDecodeError) as err:
-            raise AnthropicError(f"Identity token file at {self._path} could not be read: {err}") from err
+            raise IdentityTokenFileError(
+                f"Identity token file at {self._path} could not be read: {err}", path=self._path
+            ) from err
         if not content:
-            raise AnthropicError(
+            raise IdentityTokenFileError(
                 f"Identity token file at {self._path} is empty. "
                 f"If this is a Kubernetes projected service-account token, check the "
-                f"volume mount and the serviceAccountToken projection audience."
+                f"volume mount and the serviceAccountToken projection audience.",
+                path=self._path,
             )
         return content
 
@@ -830,11 +819,11 @@ class InMemoryConfig(CredentialsFile):
         config: Dict[str, Any],
         *,
         identity_token_provider: Optional[IdentityTokenProvider] = None,
-        http_client: Optional[httpx.Client] = None,
+        http_client: Optional[httpx2.Client] = None,
     ) -> None:
         raw_auth = config.get("authentication")
         if not isinstance(raw_auth, dict):
-            raise AnthropicError(
+            raise CredentialsError(
                 "config dict is missing the 'authentication' object. "
                 f'Expected shape: {{"authentication": {{"type": "{AUTH_TYPE_OIDC_FEDERATION}"'
                 f'|"{AUTH_TYPE_USER_OAUTH}", ...}}, ...}}'
@@ -842,14 +831,14 @@ class InMemoryConfig(CredentialsFile):
         auth = cast("Dict[str, Any]", raw_auth)
         auth_type = auth.get("type")
         if auth_type not in (AUTH_TYPE_OIDC_FEDERATION, AUTH_TYPE_USER_OAUTH):
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Unknown authentication.type {auth_type!r}. "
                 f"Expected {AUTH_TYPE_OIDC_FEDERATION!r} or {AUTH_TYPE_USER_OAUTH!r}."
             )
 
         credentials_path = auth.get("credentials_path")
         if auth_type == AUTH_TYPE_USER_OAUTH and not credentials_path:
-            raise AnthropicError(
+            raise CredentialsError(
                 f"authentication.type {AUTH_TYPE_USER_OAUTH!r} requires "
                 f"'authentication.credentials_path' (where the access/refresh tokens live). "
                 f"For profile-based resolution, use CredentialsFile instead."
@@ -861,7 +850,7 @@ class InMemoryConfig(CredentialsFile):
         self._config_path = self._IN_MEMORY_PATH
         self._bound_base_url: Optional[str] = None
         self._http_client = http_client
-        self._owned_http_client: Optional[httpx.Client] = None
+        self._owned_http_client: Optional[httpx2.Client] = None
         self._workload_delegate: Optional[WorkloadIdentityCredentials] = None
         self._identity_token_provider_override = identity_token_provider
 

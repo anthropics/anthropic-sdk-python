@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -30,3 +28,5 @@ class SkillListParams(TypedDict, total=False):
     - `"custom"`: only return user-created skills
     - `"anthropic"`: only return Anthropic-created skills
     """
+
+    workspace_id: str

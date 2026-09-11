@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from anthropic import AnthropicBedrockMantle, AsyncAnthropicBedrockMantle
@@ -73,7 +73,7 @@ class TestSigV4ServiceName:
             aws_region="us-east-1",
         )
 
-        request = httpx.Request(
+        request = httpx2.Request(
             "POST",
             MANTLE_MESSAGES_URL,
             headers={"content-type": "application/json"},
@@ -210,7 +210,7 @@ class TestSkipAuth:
             base_url="https://example.com",
         )
 
-        request = httpx.Request("POST", "https://example.com/v1/messages", content=b"{}")
+        request = httpx2.Request("POST", "https://example.com/v1/messages", content=b"{}")
         client._prepare_request(request)
 
         assert get_auth_headers_recorder.calls == []
@@ -269,7 +269,9 @@ class TestAsyncClient:
 
         monkeypatch.setattr("anthropic.lib.bedrock._mantle.get_auth_headers", fake_get_auth_headers)
 
-        request = httpx.Request("POST", "https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages", content=b"{}")
+        request = httpx2.Request(
+            "POST", "https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages", content=b"{}"
+        )
         await client._prepare_request(request)
 
         assert len(signing_threads) == 1

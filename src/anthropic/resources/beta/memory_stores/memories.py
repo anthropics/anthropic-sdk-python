@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Any, List, Optional, cast
@@ -65,6 +63,7 @@ class Memories(SyncAPIResource):
         path: str,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -83,7 +82,8 @@ class Memories(SyncAPIResource):
           path: Hierarchical path for the new memory, e.g. `/projects/foo/notes.md`. Must start
               with `/`, contain at least one non-empty segment, and be at most 1,024 bytes.
               Must not contain empty segments, `.` or `..` segments, control or format
-              characters, and must be NFC-normalized. Paths are case-sensitive.
+              characters, or the Unicode line and paragraph separators (U+2028, U+2029), and
+              must be NFC-normalized. Paths are case-sensitive.
 
           view: Query parameter for view
 
@@ -104,7 +104,8 @@ class Memories(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -136,6 +137,7 @@ class Memories(SyncAPIResource):
         memory_store_id: str,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -168,7 +170,8 @@ class Memories(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -200,6 +203,7 @@ class Memories(SyncAPIResource):
         path: Optional[str] | Omit = omit,
         precondition: BetaManagedAgentsPreconditionParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -218,9 +222,10 @@ class Memories(SyncAPIResource):
 
           path: New path for the memory (a rename). Must start with `/`, contain at least one
               non-empty segment, and be at most 1,024 bytes. Must not contain empty segments,
-              `.` or `..` segments, control or format characters, and must be NFC-normalized.
-              Paths are case-sensitive. The memory's `id` is preserved across renames. Omit to
-              leave the path unchanged.
+              `.` or `..` segments, control or format characters, or the Unicode line and
+              paragraph separators (U+2028, U+2029), and must be NFC-normalized. Paths are
+              case-sensitive. The memory's `id` is preserved across renames. Omit to leave the
+              path unchanged.
 
           precondition: Optimistic-concurrency precondition: the update applies only if the memory's
               stored `content_sha256` equals the supplied value. On mismatch, the request
@@ -248,7 +253,8 @@ class Memories(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -288,6 +294,7 @@ class Memories(SyncAPIResource):
         path_prefix: str | Omit = omit,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -335,7 +342,8 @@ class Memories(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -372,6 +380,7 @@ class Memories(SyncAPIResource):
         memory_store_id: str,
         expected_content_sha256: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -404,7 +413,8 @@ class Memories(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -457,6 +467,7 @@ class AsyncMemories(AsyncAPIResource):
         path: str,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -475,7 +486,8 @@ class AsyncMemories(AsyncAPIResource):
           path: Hierarchical path for the new memory, e.g. `/projects/foo/notes.md`. Must start
               with `/`, contain at least one non-empty segment, and be at most 1,024 bytes.
               Must not contain empty segments, `.` or `..` segments, control or format
-              characters, and must be NFC-normalized. Paths are case-sensitive.
+              characters, or the Unicode line and paragraph separators (U+2028, U+2029), and
+              must be NFC-normalized. Paths are case-sensitive.
 
           view: Query parameter for view
 
@@ -496,7 +508,8 @@ class AsyncMemories(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -528,6 +541,7 @@ class AsyncMemories(AsyncAPIResource):
         memory_store_id: str,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -560,7 +574,8 @@ class AsyncMemories(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -592,6 +607,7 @@ class AsyncMemories(AsyncAPIResource):
         path: Optional[str] | Omit = omit,
         precondition: BetaManagedAgentsPreconditionParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -610,9 +626,10 @@ class AsyncMemories(AsyncAPIResource):
 
           path: New path for the memory (a rename). Must start with `/`, contain at least one
               non-empty segment, and be at most 1,024 bytes. Must not contain empty segments,
-              `.` or `..` segments, control or format characters, and must be NFC-normalized.
-              Paths are case-sensitive. The memory's `id` is preserved across renames. Omit to
-              leave the path unchanged.
+              `.` or `..` segments, control or format characters, or the Unicode line and
+              paragraph separators (U+2028, U+2029), and must be NFC-normalized. Paths are
+              case-sensitive. The memory's `id` is preserved across renames. Omit to leave the
+              path unchanged.
 
           precondition: Optimistic-concurrency precondition: the update applies only if the memory's
               stored `content_sha256` equals the supplied value. On mismatch, the request
@@ -640,7 +657,8 @@ class AsyncMemories(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -680,6 +698,7 @@ class AsyncMemories(AsyncAPIResource):
         path_prefix: str | Omit = omit,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -727,7 +746,8 @@ class AsyncMemories(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -764,6 +784,7 @@ class AsyncMemories(AsyncAPIResource):
         memory_store_id: str,
         expected_content_sha256: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -796,7 +817,8 @@ class AsyncMemories(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),

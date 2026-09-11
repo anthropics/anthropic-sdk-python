@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import random
 
-import httpx2 as httpx
+import httpx2
 
 from .._exceptions import APIError, APIStatusError
 
@@ -21,7 +21,7 @@ __all__ = ["backoff", "jitter", "is_fatal_status_error", "TRANSIENT_ERRORS"]
 # — the 4xx-vs-transient split is then made by ``is_fatal_status_error``).
 # Anything else (AttributeError, KeyError, …) is a real bug and must propagate
 # instead of being silently retried forever.
-TRANSIENT_ERRORS: tuple[type[Exception], ...] = (httpx.HTTPError, APIError)
+TRANSIENT_ERRORS: tuple[type[Exception], ...] = (httpx2.HTTPError, APIError)
 
 # 4xx codes that are still worth retrying: request timeout, conflict, and rate
 # limit. This matches the core client's retry policy — notably 409 is retryable

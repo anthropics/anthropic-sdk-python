@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Union
@@ -33,11 +31,13 @@ class DeploymentListParams(TypedDict, total=False):
     """Opaque pagination cursor."""
 
     status: BetaManagedAgentsDeploymentStatus
-    """Filter by status: active or paused.
+    """Filter by status: `active` or `paused`.
 
-    Omit for both. To include archived deployments, use include_archived instead;
+    Omit for both. To include archived deployments, use `include_archived` instead;
     the two cannot be combined.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
+
+    workspace_id: str

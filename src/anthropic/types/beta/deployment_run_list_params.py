@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Union
@@ -30,13 +28,13 @@ class DeploymentRunListParams(TypedDict, total=False):
     """Filter to a specific deployment.
 
     Omit to list across all deployments in the workspace. Filtering by a
-    non-existent deployment_id returns 200 with empty data.
+    non-existent `deployment_id` returns 200 with empty data.
     """
 
     has_error: bool
     """
-    Filter: true for runs with non-null error, false for runs with non-null
-    session_id. Omit for all.
+    Filter: true for runs with non-null `error`, false for runs with non-null
+    `session_id`. Omit for all.
     """
 
     limit: int
@@ -45,12 +43,14 @@ class DeploymentRunListParams(TypedDict, total=False):
     page: str
     """Opaque pagination cursor.
 
-    Pass next_page from the previous response. Invalid or expired cursors
+    Pass `next_page` from the previous response. Invalid or expired cursors
     return 400.
     """
 
     trigger_type: BetaManagedAgentsTriggerType
     """Filter runs by what triggered them. Omit to return all runs."""
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
+
+    workspace_id: str

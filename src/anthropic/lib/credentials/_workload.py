@@ -7,7 +7,7 @@ from types import TracebackType
 from typing import Any, Dict, Type, Union, NoReturn, Optional
 from typing_extensions import override
 
-import httpx2 as httpx
+import httpx2
 
 from ._types import AccessToken, IdentityTokenProvider
 from ._secrets import (
@@ -50,7 +50,7 @@ _MAX_ASSERTION_BYTES = 16 * 1024
 _MAX_TOKEN_RESPONSE_BYTES = 1 << 20
 
 
-def _request_id(resp: httpx.Response) -> Optional[str]:
+def _request_id(resp: httpx2.Response) -> Optional[str]:
     rid: Optional[str] = resp.headers.get("Request-Id") or resp.headers.get("request-id")
     return rid
 
@@ -73,7 +73,7 @@ def _redact_body(body: Any) -> Any:
     return None
 
 
-def _raise_token_endpoint_error(resp: httpx.Response, *, message_prefix: str, hint: Optional[str] = None) -> NoReturn:
+def _raise_token_endpoint_error(resp: httpx2.Response, *, message_prefix: str, hint: Optional[str] = None) -> NoReturn:
     """Raise a redacted :class:`WorkloadIdentityError` from a non-200 token-endpoint response.
 
     Shared between the jwt-bearer exchange path in this module and the
@@ -168,7 +168,7 @@ class WorkloadIdentityCredentials:
         service_account_id: Optional[str] = None,
         workspace_id: Optional[str] = None,
         scope: Optional[str] = None,
-        http_client: Optional[httpx.Client] = None,
+        http_client: Optional[httpx2.Client] = None,
     ) -> None:
         self._identity_token_provider = identity_token_provider
         self._federation_rule_id = federation_rule_id
@@ -188,7 +188,7 @@ class WorkloadIdentityCredentials:
         # client-base is always a bug.
         self._bound_base_url: Optional[str] = None
         if http_client is None:
-            self._http_client = httpx.Client(timeout=TOKEN_EXCHANGE_TIMEOUT)
+            self._http_client = httpx2.Client(timeout=TOKEN_EXCHANGE_TIMEOUT)
             self._owns_http_client = True
         else:
             self._http_client = http_client
@@ -220,7 +220,7 @@ class WorkloadIdentityCredentials:
         different host (e.g. the parent of ``copy(base_url=...)``). Rebinding
         would move that client's token exchange too, so a copy bound to
         ``base_url`` is returned instead; it shares the identity token and
-        borrows (never closes) this instance's ``httpx.Client``.
+        borrows (never closes) this instance's ``httpx2.Client``.
         """
         bound = base_url.rstrip("/")
         provider = self
@@ -231,7 +231,7 @@ class WorkloadIdentityCredentials:
         return provider
 
     def close(self) -> None:
-        """Close the underlying ``httpx.Client`` if we created it."""
+        """Close the underlying ``httpx2.Client`` if we created it."""
         if self._owns_http_client:
             self._http_client.close()
 
@@ -285,7 +285,7 @@ class WorkloadIdentityCredentials:
                     "User-Agent": _user_agent(),
                 },
             )
-        except httpx.HTTPError as err:
+        except httpx2.HTTPError as err:
             raise WorkloadIdentityError(f"Failed to reach token endpoint {url}: {err}") from _strip_traceback(err)
 
         request_id = _request_id(resp)
@@ -372,7 +372,7 @@ def exchange_federation_assertion(
     service_account_id: Optional[str] = None,
     workspace_id: Optional[str] = None,
     base_url: Optional[str] = None,
-    http_client: Optional[httpx.Client] = None,
+    http_client: Optional[httpx2.Client] = None,
 ) -> AccessToken:
     """Perform a single RFC 7523 ``jwt-bearer`` exchange and return the resulting
     :class:`AccessToken`.

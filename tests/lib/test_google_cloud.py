@@ -9,7 +9,7 @@ import pathlib
 import threading
 from typing import Any, cast
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -220,7 +220,9 @@ class TestAnthropicGoogleCloud:
 
 @pytest.mark.respx()
 def test_token_provider_attaches_bearer(respx_mock: MockRouter) -> None:
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     client = AnthropicGoogleCloud(
         base_url="https://example.test/",
@@ -239,7 +241,9 @@ def test_token_provider_attaches_bearer(respx_mock: MockRouter) -> None:
 
 @pytest.mark.respx()
 async def test_token_provider_attaches_bearer_async(respx_mock: MockRouter) -> None:
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     async def provider() -> str:
         return "async-token"
@@ -261,7 +265,9 @@ async def test_token_provider_attaches_bearer_async(respx_mock: MockRouter) -> N
 async def test_sync_token_provider_on_async_client_runs_off_event_loop(
     respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     offloaded: list[Any] = []
     real_asyncify = google_cloud_module.asyncify
@@ -300,7 +306,9 @@ def test_async_token_provider_on_sync_client_rejected_clearly() -> None:
 
 @pytest.mark.respx()
 def test_credentials_object_attaches_bearer(respx_mock: MockRouter) -> None:
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     creds = _FakeCredentials(token="cred-token")
     client = AnthropicGoogleCloud(
@@ -317,7 +325,9 @@ def test_credentials_object_attaches_bearer(respx_mock: MockRouter) -> None:
 
 @pytest.mark.respx()
 def test_expired_credentials_refreshed(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     # Avoid the real google-auth Request import (optional dep, not installed here).
     def _fake_refresh(creds: _FakeCredentials) -> None:
@@ -346,7 +356,9 @@ def test_refresh_without_google_auth_raises_actionable_error(monkeypatch: pytest
 
 @pytest.mark.respx()
 def test_adc_path(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     monkeypatch.setattr(
         "anthropic.lib.google_cloud._client._load_adc_credentials",
@@ -372,7 +384,9 @@ def test_explicit_credential_suppresses_adc(
     respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch, kwarg: dict[str, Any]
 ) -> None:
     # With any explicit credential source set, ADC discovery must never run.
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     def _fail() -> Any:
         raise AssertionError("ADC discovery must not run when an explicit credential source is set")
@@ -390,7 +404,9 @@ def test_explicit_credential_suppresses_adc(
 async def test_explicit_credential_suppresses_adc_async(
     respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     def _fail() -> Any:
         raise AssertionError("ADC discovery must not run when an explicit credential source is set")
@@ -431,7 +447,9 @@ def test_concurrent_first_token_resolution_loads_adc_once(monkeypatch: pytest.Mo
 
 @pytest.mark.respx()
 def test_bearer_token_not_in_debug_logs(respx_mock: MockRouter, caplog: pytest.LogCaptureFixture) -> None:
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
     caplog.set_level(logging.DEBUG)
 
     client = AnthropicGoogleCloud(
@@ -451,7 +469,9 @@ def test_bearer_token_not_in_debug_logs(respx_mock: MockRouter, caplog: pytest.L
 
 @pytest.mark.respx()
 def test_lowercase_authorization_header_respected(respx_mock: MockRouter) -> None:
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     client = AnthropicGoogleCloud(
         base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "gcp-token"
@@ -471,7 +491,9 @@ def test_lowercase_authorization_header_respected(respx_mock: MockRouter) -> Non
 def test_custom_headers_env_flows_through(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
     # ANTHROPIC_CUSTOM_HEADERS behaves like it does on other SDK clients.
     monkeypatch.setenv("ANTHROPIC_CUSTOM_HEADERS", "x-custom-header: hello")
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     client = AnthropicGoogleCloud(
         base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "gcp-token"
@@ -491,7 +513,9 @@ def test_custom_headers_env_authorization_never_conflicts(
     # An env-supplied Authorization wins under the only-if-absent contract — and
     # exactly one Authorization header goes out, never two conflicting ones.
     monkeypatch.setenv("ANTHROPIC_CUSTOM_HEADERS", "Authorization: Bearer env-token")
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     client = AnthropicGoogleCloud(
         base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "gcp-token"
@@ -515,7 +539,7 @@ ADC_DERIVED_BASE_URL = (
 @pytest.mark.respx()
 def test_project_backfilled_from_adc_on_first_request(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
     respx_mock.post(re.compile(r"https://claude\.googleapis\.com/.*")).mock(
-        return_value=httpx.Response(200, json={"foo": "bar"})
+        return_value=httpx2.Response(200, json={"foo": "bar"})
     )
 
     load_calls = 0
@@ -549,7 +573,7 @@ def test_backfill_happens_even_with_caller_authorization(
     # The back-fill is decoupled from token attachment: a first request carrying
     # its own Authorization header must still resolve the deferred base URL.
     respx_mock.post(re.compile(r"https://claude\.googleapis\.com/.*")).mock(
-        return_value=httpx.Response(200, json={"foo": "bar"})
+        return_value=httpx2.Response(200, json={"foo": "bar"})
     )
     monkeypatch.setattr(
         "anthropic.lib.google_cloud._client._load_adc_credentials",
@@ -593,7 +617,7 @@ def test_post_construction_base_url_assignment_wins(respx_mock: MockRouter) -> N
     # Assigning base_url on a deferred-project client cancels the pending back-fill
     # instead of being clobbered (or raising a spurious missing-project error).
     respx_mock.post(re.compile(r"https://my-gateway\.test/.*")).mock(
-        return_value=httpx.Response(200, json={"foo": "bar"})
+        return_value=httpx2.Response(200, json={"foo": "bar"})
     )
 
     client = AnthropicGoogleCloud(location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok")
@@ -611,7 +635,7 @@ def test_copy_of_deferred_client_still_backfills_and_shares_adc(
     respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     respx_mock.post(re.compile(r"https://claude\.googleapis\.com/.*")).mock(
-        return_value=httpx.Response(200, json={"foo": "bar"})
+        return_value=httpx2.Response(200, json={"foo": "bar"})
     )
     load_calls = 0
 
@@ -639,7 +663,7 @@ async def test_project_backfilled_from_adc_on_first_request_async(
     respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     respx_mock.post(re.compile(r"https://claude\.googleapis\.com/.*")).mock(
-        return_value=httpx.Response(200, json={"foo": "bar"})
+        return_value=httpx2.Response(200, json={"foo": "bar"})
     )
     monkeypatch.setattr(
         "anthropic.lib.google_cloud._client._load_adc_credentials",
@@ -707,7 +731,7 @@ class TestCopy:
         # copy(credentials=...) on a token_provider client must not keep calling
         # the inherited (higher-precedence) provider.
         respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
 
         def provider() -> str:
@@ -725,7 +749,7 @@ class TestCopy:
     @pytest.mark.respx()
     def test_copy_token_provider_replaces_credentials(self, respx_mock: MockRouter) -> None:
         respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
 
         client = AnthropicGoogleCloud(
@@ -744,7 +768,7 @@ class TestCopy:
         # The documented pre-authenticated-proxy derivation: no bearer, and the
         # workspace ID is clearable on the clone.
         respx_mock.post(re.compile(r"https://proxy\.test/.*")).mock(
-            return_value=httpx.Response(200, json={"foo": "bar"})
+            return_value=httpx2.Response(200, json={"foo": "bar"})
         )
 
         client = AnthropicGoogleCloud(
@@ -793,7 +817,9 @@ class TestCopy:
 
 @pytest.mark.respx()
 def test_skip_auth_sends_neither_header(respx_mock: MockRouter) -> None:
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     client = AnthropicGoogleCloud(base_url="https://example.test/", skip_auth=True)
     assert client.workspace_id is None
@@ -815,7 +841,9 @@ def test_skip_auth_sends_neither_header(respx_mock: MockRouter) -> None:
 @pytest.mark.respx()
 def test_no_api_key_leak(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-leak")
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     client = AnthropicGoogleCloud(
         base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "tok"
@@ -833,7 +861,9 @@ def test_no_api_key_leak(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
 @pytest.mark.respx()
 async def test_no_api_key_leak_async(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-leak")
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     client = AsyncAnthropicGoogleCloud(
         base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "tok"
@@ -851,7 +881,9 @@ def test_no_auth_token_leak(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPa
     # An ANTHROPIC_AUTH_TOKEN in the env must never become the Authorization header —
     # the bearer token sent is always the one this client resolved itself.
     monkeypatch.setenv("ANTHROPIC_AUTH_TOKEN", "first-party-leak")
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     client = AnthropicGoogleCloud(
         base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "gcp-token"
@@ -866,7 +898,9 @@ def test_no_auth_token_leak(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPa
 @pytest.mark.respx()
 async def test_no_auth_token_leak_async(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ANTHROPIC_AUTH_TOKEN", "first-party-leak")
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     client = AsyncAnthropicGoogleCloud(
         base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "gcp-token"
@@ -884,7 +918,7 @@ def test_env_base_url_does_not_override_derived_url(respx_mock: MockRouter, monk
     # derived from project/location always wins here.
     monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://first-party.test/")
     respx_mock.post(re.compile(r"https://claude\.googleapis\.com/.*")).mock(
-        return_value=httpx.Response(200, json={"foo": "bar"})
+        return_value=httpx2.Response(200, json={"foo": "bar"})
     )
 
     client = AnthropicGoogleCloud(
@@ -980,7 +1014,7 @@ def test_resolvable_profile_cannot_leak(
     monkeypatch.setenv("ANTHROPIC_CONFIG_DIR", str(profile_config_dir))
     monkeypatch.setenv("ANTHROPIC_PROFILE", "default")
     respx_mock.post(re.compile(r"https://claude\.googleapis\.com/.*")).mock(
-        return_value=httpx.Response(200, json={"foo": "bar"})
+        return_value=httpx2.Response(200, json={"foo": "bar"})
     )
 
     client = AnthropicGoogleCloud(
@@ -1003,7 +1037,9 @@ async def test_resolvable_profile_cannot_leak_async(
 ) -> None:
     monkeypatch.setenv("ANTHROPIC_CONFIG_DIR", str(profile_config_dir))
     monkeypatch.setenv("ANTHROPIC_PROFILE", "default")
-    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
 
     client = AsyncAnthropicGoogleCloud(
         base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "gcp-token"

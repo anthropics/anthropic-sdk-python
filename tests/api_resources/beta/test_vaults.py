@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -33,7 +31,8 @@ class TestVaults:
         vault = client.beta.vaults.create(
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -72,7 +71,8 @@ class TestVaults:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -120,7 +120,8 @@ class TestVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -155,24 +156,25 @@ class TestVaults:
                 vault_id="",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         vault = client.beta.vaults.list()
         assert_matches_type(SyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.list(
             include_archived=True,
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.vaults.with_raw_response.list()
@@ -182,7 +184,7 @@ class TestVaults:
         vault = response.parse()
         assert_matches_type(SyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.vaults.with_streaming_response.list() as response:
@@ -205,7 +207,8 @@ class TestVaults:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedVault, vault, path=["response"])
 
@@ -251,7 +254,8 @@ class TestVaults:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -304,7 +308,8 @@ class TestAsyncVaults:
         vault = await async_client.beta.vaults.create(
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -343,7 +348,8 @@ class TestAsyncVaults:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -391,7 +397,8 @@ class TestAsyncVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -426,24 +433,25 @@ class TestAsyncVaults:
                 vault_id="",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.list()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.list(
             include_archived=True,
             limit=0,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.with_raw_response.list()
@@ -453,7 +461,7 @@ class TestAsyncVaults:
         vault = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.with_streaming_response.list() as response:
@@ -476,7 +484,8 @@ class TestAsyncVaults:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsDeletedVault, vault, path=["response"])
 
@@ -522,7 +531,8 @@ class TestAsyncVaults:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 

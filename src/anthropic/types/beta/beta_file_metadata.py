@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -37,6 +35,13 @@ class BetaFileMetadata(BaseModel):
 
     downloadable: Optional[bool] = None
     """Whether the file can be downloaded."""
+
+    expires_at: Optional[datetime] = None
+    """
+    RFC 3339 datetime string representing when the file will expire and become
+    unavailable for download. Null if the file does not expire. For files uploaded
+    with `expires_in_seconds`, this is the upload time plus that value.
+    """
 
     scope: Optional[BetaFileScope] = None
     """

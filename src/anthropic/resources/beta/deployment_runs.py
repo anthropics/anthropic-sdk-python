@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Union
@@ -53,6 +51,7 @@ class DeploymentRuns(SyncAPIResource):
         deployment_run_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -81,7 +80,8 @@ class DeploymentRuns(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -108,6 +108,7 @@ class DeploymentRuns(SyncAPIResource):
         page: str | Omit = omit,
         trigger_type: BetaManagedAgentsTriggerType | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -128,16 +129,16 @@ class DeploymentRuns(SyncAPIResource):
           created_at_lte: Return runs created at or before this time (inclusive).
 
           deployment_id: Filter to a specific deployment. Omit to list across all deployments in the
-              workspace. Filtering by a non-existent deployment_id returns 200 with empty
+              workspace. Filtering by a non-existent `deployment_id` returns 200 with empty
               data.
 
-          has_error: Filter: true for runs with non-null error, false for runs with non-null
-              session_id. Omit for all.
+          has_error: Filter: true for runs with non-null `error`, false for runs with non-null
+              `session_id`. Omit for all.
 
           limit: Maximum results per page. Default 20, maximum 1000.
 
-          page: Opaque pagination cursor. Pass next_page from the previous response. Invalid or
-              expired cursors return 400.
+          page: Opaque pagination cursor. Pass `next_page` from the previous response. Invalid
+              or expired cursors return 400.
 
           trigger_type: Filter runs by what triggered them. Omit to return all runs.
 
@@ -156,7 +157,8 @@ class DeploymentRuns(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -214,6 +216,7 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         deployment_run_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -242,7 +245,8 @@ class AsyncDeploymentRuns(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -269,6 +273,7 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         page: str | Omit = omit,
         trigger_type: BetaManagedAgentsTriggerType | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -289,16 +294,16 @@ class AsyncDeploymentRuns(AsyncAPIResource):
           created_at_lte: Return runs created at or before this time (inclusive).
 
           deployment_id: Filter to a specific deployment. Omit to list across all deployments in the
-              workspace. Filtering by a non-existent deployment_id returns 200 with empty
+              workspace. Filtering by a non-existent `deployment_id` returns 200 with empty
               data.
 
-          has_error: Filter: true for runs with non-null error, false for runs with non-null
-              session_id. Omit for all.
+          has_error: Filter: true for runs with non-null `error`, false for runs with non-null
+              `session_id`. Omit for all.
 
           limit: Maximum results per page. Default 20, maximum 1000.
 
-          page: Opaque pagination cursor. Pass next_page from the previous response. Invalid or
-              expired cursors return 400.
+          page: Opaque pagination cursor. Pass `next_page` from the previous response. Invalid
+              or expired cursors return 400.
 
           trigger_type: Filter runs by what triggered them. Omit to return all runs.
 
@@ -317,7 +322,8 @@ class AsyncDeploymentRuns(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),

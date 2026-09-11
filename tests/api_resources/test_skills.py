@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -30,6 +28,7 @@ class TestSkills:
         skill = client.skills.create(
             files=[b"Example data"],
             display_name="display_name",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(Skill, skill, path=["response"])
 
@@ -60,14 +59,22 @@ class TestSkills:
     @parametrize
     def test_method_retrieve(self, client: Anthropic) -> None:
         skill = client.skills.retrieve(
-            "skill_id",
+            skill_id="skill_id",
+        )
+        assert_matches_type(Skill, skill, path=["response"])
+
+    @parametrize
+    def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
+        skill = client.skills.retrieve(
+            skill_id="skill_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(Skill, skill, path=["response"])
 
     @parametrize
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.skills.with_raw_response.retrieve(
-            "skill_id",
+            skill_id="skill_id",
         )
 
         assert response.is_closed is True
@@ -78,7 +85,7 @@ class TestSkills:
     @parametrize
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.skills.with_streaming_response.retrieve(
-            "skill_id",
+            skill_id="skill_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -92,7 +99,7 @@ class TestSkills:
     def test_path_params_retrieve(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `skill_id` but received ''"):
             client.skills.with_raw_response.retrieve(
-                "",
+                skill_id="",
             )
 
     @parametrize
@@ -106,6 +113,7 @@ class TestSkills:
             limit=1,
             page="page",
             source="source",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[Skill], skill, path=["response"])
 
@@ -132,14 +140,22 @@ class TestSkills:
     @parametrize
     def test_method_delete(self, client: Anthropic) -> None:
         skill = client.skills.delete(
-            "skill_id",
+            skill_id="skill_id",
+        )
+        assert_matches_type(DeletedSkill, skill, path=["response"])
+
+    @parametrize
+    def test_method_delete_with_all_params(self, client: Anthropic) -> None:
+        skill = client.skills.delete(
+            skill_id="skill_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(DeletedSkill, skill, path=["response"])
 
     @parametrize
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.skills.with_raw_response.delete(
-            "skill_id",
+            skill_id="skill_id",
         )
 
         assert response.is_closed is True
@@ -150,7 +166,7 @@ class TestSkills:
     @parametrize
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.skills.with_streaming_response.delete(
-            "skill_id",
+            skill_id="skill_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -164,7 +180,7 @@ class TestSkills:
     def test_path_params_delete(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `skill_id` but received ''"):
             client.skills.with_raw_response.delete(
-                "",
+                skill_id="",
             )
 
 
@@ -185,6 +201,7 @@ class TestAsyncSkills:
         skill = await async_client.skills.create(
             files=[b"Example data"],
             display_name="display_name",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(Skill, skill, path=["response"])
 
@@ -215,14 +232,22 @@ class TestAsyncSkills:
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.skills.retrieve(
-            "skill_id",
+            skill_id="skill_id",
+        )
+        assert_matches_type(Skill, skill, path=["response"])
+
+    @parametrize
+    async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        skill = await async_client.skills.retrieve(
+            skill_id="skill_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(Skill, skill, path=["response"])
 
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.skills.with_raw_response.retrieve(
-            "skill_id",
+            skill_id="skill_id",
         )
 
         assert response.is_closed is True
@@ -233,7 +258,7 @@ class TestAsyncSkills:
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.skills.with_streaming_response.retrieve(
-            "skill_id",
+            skill_id="skill_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -247,7 +272,7 @@ class TestAsyncSkills:
     async def test_path_params_retrieve(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `skill_id` but received ''"):
             await async_client.skills.with_raw_response.retrieve(
-                "",
+                skill_id="",
             )
 
     @parametrize
@@ -261,6 +286,7 @@ class TestAsyncSkills:
             limit=1,
             page="page",
             source="source",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[Skill], skill, path=["response"])
 
@@ -287,14 +313,22 @@ class TestAsyncSkills:
     @parametrize
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.skills.delete(
-            "skill_id",
+            skill_id="skill_id",
+        )
+        assert_matches_type(DeletedSkill, skill, path=["response"])
+
+    @parametrize
+    async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        skill = await async_client.skills.delete(
+            skill_id="skill_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(DeletedSkill, skill, path=["response"])
 
     @parametrize
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.skills.with_raw_response.delete(
-            "skill_id",
+            skill_id="skill_id",
         )
 
         assert response.is_closed is True
@@ -305,7 +339,7 @@ class TestAsyncSkills:
     @parametrize
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.skills.with_streaming_response.delete(
-            "skill_id",
+            skill_id="skill_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -319,5 +353,5 @@ class TestAsyncSkills:
     async def test_path_params_delete(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `skill_id` but received ''"):
             await async_client.skills.with_raw_response.delete(
-                "",
+                skill_id="",
             )

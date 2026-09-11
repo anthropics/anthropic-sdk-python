@@ -1,10 +1,9 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import gc
 import os
 import sys
+import copy
 import json
 import asyncio
 import inspect
@@ -303,7 +302,6 @@ class TestAnthropic:
                         # to_raw_response_wrapper leaks through the @functools.wraps() decorator.
                         #
                         # removing the decorator fixes the leak for reasons we don't understand.
-                        "anthropic/_legacy_response.py",
                         "anthropic/_response.py",
                         # pydantic.BaseModel.model_dump || pydantic.BaseModel.dict leak memory for some reason.
                         "anthropic/_compat.py",
@@ -391,6 +389,36 @@ class TestAnthropic:
                     _strict_response_validation=True,
                     http_client=cast(Any, http_client),
                 )
+
+    def test_httpx_objects_rejected(self, client: Anthropic) -> None:
+        # `import httpx` resolves to `httpx2` in this test suite, so fake the `httpx` classes
+        class Timeout:
+            __module__ = "httpx"
+
+        class HTTPTransport:
+            __module__ = "httpx._transports.default"
+
+        class Client:
+            __module__ = "httpx"
+
+        class MyClient(Client):
+            pass
+
+        timeout: Any = Timeout()
+        transport: Any = HTTPTransport()
+        http_client: Any = MyClient()
+
+        with pytest.raises(TypeError, match="Use `httpx2.Client` instead"):
+            Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client)
+
+        with pytest.raises(TypeError, match="Use `httpx2.Timeout` instead"):
+            Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+
+        with pytest.raises(TypeError, match="Use `httpx2.Timeout` instead"):
+            client.post("/foo", cast_to=httpx2.Response, options={"timeout": timeout})
+
+        with pytest.raises(TypeError, match="Use `httpx2.HTTPTransport` instead"):
+            DefaultHttpxClient(transport=transport)
 
     def test_default_headers_option(self) -> None:
         test_client = Anthropic(
@@ -586,6 +614,32 @@ class TestAnthropic:
         )
         data = json.loads(request.content.decode("utf-8"))
         assert data == {"foo": "bar", "baz": None}
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_request_extra_json_merged_before_prepare_options(self, respx_mock: MockRouter) -> None:
+        # client hooks (e.g. a `_prepare_options` that derives the URL from the body) see the body with `extra_body` applied
+        seen: list[FinalRequestOptions] = []
+
+        class Client(Anthropic):
+            @override
+            def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+                seen.append(copy.deepcopy(options))
+                return super()._prepare_options(options)
+
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={}))
+        client = Client(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+
+        response = client.post(
+            "/foo",
+            cast_to=httpx2.Response,
+            body={"foo": "bar", "baz": True},
+            options=make_request_options(extra_body={"baz": None}),
+        )
+
+        assert len(seen) == 1
+        assert seen[0].json_data == {"foo": "bar", "baz": None}
+        assert seen[0].extra_json is None
+        assert json.loads(response.request.content) == {"foo": "bar", "baz": None}
 
     def test_request_extra_headers(self, client: Anthropic) -> None:
         request = client._build_request(
@@ -1241,7 +1295,6 @@ class TestAnthropic:
         assert len(mounts) == 1
         assert mounts[0][0].pattern == "https://"
 
-    @pytest.mark.filterwarnings("ignore:.*deprecated.*:DeprecationWarning")
     def test_default_client_creation(self) -> None:
         # Ensure that the client can be initialized without any exceptions
         DefaultHttpxClient(
@@ -1473,7 +1526,6 @@ class TestAsyncAnthropic:
                         # to_raw_response_wrapper leaks through the @functools.wraps() decorator.
                         #
                         # removing the decorator fixes the leak for reasons we don't understand.
-                        "anthropic/_legacy_response.py",
                         "anthropic/_response.py",
                         # pydantic.BaseModel.model_dump || pydantic.BaseModel.dict leak memory for some reason.
                         "anthropic/_compat.py",
@@ -1563,6 +1615,38 @@ class TestAsyncAnthropic:
                     _strict_response_validation=True,
                     http_client=cast(Any, http_client),
                 )
+
+    async def test_httpx_objects_rejected(self, async_client: AsyncAnthropic) -> None:
+        # `import httpx` resolves to `httpx2` in this test suite, so fake the `httpx` classes
+        class Timeout:
+            __module__ = "httpx"
+
+        class HTTPTransport:
+            __module__ = "httpx._transports.default"
+
+        class Client:
+            __module__ = "httpx"
+
+        class MyClient(Client):
+            pass
+
+        timeout: Any = Timeout()
+        transport: Any = HTTPTransport()
+        http_client: Any = MyClient()
+
+        with pytest.raises(TypeError, match="Use `httpx2.Client` instead"):
+            AsyncAnthropic(
+                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
+            )
+
+        with pytest.raises(TypeError, match="Use `httpx2.Timeout` instead"):
+            AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+
+        with pytest.raises(TypeError, match="Use `httpx2.Timeout` instead"):
+            await async_client.post("/foo", cast_to=httpx2.Response, options={"timeout": timeout})
+
+        with pytest.raises(TypeError, match="Use `httpx2.HTTPTransport` instead"):
+            DefaultAsyncHttpxClient(transport=transport)
 
     async def test_default_headers_option(self) -> None:
         test_client = AsyncAnthropic(
@@ -1760,6 +1844,32 @@ class TestAsyncAnthropic:
         )
         data = json.loads(request.content.decode("utf-8"))
         assert data == {"foo": "bar", "baz": None}
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_request_extra_json_merged_before_prepare_options(self, respx_mock: MockRouter) -> None:
+        # client hooks (e.g. a `_prepare_options` that derives the URL from the body) see the body with `extra_body` applied
+        seen: list[FinalRequestOptions] = []
+
+        class Client(AsyncAnthropic):
+            @override
+            async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+                seen.append(copy.deepcopy(options))
+                return await super()._prepare_options(options)
+
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={}))
+        client = Client(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+
+        response = await client.post(
+            "/foo",
+            cast_to=httpx2.Response,
+            body={"foo": "bar", "baz": True},
+            options=make_request_options(extra_body={"baz": None}),
+        )
+
+        assert len(seen) == 1
+        assert seen[0].json_data == {"foo": "bar", "baz": None}
+        assert seen[0].extra_json is None
+        assert json.loads(response.request.content) == {"foo": "bar", "baz": None}
 
     def test_request_extra_headers(self, client: Anthropic) -> None:
         request = client._build_request(
@@ -2449,7 +2559,6 @@ class TestAsyncAnthropic:
         assert len(mounts) == 1
         assert mounts[0][0].pattern == "https://"
 
-    @pytest.mark.filterwarnings("ignore:.*deprecated.*:DeprecationWarning")
     async def test_default_client_creation(self) -> None:
         # Ensure that the client can be initialized without any exceptions
         DefaultAsyncHttpxClient(

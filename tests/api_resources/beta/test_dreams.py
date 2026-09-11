@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -45,6 +43,7 @@ class TestDreams:
             instructions="x",
             output_behavior={"type": "create_new"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -96,6 +95,7 @@ class TestDreams:
         dream = client.beta.dreams.retrieve(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -145,6 +145,7 @@ class TestDreams:
             page="page",
             statuses=["pending"],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaDream], dream, path=["response"])
 
@@ -180,6 +181,7 @@ class TestDreams:
         dream = client.beta.dreams.archive(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -226,6 +228,7 @@ class TestDreams:
         dream = client.beta.dreams.cancel(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -292,6 +295,7 @@ class TestAsyncDreams:
             instructions="x",
             output_behavior={"type": "create_new"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -343,6 +347,7 @@ class TestAsyncDreams:
         dream = await async_client.beta.dreams.retrieve(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -392,6 +397,7 @@ class TestAsyncDreams:
             page="page",
             statuses=["pending"],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaDream], dream, path=["response"])
 
@@ -427,6 +433,7 @@ class TestAsyncDreams:
         dream = await async_client.beta.dreams.archive(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -473,6 +480,7 @@ class TestAsyncDreams:
         dream = await async_client.beta.dreams.cancel(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 

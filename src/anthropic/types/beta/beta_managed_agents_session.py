@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, List, Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -46,7 +44,7 @@ class BetaManagedAgentsSession(BaseModel):
     outcome_evaluations: List[BetaManagedAgentsOutcomeEvaluationResource]
     """Per-outcome evaluation state.
 
-    One entry per define_outcome event sent to the session.
+    One entry per `define_outcome` event sent to the session.
     """
 
     resources: List[BetaManagedAgentsSessionResource]

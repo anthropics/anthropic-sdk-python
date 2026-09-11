@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 from pydantic import BaseModel
@@ -17,7 +17,7 @@ class Answer(BaseModel):
 
 
 def _count(respx_mock: MockRouter) -> None:
-    respx_mock.post("/v1/messages/count_tokens").mock(return_value=httpx.Response(200, json={"input_tokens": 7}))
+    respx_mock.post("/v1/messages/count_tokens").mock(return_value=httpx2.Response(200, json={"input_tokens": 7}))
 
 
 def _last_body(respx_mock: MockRouter) -> dict[str, object]:

@@ -52,11 +52,9 @@ class TestFunctionTool:
 
         function_tool = beta_tool(simple_function)
 
-        # Test that we can create the tool and call it
         assert function_tool.name == "simple_function"
         assert function_tool.description == "A simple function with basic parameter types."
 
-        # Test calling the function
         result = function_tool.call(
             {
                 "name": "John",
@@ -65,7 +63,6 @@ class TestFunctionTool:
         )
         assert result == "Person: John, 25 years old"
 
-        # Test schema structure
         expected_schema = {
             "additionalProperties": False,
             "type": "object",

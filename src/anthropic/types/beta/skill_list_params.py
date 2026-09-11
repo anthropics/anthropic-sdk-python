@@ -1,11 +1,8 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["SkillListParams"]
@@ -15,7 +12,7 @@ class SkillListParams(TypedDict, total=False):
     limit: int
     """Number of results to return per page.
 
-    Maximum value is 100. Defaults to 20.
+    Ranges from `1` to `1000`. Defaults to `20`.
     """
 
     page: Optional[str]
@@ -34,5 +31,7 @@ class SkillListParams(TypedDict, total=False):
     - `"anthropic"`: only return Anthropic-created skills
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
+
+    workspace_id: str

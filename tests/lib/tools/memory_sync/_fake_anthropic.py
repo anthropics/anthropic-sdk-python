@@ -15,7 +15,7 @@ from types import SimpleNamespace
 from typing import Any
 from collections.abc import Mapping, Callable, Awaitable, AsyncIterator
 
-import httpx2 as httpx
+import httpx2
 
 from anthropic import APIStatusError
 
@@ -25,8 +25,8 @@ def _sha(content: str) -> str:
 
 
 def _status_error(code: int) -> APIStatusError:
-    request = httpx.Request("POST", "https://api.example/v1/memory")
-    return APIStatusError(f"status {code}", response=httpx.Response(code, request=request), body=None)
+    request = httpx2.Request("POST", "https://api.example/v1/memory")
+    return APIStatusError(f"status {code}", response=httpx2.Response(code, request=request), body=None)
 
 
 class MemoryServer:

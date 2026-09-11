@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Union
@@ -44,11 +42,11 @@ class EventListParams(TypedDict, total=False):
     order: Literal["asc", "desc"]
     """Sort direction for results, ordered by the event's `processed_at`.
 
-    Defaults to asc (chronological).
+    Defaults to `asc` (chronological).
     """
 
     page: str
-    """Opaque pagination cursor from a previous response's next_page."""
+    """Opaque pagination cursor from a previous response's `next_page`."""
 
     types: SequenceNotStr[str]
     """Filter by event type.
@@ -57,5 +55,7 @@ class EventListParams(TypedDict, total=False):
     `agent.tool_use`). Omit to return all event types.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
+
+    workspace_id: str

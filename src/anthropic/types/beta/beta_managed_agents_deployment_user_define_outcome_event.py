@@ -1,17 +1,14 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
-from ..._models import BaseModel
+from ..._models import BaseModel, UnionDiscriminator
 from .sessions.beta_managed_agents_file_rubric import BetaManagedAgentsFileRubric
 from .sessions.beta_managed_agents_text_rubric import BetaManagedAgentsTextRubric
 
 __all__ = ["BetaManagedAgentsDeploymentUserDefineOutcomeEvent", "Rubric"]
 
 Rubric: TypeAlias = Annotated[
-    Union[BetaManagedAgentsFileRubric, BetaManagedAgentsTextRubric], PropertyInfo(discriminator="type")
+    Union[BetaManagedAgentsFileRubric, BetaManagedAgentsTextRubric], UnionDiscriminator("type")
 ]
 
 

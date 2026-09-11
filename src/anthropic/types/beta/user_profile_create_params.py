@@ -1,12 +1,12 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Union, Optional
+from datetime import datetime
 from typing_extensions import Literal, Annotated, TypedDict
 
 from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
+from .beta_user_profile_external_user_details_params import BetaUserProfileExternalUserDetailsParams
 
 __all__ = ["UserProfileCreateParams"]
 
@@ -24,8 +24,20 @@ class UserProfileCreateParams(TypedDict, total=False):
     external_id: Optional[str]
     """Platform's own identifier for this user.
 
-    Not enforced unique. Maximum 255 characters.
+    Not enforced unique. Maximum 255 characters. Accepted under the
+    `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers; under
+    `user-profiles-2026-09-04` send `external_user_details.reference_id` instead.
     """
+
+    external_user_details: BetaUserProfileExternalUserDetailsParams
+    """Details about the entity this profile represents, as the platform states them.
+
+    Every field is optional. Accepted under the `user-profiles-2026-09-04` beta
+    header only.
+    """
+
+    external_user_onboarded_at: Annotated[Union[str, datetime], PropertyInfo(format="iso8601")]
+    """A timestamp in RFC 3339 format"""
 
     metadata: Dict[str, str]
     """Free-form key-value data to attach to this user profile.
@@ -38,16 +50,9 @@ class UserProfileCreateParams(TypedDict, total=False):
     """Optional for all profiles.
 
     Real-world name of the entity this profile represents (company or individual);
-    for a resold-to company (`relationship` `resold` / `access_type` `passthrough`),
-    that company's name where known. Maximum 255 characters.
+    for a company the platform resells Claude access to (`access_type`
+    `passthrough`), that company's name where known. Maximum 255 characters.
     """
 
-    relationship: Literal["external", "resold", "internal"]
-    """
-    How the entity behind a user profile relates to the platform that owns the API
-    key. `external`: an individual end-user of the platform. `resold`: a company the
-    platform resells Claude access to. `internal`: the platform's own usage.
-    """
-
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

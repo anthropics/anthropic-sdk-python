@@ -51,7 +51,7 @@ If you want to implement calling the tool yourself, you can then pass the to the
 
 ```python
 message = client.beta.messages.create(
-    tools=[get_weather.to_dict()],
+    tools=[get_weather],
     # ...
     max_tokens=1024,
     model="claude-sonnet-4-5-20250929",
@@ -63,7 +63,7 @@ or you can use our [tool runner](#tool-runner)!
 
 ## Tool runner
 
-We provide a `client.beta.messages.tool_runner()` method that can automatically call tools defined with `@beta_tool()`. This method returns a `BetaToolRunner` class that is an iterator where each iteration yields a new `BetaMessage` instance from an API call, iteration will stop when there no tool call content blocks.
+We provide a `client.beta.messages.tool_runner()` method that can automatically call tools defined with `@beta_tool()`. This method returns a `BetaToolRunner` class that is an iterator where each iteration yields a new `BetaMessage` instance from an API call. Iteration is driven by each message's `stop_reason`: on `tool_use` the runner executes the requested tools and sends the results back, on `pause_turn` or `compaction` it sends the turn back unchanged so the server can resume it, and on any other stop reason it stops after yielding that final message without running tools.
 
 ```py
 runner = client.beta.messages.tool_runner(

@@ -1,4 +1,5 @@
 from ._beta_runner import BetaToolRunner, BetaAsyncToolRunner, BetaStreamingToolRunner, BetaAsyncStreamingToolRunner
+from ._tool_params import BetaToolLike
 from ._beta_functions import (
     ToolError,
     BetaFunctionTool,
@@ -25,5 +26,6 @@ __all__ = [
     "BetaFunctionToolResultType",
     "BetaAbstractMemoryTool",
     "BetaAsyncAbstractMemoryTool",
+    "BetaToolLike",
     "ToolError",
 ]

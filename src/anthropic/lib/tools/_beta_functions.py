@@ -249,7 +249,6 @@ class BaseFunctionTool(Generic[CallableT]):
                 if not properties or not is_dict(properties):
                     return schema
 
-                # Add parameter descriptions from docstring
                 for param in self._parsed_docstring.params:
                     prop_schema = properties.get(param.arg_name)
                     if not prop_schema or not is_dict(prop_schema):

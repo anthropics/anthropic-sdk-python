@@ -8,7 +8,7 @@ and async client paths are covered so the ``ClientT`` generic threads through.
 
 from __future__ import annotations
 
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
@@ -111,7 +111,7 @@ def test_strips_inherited_authorization_from_parent_default_headers() -> None:
 @pytest.mark.asyncio()
 async def test_scoped_sub_client_sends_only_bearer_on_the_wire() -> None:
     """Integration-level check: send a real HTTP request through the scoped
-    sub-client (via ``httpx.MockTransport``) and inspect the headers actually
+    sub-client (via ``httpx2.MockTransport``) and inspect the headers actually
     on the wire. Asserts exactly one auth credential is sent — the bearer —
     and the parent's ``X-Api-Key`` doesn't leak.
 
@@ -121,14 +121,14 @@ async def test_scoped_sub_client_sends_only_bearer_on_the_wire() -> None:
     change to ``_build_headers`` reverses the merge order or
     ``_copy_client_with_bearer_auth`` stops stripping the parent's
     ``X-Api-Key``, this is the test that catches it."""
-    captured: list[httpx.Request] = []
+    captured: list[httpx2.Request] = []
 
-    async def handler(req: httpx.Request) -> httpx.Response:
+    async def handler(req: httpx2.Request) -> httpx2.Response:
         captured.append(req)
-        return httpx.Response(200, json={"id": "agent_test"})
+        return httpx2.Response(200, json={"id": "agent_test"})
 
-    transport = httpx.MockTransport(handler)
-    http_client = httpx.AsyncClient(transport=transport)
+    transport = httpx2.MockTransport(handler)
+    http_client = httpx2.AsyncClient(transport=transport)
     # Parent has *every* way a credential could leak: an api_key, an
     # Authorization in default_headers, AND an X-Api-Key in default_headers.
     parent = AsyncAnthropic(
@@ -147,7 +147,7 @@ async def test_scoped_sub_client_sends_only_bearer_on_the_wire() -> None:
 
     assert len(captured) == 1
     req = captured[0]
-    # ``httpx.Headers`` is case-insensitive, so .get() catches any casing.
+    # ``httpx2.Headers`` is case-insensitive, so .get() catches any casing.
     assert req.headers.get("authorization") == "Bearer env-key"
     # The parent's ``X-Api-Key`` must NOT be on the wire — that was the bug.
     assert req.headers.get("x-api-key") is None

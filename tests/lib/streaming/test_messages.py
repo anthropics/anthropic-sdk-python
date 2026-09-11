@@ -1,19 +1,22 @@
 from __future__ import annotations
 
 import os
+import json
 from typing import Any, Set, TypeVar, Iterator, cast
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
 from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
 from anthropic._utils import assert_signatures_in_sync
-from anthropic._compat import PYDANTIC_V1
+from anthropic._compat import PYDANTIC_V1, get_model_fields
 from anthropic.lib.streaming import InputJsonEvent, ParsedMessageStreamEvent
 from anthropic.types.message import Message
 from anthropic.resources.messages import DEPRECATED_MODELS
 from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
+from anthropic.types.message_delta_usage import MessageDeltaUsage
+from anthropic.types.raw_message_delta_event import Delta as RawMessageDelta, RawMessageDeltaEvent
 
 from .helpers import get_response, to_async_iter
 
@@ -30,6 +33,26 @@ INVALID_TOOL_JSON_ERROR = (
     r"^Unable to parse tool parameter JSON from model\. Please retry your request or adjust your prompt\. "
     r'Error: .+\. JSON: \{"location": "Paris", "unit": celsius\}$'
 )
+
+
+FOLLOW_UP_MESSAGE = {
+    "id": "msg_01FollowUp",
+    "type": "message",
+    "role": "assistant",
+    "model": "claude-sonnet-4-5",
+    "content": [{"type": "text", "text": "It is sunny in Paris."}],
+    "stop_reason": "end_turn",
+    "stop_sequence": None,
+    "usage": {"input_tokens": 400, "output_tokens": 10},
+}
+
+EXPECTED_TOOL_USE_PARAM = {
+    "type": "tool_use",
+    "id": "toolu_01NRLabsLyVHZPKxbKvkfSMn",
+    "name": "get_weather",
+    "input": {"location": "Paris"},
+    "caller": {"type": "direct"},
+}
 
 
 def assert_basic_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
@@ -205,7 +228,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("basic_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -225,7 +248,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
                 content=get_response("basic_response.txt"),
@@ -253,7 +276,7 @@ class TestSyncMessages:
     def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
         for deprecated_model in DEPRECATED_MODELS:
             respx_mock.post("/v1/messages").mock(
-                return_value=httpx.Response(200, content=get_response("basic_response.txt"))
+                return_value=httpx2.Response(200, content=get_response("basic_response.txt"))
             )
 
             with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
@@ -268,7 +291,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("tool_use_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("tool_use_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -288,7 +311,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_server_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("server_tool_use_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("server_tool_use_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -301,7 +324,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_tool_use_invalid_json(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("tool_use_invalid_json_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("tool_use_invalid_json_response.txt"))
         )
 
         with pytest.raises(ValueError, match=INVALID_TOOL_JSON_ERROR):
@@ -315,7 +338,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_tool_use_caller_omitted(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_tool_use_response_without_caller())
+            return_value=httpx2.Response(200, content=get_tool_use_response_without_caller())
         )
 
         with sync_client.messages.stream(
@@ -326,9 +349,44 @@ class TestSyncMessages:
             assert_tool_use_caller_unset(stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
+    def test_tool_use_round_trip(self, respx_mock: MockRouter) -> None:
+        route = respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                httpx2.Response(200, content=get_response("tool_use_response.txt")),
+                httpx2.Response(200, json=FOLLOW_UP_MESSAGE),
+            ]
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "What is the weather in Paris?"}],
+            model="claude-sonnet-4-5",
+        ) as stream:
+            message = stream.get_final_message()
+
+        # accumulated blocks must be reusable as request params without leaking accumulator state
+        sync_client.messages.create(
+            max_tokens=1024,
+            messages=[
+                {"role": "user", "content": "What is the weather in Paris?"},
+                {"role": "assistant", "content": message.content},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "tool_result", "tool_use_id": "toolu_01NRLabsLyVHZPKxbKvkfSMn", "content": "Sunny"}
+                    ],
+                },
+            ],
+            model="claude-sonnet-4-5",
+        )
+
+        request_body = json.loads(route.calls.last.request.content)
+        assert request_body["messages"][1]["content"][1] == EXPECTED_TOOL_USE_PARAM
+
+    @pytest.mark.respx(base_url=base_url)
     def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("refusal_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("refusal_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -341,7 +399,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("message_delta_fields_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("message_delta_fields_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -354,7 +412,7 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_message_delta_omitted_usage_keeps_message_start(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=get_response("message_delta_omitted_usage_response.txt"))
+            return_value=httpx2.Response(200, content=get_response("message_delta_omitted_usage_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -369,7 +427,7 @@ class TestSyncMessages:
     def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
         # trailing blank line terminates the final `message_stop` SSE so it is dispatched
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=iter([*get_response("basic_response.txt"), b"\n"]))
+            return_value=httpx2.Response(200, content=iter([*get_response("basic_response.txt"), b"\n"]))
         )
 
         with sync_client.messages.stream(
@@ -391,7 +449,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -412,7 +470,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 headers={"request-id": "my-req-id", "anthropic-workspace-id": "wrkspc_123"},
                 content=to_async_iter(get_response("basic_response.txt")),
@@ -441,7 +499,7 @@ class TestAsyncMessages:
     async def test_deprecated_model_warning_stream(self, respx_mock: MockRouter) -> None:
         for deprecated_model in DEPRECATED_MODELS:
             respx_mock.post("/v1/messages").mock(
-                return_value=httpx.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+                return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
             )
 
             with pytest.warns(DeprecationWarning, match=f"The model '{deprecated_model}' is deprecated"):
@@ -457,7 +515,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("tool_use_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("tool_use_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -478,7 +536,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_server_tool_use(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("server_tool_use_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("server_tool_use_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -492,7 +550,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_tool_use_invalid_json(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("tool_use_invalid_json_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("tool_use_invalid_json_response.txt")))
         )
 
         with pytest.raises(ValueError, match=INVALID_TOOL_JSON_ERROR):
@@ -507,7 +565,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_tool_use_caller_omitted(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_tool_use_response_without_caller()))
+            return_value=httpx2.Response(200, content=to_async_iter(get_tool_use_response_without_caller()))
         )
 
         async with async_client.messages.stream(
@@ -521,7 +579,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("refusal_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("refusal_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -535,7 +593,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(get_response("message_delta_fields_response.txt")))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("message_delta_fields_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -549,7 +607,7 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     async def test_message_delta_omitted_usage_keeps_message_start(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200, content=to_async_iter(get_response("message_delta_omitted_usage_response.txt"))
             )
         )
@@ -567,7 +625,7 @@ class TestAsyncMessages:
     async def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
         # trailing blank line terminates the final `message_stop` SSE so it is dispatched
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, content=to_async_iter(iter([*get_response("basic_response.txt"), b"\n"])))
+            return_value=httpx2.Response(200, content=to_async_iter(iter([*get_response("basic_response.txt"), b"\n"])))
         )
 
         async with async_client.messages.stream(
@@ -582,6 +640,29 @@ class TestAsyncMessages:
         # must not emit `PydanticSerializationUnexpectedValue` warnings
         stop_event.model_dump()
         stop_event.model_dump_json()
+
+
+def test_message_delta_fields_are_all_accumulated() -> None:
+    # tripwire: handle a new field in accumulate_event (src/anthropic/lib/streaming/_messages.py), then list it here
+    assert set(get_model_fields(RawMessageDeltaEvent)) == {
+        "delta",
+        "type",
+        "usage",
+    }
+    assert set(get_model_fields(RawMessageDelta)) == {
+        "container",
+        "stop_details",
+        "stop_reason",
+        "stop_sequence",
+    }
+    assert set(get_model_fields(MessageDeltaUsage)) == {
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "input_tokens",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+    }
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
@@ -604,24 +685,18 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
 
     from anthropic.types.content_block import ContentBlock
 
-    # Get the content block union type
     content_block_union = get_args(ContentBlock)[0]
 
-    # Get all types from ContentBlock union
     content_block_types = get_args(content_block_union)
 
-    # Types that should have an input property
     types_with_input: Set[Any] = set()
 
-    # Check each type to see if it has an input property in its model_fields
     for block_type in content_block_types:
         if issubclass(block_type, BaseModel) and "input" in block_type.model_fields:
             types_with_input.add(block_type)
 
-    # Get the types included in TRACKS_TOOL_INPUT
     tracked_types = TRACKS_TOOL_INPUT
 
-    # Make sure all types with input are tracked
     for block_type in types_with_input:
         assert block_type in tracked_types, (
             f"ContentBlock type {block_type.__name__} has an input property, "

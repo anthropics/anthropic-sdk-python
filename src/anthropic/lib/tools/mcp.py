@@ -64,10 +64,6 @@ __all__ = [
     "UnsupportedMCPValueError",
 ]
 
-# -----------------------------------------------------------------------
-# mcp version compatibility
-# -----------------------------------------------------------------------
-
 # mcp<2 exposes camelCase model fields (`tool.inputSchema`); mcp>=2 exposes
 # snake_case (`tool.input_schema`). Read through this helper to support both.
 
@@ -85,10 +81,6 @@ def _mcp_field_v1_or_v2(obj: Any, name: str) -> Any:
     except AttributeError:
         return getattr(obj, _MCP_V1_NAMES[name])
 
-
-# -----------------------------------------------------------------------
-# Supported MIME types
-# -----------------------------------------------------------------------
 
 _SUPPORTED_IMAGE_TYPES = frozenset({"image/jpeg", "image/png", "image/gif", "image/webp"})
 
@@ -118,18 +110,8 @@ def _is_supported_resource_mime_type(mime_type: str | None) -> bool:
     )
 
 
-# -----------------------------------------------------------------------
-# Errors
-# -----------------------------------------------------------------------
-
-
 class UnsupportedMCPValueError(Exception):
     """Raised when an MCP value cannot be converted to a format supported by the Claude API."""
-
-
-# -----------------------------------------------------------------------
-# Content conversion
-# -----------------------------------------------------------------------
 
 
 def mcp_content(
@@ -184,7 +166,6 @@ def _resource_contents_to_block(
     """Convert MCP resource contents to an Anthropic content block."""
     mime_type = _mcp_field_v1_or_v2(resource, "mime_type")
 
-    # Images
     if mime_type is not None and _is_supported_image_type(mime_type):
         if not isinstance(resource, BlobResourceContents):
             raise UnsupportedMCPValueError(f"Image resource must have blob data, not text. URI: {resource.uri}")
@@ -203,7 +184,6 @@ def _resource_contents_to_block(
         tag_helper(image_block, "mcp_resource_to_content")
         return image_block  # type: ignore[return-value]
 
-    # PDFs
     if mime_type == "application/pdf":
         if not isinstance(resource, BlobResourceContents):
             raise UnsupportedMCPValueError(f"PDF resource must have blob data, not text. URI: {resource.uri}")
@@ -222,7 +202,6 @@ def _resource_contents_to_block(
         tag_helper(pdf_block, "mcp_resource_to_content")
         return pdf_block  # type: ignore[return-value]
 
-    # Text (text/*, or no MIME type)
     if mime_type is None or mime_type.startswith("text/"):
         if isinstance(resource, TextResourceContents):
             data = resource.text
@@ -246,11 +225,6 @@ def _resource_contents_to_block(
     raise UnsupportedMCPValueError(f'Unsupported MIME type "{mime_type}" for resource: {resource.uri}')
 
 
-# -----------------------------------------------------------------------
-# Message conversion
-# -----------------------------------------------------------------------
-
-
 def mcp_message(
     message: PromptMessage,
     *,
@@ -265,11 +239,6 @@ def mcp_message(
     )
     tag_helper(result, "mcp_message")
     return result
-
-
-# -----------------------------------------------------------------------
-# Resource conversion
-# -----------------------------------------------------------------------
 
 
 def mcp_resource_to_content(
@@ -313,11 +282,9 @@ def mcp_resource_to_file(
     resource = result.contents[0]
     uri_str = str(resource.uri)
 
-    # Extract filename from URI
     path = urlparse(uri_str).path
     name = path.rsplit("/", 1)[-1] if path else None
 
-    # Get bytes
     if isinstance(resource, BlobResourceContents):
         content_bytes = base64.b64decode(resource.blob)
     else:
@@ -328,27 +295,16 @@ def mcp_resource_to_file(
     return file_tuple
 
 
-# -----------------------------------------------------------------------
-# Tool result conversion (used by tool call handlers)
-# -----------------------------------------------------------------------
-
-
 def _convert_tool_result(result: CallToolResult) -> BetaFunctionToolResultType:
     """Convert MCP ``CallToolResult`` to a value suitable for returning from ``call()``."""
     if _mcp_field_v1_or_v2(result, "is_error"):
         raise ToolError([mcp_content(item) for item in result.content])
 
-    # If content is empty but structuredContent is present, JSON-encode it
     structured_content = _mcp_field_v1_or_v2(result, "structured_content")
     if not result.content and structured_content is not None:
         return json.dumps(structured_content)
 
     return [mcp_content(item) for item in result.content]
-
-
-# -----------------------------------------------------------------------
-# Public factory functions
-# -----------------------------------------------------------------------
 
 
 def mcp_tool(

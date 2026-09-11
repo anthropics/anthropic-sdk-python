@@ -4,7 +4,7 @@ import copy as _copy
 from typing import Any
 from typing_extensions import override
 
-import httpx2 as httpx
+import httpx2
 
 from ._types import Body, Query, Headers, NotGiven, not_given
 from ._utils import is_given
@@ -59,7 +59,7 @@ class APIRequest:
         return self.options.json_data
 
     @property
-    def timeout(self) -> float | httpx.Timeout | None | NotGiven:
+    def timeout(self) -> float | httpx2.Timeout | None | NotGiven:
         return self.options.timeout
 
     @property
@@ -74,7 +74,7 @@ class APIRequest:
         headers: Headers | NotGiven = not_given,
         params: Query | NotGiven = not_given,
         body: Body | NotGiven = not_given,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> APIRequest:
         # Note: we intentionally avoid `model_copy(deep=True)` here as fields like
         # `files` and `content` can hold open file/IO objects which cannot be deep-copied.

@@ -1,12 +1,9 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
 from ..._types import SequenceNotStr
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_budget_limit_param import BetaManagedAgentsBudgetLimitParam
 from .beta_managed_agents_session_agent_update_param import BetaManagedAgentsSessionAgentUpdateParam
@@ -47,5 +44,7 @@ class SessionUpdateParams(TypedDict, total=False):
     use.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
+
+    workspace_id: str

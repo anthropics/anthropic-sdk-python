@@ -50,7 +50,6 @@ from ._types import (
     HttpxRequestFiles,
 )
 from ._utils import (
-    PropertyInfo,
     is_list,
     is_given,
     json_safe,
@@ -701,6 +700,27 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
     return value
 
 
+class UnionDiscriminator:
+    """Annotated metadata naming the field that tells the variants of a union apart, e.g.
+
+    ```py
+    Pet: TypeAlias = Annotated[Union[Cat, Dog], UnionDiscriminator("type")]
+    ```
+
+    When constructing a `Pet` from a response, the `type` value picks which variant to build.
+    """
+
+    field_name: str
+    """The discriminator field's attribute name on the variant classes (not its API alias), e.g. `type`"""
+
+    def __init__(self, field_name: str) -> None:
+        self.field_name = field_name
+
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.field_name!r})"
+
+
 @runtime_checkable
 class CachedDiscriminatorType(Protocol):
     __discriminator__: DiscriminatorDetails
@@ -758,8 +778,8 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
     discriminator_field_name: str | None = None
 
     for annotation in meta_annotations:
-        if isinstance(annotation, PropertyInfo) and annotation.discriminator is not None:
-            discriminator_field_name = annotation.discriminator
+        if isinstance(annotation, UnionDiscriminator):
+            discriminator_field_name = annotation.field_name
             break
 
     if not discriminator_field_name:

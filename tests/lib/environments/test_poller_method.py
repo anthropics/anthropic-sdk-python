@@ -15,7 +15,7 @@ import logging
 from typing import Any, cast
 from collections.abc import AsyncIterator
 
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from anthropic import APIStatusError
@@ -36,8 +36,8 @@ class _StubWork:
 
 
 def _api_status_error(code: int) -> APIStatusError:
-    request = httpx.Request("POST", "https://api.example/poll")
-    response = httpx.Response(status_code=code, request=request, content=b"{}")
+    request = httpx2.Request("POST", "https://api.example/poll")
+    response = httpx2.Response(status_code=code, request=request, content=b"{}")
     return APIStatusError("boom", response=response, body=None)
 
 
@@ -200,7 +200,7 @@ def test_iter_work_stop_conflict_is_silent(caplog: pytest.LogCaptureFixture) -> 
 def test_iter_work_backs_off_on_httpx_transport_error() -> None:
     """A raw ``httpx`` transport error (not wrapped in an SDK ``APIError``) is
     still transient and must be retried, not propagated."""
-    fake = FakeWork(poll_script=[httpx.ConnectError("connection refused"), _StubWork(id="work_2")])
+    fake = FakeWork(poll_script=[httpx2.ConnectError("connection refused"), _StubWork(id="work_2")])
     it = iter_work(cast(Any, fake), environment_id="env_1")
 
     item = _drain_one(it)

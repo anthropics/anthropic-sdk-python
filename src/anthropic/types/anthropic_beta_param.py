@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union
@@ -33,6 +31,7 @@ AnthropicBetaParam: TypeAlias = Union[
         "output-300k-2026-03-24",
         "user-profiles-2026-03-24",
         "user-profiles-2026-08-18",
+        "user-profiles-2026-09-04",
         "advisor-tool-2026-03-01",
         "managed-agents-2026-04-01",
         "cache-diagnosis-2026-04-07",
@@ -44,5 +43,15 @@ AnthropicBetaParam: TypeAlias = Union[
         "fallback-credit-2026-07-01",
         "agent-memory-2026-07-22",
         "mid-conversation-tool-changes-2026-07-01",
+        "compact-2026-01-12",
+        "computer-use-2025-11-24",
+        "mcp-tunnels-2026-06-22",
+        "structured-outputs-2025-11-13",
+        "task-budgets-2026-03-13",
+        "thinking-display-updates-2026-08-18",
+        "ce-user-management-2026-07-13",
+        "mid-conversation-output-config-2026-07-01",
+        "thinking-binding-controls-2026-08-01",
+        "mid-conversation-system-clear-at-2026-08-21",
     ],
 ]

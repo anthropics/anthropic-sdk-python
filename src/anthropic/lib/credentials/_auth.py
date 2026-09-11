@@ -5,7 +5,7 @@ import threading
 from typing import Generator, AsyncGenerator
 from typing_extensions import override
 
-import httpx2 as httpx
+import httpx2
 
 from ._cache import TokenCache
 from ..._utils import asyncify
@@ -62,8 +62,8 @@ def warn_env_static_shadows_auto_discovery(env_var: str) -> None:
     )
 
 
-class AccessTokenAuth(httpx.Auth):
-    """Adapts a :class:`TokenCache` to httpx's :class:`~httpx.Auth` protocol.
+class AccessTokenAuth(httpx2.Auth):
+    """Adapts a :class:`TokenCache` to httpx's :class:`~httpx2.Auth` protocol.
 
     Used by :meth:`anthropic.Anthropic.custom_auth` to inject ``Authorization: Bearer``
     plus the OAuth beta header on every request, with proactive refresh handled by
@@ -82,10 +82,10 @@ class AccessTokenAuth(httpx.Auth):
         self._token_cache = token_cache
 
     @staticmethod
-    def _has_static_credential(request: httpx.Request) -> bool:
+    def _has_static_credential(request: httpx2.Request) -> bool:
         return bool(request.headers.get("X-Api-Key") or request.headers.get("Authorization"))
 
-    def _apply(self, request: httpx.Request, token: str) -> None:
+    def _apply(self, request: httpx2.Request, token: str) -> None:
         request.headers["Authorization"] = f"Bearer {token}"
         existing_beta = request.headers.get("anthropic-beta", "")
         # Tokenize the comma-separated header so dedupe matches whole flag
@@ -102,7 +102,7 @@ class AccessTokenAuth(httpx.Auth):
             request.headers["anthropic-beta"] = ", ".join(existing_flags)
 
     @override
-    def sync_auth_flow(self, request: httpx.Request) -> Generator[httpx.Request, httpx.Response, None]:
+    def sync_auth_flow(self, request: httpx2.Request) -> Generator[httpx2.Request, httpx2.Response, None]:
         if self._has_static_credential(request):
             yield request
             return
@@ -111,7 +111,7 @@ class AccessTokenAuth(httpx.Auth):
         yield request
 
     @override
-    async def async_auth_flow(self, request: httpx.Request) -> AsyncGenerator[httpx.Request, httpx.Response]:
+    async def async_auth_flow(self, request: httpx2.Request) -> AsyncGenerator[httpx2.Request, httpx2.Response]:
         if self._has_static_credential(request):
             yield request
             return

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, overload
+from typing import overload
 from datetime import datetime, timezone
-from typing_extensions import TypeAlias, assert_never
+from typing_extensions import TypeAlias
 
 from ..._compat import model_copy
 from ..._models import build
@@ -49,11 +49,11 @@ def accumulate_managed_agents_event(
       inserts the fragment as a fresh content entry; an existing index returns
       a copy with that entry appended to. An unrecognised fragment type on an
       existing index passes the entry through unchanged — deltas are
-      best-effort and the buffered final event is canonical — but is a
-      type-check-time error via the exhaustiveness guard, matching
-      ``accumulate_event`` in ``lib/streaming/_messages.py``.
+      best-effort and the buffered final event is canonical.
     - ``agent.message`` is the buffered final event: a copy of it is returned,
       replacing whatever the preview had accumulated.
+    - Any other event, including types this SDK version does not know about,
+      passes ``accumulated`` through unchanged.
     """
     if event.type == "event_start":
         if event.event.type == "agent.message":
@@ -64,15 +64,10 @@ def accumulate_managed_agents_event(
                 content=[],
                 processed_at=_UNPROCESSED,
             )
-        elif event.event.type == "agent.thinking":
-            # This helper only tracks agent.message previews; agent.thinking
-            # previews are start-only and have no deltas to fold.
-            return accumulated
-        else:
-            # we only want exhaustive checking for linters, not at runtime
-            if TYPE_CHECKING:  # type: ignore[unreachable]
-                assert_never(event.event)
-            return accumulated
+        # This helper only tracks agent.message previews; agent.thinking
+        # previews are start-only and have no deltas to fold, and unrecognised
+        # preview types pass through unchanged.
+        return accumulated
 
     elif event.type == "agent.message":
         return model_copy(event, deep=True)
@@ -99,59 +94,14 @@ def accumulate_managed_agents_event(
             content.append(model_copy(fragment))
         else:
             existing = content[idx]
-            if fragment.type == "text":
-                if existing.type == "text":
-                    updated = model_copy(existing)
-                    updated.text = existing.text + fragment.text
-                    content[idx] = updated
-            else:
-                # we only want exhaustive checking for linters, not at runtime
-                if TYPE_CHECKING:  # type: ignore[unreachable]
-                    assert_never(fragment.type)
+            if fragment.type == "text" and existing.type == "text":
+                updated = model_copy(existing)
+                updated.text = existing.text + fragment.text
+                content[idx] = updated
 
         snapshot = model_copy(accumulated)
         snapshot.content = content
         return snapshot
 
-    elif (
-        event.type == "user.message"
-        or event.type == "user.interrupt"
-        or event.type == "user.tool_confirmation"
-        or event.type == "user.tool_result"
-        or event.type == "user.custom_tool_result"
-        or event.type == "user.define_outcome"
-        or event.type == "agent.thinking"
-        or event.type == "agent.tool_use"
-        or event.type == "agent.tool_result"
-        or event.type == "agent.custom_tool_use"
-        or event.type == "agent.mcp_tool_use"
-        or event.type == "agent.mcp_tool_result"
-        or event.type == "agent.thread_message_received"
-        or event.type == "agent.thread_message_sent"
-        or event.type == "agent.thread_context_compacted"
-        or event.type == "session.error"
-        or event.type == "session.updated"
-        or event.type == "session.deleted"
-        or event.type == "session.usage"
-        or event.type == "session.status_running"
-        or event.type == "session.status_idle"
-        or event.type == "session.status_rescheduled"
-        or event.type == "session.status_terminated"
-        or event.type == "session.thread_created"
-        or event.type == "session.thread_status_running"
-        or event.type == "session.thread_status_idle"
-        or event.type == "session.thread_status_rescheduled"
-        or event.type == "session.thread_status_terminated"
-        or event.type == "span.model_request_start"
-        or event.type == "span.model_request_end"
-        or event.type == "span.outcome_evaluation_start"
-        or event.type == "span.outcome_evaluation_ongoing"
-        or event.type == "span.outcome_evaluation_end"
-        or event.type == "system.message"
-    ):
-        return accumulated
-    else:
-        # we only want exhaustive checking for linters, not at runtime
-        if TYPE_CHECKING:  # type: ignore[unreachable]
-            assert_never(event)
-        return accumulated
+    # Any other event, including types newer than this SDK, leaves the snapshot unchanged.
+    return accumulated

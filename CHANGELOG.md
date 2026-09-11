@@ -1,5 +1,170 @@
 # Changelog
 
+## 1.5.0 (2026-09-10)
+
+Full Changelog: [v1.4.0...v1.5.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.4.0...v1.5.0)
+
+### Features
+
+* **api:** add auto mode tool permissions for Managed Agents ([62aa21b](https://github.com/anthropics/anthropic-sdk-python/commit/62aa21bb10c5d058d44ac969b06421f169495bee))
+* **api:** add content_too_large web_fetch tool error code ([4b5dec6](https://github.com/anthropics/anthropic-sdk-python/commit/4b5dec6cb427528f3a4f144f11b1010be80a493b))
+* **api:** add the user-profiles-2026-09-04 beta value and external_user_details to user profiles ([5f881a5](https://github.com/anthropics/anthropic-sdk-python/commit/5f881a587a730455a935ca0e85080026f0c5e6d9))
+* **api:** support mounting public GitHub repositories without an authorization_token in Managed Agents sessions ([285937c](https://github.com/anthropics/anthropic-sdk-python/commit/285937cd7f4d0d63ee55735d74dbb2e643643d8c))
+* **client:** add Message.to_param() and BetaMessage.to_param() ([192a2b2](https://github.com/anthropics/anthropic-sdk-python/commit/192a2b251df49f257d8f73e612b12a3c297d9a6c))
+* **credentials:** add CredentialsError and IdentityTokenFileError ([9acd79f](https://github.com/anthropics/anthropic-sdk-python/commit/9acd79f3d6306c6c9d33e4f9f542db9f67f8dd80))
+* **tools:** accept tool objects directly in messages.create, parse, stream and count_tokens ([ebd2fc5](https://github.com/anthropics/anthropic-sdk-python/commit/ebd2fc5cf6572b37dca115e7f82af0cc7b43d25d))
+
+
+### Bug Fixes
+
+* **client:** merge extra_body before client hooks run ([7aaf887](https://github.com/anthropics/anthropic-sdk-python/commit/7aaf887dd1ffd71b2fa5a8368afd16c39a3d3d18))
+* **credentials:** refuse credentials files accessible by group or others ([7af3e2b](https://github.com/anthropics/anthropic-sdk-python/commit/7af3e2b783ff5231b0172e03c2c89d741427b25b))
+* **streaming:** keep partial tool input JSON off content blocks ([4605bca](https://github.com/anthropics/anthropic-sdk-python/commit/4605bcaf758e0a87ec9257928a347b005235761c))
+* **types:** leave parsed_output out of dumped text blocks ([ca0706d](https://github.com/anthropics/anthropic-sdk-python/commit/ca0706dee59642c2ec45354bca05e1b2a1fac7e1))
+
+
+### Chores
+
+* **client:** clean up the unused idempotency request option ([c97830c](https://github.com/anthropics/anthropic-sdk-python/commit/c97830cb3d1779f84d6456e45cc1717328c8c42c))
+* **client:** keep the idempotency_key request option as a deprecated no-op ([#621](https://github.com/anthropics/anthropic-sdk-python/issues/621)) ([c2ab92e](https://github.com/anthropics/anthropic-sdk-python/commit/c2ab92ef19b4e482001c5ada85b29eebd5909054))
+* **docs:** correct the environment scope field description ([b903ee0](https://github.com/anthropics/anthropic-sdk-python/commit/b903ee02cb192d91dab138e12c9ddf7ccde13336))
+* **internal:** remove generated file header comments ([ae671f8](https://github.com/anthropics/anthropic-sdk-python/commit/ae671f8377dde9f5764ea570a3586fe138db9706))
+* **internal:** restore package version ([f3aefc7](https://github.com/anthropics/anthropic-sdk-python/commit/f3aefc718125b1a1b7cc1586d11f23a6f6ed82d8))
+* **internal:** restore package version ([e3c70e8](https://github.com/anthropics/anthropic-sdk-python/commit/e3c70e8d85bcba86cc4eb2bfbdf7f7bdcb71ecae))
+* **internal:** stop stamping the package version into generated files ([e7a6a28](https://github.com/anthropics/anthropic-sdk-python/commit/e7a6a28a85ab26db86bb093037043d1bef4f33b2))
+* **tests:** restore empty test package marker files ([0803af0](https://github.com/anthropics/anthropic-sdk-python/commit/0803af0f3a2c03ddd5e5c113ec1822f1a7380bf2))
+
+## 1.4.0 (2026-09-04)
+
+Full Changelog: [v1.3.0...v1.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.3.0...v1.4.0)
+
+### Features
+
+* **api:** add Claude Tag category and user breakdowns to usage reports ([9fce1e4](https://github.com/anthropics/anthropic-sdk-python/commit/9fce1e4994e113c35f4a7116d0c5eb90367b9c66))
+* **api:** add named types for organization compliance settings state ([1de1957](https://github.com/anthropics/anthropic-sdk-python/commit/1de1957334e7491979ddb21a1d673fa4e56d5459))
+* **api:** add support for sending a workspace ID on more endpoints ([d1d2c01](https://github.com/anthropics/anthropic-sdk-python/commit/d1d2c01d8aa128080dea3d711e12cb3df95a2149))
+
+
+### Bug Fixes
+
+* **client:** raise a clear error when an httpx object is passed instead of an httpx2 one ([9447099](https://github.com/anthropics/anthropic-sdk-python/commit/94470992f0f00ed331f2faa585cfda2cb8412a08))
+* repair custom-code merge in messages resources ([#580](https://github.com/anthropics/anthropic-sdk-python/issues/580)) ([85454ca](https://github.com/anthropics/anthropic-sdk-python/commit/85454cab9a323801b76500707b84c1992c1c0ee4))
+
+
+### Chores
+
+* **examples:** refresh platform model IDs ([#499](https://github.com/anthropics/anthropic-sdk-python/issues/499)) ([182abb5](https://github.com/anthropics/anthropic-sdk-python/commit/182abb51cdb5dda815b0b2498dc4adaab6dde469))
+* **internal:** bundle the mock server spec and update dev tooling ([f9b0cf2](https://github.com/anthropics/anthropic-sdk-python/commit/f9b0cf281932512e6b40cd1a887a44542c883468))
+* **internal:** clean up code comments ([#578](https://github.com/anthropics/anthropic-sdk-python/issues/578)) ([d202327](https://github.com/anthropics/anthropic-sdk-python/commit/d2023274f69dd0609ddabbf8f6af08041f868d8b))
+* **internal:** fix mypy unreachable error in detect-breaking-changes script ([07834f6](https://github.com/anthropics/anthropic-sdk-python/commit/07834f601fb4a81958f15e2129ca091cb9d1c646))
+* **internal:** narrower codeowners scope ([daca8f1](https://github.com/anthropics/anthropic-sdk-python/commit/daca8f13032311676ed30a6e0527ee304e1419c9))
+* **internal:** revert codeowners change ([41aa767](https://github.com/anthropics/anthropic-sdk-python/commit/41aa767464881bb51937f42fe9c426ae3081fd9f))
+* **tests:** remove stale warning filters ([ba9bf35](https://github.com/anthropics/anthropic-sdk-python/commit/ba9bf356ed60fa2eb206e266c86c0202dd005616))
+* **tests:** reword the skip reason on the path-level query param tests ([6b5046a](https://github.com/anthropics/anthropic-sdk-python/commit/6b5046ad29999ec887226aecff67db9feb2d1972))
+
+
+### Documentation
+
+* **api:** update a few doc strings ([26c509d](https://github.com/anthropics/anthropic-sdk-python/commit/26c509d66192f2b40150b481fa89da97e532612c))
+
+## 1.3.0 (2026-09-01)
+
+Full Changelog: [v1.2.0...v1.3.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.2.0...v1.3.0)
+
+### Features
+
+* **api:** beta user profiles: add external_user_onboarded_at, remove relationship in favor of access_type ([74080c3](https://github.com/anthropics/anthropic-sdk-python/commit/74080c35d6e4f3e5e7fd47454ecce2350cbfdd2b))
+* **api:** manual updates ([1dc3ce0](https://github.com/anthropics/anthropic-sdk-python/commit/1dc3ce0709a9bca146b045dfb0787971e747b1f5))
+* **api:** organization compliance settings, user-profile order_by, memory-store and toolset schema updates ([429e719](https://github.com/anthropics/anthropic-sdk-python/commit/429e719f84bd78db51c9fd0442ccb0ca63e614ba))
+
+
+### Bug Fixes
+
+* **aws:** resolve base_url from aws_region under skip_auth and with_options ([#564](https://github.com/anthropics/anthropic-sdk-python/issues/564)) ([b6d1732](https://github.com/anthropics/anthropic-sdk-python/commit/b6d1732cc89eb743b4d40e33c6cd3f7ecfb3d0ab))
+* **batches:** add results to GA raw/streaming response wrappers ([cbf9715](https://github.com/anthropics/anthropic-sdk-python/commit/cbf9715a461b4c5deec7a669b2b6e211faaf8827))
+* **ci:** don't hard-wrap detect-breaking-changes output ([b5be779](https://github.com/anthropics/anthropic-sdk-python/commit/b5be779c110e68f6c884091b3524083733f3f8a9))
+* **client:** derive multipart filename for file tuples passed without one ([a9f3fb4](https://github.com/anthropics/anthropic-sdk-python/commit/a9f3fb40abdd2f5842054a96e08afeee35fb932a))
+* **types:** remove unused wire aliases from header and path params ([dc0a9ab](https://github.com/anthropics/anthropic-sdk-python/commit/dc0a9ab4360c7fc28f7326c39876f18ad04d2c26))
+
+
+### Chores
+
+* **internal:** drop the unused discriminator argument from PropertyInfo ([3dae6fd](https://github.com/anthropics/anthropic-sdk-python/commit/3dae6fd196cb2fe658029e8eec60551dfa847949))
+* **internal:** drop the unused distro dependency ([a47d85f](https://github.com/anthropics/anthropic-sdk-python/commit/a47d85f6a740e3a38610c5239ac8c2c7b12ead55))
+
+
+### Documentation
+
+* **changelog:** detail the beta files/skills GA-shape change ([#1900](https://github.com/anthropics/anthropic-sdk-python/issues/1900)) ([7c84e13](https://github.com/anthropics/anthropic-sdk-python/commit/7c84e133570991589c90d888790d536ca943568d))
+
+
+### Refactors
+
+* **types:** mark discriminated unions with UnionDiscriminator instead of PropertyInfo ([17df0bf](https://github.com/anthropics/anthropic-sdk-python/commit/17df0bf37c875598b49b2909c58aa48e17a1b25a))
+* **types:** use UnionDiscriminator for more discriminated unions ([b44af2c](https://github.com/anthropics/anthropic-sdk-python/commit/b44af2c625703ba1c0ed2e81871ac14dc572665e))
+
+## 1.2.0 (2026-08-27)
+
+Full Changelog: [v1.1.0...v1.2.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.1.0...v1.2.0)
+
+### Features
+
+* **api:** beta files/skills namespaces use GA shapes; drop dated beta header pins ([9df4565](https://github.com/anthropics/anthropic-sdk-python/commit/9df4565fdfe4eec941809a0a3d1615ee11e16b68))
+
+  The beta Files and Skills namespaces (`client.beta.files`, `client.beta.skills`) no longer send the `files-api-2025-04-14` / `skills-2025-10-02` headers and return the same shapes as `client.files` / `client.skills` (with `Beta`-prefixed type names under `anthropic.types.beta`). Requests that still send those headers on raw HTTP keep receiving the beta shapes.
+
+  Changes in the beta namespaces:
+  - `client.beta.skills.delete()` now deletes a Skill together with all of its versions (previously refused while any version existed). It returns `BetaDeletedSkill` (was `SkillDeleteResponse`).
+  - Beta Messages type `BetaSkill` (container skill reference with `skill_id`, `type`, `version`) is renamed `BetaContainerSkill`; the request-side `BetaSkillParams` keeps its name. `BetaSkill` now names the Skill object returned by `client.beta.skills.create()` / `retrieve()` / `list()` (replacing `SkillCreateResponse` / `SkillRetrieveResponse` / `SkillListResponse`), and skill versions are `BetaSkillVersion` / `BetaDeletedSkillVersion` (replacing `Version*Response`).
+  - `client.beta.files.list()` returns `SyncPageCursor[BetaFileMetadata]` / `AsyncPageCursor[BetaFileMetadata]` (with `data` / `next_page`) and paginates with `page=` / `ids=` (was `SyncPage` / `AsyncPage` with `data`, `has_more`, `first_id`, `last_id` and `before_id=` / `after_id=`); iterating the result for auto-pagination is unchanged. `BetaSkill` uses `display_name` (was `display_title`, also the `create()` keyword) and `latest_version_id` (was `latest_version`), and `BetaSkillVersion` is addressed by its `skver_…` `id` (the Unix-timestamp `version` field is gone).
+
+  Migration guides: [Migrate from `files-api-2025-04-14`](https://platform.claude.com/docs/en/build-with-claude/files#migrate-from-files-api-2025-04-14) · [Migrate from `skills-2025-10-02`](https://platform.claude.com/docs/en/build-with-claude/skills-guide#migrate-from-skills-2025-10-02)
+
+
+### Bug Fixes
+
+* **aws,bedrock:** sign raw request bytes so binary file uploads work ([#531](https://github.com/anthropics/anthropic-sdk-python/issues/531)) ([f50e910](https://github.com/anthropics/anthropic-sdk-python/commit/f50e9106c002d71966f5f8027758b3d703999936))
+* **ci:** resolve assignment aliases in detect-breaking-changes ([f2c4925](https://github.com/anthropics/anthropic-sdk-python/commit/f2c49254941b4d700fe97cbe6bb85205b06a6460))
+* **sessions:** make event accumulator forward-compatible with new event types ([#533](https://github.com/anthropics/anthropic-sdk-python/issues/533)) ([cbbaf6e](https://github.com/anthropics/anthropic-sdk-python/commit/cbbaf6e46358d5c844eac01ed3c50a797daf93a7))
+* **tools:** let read return a view_range of a file over the size cap ([#538](https://github.com/anthropics/anthropic-sdk-python/issues/538)) ([b68e876](https://github.com/anthropics/anthropic-sdk-python/commit/b68e876345bde1ecc099ef245e87b1319dc8d080))
+* **tools:** preserve exact file bytes in the agent toolset and memory tool (no newline translation) ([#540](https://github.com/anthropics/anthropic-sdk-python/issues/540)) ([56921a8](https://github.com/anthropics/anthropic-sdk-python/commit/56921a8c04e0ec71192fcd22dd28db2a5e1306f7))
+* **webhooks:** require headers to be passed to `unwrap()` ([0baa902](https://github.com/anthropics/anthropic-sdk-python/commit/0baa90225359f6b4bec50476c19bb52c2ad4250d))
+
+
+### Documentation
+
+* **api:** clarify pagination on the organization rate-limit list endpoints ([1832b27](https://github.com/anthropics/anthropic-sdk-python/commit/1832b27d0751943640cb898bb77c088ea3f24acb))
+
+## 1.1.0 (2026-08-26)
+
+Full Changelog: [v1.0.0...v1.1.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.0.0...v1.1.0)
+
+### Features
+
+* **api:** add `updates` thinking display mode (beta) ([eb4a73f](https://github.com/anthropics/anthropic-sdk-python/commit/eb4a73fdddc153e1bb4375f7b9e3d45b4bce5c5b))
+* **api:** add missing anthropic-beta values ([dbebd15](https://github.com/anthropics/anthropic-sdk-python/commit/dbebd1515db48f4200105b3a92136a0ba787751e))
+* **api:** add support for Organization API endpoints ([5a5b8fc](https://github.com/anthropics/anthropic-sdk-python/commit/5a5b8fc1eec3f3a494f6a3b08819e0ea06ecc45d))
+
+
+### Bug Fixes
+
+* **docs:** correct link for long requests error ([#1884](https://github.com/anthropics/anthropic-sdk-python/issues/1884)) ([4474f31](https://github.com/anthropics/anthropic-sdk-python/commit/4474f31efa48588eff590f04419230791e22419f)), closes [#1883](https://github.com/anthropics/anthropic-sdk-python/issues/1883)
+* **tools:** keep the tool runner going on pause_turn ([#343](https://github.com/anthropics/anthropic-sdk-python/issues/343)) ([ab1ec60](https://github.com/anthropics/anthropic-sdk-python/commit/ab1ec609f2cce801644ff4410660deb52680f273))
+
+
+### Chores
+
+* **docs:** clarify skill version `latest` support and memory version retention ([a754f3b](https://github.com/anthropics/anthropic-sdk-python/commit/a754f3b53f2040491d6390850e08982d36f19910))
+* **internal:** cancel superseded CI runs ([c061ab1](https://github.com/anthropics/anthropic-sdk-python/commit/c061ab1cf0cf9a7c6519abe1260a2bc0bac4794c))
+* **internal:** minor workflow reformat ([1569002](https://github.com/anthropics/anthropic-sdk-python/commit/1569002594c39349d8a38eaef51c57caaa981485))
+* **internal:** remove the legacy response API ([a48b1dd](https://github.com/anthropics/anthropic-sdk-python/commit/a48b1dde8b3159085c904b9abe252adccf06b47b))
+* **internal:** use `import httpx2` directly instead of aliasing as httpx ([628d789](https://github.com/anthropics/anthropic-sdk-python/commit/628d7891884748b4eef51506543bfd2ef757ba17))
+
+
+### Documentation
+
+* **api:** clarify session thread agent and usage.iterations compaction descriptions (beta) ([4ace503](https://github.com/anthropics/anthropic-sdk-python/commit/4ace503320c2af170fefe6be605cf2ddd729594a))
+
 ## 1.0.0 (2026-08-20)
 
 Full Changelog: [v0.125.0...v1.0.0](https://github.com/anthropics/anthropic-sdk-python/compare/v0.125.0...v1.0.0)

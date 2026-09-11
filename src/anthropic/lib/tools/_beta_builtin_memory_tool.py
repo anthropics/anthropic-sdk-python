@@ -20,6 +20,7 @@ from anthropic.types.beta import (
     BetaMemoryTool20250818StrReplaceCommand,
 )
 
+from ._files import read_text_exact
 from ..._models import construct_type_unchecked
 from ...types.beta import (
     BetaMemoryTool20250818Param,
@@ -353,11 +354,19 @@ def _validate_no_symlink_escape(target_path: Path, memory_root: Path) -> None:
 
 def _read_file_content(full_path: Path, memory_path: str) -> str:
     try:
-        return full_path.read_text(encoding="utf-8")
+        return read_text_exact(full_path)
     except FileNotFoundError as err:
         raise ToolError(
             f"The file {memory_path} no longer exists (may have been deleted or renamed concurrently)."
         ) from err
+
+
+def _split_lines_keeping_cr(content: str) -> List[str]:
+    """Split on LF only (keeping any CR), without the empty tail a trailing newline leaves."""
+    lines = content.split("\n")
+    if lines[-1] == "":
+        lines.pop()
+    return lines
 
 
 def _format_file_size(bytes_size: int) -> str:
@@ -547,7 +556,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
             raise ToolError(f"The path {command.path} is not a file.")
 
         content = _read_file_content(full_path, command.path)
-        lines = content.splitlines()
+        lines = _split_lines_keeping_cr(content)
 
         if command.insert_line < 0 or command.insert_line > len(lines):
             raise ToolError(
@@ -650,7 +659,7 @@ async def _async_secure_mkdir(path: AsyncPath, mode: int = _DIR_CREATE_MODE) -> 
 
 async def _async_read_file_content(full_path: AsyncPath, memory_path: str) -> str:
     try:
-        return await full_path.read_text(encoding="utf-8")
+        return await run_sync(read_text_exact, Path(str(full_path)))
     except FileNotFoundError as err:
         raise ToolError(
             f"The file {memory_path} no longer exists (may have been deleted or renamed concurrently)."
@@ -848,7 +857,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
             raise ToolError(f"The path {command.path} is not a file.")
 
         content = await _async_read_file_content(full_path, command.path)
-        lines = content.splitlines()
+        lines = _split_lines_keeping_cr(content)
 
         if command.insert_line < 0 or command.insert_line > len(lines):
             raise ToolError(

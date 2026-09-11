@@ -132,6 +132,16 @@ else:
         HTTPX_DEFAULT_TIMEOUT = Timeout(5.0)
 
 
+def _reject_httpx_object(name: str, value: object) -> None:
+    """`httpx` objects don't work with `httpx2`, and would otherwise fail deep inside a request."""
+    for cls in type(value).__mro__:
+        module = getattr(cls, "__module__", None)
+        if isinstance(module, str) and module.partition(".")[0] == "httpx":
+            raise TypeError(
+                f"Invalid `{name}` argument; `httpx.{cls.__name__}` is from the `httpx` package, but this SDK uses `httpx2`. Use `httpx2.{cls.__name__}` instead."
+            )
+
+
 class PageInfo:
     """Stores the necessary information to build the request to retrieve the next page.
 
@@ -400,6 +410,8 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         custom_query: Mapping[str, object] | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
     ) -> None:
+        _reject_httpx_object("timeout", timeout)
+
         self._version = version
         self._base_url = self._enforce_trailing_slash(URL(base_url))
         self.max_retries = max_retries
@@ -500,6 +512,8 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         *,
         retries_taken: int = 0,
     ) -> httpx2.Request:
+        _reject_httpx_object("timeout", options.timeout)
+
         if log.isEnabledFor(logging.DEBUG):
             log.debug(
                 "Request options: %s",
@@ -753,7 +767,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         if expected_time > default_time or (max_nonstreaming_tokens and max_tokens > max_nonstreaming_tokens):
             raise ValueError(
                 "Streaming is required for operations that may take longer than 10 minutes. "
-                + "See https://github.com/anthropics/anthropic-sdk-python#long-requests for more details",
+                + "See https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/python#long-requests for more details",
             )
         return Timeout(
             default_time,
@@ -884,6 +898,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
 class _DefaultHttpxClient(httpx2.Client):
     def __init__(self, **kwargs: Any) -> None:
+        _reject_httpx_object("transport", kwargs.get("transport"))
         kwargs.setdefault("timeout", DEFAULT_TIMEOUT)
         kwargs.setdefault("limits", DEFAULT_CONNECTION_LIMITS)
         kwargs.setdefault("follow_redirects", True)
@@ -973,6 +988,8 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool,
     ) -> None:
+        _reject_httpx_object("http_client", http_client)
+
         if not is_given(timeout):
             # if the user passed in a custom http client with a non-default
             # timeout set then we use that timeout.
@@ -1101,6 +1118,8 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         # options are mutated later & we then retry, the retries are
         # given the original options
         input_options = model_copy(options)
+        # merged ahead of `_prepare_options` so that client hooks and middleware see `extra_body` too
+        _merge_extra_json(input_options)
         if input_options.idempotency_key is None and input_options.method.lower() != "get":
             # ensure the idempotency key is reused between requests
             input_options.idempotency_key = self._idempotency_key()
@@ -1557,6 +1576,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
 
 class _DefaultAsyncHttpxClient(httpx2.AsyncClient):
     def __init__(self, **kwargs: Any) -> None:
+        _reject_httpx_object("transport", kwargs.get("transport"))
         kwargs.setdefault("timeout", DEFAULT_TIMEOUT)
         kwargs.setdefault("limits", DEFAULT_CONNECTION_LIMITS)
         kwargs.setdefault("follow_redirects", True)
@@ -1669,6 +1689,8 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         custom_query: Mapping[str, object] | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
     ) -> None:
+        _reject_httpx_object("http_client", http_client)
+
         if not is_given(timeout):
             # if the user passed in a custom http client with a non-default
             # timeout set then we use that timeout.
@@ -1799,6 +1821,8 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         # options are mutated later & we then retry, the retries are
         # given the original options
         input_options = model_copy(options)
+        # merged ahead of `_prepare_options` so that client hooks and middleware see `extra_body` too
+        _merge_extra_json(input_options)
         if input_options.idempotency_key is None and input_options.method.lower() != "get":
             # ensure the idempotency key is reused between requests
             input_options.idempotency_key = self._idempotency_key()
@@ -2260,7 +2284,6 @@ def make_request_options(
     extra_headers: Headers | None = None,
     extra_query: Query | None = None,
     extra_body: Body | None = None,
-    idempotency_key: str | None = None,
     timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     post_parser: PostParser | NotGiven = not_given,
 ) -> RequestOptions:
@@ -2280,9 +2303,6 @@ def make_request_options(
 
     if not isinstance(timeout, NotGiven):
         options["timeout"] = timeout
-
-    if idempotency_key is not None:
-        options["idempotency_key"] = idempotency_key
 
     if is_given(post_parser):
         # internal
@@ -2435,6 +2455,27 @@ def _merge_mappings(
     """
     merged = {**obj1, **obj2}
     return {key: value for key, value in merged.items() if not isinstance(value, Omit)}
+
+
+def _merge_extra_json(options: FinalRequestOptions) -> None:
+    """Merge `extra_json` into `json_data` in place, as `_build_request` would.
+
+    This runs before `_prepare_options` so that client hooks, such as Bedrock and Vertex
+    routing, see `extra_body` values.
+    """
+    extra_json = options.extra_json
+    if extra_json is None:
+        return
+
+    json_data = options.json_data
+    if json_data is None:
+        options.json_data = cast(Body, extra_json)
+    elif is_mapping(json_data):
+        options.json_data = _merge_mappings(json_data, extra_json)
+    else:
+        raise RuntimeError(f"Unexpected JSON data type, {type(json_data)}, cannot merge with `extra_body`")
+
+    options.extra_json = None
 
 
 # `x-stainless-helper` is the one header whose values accumulate across layers into a single

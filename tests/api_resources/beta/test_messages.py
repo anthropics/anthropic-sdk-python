@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -42,6 +40,8 @@ class TestMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -135,6 +135,7 @@ class TestMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -167,6 +168,7 @@ class TestMessages:
             ],
             betas=["message-batches-2024-09-24"],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -231,6 +233,8 @@ class TestMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -324,6 +328,7 @@ class TestMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -356,6 +361,7 @@ class TestMessages:
             ],
             betas=["message-batches-2024-09-24"],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         message_stream.response.close()
 
@@ -418,6 +424,8 @@ class TestMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -493,6 +501,7 @@ class TestMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -524,6 +533,7 @@ class TestMessages:
                 }
             ],
             betas=["string"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -591,6 +601,8 @@ class TestAsyncMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -684,6 +696,7 @@ class TestAsyncMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -716,6 +729,7 @@ class TestAsyncMessages:
             ],
             betas=["message-batches-2024-09-24"],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -780,6 +794,8 @@ class TestAsyncMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -873,6 +889,7 @@ class TestAsyncMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -905,6 +922,7 @@ class TestAsyncMessages:
             ],
             betas=["message-batches-2024-09-24"],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         await message_stream.response.aclose()
 
@@ -967,6 +985,8 @@ class TestAsyncMessages:
                 {
                     "content": "Hello, world",
                     "role": "user",
+                    "clear_at": "next_user_message",
+                    "output_config": {"effort": "low"},
                 }
             ],
             model="claude-opus-5",
@@ -1042,6 +1062,7 @@ class TestAsyncMessages:
             ],
             thinking={
                 "type": "adaptive",
+                "block_binding": {"prefix_mismatch_behavior": "error"},
                 "display": "summarized",
             },
             tool_choice={
@@ -1074,6 +1095,7 @@ class TestAsyncMessages:
             ],
             betas=["string"],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 

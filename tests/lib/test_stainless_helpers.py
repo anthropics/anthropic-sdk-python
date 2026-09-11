@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import cast
+import json
 
 import respx
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from anthropic import Anthropic, AsyncAnthropic, _compat
@@ -18,8 +18,11 @@ from anthropic.lib._stainless_helpers import (
 from ..conftest import base_url
 
 
-class _TaggedDict(dict):  # type: ignore[type-arg]
-    """Plain dicts reject ``object.__setattr__`` — helpers tag attribute-capable subclasses."""
+class _Tool:
+    """Stands in for a ``@beta_tool`` / toolset object: ``tools=`` takes anything with a ``to_dict()``."""
+
+    def to_dict(self) -> BetaToolParam:
+        return {"name": "t", "description": "d", "input_schema": {"type": "object"}}
 
 
 class _TaggedTuple(tuple):  # type: ignore[type-arg]
@@ -62,9 +65,9 @@ def _file_json() -> dict[str, object]:
 @pytest.mark.respx(base_url=base_url)
 class TestSyncWireHeaders:
     def test_caller_tag_is_appended_not_clobbered(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
-        tool = cast("BetaToolParam", _TaggedDict({"name": "t", "description": "d", "input_schema": {"type": "object"}}))
+        tool = _Tool()
         tag_helper(tool, "mcp_tool")
         client.beta.messages.create(
             model="claude-sonnet-4-5",
@@ -77,9 +80,10 @@ class TestSyncWireHeaders:
         request = respx_mock.calls.last.request
         values = request.headers.get_list(STAINLESS_HELPER_HEADER)
         assert values == ["mcp_tool, caller-tag"]
+        assert json.loads(request.content)["tools"] == [tool.to_dict()]
 
     def test_file_upload_tag_is_appended_not_clobbered(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
-        respx_mock.post("/v1/files").mock(return_value=httpx.Response(200, json=_file_json()))
+        respx_mock.post("/v1/files").mock(return_value=httpx2.Response(200, json=_file_json()))
 
         file = _TaggedTuple(("data.json", b"{}", "application/json"))
         tag_helper(file, "mcp_resource_to_file")
@@ -93,24 +97,34 @@ class TestSyncWireHeaders:
     def test_parse_sends_single_header_line(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
         # regression: the literal tag and the collected tags used to land under
         # two casings of the key, producing two header lines on the wire
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         client.beta.messages.parse(
             model="claude-sonnet-4-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
+            tools=[_Tool()],
         )
 
         request = respx_mock.calls.last.request
         values = request.headers.get_list(STAINLESS_HELPER_HEADER)
         assert values == ["beta.messages.parse"]
+        assert json.loads(request.content)["tools"] == [_Tool().to_dict()]
+
+    def test_count_tokens_takes_a_tool_object(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
+        respx_mock.post("/v1/messages/count_tokens").mock(return_value=httpx2.Response(200, json={"input_tokens": 3}))
+        result = client.beta.messages.count_tokens(
+            model="claude-sonnet-4-5", messages=[{"role": "user", "content": "hello"}], tools=[_Tool()]
+        )
+        assert result.input_tokens == 3
+        assert json.loads(respx_mock.calls.last.request.content)["tools"] == [_Tool().to_dict()]
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
     def test_parse_merges_caller_extra_headers(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
         # caller-supplied betas, user_profile_id, and extra_headers must all
         # survive parse()'s hand-written merge alongside the injected
         # structured-outputs beta and the helper tag
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         client.beta.messages.parse(
             model="claude-sonnet-4-5",
@@ -132,7 +146,7 @@ class TestSyncWireHeaders:
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
     def test_parse_caller_beta_header_overrides(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
         # extra_headers win outright on non-append headers, matching create()
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         client.beta.messages.parse(
             model="claude-sonnet-4-5",
@@ -150,9 +164,9 @@ class TestAsyncWireHeaders:
     async def test_caller_tag_is_appended_not_clobbered(
         self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
     ) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
-        tool = cast("BetaToolParam", _TaggedDict({"name": "t", "description": "d", "input_schema": {"type": "object"}}))
+        tool = _Tool()
         tag_helper(tool, "mcp_tool")
         await async_client.beta.messages.create(
             model="claude-sonnet-4-5",
@@ -165,11 +179,12 @@ class TestAsyncWireHeaders:
         request = respx_mock.calls.last.request
         values = request.headers.get_list(STAINLESS_HELPER_HEADER)
         assert values == ["mcp_tool, caller-tag"]
+        assert json.loads(request.content)["tools"] == [tool.to_dict()]
 
     async def test_file_upload_tag_is_appended_not_clobbered(
         self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
     ) -> None:
-        respx_mock.post("/v1/files").mock(return_value=httpx.Response(200, json=_file_json()))
+        respx_mock.post("/v1/files").mock(return_value=httpx2.Response(200, json=_file_json()))
 
         file = _TaggedTuple(("data.json", b"{}", "application/json"))
         tag_helper(file, "mcp_resource_to_file")
@@ -183,23 +198,35 @@ class TestAsyncWireHeaders:
     async def test_parse_sends_single_header_line(
         self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
     ) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         await async_client.beta.messages.parse(
             model="claude-sonnet-4-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
+            tools=[_Tool()],
         )
 
         request = respx_mock.calls.last.request
         values = request.headers.get_list(STAINLESS_HELPER_HEADER)
         assert values == ["beta.messages.parse"]
+        assert json.loads(request.content)["tools"] == [_Tool().to_dict()]
+
+    async def test_count_tokens_takes_a_tool_object(
+        self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages/count_tokens").mock(return_value=httpx2.Response(200, json={"input_tokens": 3}))
+        result = await async_client.beta.messages.count_tokens(
+            model="claude-sonnet-4-5", messages=[{"role": "user", "content": "hello"}], tools=[_Tool()]
+        )
+        assert result.input_tokens == 3
+        assert json.loads(respx_mock.calls.last.request.content)["tools"] == [_Tool().to_dict()]
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
     async def test_parse_merges_caller_extra_headers(
         self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
     ) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         await async_client.beta.messages.parse(
             model="claude-sonnet-4-5",
@@ -220,7 +247,7 @@ class TestAsyncWireHeaders:
     async def test_parse_caller_beta_header_overrides(
         self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
     ) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=_message_json()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         await async_client.beta.messages.parse(
             model="claude-sonnet-4-5",

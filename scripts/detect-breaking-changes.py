@@ -4,13 +4,36 @@ import sys
 from typing import Iterator
 from pathlib import Path
 
-import rich
 import griffe
 from rich.text import Text
 from rich.style import Style
+from rich.console import Console
+
+
+def resolve_assignment_alias(obj: griffe.Object | griffe.Alias) -> griffe.Object | griffe.Alias:
+    # griffe models `Foo = Bar` (a deprecated alias for a renamed class) as an attribute
+    # with no members, so compare against the class it points to instead. Aliases can be
+    # chained (`Foo = Bar`, `Bar = Baz`), so keep following them until we reach a class.
+    target: griffe.Object | griffe.Alias | None = obj
+    seen: set[str] = set()
+    while isinstance(target, griffe.Attribute) and isinstance(target.value, griffe.ExprName):
+        if target.path in seen:  # `A = B; B = A`
+            return obj
+        seen.add(target.path)
+        try:
+            # annotated as `Module | Class` upstream, but a re-exported name resolves to an `Alias`
+            resolved: griffe.Object | griffe.Alias | None = target.value.resolved
+            if isinstance(resolved, griffe.Alias):
+                resolved = resolved.final_target
+            target = resolved
+        except Exception:
+            return obj
+
+    return target if isinstance(target, griffe.Class) else obj
 
 
 def public_members(obj: griffe.Object | griffe.Alias) -> dict[str, griffe.Object | griffe.Alias]:
+    obj = resolve_assignment_alias(obj)
     if isinstance(obj, griffe.Alias):
         # ignore imports for now, they're technically part of the public API
         # but we don't have good preventative measures in place to prevent
@@ -67,11 +90,13 @@ def main() -> None:
 
     output = list(find_breaking_changes(package, old_package, path=["anthropic"]))
     if output:
-        rich.print(Text("Breaking changes detected!", style=Style(color="rgb(165, 79, 87)")))
-        rich.print()
+        # soft_wrap: CI stdout is not a TTY, so rich would otherwise hard-wrap long symbol paths at 80 columns
+        console = Console(soft_wrap=True)
+        console.print(Text("Breaking changes detected!", style=Style(color="rgb(165, 79, 87)")))
+        console.print()
 
         for text in output:
-            rich.print(text, end="")
+            console.print(text, end="")
 
         sys.exit(1)
 

@@ -537,6 +537,7 @@ from anthropic.types.beta import (
     BetaComputerZoomConfig,
     BetaContainer,
     BetaContainerParams,
+    BetaContainerSkill,
     BetaContainerUploadBlock,
     BetaContainerUploadBlockParam,
     BetaContentBlock,
@@ -620,9 +621,9 @@ from anthropic.types.beta import (
     BetaServerToolUseBlock,
     BetaServerToolUseBlockParam,
     BetaSignatureDelta,
-    BetaSkill,
     BetaSkillParams,
     BetaStopReason,
+    BetaSystemMessageOutputConfig,
     BetaTextBlock,
     BetaTextBlockParam,
     BetaTextCitation,
@@ -639,12 +640,15 @@ from anthropic.types.beta import (
     BetaTextEditorCodeExecutionViewResultBlock,
     BetaTextEditorCodeExecutionViewResultBlockParam,
     BetaThinkingBlock,
+    BetaThinkingBlockBinding,
     BetaThinkingBlockParam,
     BetaThinkingConfigAdaptive,
     BetaThinkingConfigDisabled,
     BetaThinkingConfigEnabled,
     BetaThinkingConfigParam,
     BetaThinkingDelta,
+    BetaThinkingDroppedInputTransformation,
+    BetaThinkingPrefixMismatchBehavior,
     BetaThinkingTurns,
     BetaTokenTaskBudget,
     BetaTool,
@@ -768,6 +772,7 @@ from anthropic.types.beta import (
     BetaManagedAgentsAlwaysAskPolicy,
     BetaManagedAgentsAnthropicSkill,
     BetaManagedAgentsAnthropicSkillParams,
+    BetaManagedAgentsAutoPolicy,
     BetaManagedAgentsBashToolConfig,
     BetaManagedAgentsBashToolConfigParams,
     BetaManagedAgentsCustomSkill,
@@ -942,6 +947,10 @@ Types:
 
 ```python
 from anthropic.types.beta.sessions import (
+    BetaManagedAgentsAgentAutoEvaluatedPermission,
+    BetaManagedAgentsAgentAutoEvaluatedPermissionAllow,
+    BetaManagedAgentsAgentAutoEvaluatedPermissionAsk,
+    BetaManagedAgentsAgentAutoEvaluatedPermissionDeny,
     BetaManagedAgentsAgentCustomToolUseEvent,
     BetaManagedAgentsAgentMCPToolResultEvent,
     BetaManagedAgentsAgentMCPToolUseEvent,
@@ -950,6 +959,10 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsAgentThreadContextCompactedEvent,
     BetaManagedAgentsAgentThreadMessageReceivedEvent,
     BetaManagedAgentsAgentThreadMessageSentEvent,
+    BetaManagedAgentsAgentToolEvaluation,
+    BetaManagedAgentsAgentToolEvaluationAlwaysAllow,
+    BetaManagedAgentsAgentToolEvaluationAlwaysAsk,
+    BetaManagedAgentsAgentToolEvaluationAuto,
     BetaManagedAgentsAgentToolResultEvent,
     BetaManagedAgentsAgentToolUseEvent,
     BetaManagedAgentsBase64DocumentSource,
@@ -1315,7 +1328,7 @@ from anthropic.types.beta import BetaDeletedFile, BetaFileMetadata, BetaFileScop
 
 Methods:
 
-- <code title="get /v1/files?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">list</a>(\*\*<a href="src/anthropic/types/beta/file_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_file_metadata.py">SyncPage[BetaFileMetadata]</a></code>
+- <code title="get /v1/files?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">list</a>(\*\*<a href="src/anthropic/types/beta/file_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_file_metadata.py">SyncPageCursor[BetaFileMetadata]</a></code>
 - <code title="delete /v1/files/{file_id}?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">delete</a>(file_id) -> <a href="./src/anthropic/types/beta/beta_deleted_file.py">BetaDeletedFile</a></code>
 - <code title="get /v1/files/{file_id}/content?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">download</a>(file_id) -> BinaryAPIResponse</code>
 - <code title="get /v1/files/{file_id}?beta=true">client.beta.files.<a href="./src/anthropic/resources/beta/files.py">retrieve_metadata</a>(file_id) -> <a href="./src/anthropic/types/beta/beta_file_metadata.py">BetaFileMetadata</a></code>
@@ -1326,40 +1339,30 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta import (
-    SkillCreateResponse,
-    SkillRetrieveResponse,
-    SkillListResponse,
-    SkillDeleteResponse,
-)
+from anthropic.types.beta import BetaDeletedSkill, BetaSkill, BetaSkillSource
 ```
 
 Methods:
 
-- <code title="post /v1/skills?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">create</a>(\*\*<a href="src/anthropic/types/beta/skill_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skill_create_response.py">SkillCreateResponse</a></code>
-- <code title="get /v1/skills/{skill_id}?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">retrieve</a>(skill_id) -> <a href="./src/anthropic/types/beta/skill_retrieve_response.py">SkillRetrieveResponse</a></code>
-- <code title="get /v1/skills?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">list</a>(\*\*<a href="src/anthropic/types/beta/skill_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skill_list_response.py">SyncPageCursor[SkillListResponse]</a></code>
-- <code title="delete /v1/skills/{skill_id}?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">delete</a>(skill_id) -> <a href="./src/anthropic/types/beta/skill_delete_response.py">SkillDeleteResponse</a></code>
+- <code title="post /v1/skills?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">create</a>(\*\*<a href="src/anthropic/types/beta/skill_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_skill.py">BetaSkill</a></code>
+- <code title="get /v1/skills/{skill_id}?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">retrieve</a>(skill_id) -> <a href="./src/anthropic/types/beta/beta_skill.py">BetaSkill</a></code>
+- <code title="get /v1/skills?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">list</a>(\*\*<a href="src/anthropic/types/beta/skill_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_skill.py">SyncPageCursor[BetaSkill]</a></code>
+- <code title="delete /v1/skills/{skill_id}?beta=true">client.beta.skills.<a href="./src/anthropic/resources/beta/skills/skills.py">delete</a>(skill_id) -> <a href="./src/anthropic/types/beta/beta_deleted_skill.py">BetaDeletedSkill</a></code>
 
 ### Versions
 
 Types:
 
 ```python
-from anthropic.types.beta.skills import (
-    VersionCreateResponse,
-    VersionRetrieveResponse,
-    VersionListResponse,
-    VersionDeleteResponse,
-)
+from anthropic.types.beta.skills import BetaDeletedSkillVersion, BetaSkillVersion
 ```
 
 Methods:
 
-- <code title="post /v1/skills/{skill_id}/versions?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">create</a>(skill_id, \*\*<a href="src/anthropic/types/beta/skills/version_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skills/version_create_response.py">VersionCreateResponse</a></code>
-- <code title="get /v1/skills/{skill_id}/versions/{version}?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">retrieve</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/beta/skills/version_retrieve_response.py">VersionRetrieveResponse</a></code>
-- <code title="get /v1/skills/{skill_id}/versions?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">list</a>(skill_id, \*\*<a href="src/anthropic/types/beta/skills/version_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skills/version_list_response.py">SyncPageCursor[VersionListResponse]</a></code>
-- <code title="delete /v1/skills/{skill_id}/versions/{version}?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">delete</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/beta/skills/version_delete_response.py">VersionDeleteResponse</a></code>
+- <code title="post /v1/skills/{skill_id}/versions?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">create</a>(skill_id, \*\*<a href="src/anthropic/types/beta/skills/version_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skills/beta_skill_version.py">BetaSkillVersion</a></code>
+- <code title="get /v1/skills/{skill_id}/versions/{version}?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">retrieve</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/beta/skills/beta_skill_version.py">BetaSkillVersion</a></code>
+- <code title="get /v1/skills/{skill_id}/versions?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">list</a>(skill_id, \*\*<a href="src/anthropic/types/beta/skills/version_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/skills/beta_skill_version.py">SyncPageCursor[BetaSkillVersion]</a></code>
+- <code title="delete /v1/skills/{skill_id}/versions/{version}?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">delete</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/beta/skills/beta_deleted_skill_version.py">BetaDeletedSkillVersion</a></code>
 - <code title="get /v1/skills/{skill_id}/versions/{version}/content?beta=true">client.beta.skills.versions.<a href="./src/anthropic/resources/beta/skills/versions.py">download</a>(version, \*, skill_id) -> BinaryAPIResponse</code>
 
 ## Webhooks
@@ -1426,6 +1429,8 @@ Types:
 from anthropic.types.beta import (
     BetaUserProfile,
     BetaUserProfileEnrollmentURL,
+    BetaUserProfileExternalUserDetails,
+    BetaUserProfileExternalUserDetailsParams,
     BetaUserProfileTrustGrant,
 )
 ```
@@ -1455,9 +1460,11 @@ from anthropic.types.beta import (
     BetaDreamSessionsInput,
     BetaDreamStatus,
     BetaDreamUsage,
+    BetaDreamingError,
     BetaOutputBehavior,
     BetaOutputBehaviorCreateNew,
     BetaOutputBehaviorUpdateExisting,
+    BetaTargetStoreHeldError,
 )
 ```
 
@@ -1500,3 +1507,290 @@ Methods:
 - <code title="get /v1/tunnels/{tunnel_id}/certificates/{certificate_id}?beta=true">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">retrieve</a>(certificate_id, \*, tunnel_id) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">BetaTunnelCertificate</a></code>
 - <code title="get /v1/tunnels/{tunnel_id}/certificates?beta=true">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">list</a>(tunnel_id, \*\*<a href="src/anthropic/types/beta/tunnels/certificate_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">SyncPageCursor[BetaTunnelCertificate]</a></code>
 - <code title="post /v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive?beta=true">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">archive</a>(certificate_id, \*, tunnel_id) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">BetaTunnelCertificate</a></code>
+
+## Organization
+
+Types:
+
+```python
+from anthropic.types.beta import BetaOrganization, BetaOrganizationRole
+```
+
+Methods:
+
+- <code title="get /v1/organizations/me?beta=true">client.beta.organization.<a href="./src/anthropic/resources/beta/organization/organization.py">retrieve</a>() -> <a href="./src/anthropic/types/beta/beta_organization.py">BetaOrganization</a></code>
+
+### APIKeys
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaAPIKey,
+    BetaAPIKeyCreatedBy,
+    BetaAPIKeyOrganizationScope,
+    BetaAPIKeyServiceAccountActor,
+    BetaAPIKeyUserActor,
+    BetaAPIKeyWorkspaceScope,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/api_keys/{api_key_id}?beta=true">client.beta.organization.api_keys.<a href="./src/anthropic/resources/beta/organization/api_keys.py">retrieve</a>(api_key_id) -> <a href="./src/anthropic/types/beta/organization/beta_api_key.py">BetaAPIKey</a></code>
+- <code title="post /v1/organizations/api_keys/{api_key_id}?beta=true">client.beta.organization.api_keys.<a href="./src/anthropic/resources/beta/organization/api_keys.py">update</a>(api_key_id, \*\*<a href="src/anthropic/types/beta/organization/api_key_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_api_key.py">BetaAPIKey</a></code>
+- <code title="get /v1/organizations/api_keys?beta=true">client.beta.organization.api_keys.<a href="./src/anthropic/resources/beta/organization/api_keys.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/api_key_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_api_key.py">SyncPage[BetaAPIKey]</a></code>
+
+### ExternalKeys
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaAWSExternalKeyConfig,
+    BetaAzureExternalKeyConfig,
+    BetaAzureExternalKeyConfigParam,
+    BetaExternalKey,
+    BetaExternalKeyAttachedAttachment,
+    BetaExternalKeyUnattachedAttachment,
+    BetaGCPExternalKeyConfig,
+    ExternalKeyDeleteResponse,
+    ExternalKeyValidateResponse,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/external_keys?beta=true">client.beta.organization.external_keys.<a href="./src/anthropic/resources/beta/organization/external_keys.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/external_key_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_external_key.py">BetaExternalKey</a></code>
+- <code title="get /v1/organizations/external_keys/{external_key_id}?beta=true">client.beta.organization.external_keys.<a href="./src/anthropic/resources/beta/organization/external_keys.py">retrieve</a>(external_key_id) -> <a href="./src/anthropic/types/beta/organization/beta_external_key.py">BetaExternalKey</a></code>
+- <code title="post /v1/organizations/external_keys/{external_key_id}?beta=true">client.beta.organization.external_keys.<a href="./src/anthropic/resources/beta/organization/external_keys.py">update</a>(external_key_id, \*\*<a href="src/anthropic/types/beta/organization/external_key_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_external_key.py">BetaExternalKey</a></code>
+- <code title="get /v1/organizations/external_keys?beta=true">client.beta.organization.external_keys.<a href="./src/anthropic/resources/beta/organization/external_keys.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/external_key_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_external_key.py">SyncPageCursor[BetaExternalKey]</a></code>
+- <code title="delete /v1/organizations/external_keys/{external_key_id}?beta=true">client.beta.organization.external_keys.<a href="./src/anthropic/resources/beta/organization/external_keys.py">delete</a>(external_key_id) -> <a href="./src/anthropic/types/beta/organization/external_key_delete_response.py">ExternalKeyDeleteResponse</a></code>
+- <code title="post /v1/organizations/external_keys/{external_key_id}/validate?beta=true">client.beta.organization.external_keys.<a href="./src/anthropic/resources/beta/organization/external_keys.py">validate</a>(external_key_id) -> <a href="./src/anthropic/types/beta/organization/external_key_validate_response.py">ExternalKeyValidateResponse</a></code>
+
+### Federation
+
+#### Issuers
+
+Types:
+
+```python
+from anthropic.types.beta.organization.federation import (
+    BetaFederationIssuer,
+    BetaFederationIssuerPollStatus,
+    BetaJWKSDiscovery,
+    BetaJWKSExplicitURL,
+    BetaJWKSInline,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/federation_issuers?beta=true">client.beta.organization.federation.issuers.<a href="./src/anthropic/resources/beta/organization/federation/issuers.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/federation/issuer_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_issuer.py">BetaFederationIssuer</a></code>
+- <code title="get /v1/organizations/federation_issuers/{federation_issuer_id}?beta=true">client.beta.organization.federation.issuers.<a href="./src/anthropic/resources/beta/organization/federation/issuers.py">retrieve</a>(federation_issuer_id) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_issuer.py">BetaFederationIssuer</a></code>
+- <code title="post /v1/organizations/federation_issuers/{federation_issuer_id}?beta=true">client.beta.organization.federation.issuers.<a href="./src/anthropic/resources/beta/organization/federation/issuers.py">update</a>(federation_issuer_id, \*\*<a href="src/anthropic/types/beta/organization/federation/issuer_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_issuer.py">BetaFederationIssuer</a></code>
+- <code title="get /v1/organizations/federation_issuers?beta=true">client.beta.organization.federation.issuers.<a href="./src/anthropic/resources/beta/organization/federation/issuers.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/federation/issuer_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_issuer.py">SyncPageCursor[BetaFederationIssuer]</a></code>
+- <code title="post /v1/organizations/federation_issuers/{federation_issuer_id}/archive?beta=true">client.beta.organization.federation.issuers.<a href="./src/anthropic/resources/beta/organization/federation/issuers.py">archive</a>(federation_issuer_id) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_issuer.py">BetaFederationIssuer</a></code>
+
+#### Rules
+
+Types:
+
+```python
+from anthropic.types.beta.organization.federation import (
+    BetaFederationRule,
+    BetaFederationRuleMatch,
+    BetaFederationRuleWorkspace,
+    BetaServiceAccountTarget,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/federation_rules?beta=true">client.beta.organization.federation.rules.<a href="./src/anthropic/resources/beta/organization/federation/rules/rules.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/federation/rule_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_rule.py">BetaFederationRule</a></code>
+- <code title="get /v1/organizations/federation_rules/{federation_rule_id}?beta=true">client.beta.organization.federation.rules.<a href="./src/anthropic/resources/beta/organization/federation/rules/rules.py">retrieve</a>(federation_rule_id) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_rule.py">BetaFederationRule</a></code>
+- <code title="post /v1/organizations/federation_rules/{federation_rule_id}?beta=true">client.beta.organization.federation.rules.<a href="./src/anthropic/resources/beta/organization/federation/rules/rules.py">update</a>(federation_rule_id, \*\*<a href="src/anthropic/types/beta/organization/federation/rule_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_rule.py">BetaFederationRule</a></code>
+- <code title="get /v1/organizations/federation_rules?beta=true">client.beta.organization.federation.rules.<a href="./src/anthropic/resources/beta/organization/federation/rules/rules.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/federation/rule_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_rule.py">SyncPageCursor[BetaFederationRule]</a></code>
+- <code title="post /v1/organizations/federation_rules/{federation_rule_id}/archive?beta=true">client.beta.organization.federation.rules.<a href="./src/anthropic/resources/beta/organization/federation/rules/rules.py">archive</a>(federation_rule_id) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_rule.py">BetaFederationRule</a></code>
+
+##### Workspaces
+
+Types:
+
+```python
+from anthropic.types.beta.organization.federation.rules import WorkspaceRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/federation_rules/{federation_rule_id}/workspaces?beta=true">client.beta.organization.federation.rules.workspaces.<a href="./src/anthropic/resources/beta/organization/federation/rules/workspaces.py">list</a>(federation_rule_id, \*\*<a href="src/anthropic/types/beta/organization/federation/rules/workspace_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_rule_workspace.py">SyncPageCursor[BetaFederationRuleWorkspace]</a></code>
+- <code title="post /v1/organizations/federation_rules/{federation_rule_id}/workspaces?beta=true">client.beta.organization.federation.rules.workspaces.<a href="./src/anthropic/resources/beta/organization/federation/rules/workspaces.py">add</a>(federation_rule_id, \*\*<a href="src/anthropic/types/beta/organization/federation/rules/workspace_add_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/federation/beta_federation_rule_workspace.py">BetaFederationRuleWorkspace</a></code>
+- <code title="delete /v1/organizations/federation_rules/{federation_rule_id}/workspaces/{workspace_id}?beta=true">client.beta.organization.federation.rules.workspaces.<a href="./src/anthropic/resources/beta/organization/federation/rules/workspaces.py">remove</a>(workspace_id, \*, federation_rule_id) -> <a href="./src/anthropic/types/beta/organization/federation/rules/workspace_remove_response.py">WorkspaceRemoveResponse</a></code>
+
+### Invites
+
+Types:
+
+```python
+from anthropic.types.beta.organization import BetaOrganizationInvite, InviteDeleteResponse
+```
+
+Methods:
+
+- <code title="post /v1/organizations/invites?beta=true">client.beta.organization.invites.<a href="./src/anthropic/resources/beta/organization/invites.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/invite_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_invite.py">BetaOrganizationInvite</a></code>
+- <code title="get /v1/organizations/invites/{invite_id}?beta=true">client.beta.organization.invites.<a href="./src/anthropic/resources/beta/organization/invites.py">retrieve</a>(invite_id) -> <a href="./src/anthropic/types/beta/organization/beta_organization_invite.py">BetaOrganizationInvite</a></code>
+- <code title="get /v1/organizations/invites?beta=true">client.beta.organization.invites.<a href="./src/anthropic/resources/beta/organization/invites.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/invite_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_invite.py">SyncPage[BetaOrganizationInvite]</a></code>
+- <code title="delete /v1/organizations/invites/{invite_id}?beta=true">client.beta.organization.invites.<a href="./src/anthropic/resources/beta/organization/invites.py">delete</a>(invite_id) -> <a href="./src/anthropic/types/beta/organization/invite_delete_response.py">InviteDeleteResponse</a></code>
+
+### ServiceAccounts
+
+Types:
+
+```python
+from anthropic.types.beta.organization import BetaServiceAccount, BetaServiceAccountWorkspaceMember
+```
+
+Methods:
+
+- <code title="post /v1/organizations/service_accounts?beta=true">client.beta.organization.service_accounts.<a href="./src/anthropic/resources/beta/organization/service_accounts/service_accounts.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/service_account_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_service_account.py">BetaServiceAccount</a></code>
+- <code title="get /v1/organizations/service_accounts/{service_account_id}?beta=true">client.beta.organization.service_accounts.<a href="./src/anthropic/resources/beta/organization/service_accounts/service_accounts.py">retrieve</a>(service_account_id) -> <a href="./src/anthropic/types/beta/organization/beta_service_account.py">BetaServiceAccount</a></code>
+- <code title="post /v1/organizations/service_accounts/{service_account_id}?beta=true">client.beta.organization.service_accounts.<a href="./src/anthropic/resources/beta/organization/service_accounts/service_accounts.py">update</a>(service_account_id, \*\*<a href="src/anthropic/types/beta/organization/service_account_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_service_account.py">BetaServiceAccount</a></code>
+- <code title="get /v1/organizations/service_accounts?beta=true">client.beta.organization.service_accounts.<a href="./src/anthropic/resources/beta/organization/service_accounts/service_accounts.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/service_account_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_service_account.py">SyncPageCursor[BetaServiceAccount]</a></code>
+- <code title="post /v1/organizations/service_accounts/{service_account_id}/archive?beta=true">client.beta.organization.service_accounts.<a href="./src/anthropic/resources/beta/organization/service_accounts/service_accounts.py">archive</a>(service_account_id) -> <a href="./src/anthropic/types/beta/organization/beta_service_account.py">BetaServiceAccount</a></code>
+
+#### Workspaces
+
+Types:
+
+```python
+from anthropic.types.beta.organization.service_accounts import WorkspaceRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/service_accounts/{service_account_id}/workspaces?beta=true">client.beta.organization.service_accounts.workspaces.<a href="./src/anthropic/resources/beta/organization/service_accounts/workspaces.py">list</a>(service_account_id, \*\*<a href="src/anthropic/types/beta/organization/service_accounts/workspace_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_service_account_workspace_member.py">SyncPageCursor[BetaServiceAccountWorkspaceMember]</a></code>
+- <code title="post /v1/organizations/service_accounts/{service_account_id}/workspaces?beta=true">client.beta.organization.service_accounts.workspaces.<a href="./src/anthropic/resources/beta/organization/service_accounts/workspaces.py">add</a>(service_account_id, \*\*<a href="src/anthropic/types/beta/organization/service_accounts/workspace_add_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_service_account_workspace_member.py">BetaServiceAccountWorkspaceMember</a></code>
+- <code title="delete /v1/organizations/service_accounts/{service_account_id}/workspaces/{workspace_id}?beta=true">client.beta.organization.service_accounts.workspaces.<a href="./src/anthropic/resources/beta/organization/service_accounts/workspaces.py">remove</a>(workspace_id, \*, service_account_id) -> <a href="./src/anthropic/types/beta/organization/service_accounts/workspace_remove_response.py">WorkspaceRemoveResponse</a></code>
+
+### Users
+
+Types:
+
+```python
+from anthropic.types.beta.organization import BetaOrganizationUser, UserRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/users/{user_id}?beta=true">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">retrieve</a>(user_id) -> <a href="./src/anthropic/types/beta/organization/beta_organization_user.py">BetaOrganizationUser</a></code>
+- <code title="post /v1/organizations/users/{user_id}?beta=true">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">update</a>(user_id, \*\*<a href="src/anthropic/types/beta/organization/user_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_user.py">BetaOrganizationUser</a></code>
+- <code title="get /v1/organizations/users?beta=true">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/user_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_user.py">SyncPage[BetaOrganizationUser]</a></code>
+- <code title="delete /v1/organizations/users/{user_id}?beta=true">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">remove</a>(user_id) -> <a href="./src/anthropic/types/beta/organization/user_remove_response.py">UserRemoveResponse</a></code>
+
+### Workspaces
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaAllowedInferenceGeo,
+    BetaDataResidency,
+    BetaDataResidencyCreateConfig,
+    BetaDataResidencyUpdateConfig,
+    BetaNoBillingWorkspaceRole,
+    BetaWorkspace,
+    BetaWorkspaceMember,
+    BetaWorkspaceRole,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/workspaces?beta=true">client.beta.organization.workspaces.<a href="./src/anthropic/resources/beta/organization/workspaces/workspaces.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/workspace_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_workspace.py">BetaWorkspace</a></code>
+- <code title="get /v1/organizations/workspaces/{workspace_id}?beta=true">client.beta.organization.workspaces.<a href="./src/anthropic/resources/beta/organization/workspaces/workspaces.py">retrieve</a>(workspace_id) -> <a href="./src/anthropic/types/beta/organization/beta_workspace.py">BetaWorkspace</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}?beta=true">client.beta.organization.workspaces.<a href="./src/anthropic/resources/beta/organization/workspaces/workspaces.py">update</a>(workspace_id, \*\*<a href="src/anthropic/types/beta/organization/workspace_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_workspace.py">BetaWorkspace</a></code>
+- <code title="get /v1/organizations/workspaces?beta=true">client.beta.organization.workspaces.<a href="./src/anthropic/resources/beta/organization/workspaces/workspaces.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/workspace_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_workspace.py">SyncPage[BetaWorkspace]</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}/archive?beta=true">client.beta.organization.workspaces.<a href="./src/anthropic/resources/beta/organization/workspaces/workspaces.py">archive</a>(workspace_id) -> <a href="./src/anthropic/types/beta/organization/beta_workspace.py">BetaWorkspace</a></code>
+
+#### RateLimits
+
+Types:
+
+```python
+from anthropic.types.beta.organization.workspaces import (
+    BetaWorkspaceRateLimit,
+    BetaWorkspaceRateLimitValue,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/workspaces/{workspace_id}/rate_limits?beta=true">client.beta.organization.workspaces.rate_limits.<a href="./src/anthropic/resources/beta/organization/workspaces/rate_limits.py">list</a>(workspace_id, \*\*<a href="src/anthropic/types/beta/organization/workspaces/rate_limit_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/workspaces/beta_workspace_rate_limit.py">SyncPageCursor[BetaWorkspaceRateLimit]</a></code>
+
+#### Members
+
+Types:
+
+```python
+from anthropic.types.beta.organization.workspaces import MemberRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/workspaces/{workspace_id}/members/{user_id}?beta=true">client.beta.organization.workspaces.members.<a href="./src/anthropic/resources/beta/organization/workspaces/members.py">retrieve</a>(user_id, \*, workspace_id) -> <a href="./src/anthropic/types/beta/organization/beta_workspace_member.py">BetaWorkspaceMember</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}/members/{user_id}?beta=true">client.beta.organization.workspaces.members.<a href="./src/anthropic/resources/beta/organization/workspaces/members.py">update</a>(user_id, \*, workspace_id, \*\*<a href="src/anthropic/types/beta/organization/workspaces/member_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_workspace_member.py">BetaWorkspaceMember</a></code>
+- <code title="get /v1/organizations/workspaces/{workspace_id}/members?beta=true">client.beta.organization.workspaces.members.<a href="./src/anthropic/resources/beta/organization/workspaces/members.py">list</a>(workspace_id, \*\*<a href="src/anthropic/types/beta/organization/workspaces/member_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_workspace_member.py">SyncPage[BetaWorkspaceMember]</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}/members?beta=true">client.beta.organization.workspaces.members.<a href="./src/anthropic/resources/beta/organization/workspaces/members.py">add</a>(workspace_id, \*\*<a href="src/anthropic/types/beta/organization/workspaces/member_add_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_workspace_member.py">BetaWorkspaceMember</a></code>
+- <code title="delete /v1/organizations/workspaces/{workspace_id}/members/{user_id}?beta=true">client.beta.organization.workspaces.members.<a href="./src/anthropic/resources/beta/organization/workspaces/members.py">remove</a>(user_id, \*, workspace_id) -> <a href="./src/anthropic/types/beta/organization/workspaces/member_remove_response.py">MemberRemoveResponse</a></code>
+
+#### ServiceAccounts
+
+Types:
+
+```python
+from anthropic.types.beta.organization.workspaces import ServiceAccountRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}?beta=true">client.beta.organization.workspaces.service_accounts.<a href="./src/anthropic/resources/beta/organization/workspaces/service_accounts.py">retrieve</a>(service_account_id, \*, workspace_id) -> <a href="./src/anthropic/types/beta/organization/beta_service_account_workspace_member.py">BetaServiceAccountWorkspaceMember</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}?beta=true">client.beta.organization.workspaces.service_accounts.<a href="./src/anthropic/resources/beta/organization/workspaces/service_accounts.py">update</a>(service_account_id, \*, workspace_id, \*\*<a href="src/anthropic/types/beta/organization/workspaces/service_account_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_service_account_workspace_member.py">BetaServiceAccountWorkspaceMember</a></code>
+- <code title="get /v1/organizations/workspaces/{workspace_id}/service_accounts?beta=true">client.beta.organization.workspaces.service_accounts.<a href="./src/anthropic/resources/beta/organization/workspaces/service_accounts.py">list</a>(workspace_id, \*\*<a href="src/anthropic/types/beta/organization/workspaces/service_account_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_service_account_workspace_member.py">SyncPageCursor[BetaServiceAccountWorkspaceMember]</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}/service_accounts?beta=true">client.beta.organization.workspaces.service_accounts.<a href="./src/anthropic/resources/beta/organization/workspaces/service_accounts.py">add</a>(workspace_id, \*\*<a href="src/anthropic/types/beta/organization/workspaces/service_account_add_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_service_account_workspace_member.py">BetaServiceAccountWorkspaceMember</a></code>
+- <code title="delete /v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}?beta=true">client.beta.organization.workspaces.service_accounts.<a href="./src/anthropic/resources/beta/organization/workspaces/service_accounts.py">remove</a>(service_account_id, \*, workspace_id) -> <a href="./src/anthropic/types/beta/organization/workspaces/service_account_remove_response.py">ServiceAccountRemoveResponse</a></code>
+
+### RateLimits
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaOrganizationRateLimit,
+    BetaOrganizationRateLimitValue,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/rate_limits?beta=true">client.beta.organization.rate_limits.<a href="./src/anthropic/resources/beta/organization/rate_limits.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/rate_limit_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_rate_limit.py">SyncPageCursor[BetaOrganizationRateLimit]</a></code>
+
+### ComplianceSettings
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaComplianceSettings,
+    BetaComplianceSettingsState,
+    BetaComplianceSettingsStateDisabled,
+    BetaComplianceSettingsStateDisabledParam,
+    BetaComplianceSettingsStateEnabled,
+    BetaComplianceSettingsStateEnabledParam,
+    BetaComplianceSettingsStateParam,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/compliance_settings?beta=true">client.beta.organization.compliance_settings.<a href="./src/anthropic/resources/beta/organization/compliance_settings.py">retrieve</a>() -> <a href="./src/anthropic/types/beta/organization/beta_compliance_settings.py">BetaComplianceSettings</a></code>
+- <code title="post /v1/organizations/compliance_settings?beta=true">client.beta.organization.compliance_settings.<a href="./src/anthropic/resources/beta/organization/compliance_settings.py">update</a>(\*\*<a href="src/anthropic/types/beta/organization/compliance_setting_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_compliance_settings.py">BetaComplianceSettings</a></code>

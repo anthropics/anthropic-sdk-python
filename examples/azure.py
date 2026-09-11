@@ -16,7 +16,7 @@ cl = AnthropicFoundry(
 )
 
 response = cl.messages.create(
-    model="claude-haiku-4-5",
+    model="claude-sonnet-5",
     messages=[
         {"role": "user", "content": "Hello!"},
     ],

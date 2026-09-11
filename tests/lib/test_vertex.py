@@ -6,7 +6,7 @@ import json
 from typing import Any, Dict, List, cast
 from typing_extensions import Protocol
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -19,14 +19,14 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 
 class MockRequestCall(Protocol):
-    request: httpx.Request
+    request: httpx2.Request
 
 
 TOOL_RUNNER_URL = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-haiku-4-5@20251001:rawPredict"
 
 
-def _vertex_message(content: List[Dict[str, Any]], stop_reason: str) -> httpx.Response:
-    return httpx.Response(
+def _vertex_message(content: List[Dict[str, Any]], stop_reason: str) -> httpx2.Response:
+    return httpx2.Response(
         200,
         json={
             "id": "msg_01",
@@ -41,7 +41,7 @@ def _vertex_message(content: List[Dict[str, Any]], stop_reason: str) -> httpx.Re
     )
 
 
-def _tool_runner_responses() -> List[httpx.Response]:
+def _tool_runner_responses() -> List[httpx2.Response]:
     return [
         _vertex_message(
             [{"type": "tool_use", "id": "toolu_01", "name": "get_weather", "input": {"city": "Paris"}}],
@@ -77,8 +77,8 @@ class TestAnthropicVertex:
         request_url = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
         respx_mock.post(request_url).mock(
             side_effect=[
-                httpx.Response(500, json={"error": "server error"}, headers={"retry-after-ms": "10"}),
-                httpx.Response(200, json={"foo": "bar"}),
+                httpx2.Response(500, json={"error": "server error"}, headers={"retry-after-ms": "10"}),
+                httpx2.Response(200, json={"foo": "bar"}),
             ]
         )
 
@@ -128,10 +128,10 @@ class TestAnthropicVertex:
         assert copied.max_retries == 7
 
         # timeout
-        assert isinstance(self.client.timeout, httpx.Timeout)
+        assert isinstance(self.client.timeout, httpx2.Timeout)
         copied = self.client.copy(timeout=None)
         assert copied.timeout is None
-        assert isinstance(self.client.timeout, httpx.Timeout)
+        assert isinstance(self.client.timeout, httpx2.Timeout)
 
     def test_copy_default_headers(self) -> None:
         client = AnthropicVertex(
@@ -271,8 +271,8 @@ class TestAsyncAnthropicVertex:
         request_url = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
         respx_mock.post(request_url).mock(
             side_effect=[
-                httpx.Response(500, json={"error": "server error"}, headers={"retry-after-ms": "10"}),
-                httpx.Response(200, json={"foo": "bar"}),
+                httpx2.Response(500, json={"error": "server error"}, headers={"retry-after-ms": "10"}),
+                httpx2.Response(200, json={"foo": "bar"}),
             ]
         )
 
@@ -322,10 +322,10 @@ class TestAsyncAnthropicVertex:
         assert copied.max_retries == 7
 
         # timeout
-        assert isinstance(self.client.timeout, httpx.Timeout)
+        assert isinstance(self.client.timeout, httpx2.Timeout)
         copied = self.client.copy(timeout=None)
         assert copied.timeout is None
-        assert isinstance(self.client.timeout, httpx.Timeout)
+        assert isinstance(self.client.timeout, httpx2.Timeout)
 
     def test_copy_default_headers(self) -> None:
         client = AsyncAnthropicVertex(

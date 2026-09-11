@@ -1,11 +1,8 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Union, Optional
-from typing_extensions import Literal, Annotated, TypeAlias, TypedDict
+from typing_extensions import Literal, TypeAlias, TypedDict
 
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_cloud_config_params import BetaCloudConfigParams
 from .beta_self_hosted_config_params import BetaSelfHostedConfigParams
@@ -40,8 +37,10 @@ class EnvironmentUpdateParams(TypedDict, total=False):
     restricts visibility to the owning account only.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
+
+    workspace_id: str
 
 
 Config: TypeAlias = Union[BetaCloudConfigParams, BetaSelfHostedConfigParams]

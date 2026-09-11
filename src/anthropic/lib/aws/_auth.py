@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import httpx2 as httpx
+import httpx2
 
 from ..._utils import lru_cache
 
@@ -34,13 +34,13 @@ def get_auth_headers(
     *,
     method: str,
     url: str,
-    headers: httpx.Headers,
+    headers: httpx2.Headers,
     aws_access_key: str | None,
     aws_secret_key: str | None,
     aws_session_token: str | None,
     region: str | None,
     profile: str | None,
-    data: str | None,
+    data: str | bytes | None,
     service_name: str,
 ) -> dict[str, str]:
     from botocore.auth import SigV4Auth

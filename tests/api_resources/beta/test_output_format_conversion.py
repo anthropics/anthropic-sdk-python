@@ -3,7 +3,7 @@
 import json
 import warnings
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 from pydantic import BaseModel
@@ -23,7 +23,7 @@ class TestOutputFormatConversion:
             age: int
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -37,14 +37,12 @@ class TestOutputFormatConversion:
             )
         )
 
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            client.beta.messages.parse(
-                max_tokens=1024,
-                messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
-                output_format=User,
-            )
+        client.beta.messages.parse(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Test"}],
+            model="claude-sonnet-4-5",
+            output_format=User,
+        )
 
         request = respx_mock.calls.last.request
         body = json.loads(request.content)
@@ -82,7 +80,7 @@ class TestOutputFormatNoDeprecationWarning:
             value: str
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -109,7 +107,7 @@ class TestOutputFormatNoDeprecationWarning:
     def test_stream_does_not_warn_for_type(self, client: Anthropic, respx_mock: MockRouter) -> None:
         """`.stream(output_format=Model)` is silent."""
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -143,7 +141,7 @@ class TestOutputFormatNoDeprecationWarning:
     def test_no_warning_when_output_format_not_provided(self, client: Anthropic, respx_mock: MockRouter) -> None:
         """Verify no deprecation warning when output_format is not used."""
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -169,7 +167,7 @@ class TestOutputFormatNoDeprecationWarning:
     def test_no_warning_when_using_output_config(self, client: Anthropic, respx_mock: MockRouter) -> None:
         """Verify no deprecation warning when using output_config.format directly."""
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -224,7 +222,7 @@ class TestStructuredOutputsBetaHeader:
             value: int
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -238,14 +236,12 @@ class TestStructuredOutputsBetaHeader:
             )
         )
 
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            client.beta.messages.parse(
-                max_tokens=1024,
-                messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
-                output_format=DataModel,
-            )
+        client.beta.messages.parse(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Test"}],
+            model="claude-sonnet-4-5",
+            output_format=DataModel,
+        )
 
         request = respx_mock.calls.last.request
         assert "anthropic-beta" in request.headers
@@ -259,7 +255,7 @@ class TestStructuredOutputsBetaHeader:
             value: int
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -273,15 +269,13 @@ class TestStructuredOutputsBetaHeader:
             )
         )
 
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            client.beta.messages.parse(
-                max_tokens=1024,
-                messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
-                output_format=DataModel,
-                betas=["some-other-beta-feature"],
-            )
+        client.beta.messages.parse(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Test"}],
+            model="claude-sonnet-4-5",
+            output_format=DataModel,
+            betas=["some-other-beta-feature"],
+        )
 
         request = respx_mock.calls.last.request
         beta_header = request.headers["anthropic-beta"]
@@ -296,7 +290,7 @@ class TestStructuredOutputsBetaHeader:
             value: int
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -310,15 +304,13 @@ class TestStructuredOutputsBetaHeader:
             )
         )
 
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            client.beta.messages.parse(
-                max_tokens=1024,
-                messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
-                output_format=DataModel,
-                betas=["structured-outputs-2025-12-15"],
-            )
+        client.beta.messages.parse(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Test"}],
+            model="claude-sonnet-4-5",
+            output_format=DataModel,
+            betas=["structured-outputs-2025-12-15"],
+        )
 
         request = respx_mock.calls.last.request
         beta_header = request.headers["anthropic-beta"]
@@ -337,7 +329,7 @@ class TestAsyncOutputFormatConversion:
             name: str
 
         respx_mock.post("/v1/messages?beta=true").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_123",
@@ -351,14 +343,12 @@ class TestAsyncOutputFormatConversion:
             )
         )
 
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("always")
-            await async_client.beta.messages.parse(
-                max_tokens=1024,
-                messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
-                output_format=User,
-            )
+        await async_client.beta.messages.parse(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Test"}],
+            model="claude-sonnet-4-5",
+            output_format=User,
+        )
 
         request = respx_mock.calls.last.request
         body = json.loads(request.content)

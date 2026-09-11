@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -32,6 +30,7 @@ class TestCertificates:
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -69,7 +68,7 @@ class TestCertificates:
                 ca_certificate_pem="ca_certificate_pem",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_retrieve(self, client: Anthropic) -> None:
         certificate = client.beta.tunnels.certificates.retrieve(
@@ -78,17 +77,18 @@ class TestCertificates:
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         certificate = client.beta.tunnels.certificates.retrieve(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.tunnels.certificates.with_raw_response.retrieve(
@@ -101,7 +101,7 @@ class TestCertificates:
         certificate = response.parse()
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.tunnels.certificates.with_streaming_response.retrieve(
@@ -116,7 +116,7 @@ class TestCertificates:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_path_params_retrieve(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `tunnel_id` but received ''"):
@@ -131,7 +131,7 @@ class TestCertificates:
                 tunnel_id="tunnel_id",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         certificate = client.beta.tunnels.certificates.list(
@@ -139,7 +139,7 @@ class TestCertificates:
         )
         assert_matches_type(SyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         certificate = client.beta.tunnels.certificates.list(
@@ -148,10 +148,11 @@ class TestCertificates:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.tunnels.certificates.with_raw_response.list(
@@ -163,7 +164,7 @@ class TestCertificates:
         certificate = response.parse()
         assert_matches_type(SyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.tunnels.certificates.with_streaming_response.list(
@@ -177,7 +178,7 @@ class TestCertificates:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_path_params_list(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `tunnel_id` but received ''"):
@@ -199,6 +200,7 @@ class TestCertificates:
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -262,6 +264,7 @@ class TestAsyncCertificates:
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -299,7 +302,7 @@ class TestAsyncCertificates:
                 ca_certificate_pem="ca_certificate_pem",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         certificate = await async_client.beta.tunnels.certificates.retrieve(
@@ -308,17 +311,18 @@ class TestAsyncCertificates:
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         certificate = await async_client.beta.tunnels.certificates.retrieve(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.tunnels.certificates.with_raw_response.retrieve(
@@ -331,7 +335,7 @@ class TestAsyncCertificates:
         certificate = await response.parse()
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.tunnels.certificates.with_streaming_response.retrieve(
@@ -346,7 +350,7 @@ class TestAsyncCertificates:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_path_params_retrieve(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `tunnel_id` but received ''"):
@@ -361,7 +365,7 @@ class TestAsyncCertificates:
                 tunnel_id="tunnel_id",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         certificate = await async_client.beta.tunnels.certificates.list(
@@ -369,7 +373,7 @@ class TestAsyncCertificates:
         )
         assert_matches_type(AsyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         certificate = await async_client.beta.tunnels.certificates.list(
@@ -378,10 +382,11 @@ class TestAsyncCertificates:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.tunnels.certificates.with_raw_response.list(
@@ -393,7 +398,7 @@ class TestAsyncCertificates:
         certificate = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.tunnels.certificates.with_streaming_response.list(
@@ -407,7 +412,7 @@ class TestAsyncCertificates:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params (SDK-4349)")
+    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_path_params_list(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `tunnel_id` but received ''"):
@@ -429,6 +434,7 @@ class TestAsyncCertificates:
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 

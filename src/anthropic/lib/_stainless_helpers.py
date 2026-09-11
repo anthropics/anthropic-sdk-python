@@ -8,7 +8,7 @@ we only carry the constants and the per-object tagging machinery.
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any, Dict, Mapping, TypeVar, cast
 from typing_extensions import Literal
 
 __all__ = [
@@ -20,6 +20,7 @@ __all__ = [
     "helper_header",
     "tag_helper",
     "get_helper_tag",
+    "carry_helper_tag",
     "collect_helpers",
     "stainless_helper_header",
     "stainless_helper_header_from_file",
@@ -94,6 +95,23 @@ def get_helper_tag(obj: object) -> str | None:
     return getattr(obj, _HELPER_ATTR, None)  # type: ignore[return-value]
 
 
+_MappingT = TypeVar("_MappingT", bound="Mapping[str, object]")
+
+
+class _TaggedDict(Dict[str, Any]):
+    """A plain ``dict`` rejects ``object.__setattr__``; this subclass can carry the tag."""
+
+
+def carry_helper_tag(source: object, params: _MappingT) -> _MappingT:
+    """Return ``params`` carrying ``source``'s helper tag, so the tag survives serializing a tagged object."""
+    tag = get_helper_tag(source)
+    if tag is None:
+        return params
+    tagged = _TaggedDict(params)
+    object.__setattr__(tagged, _HELPER_ATTR, tag)
+    return cast(_MappingT, tagged)
+
+
 def collect_helpers(
     tools: Any = None,
     messages: Any = None,
@@ -113,7 +131,6 @@ def collect_helpers(
         for message in messages:
             _add(get_helper_tag(message))
 
-            # Check content blocks within messages
             if isinstance(message, dict):
                 blocks: Any = cast(dict[str, Any], message).get("content")
             else:

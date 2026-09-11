@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import copy
 import json
 import time
 import logging
@@ -8,7 +9,7 @@ import pathlib
 from typing import Any, Dict, List, Callable, Optional, cast
 from typing_extensions import Protocol
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -23,8 +24,10 @@ from anthropic import (
     AsyncAnthropic,
     InMemoryConfig,
     CredentialsFile,
+    CredentialsError,
     IdentityTokenFile,
     WorkloadIdentityError,
+    IdentityTokenFileError,
     WorkloadIdentityCredentials,
     default_credentials,
     exchange_federation_assertion,
@@ -61,7 +64,7 @@ _ALL_ENV = [
 
 
 class MockRequestCall(Protocol):
-    request: httpx.Request
+    request: httpx2.Request
 
 
 @pytest.fixture
@@ -222,8 +225,15 @@ class TestIdentityTokenFile:
             IdentityTokenFile()
 
     def test_raises_when_file_missing(self, tmp_path: pathlib.Path) -> None:
-        with pytest.raises(AnthropicError, match="not found"):
-            IdentityTokenFile(tmp_path / "nope")()
+        path = tmp_path / "nope"
+        with pytest.raises(IdentityTokenFileError, match="not found") as exc_info:
+            IdentityTokenFile(path)()
+        # Subclasses AnthropicError so existing handlers keep matching.
+        assert isinstance(exc_info.value, CredentialsError)
+        assert isinstance(exc_info.value, AnthropicError)
+        assert exc_info.value.path == path
+        assert isinstance(exc_info.value.__cause__, OSError)
+        assert copy.copy(exc_info.value).path == path
 
 
 class TestCredentialsFile:
@@ -265,8 +275,9 @@ class TestCredentialsFile:
 
     def test_external_missing_credentials_file(self, tmp_path: pathlib.Path) -> None:
         _write_profile(tmp_path, "default", {"type": "external"})  # no credentials file
-        with pytest.raises(AnthropicError, match="Credentials file not found"):
+        with pytest.raises(CredentialsError, match="Credentials file not found") as exc_info:
             CredentialsFile()()
+        assert isinstance(exc_info.value, AnthropicError)
 
     def test_credentials_file_wrong_type_raises(self, tmp_path: pathlib.Path) -> None:
         _write_profile(
@@ -334,7 +345,7 @@ class TestCredentialsFile:
         )
 
         token_route = respx_mock.post(TOKEN_ENDPOINT).mock(
-            return_value=httpx.Response(200, json={"access_token": "exch_tok", "expires_in": 3600})
+            return_value=httpx2.Response(200, json={"access_token": "exch_tok", "expires_in": 3600})
         )
 
         provider = CredentialsFile()
@@ -385,14 +396,14 @@ class TestCredentialsFile:
 
         # config omits base_url, no bind → DEFAULT_BASE_URL
         write("p0", with_base_url=None)
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         CredentialsFile("p0")()
         assert str(cast("list[MockRequestCall]", respx_mock.calls)[-1].request.url) == TOKEN_URL
 
         # config omits base_url + bound → bound
         write("p1", with_base_url=None)
         respx_mock.post(f"{bound}{TOKEN_ENDPOINT}").mock(
-            return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60})
+            return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60})
         )
         creds = CredentialsFile("p1")
         creds.bind_base_url(bound)
@@ -402,7 +413,7 @@ class TestCredentialsFile:
         # config has base_url + bound → config wins
         write("p2", with_base_url="https://from-config.example")
         respx_mock.post(f"https://from-config.example{TOKEN_ENDPOINT}").mock(
-            return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60})
+            return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60})
         )
         creds = CredentialsFile("p2")
         creds.bind_base_url(bound)
@@ -496,7 +507,7 @@ class TestCredentialsFile:
             credentials={"access_token": "stale-tok", "expires_at": int(time.time()) - 1},
         )
         token_route = respx_mock.post(TOKEN_ENDPOINT).mock(
-            return_value=httpx.Response(200, json={"access_token": "fresh-tok", "expires_in": 600})
+            return_value=httpx2.Response(200, json={"access_token": "fresh-tok", "expires_in": 600})
         )
         tok = CredentialsFile()()
         assert tok.token == "fresh-tok"
@@ -524,7 +535,7 @@ class TestCredentialsFile:
             credentials={"access_token": "stale-tok", "expires_at": "not-a-number"},
         )
         token_route = respx_mock.post(TOKEN_ENDPOINT).mock(
-            return_value=httpx.Response(200, json={"access_token": "fresh-tok", "expires_in": 600})
+            return_value=httpx2.Response(200, json={"access_token": "fresh-tok", "expires_in": 600})
         )
         tok = CredentialsFile()()
         assert tok.token == "fresh-tok"
@@ -539,7 +550,7 @@ class TestCredentialsFile:
 
     @pytest.mark.respx(base_url=BASE_URL)
     def test_workload_delegate_borrows_parent_http_client(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """The workload delegate must borrow CredentialsFile's owned httpx.Client
+        """The workload delegate must borrow CredentialsFile's owned httpx2.Client
         rather than creating its own. CredentialsFile.close() then has a single
         client to release; if a refactor regresses this and the delegate creates
         its own pool, this test catches it before close() starts leaking sockets."""
@@ -556,13 +567,13 @@ class TestCredentialsFile:
             },
         )
         respx_mock.post(TOKEN_ENDPOINT).mock(
-            return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60})
+            return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60})
         )
         provider = CredentialsFile()
         provider()
         delegate = provider._workload_delegate  # pyright: ignore[reportPrivateUsage]
         assert delegate is not None
-        # The delegate must NOT own its httpx.Client — that would mean we have
+        # The delegate must NOT own its httpx2.Client — that would mean we have
         # two pools to track and close().
         assert delegate._owns_http_client is False  # pyright: ignore[reportPrivateUsage]
         # Both objects share the same client instance.
@@ -620,7 +631,7 @@ class TestCredentialsFile:
         )
 
         refresh_route = respx_mock.post(TOKEN_ENDPOINT).mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200, json={"access_token": "new-tok", "expires_in": 3600, "refresh_token": "refresh-new"}
             )
         )
@@ -676,7 +687,7 @@ class TestCredentialsFile:
             config={"type": "authorized_user", "client_id": "cid"},
             credentials={"access_token": "old", "expires_at": int(time.time()) - 1, "refresh_token": "rt"},
         )
-        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx.Response(400, json={"error": "invalid_grant"}))
+        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx2.Response(400, json={"error": "invalid_grant"}))
         with pytest.raises(WorkloadIdentityError, match="refresh failed"):
             CredentialsFile()()
 
@@ -714,7 +725,7 @@ class TestCredentialsFile:
             },
         )
         refresh_route = respx_mock.post(TOKEN_ENDPOINT).mock(
-            return_value=httpx.Response(200, json={"access_token": "new-tok", "expires_in": 3600})
+            return_value=httpx2.Response(200, json={"access_token": "new-tok", "expires_in": 3600})
         )
         CredentialsFile()()
         req = cast("list[MockRequestCall]", refresh_route.calls)[0].request
@@ -851,17 +862,16 @@ class TestCredentialsFile:
         assert len(calls) == 1
         assert calls[0][1] == 0o600
 
-    def test_credentials_file_world_readable_rejected(self, tmp_path: pathlib.Path) -> None:
+    @pytest.mark.parametrize("mode", [0o644, 0o640, 0o604, 0o660, 0o620, 0o602])
+    def test_credentials_file_group_or_other_access_rejected(self, tmp_path: pathlib.Path, mode: int) -> None:
         if os.name != "posix":
             pytest.skip("POSIX mode bits only")
         _write_profile(tmp_path, "default", {"type": "external"}, {"access_token": "x"})
-        (tmp_path / "credentials" / "default.json").chmod(0o644)
-        with pytest.raises(AnthropicError, match="world-readable"):
+        (tmp_path / "credentials" / "default.json").chmod(mode)
+        with pytest.raises(AnthropicError, match=rf"accessible by group or others \(mode {mode:#o}\)"):
             CredentialsFile()()
 
-    def test_credentials_file_group_readable_warns(
-        self, tmp_path: pathlib.Path, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_credentials_file_owner_only_accepted(self, tmp_path: pathlib.Path) -> None:
         if os.name != "posix":
             pytest.skip("POSIX mode bits only")
         _write_profile(
@@ -870,10 +880,8 @@ class TestCredentialsFile:
             {"type": "external"},
             {"access_token": "x", "expires_at": int(time.time()) + 3600},
         )
-        (tmp_path / "credentials" / "default.json").chmod(0o640)
-        with caplog.at_level("WARNING", logger="anthropic.lib.credentials._providers"):
-            CredentialsFile()()
-        assert any("group-readable" in rec.message for rec in caplog.records)
+        (tmp_path / "credentials" / "default.json").chmod(0o600)
+        assert CredentialsFile()().token == "x"
 
     def test_credentials_file_symlink_rejected(self, tmp_path: pathlib.Path) -> None:
         if os.name != "posix":
@@ -968,7 +976,7 @@ class TestCredentialsFile:
             },
         )
         token_route = respx_mock.post("/v1/oauth/token").mock(
-            return_value=httpx.Response(200, json={"access_token": "tok", "expires_in": 3600})
+            return_value=httpx2.Response(200, json={"access_token": "tok", "expires_in": 3600})
         )
         CredentialsFile()()  # no base_url ctor arg → config wins
         assert str(cast("list[MockRequestCall]", token_route.calls)[0].request.url).startswith(
@@ -1000,7 +1008,7 @@ class TestWorkloadIdentityCredentials:
     @pytest.mark.respx()
     def test_exchange(self, respx_mock: MockRouter) -> None:
         respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={"access_token": "sk-ant-oat01-test", "token_type": "Bearer", "expires_in": 600},
             )
@@ -1041,7 +1049,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_service_account_included(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
             federation_rule_id="fdrl_01abc",
@@ -1055,7 +1063,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_workspace_id_included(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
             federation_rule_id="fdrl_01abc",
@@ -1068,7 +1076,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_workspace_id_default_sentinel(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
             federation_rule_id="fdrl_01abc",
@@ -1083,7 +1091,7 @@ class TestWorkloadIdentityCredentials:
     def test_scope_is_display_only(self, respx_mock: MockRouter) -> None:
         """``scope`` is stored on the provider for parity but never sent on the
         wire — the server derives effective scope from the federation rule."""
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
             federation_rule_id="fdrl_x",
@@ -1098,7 +1106,7 @@ class TestWorkloadIdentityCredentials:
     @pytest.mark.respx()
     def test_exchange_federation_assertion_helper(self, respx_mock: MockRouter) -> None:
         respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(200, json={"access_token": "sk-ant-oat01-one", "expires_in": 600})
+            return_value=httpx2.Response(200, json={"access_token": "sk-ant-oat01-one", "expires_in": 600})
         )
         token = exchange_federation_assertion(
             assertion="ext.jwt.value",
@@ -1119,7 +1127,7 @@ class TestWorkloadIdentityCredentials:
         bound = "https://bound.example"
 
         # No bind → DEFAULT_BASE_URL
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j", federation_rule_id="fdrl_x", organization_id="org"
         )()
@@ -1127,7 +1135,7 @@ class TestWorkloadIdentityCredentials:
 
         # bound → bound
         respx_mock.post(f"{bound}{TOKEN_ENDPOINT}").mock(
-            return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60})
+            return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60})
         )
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j", federation_rule_id="fdrl_x", organization_id="org"
@@ -1181,7 +1189,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_reinvokes_identity_provider(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         calls: List[int] = []
 
         def jwt_provider() -> str:
@@ -1202,7 +1210,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_403_raises(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(403, json={"error": "assertion rejected"}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(403, json={"error": "assertion rejected"}))
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
             federation_rule_id="f",
@@ -1215,7 +1223,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_503_raises(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(503, text="overloaded"))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(503, text="overloaded"))
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
             federation_rule_id="f",
@@ -1228,7 +1236,7 @@ class TestWorkloadIdentityCredentials:
     @pytest.mark.respx()
     def test_request_id_surfaced_on_error(self, respx_mock: MockRouter) -> None:
         respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(400, json={"error": "invalid_grant"}, headers={"Request-Id": "req_abc123"})
+            return_value=httpx2.Response(400, json={"error": "invalid_grant"}, headers={"Request-Id": "req_abc123"})
         )
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
@@ -1245,7 +1253,7 @@ class TestWorkloadIdentityCredentials:
         """A failed exchange with no workspace_id should surface all three hint
         parts: the federation-rule lead-in, the multi-workspace fix, and the
         Console auth-events pointer."""
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(401, json={"error": "unauthorized"}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(401, json={"error": "unauthorized"}))
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
             federation_rule_id="f",
@@ -1264,7 +1272,7 @@ class TestWorkloadIdentityCredentials:
     def test_401_with_workspace_id_set_omits_workspace_hint(self, respx_mock: MockRouter) -> None:
         """When workspace_id is already set the multi-workspace fix is noise,
         but the federation-rule lead-in and Console pointer still apply."""
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(401, json={"error": "unauthorized"}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(401, json={"error": "unauthorized"}))
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
             federation_rule_id="f",
@@ -1282,7 +1290,7 @@ class TestWorkloadIdentityCredentials:
     @pytest.mark.respx()
     def test_non_401_omits_hint(self, respx_mock: MockRouter) -> None:
         """The hint is 401-specific; a 5xx or 400 shouldn't suggest a config change."""
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(500, json={"error": "server_error"}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(500, json={"error": "server_error"}))
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
             federation_rule_id="f",
@@ -1308,7 +1316,7 @@ class TestWorkloadIdentityCredentials:
     @pytest.mark.respx()
     def test_non_bearer_token_type_rejected(self, respx_mock: MockRouter) -> None:
         respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60, "token_type": "MAC"})
+            return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60, "token_type": "MAC"})
         )
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
@@ -1321,7 +1329,7 @@ class TestWorkloadIdentityCredentials:
     @pytest.mark.respx()
     def test_bearer_token_type_case_insensitive(self, respx_mock: MockRouter) -> None:
         respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60, "token_type": "bearer"})
+            return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60, "token_type": "bearer"})
         )
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
@@ -1332,7 +1340,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_oversized_response_body_rejected(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, content=b"x" * ((1 << 20) + 1)))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, content=b"x" * ((1 << 20) + 1)))
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: "j",
             federation_rule_id="f",
@@ -1907,7 +1915,7 @@ class TestDefaultCredentials:
         clean_env.setenv("ANTHROPIC_FEDERATION_RULE_ID", "fdrl_01abc")
         clean_env.setenv("ANTHROPIC_ORGANIZATION_ID", "org-uuid")
         clean_env.setenv("ANTHROPIC_WORKSPACE_ID", "")
-        respx_mock.post(TOKEN_URL).mock(return_value=httpx.Response(200, json={"access_token": "t", "expires_in": 60}))
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         result = default_credentials()
         assert result is not None
         provider = result.provider
@@ -1984,15 +1992,15 @@ class TestDefaultCredentials:
 
 def _mock_token_endpoint(respx_mock: MockRouter) -> None:
     respx_mock.post(TOKEN_URL).mock(
-        return_value=httpx.Response(
+        return_value=httpx2.Response(
             200,
             json={"access_token": "sk-ant-oat01-test", "token_type": "Bearer", "expires_in": 600},
         )
     )
 
 
-def _message_response() -> httpx.Response:
-    return httpx.Response(
+def _message_response() -> httpx2.Response:
+    return httpx2.Response(
         200,
         json={
             "id": "msg_01",
@@ -2013,7 +2021,7 @@ def _mock_messages_endpoint(respx_mock: MockRouter) -> None:
 
 def _mock_token_exchange(respx_mock: MockRouter, base_url: str, token: str) -> None:
     respx_mock.post(f"{base_url}{TOKEN_ENDPOINT}").mock(
-        return_value=httpx.Response(200, json={"access_token": token, "token_type": "Bearer", "expires_in": 600})
+        return_value=httpx2.Response(200, json={"access_token": token, "token_type": "Bearer", "expires_in": 600})
     )
 
 
@@ -2026,7 +2034,7 @@ def _mock_deployment(respx_mock: MockRouter, base_url: str, token: str) -> None:
     respx_mock.post(f"{base_url}/v1/messages").mock(return_value=_message_response())
 
 
-def _requests_to(respx_mock: MockRouter, base_url: str) -> List[httpx.Request]:
+def _requests_to(respx_mock: MockRouter, base_url: str) -> List[httpx2.Request]:
     calls = cast("list[MockRequestCall]", respx_mock.calls)
     return [c.request for c in calls if str(c.request.url).startswith(f"{base_url}/")]
 
@@ -2092,10 +2100,10 @@ class TestAnthropicCredentials:
         doesn't have to pass the same URL twice."""
         custom_base = "https://api-staging.example"
         respx_mock.post(f"{custom_base}{TOKEN_ENDPOINT}").mock(
-            return_value=httpx.Response(200, json={"access_token": "tok-staging", "expires_in": 600})
+            return_value=httpx2.Response(200, json={"access_token": "tok-staging", "expires_in": 600})
         )
         respx_mock.post(f"{custom_base}/v1/messages").mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200,
                 json={
                     "id": "msg_01",
@@ -2317,9 +2325,16 @@ class TestAnthropicCredentials:
 
         client = Anthropic()
         _send_message(client)
+        client.messages.create(
+            max_tokens=1,
+            model="claude-opus-4-5",
+            messages=[{"role": "user", "content": "hi"}],
+            workspace_id="wrkspc_req",
+        )
 
-        req = cast("list[MockRequestCall]", respx_mock.calls)[0].request
-        assert req.headers["anthropic-workspace-id"] == "wrkspc_01abc"
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_01abc"
+        assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_req"
 
     @pytest.mark.respx()
     def test_401_invalidates_cache_and_retries_once(self, respx_mock: MockRouter) -> None:
@@ -2335,8 +2350,8 @@ class TestAnthropicCredentials:
         # 401 then 200 — the retry should succeed transparently.
         respx_mock.post(f"{BASE_URL}/v1/messages").mock(
             side_effect=[
-                httpx.Response(401, json={"error": "unauthorized"}),
-                httpx.Response(
+                httpx2.Response(401, json={"error": "unauthorized"}),
+                httpx2.Response(
                     200,
                     json={
                         "id": "msg_01",
@@ -2363,7 +2378,7 @@ class TestAnthropicCredentials:
         """Two consecutive 401s → exactly one retry, then the error surfaces
         even with max_retries > 1 remaining."""
         respx_mock.post(f"{BASE_URL}/v1/messages").mock(
-            return_value=httpx.Response(401, json={"error": "unauthorized"}),
+            return_value=httpx2.Response(401, json={"error": "unauthorized"}),
         )
         provider_calls: List[str] = []
 
@@ -2676,7 +2691,7 @@ class TestInMemoryConfig:
         jwt_path = tmp_path / "jwt"
         jwt_path.write_text("ext-jwt")
         respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(200, json={"access_token": "tok", "expires_in": 600})
+            return_value=httpx2.Response(200, json={"access_token": "tok", "expires_in": 600})
         )
         provider = InMemoryConfig(
             {
@@ -2702,7 +2717,7 @@ class TestInMemoryConfig:
 
     def test_identity_token_provider_override(self, respx_mock: MockRouter) -> None:
         respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(200, json={"access_token": "tok", "expires_in": 600})
+            return_value=httpx2.Response(200, json={"access_token": "tok", "expires_in": 600})
         )
         provider = InMemoryConfig(
             {
@@ -2727,7 +2742,7 @@ class TestInMemoryConfig:
         """Without ``authentication.credentials_path``, every call exchanges
         fresh — nothing is written to disk."""
         token_route = respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(200, json={"access_token": "tok", "expires_in": 600})
+            return_value=httpx2.Response(200, json={"access_token": "tok", "expires_in": 600})
         )
         provider = InMemoryConfig(
             {
@@ -2749,7 +2764,7 @@ class TestInMemoryConfig:
         written to that path and a second call returns it without re-exchanging."""
         creds_path = tmp_path / "cache.json"
         token_route = respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(200, json={"access_token": "cached-tok", "expires_in": 600})
+            return_value=httpx2.Response(200, json={"access_token": "cached-tok", "expires_in": 600})
         )
         provider = InMemoryConfig(
             {
@@ -2795,7 +2810,7 @@ class TestInMemoryConfig:
         )
         creds_path.chmod(0o600)
         refresh_route = respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200, json={"access_token": "new-tok", "expires_in": 3600, "refresh_token": "refresh-new"}
             )
         )
@@ -2856,6 +2871,34 @@ async def _send_message_async(client: AsyncAnthropic) -> None:
 
 @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
 class TestAsyncAnthropicCredentials:
+    @pytest.mark.respx()
+    async def test_workspace_id_header_from_config(
+        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        clean_env.setenv("ANTHROPIC_CONFIG_DIR", str(tmp_path))
+        _write_profile(
+            tmp_path,
+            "default",
+            {"type": "external", "workspace_id": "wrkspc_01abc"},
+            {"access_token": "sk-ant-oat01-file"},
+        )
+
+        _mock_messages_endpoint(respx_mock)
+
+        client = AsyncAnthropic()
+        await _send_message_async(client)
+        await client.messages.create(
+            max_tokens=1,
+            model="claude-opus-4-5",
+            messages=[{"role": "user", "content": "hi"}],
+            workspace_id="wrkspc_req",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_01abc"
+        assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_req"
+
     @pytest.mark.respx()
     async def test_async_static_token(self, respx_mock: MockRouter) -> None:
         _mock_messages_endpoint(respx_mock)
@@ -2931,7 +2974,7 @@ class TestAsyncAnthropicCredentials:
             {"access_token": "old", "expires_at": int(time.time()) - 1, "refresh_token": "rt"},
         )
         respx_mock.post(TOKEN_URL).mock(
-            return_value=httpx.Response(200, json={"access_token": "refreshed", "expires_in": 3600})
+            return_value=httpx2.Response(200, json={"access_token": "refreshed", "expires_in": 3600})
         )
         _mock_messages_endpoint(respx_mock)
         client = AsyncAnthropic(credentials=CredentialsFile())
@@ -2965,7 +3008,7 @@ class TestAsyncAnthropicCredentials:
         """Async client 401 behavior mirrors sync: invalidate the cache and
         retry the current request once with a freshly minted token."""
         respx_mock.post(f"{BASE_URL}/v1/messages").mock(
-            return_value=httpx.Response(401, json={"error": "unauthorized"}),
+            return_value=httpx2.Response(401, json={"error": "unauthorized"}),
         )
         provider_calls: List[str] = []
 
@@ -3016,7 +3059,7 @@ class TestAsyncAnthropicCredentials:
     async def test_async_max_retries_zero_honored_on_401(self, respx_mock: MockRouter) -> None:
         """max_retries=0 means a 401 surfaces immediately — no implicit retry."""
         respx_mock.post(f"{BASE_URL}/v1/messages").mock(
-            return_value=httpx.Response(401, json={"error": "unauthorized"}),
+            return_value=httpx2.Response(401, json={"error": "unauthorized"}),
         )
         client = AsyncAnthropic(credentials=StaticToken("t"), max_retries=0)
         with pytest.raises(anthropic.AuthenticationError):
@@ -3107,29 +3150,34 @@ class TestTypedCredentialErrors:
         f.chmod(0o000)
         try:
             provider = IdentityTokenFile(f)
-            with pytest.raises(AnthropicError, match="not readable|Permission"):
+            with pytest.raises(IdentityTokenFileError, match="not readable|Permission") as exc_info:
                 provider()
+            assert exc_info.value.path == f
         finally:
             f.chmod(0o600)
 
     def test_identity_token_file_directory_raises_anthropic_error(self, tmp_path: pathlib.Path) -> None:
         provider = IdentityTokenFile(tmp_path)
-        with pytest.raises(AnthropicError):
+        with pytest.raises(IdentityTokenFileError) as exc_info:
             provider()
+        assert exc_info.value.path == tmp_path
+        assert isinstance(exc_info.value.__cause__, OSError)
 
     def test_identity_token_file_binary_content_raises_anthropic_error(self, tmp_path: pathlib.Path) -> None:
         f = tmp_path / "token"
         f.write_bytes(b"\xff\xfe\xfd\x00not-utf8")
         provider = IdentityTokenFile(f)
-        with pytest.raises(AnthropicError):
+        with pytest.raises(IdentityTokenFileError) as exc_info:
             provider()
+        assert exc_info.value.path == f
 
     def test_identity_token_file_empty_raises_anthropic_error(self, tmp_path: pathlib.Path) -> None:
         f = tmp_path / "token"
         f.write_text("")
         provider = IdentityTokenFile(f)
-        with pytest.raises(AnthropicError, match="empty"):
+        with pytest.raises(IdentityTokenFileError, match="empty") as exc_info:
             provider()
+        assert exc_info.value.path == f
 
     def test_user_oauth_malformed_expires_at_raises_anthropic_error(
         self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
@@ -3148,7 +3196,7 @@ class TestTypedCredentialErrors:
 
 class TestTokenCacheDeadlock:
     def test_non_anthropic_error_from_provider_releases_waiters(self) -> None:
-        """A non-``AnthropicError`` / non-``httpx.HTTPError`` from the leader
+        """A non-``AnthropicError`` / non-``httpx2.HTTPError`` from the leader
         provider must still release ``_refresh_event`` so concurrent waiters
         don't deadlock."""
         import threading as _threading
@@ -3248,7 +3296,7 @@ class TestCredentialPrecedence:
         _auth._warn_once_seen.clear()
 
     @staticmethod
-    def _walk_sync_auth(client: Anthropic) -> httpx.Request:
+    def _walk_sync_auth(client: Anthropic) -> httpx2.Request:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         auth = client.custom_auth
         flow = auth.sync_auth_flow(request) if auth is not None else None
@@ -3256,7 +3304,7 @@ class TestCredentialPrecedence:
             return request
         modified = next(flow)
         try:
-            flow.send(httpx.Response(200))
+            flow.send(httpx2.Response(200))
         except StopIteration:
             pass
         return modified
@@ -3591,25 +3639,25 @@ class TestNoSecretsInTracebackFrameLocals:
     Sentry's default local-variable capture — render each local's ``repr``,
     which is why SecretStr-wrapped locals are safe to retain."""
 
-    def _workload_provider(self, handler: Callable[[httpx.Request], httpx.Response]) -> WorkloadIdentityCredentials:
+    def _workload_provider(self, handler: Callable[[httpx2.Request], httpx2.Response]) -> WorkloadIdentityCredentials:
         creds = WorkloadIdentityCredentials(
             identity_token_provider=lambda: _SECRET_ASSERTION,
             federation_rule_id="fdrl_01abc",
             organization_id="org-uuid",
-            http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+            http_client=httpx2.Client(transport=httpx2.MockTransport(handler)),
         )
         creds.bind_base_url(BASE_URL)
         return creds
 
     def test_http_4xx_does_not_retain_assertion(self) -> None:
-        provider = self._workload_provider(lambda _: httpx.Response(401, json={"error": "invalid_grant"}))
+        provider = self._workload_provider(lambda _: httpx2.Response(401, json={"error": "invalid_grant"}))
         with pytest.raises(WorkloadIdentityError) as exc_info:
             provider()
         _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)
 
     def test_invalid_expires_in_does_not_retain_minted_token(self) -> None:
         provider = self._workload_provider(
-            lambda _: httpx.Response(200, json={"access_token": _SECRET_MINTED, "expires_in": "NaN"})
+            lambda _: httpx2.Response(200, json={"access_token": _SECRET_MINTED, "expires_in": "NaN"})
         )
         with pytest.raises(WorkloadIdentityError) as exc_info:
             provider()
@@ -3617,14 +3665,16 @@ class TestNoSecretsInTracebackFrameLocals:
 
     def test_token_type_mismatch_does_not_retain_minted_token(self) -> None:
         provider = self._workload_provider(
-            lambda _: httpx.Response(200, json={"access_token": _SECRET_MINTED, "expires_in": 600, "token_type": "MAC"})
+            lambda _: httpx2.Response(
+                200, json={"access_token": _SECRET_MINTED, "expires_in": 600, "token_type": "MAC"}
+            )
         )
         with pytest.raises(WorkloadIdentityError) as exc_info:
             provider()
         _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION, _SECRET_MINTED)
 
     def test_non_json_response_does_not_retain_assertion(self) -> None:
-        provider = self._workload_provider(lambda _: httpx.Response(200, text="<html>gateway error</html>"))
+        provider = self._workload_provider(lambda _: httpx2.Response(200, text="<html>gateway error</html>"))
         with pytest.raises(WorkloadIdentityError) as exc_info:
             provider()
         _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)
@@ -3638,14 +3688,14 @@ class TestNoSecretsInTracebackFrameLocals:
         """A 200 whose body is a JSON *string* echoing the assertion must be
         rejected at the wrap boundary — never bound to a frame local on its
         way to the type error."""
-        provider = self._workload_provider(lambda _: httpx.Response(200, json=_SECRET_ASSERTION))
+        provider = self._workload_provider(lambda _: httpx2.Response(200, json=_SECRET_ASSERTION))
         with pytest.raises(WorkloadIdentityError, match="expected an object") as exc_info:
             provider()
         _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)
 
     def test_transport_error_does_not_retain_assertion(self) -> None:
-        def raise_connect_error(req: httpx.Request) -> httpx.Response:
-            raise httpx.ConnectError("connection refused", request=req)
+        def raise_connect_error(req: httpx2.Request) -> httpx2.Response:
+            raise httpx2.ConnectError("connection refused", request=req)
 
         provider = self._workload_provider(raise_connect_error)
         with pytest.raises(WorkloadIdentityError) as exc_info:
@@ -3662,7 +3712,7 @@ class TestNoSecretsInTracebackFrameLocals:
             identity_token_provider=lambda: big,
             federation_rule_id="fdrl_01abc",
             organization_id="org-uuid",
-            http_client=httpx.Client(),
+            http_client=httpx2.Client(),
         )
         with pytest.raises(WorkloadIdentityError) as exc_info:
             provider()
@@ -3686,7 +3736,7 @@ class TestNoSecretsInTracebackFrameLocals:
         self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
     ) -> None:
         self._write_refresh_profile(clean_env, tmp_path)
-        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx.Response(400, json={"error": "invalid_grant"}))
+        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx2.Response(400, json={"error": "invalid_grant"}))
         with pytest.raises(WorkloadIdentityError) as exc_info:
             CredentialsFile()()
         _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET", "old-access-SECRET")
@@ -3697,7 +3747,7 @@ class TestNoSecretsInTracebackFrameLocals:
     ) -> None:
         self._write_refresh_profile(clean_env, tmp_path)
         respx_mock.post(TOKEN_ENDPOINT).mock(
-            return_value=httpx.Response(200, json={"access_token": _SECRET_MINTED, "expires_in": "NaN"})
+            return_value=httpx2.Response(200, json={"access_token": _SECRET_MINTED, "expires_in": "NaN"})
         )
         with pytest.raises(WorkloadIdentityError) as exc_info:
             CredentialsFile()()
@@ -3711,7 +3761,7 @@ class TestNoSecretsInTracebackFrameLocals:
         previously escaped as a raw json ValueError whose ``.doc`` carries the
         full response body) and retains no secrets."""
         self._write_refresh_profile(clean_env, tmp_path)
-        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx.Response(200, text="<html>gateway error</html>"))
+        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx2.Response(200, text="<html>gateway error</html>"))
         with pytest.raises(WorkloadIdentityError, match="non-JSON") as exc_info:
             CredentialsFile()()
         _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET", "old-access-SECRET")
@@ -3727,7 +3777,7 @@ class TestNoSecretsInTracebackFrameLocals:
         refresh token) is rejected at the wrap boundary and never bound to a
         frame local."""
         self._write_refresh_profile(clean_env, tmp_path)
-        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx.Response(200, json=["rt-SECRET"]))
+        respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx2.Response(200, json=["rt-SECRET"]))
         with pytest.raises(WorkloadIdentityError, match="expected an object") as exc_info:
             CredentialsFile()()
         _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET", "old-access-SECRET")
@@ -3769,7 +3819,7 @@ class TestNoSecretsInTracebackFrameLocals:
             },
         )
         respx_mock.post(TOKEN_ENDPOINT).mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200, json={"access_token": "new-access", "expires_in": 3600, "refresh_token": "rt-NEW"}
             )
         )
@@ -3885,7 +3935,7 @@ class TestNoSecretsInTracebackFrameLocals:
         old refresh token, or the creds dict."""
         self._write_refresh_profile(clean_env, tmp_path)
         respx_mock.post(TOKEN_ENDPOINT).mock(
-            return_value=httpx.Response(
+            return_value=httpx2.Response(
                 200, json={"access_token": _SECRET_MINTED, "expires_in": 3600, "refresh_token": "rt-NEW-SECRET"}
             )
         )
@@ -3912,8 +3962,8 @@ class TestNoSecretsInTracebackFrameLocals:
                 federation_rule_id="fdrl_01abc",
                 organization_id="org-uuid",
                 base_url=BASE_URL,
-                http_client=httpx.Client(
-                    transport=httpx.MockTransport(lambda _: httpx.Response(401, json={"error": "invalid_grant"}))
+                http_client=httpx2.Client(
+                    transport=httpx2.MockTransport(lambda _: httpx2.Response(401, json={"error": "invalid_grant"}))
                 ),
             )
         _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)

@@ -1,10 +1,7 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from typing_extensions import Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_token_endpoint_auth_none_response import BetaManagedAgentsTokenEndpointAuthNoneResponse
 from .beta_managed_agents_token_endpoint_auth_post_response import BetaManagedAgentsTokenEndpointAuthPostResponse
 from .beta_managed_agents_token_endpoint_auth_basic_response import BetaManagedAgentsTokenEndpointAuthBasicResponse
@@ -17,7 +14,7 @@ TokenEndpointAuth: TypeAlias = Annotated[
         BetaManagedAgentsTokenEndpointAuthBasicResponse,
         BetaManagedAgentsTokenEndpointAuthPostResponse,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 

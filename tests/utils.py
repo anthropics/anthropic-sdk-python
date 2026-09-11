@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import inspect
 import traceback
 import contextlib
 from typing import Any, TypeVar, Iterator, Sequence, cast
@@ -136,8 +135,6 @@ def assert_matches_type(
     elif issubclass(origin, BaseModel):
         assert isinstance(value, type_)
         assert assert_matches_model(type_, cast(Any, value), path=path)
-    elif inspect.isclass(origin) and origin.__name__ == "HttpxBinaryResponseContent":
-        assert value.__class__.__name__ == "HttpxBinaryResponseContent"
     else:
         assert None, f"Unhandled field type: {type_}"
 

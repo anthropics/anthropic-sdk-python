@@ -1,9 +1,7 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
+from ...._models import UnionDiscriminator
 from ..beta_managed_agents_delta_event import BetaManagedAgentsDeltaEvent
 from ..beta_managed_agents_start_event import BetaManagedAgentsStartEvent
 from .beta_managed_agents_user_message_event import BetaManagedAgentsUserMessageEvent
@@ -90,5 +88,5 @@ BetaManagedAgentsStreamSessionEvents: TypeAlias = Annotated[
         BetaManagedAgentsSystemMessageEvent,
         BetaManagedAgentsSessionUsageEvent,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

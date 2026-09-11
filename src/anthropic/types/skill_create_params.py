@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -24,3 +22,5 @@ class SkillCreateParams(TypedDict, total=False):
     Maximum 255 characters. Always set: derived from the SKILL.md frontmatter `name`
     when omitted at creation. Not unique.
     """
+
+    workspace_id: str

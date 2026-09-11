@@ -1,11 +1,8 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Required, TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_memory_view import BetaManagedAgentsMemoryView
 
@@ -25,12 +22,15 @@ class MemoryCreateParams(TypedDict, total=False):
 
     `/projects/foo/notes.md`. Must start with `/`, contain at least one non-empty
     segment, and be at most 1,024 bytes. Must not contain empty segments, `.` or
-    `..` segments, control or format characters, and must be NFC-normalized. Paths
-    are case-sensitive.
+    `..` segments, control or format characters, or the Unicode line and paragraph
+    separators (U+2028, U+2029), and must be NFC-normalized. Paths are
+    case-sensitive.
     """
 
     view: BetaManagedAgentsMemoryView
     """Query parameter for view"""
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
+
+    workspace_id: str

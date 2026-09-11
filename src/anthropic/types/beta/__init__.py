@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from .beta_dream import BetaDream as BetaDream
@@ -26,7 +24,9 @@ from .beta_cloud_config import BetaCloudConfig as BetaCloudConfig
 from .beta_deleted_file import BetaDeletedFile as BetaDeletedFile
 from .beta_dream_output import BetaDreamOutput as BetaDreamOutput
 from .beta_dream_status import BetaDreamStatus as BetaDreamStatus
+from .beta_organization import BetaOrganization as BetaOrganization
 from .beta_skill_params import BetaSkillParams as BetaSkillParams
+from .beta_skill_source import BetaSkillSource as BetaSkillSource
 from .beta_tunnel_token import BetaTunnelToken as BetaTunnelToken
 from .beta_user_profile import BetaUserProfile as BetaUserProfile
 from .dream_list_params import DreamListParams as DreamListParams
@@ -34,11 +34,13 @@ from .model_list_params import ModelListParams as ModelListParams
 from .skill_list_params import SkillListParams as SkillListParams
 from .vault_list_params import VaultListParams as VaultListParams
 from .beta_content_block import BetaContentBlock as BetaContentBlock
+from .beta_deleted_skill import BetaDeletedSkill as BetaDeletedSkill
 from .beta_direct_caller import BetaDirectCaller as BetaDirectCaller
 from .beta_fallback_info import BetaFallbackInfo as BetaFallbackInfo
 from .beta_file_metadata import BetaFileMetadata as BetaFileMetadata
 from .beta_message_param import BetaMessageParam as BetaMessageParam
 from .beta_text_citation import BetaTextCitation as BetaTextCitation
+from .beta_webhook_event import BetaWebhookEvent as BetaWebhookEvent
 from .file_upload_params import FileUploadParams as FileUploadParams
 from .tunnel_list_params import TunnelListParams as TunnelListParams
 from .agent_create_params import AgentCreateParams as AgentCreateParams
@@ -55,11 +57,11 @@ from .beta_tool_use_block import BetaToolUseBlock as BetaToolUseBlock
 from .dream_create_params import DreamCreateParams as DreamCreateParams
 from .session_list_params import SessionListParams as SessionListParams
 from .skill_create_params import SkillCreateParams as SkillCreateParams
-from .skill_list_response import SkillListResponse as SkillListResponse
 from .vault_create_params import VaultCreateParams as VaultCreateParams
 from .vault_update_params import VaultUpdateParams as VaultUpdateParams
 from .beta_citation_config import BetaCitationConfig as BetaCitationConfig
 from .beta_citations_delta import BetaCitationsDelta as BetaCitationsDelta
+from .beta_container_skill import BetaContainerSkill as BetaContainerSkill
 from .beta_fallbacks_param import BetaFallbacksParam as BetaFallbacksParam
 from .beta_limited_network import BetaLimitedNetwork as BetaLimitedNetwork
 from .beta_output_behavior import BetaOutputBehavior as BetaOutputBehavior
@@ -78,14 +80,13 @@ from .beta_tool_union_param import BetaToolUnionParam as BetaToolUnionParam
 from .message_create_params import MessageCreateParams as MessageCreateParams
 from .session_create_params import SessionCreateParams as SessionCreateParams
 from .session_update_params import SessionUpdateParams as SessionUpdateParams
-from .skill_create_response import SkillCreateResponse as SkillCreateResponse
-from .skill_delete_response import SkillDeleteResponse as SkillDeleteResponse
 from .beta_base64_pdf_source import BetaBase64PDFSource as BetaBase64PDFSource
 from .beta_diagnostics_param import BetaDiagnosticsParam as BetaDiagnosticsParam
 from .beta_dream_input_param import BetaDreamInputParam as BetaDreamInputParam
 from .beta_effort_capability import BetaEffortCapability as BetaEffortCapability
 from .beta_image_block_param import BetaImageBlockParam as BetaImageBlockParam
 from .beta_mcp_toolset_param import BetaMCPToolsetParam as BetaMCPToolsetParam
+from .beta_organization_role import BetaOrganizationRole as BetaOrganizationRole
 from .beta_plain_text_source import BetaPlainTextSource as BetaPlainTextSource
 from .beta_server_tool_usage import BetaServerToolUsage as BetaServerToolUsage
 from .beta_tool_choice_param import BetaToolChoiceParam as BetaToolChoiceParam
@@ -98,7 +99,6 @@ from .beta_self_hosted_config import BetaSelfHostedConfig as BetaSelfHostedConfi
 from .beta_server_tool_caller import BetaServerToolCaller as BetaServerToolCaller
 from .beta_webhook_event_data import BetaWebhookEventData as BetaWebhookEventData
 from .environment_list_params import EnvironmentListParams as EnvironmentListParams
-from .skill_retrieve_response import SkillRetrieveResponse as SkillRetrieveResponse
 from .beta_cloud_config_params import BetaCloudConfigParams as BetaCloudConfigParams
 from .beta_content_block_param import BetaContentBlockParam as BetaContentBlockParam
 from .beta_direct_caller_param import BetaDirectCallerParam as BetaDirectCallerParam
@@ -215,6 +215,7 @@ from .beta_content_block_source_param import BetaContentBlockSourceParam as Beta
 from .beta_dream_sessions_input_param import BetaDreamSessionsInputParam as BetaDreamSessionsInputParam
 from .beta_file_document_source_param import BetaFileDocumentSourceParam as BetaFileDocumentSourceParam
 from .beta_input_tokens_trigger_param import BetaInputTokensTriggerParam as BetaInputTokensTriggerParam
+from .beta_managed_agents_auto_policy import BetaManagedAgentsAutoPolicy as BetaManagedAgentsAutoPolicy
 from .beta_managed_agents_custom_tool import BetaManagedAgentsCustomTool as BetaManagedAgentsCustomTool
 from .beta_managed_agents_delta_event import BetaManagedAgentsDeltaEvent as BetaManagedAgentsDeltaEvent
 from .beta_managed_agents_effort_high import BetaManagedAgentsEffortHigh as BetaManagedAgentsEffortHigh
@@ -263,6 +264,7 @@ from .beta_managed_agents_user_location import BetaManagedAgentsUserLocation as 
 from .beta_memory_tool_20250818_command import BetaMemoryTool20250818Command as BetaMemoryTool20250818Command
 from .beta_raw_content_block_stop_event import BetaRawContentBlockStopEvent as BetaRawContentBlockStopEvent
 from .beta_request_document_block_param import BetaRequestDocumentBlockParam as BetaRequestDocumentBlockParam
+from .beta_thinking_block_binding_param import BetaThinkingBlockBindingParam as BetaThinkingBlockBindingParam
 from .beta_web_search_tool_result_block import BetaWebSearchToolResultBlock as BetaWebSearchToolResultBlock
 from .beta_web_search_tool_result_error import BetaWebSearchToolResultError as BetaWebSearchToolResultError
 from .beta_advisor_redacted_result_block import BetaAdvisorRedactedResultBlock as BetaAdvisorRedactedResultBlock
@@ -348,6 +350,7 @@ from .beta_fallback_message_iteration_usage import (
 )
 from .beta_managed_agents_agent_tool_config import BetaManagedAgentsAgentToolConfig as BetaManagedAgentsAgentToolConfig
 from .beta_managed_agents_always_ask_policy import BetaManagedAgentsAlwaysAskPolicy as BetaManagedAgentsAlwaysAskPolicy
+from .beta_managed_agents_auto_policy_param import BetaManagedAgentsAutoPolicyParam as BetaManagedAgentsAutoPolicyParam
 from .beta_managed_agents_deployment_status import (
     BetaManagedAgentsDeploymentStatus as BetaManagedAgentsDeploymentStatus,
 )
@@ -417,6 +420,9 @@ from .beta_request_tool_addition_block_param import (
 from .beta_server_tool_caller_20260120_param import (
     BetaServerToolCaller20260120Param as BetaServerToolCaller20260120Param,
 )
+from .beta_thinking_prefix_mismatch_behavior import (
+    BetaThinkingPrefixMismatchBehavior as BetaThinkingPrefixMismatchBehavior,
+)
 from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam as BetaWebFetchToolResultBlockParam
 from .beta_web_fetch_tool_result_error_block import BetaWebFetchToolResultErrorBlock as BetaWebFetchToolResultErrorBlock
 from .beta_web_search_tool_result_error_code import BetaWebSearchToolResultErrorCode as BetaWebSearchToolResultErrorCode
@@ -479,6 +485,12 @@ from .beta_managed_agents_start_event_preview import (
 )
 from .beta_managed_agents_user_location_param import (
     BetaManagedAgentsUserLocationParam as BetaManagedAgentsUserLocationParam,
+)
+from .beta_system_message_output_config_param import (
+    BetaSystemMessageOutputConfigParam as BetaSystemMessageOutputConfigParam,
+)
+from .beta_user_profile_external_user_details import (
+    BetaUserProfileExternalUserDetails as BetaUserProfileExternalUserDetails,
 )
 from .beta_web_search_tool_result_block_param import (
     BetaWebSearchToolResultBlockParam as BetaWebSearchToolResultBlockParam,
@@ -663,6 +675,9 @@ from .beta_managed_agents_web_search_tool_config import (
 from .beta_output_behavior_update_existing_param import (
     BetaOutputBehaviorUpdateExistingParam as BetaOutputBehaviorUpdateExistingParam,
 )
+from .beta_thinking_dropped_input_transformation import (
+    BetaThinkingDroppedInputTransformation as BetaThinkingDroppedInputTransformation,
+)
 from .beta_tool_search_tool_regex_20251119_param import (
     BetaToolSearchToolRegex20251119Param as BetaToolSearchToolRegex20251119Param,
 )
@@ -815,6 +830,9 @@ from .beta_managed_agents_session_agent_update_param import (
 )
 from .beta_managed_agents_system_content_block_param import (
     BetaManagedAgentsSystemContentBlockParam as BetaManagedAgentsSystemContentBlockParam,
+)
+from .beta_user_profile_external_user_details_params import (
+    BetaUserProfileExternalUserDetailsParams as BetaUserProfileExternalUserDetailsParams,
 )
 from .beta_webhook_deployment_run_started_event_data import (
     BetaWebhookDeploymentRunStartedEventData as BetaWebhookDeploymentRunStartedEventData,

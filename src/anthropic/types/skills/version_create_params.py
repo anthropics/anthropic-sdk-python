@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing_extensions import Required, TypedDict
@@ -16,3 +14,5 @@ class VersionCreateParams(TypedDict, total=False):
     All files must be in the same top-level directory and must include a SKILL.md
     file at the root of that directory.
     """
+
+    workspace_id: str

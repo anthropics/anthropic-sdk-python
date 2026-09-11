@@ -17,9 +17,9 @@ from typing import (
     AsyncIterator,
 )
 from contextlib import contextmanager, asynccontextmanager
-from typing_extensions import TypedDict, override
+from typing_extensions import Literal, TypedDict, override
 
-import httpx2 as httpx
+import httpx2
 
 from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import consume_sync_iterator, consume_async_iterator
@@ -37,6 +37,7 @@ from ._beta_functions import (
 )
 from .._stainless_helpers import stainless_helper_header
 from ..streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
+from ...types.beta.beta_stop_reason import BetaStopReason
 from ...types.beta.parsed_beta_message import ResponseFormatT, ParsedBetaMessage, ParsedBetaContentBlock
 from ...types.beta.message_create_params import ParseMessageCreateParamsBase
 from ...types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
@@ -55,12 +56,41 @@ RunnerItemT = TypeVar("RunnerItemT")
 
 log = logging.getLogger(__name__)
 
+_Step = Literal["run_tools", "resume", "stop"]
+
+# Every stop reason maps to exactly one step. The runner tests assert this mapping
+# covers `BetaStopReason`, so a newly generated value must be classified here.
+_STOP_REASON_STEPS: dict[BetaStopReason, _Step] = {
+    "tool_use": "run_tools",
+    "pause_turn": "resume",
+    # pause_after_compaction hands the turn back before the model answers; sending it back unchanged continues it.
+    "compaction": "resume",
+    "end_turn": "stop",
+    "stop_sequence": "stop",
+    "max_tokens": "stop",
+    "model_context_window_exceeded": "stop",
+    "refusal": "stop",
+}
+
+
+def _determine_next_step_from_stop_reason(stop_reason: BetaStopReason | None) -> _Step:
+    """Decide how the runner loop treats a finished assistant turn.
+
+    - ``run_tools``: run the turn's client tool calls, append their results and continue; stop if there are none.
+    - ``resume``: the turn is not finished; send it back unchanged, running no tool calls, so the server continues it.
+    - ``stop``: terminal; the turn is the final message and its tool_use blocks must not be executed.
+    """
+    if stop_reason is not None and stop_reason in _STOP_REASON_STEPS:
+        return _STOP_REASON_STEPS[stop_reason]
+    # Absent and unknown (forward-compatible) values stop like any other finished turn.
+    return "stop"
+
 
 class RequestOptions(TypedDict, total=False):
     extra_headers: Headers | None
     extra_query: Query | None
     extra_body: Body | None
-    timeout: float | httpx.Timeout | None | NotGiven
+    timeout: float | httpx2.Timeout | None | NotGiven
 
 
 class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
@@ -112,8 +142,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         be called again on the next loop iteration.
         """
         message_params: List[BetaMessageParam] = [
-            {"role": message.role, "content": message.content} if isinstance(message, BetaMessage) else message
-            for message in messages
+            message.to_param() if isinstance(message, BetaMessage) else message for message in messages
         ]
         self._messages_modified = True
         self.set_messages_params(lambda params: {**params, "messages": [*params["messages"], *message_params]})
@@ -184,20 +213,21 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
             self._iteration_count += 1
 
-            # Refusal-terminated turns are terminal: executing their tool_use blocks would
-            # fire side effects the model never confirmed, and the resulting tool_results
-            # cannot be replayed coherently. Surface the refusal as the final message.
-            if message.stop_reason == "refusal":
-                log.debug("Turn ended with a refusal, exiting from tool runner loop.")
+            next_step = _determine_next_step_from_stop_reason(message.stop_reason)
+            if next_step == "stop":
+                log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
                 return
 
-            response = self.generate_tool_call_response()
-            if response is None:
-                log.debug("Tool call was not requested, exiting from tool runner loop.")
-                return
-
-            if not self._messages_modified:
-                self.append_messages(message, response)
+            if next_step == "resume":
+                if not self._messages_modified:
+                    self.append_messages(message)
+            else:
+                response = self.generate_tool_call_response()
+                if response is None:
+                    log.debug("Tool call was not requested, exiting from tool runner loop.")
+                    return
+                if not self._messages_modified:
+                    self.append_messages(message, response)
 
             self._messages_modified = False
             self._cached_tool_call_response = None
@@ -375,20 +405,21 @@ class BaseAsyncToolRunner(
 
             self._iteration_count += 1
 
-            # Refusal-terminated turns are terminal: executing their tool_use blocks would
-            # fire side effects the model never confirmed, and the resulting tool_results
-            # cannot be replayed coherently. Surface the refusal as the final message.
-            if message.stop_reason == "refusal":
-                log.debug("Turn ended with a refusal, exiting from tool runner loop.")
+            next_step = _determine_next_step_from_stop_reason(message.stop_reason)
+            if next_step == "stop":
+                log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
                 return
 
-            response = await self.generate_tool_call_response()
-            if response is None:
-                log.debug("Tool call was not requested, exiting from tool runner loop.")
-                return
-
-            if not self._messages_modified:
-                self.append_messages(message, response)
+            if next_step == "resume":
+                if not self._messages_modified:
+                    self.append_messages(message)
+            else:
+                response = await self.generate_tool_call_response()
+                if response is None:
+                    log.debug("Tool call was not requested, exiting from tool runner loop.")
+                    return
+                if not self._messages_modified:
+                    self.append_messages(message, response)
 
             self._messages_modified = False
             self._cached_tool_call_response = None

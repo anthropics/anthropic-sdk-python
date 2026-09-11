@@ -17,17 +17,14 @@ message = client.messages.create(
     ],
 )
 
-# Print the full response
 print("\nFull response:")
 print(message.model_dump_json(indent=2))
 
-# Extract and print the content
 print("\nResponse content:")
 for content_block in message.content:
     if content_block.type == "text":
         print(content_block.text)
 
-# Print usage information
 print("\nUsage statistics:")
 print(f"Input tokens: {message.usage.input_tokens}")
 print(f"Output tokens: {message.usage.output_tokens}")
