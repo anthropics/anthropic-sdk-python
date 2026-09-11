@@ -89,12 +89,12 @@ pydantic==2.12.5
     # via anthropic
 pydantic-core==2.41.5
     # via pydantic
-pygments==2.19.2
+pygments==2.21.0
     # via
     #   pytest
     #   rich
 pyright==1.1.399
-pytest==9.0.2
+pytest==9.0.3
     # via
     #   inline-snapshot
     #   pytest-asyncio
