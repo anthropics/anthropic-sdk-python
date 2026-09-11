@@ -31,6 +31,5 @@ class BetaManagedAgentsSessionStatusIdleEvent(BaseModel):
     """A timestamp in RFC 3339 format"""
 
     stop_reason: StopReason
-    """The agent completed its turn naturally and is ready for the next user message."""
 
     type: Literal["session.status_idle"]

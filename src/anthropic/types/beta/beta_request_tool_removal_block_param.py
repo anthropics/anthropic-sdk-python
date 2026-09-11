@@ -24,12 +24,6 @@ class BetaRequestToolRemovalBlockParam(TypedDict, total=False):
     """
 
     tool: Required[Tool]
-    """Reference to a single tool the caller declared directly in `tools[]`.
-
-    Does not accept the composed `{server}_{name}` form the server assigns to
-    MCP-resolved tools — use `mcp_tool_reference` or `mcp_toolset_reference` for
-    those.
-    """
 
     type: Required[Literal["tool_removal"]]
 

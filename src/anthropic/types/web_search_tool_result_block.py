@@ -16,7 +16,6 @@ Caller: TypeAlias = Annotated[
 
 class WebSearchToolResultBlock(BaseModel):
     caller: Optional[Caller] = None
-    """Tool invocation directly from the model."""
 
     content: WebSearchToolResultBlockContent
 

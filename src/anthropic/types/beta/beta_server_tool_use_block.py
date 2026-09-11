@@ -32,4 +32,3 @@ class BetaServerToolUseBlock(BaseModel):
     type: Literal["server_tool_use"]
 
     caller: Optional[Caller] = None
-    """Tool invocation directly from the model."""

@@ -25,4 +25,3 @@ class BetaWebFetchToolResultBlock(BaseModel):
     type: Literal["web_fetch_tool_result"]
 
     caller: Optional[Caller] = None
-    """Tool invocation directly from the model."""

@@ -25,4 +25,3 @@ class WebSearchToolResultBlockParam(TypedDict, total=False):
     """Create a cache control breakpoint at this content block."""
 
     caller: Caller
-    """Tool invocation directly from the model."""

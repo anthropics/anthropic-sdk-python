@@ -8,7 +8,6 @@ __all__ = ["BetaCodeExecutionToolResultBlock"]
 
 class BetaCodeExecutionToolResultBlock(BaseModel):
     content: BetaCodeExecutionToolResultBlockContent
-    """Code execution result with encrypted stdout for PFC + web_search results."""
 
     tool_use_id: str
 

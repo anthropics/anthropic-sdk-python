@@ -17,7 +17,6 @@ class ServerToolUseBlock(BaseModel):
     id: str
 
     caller: Optional[Caller] = None
-    """Tool invocation directly from the model."""
 
     input: Dict[str, object]
 

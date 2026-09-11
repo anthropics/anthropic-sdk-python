@@ -68,12 +68,6 @@ class Dreams(SyncAPIResource):
         Create a Dream
 
         Args:
-          model: Model identifier and configuration applied to every pipeline stage.
-
-          output_behavior: The default destination: the job creates a new output memory store as a clone of
-              the memory_store input and writes the consolidated memories into it. The input
-              store is never mutated.
-
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -383,12 +377,6 @@ class AsyncDreams(AsyncAPIResource):
         Create a Dream
 
         Args:
-          model: Model identifier and configuration applied to every pipeline stage.
-
-          output_behavior: The default destination: the job creates a new output memory store as a clone of
-              the memory_store input and writes the consolidated memories into it. The input
-              store is never mutated.
-
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
