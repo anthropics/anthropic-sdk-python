@@ -258,7 +258,7 @@ pydantic-v2 = [
 [package.metadata]
 requires-dist = [
     { name = "aiohttp", marker = "extra == 'aiohttp'", specifier = ">=3.10.0,<4" },
-    { name = "anyio", specifier = ">=3.5.0,<5" },
+    { name = "anyio", specifier = ">=4.1.0,<5" },
     { name = "boto3", marker = "extra == 'aws'", specifier = ">=1.28.57,<2" },
     { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.28.57,<2" },
     { name = "botocore", marker = "extra == 'aws'", specifier = ">=1.31.57,<2" },
