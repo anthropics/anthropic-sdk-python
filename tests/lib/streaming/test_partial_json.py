@@ -44,11 +44,13 @@ class TestPartialJson:
         message1 = accumulate_event(
             event=event_complete,
             current_snapshot=copy.deepcopy(message),
+            json_bufs={},
             request_headers=httpx2.Headers({"some-header": "value"}),
         )
         message2 = accumulate_event(
             event=event_complete,
             current_snapshot=copy.deepcopy(message),
+            json_bufs={},
             request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
         )
 
@@ -68,6 +70,7 @@ class TestPartialJson:
         message_standard = accumulate_event(
             event=event_incomplete,
             current_snapshot=copy.deepcopy(message),
+            json_bufs={},
             request_headers=httpx2.Headers({"some-header": "value"}),
         )
 
@@ -75,6 +78,7 @@ class TestPartialJson:
         message_trailing = accumulate_event(
             event=event_incomplete,
             current_snapshot=copy.deepcopy(message),
+            json_bufs={},
             request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
         )
 
@@ -132,6 +136,7 @@ class TestPartialJson:
             accumulate_event(
                 event=event_invalid,
                 current_snapshot=copy.deepcopy(message),
+                json_bufs={},
                 request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
             )
             raise AssertionError("Expected ValueError for invalid JSON, but no error was raised.")

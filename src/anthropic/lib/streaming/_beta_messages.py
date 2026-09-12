@@ -54,6 +54,7 @@ class BetaMessageStream(Generic[ResponseFormatT]):
         self.text_stream = self.__stream_text__()
         self._iterator = self.__stream__()
         self.__final_message_snapshot: ParsedBetaMessage[ResponseFormatT] | None = None
+        self.__json_bufs: dict[int, bytes] = {}
         self.__output_format = output_format
 
     @property
@@ -137,6 +138,7 @@ class BetaMessageStream(Generic[ResponseFormatT]):
             self.__final_message_snapshot = accumulate_event(
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
+                json_bufs=self.__json_bufs,
                 request_headers=self.response.request.headers,
                 output_format=self.__output_format,
             )
@@ -206,6 +208,7 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
         self.text_stream = self.__stream_text__()
         self._iterator = self.__stream__()
         self.__final_message_snapshot: ParsedBetaMessage[ResponseFormatT] | None = None
+        self.__json_bufs: dict[int, bytes] = {}
         self.__output_format = output_format
 
     @property
@@ -289,6 +292,7 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
             self.__final_message_snapshot = accumulate_event(
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
+                json_bufs=self.__json_bufs,
                 request_headers=self.response.request.headers,
                 output_format=self.__output_format,
             )
@@ -444,8 +448,6 @@ def build_events(
     return events_to_fire
 
 
-JSON_BUF_PROPERTY = "__json_buf"
-
 TRACKS_TOOL_INPUT = (
     BetaToolUseBlock,
     BetaServerToolUseBlock,
@@ -457,6 +459,7 @@ def accumulate_event(
     *,
     event: BetaRawMessageStreamEvent,
     current_snapshot: ParsedBetaMessage[ResponseFormatT] | None,
+    json_bufs: dict[int, bytes],
     request_headers: httpx2.Headers,
     output_format: ResponseFormatT | NotGiven = not_given,
 ) -> ParsedBetaMessage[ResponseFormatT]:
@@ -502,10 +505,7 @@ def accumulate_event(
             if isinstance(content, TRACKS_TOOL_INPUT):
                 from jiter import from_json
 
-                # we need to keep track of the raw JSON string as well so that we can
-                # re-parse it for each delta, for now we just store it as an untyped
-                # property on the snapshot
-                json_buf = cast(bytes, getattr(content, JSON_BUF_PROPERTY, b""))
+                json_buf = json_bufs.get(event.index, b"")
                 json_buf += bytes(event.delta.partial_json, "utf-8")
 
                 if json_buf:
@@ -521,7 +521,7 @@ def accumulate_event(
                             f"Unable to parse tool parameter JSON from model. Please retry your request or adjust your prompt. Error: {e}. JSON: {json_buf.decode('utf-8')}"
                         ) from e
 
-                setattr(content, JSON_BUF_PROPERTY, json_buf)
+                json_bufs[event.index] = json_buf
         elif event.delta.type == "citations_delta":
             if content.type == "text":
                 if not content.citations:

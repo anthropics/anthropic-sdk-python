@@ -712,8 +712,8 @@ async def test_handle_item_uses_constructor_environment_key(monkeypatch: pytest.
 @pytest.mark.asyncio()
 async def test_handle_item_uses_work_secret_argument(monkeypatch: pytest.MonkeyPatch) -> None:
     """An explicit ``work_secret`` payload supplies the per-item Bearer
-    credential (its sessions token); ``environment_key`` is still required but
-    only used as the fallback."""
+    credential (its sessions token); an ``environment_key`` passed alongside it
+    is only the fallback."""
     secret = _encode_secret({"sessions_token": "sessions-token-arg"})
     work = _FakeWorkResource(heartbeat_state="running")
     sessions = _FakeSessions()
@@ -773,7 +773,13 @@ async def test_handle_item_missing_required_raises(monkeypatch: pytest.MonkeyPat
     sessions = _FakeSessions()
     client = _fake_client(work, sessions)
 
-    for var in ("ANTHROPIC_WORK_ID", "ANTHROPIC_ENVIRONMENT_ID", "ANTHROPIC_SESSION_ID", "ANTHROPIC_ENVIRONMENT_KEY"):
+    for var in (
+        "ANTHROPIC_WORK_ID",
+        "ANTHROPIC_ENVIRONMENT_ID",
+        "ANTHROPIC_SESSION_ID",
+        "ANTHROPIC_ENVIRONMENT_KEY",
+        "ANTHROPIC_WORK_SECRET",
+    ):
         monkeypatch.delenv(var, raising=False)
 
     worker = EnvironmentWorker(client, workdir=".")
@@ -782,11 +788,62 @@ async def test_handle_item_missing_required_raises(monkeypatch: pytest.MonkeyPat
     with pytest.raises(ValueError, match=r"handle_item: work_id is required — pass it or set ANTHROPIC_WORK_ID"):
         await worker.handle_item()
 
-    # environment_key still missing even though the others are supplied.
+    # environment_key still missing, and no work secret to stand in for it.
     with pytest.raises(
         ValueError, match=r"handle_item: environment_key is required — pass it or set ANTHROPIC_ENVIRONMENT_KEY"
     ):
         await worker.handle_item(work_id="w_1", environment_id="e_1", session_id="s_1")
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
+@pytest.mark.asyncio()
+async def test_handle_item_runs_keyless_on_a_token_bearing_secret(monkeypatch: pytest.MonkeyPatch) -> None:
+    """With no environment key anywhere — argument, constructor, or env var —
+    a work secret whose payload carries a sessions token is credential enough:
+    every per-item call rides that token. (The on-prem Kubernetes sandbox hands
+    the pod only the short-lived secret; the pod never holds the key.)"""
+    secret = _encode_secret({"sessions_token": "sessions-token-keyless"})
+    work = _FakeWorkResource(heartbeat_state="running")
+    sessions = _FakeSessions()
+    client = _fake_client(work, sessions)
+    scoped_calls = _install_scoped_client(monkeypatch, work, sessions)
+    record: dict[str, Any] = {}
+    _install_run_session_tools(monkeypatch, record)
+    monkeypatch.delenv("ANTHROPIC_ENVIRONMENT_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_WORK_SECRET", raising=False)
+
+    worker = EnvironmentWorker(client, workdir=".")
+    await asyncio.wait_for(
+        worker.handle_item(work_id="w_1", environment_id="e_1", session_id="s_1", work_secret=secret),
+        timeout=5,
+    )
+
+    assert scoped_calls == [{"auth_token": "sessions-token-keyless", "helper": "environments-worker"}]
+    assert record["run"]["environment_key"] == "sessions-token-keyless"
+    assert sessions.retrieve_calls == ["s_1"]
+    assert work.stop_calls[0]["work_id"] == "w_1"
+
+
+@pytest.mark.asyncio()
+async def test_handle_item_keyless_with_a_tokenless_secret_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A work secret that yields no sessions token, with no environment key to
+    fall back to, must not run the item unauthenticated: the error names both
+    ways out (a token-bearing secret, or the key), and no call is made."""
+    work = _FakeWorkResource()
+    sessions = _FakeSessions()
+    client = _fake_client(work, sessions)
+    scoped_calls = _install_scoped_client(monkeypatch, work, sessions)
+    monkeypatch.delenv("ANTHROPIC_ENVIRONMENT_KEY", raising=False)
+
+    worker = EnvironmentWorker(client, workdir=".")
+    with pytest.raises(ValueError, match=r"sessions_token, or an environment key"):
+        await worker.handle_item(
+            work_id="w_1", environment_id="e_1", session_id="s_1", work_secret="not-a-valid-payload"
+        )
+
+    assert scoped_calls == []
+    assert work.heartbeat_calls == []
+    assert work.stop_calls == []
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Optional
 from typing_extensions import Literal
 
@@ -9,6 +7,7 @@ from .._models import BaseModel
 from .container import Container
 from .stop_reason import StopReason
 from .content_block import ContentBlock, ContentBlock as ContentBlock
+from .message_param import MessageParam
 from .refusal_stop_details import RefusalStopDetails
 
 __all__ = ["Message"]
@@ -127,3 +126,9 @@ class Message(BaseModel):
     Total input tokens in a request is the summation of `input_tokens`,
     `cache_creation_input_tokens`, and `cache_read_input_tokens`.
     """
+
+    def to_param(self) -> MessageParam:
+        """Convert this response Message to a MessageParam so it can be passed back
+        to the API as an input message, e.g. in the `messages` param.
+        """
+        return MessageParam(role=self.role, content=list(self.content))

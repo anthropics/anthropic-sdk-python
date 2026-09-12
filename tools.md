@@ -51,7 +51,7 @@ If you want to implement calling the tool yourself, you can then pass the to the
 
 ```python
 message = client.beta.messages.create(
-    tools=[get_weather.to_dict()],
+    tools=[get_weather],
     # ...
     max_tokens=1024,
     model="claude-sonnet-4-5-20250929",

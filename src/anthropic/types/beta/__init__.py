@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from .beta_dream import BetaDream as BetaDream
@@ -217,6 +215,7 @@ from .beta_content_block_source_param import BetaContentBlockSourceParam as Beta
 from .beta_dream_sessions_input_param import BetaDreamSessionsInputParam as BetaDreamSessionsInputParam
 from .beta_file_document_source_param import BetaFileDocumentSourceParam as BetaFileDocumentSourceParam
 from .beta_input_tokens_trigger_param import BetaInputTokensTriggerParam as BetaInputTokensTriggerParam
+from .beta_managed_agents_auto_policy import BetaManagedAgentsAutoPolicy as BetaManagedAgentsAutoPolicy
 from .beta_managed_agents_custom_tool import BetaManagedAgentsCustomTool as BetaManagedAgentsCustomTool
 from .beta_managed_agents_delta_event import BetaManagedAgentsDeltaEvent as BetaManagedAgentsDeltaEvent
 from .beta_managed_agents_effort_high import BetaManagedAgentsEffortHigh as BetaManagedAgentsEffortHigh
@@ -351,6 +350,7 @@ from .beta_fallback_message_iteration_usage import (
 )
 from .beta_managed_agents_agent_tool_config import BetaManagedAgentsAgentToolConfig as BetaManagedAgentsAgentToolConfig
 from .beta_managed_agents_always_ask_policy import BetaManagedAgentsAlwaysAskPolicy as BetaManagedAgentsAlwaysAskPolicy
+from .beta_managed_agents_auto_policy_param import BetaManagedAgentsAutoPolicyParam as BetaManagedAgentsAutoPolicyParam
 from .beta_managed_agents_deployment_status import (
     BetaManagedAgentsDeploymentStatus as BetaManagedAgentsDeploymentStatus,
 )
@@ -488,6 +488,9 @@ from .beta_managed_agents_user_location_param import (
 )
 from .beta_system_message_output_config_param import (
     BetaSystemMessageOutputConfigParam as BetaSystemMessageOutputConfigParam,
+)
+from .beta_user_profile_external_user_details import (
+    BetaUserProfileExternalUserDetails as BetaUserProfileExternalUserDetails,
 )
 from .beta_web_search_tool_result_block_param import (
     BetaWebSearchToolResultBlockParam as BetaWebSearchToolResultBlockParam,
@@ -827,6 +830,9 @@ from .beta_managed_agents_session_agent_update_param import (
 )
 from .beta_managed_agents_system_content_block_param import (
     BetaManagedAgentsSystemContentBlockParam as BetaManagedAgentsSystemContentBlockParam,
+)
+from .beta_user_profile_external_user_details_params import (
+    BetaUserProfileExternalUserDetailsParams as BetaUserProfileExternalUserDetailsParams,
 )
 from .beta_webhook_deployment_run_started_event_data import (
     BetaWebhookDeploymentRunStartedEventData as BetaWebhookDeploymentRunStartedEventData,

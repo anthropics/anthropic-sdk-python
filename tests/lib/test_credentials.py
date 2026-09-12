@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import copy
 import json
 import time
 import logging
@@ -23,8 +24,10 @@ from anthropic import (
     AsyncAnthropic,
     InMemoryConfig,
     CredentialsFile,
+    CredentialsError,
     IdentityTokenFile,
     WorkloadIdentityError,
+    IdentityTokenFileError,
     WorkloadIdentityCredentials,
     default_credentials,
     exchange_federation_assertion,
@@ -222,8 +225,15 @@ class TestIdentityTokenFile:
             IdentityTokenFile()
 
     def test_raises_when_file_missing(self, tmp_path: pathlib.Path) -> None:
-        with pytest.raises(AnthropicError, match="not found"):
-            IdentityTokenFile(tmp_path / "nope")()
+        path = tmp_path / "nope"
+        with pytest.raises(IdentityTokenFileError, match="not found") as exc_info:
+            IdentityTokenFile(path)()
+        # Subclasses AnthropicError so existing handlers keep matching.
+        assert isinstance(exc_info.value, CredentialsError)
+        assert isinstance(exc_info.value, AnthropicError)
+        assert exc_info.value.path == path
+        assert isinstance(exc_info.value.__cause__, OSError)
+        assert copy.copy(exc_info.value).path == path
 
 
 class TestCredentialsFile:
@@ -265,8 +275,9 @@ class TestCredentialsFile:
 
     def test_external_missing_credentials_file(self, tmp_path: pathlib.Path) -> None:
         _write_profile(tmp_path, "default", {"type": "external"})  # no credentials file
-        with pytest.raises(AnthropicError, match="Credentials file not found"):
+        with pytest.raises(CredentialsError, match="Credentials file not found") as exc_info:
             CredentialsFile()()
+        assert isinstance(exc_info.value, AnthropicError)
 
     def test_credentials_file_wrong_type_raises(self, tmp_path: pathlib.Path) -> None:
         _write_profile(
@@ -813,17 +824,16 @@ class TestCredentialsFile:
 
     # -- security: credentials file permissions ---------------------------
 
-    def test_credentials_file_world_readable_rejected(self, tmp_path: pathlib.Path) -> None:
+    @pytest.mark.parametrize("mode", [0o644, 0o640, 0o604, 0o660, 0o620, 0o602])
+    def test_credentials_file_group_or_other_access_rejected(self, tmp_path: pathlib.Path, mode: int) -> None:
         if os.name != "posix":
             pytest.skip("POSIX mode bits only")
         _write_profile(tmp_path, "default", {"type": "external"}, {"access_token": "x"})
-        (tmp_path / "credentials" / "default.json").chmod(0o644)
-        with pytest.raises(AnthropicError, match="world-readable"):
+        (tmp_path / "credentials" / "default.json").chmod(mode)
+        with pytest.raises(AnthropicError, match=rf"accessible by group or others \(mode {mode:#o}\)"):
             CredentialsFile()()
 
-    def test_credentials_file_group_readable_warns(
-        self, tmp_path: pathlib.Path, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_credentials_file_owner_only_accepted(self, tmp_path: pathlib.Path) -> None:
         if os.name != "posix":
             pytest.skip("POSIX mode bits only")
         _write_profile(
@@ -832,10 +842,8 @@ class TestCredentialsFile:
             {"type": "external"},
             {"access_token": "x", "expires_at": int(time.time()) + 3600},
         )
-        (tmp_path / "credentials" / "default.json").chmod(0o640)
-        with caplog.at_level("WARNING", logger="anthropic.lib.credentials._providers"):
-            CredentialsFile()()
-        assert any("group-readable" in rec.message for rec in caplog.records)
+        (tmp_path / "credentials" / "default.json").chmod(0o600)
+        assert CredentialsFile()().token == "x"
 
     def test_credentials_file_symlink_rejected(self, tmp_path: pathlib.Path) -> None:
         if os.name != "posix":
@@ -3104,29 +3112,34 @@ class TestTypedCredentialErrors:
         f.chmod(0o000)
         try:
             provider = IdentityTokenFile(f)
-            with pytest.raises(AnthropicError, match="not readable|Permission"):
+            with pytest.raises(IdentityTokenFileError, match="not readable|Permission") as exc_info:
                 provider()
+            assert exc_info.value.path == f
         finally:
             f.chmod(0o600)
 
     def test_identity_token_file_directory_raises_anthropic_error(self, tmp_path: pathlib.Path) -> None:
         provider = IdentityTokenFile(tmp_path)
-        with pytest.raises(AnthropicError):
+        with pytest.raises(IdentityTokenFileError) as exc_info:
             provider()
+        assert exc_info.value.path == tmp_path
+        assert isinstance(exc_info.value.__cause__, OSError)
 
     def test_identity_token_file_binary_content_raises_anthropic_error(self, tmp_path: pathlib.Path) -> None:
         f = tmp_path / "token"
         f.write_bytes(b"\xff\xfe\xfd\x00not-utf8")
         provider = IdentityTokenFile(f)
-        with pytest.raises(AnthropicError):
+        with pytest.raises(IdentityTokenFileError) as exc_info:
             provider()
+        assert exc_info.value.path == f
 
     def test_identity_token_file_empty_raises_anthropic_error(self, tmp_path: pathlib.Path) -> None:
         f = tmp_path / "token"
         f.write_text("")
         provider = IdentityTokenFile(f)
-        with pytest.raises(AnthropicError, match="empty"):
+        with pytest.raises(IdentityTokenFileError, match="empty") as exc_info:
             provider()
+        assert exc_info.value.path == f
 
     def test_user_oauth_malformed_expires_at_raises_anthropic_error(
         self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path

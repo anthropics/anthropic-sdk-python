@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Optional
@@ -91,8 +89,8 @@ class Environments(SyncAPIResource):
 
           scope: The visibility scope for this environment. 'organization' makes the environment
               visible to all accounts. 'account' restricts visibility to the owning account
-              only. Only applicable for self-hosted environments. If not specified, defaults
-              based on organization type.
+              only. API organizations support only 'organization'; 'account' is rejected. If
+              not specified, defaults based on organization type.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -486,8 +484,8 @@ class AsyncEnvironments(AsyncAPIResource):
 
           scope: The visibility scope for this environment. 'organization' makes the environment
               visible to all accounts. 'account' restricts visibility to the owning account
-              only. Only applicable for self-hosted environments. If not specified, defaults
-              based on organization type.
+              only. API organizations support only 'organization'; 'account' is rejected. If
+              not specified, defaults based on organization type.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

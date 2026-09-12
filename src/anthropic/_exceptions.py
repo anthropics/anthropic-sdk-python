@@ -1,7 +1,6 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
+import pathlib
 from typing import Union, cast
 from typing_extensions import Literal
 
@@ -24,6 +23,8 @@ __all__ = [
     "ServiceUnavailableError",
     "OverloadedError",
     "DeadlineExceededError",
+    "CredentialsError",
+    "IdentityTokenFileError",
 ]
 
 
@@ -111,6 +112,24 @@ class RetryableError(AnthropicError):
     The request is only retried while `max_retries` has not been exhausted;
     once exhausted the error propagates to the caller as-is.
     """
+
+
+class CredentialsError(AnthropicError):
+    """Raised when credentials cannot be loaded from local files, config, or the environment."""
+
+
+class IdentityTokenFileError(CredentialsError):
+    """Raised when the identity token file does not exist, is empty, or cannot be read.
+
+    `path` is the file the provider tried to read (when known), so callers
+    waiting for a projected token to appear can retry without parsing the message.
+    """
+
+    path: pathlib.Path | None
+
+    def __init__(self, message: str, *, path: pathlib.Path | None = None) -> None:
+        super().__init__(message)
+        self.path = path
 
 
 class BadRequestError(APIStatusError):

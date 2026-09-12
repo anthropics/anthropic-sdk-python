@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 import typing as _t
 
 from . import types
@@ -22,12 +20,14 @@ from ._exceptions import (
     APITimeoutError,
     BadRequestError,
     OverloadedError,
+    CredentialsError,
     APIConnectionError,
     AuthenticationError,
     InternalServerError,
     RequestTooLargeError,
     DeadlineExceededError,
     PermissionDeniedError,
+    IdentityTokenFileError,
     ServiceUnavailableError,
     UnprocessableEntityError,
     APIWebhookValidationError,
@@ -76,6 +76,8 @@ __all__ = [
     "OverloadedError",
     "DeadlineExceededError",
     "RetryableError",
+    "CredentialsError",
+    "IdentityTokenFileError",
     "Timeout",
     "RequestOptions",
     "Client",

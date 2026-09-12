@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from ..._models import BaseModel
 from .beta_effort_capability import BetaEffortCapability
 from .beta_capability_support import BetaCapabilitySupport

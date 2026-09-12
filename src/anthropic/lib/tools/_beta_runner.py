@@ -142,8 +142,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         be called again on the next loop iteration.
         """
         message_params: List[BetaMessageParam] = [
-            {"role": message.role, "content": message.content} if isinstance(message, BetaMessage) else message
-            for message in messages
+            message.to_param() if isinstance(message, BetaMessage) else message for message in messages
         ]
         self._messages_modified = True
         self.set_messages_params(lambda params: {**params, "messages": [*params["messages"], *message_params]})

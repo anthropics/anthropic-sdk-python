@@ -1,10 +1,9 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import gc
 import os
 import sys
+import copy
 import json
 import asyncio
 import inspect
@@ -615,6 +614,32 @@ class TestAnthropic:
         )
         data = json.loads(request.content.decode("utf-8"))
         assert data == {"foo": "bar", "baz": None}
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_request_extra_json_merged_before_prepare_options(self, respx_mock: MockRouter) -> None:
+        # client hooks (e.g. a `_prepare_options` that derives the URL from the body) see the body with `extra_body` applied
+        seen: list[FinalRequestOptions] = []
+
+        class Client(Anthropic):
+            @override
+            def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+                seen.append(copy.deepcopy(options))
+                return super()._prepare_options(options)
+
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={}))
+        client = Client(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+
+        response = client.post(
+            "/foo",
+            cast_to=httpx2.Response,
+            body={"foo": "bar", "baz": True},
+            options=make_request_options(extra_body={"baz": None}),
+        )
+
+        assert len(seen) == 1
+        assert seen[0].json_data == {"foo": "bar", "baz": None}
+        assert seen[0].extra_json is None
+        assert json.loads(response.request.content) == {"foo": "bar", "baz": None}
 
     def test_request_extra_headers(self, client: Anthropic) -> None:
         request = client._build_request(
@@ -1819,6 +1844,32 @@ class TestAsyncAnthropic:
         )
         data = json.loads(request.content.decode("utf-8"))
         assert data == {"foo": "bar", "baz": None}
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_request_extra_json_merged_before_prepare_options(self, respx_mock: MockRouter) -> None:
+        # client hooks (e.g. a `_prepare_options` that derives the URL from the body) see the body with `extra_body` applied
+        seen: list[FinalRequestOptions] = []
+
+        class Client(AsyncAnthropic):
+            @override
+            async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+                seen.append(copy.deepcopy(options))
+                return await super()._prepare_options(options)
+
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={}))
+        client = Client(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+
+        response = await client.post(
+            "/foo",
+            cast_to=httpx2.Response,
+            body={"foo": "bar", "baz": True},
+            options=make_request_options(extra_body={"baz": None}),
+        )
+
+        assert len(seen) == 1
+        assert seen[0].json_data == {"foo": "bar", "baz": None}
+        assert seen[0].extra_json is None
+        assert json.loads(response.request.content) == {"foo": "bar", "baz": None}
 
     def test_request_extra_headers(self, client: Anthropic) -> None:
         request = client._build_request(

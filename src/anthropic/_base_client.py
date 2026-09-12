@@ -1118,6 +1118,8 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         # options are mutated later & we then retry, the retries are
         # given the original options
         input_options = model_copy(options)
+        # merged ahead of `_prepare_options` so that client hooks and middleware see `extra_body` too
+        _merge_extra_json(input_options)
         if input_options.idempotency_key is None and input_options.method.lower() != "get":
             # ensure the idempotency key is reused between requests
             input_options.idempotency_key = self._idempotency_key()
@@ -1819,6 +1821,8 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         # options are mutated later & we then retry, the retries are
         # given the original options
         input_options = model_copy(options)
+        # merged ahead of `_prepare_options` so that client hooks and middleware see `extra_body` too
+        _merge_extra_json(input_options)
         if input_options.idempotency_key is None and input_options.method.lower() != "get":
             # ensure the idempotency key is reused between requests
             input_options.idempotency_key = self._idempotency_key()
@@ -2280,7 +2284,6 @@ def make_request_options(
     extra_headers: Headers | None = None,
     extra_query: Query | None = None,
     extra_body: Body | None = None,
-    idempotency_key: str | None = None,
     timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     post_parser: PostParser | NotGiven = not_given,
 ) -> RequestOptions:
@@ -2300,9 +2303,6 @@ def make_request_options(
 
     if not isinstance(timeout, NotGiven):
         options["timeout"] = timeout
-
-    if idempotency_key is not None:
-        options["idempotency_key"] = idempotency_key
 
     if is_given(post_parser):
         # internal
@@ -2455,6 +2455,27 @@ def _merge_mappings(
     """
     merged = {**obj1, **obj2}
     return {key: value for key, value in merged.items() if not isinstance(value, Omit)}
+
+
+def _merge_extra_json(options: FinalRequestOptions) -> None:
+    """Merge `extra_json` into `json_data` in place, as `_build_request` would.
+
+    This runs before `_prepare_options` so that client hooks, such as Bedrock and Vertex
+    routing, see `extra_body` values.
+    """
+    extra_json = options.extra_json
+    if extra_json is None:
+        return
+
+    json_data = options.json_data
+    if json_data is None:
+        options.json_data = cast(Body, extra_json)
+    elif is_mapping(json_data):
+        options.json_data = _merge_mappings(json_data, extra_json)
+    else:
+        raise RuntimeError(f"Unexpected JSON data type, {type(json_data)}, cannot merge with `extra_body`")
+
+    options.extra_json = None
 
 
 # `x-stainless-helper` is the one header whose values accumulate across layers into a single

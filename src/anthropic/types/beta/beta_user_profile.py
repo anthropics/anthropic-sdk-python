@@ -1,11 +1,10 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, Optional
 from datetime import datetime
 from typing_extensions import Literal
 
 from ..._models import BaseModel
 from .beta_user_profile_trust_grant import BetaUserProfileTrustGrant
+from .beta_user_profile_external_user_details import BetaUserProfileExternalUserDetails
 
 __all__ = ["BetaUserProfile"]
 
@@ -45,7 +44,19 @@ class BetaUserProfile(BaseModel):
     """
 
     external_id: Optional[str] = None
-    """Platform's own identifier for this user. Not enforced unique."""
+    """Platform's own identifier for this user.
+
+    Not enforced unique. Present under the `user-profiles-2026-03-24` and
+    `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` the
+    value is `external_user_details.reference_id`.
+    """
+
+    external_user_details: Optional[BetaUserProfileExternalUserDetails] = None
+    """Details about the entity this profile represents, as the platform states them.
+
+    Anthropic does not verify them. Every field is present, `null` until the
+    platform supplies a value.
+    """
 
     external_user_onboarded_at: Optional[datetime] = None
     """A timestamp in RFC 3339 format"""

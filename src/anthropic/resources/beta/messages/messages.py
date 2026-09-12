@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import warnings
@@ -62,6 +60,7 @@ from ....lib._stainless_helpers import (
     helper_header as _helper_header,
     stainless_helper_header as _stainless_helper_header,
 )
+from ....lib.tools._tool_params import BetaToolLike, to_tool_params as _to_tool_params
 from ....types.beta.beta_message import BetaMessage
 from ....lib.tools._beta_functions import (
     BetaFunctionTool,
@@ -143,7 +142,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -459,7 +458,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -775,7 +774,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -1091,7 +1090,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -1121,6 +1120,7 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
+        tools = _to_tool_params(tools)
         extra_headers = merge_headers(
             strip_not_given(
                 {
@@ -1193,7 +1193,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -1231,6 +1231,7 @@ class Messages(SyncAPIResource):
             # Ensure structured outputs beta is included for parse method
             betas.append("structured-outputs-2025-12-15")
 
+        tools = _to_tool_params(tools)
         extra_headers = merge_headers(
             _helper_header("beta.messages.parse"),
             strip_not_given(
@@ -1588,7 +1589,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -1616,6 +1617,7 @@ class Messages(SyncAPIResource):
             )
 
         """Create a Message stream"""
+        tools = _to_tool_params(tools)
         extra_headers = merge_headers(
             {
                 _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
@@ -1711,7 +1713,7 @@ class Messages(SyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[message_count_tokens_params.Tool] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -1930,6 +1932,7 @@ class Messages(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        tools = _to_tool_params(tools)
         extra_headers = {
             **strip_not_given(
                 {
@@ -2016,7 +2019,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -2332,7 +2335,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -2648,7 +2651,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -2964,7 +2967,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -2994,6 +2997,7 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
+        tools = _to_tool_params(tools)
         extra_headers = merge_headers(
             strip_not_given(
                 {
@@ -3066,7 +3070,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -3103,6 +3107,7 @@ class AsyncMessages(AsyncAPIResource):
             # Ensure structured outputs beta is included for parse method
             betas.append("structured-outputs-2025-12-15")
 
+        tools = _to_tool_params(tools)
         extra_headers = merge_headers(
             _helper_header("beta.messages.parse"),
             strip_not_given(
@@ -3453,7 +3458,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[BetaToolUnionParam] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -3480,6 +3485,7 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
+        tools = _to_tool_params(tools)
         extra_headers = merge_headers(
             {
                 _STAINLESS_HELPER_METHOD_HEADER: _HELPER_METHOD_STREAM,
@@ -3574,7 +3580,7 @@ class AsyncMessages(AsyncAPIResource):
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
-        tools: Iterable[message_count_tokens_params.Tool] | Omit = omit,
+        tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -3793,6 +3799,7 @@ class AsyncMessages(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        tools = _to_tool_params(tools)
         extra_headers = {
             **strip_not_given(
                 {

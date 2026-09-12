@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Union, Optional
@@ -20,11 +18,17 @@ from ..._response import (
     async_to_streamed_response_wrapper,
 )
 from ...pagination import SyncPageCursor, AsyncPageCursor
-from ...types.beta import user_profile_list_params, user_profile_create_params, user_profile_update_params
+from ...types.beta import (
+    BetaUserProfileExternalUserDetailsParams,
+    user_profile_list_params,
+    user_profile_create_params,
+    user_profile_update_params,
+)
 from ..._base_client import AsyncPaginator, make_request_options
 from ...types.anthropic_beta_param import AnthropicBetaParam
 from ...types.beta.beta_user_profile import BetaUserProfile
 from ...types.beta.beta_user_profile_enrollment_url import BetaUserProfileEnrollmentURL
+from ...types.beta.beta_user_profile_external_user_details_params import BetaUserProfileExternalUserDetailsParams
 
 __all__ = ["UserProfiles", "AsyncUserProfiles"]
 
@@ -54,6 +58,7 @@ class UserProfiles(SyncAPIResource):
         *,
         access_type: Literal["application", "passthrough"] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_details: BetaUserProfileExternalUserDetailsParams | Omit = omit,
         external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -76,7 +81,13 @@ class UserProfiles(SyncAPIResource):
               the resold-to company.
 
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
-              characters.
+              characters. Accepted under the `user-profiles-2026-03-24` and
+              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
+              `external_user_details.reference_id` instead.
+
+          external_user_details: Details about the entity this profile represents, as the platform states them.
+              Every field is optional. Accepted under the `user-profiles-2026-09-04` beta
+              header only.
 
           external_user_onboarded_at: A timestamp in RFC 3339 format
 
@@ -116,6 +127,7 @@ class UserProfiles(SyncAPIResource):
                 {
                     "access_type": access_type,
                     "external_id": external_id,
+                    "external_user_details": external_user_details,
                     "external_user_onboarded_at": external_user_onboarded_at,
                     "metadata": metadata,
                     "name": name,
@@ -181,6 +193,7 @@ class UserProfiles(SyncAPIResource):
         *,
         access_type: Optional[Literal["application", "passthrough"]] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_details: BetaUserProfileExternalUserDetailsParams | Omit = omit,
         external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -203,7 +216,14 @@ class UserProfiles(SyncAPIResource):
               the resold-to company.
 
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
-              255 characters.
+              255 characters. Accepted under the `user-profiles-2026-03-24` and
+              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
+              `external_user_details.reference_id` instead.
+
+          external_user_details: Details about the entity this profile represents, as the platform states them.
+              Each field sent replaces the stored value; omit a field to leave it unchanged.
+              Once set, a value cannot be cleared and `null` is rejected. Accepted under the
+              `user-profiles-2026-09-04` beta header only.
 
           external_user_onboarded_at: A timestamp in RFC 3339 format
 
@@ -244,6 +264,7 @@ class UserProfiles(SyncAPIResource):
                 {
                     "access_type": access_type,
                     "external_id": external_id,
+                    "external_user_details": external_user_details,
                     "external_user_onboarded_at": external_user_onboarded_at,
                     "metadata": metadata,
                     "name": name,
@@ -400,6 +421,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         *,
         access_type: Literal["application", "passthrough"] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_details: BetaUserProfileExternalUserDetailsParams | Omit = omit,
         external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -422,7 +444,13 @@ class AsyncUserProfiles(AsyncAPIResource):
               the resold-to company.
 
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
-              characters.
+              characters. Accepted under the `user-profiles-2026-03-24` and
+              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
+              `external_user_details.reference_id` instead.
+
+          external_user_details: Details about the entity this profile represents, as the platform states them.
+              Every field is optional. Accepted under the `user-profiles-2026-09-04` beta
+              header only.
 
           external_user_onboarded_at: A timestamp in RFC 3339 format
 
@@ -462,6 +490,7 @@ class AsyncUserProfiles(AsyncAPIResource):
                 {
                     "access_type": access_type,
                     "external_id": external_id,
+                    "external_user_details": external_user_details,
                     "external_user_onboarded_at": external_user_onboarded_at,
                     "metadata": metadata,
                     "name": name,
@@ -527,6 +556,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         *,
         access_type: Optional[Literal["application", "passthrough"]] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_details: BetaUserProfileExternalUserDetailsParams | Omit = omit,
         external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
@@ -549,7 +579,14 @@ class AsyncUserProfiles(AsyncAPIResource):
               the resold-to company.
 
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
-              255 characters.
+              255 characters. Accepted under the `user-profiles-2026-03-24` and
+              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
+              `external_user_details.reference_id` instead.
+
+          external_user_details: Details about the entity this profile represents, as the platform states them.
+              Each field sent replaces the stored value; omit a field to leave it unchanged.
+              Once set, a value cannot be cleared and `null` is rejected. Accepted under the
+              `user-profiles-2026-09-04` beta header only.
 
           external_user_onboarded_at: A timestamp in RFC 3339 format
 
@@ -590,6 +627,7 @@ class AsyncUserProfiles(AsyncAPIResource):
                 {
                     "access_type": access_type,
                     "external_id": external_id,
+                    "external_user_details": external_user_details,
                     "external_user_onboarded_at": external_user_onboarded_at,
                     "metadata": metadata,
                     "name": name,

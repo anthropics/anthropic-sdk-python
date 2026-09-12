@@ -21,7 +21,7 @@ from ._constants import (
     resolve_identity_token_path,
 )
 from ._providers import StaticToken, CredentialsFile, IdentityTokenFile
-from ..._exceptions import AnthropicError
+from ..._exceptions import AnthropicError, CredentialsError
 
 __all__ = ["default_credentials"]
 
@@ -49,7 +49,7 @@ def _build_federation_result(*, base_url: str) -> Optional[CredentialResult]:
         def _read_env_token() -> str:
             value = os.environ.get(ENV_IDENTITY_TOKEN)
             if value is None:
-                raise AnthropicError(
+                raise CredentialsError(
                     f"{ENV_IDENTITY_TOKEN} is not set; the workload-identity chain "
                     f"selected this provider at construction time but the env var "
                     f"is no longer present."

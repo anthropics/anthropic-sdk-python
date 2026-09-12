@@ -5,7 +5,7 @@ import sys
 import pathlib
 from typing import Optional
 
-from ..._exceptions import AnthropicError
+from ..._exceptions import AnthropicError, CredentialsError
 
 GRANT_TYPE_JWT_BEARER = "urn:ietf:params:oauth:grant-type:jwt-bearer"
 GRANT_TYPE_REFRESH_TOKEN = "refresh_token"
@@ -126,7 +126,7 @@ def _require_https(url: str, *, field: str) -> None:  # pyright: ignore[reportUn
         return
     if lowered.startswith(("http://localhost", "http://127.0.0.1", "http://[::1]")):
         return
-    raise AnthropicError(
+    raise CredentialsError(
         f"{field} must use https (got {url!r}); the token-exchange endpoint "
         f"carries secret material and cannot be used over cleartext HTTP."
     )
@@ -143,19 +143,19 @@ def _validate_profile_name(profile: str, *, source: str = "profile name") -> Non
     value came from.
     """
     if not profile:
-        raise AnthropicError(f"{source} must not be empty.")
+        raise CredentialsError(f"{source} must not be empty.")
     if profile != profile.strip():
-        raise AnthropicError(f"{source} {profile!r} has leading or trailing whitespace.")
+        raise CredentialsError(f"{source} {profile!r} has leading or trailing whitespace.")
     if profile.startswith("."):
-        raise AnthropicError(f"{source} {profile!r} must not start with a dot.")
+        raise CredentialsError(f"{source} {profile!r} must not start with a dot.")
     for sep in ("/", "\\", os.sep):
         if sep and sep in profile:
-            raise AnthropicError(
+            raise CredentialsError(
                 f"{source} {profile!r} must not contain path separators — "
                 f"profiles are filenames under the config directory. Pick a name without {sep!r}."
             )
     if "\x00" in profile:
-        raise AnthropicError(f"{source} {profile!r} must not contain null bytes.")
+        raise CredentialsError(f"{source} {profile!r} must not contain null bytes.")
 
 
 def _resolve_under(base: pathlib.Path, candidate: pathlib.Path) -> pathlib.Path:
@@ -172,7 +172,7 @@ def _resolve_under(base: pathlib.Path, candidate: pathlib.Path) -> pathlib.Path:
     try:
         candidate_resolved.relative_to(base_resolved)
     except ValueError as err:
-        raise AnthropicError(f"Resolved path {candidate_resolved} escapes config directory {base_resolved}.") from err
+        raise CredentialsError(f"Resolved path {candidate_resolved} escapes config directory {base_resolved}.") from err
     return candidate
 
 

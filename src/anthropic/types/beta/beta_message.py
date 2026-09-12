@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Optional
 from typing_extensions import Literal
 
@@ -10,6 +8,7 @@ from .beta_container import BetaContainer
 from .beta_diagnostics import BetaDiagnostics
 from .beta_stop_reason import BetaStopReason
 from .beta_content_block import BetaContentBlock, BetaContentBlock as BetaContentBlock
+from .beta_message_param import BetaMessageParam
 from .beta_refusal_stop_details import BetaRefusalStopDetails
 from .beta_context_management_response import BetaContextManagementResponse
 from .beta_thinking_dropped_input_transformation import BetaThinkingDroppedInputTransformation
@@ -162,3 +161,9 @@ class BetaMessage(BaseModel):
     which case it holds the serving model's entries and replaces the one in
     `message_start`.
     """
+
+    def to_param(self) -> BetaMessageParam:
+        """Convert this response BetaMessage to a BetaMessageParam so it can be passed back
+        to the API as an input message, e.g. in the `messages` param.
+        """
+        return BetaMessageParam(role=self.role, content=list(self.content))
