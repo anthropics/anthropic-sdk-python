@@ -297,10 +297,15 @@ def mcp_resource_to_file(
 
 def _convert_tool_result(result: CallToolResult) -> BetaFunctionToolResultType:
     """Convert MCP ``CallToolResult`` to a value suitable for returning from ``call()``."""
-    if _mcp_field_v1_or_v2(result, "is_error"):
-        raise ToolError([mcp_content(item) for item in result.content])
-
     structured_content = _mcp_field_v1_or_v2(result, "structured_content")
+
+    if _mcp_field_v1_or_v2(result, "is_error"):
+        if result.content:
+            raise ToolError([mcp_content(item) for item in result.content])
+        if structured_content is not None:
+            raise ToolError(json.dumps(structured_content))
+        raise ToolError([])
+
     if not result.content and structured_content is not None:
         return json.dumps(structured_content)
 
