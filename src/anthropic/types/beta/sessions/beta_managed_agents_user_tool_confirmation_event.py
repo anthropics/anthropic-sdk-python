@@ -36,8 +36,7 @@ class BetaManagedAgentsUserToolConfirmationEvent(BaseModel):
     """A timestamp in RFC 3339 format"""
 
     session_thread_id: Optional[str] = None
-    """
-    When set, the confirmation routes to this subagent's thread rather than the
-    primary. Echo this from the `session_thread_id` on the `agent.tool_use` or
-    `agent.mcp_tool_use` event that prompted the approval.
+    """Set by the server to the subagent thread this confirmation was routed to.
+
+    Omitted when it was routed to the primary thread.
     """

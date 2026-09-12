@@ -50,7 +50,7 @@ class BetaManagedAgentsUserToolResultEvent(BaseModel):
     """A timestamp in RFC 3339 format"""
 
     session_thread_id: Optional[str] = None
-    """Routes this result to a subagent thread.
+    """Set by the server to the subagent thread this result was routed to.
 
-    Copy from the `agent.tool_use` event's `session_thread_id`.
+    Omitted when it was routed to the primary thread.
     """
