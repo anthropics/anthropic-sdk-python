@@ -666,8 +666,6 @@ class TestAsyncMessages:
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
-    @pytest.mark.asyncio
-    @pytest.mark.respx(base_url=base_url)
     async def test_message_delta_fields_propagated(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(200, content=to_async_iter(get_response("message_delta_fields_response.txt")))
