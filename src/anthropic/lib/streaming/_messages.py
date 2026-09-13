@@ -135,6 +135,7 @@ class MessageStream(Generic[ResponseFormatT]):
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
                 json_bufs=self.__json_bufs,
+                request_headers=self.response.request.headers,
                 output_format=self.__output_format,
             )
 
@@ -288,6 +289,7 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
                 json_bufs=self.__json_bufs,
+                request_headers=self.response.request.headers,
                 output_format=self.__output_format,
             )
 
@@ -442,7 +444,8 @@ def accumulate_event(
     *,
     event: RawMessageStreamEvent,
     current_snapshot: ParsedMessage[ResponseFormatT] | None,
-    json_bufs: dict[int, bytes],
+    json_bufs: dict[int, bytes] | None = None,
+    request_headers: httpx.Headers | None = None,
     output_format: ResponseFormatT | NotGiven = not_given,
 ) -> ParsedMessage[ResponseFormatT]:
     if not isinstance(cast(Any, event), BaseModel):
@@ -479,18 +482,24 @@ def accumulate_event(
             if isinstance(content, TRACKS_TOOL_INPUT):
                 from jiter import from_json
 
-                json_buf = json_bufs.get(event.index, b"")
+                json_buf = (json_bufs.get(event.index, b"") if json_bufs is not None else b"")
                 json_buf += bytes(event.delta.partial_json, "utf-8")
 
                 if json_buf:
                     try:
-                        content.input = from_json(json_buf, partial_mode=True)
+                        anthropic_beta = request_headers.get("anthropic-beta", "") if request_headers else ""
+
+                        if "fine-grained-tool-streaming-2025-05-14" in anthropic_beta:
+                            content.input = from_json(json_buf, partial_mode="trailing-strings")
+                        else:
+                            content.input = from_json(json_buf, partial_mode=True)
                     except ValueError as e:
                         raise ValueError(
                             f"Unable to parse tool parameter JSON from model. Please retry your request or adjust your prompt. Error: {e}. JSON: {json_buf.decode('utf-8')}"
                         ) from e
 
-                json_bufs[event.index] = json_buf
+                if json_bufs is not None:
+                    json_bufs[event.index] = json_buf
         elif event.delta.type == "citations_delta":
             if content.type == "text":
                 if not content.citations:
