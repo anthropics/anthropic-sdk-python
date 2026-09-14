@@ -5,6 +5,7 @@ from typing_extensions import Literal, Required, TypedDict
 
 from ..._types import SequenceNotStr
 from .beta_citations_config_param import BetaCitationsConfigParam
+from .beta_web_fetch_url_sources_param import BetaWebFetchURLSourcesParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
 __all__ = ["BetaWebFetchTool20260309Param"]
@@ -57,6 +58,15 @@ class BetaWebFetchTool20260309Param(TypedDict, total=False):
 
     strict: bool
     """When true, guarantees schema validation on tool names and inputs"""
+
+    url_sources: Optional[BetaWebFetchURLSourcesParam]
+    """Which sources contribute to the set of URLs web fetch may fetch.
+
+    Each key is a tagged variant: `user_input` is `all` or `none`; the two tool
+    filters are `all`, `none`, `only` (only the named tools' results) or `except`
+    (every result but the named tools'). A named tool must be declared in this
+    request's `tools[]`.
+    """
 
     use_cache: bool
     """Whether to use cached content.

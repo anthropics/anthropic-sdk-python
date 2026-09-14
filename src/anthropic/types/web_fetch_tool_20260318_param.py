@@ -5,6 +5,7 @@ from typing_extensions import Literal, Required, TypedDict
 
 from .._types import SequenceNotStr
 from .citations_config_param import CitationsConfigParam
+from .web_fetch_url_sources_param import WebFetchURLSourcesParam
 from .cache_control_ephemeral_param import CacheControlEphemeralParam
 
 __all__ = ["WebFetchTool20260318Param"]
@@ -65,6 +66,15 @@ class WebFetchTool20260318Param(TypedDict, total=False):
 
     strict: bool
     """When true, guarantees schema validation on tool names and inputs"""
+
+    url_sources: Optional[WebFetchURLSourcesParam]
+    """Which sources contribute to the set of URLs web fetch may fetch.
+
+    Each key is a tagged variant: `user_input` is `all` or `none`; the two tool
+    filters are `all`, `none`, `only` (only the named tools' results) or `except`
+    (every result but the named tools'). A named tool must be declared in this
+    request's `tools[]`.
+    """
 
     use_cache: bool
     """Whether to use cached content.
