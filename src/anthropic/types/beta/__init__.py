@@ -115,6 +115,7 @@ from .user_profile_list_params import UserProfileListParams as UserProfileListPa
 from .beta_advisor_result_block import BetaAdvisorResultBlock as BetaAdvisorResultBlock
 from .beta_dream_sessions_input import BetaDreamSessionsInput as BetaDreamSessionsInput
 from .beta_fallback_block_param import BetaFallbackBlockParam as BetaFallbackBlockParam
+from .beta_input_transformation import BetaInputTransformation as BetaInputTransformation
 from .beta_managed_agents_agent import BetaManagedAgentsAgent as BetaManagedAgentsAgent
 from .beta_managed_agents_model import BetaManagedAgentsModel as BetaManagedAgentsModel
 from .beta_managed_agents_vault import BetaManagedAgentsVault as BetaManagedAgentsVault
@@ -977,6 +978,9 @@ from .beta_managed_agents_organization_disabled_run_error import (
 )
 from .beta_text_editor_code_execution_create_result_block import (
     BetaTextEditorCodeExecutionCreateResultBlock as BetaTextEditorCodeExecutionCreateResultBlock,
+)
+from .beta_thinking_mismatch_allowed_input_transformation import (
+    BetaThinkingMismatchAllowedInputTransformation as BetaThinkingMismatchAllowedInputTransformation,
 )
 from .beta_managed_agents_agent_toolset20260401_bash_input import (
     BetaManagedAgentsAgentToolset20260401BashInput as BetaManagedAgentsAgentToolset20260401BashInput,
