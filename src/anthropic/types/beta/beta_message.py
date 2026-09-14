@@ -8,8 +8,8 @@ from .beta_container import BetaContainer
 from .beta_diagnostics import BetaDiagnostics
 from .beta_stop_reason import BetaStopReason
 from .beta_content_block import BetaContentBlock, BetaContentBlock as BetaContentBlock
-from .beta_input_transformation import BetaInputTransformation
 from .beta_message_param import BetaMessageParam
+from .beta_input_transformation import BetaInputTransformation
 from .beta_refusal_stop_details import BetaRefusalStopDetails
 from .beta_context_management_response import BetaContextManagementResponse
 
