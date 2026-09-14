@@ -1,16 +1,15 @@
-from typing import List, Union, Optional
-from typing_extensions import Literal, Annotated, TypeAlias
+from typing import List, Optional
+from typing_extensions import Literal
 
-from ..._models import BaseModel, UnionDiscriminator
+from ..._models import BaseModel
 from .beta_container import BetaContainer
 from .beta_stop_reason import BetaStopReason
 from .beta_message_delta_usage import BetaMessageDeltaUsage
+from .beta_input_transformation import BetaInputTransformation
 from .beta_refusal_stop_details import BetaRefusalStopDetails
 from .beta_context_management_response import BetaContextManagementResponse
-from .beta_thinking_dropped_input_transformation import BetaThinkingDroppedInputTransformation
-from .beta_thinking_mismatch_allowed_input_transformation import BetaThinkingMismatchAllowedInputTransformation
 
-__all__ = ["BetaRawMessageDeltaEvent", "Delta", "InputTransformation"]
+__all__ = ["BetaRawMessageDeltaEvent", "Delta"]
 
 
 class Delta(BaseModel):
@@ -26,12 +25,6 @@ class Delta(BaseModel):
     stop_reason: Optional[BetaStopReason] = None
 
     stop_sequence: Optional[str] = None
-
-
-InputTransformation: TypeAlias = Annotated[
-    Union[BetaThinkingDroppedInputTransformation, BetaThinkingMismatchAllowedInputTransformation],
-    UnionDiscriminator("type"),
-]
 
 
 class BetaRawMessageDeltaEvent(BaseModel):
@@ -60,7 +53,7 @@ class BetaRawMessageDeltaEvent(BaseModel):
     `cache_creation_input_tokens`, and `cache_read_input_tokens`.
     """
 
-    input_transformations: Optional[List[InputTransformation]] = None
+    input_transformations: Optional[List[BetaInputTransformation]] = None
     """
     Changes the API made to the request's input before showing it to the model, and
     blocks that failed a binding check but were left unchanged: one entry per block,
