@@ -172,7 +172,7 @@ class BaseFunctionTool(Generic[CallableT]):
         self._input_examples = input_examples
         self._strict = strict
 
-        self.description = description or self._get_description_from_docstring()
+        self.description = description if description is not None else self._get_description_from_docstring()
 
         if input_schema is not None:
             if isinstance(input_schema, type):
