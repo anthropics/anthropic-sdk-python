@@ -754,7 +754,7 @@ class TestAccumulateEvent:
         result = accumulate_event(
             event=_make_input_json_event('{"key": "value"}'),
             current_snapshot=_make_tool_use_snapshot(),
-            request_headers=httpx.Headers({"some-header": "value"}),
+            request_headers=httpx2.Headers({"some-header": "value"}),
         )
         assert cast(ToolUseBlock, result.content[0]).input == {"key": "value"}
 
@@ -764,12 +764,12 @@ class TestAccumulateEvent:
         result_standard = accumulate_event(
             event=_make_input_json_event(incomplete_json),
             current_snapshot=_make_tool_use_snapshot(),
-            request_headers=httpx.Headers({"some-header": "value"}),
+            request_headers=httpx2.Headers({"some-header": "value"}),
         )
         result_trailing = accumulate_event(
             event=_make_input_json_event(incomplete_json),
             current_snapshot=_make_tool_use_snapshot(),
-            request_headers=httpx.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
+            request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
         )
 
         standard_input = cast(ToolUseBlock, result_standard.content[0]).input
@@ -792,7 +792,7 @@ class TestAccumulateEvent:
             accumulate_event(
                 event=_make_input_json_event(invalid_json),
                 current_snapshot=_make_tool_use_snapshot(),
-                request_headers=httpx.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
+                request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
             )
 
     def test_invalid_json_raises_without_beta_header(self) -> None:
@@ -802,5 +802,5 @@ class TestAccumulateEvent:
             accumulate_event(
                 event=_make_input_json_event(invalid_json),
                 current_snapshot=_make_tool_use_snapshot(),
-                request_headers=httpx.Headers({"some-header": "value"}),
+                request_headers=httpx2.Headers({"some-header": "value"}),
             )

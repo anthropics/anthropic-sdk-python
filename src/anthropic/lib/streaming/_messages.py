@@ -445,7 +445,7 @@ def accumulate_event(
     event: RawMessageStreamEvent,
     current_snapshot: ParsedMessage[ResponseFormatT] | None,
     json_bufs: dict[int, bytes] | None = None,
-    request_headers: httpx.Headers | None = None,
+    request_headers: httpx2.Headers | None = None,
     output_format: ResponseFormatT | NotGiven = not_given,
 ) -> ParsedMessage[ResponseFormatT]:
     if not isinstance(cast(Any, event), BaseModel):
