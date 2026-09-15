@@ -21,8 +21,7 @@ class BetaCompactionConfigParam(TypedDict, total=False):
     type: Required[Literal["summarize"]]
 
     instructions: Optional[str]
-    """Replaces the server's summarization prompt for this request.
+    """Replaces the server's default summarization prompt for this request.
 
-    When set, earlier thinking blocks are left out of the content being summarized
-    on models that require it.
+    An empty or whitespace-only value counts as absent.
     """
