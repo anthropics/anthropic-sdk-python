@@ -814,7 +814,7 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
                 field_schema = field["schema"]
 
                 if field_schema["type"] == "literal":
-                    for entry in cast("LiteralSchema", field_schema)["expected"]:
+                    for entry in cast("LiteralSchema", field_schema)["expected"]:  # pyright: ignore[reportUnnecessaryCast]
                         if isinstance(entry, str):
                             mapping[entry] = variant
 
@@ -838,12 +838,12 @@ def _extract_field_schema_pv2(model: type[BaseModel], field_name: str) -> ModelF
     if schema["type"] != "model":
         return None
 
-    schema = cast("ModelSchema", schema)
+    schema = cast("ModelSchema", schema)  # pyright: ignore[reportUnnecessaryCast]
     fields_schema = schema["schema"]
     if fields_schema["type"] != "model-fields":
         return None
 
-    fields_schema = cast("ModelFieldsSchema", fields_schema)
+    fields_schema = cast("ModelFieldsSchema", fields_schema)  # pyright: ignore[reportUnnecessaryCast]
     field = fields_schema["fields"].get(field_name)
     if not field:
         return None
