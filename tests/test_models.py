@@ -833,10 +833,11 @@ def test_discriminated_unions_invalid_data_uses_cache() -> None:
     assert DISCRIMINATOR_CACHE.get(UnionType) is discriminator
 
 
+Alias = TypeAliasType("Alias", str)
+
+
 @pytest.mark.skipif(PYDANTIC_V1, reason="TypeAliasType is not supported in Pydantic v1")
 def test_type_alias_type() -> None:
-    Alias = TypeAliasType("Alias", str)  # pyright: ignore
-
     class Model(BaseModel):
         alias: Alias
         union: Union[int, Alias]
