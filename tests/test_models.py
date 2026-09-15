@@ -879,8 +879,7 @@ def test_pep604_union_field_invalid_data() -> None:
         data: int
 
     class Model(BaseModel):
-        # FA102's fix postpones annotations, which Pydantic v1 can't resolve for these local models
-        item: A | B  # noqa: FA102
+        item: A | B
 
     # fails strict validation for both variants, so the union fallback in `construct_type` runs
     m = Model.construct(item={"kind": "b", "data": "foo"})
