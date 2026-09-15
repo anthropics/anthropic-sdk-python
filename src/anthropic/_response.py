@@ -615,7 +615,7 @@ class StreamAlreadyConsumed(AnthropicError):
     been streamed.
 
     This can happen if you use a method like `.iter_lines()` and then attempt
-    to read th entire response body afterwards, e.g.
+    to read the entire response body afterwards, e.g.
 
     ```py
     response = await client.post(...)
