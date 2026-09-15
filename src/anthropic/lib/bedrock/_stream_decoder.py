@@ -56,7 +56,10 @@ class AWSEventStreamDecoder:
         response_dict = event.to_response_dict()
         parsed_response = self.parser.parse(response_dict, get_response_stream_shape())
         if response_dict["status_code"] != 200:
-            raise ValueError(f"Bad response code, expected 200: {response_dict}")
+            # an `exception`/`error` frame: surface it the way a first-party stream `error` event does
+            error = parsed_response["Error"]
+            data = {"type": "error", "error": {"type": error["Code"], "message": error["Message"]}}
+            return ServerSentEvent(data=json.dumps(data), event="error")
 
         chunk = parsed_response.get("chunk")
         if not chunk:
