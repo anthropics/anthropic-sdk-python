@@ -1470,5 +1470,7 @@ def test_tool_runner_method_in_sync(sync: bool, client: Anthropic, async_client:
             "output_format",
             # TODO
             "stream",
+            # a tool runner can't take it: every request of the loop would compact again
+            "compaction",
         },
     )

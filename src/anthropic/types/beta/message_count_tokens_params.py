@@ -12,6 +12,7 @@ from .beta_mcp_toolset_param import BetaMCPToolsetParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_output_config_param import BetaOutputConfigParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
+from .beta_compaction_config_param import BetaCompactionConfigParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
 from .beta_tool_bash_20250124_param import BetaToolBash20250124Param
 from .beta_memory_tool_20250818_param import BetaMemoryTool20250818Param
@@ -126,6 +127,18 @@ class MessageCountTokensParams(TypedDict, total=False):
     """
     Top-level cache control automatically applies a cache_control marker to the last
     cacheable block in the request.
+    """
+
+    compaction: Optional[BetaCompactionConfigParam]
+    """
+    Compact the whole conversation and return a signed `compaction` block, alone,
+    that a later request sends back first in `messages`, in place of the messages it
+    summarizes. There is no trigger and no pause flag: sending the parameter
+    compacts, and nothing is sampled after the block.
+
+    The summarization prompt is the server's own unless `instructions` are given,
+    which then replace it for this request; a value that is empty or only whitespace
+    counts as absent.
     """
 
     context_management: Optional[BetaContextManagementConfigParam]

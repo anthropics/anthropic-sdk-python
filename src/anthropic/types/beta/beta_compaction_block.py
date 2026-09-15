@@ -21,3 +21,6 @@ class BetaCompactionBlock(BaseModel):
     """Opaque metadata from prior compaction, to be round-tripped verbatim"""
 
     type: Literal["compaction"]
+
+    signature: Optional[str] = None
+    """Signature over the summary, to be sent back with the block verbatim"""

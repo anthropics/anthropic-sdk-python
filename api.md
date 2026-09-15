@@ -396,6 +396,7 @@ Types:
 ```python
 from anthropic.types.beta import (
     BetaCapabilitySupport,
+    BetaCompactionCapability,
     BetaContextManagementCapability,
     BetaEffortCapability,
     BetaModelCapabilities,
@@ -520,6 +521,7 @@ from anthropic.types.beta import (
     BetaCompact20260112Edit,
     BetaCompactionBlock,
     BetaCompactionBlockParam,
+    BetaCompactionConfig,
     BetaCompactionContentBlockDelta,
     BetaCompactionIterationUsage,
     BetaComputerCursorPositionConfig,
@@ -630,6 +632,7 @@ from anthropic.types.beta import (
     BetaSignatureDelta,
     BetaSkillParams,
     BetaStopReason,
+    BetaSummarizeCompaction,
     BetaSystemMessageOutputConfig,
     BetaTextBlock,
     BetaTextBlockParam,
