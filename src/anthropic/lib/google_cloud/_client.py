@@ -48,10 +48,10 @@ class _GoogleCredentialsState:
     """Holder for the Google credentials object, its refresh lock, and the project
     ADC resolved.
 
-    Shared between a client and its ``copy()``/``with_options()`` clones (when the
+    Shared between a client and its `copy()`/`with_options()` clones (when the
     credential configuration is inherited) so a lazily-loaded ADC credential is
     minted once — not once per clone — and concurrent loads/refreshes are
-    serialized: google-auth credential objects are not safe to ``refresh()``
+    serialized: google-auth credential objects are not safe to `refresh()`
     concurrently.
     """
 
@@ -76,9 +76,9 @@ class _GoogleCredentialsState:
 
 
 class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
-    """Marker base so ``_is_base_client()`` keeps these clients off the first-party
-    credential-discovery chain (it matches only the exact ``Anthropic`` /
-    ``AsyncAnthropic`` classes). Auth is handled entirely by this helper."""
+    """Marker base so `_is_base_client()` keeps these clients off the first-party
+    credential-discovery chain (it matches only the exact `Anthropic` /
+    `AsyncAnthropic` classes). Auth is handled entirely by this helper."""
 
     workspace_id: str | None
     _project: str | None
@@ -101,10 +101,10 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
 
     @property
     def google_credentials(self) -> GoogleCredentials | None:
-        """The ``google.auth`` credentials in use (explicit or lazily-loaded ADC), if any.
+        """The `google.auth` credentials in use (explicit or lazily-loaded ADC), if any.
 
-        Distinct from ``.credentials``, which is the base client's first-party
-        credentials provider and is always ``None`` on this client.
+        Distinct from `.credentials`, which is the base client's first-party
+        credentials provider and is always `None` on this client.
         """
         return self._creds_state.credentials
 
@@ -138,11 +138,11 @@ def _resolve_base_url(
     workspace_id: str | None,
     allow_deferred_project: bool,
 ) -> str | httpx2.URL | None:
-    """base_url (arg or ``ANTHROPIC_GOOGLE_CLOUD_BASE_URL``, resolved by the caller)
+    """base_url (arg or `ANTHROPIC_GOOGLE_CLOUD_BASE_URL`, resolved by the caller)
     > derived template.
 
-    Returns ``None`` when derivation must wait for the project to be back-filled
-    from Google credentials on the first request (``allow_deferred_project``).
+    Returns `None` when derivation must wait for the project to be back-filled
+    from Google credentials on the first request (`allow_deferred_project`).
     """
     if base_url is not None:
         return base_url
@@ -188,7 +188,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
     gateway (Claude Platform on Google Cloud).
 
     The whole first-party surface is proxied verbatim (no URL or body rewriting), so
-    this subclasses the full ``Anthropic`` client. Authentication is a GCP bearer
+    this subclasses the full `Anthropic` client. Authentication is a GCP bearer
     token.
     """
 
@@ -215,23 +215,23 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
     ) -> None:
         """Construct a new synchronous Claude Platform on Google Cloud client.
 
-        Auth precedence (first match wins, unless ``skip_auth=True``):
-          1. ``token_provider`` — a callable returning a GCP access token, invoked per request.
-          2. ``credentials`` — a ``google.auth`` Credentials object, refreshed as needed.
-          3. Application Default Credentials (``google.auth.default``).
+        Auth precedence (first match wins, unless `skip_auth=True`):
+          1. `token_provider` — a callable returning a GCP access token, invoked per request.
+          2. `credentials` — a `google.auth` Credentials object, refreshed as needed.
+          3. Application Default Credentials (`google.auth.default`).
 
         Args:
-            project: GCP consumer project id (or ``ANTHROPIC_GOOGLE_CLOUD_PROJECT``,
-                else ``GOOGLE_CLOUD_PROJECT``). Only needed when the base URL must be
-                derived; if omitted there, it is taken from an explicit ``credentials``
+            project: GCP consumer project id (or `ANTHROPIC_GOOGLE_CLOUD_PROJECT`,
+                else `GOOGLE_CLOUD_PROJECT`). Only needed when the base URL must be
+                derived; if omitted there, it is taken from an explicit `credentials`
                 object when it exposes one, or back-filled from ADC on the first request.
-            location: GCP location (or ``ANTHROPIC_GOOGLE_CLOUD_LOCATION``). Optional —
-                defaults to ``global``, the region the gateway should normally be
+            location: GCP location (or `ANTHROPIC_GOOGLE_CLOUD_LOCATION`). Optional —
+                defaults to `global`, the region the gateway should normally be
                 addressed through.
-            workspace_id: The Anthropic workspace ID (or ``ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID``).
-                Required unless ``skip_auth`` is set with an explicit ``base_url``.
+            workspace_id: The Anthropic workspace ID (or `ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID`).
+                Required unless `skip_auth` is set with an explicit `base_url`.
             skip_auth: For pre-authenticated proxies — skips token attachment. A
-                workspace ID is still needed to derive the base URL; pass ``base_url``
+                workspace ID is still needed to derive the base URL; pass `base_url`
                 to construct without one. Mutually exclusive with the credential
                 arguments.
         """
@@ -375,11 +375,11 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
     ) -> Self:
         """Create a new client re-using the current options, with optional overrides.
 
-        Passing either of ``token_provider`` / ``credentials`` replaces the
+        Passing either of `token_provider` / `credentials` replaces the
         inherited credential configuration wholesale — the source not passed is
         cleared, so an explicit lower-precedence credential takes effect.
-        ``workspace_id=None`` clears the workspace ID; ``project`` /
-        ``location`` overrides re-derive a template-derived base URL.
+        `workspace_id=None` clears the workspace ID; `project` /
+        `location` overrides re-derive a template-derived base URL.
         """
         if default_headers is not None and set_default_headers is not None:
             raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
@@ -445,7 +445,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
 
 class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncStream[Any]], AsyncAnthropic):
     """Asynchronous client for the first-party Anthropic API served through Google's
-    gateway (Claude Platform on Google Cloud). See ``AnthropicGoogleCloud``.
+    gateway (Claude Platform on Google Cloud). See `AnthropicGoogleCloud`.
     """
 
     workspace_id: str | None
@@ -471,8 +471,8 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
     ) -> None:
         """Construct a new asynchronous Claude Platform on Google Cloud client.
 
-        ``token_provider`` may be sync or async; sync providers are run off the
-        event loop. See ``AnthropicGoogleCloud`` for the full argument and
+        `token_provider` may be sync or async; sync providers are run off the
+        event loop. See `AnthropicGoogleCloud` for the full argument and
         auth-precedence docs.
         """
         _reject_skip_auth_conflict(skip_auth=skip_auth, token_provider=token_provider, credentials=credentials)
@@ -608,7 +608,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
     ) -> Self:
         """Create a new client re-using the current options, with optional overrides.
 
-        See ``AnthropicGoogleCloud.copy`` for the override semantics.
+        See `AnthropicGoogleCloud.copy` for the override semantics.
         """
         if default_headers is not None and set_default_headers is not None:
             raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")

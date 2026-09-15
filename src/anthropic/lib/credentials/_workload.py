@@ -74,18 +74,18 @@ def _redact_body(body: Any) -> Any:
 
 
 def _raise_token_endpoint_error(resp: httpx2.Response, *, message_prefix: str, hint: Optional[str] = None) -> NoReturn:
-    """Raise a redacted :class:`WorkloadIdentityError` from a non-200 token-endpoint response.
+    """Raise a redacted `WorkloadIdentityError` from a non-200 token-endpoint response.
 
     Shared between the jwt-bearer exchange path in this module and the
-    refresh_token grant path in :mod:`_providers`.
+    refresh_token grant path in `_providers`.
 
     The raw response body (which token endpoints can echo credential material
     into) is never bound to a local in this frame — only the redaction is —
     so this frame is safe under crash reporters that capture traceback locals.
 
-    ``hint`` is an optional caller-supplied diagnostic appended verbatim to the
+    `hint` is an optional caller-supplied diagnostic appended verbatim to the
     error message (after the redacted body). Callers gate it on the response
-    status and their own state — this helper does not inspect ``resp`` for it.
+    status and their own state — this helper does not inspect `resp` for it.
     """
     try:
         redacted = _redact_body(resp.json())
@@ -108,7 +108,7 @@ log: logging.Logger = logging.getLogger(__name__)
 
 
 class WorkloadIdentityError(AnthropicError):
-    """Raised when the OIDC token exchange (``POST /v1/oauth/token``) fails."""
+    """Raised when the OIDC token exchange (`POST /v1/oauth/token`) fails."""
 
     status_code: Optional[int]
     body: Any
@@ -137,26 +137,26 @@ class WorkloadIdentityError(AnthropicError):
 
 class WorkloadIdentityCredentials:
     """Exchanges an external OIDC JWT for an Anthropic access token via the
-    RFC 7523 ``jwt-bearer`` grant.
+    RFC 7523 `jwt-bearer` grant.
 
-    This is an :class:`AccessTokenProvider`: calling it performs a *fresh* token
-    exchange. Wrap in a :class:`TokenCache` (done automatically when passed as
-    ``credentials=`` to :class:`anthropic.Anthropic`) to avoid exchanging on every
+    This is an `AccessTokenProvider`: calling it performs a *fresh* token
+    exchange. Wrap in a `TokenCache` (done automatically when passed as
+    `credentials=` to `anthropic.Anthropic`) to avoid exchanging on every
     request.
 
     Args:
         organization_id: The organization's raw UUID string (organizations do
             not use tagged IDs).
-        workspace_id: Optional ``wrkspc_*`` tagged ID, or the literal
-            ``"default"`` to scope the token to the organization's default
+        workspace_id: Optional `wrkspc_*` tagged ID, or the literal
+            `"default"` to scope the token to the organization's default
             workspace. When omitted the server picks the rule's sole enabled
             workspace, else the org default if the rule covers it. Required
             when the rule enables more than one non-default workspace, or to
             target a specific workspace other than the one the server would
             pick. The minted token is workspace-scoped: per-request workspace
-            selection (the ``anthropic-workspace-id`` header) is not supported
+            selection (the `anthropic-workspace-id` header) is not supported
             for federation tokens — switching workspaces requires a new token
-            exchange with a different ``workspace_id``.
+            exchange with a different `workspace_id`.
     """
 
     def __init__(
@@ -180,8 +180,8 @@ class WorkloadIdentityCredentials:
         # transform drops unknown body fields, so it is intentionally NOT sent
         # on the jwt-bearer request.
         self._scope = scope
-        # The client passing this object as ``credentials=`` calls
-        # :meth:`for_base_url` to set its own endpoint, so the token exchange
+        # The client passing this object as `credentials=` calls
+        # `for_base_url` to set its own endpoint, so the token exchange
         # and the API calls hit the same deployment. There is intentionally no
         # constructor kwarg for this: a token minted by one deployment is only
         # valid against that deployment, so splitting exchange-base from
@@ -203,10 +203,10 @@ class WorkloadIdentityCredentials:
         return self._bound_base_url or DEFAULT_BASE_URL
 
     def bind_base_url(self, base_url: str) -> None:
-        """Set the API ``base_url`` the token exchange POSTs to.
+        """Set the API `base_url` the token exchange POSTs to.
 
         For standalone use (no client) or tests. Clients bind through
-        :meth:`for_base_url`, which never rebinds an instance another client
+        `for_base_url`, which never rebinds an instance another client
         is already exchanging through.
         """
         bound = base_url.rstrip("/")
@@ -214,13 +214,13 @@ class WorkloadIdentityCredentials:
         self._bound_base_url = bound
 
     def for_base_url(self, base_url: str) -> "WorkloadIdentityCredentials":
-        """Return the provider a client with ``base_url`` should exchange through.
+        """Return the provider a client with `base_url` should exchange through.
 
         Binds in place, unless another client already bound this instance to a
-        different host (e.g. the parent of ``copy(base_url=...)``). Rebinding
+        different host (e.g. the parent of `copy(base_url=...)`). Rebinding
         would move that client's token exchange too, so a copy bound to
-        ``base_url`` is returned instead; it shares the identity token and
-        borrows (never closes) this instance's ``httpx2.Client``.
+        `base_url` is returned instead; it shares the identity token and
+        borrows (never closes) this instance's `httpx2.Client`.
         """
         bound = base_url.rstrip("/")
         provider = self
@@ -231,7 +231,7 @@ class WorkloadIdentityCredentials:
         return provider
 
     def close(self) -> None:
-        """Close the underlying ``httpx2.Client`` if we created it."""
+        """Close the underlying `httpx2.Client` if we created it."""
         if self._owns_http_client:
             self._http_client.close()
 
@@ -319,7 +319,7 @@ class WorkloadIdentityCredentials:
 
         try:
             # Token values are SecretStr-wrapped in place at the parse
-            # boundary, so every error path below may hold ``data`` in its
+            # boundary, so every error path below may hold `data` in its
             # frame without retaining raw credential material.
             data = _wrap_secret_fields(resp.json())
         except ValueError as err:
@@ -351,9 +351,9 @@ class WorkloadIdentityCredentials:
 
         try:
             token = data["access_token"]
-            # ``expires_in`` is a JSON number per RFC 6749 §5.1; coerce to int seconds.
+            # `expires_in` is a JSON number per RFC 6749 §5.1; coerce to int seconds.
             expires_in = int(data["expires_in"])
-        except (KeyError, TypeError, ValueError) as err:
+        except (KeyError, TypeError, ValueError, OverflowError) as err:
             raise WorkloadIdentityError(
                 "Token endpoint response missing required fields (access_token / expires_in).",
                 status_code=resp.status_code,
@@ -374,15 +374,15 @@ def exchange_federation_assertion(
     base_url: Optional[str] = None,
     http_client: Optional[httpx2.Client] = None,
 ) -> AccessToken:
-    """Perform a single RFC 7523 ``jwt-bearer`` exchange and return the resulting
-    :class:`AccessToken`.
+    """Perform a single RFC 7523 `jwt-bearer` exchange and return the resulting
+    `AccessToken`.
 
-    This is a one-shot convenience wrapper around :class:`WorkloadIdentityCredentials`
+    This is a one-shot convenience wrapper around `WorkloadIdentityCredentials`
     for callers that already have the assertion JWT in hand and just want the
     Anthropic access token back (no caching, no provider plumbing).
 
-    ``assertion`` may be a :class:`pydantic.SecretStr` to keep it redacted
-    end-to-end; a plain ``str`` is wrapped on entry.
+    `assertion` may be a `pydantic.SecretStr` to keep it redacted
+    end-to-end; a plain `str` is wrapped on entry.
     """
     if isinstance(assertion, str):
         # Rebind so this frame's local holds the wrapped form — the raw string

@@ -1,4 +1,4 @@
-"""Serializing SDK tool objects into the ``tools[]`` entries the Messages API accepts."""
+"""Serializing SDK tool objects into the `tools[]` entries the Messages API accepts."""
 
 from __future__ import annotations
 
@@ -15,21 +15,21 @@ __all__ = ["BetaToolLike"]
 
 @runtime_checkable
 class SupportsToDict(Protocol):
-    """An object whose ``to_dict()`` is the ``tools[]`` entry to send for it.
+    """An object whose `to_dict()` is the `tools[]` entry to send for it.
 
-    ``@beta_tool`` function tools and builtin tools satisfy this, as does anything else
-    with a matching ``to_dict()``.
+    `@beta_tool` function tools and builtin tools satisfy this, as does anything else
+    with a matching `to_dict()`.
     """
 
     def to_dict(self) -> BetaToolUnionParam: ...
 
 
 BetaToolLike: TypeAlias = Union[BetaToolUnionParam, SupportsToDict]
-"""A ``tools[]`` entry, or an object that serializes to one through ``to_dict()``."""
+"""A `tools[]` entry, or an object that serializes to one through `to_dict()`."""
 
 
 def to_tool_params(tools: Iterable[BetaToolLike] | Omit | NotGiven) -> list[BetaToolUnionParam] | Omit:
-    """Replace every ``to_dict()``-bearing object in ``tools`` with its entry, keeping order and helper tags."""
+    """Replace every `to_dict()`-bearing object in `tools` with its entry, keeping order and helper tags."""
     if not is_given(tools):
         return omit
     return [carry_helper_tag(tool, tool.to_dict()) if isinstance(tool, SupportsToDict) else tool for tool in tools]

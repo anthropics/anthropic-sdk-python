@@ -43,6 +43,7 @@ class TestUserProfiles:
             metadata={},
             name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -78,6 +79,7 @@ class TestUserProfiles:
         user_profile = client.beta.user_profiles.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -138,6 +140,7 @@ class TestUserProfiles:
             metadata={"foo": "string"},
             name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -185,6 +188,7 @@ class TestUserProfiles:
             order_by="created_at",
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaUserProfile], user_profile, path=["response"])
 
@@ -220,6 +224,7 @@ class TestUserProfiles:
         user_profile = client.beta.user_profiles.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfileEnrollmentURL, user_profile, path=["response"])
 
@@ -283,6 +288,7 @@ class TestAsyncUserProfiles:
             metadata={},
             name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -318,6 +324,7 @@ class TestAsyncUserProfiles:
         user_profile = await async_client.beta.user_profiles.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -378,6 +385,7 @@ class TestAsyncUserProfiles:
             metadata={"foo": "string"},
             name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -425,6 +433,7 @@ class TestAsyncUserProfiles:
             order_by="created_at",
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaUserProfile], user_profile, path=["response"])
 
@@ -460,6 +469,7 @@ class TestAsyncUserProfiles:
         user_profile = await async_client.beta.user_profiles.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfileEnrollmentURL, user_profile, path=["response"])
 

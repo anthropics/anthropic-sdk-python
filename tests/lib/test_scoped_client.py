@@ -1,9 +1,9 @@
-"""Direct unit tests for :func:`_copy_client_with_bearer_auth`.
+"""Direct unit tests for `_copy_client_with_bearer_auth`.
 
 These verify the load-bearing invariants of the util — auth replaced, parent
-not mutated, helper-telemetry header set — without re-exercising ``copy()``'s
+not mutated, helper-telemetry header set — without re-exercising `copy()`'s
 own inheritance contract (which is the SDK's job to keep working). Both sync
-and async client paths are covered so the ``ClientT`` generic threads through.
+and async client paths are covered so the `ClientT` generic threads through.
 """
 
 from __future__ import annotations
@@ -22,9 +22,9 @@ def test_sets_bearer_auth_token_on_copy() -> None:
 
 
 def test_clears_parent_api_key_on_copy() -> None:
-    """The post-hoc ``scoped.api_key = None`` mutation is the only thing
-    keeping the parent's ``X-Api-Key`` off the sub-client's wire. If this ever
-    starts returning a sub-client with ``api_key`` set, the parent's API
+    """The post-hoc `scoped.api_key = None` mutation is the only thing
+    keeping the parent's `X-Api-Key` off the sub-client's wire. If this ever
+    starts returning a sub-client with `api_key` set, the parent's API
     credential would silently authenticate every helper request."""
     parent = Anthropic(api_key="parent-key")
     scoped = _copy_client_with_bearer_auth(parent, auth_token="env-key", helper="environments-work-poller")
@@ -63,8 +63,8 @@ def test_does_not_mutate_parent_client() -> None:
 
 
 def test_empty_auth_token_raises() -> None:
-    """An empty ``auth_token`` would silently fall back to the parent's
-    ``auth_token`` via ``copy()``'s truthy-or, producing a sub-client with no
+    """An empty `auth_token` would silently fall back to the parent's
+    `auth_token` via `copy()`'s truthy-or, producing a sub-client with no
     intentional credential set."""
     parent = Anthropic(api_key="parent-key")
     with pytest.raises(ValueError, match="auth_token"):
@@ -73,8 +73,8 @@ def test_empty_auth_token_raises() -> None:
 
 @pytest.mark.asyncio()
 async def test_async_client_path_clears_api_key_and_sets_bearer() -> None:
-    """The same invariants hold for ``AsyncAnthropic`` — verifies the
-    ``ClientT`` typevar threads sync/async correctly through ``copy()``."""
+    """The same invariants hold for `AsyncAnthropic` — verifies the
+    `ClientT` typevar threads sync/async correctly through `copy()`."""
     parent = AsyncAnthropic(api_key="parent-key")
     scoped = _copy_client_with_bearer_auth(parent, auth_token="env-key", helper="session-tool-runner")
     assert isinstance(scoped, AsyncAnthropic)
@@ -85,10 +85,10 @@ async def test_async_client_path_clears_api_key_and_sets_bearer() -> None:
 
 def test_strips_inherited_authorization_from_parent_default_headers() -> None:
     """If the parent client was configured with a custom
-    ``default_headers={"Authorization": ...}`` (or ``X-Api-Key``), those would
+    `default_headers={"Authorization": ...}` (or `X-Api-Key`), those would
     otherwise win over the bearer we just set because
-    :meth:`AsyncAnthropic.default_headers` merges ``_custom_headers`` after
-    ``auth_headers``. The helper strips them from the sub-client's custom
+    `AsyncAnthropic.default_headers` merges `_custom_headers` after
+    `auth_headers`. The helper strips them from the sub-client's custom
     headers so the bearer is unambiguous on the wire."""
     parent = Anthropic(
         api_key="parent-key",
@@ -111,16 +111,16 @@ def test_strips_inherited_authorization_from_parent_default_headers() -> None:
 @pytest.mark.asyncio()
 async def test_scoped_sub_client_sends_only_bearer_on_the_wire() -> None:
     """Integration-level check: send a real HTTP request through the scoped
-    sub-client (via ``httpx2.MockTransport``) and inspect the headers actually
+    sub-client (via `httpx2.MockTransport`) and inspect the headers actually
     on the wire. Asserts exactly one auth credential is sent — the bearer —
-    and the parent's ``X-Api-Key`` doesn't leak.
+    and the parent's `X-Api-Key` doesn't leak.
 
     This is the surface that the case-mismatch bug fixed by this whole
     refactor lived on. The unit tests above check the sub-client's *state*;
     this one checks the request the SDK builds *from* that state. If a future
-    change to ``_build_headers`` reverses the merge order or
-    ``_copy_client_with_bearer_auth`` stops stripping the parent's
-    ``X-Api-Key``, this is the test that catches it."""
+    change to `_build_headers` reverses the merge order or
+    `_copy_client_with_bearer_auth` stops stripping the parent's
+    `X-Api-Key`, this is the test that catches it."""
     captured: list[httpx2.Request] = []
 
     async def handler(req: httpx2.Request) -> httpx2.Response:
@@ -147,9 +147,9 @@ async def test_scoped_sub_client_sends_only_bearer_on_the_wire() -> None:
 
     assert len(captured) == 1
     req = captured[0]
-    # ``httpx2.Headers`` is case-insensitive, so .get() catches any casing.
+    # `httpx2.Headers` is case-insensitive, so .get() catches any casing.
     assert req.headers.get("authorization") == "Bearer env-key"
-    # The parent's ``X-Api-Key`` must NOT be on the wire — that was the bug.
+    # The parent's `X-Api-Key` must NOT be on the wire — that was the bug.
     assert req.headers.get("x-api-key") is None
     # Helper telemetry is on every scoped request.
     assert req.headers.get("x-stainless-helper") == "environments-worker"

@@ -1,7 +1,7 @@
 """Deprecated-parameter checks shared by the agent toolset and the environment worker.
 
-Kept free of host-only imports so ``anthropic.lib.environments`` can use it at
-module level without pulling in :mod:`anthropic.lib.tools.agent_toolset`.
+Kept free of host-only imports so `anthropic.lib.environments` can use it at
+module level without pulling in `anthropic.lib.tools.agent_toolset`.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ UNRESTRICTED_PATHS_DEPRECATION = (
 
 
 def reject_unrestricted_paths(value: bool | NotGiven) -> None:
-    """Raise :class:`TypeError` if the deprecated ``unrestricted_paths`` was passed at all."""
+    """Raise `TypeError` if the deprecated `unrestricted_paths` was passed at all."""
     if isinstance(value, NotGiven):
         return
     raise TypeError(UNRESTRICTED_PATHS_DEPRECATION)

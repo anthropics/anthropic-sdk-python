@@ -14,11 +14,11 @@ function steady_is_running() {
 }
 
 kill_server_on_port() {
-  pids=$(lsof -t -i tcp:"$1" || echo "")
-  if [ "$pids" != "" ]; then
-    kill "$pids"
-    echo "Stopped $pids."
-  fi
+  pids=$(lsof -t -i tcp:"$1" -sTCP:LISTEN || echo "")
+  for pid in $pids; do
+    kill "$pid"
+    echo "Stopped process $pid on port $1."
+  done
 }
 
 function is_overriding_api_base_url() {

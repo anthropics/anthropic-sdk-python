@@ -1,29 +1,33 @@
 """The self-hosted environment worker — the full composition of the
 control-plane poller and the per-session tool runner.
 
-:class:`EnvironmentWorker` claims work items from a self-hosted environment, and
-for each claimed ``session`` work item: builds the per-session
-:class:`~anthropic.lib.tools.agent_toolset.AgentToolContext` and downloads the
+`EnvironmentWorker` claims work items from a self-hosted environment, and
+for each claimed `session` work item: builds the per-session
+`anthropic.lib.tools.agent_toolset.AgentToolContext` and downloads the
 session agent's skills, then runs a
-:class:`~anthropic.lib.tools._beta_session_runner.SessionToolRunner` for the
+`anthropic.lib.tools._beta_session_runner.SessionToolRunner` for the
 session *while* heartbeating the work-item lease in parallel; on exit it
 force-stops the work item (unless the lease was lost, in which case the item is
 left to whoever holds it now) and loops to the next one. The lease heartbeat
-reporting ``state == "stopping"`` (or a lost lease) ends the session run.
+reporting `state == "stopping"` (or a lost lease) ends the session run.
 
-Build one from the generated work resource::
+Build one from the generated work resource:
 
-    client.beta.environments.work.worker(environment_id=..., environment_key=...)
+```py
+client.beta.environments.work.worker(environment_id=..., environment_key=...)
+```
 
-or construct it directly::
+or construct it directly:
 
-    from anthropic.lib.environments import EnvironmentWorker
+```py
+from anthropic.lib.environments import EnvironmentWorker
 
-    EnvironmentWorker(client, environment_id=..., environment_key=...)
+EnvironmentWorker(client, environment_id=..., environment_key=...)
+```
 
-:meth:`EnvironmentWorker.handle_item` runs that same per-work-item flow for a
-single work item you've already claimed (e.g. a ``worker poll --on-work`` script
-handed one to a fresh process); with no arguments it reads the ``ANTHROPIC_*``
+`EnvironmentWorker.handle_item` runs that same per-work-item flow for a
+single work item you've already claimed (e.g. a `worker poll --on-work` script
+handed one to a fresh process); with no arguments it reads the `ANTHROPIC_*`
 env vars that command sets.
 """
 
@@ -70,11 +74,11 @@ if TYPE_CHECKING:
     from ..tools.agent_toolset import AgentToolContext
     from ...resources.beta.environments.work import AsyncWork
 
-# ``agent_toolset`` pulls in host-only modules (``subprocess``, ``tarfile``, …),
+# `agent_toolset` pulls in host-only modules (`subprocess`, `tarfile`, …),
 # so it is never imported at module level here — only as a type above, and
-# lazily for its values inside ``_tools_for`` / ``_handle_item``. That keeps this
-# module host-dep-free so the generated ``work`` resource can expose
-# ``EnvironmentWorker`` without dragging those imports into ``import anthropic``.
+# lazily for its values inside `_tools_for` / `_handle_item`. That keeps this
+# module host-dep-free so the generated `work` resource can expose
+# `EnvironmentWorker` without dragging those imports into `import anthropic`.
 
 __all__ = [
     "EnvironmentWorker",
@@ -94,25 +98,25 @@ _HEARTBEAT_TTL_DEFAULT = 90.0
 _NO_HEARTBEAT_SENTINEL = "NO_HEARTBEAT"
 
 # A fixed tool list, or a factory invoked once per claimed session with that
-# session's ``AgentToolContext`` — use the factory form to bind
-# :func:`beta_agent_toolset_20260401` (or any tool that needs the workdir /
+# session's `AgentToolContext` — use the factory form to bind
+# `beta_agent_toolset_20260401` (or any tool that needs the workdir /
 # session id) to the right session.
 EnvironmentWorkerTools = Union[
     Sequence[BetaAnyRunnableTool], Callable[["AgentToolContext"], Sequence[BetaAnyRunnableTool]]
 ]
 
-# Transient errors the heartbeat loop retries on top of ``TRANSIENT_ERRORS``:
-# ``anyio.fail_after`` (which bounds each heartbeat) raises the builtin
-# ``TimeoutError`` rather than an ``APIError``, so it would otherwise fall
+# Transient errors the heartbeat loop retries on top of `TRANSIENT_ERRORS`:
+# `anyio.fail_after` (which bounds each heartbeat) raises the builtin
+# `TimeoutError` rather than an `APIError`, so it would otherwise fall
 # through to the un-retried branch. Declared at module level with an explicit
-# type so mypy can verify the ``except`` clause; an inline
-# ``except (*TRANSIENT_ERRORS, TimeoutError)`` types as ``tuple[Any, ...]``
+# type so mypy can verify the `except` clause; an inline
+# `except (*TRANSIENT_ERRORS, TimeoutError)` types as `tuple[Any, ...]`
 # and mypy rejects it as not-an-exception-tuple.
 _HEARTBEAT_TRANSIENT_ERRORS: tuple[type[Exception], ...] = (*TRANSIENT_ERRORS, TimeoutError)
 
 
 class _LeaseEndReason(enum.Enum):
-    """Why heartbeating of a work item ended, as recorded on its :class:`_Lease`."""
+    """Why heartbeating of a work item ended, as recorded on its `_Lease`."""
 
     RUNNER_DONE = "runner_done"  # the session run ended first; the lease was held throughout
     CONTROL_PLANE_STOP = "control_plane_stop"  # state stopping / stopped, or lease_extended false
@@ -124,7 +128,7 @@ class _LeaseEndReason(enum.Enum):
 class _Lease:
     """This worker's view of one work-item lease: whether it has ended, and why.
 
-    Shared by :func:`_heartbeat_loop` and the code serving the item. The first
+    Shared by `_heartbeat_loop` and the code serving the item. The first
     recorded reason wins, so a run cancelled *because* the lease was lost still
     reads as lost afterwards.
     """
@@ -174,13 +178,13 @@ async def _heartbeat_loop(
 ) -> None:
     """Keep the work-item lease alive while a session is being served.
 
-    ``work`` must be bound to a sub-client authenticated for the environment;
-    this loop adds no auth of its own. Returns once ``lease`` has ended, and
-    ends it itself when the control plane reports the work is ``stopping`` /
-    ``stopped`` or no longer extends the lease, when a heartbeat is rejected
+    `work` must be bound to a sub-client authenticated for the environment;
+    this loop adds no auth of its own. Returns once `lease` has ended, and
+    ends it itself when the control plane reports the work is `stopping` /
+    `stopped` or no longer extends the lease, when a heartbeat is rejected
     (a 412 means the lease already belongs to someone else), or when
     transient failures have run long enough that the lease must be assumed
-    lost (so two runners don't end up serving the same work). ``on_lease_ttl``
+    lost (so two runners don't end up serving the same work). `on_lease_ttl`
     is called with the server-reported TTL after every successful beat.
     """
     interval = _HEARTBEAT_DEFAULT
@@ -199,7 +203,7 @@ async def _heartbeat_loop(
                     expected_last_heartbeat=last,
                     extra_headers=extra_headers,
                 )
-        # Anything outside ``_HEARTBEAT_TRANSIENT_ERRORS`` is a real bug and
+        # Anything outside `_HEARTBEAT_TRANSIENT_ERRORS` is a real bug and
         # propagates rather than being swallowed and retried until the lease
         # is assumed lost.
         except _HEARTBEAT_TRANSIENT_ERRORS as e:
@@ -257,13 +261,13 @@ def _has_memory_store(session: BetaManagedAgentsSession) -> bool:
 
 
 def _sessions_token_from_secret(secret: str | None) -> str | None:
-    """Extract the per-item sessions token from a work item's ``secret`` payload.
+    """Extract the per-item sessions token from a work item's `secret` payload.
 
-    The ``secret`` the poll response populates is not itself a credential: it
+    The `secret` the poll response populates is not itself a credential: it
     is a URL-safe base64 JSON payload bundling the per-item material — the
-    ``sessions_token`` (the bearer for this item's work lifecycle and
+    `sessions_token` (the bearer for this item's work lifecycle and
     session-level calls) plus ingress / source tokens this worker does not
-    consume. Returns the sessions token, or ``None`` (the caller then falls
+    consume. Returns the sessions token, or `None` (the caller then falls
     back to the environment key, or fails the item when there is none) when
     the payload is missing, doesn't decode, or carries no token. Never log
     the payload or anything extracted from it.
@@ -284,9 +288,9 @@ def _sessions_token_from_secret(secret: str | None) -> str | None:
 
 
 def _require(value: str | None, *, name: str, env_var: str) -> str:
-    """Fall back to ``env_var`` for ``value``; raise a clear error if still empty.
+    """Fall back to `env_var` for `value`; raise a clear error if still empty.
 
-    The ``ANTHROPIC_*`` env vars are the ones the ``ant worker poll --on-work``
+    The `ANTHROPIC_*` env vars are the ones the `ant worker poll --on-work`
     command sets on the process it spawns for a claimed work item.
     """
     resolved = value or os.environ.get(env_var)
@@ -298,118 +302,120 @@ def _require(value: str | None, *, name: str, env_var: str) -> str:
 class EnvironmentWorker:
     """Run a self-hosted environment worker.
 
-    Composed from the control-plane poller (``client.beta.environments.work.poller``)
-    and the per-session :class:`SessionToolRunner`. For each claimed ``session``
-    work item it builds the per-session :class:`AgentToolContext` and downloads
+    Composed from the control-plane poller (`client.beta.environments.work.poller`)
+    and the per-session `SessionToolRunner`. For each claimed `session`
+    work item it builds the per-session `AgentToolContext` and downloads
     the session agent's skills, then runs a session tool runner for the session
     *while* heartbeating the work-item lease in parallel; on exit it force-stops
     the work item (unless the lease was lost, in which case the item is left to
     whoever holds it now) and loops to the next one.
 
-    The ``environment_key`` is the worker's standing credential: polling
+    The `environment_key` is the worker's standing credential: polling
     always uses it, and per-session calls fall back to it when a work item's
-    ``secret`` doesn't yield a sessions token (every request rides a
-    Bearer-only scoped sub-client, never the parent client's ``X-Api-Key``).
-    :meth:`handle_item` can run without it when the work item's ``secret``
+    `secret` doesn't yield a sessions token (every request rides a
+    Bearer-only scoped sub-client, never the parent client's `X-Api-Key`).
+    `handle_item` can run without it when the work item's `secret`
     carries a sessions token — that token then authorizes every per-item call.
 
-    Async only — :meth:`run` loops forever, so bound it (cancel the task or wrap
-    it in :func:`asyncio.wait_for`) when you want it to stop.
+    Async only — `run` loops forever, so bound it (cancel the task or wrap
+    it in `asyncio.wait_for`) when you want it to stop.
 
-    Use :meth:`handle_item` if you already hold a claimed work item (e.g. a
-    ``worker poll --on-work`` script handed one to a fresh process) and just
+    Use `handle_item` if you already hold a claimed work item (e.g. a
+    `worker poll --on-work` script handed one to a fresh process) and just
     want the per-item flow without the poll loop — with no arguments it reads the
-    ``ANTHROPIC_*`` env vars that command sets, so ``environment_id`` (only used
-    by :meth:`run`) isn't needed.
+    `ANTHROPIC_*` env vars that command sets, so `environment_id` (only used
+    by `run`) isn't needed.
 
-    Prefer ``client.beta.environments.work.worker(...)`` to build one; the direct
+    Prefer `client.beta.environments.work.worker(...)` to build one; the direct
     constructor below is equivalent.
 
-    Example::
+    Example:
 
-        from anthropic import AsyncAnthropic
+    ```py
+    from anthropic import AsyncAnthropic
 
-        client = AsyncAnthropic()
+    client = AsyncAnthropic()
 
-        # Long-running daemon: poll for work, serve each session, loop.
-        await client.beta.environments.work.worker(
-            environment_id=environment_id,
-            environment_key=environment_key,
-            workdir="/workspace",
-        ).run()
+    # Long-running daemon: poll for work, serve each session, loop.
+    await client.beta.environments.work.worker(
+        environment_id=environment_id,
+        environment_key=environment_key,
+        workdir="/workspace",
+    ).run()
 
-        # Already-claimed item (e.g. inside `ant worker poll --on-work ...`):
-        await client.beta.environments.work.worker(workdir="/workspace").handle_item()
+    # Already-claimed item (e.g. inside `ant worker poll --on-work ...`):
+    await client.beta.environments.work.worker(workdir="/workspace").handle_item()
 
-        # Equivalent, constructing the worker directly:
-        from anthropic.lib.environments import EnvironmentWorker
+    # Equivalent, constructing the worker directly:
+    from anthropic.lib.environments import EnvironmentWorker
 
-        await EnvironmentWorker(client, workdir="/workspace").handle_item()
+    await EnvironmentWorker(client, workdir="/workspace").handle_item()
+    ```
 
     Args:
       client: The async Anthropic client.
       environment_id: The self-hosted environment to poll for work. Required by
-        :meth:`run`; not used by :meth:`handle_item`.
+        `run`; not used by `handle_item`.
       environment_key: The environment key — the worker's standing credential.
         Used as the Bearer credential on the scoped sub-clients the worker
         constructs for the control-plane (poll / ack / stop) and session-level
         (events stream / list / send + heartbeat / force-stop) calls, except
-        where a claimed item's own ``secret`` takes precedence (see the class
-        docstring). Required by :meth:`run`; :meth:`handle_item` falls back to
-        it (then to ``ANTHROPIC_ENVIRONMENT_KEY``) when not passed one, and
-        requires it only when the work item carries no ``work_secret``.
+        where a claimed item's own `secret` takes precedence (see the class
+        docstring). Required by `run`; `handle_item` falls back to
+        it (then to `ANTHROPIC_ENVIRONMENT_KEY`) when not passed one, and
+        requires it only when the work item carries no `work_secret`.
       tools: Tools to expose to each claimed session. Either a fixed list, or a
         factory invoked once per session with that session's
-        :class:`AgentToolContext`. Defaults to
-        ``beta_agent_toolset_20260401(env)`` (the standard
-        ``agent_toolset_20260401`` set bound to the per-session context).
+        `AgentToolContext`. Defaults to
+        `beta_agent_toolset_20260401(env)` (the standard
+        `agent_toolset_20260401` set bound to the per-session context).
         Async tools share the event loop with the lease heartbeat, so keep
         them non-blocking.
-      workdir: Base directory for the per-session :class:`AgentToolContext`.
-        Defaults to :func:`os.getcwd` captured when the worker is constructed
-        (matches the TS worker's ``process.cwd()``-at-construction), so a
-        ``chdir`` between constructing the worker and serving a session does not
+      workdir: Base directory for the per-session `AgentToolContext`.
+        Defaults to `os.getcwd` captured when the worker is constructed
+        (matches the TS worker's `process.cwd()`-at-construction), so a
+        `chdir` between constructing the worker and serving a session does not
         change where tools resolve paths.
       unrestricted_paths: Deprecated and no longer accepted; passing either value
-        raises :class:`TypeError` (see :class:`AgentToolContext`).
+        raises `TypeError` (see `AgentToolContext`).
       max_idle: Forwarded to the session tool runner — seconds to keep running
-        after the session goes idle with ``stop_reason`` ``end_turn``. Defaults
-        to :data:`~anthropic.lib.environments.DEFAULT_MAX_IDLE` (60s). ``None``
+        after the session goes idle with `stop_reason` `end_turn`. Defaults
+        to `anthropic.lib.environments.DEFAULT_MAX_IDLE` (60s). `None`
         disables it.
       memory_sync_interval: How often (seconds) to sync the session's
         attached memory stores back while it runs — checked after each
         dispatched tool call, plus one final sync when the session ends
-        cleanly. Defaults to :data:`DEFAULT_MEMORY_SYNC_INTERVAL` (15s).
-        The interval floors at :data:`MIN_MEMORY_SYNC_INTERVAL` (5s): any
-        value below it raises :class:`ValueError` — each sync lists every
+        cleanly. Defaults to `DEFAULT_MEMORY_SYNC_INTERVAL` (15s).
+        The interval floors at `MIN_MEMORY_SYNC_INTERVAL` (5s): any
+        value below it raises `ValueError` — each sync lists every
         attached store, and a tighter cadence would hammer the memory
         endpoints.
         A session that ends on an error or cancel instead gets a
         push-only flush — best-effort, bounded by
-        :data:`MEMORY_FLUSH_TIMEOUT` like the final sync, with a warning
+        `MEMORY_FLUSH_TIMEOUT` like the final sync, with a warning
         logged when either bound cuts work off; it deletes and pulls
         nothing, so an errored session can still lose its last edits.
-        ``None`` disables memory download and sync entirely. Memory
-        stores are only touched for work items whose ``secret`` carries a
-        ``sessions_token``; while memory sync is enabled, a work item
+        `None` disables memory download and sync entirely. Memory
+        stores are only touched for work items whose `secret` carries a
+        `sessions_token`; while memory sync is enabled, a work item
         without one fails when its session has memory stores attached,
         because those stores cannot be mounted without the token. With
-        ``None`` the same item runs, without memory, and nothing is
+        `None` the same item runs, without memory, and nothing is
         logged — disabling sync is the operator's explicit choice.
       memory_sync_deletions: Whether a file deleted locally in a memory
-        store's folder may delete its server memory. ``"log_only"`` runs
+        store's folder may delete its server memory. `"log_only"` runs
         the same checks and only logs — use it to watch a deployment
-        before trusting ``"enabled"``; ``"disabled"`` never deletes.
-        Uploads and pulls are unaffected. Defaults to ``"enabled"``.
+        before trusting `"enabled"`; `"disabled"` never deletes.
+        Uploads and pulls are unaffected. Defaults to `"enabled"`.
       worker_id: Optional identifier sent on each poll. Defaults to a unique,
         hostname-prefixed id.
       extra_headers: Optional headers passed through per request on every
         call the worker makes (poll / ack / stop / heartbeat and the session
         tool runner's event stream / list / send). They are threaded into
-        each call's ``extra_headers=`` and never assigned onto the client, so
-        client state is not mutated. Auth and ``x-stainless-helper`` are
+        each call's `extra_headers=` and never assigned onto the client, so
+        client state is not mutated. Auth and `x-stainless-helper` are
         supplied by the worker's scoped sub-clients (and the parent client's
-        ``default_headers`` propagate via their ``client.copy()``); a header
+        `default_headers` propagate via their `client.copy()`); a header
         given here overrides a scoped client's same-named default for that
         request, so use it for caller passthrough (e.g. trace ids), not auth.
     """
@@ -472,7 +478,7 @@ class EnvironmentWorker:
         self._environment_key = environment_key
         self._tools = tools
         # Snapshot the cwd at construction time when no explicit workdir was
-        # given (TS parity: ``process.cwd()`` captured up front). Resolving "."
+        # given (TS parity: `process.cwd()` captured up front). Resolving "."
         # lazily at first tool use would instead pick up any intervening chdir.
         self._workdir: str | os.PathLike[str] = os.getcwd() if workdir is None else workdir
         self._max_file_bytes = max_file_bytes
@@ -489,7 +495,7 @@ class EnvironmentWorker:
             return self._tools(env)
         if self._tools is not None:
             return self._tools
-        # Lazy import: keeps the host-only ``agent_toolset`` module out of this
+        # Lazy import: keeps the host-only `agent_toolset` module out of this
         # module's import graph (see the note next to the imports).
         from ..tools.agent_toolset import beta_agent_toolset_20260401
 
@@ -498,13 +504,13 @@ class EnvironmentWorker:
     async def run(self) -> None:
         """Poll the environment and service each claimed session until cancelled.
 
-        Loops forever; cancel the task (or wrap it in :func:`asyncio.wait_for`)
+        Loops forever; cancel the task (or wrap it in `asyncio.wait_for`)
         to stop it. Equivalent to claiming work items via
-        ``client.beta.environments.work.poller`` and running the per-item flow
+        `client.beta.environments.work.poller` and running the per-item flow
         for each.
 
         Raises:
-          ValueError: if ``environment_id`` / ``environment_key`` were not passed
+          ValueError: if `environment_id` / `environment_key` were not passed
             to the constructor.
         """
         environment_id = self._environment_id
@@ -512,8 +518,8 @@ class EnvironmentWorker:
         if environment_id is None or environment_key is None:
             raise ValueError("EnvironmentWorker.run: environment_id and environment_key are required to poll for work")
         # Poll/ack/stop calls run through a Bearer-only sub-client tagged with
-        # the poller's helper telemetry. ``_handle_item`` builds its own
-        # ``environments-worker``-tagged sub-client for the heartbeat / force-stop.
+        # the poller's helper telemetry. `_handle_item` builds its own
+        # `environments-worker`-tagged sub-client for the heartbeat / force-stop.
         poll_client = _copy_client_with_bearer_auth(
             self._client, auth_token=environment_key, helper="environments-work-poller"
         )
@@ -543,47 +549,47 @@ class EnvironmentWorker:
     ) -> None:
         """Service a single, already-claimed work item without the poll loop.
 
-        Builds the per-session :class:`AgentToolContext` (workdir from this
+        Builds the per-session `AgentToolContext` (workdir from this
         worker's options) and downloads the session agent's skills, then runs a
-        :class:`SessionToolRunner` for the session *while* heartbeating the
+        `SessionToolRunner` for the session *while* heartbeating the
         work-item lease in parallel, and force-stops the work item on exit
         (whether the runner finishes normally, raises, or the control plane
         signals shutdown). The one exception is a lost lease: the item then
         belongs to the queue or another worker and is left alone.
 
         Use this when something else does the claiming — e.g. a
-        ``worker poll --on-work`` script that hands an already-claimed item to a
-        fresh process. ``work_id`` / ``environment_id`` / ``session_id`` fall
-        back to ``ANTHROPIC_WORK_ID`` / ``ANTHROPIC_ENVIRONMENT_ID`` /
-        ``ANTHROPIC_SESSION_ID`` (the env vars that command sets) when not
-        passed; ``environment_key`` resolves in order: the explicit argument,
-        then this worker's own ``environment_key``, then
-        ``ANTHROPIC_ENVIRONMENT_KEY`` — so with no arguments inside that command
-        it just works. It is required only when no ``work_secret`` is present:
+        `worker poll --on-work` script that hands an already-claimed item to a
+        fresh process. `work_id` / `environment_id` / `session_id` fall
+        back to `ANTHROPIC_WORK_ID` / `ANTHROPIC_ENVIRONMENT_ID` /
+        `ANTHROPIC_SESSION_ID` (the env vars that command sets) when not
+        passed; `environment_key` resolves in order: the explicit argument,
+        then this worker's own `environment_key`, then
+        `ANTHROPIC_ENVIRONMENT_KEY` — so with no arguments inside that command
+        it just works. It is required only when no `work_secret` is present:
         a sandbox that hands the process only the work secret (e.g. a pod that
         must never hold the environment key) runs on the secret's sessions
         token alone.
 
-        ``work_secret`` is the work item's per-item ``secret`` payload from the
-        poll response, falling back to ``ANTHROPIC_WORK_SECRET``. Unlike the
+        `work_secret` is the work item's per-item `secret` payload from the
+        poll response, falling back to `ANTHROPIC_WORK_SECRET`. Unlike the
         others it is optional. When present, the sessions token extracted from
         it is preferred as the Bearer credential for this item's heartbeat,
         force-stop, and session calls. When it yields no token, those calls use
-        ``environment_key`` — and with no ``environment_key`` either, the item
+        `environment_key` — and with no `environment_key` either, the item
         fails rather than run unauthenticated.
 
         Non-session work items are ignored (but still force-stopped so the
         lease doesn't sit until TTL).
 
         Raises:
-          ValueError: if any of ``work_id`` / ``environment_id`` / ``session_id``
-            is still empty after the fallbacks; if ``environment_key`` is, while
-            no ``work_secret`` is present; or if the ``work_secret`` yields no
-            sessions token and there is no ``environment_key`` to fall back to.
+          ValueError: if any of `work_id` / `environment_id` / `session_id`
+            is still empty after the fallbacks; if `environment_key` is, while
+            no `work_secret` is present; or if the `work_secret` yields no
+            sessions token and there is no `environment_key` to fall back to.
           SessionMemoryError: if the session has memory stores attached but
             they cannot be mounted — the work item carried no
-            ``sessions_token``, or a store failed to download. May arrive
-            wrapped in an ``ExceptionGroup`` by the task group.
+            `sessions_token`, or a store failed to download. May arrive
+            wrapped in an `ExceptionGroup` by the task group.
         """
         work_id = _require(work_id, name="work_id", env_var="ANTHROPIC_WORK_ID")
         environment_id = _require(environment_id, name="environment_id", env_var="ANTHROPIC_ENVIRONMENT_ID")
@@ -614,29 +620,29 @@ class EnvironmentWorker:
         await self._handle_item(work_item, environment_key)
 
     async def _handle_item(self, work_item: BetaSelfHostedWork, environment_key: str | None) -> None:
-        """The per-item body shared by :meth:`run`'s poll loop and :meth:`handle_item`.
+        """The per-item body shared by `run`'s poll loop and `handle_item`.
 
-        Runs a :class:`SessionToolRunner` for the work item's session while
+        Runs a `SessionToolRunner` for the work item's session while
         heartbeating its lease, force-stopping the work item on exit unless the
         lease was lost. All control-plane traffic for this work item —
         heartbeat + force-stop — flows through a Bearer-only sub-client built
         here; the session tool runner builds its own
-        ``session-tool-runner``-tagged sub-client internally.
+        `session-tool-runner`-tagged sub-client internally.
 
-        When the poll response carried a per-item ``secret`` (a short-lived
+        When the poll response carried a per-item `secret` (a short-lived
         payload scoped to this work item), the sessions token extracted from
-        it is preferred over ``environment_key`` as the Bearer credential for
+        it is preferred over `environment_key` as the Bearer credential for
         those per-item calls. A secret that yields no token falls back to
-        ``environment_key``; with no key available either, the item fails
+        `environment_key`; with no key available either, the item fails
         rather than run unauthenticated.
         """
-        # Lazy import: keeps the host-only ``agent_toolset`` module out of this
+        # Lazy import: keeps the host-only `agent_toolset` module out of this
         # module's import graph (see the note next to the imports).
         from ..tools.agent_toolset import AgentToolContext
 
         # The per-item credential: the sessions token carried inside the work
         # item's secret payload when the server issued one, otherwise the
-        # environment key. ``getattr`` because items synthesized by older
+        # environment key. `getattr` because items synthesized by older
         # callers (or test fakes) may predate the field. Never log this value.
         secret = getattr(work_item, "secret", None)
         sessions_token = _sessions_token_from_secret(secret)
@@ -654,7 +660,7 @@ class EnvironmentWorker:
                 work_item.id,
             )
 
-        # ``environments-worker``-scoped sub-client for the heartbeat and
+        # `environments-worker`-scoped sub-client for the heartbeat and
         # force-stop calls this item drives. The session tool runner is given
         # the parent client + the same per-item credential and builds its own
         # sub-client.
@@ -665,7 +671,7 @@ class EnvironmentWorker:
         # Memory stores: the memory_stores endpoints accept the per-item
         # sessions token but reject the environment key, so download and sync
         # only run when the item carried a usable secret (and the interval is
-        # set). ``worker_client`` is already scoped to that token then, so the
+        # set). `worker_client` is already scoped to that token then, so the
         # memory calls ride the same sub-client.
         interval = self._memory_sync_interval
         stores: SessionMemoryStores | None = None
@@ -725,7 +731,7 @@ class EnvironmentWorker:
                 tg.start_soon(_heartbeat)
 
                 # Drive AgentToolContext's enter/exit explicitly rather than via
-                # ``async with`` so its async cleanup (bash subprocess teardown
+                # `async with` so its async cleanup (bash subprocess teardown
                 # + downloaded-skill removal) runs *shielded*: by the time we
                 # tear down, the heartbeat may have cancelled the task-group
                 # scope (lost lease), and that cancel must not abort the

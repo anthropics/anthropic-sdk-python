@@ -82,6 +82,7 @@ from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_output_config_param import BetaOutputConfigParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
+from ....types.beta.beta_compaction_config_param import BetaCompactionConfigParam
 from ....types.beta.beta_json_output_format_param import BetaJSONOutputFormatParam
 from ....types.beta.beta_raw_message_stream_event import BetaRawMessageStreamEvent
 from ....types.beta.beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
@@ -126,6 +127,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -251,6 +253,15 @@ class Messages(SyncAPIResource):
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
+
+          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
+              that a later request sends back first in `messages`, in place of the messages it
+              summarizes. There is no trigger and no pause flag: sending the parameter
+              compacts, and nothing is sampled after the block.
+
+              The summarization prompt is the server's own unless `instructions` are given,
+              which then replace it for this request; a value that is empty or only whitespace
+              counts as absent.
 
           container: Container identifier for reuse across requests.
 
@@ -443,6 +454,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -572,6 +584,15 @@ class Messages(SyncAPIResource):
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
+
+          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
+              that a later request sends back first in `messages`, in place of the messages it
+              summarizes. There is no trigger and no pause flag: sending the parameter
+              compacts, and nothing is sampled after the block.
+
+              The summarization prompt is the server's own unless `instructions` are given,
+              which then replace it for this request; a value that is empty or only whitespace
+              counts as absent.
 
           container: Container identifier for reuse across requests.
 
@@ -759,6 +780,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         stream: bool,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -888,6 +910,15 @@ class Messages(SyncAPIResource):
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
+
+          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
+              that a later request sends back first in `messages`, in place of the messages it
+              summarizes. There is no trigger and no pause flag: sending the parameter
+              compacts, and nothing is sampled after the block.
+
+              The summarization prompt is the server's own unless `instructions` are given,
+              which then replace it for this request; a value that is empty or only whitespace
+              counts as absent.
 
           container: Container identifier for reuse across requests.
 
@@ -1074,6 +1105,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -1140,6 +1172,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "cache_control": cache_control,
+                    "compaction": compaction,
                     "container": container,
                     "context_management": context_management,
                     "diagnostics": diagnostics,
@@ -1177,6 +1210,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -1286,6 +1320,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "cache_control": cache_control,
+                    "compaction": compaction,
                     "container": container,
                     "context_management": context_management,
                     "diagnostics": diagnostics,
@@ -1573,6 +1608,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -1667,6 +1703,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "cache_control": cache_control,
+                    "compaction": compaction,
                     "metadata": metadata,
                     "output_config": merged_output_config,
                     "output_format": omit,
@@ -1706,6 +1743,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -1808,6 +1846,15 @@ class Messages(SyncAPIResource):
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
+
+          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
+              that a later request sends back first in `messages`, in place of the messages it
+              summarizes. There is no trigger and no pause flag: sending the parameter
+              compacts, and nothing is sampled after the block.
+
+              The summarization prompt is the server's own unless `instructions` are given,
+              which then replace it for this request; a value that is empty or only whitespace
+              counts as absent.
 
           context_management: Context management configuration.
 
@@ -1953,6 +2000,7 @@ class Messages(SyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "cache_control": cache_control,
+                    "compaction": compaction,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "output_config": output_config,
@@ -2003,6 +2051,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -2128,6 +2177,15 @@ class AsyncMessages(AsyncAPIResource):
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
+
+          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
+              that a later request sends back first in `messages`, in place of the messages it
+              summarizes. There is no trigger and no pause flag: sending the parameter
+              compacts, and nothing is sampled after the block.
+
+              The summarization prompt is the server's own unless `instructions` are given,
+              which then replace it for this request; a value that is empty or only whitespace
+              counts as absent.
 
           container: Container identifier for reuse across requests.
 
@@ -2320,6 +2378,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: Literal[True],
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -2449,6 +2508,15 @@ class AsyncMessages(AsyncAPIResource):
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
+
+          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
+              that a later request sends back first in `messages`, in place of the messages it
+              summarizes. There is no trigger and no pause flag: sending the parameter
+              compacts, and nothing is sampled after the block.
+
+              The summarization prompt is the server's own unless `instructions` are given,
+              which then replace it for this request; a value that is empty or only whitespace
+              counts as absent.
 
           container: Container identifier for reuse across requests.
 
@@ -2636,6 +2704,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         stream: bool,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -2765,6 +2834,15 @@ class AsyncMessages(AsyncAPIResource):
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
+
+          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
+              that a later request sends back first in `messages`, in place of the messages it
+              summarizes. There is no trigger and no pause flag: sending the parameter
+              compacts, and nothing is sampled after the block.
+
+              The summarization prompt is the server's own unless `instructions` are given,
+              which then replace it for this request; a value that is empty or only whitespace
+              counts as absent.
 
           container: Container identifier for reuse across requests.
 
@@ -2951,6 +3029,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -3017,6 +3096,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "cache_control": cache_control,
+                    "compaction": compaction,
                     "container": container,
                     "context_management": context_management,
                     "diagnostics": diagnostics,
@@ -3054,6 +3134,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -3162,6 +3243,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "cache_control": cache_control,
+                    "compaction": compaction,
                     "container": container,
                     "context_management": context_management,
                     "diagnostics": diagnostics,
@@ -3442,6 +3524,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
@@ -3534,6 +3617,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "cache_control": cache_control,
+                    "compaction": compaction,
                     "metadata": metadata,
                     "output_config": merged_output_config,
                     "output_format": omit,
@@ -3573,6 +3657,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
+        compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         mcp_servers: Iterable[BetaRequestMCPServerURLDefinitionParam] | Omit = omit,
         output_config: BetaOutputConfigParam | Omit = omit,
@@ -3675,6 +3760,15 @@ class AsyncMessages(AsyncAPIResource):
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
+
+          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
+              that a later request sends back first in `messages`, in place of the messages it
+              summarizes. There is no trigger and no pause flag: sending the parameter
+              compacts, and nothing is sampled after the block.
+
+              The summarization prompt is the server's own unless `instructions` are given,
+              which then replace it for this request; a value that is empty or only whitespace
+              counts as absent.
 
           context_management: Context management configuration.
 
@@ -3820,6 +3914,7 @@ class AsyncMessages(AsyncAPIResource):
                     "messages": messages,
                     "model": model,
                     "cache_control": cache_control,
+                    "compaction": compaction,
                     "context_management": context_management,
                     "mcp_servers": mcp_servers,
                     "mcp_servers": mcp_servers,

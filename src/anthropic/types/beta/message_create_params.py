@@ -17,6 +17,7 @@ from .beta_diagnostics_param import BetaDiagnosticsParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_output_config_param import BetaOutputConfigParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
+from .beta_compaction_config_param import BetaCompactionConfigParam
 from .beta_fallback_credit_token_param import BetaFallbackCreditTokenParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 from .beta_context_management_config_param import BetaContextManagementConfigParam
@@ -128,6 +129,18 @@ class MessageCreateParamsBase(TypedDict, total=False):
     """
     Top-level cache control automatically applies a cache_control marker to the last
     cacheable block in the request.
+    """
+
+    compaction: Optional[BetaCompactionConfigParam]
+    """
+    Compact the whole conversation and return a signed `compaction` block, alone,
+    that a later request sends back first in `messages`, in place of the messages it
+    summarizes. There is no trigger and no pause flag: sending the parameter
+    compacts, and nothing is sampled after the block.
+
+    The summarization prompt is the server's own unless `instructions` are given,
+    which then replace it for this request; a value that is empty or only whitespace
+    counts as absent.
     """
 
     container: Optional[Container]

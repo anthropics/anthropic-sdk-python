@@ -15,16 +15,10 @@ class DreamCreateParams(TypedDict, total=False):
     inputs: Required[Iterable[BetaDreamInputParam]]
 
     model: Required[Model]
-    """Model identifier and configuration applied to every pipeline stage."""
 
     instructions: Optional[str]
 
     output_behavior: BetaOutputBehaviorParam
-    """
-    The default destination: the job creates a new output memory store as a clone of
-    the memory_store input and writes the consolidated memories into it. The input
-    store is never mutated.
-    """
 
     betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

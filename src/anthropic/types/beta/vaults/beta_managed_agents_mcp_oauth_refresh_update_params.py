@@ -25,4 +25,3 @@ class BetaManagedAgentsMCPOAuthRefreshUpdateParams(TypedDict, total=False):
     """Updated OAuth scope for the refresh request."""
 
     token_endpoint_auth: TokenEndpointAuth
-    """Updated HTTP Basic authentication parameters for the token endpoint."""

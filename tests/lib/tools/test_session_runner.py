@@ -1,9 +1,9 @@
-"""Tests for :class:`SessionToolRunner` (the implementation behind
-``client.beta.sessions.events.tool_runner()``).
+"""Tests for `SessionToolRunner` (the implementation behind
+`client.beta.sessions.events.tool_runner()`).
 
-We use lightweight stand-ins for ``AsyncEvents`` so each test can script the
+We use lightweight stand-ins for `AsyncEvents` so each test can script the
 sequence of stream events, list events (for the reconcile pass), and per-call
-send failures. ``asyncio.sleep`` is left real so ``await asyncio.sleep(0)`` in
+send failures. `asyncio.sleep` is left real so `await asyncio.sleep(0)` in
 the fake stream actually yields control to the event loop.
 """
 
@@ -31,14 +31,14 @@ from anthropic.lib.tools._beta_session_runner import (
 
 @pytest.fixture(autouse=True)
 def _intercept_scoped_client(monkeypatch: pytest.MonkeyPatch) -> None:  # pyright: ignore[reportUnusedFunction]
-    """Make ``_scoped_client`` return the parent client unchanged so the runner's
+    """Make `_scoped_client` return the parent client unchanged so the runner's
     requests land on the test fakes.
 
-    The real ``_scoped_client`` builds an ``AsyncAnthropic`` sub-client for
-    request scoping; the tests use a ``_FakeClient`` whose only API surface is
-    ``.beta.sessions.events``, so the sub-client construction would fail. The
-    auth-specific tests further down install their own ``_scoped_client``
-    override (via the ``scoped_calls`` fixture) to assert on the args.
+    The real `_scoped_client` builds an `AsyncAnthropic` sub-client for
+    request scoping; the tests use a `_FakeClient` whose only API surface is
+    `.beta.sessions.events`, so the sub-client construction would fail. The
+    auth-specific tests further down install their own `_scoped_client`
+    override (via the `scoped_calls` fixture) to assert on the args.
     """
 
     def passthrough(client: Any, _key: str | None) -> Any:
@@ -49,7 +49,7 @@ def _intercept_scoped_client(monkeypatch: pytest.MonkeyPatch) -> None:  # pyrigh
 
 @pytest.fixture()
 def scoped_calls(monkeypatch: pytest.MonkeyPatch) -> list[dict[str, Any]]:
-    """Record every ``_scoped_client(client, environment_key)`` call; still
+    """Record every `_scoped_client(client, environment_key)` call; still
     returns the parent client (the autouse fixture's behaviour) so the runner
     keeps using the test fakes."""
     calls: list[dict[str, Any]] = []
@@ -79,8 +79,8 @@ def _tool_use(
     *,
     evaluated_permission: str | None = None,
 ) -> _StubEvent:
-    # ``evaluated_permission`` is always present on the real (typed) event —
-    # ``None`` unless the server evaluated a permission policy for the call.
+    # `evaluated_permission` is always present on the real (typed) event —
+    # `None` unless the server evaluated a permission policy for the call.
     return _StubEvent("agent.tool_use", id=id, name=name, input=input, evaluated_permission=evaluated_permission)
 
 
@@ -89,13 +89,13 @@ def _tool_result(tool_use_id: str) -> _StubEvent:
 
 
 def _tool_confirmation(tool_use_id: str, result: str) -> _StubEvent:
-    """The user's allow/deny verdict for an ask-gated (``always_ask``) tool call."""
+    """The user's allow/deny verdict for an ask-gated (`always_ask`) tool call."""
     return _StubEvent("user.tool_confirmation", id=f"conf_{tool_use_id}", tool_use_id=tool_use_id, result=result)
 
 
 def _custom_tool_use(id: str, name: str, input: dict[str, Any]) -> _StubEvent:
-    """A CUSTOM (user-defined) tool call — the agent emits ``agent.custom_tool_use``
-    rather than ``agent.tool_use`` for these."""
+    """A CUSTOM (user-defined) tool call — the agent emits `agent.custom_tool_use`
+    rather than `agent.tool_use` for these."""
     return _StubEvent("agent.custom_tool_use", id=id, name=name, input=input)
 
 
@@ -113,7 +113,7 @@ def _idle_end_turn() -> _StubEvent:
 
 def _result_content(item: DispatchedToolCall) -> Any:
     """The content blocks the runner computed and posted back, as carried in
-    ``result`` (the flat ``content`` convenience field was removed)."""
+    `result` (the flat `content` convenience field was removed)."""
     return cast(Any, item.result)["content"]
 
 
@@ -129,11 +129,11 @@ def _api_status_error(code: int) -> APIStatusError:
 
 
 class _FakeStream:
-    """Stand-in for the AsyncStream returned by ``events.stream()``.
+    """Stand-in for the AsyncStream returned by `events.stream()`.
 
     Yields scripted events in order; once exhausted, blocks forever (the real
-    stream stays open until a network event closes it). If ``raise_after`` is
-    set, raises ``raise_with`` after producing that many events — used to
+    stream stays open until a network event closes it). If `raise_after` is
+    set, raises `raise_with` after producing that many events — used to
     exercise the reconnect-with-backoff path.
     """
 
@@ -188,8 +188,8 @@ class FakeAsyncEvents:
         else:
             self._streams = [_FakeStream([])]
         self._list_events = list(list_events or [])
-        # When set, each ``list()`` call consumes the next entry (falling back
-        # to ``list_events`` once exhausted) so reconnect tests can script a
+        # When set, each `list()` call consumes the next entry (falling back
+        # to `list_events` once exhausted) so reconnect tests can script a
         # different history per reconcile pass.
         self._list_events_per_call = [list(evs) for evs in (list_events_per_call or [])]
         self._list_raises = list_raises
@@ -249,7 +249,7 @@ class _FakeTool:
 
 
 class _SyncTool(BetaBuiltinFunctionTool):
-    """A real ``BetaBuiltinFunctionTool``, unlike ``_FakeTool``, so ``run_runnable_tool``
+    """A real `BetaBuiltinFunctionTool`, unlike `_FakeTool`, so `run_runnable_tool`
     takes its sync-tool branch."""
 
     def __init__(self, name: str, fn: Callable[[object], str]) -> None:
@@ -266,7 +266,7 @@ class _SyncTool(BetaBuiltinFunctionTool):
 
 
 class _FakeClient:
-    """Minimal stand-in for ``AsyncAnthropic`` — only exposes the resource path
+    """Minimal stand-in for `AsyncAnthropic` — only exposes the resource path
     the runner reads."""
 
     def __init__(self, events: FakeAsyncEvents) -> None:
@@ -355,7 +355,7 @@ async def test_yields_error_for_failing_tool() -> None:
 async def test_unknown_tool_skipped_by_default() -> None:
     """An unregistered tool name is assumed to belong to the other client
     servicing the session, so it is skipped — not answered in place. The call
-    is still yielded (``posted=False`` / ``is_error=False`` / ``result=None``)
+    is still yielded (`posted=False` / `is_error=False` / `result=None`)
     and nothing is posted."""
     events = FakeAsyncEvents(stream_events=[_tool_use("tu_1", "missing", {}), _terminated()])
 
@@ -395,9 +395,9 @@ async def test_skips_already_answered_events() -> None:
 
 @pytest.mark.asyncio()
 async def test_yields_completed_custom_tool_call() -> None:
-    """A CUSTOM (user-defined) tool call arrives as ``agent.custom_tool_use`` and
-    must be answered with ``user.custom_tool_result`` — keyed by
-    ``custom_tool_use_id`` — not ``user.tool_result``."""
+    """A CUSTOM (user-defined) tool call arrives as `agent.custom_tool_use` and
+    must be answered with `user.custom_tool_result` — keyed by
+    `custom_tool_use_id` — not `user.tool_result`."""
 
     async def weather(input: dict[str, Any]) -> str:
         return f"sunny in {input.get('city')}"
@@ -432,8 +432,8 @@ async def test_yields_completed_custom_tool_call() -> None:
 
 @pytest.mark.asyncio()
 async def test_dispatches_builtin_and_custom_tools_in_one_stream() -> None:
-    """A single stream carrying both an ``agent.tool_use`` and an
-    ``agent.custom_tool_use`` dispatches both, each answered with its matching
+    """A single stream carrying both an `agent.tool_use` and an
+    `agent.custom_tool_use` dispatches both, each answered with its matching
     result-event type."""
 
     async def echo(input: dict[str, Any]) -> str:
@@ -473,8 +473,8 @@ async def test_dispatches_builtin_and_custom_tools_in_one_stream() -> None:
 
 @pytest.mark.asyncio()
 async def test_skips_already_answered_custom_tool() -> None:
-    """A custom tool whose ``user.custom_tool_result`` is already in history (via
-    reconcile) is not re-executed when the same ``agent.custom_tool_use`` is then
+    """A custom tool whose `user.custom_tool_result` is already in history (via
+    reconcile) is not re-executed when the same `agent.custom_tool_use` is then
     seen on the live stream."""
     counter = {"calls": 0}
 
@@ -501,10 +501,10 @@ async def test_skips_unowned_builtin_and_custom_tools_by_default() -> None:
     """Default split-client behavior: a tool-call event whose name is not in
     the runner's registry belongs to the other client servicing the session
     (e.g. the customer's app backend handling custom tools). The runner must
-    post NO result for it, claim nothing, and leave the ``tool_use_id``
-    pending — while still yielding the ``DispatchedToolCall`` so the caller can
-    observe the unowned dispatch (``posted=False``, ``is_error=False``,
-    ``result=None``). A registered tool in the same stream still runs, and the
+    post NO result for it, claim nothing, and leave the `tool_use_id`
+    pending — while still yielding the `DispatchedToolCall` so the caller can
+    observe the unowned dispatch (`posted=False`, `is_error=False`,
+    `result=None`). A registered tool in the same stream still runs, and the
     registry miss must not raise."""
     ran = {"echo": 0}
 
@@ -554,11 +554,11 @@ async def test_skips_unowned_builtin_and_custom_tools_by_default() -> None:
 @pytest.mark.asyncio()
 async def test_skipped_unowned_tool_does_not_trip_idle() -> None:
     """A skipped (unanswered) unowned tool_use stays OUT of the end-turn
-    accounting: reconcile sees history ending on an ``end_turn`` idle but with
+    accounting: reconcile sees history ending on an `end_turn` idle but with
     the unowned tool_use still unanswered, so it must NOT arm the idle
     countdown — the runner has not handled that call, its owner still has to.
 
-    A correct runner therefore stays alive past ``max_idle`` (the iterator
+    A correct runner therefore stays alive past `max_idle` (the iterator
     never completes); a buggy one would idle-stop almost immediately.
     """
     events = FakeAsyncEvents(
@@ -574,8 +574,8 @@ async def test_skipped_unowned_tool_does_not_trip_idle() -> None:
             seen.append(call)
 
     # If the unowned tool wrongly armed the idle clock the runner would stop
-    # ~0.1s in and ``drive()`` would return; a correct runner blocks until the
-    # (never-arriving) owner answers, so ``wait_for`` must time out instead.
+    # ~0.1s in and `drive()` would return; a correct runner blocks until the
+    # (never-arriving) owner answers, so `wait_for` must time out instead.
     with pytest.raises((asyncio.TimeoutError, TimeoutError)):
         await asyncio.wait_for(drive(), timeout=1.0)
 
@@ -593,9 +593,9 @@ async def test_skipped_unowned_tool_does_not_trip_idle() -> None:
 
 @pytest.mark.asyncio()
 async def test_ask_tool_blocks_without_confirmation() -> None:
-    """An ``agent.tool_use`` whose ``evaluated_permission`` is ``ask`` (an
-    ``always_ask`` tool) must NOT execute on arrival — it is held until the
-    matching ``user.tool_confirmation`` event. Here none ever arrives, so the
+    """An `agent.tool_use` whose `evaluated_permission` is `ask` (an
+    `always_ask` tool) must NOT execute on arrival — it is held until the
+    matching `user.tool_confirmation` event. Here none ever arrives, so the
     tool never runs, nothing is posted, and nothing is yielded."""
     counter = {"calls": 0}
 
@@ -615,8 +615,8 @@ async def test_ask_tool_blocks_without_confirmation() -> None:
 
 @pytest.mark.asyncio()
 async def test_ask_tool_executes_after_allow_confirmation() -> None:
-    """An ``allow`` confirmation releases the held call: the tool runs, the
-    result is posted, and the yielded call records ``confirmation="allow"``."""
+    """An `allow` confirmation releases the held call: the tool runs, the
+    result is posted, and the yielded call records `confirmation="allow"`."""
     counter = {"calls": 0}
 
     async def gated(_input: dict[str, Any]) -> str:
@@ -647,10 +647,10 @@ async def test_ask_tool_executes_after_allow_confirmation() -> None:
 
 @pytest.mark.asyncio()
 async def test_ask_tool_denied_never_executes() -> None:
-    """A ``deny`` confirmation resolves the held call without executing it:
+    """A `deny` confirmation resolves the held call without executing it:
     nothing runs, nothing is posted (the denial itself resolves the call
     server-side), and the call is still yielded for observability with
-    ``confirmation="deny"`` / ``posted=False`` / ``result=None``."""
+    `confirmation="deny"` / `posted=False` / `result=None`."""
     counter = {"calls": 0}
 
     async def gated(_input: dict[str, Any]) -> str:
@@ -680,7 +680,7 @@ async def test_ask_tool_denied_never_executes() -> None:
 
 @pytest.mark.asyncio()
 async def test_pre_denied_tool_never_executes() -> None:
-    """A call the server already evaluated to ``deny`` needs no confirmation —
+    """A call the server already evaluated to `deny` needs no confirmation —
     it must never execute and nothing may be posted for it."""
     counter = {"calls": 0}
 
@@ -703,7 +703,7 @@ async def test_pre_denied_tool_never_executes() -> None:
 
 @pytest.mark.asyncio()
 async def test_confirmation_in_history_releases_ask_call() -> None:
-    """An ask-gated call whose ``allow`` confirmation is already in history
+    """An ask-gated call whose `allow` confirmation is already in history
     (e.g. it was posted while the runner was disconnected) executes on the
     reconcile pass — the verdict is recorded before pending calls are routed."""
     counter = {"calls": 0}
@@ -732,7 +732,7 @@ async def test_confirmation_in_history_releases_ask_call() -> None:
 @pytest.mark.asyncio()
 async def test_denied_ask_call_does_not_block_idle_stop() -> None:
     """A denied call counts as resolved in the reconcile idle accounting:
-    history ends on an ``end_turn`` idle with the denied call unanswered (no
+    history ends on an `end_turn` idle with the denied call unanswered (no
     result event ever exists for it), and the runner must still arm the idle
     countdown and stop on its own rather than wait forever for a result."""
     events = FakeAsyncEvents(
@@ -754,7 +754,7 @@ async def test_denied_ask_call_does_not_block_idle_stop() -> None:
 @pytest.mark.asyncio()
 async def test_held_ask_call_keeps_runner_alive() -> None:
     """While a call awaits its confirmation the runner must keep running —
-    even if history (defensively) ends on an ``end_turn`` idle — so the
+    even if history (defensively) ends on an `end_turn` idle — so the
     verdict can still arrive and be acted on."""
     counter = {"calls": 0}
 
@@ -773,7 +773,7 @@ async def test_held_ask_call_keeps_runner_alive() -> None:
             pass
 
     # A runner that wrongly armed the idle clock would stop ~0.1s in and
-    # ``drive()`` would return; a correct one blocks awaiting the confirmation.
+    # `drive()` would return; a correct one blocks awaiting the confirmation.
     with pytest.raises((asyncio.TimeoutError, TimeoutError)):
         await asyncio.wait_for(drive(), timeout=1.0)
 
@@ -783,10 +783,10 @@ async def test_held_ask_call_keeps_runner_alive() -> None:
 
 @pytest.mark.asyncio()
 async def test_live_idle_while_call_held_keeps_runner_alive() -> None:
-    """An ``end_turn`` idle arriving on the LIVE stream while a call is held
+    """An `end_turn` idle arriving on the LIVE stream while a call is held
     for confirmation must not start the idle countdown — stopping would drop
     the call when its verdict later arrives. (The reconcile-path counterpart
-    is ``test_held_ask_call_keeps_runner_alive``.)"""
+    is `test_held_ask_call_keeps_runner_alive`.)"""
     counter = {"calls": 0}
 
     async def gated(_input: dict[str, Any]) -> str:
@@ -802,7 +802,7 @@ async def test_live_idle_while_call_held_keeps_runner_alive() -> None:
         async for _ in _run_with_fakes(events=events, tools=[tool], max_idle=0.1):
             pass
 
-    # A runner that armed the idle clock would stop ~0.1s in and ``drive()``
+    # A runner that armed the idle clock would stop ~0.1s in and `drive()`
     # would return; a correct one blocks awaiting the confirmation.
     with pytest.raises((asyncio.TimeoutError, TimeoutError)):
         await asyncio.wait_for(drive(), timeout=1.0)
@@ -813,7 +813,7 @@ async def test_live_idle_while_call_held_keeps_runner_alive() -> None:
 
 @pytest.mark.asyncio()
 async def test_reconnect_does_not_double_dispatch_held_call(monkeypatch: pytest.MonkeyPatch) -> None:
-    """A call held on the live stream whose ``allow`` confirmation shows up in
+    """A call held on the live stream whose `allow` confirmation shows up in
     the reconcile history after a reconnect is dispatched exactly once: the
     routing pass applies the recorded verdict, the history loop must not also
     release the held copy. The first result post fails permanently so a
@@ -920,7 +920,7 @@ async def test_held_ask_call_does_not_block_other_dispatches() -> None:
 @pytest.mark.asyncio()
 async def test_confirmation_for_unknown_id_is_ignored() -> None:
     """A confirmation for a call this runner has never seen (another client's
-    call, or an ``agent.mcp_tool_use`` it never dispatches) is recorded but
+    call, or an `agent.mcp_tool_use` it never dispatches) is recorded but
     must not crash or yield anything."""
     events = FakeAsyncEvents(stream_events=[_tool_confirmation("tu_elsewhere", "allow"), _terminated()])
 
@@ -932,7 +932,7 @@ async def test_confirmation_for_unknown_id_is_ignored() -> None:
 
 @pytest.mark.asyncio()
 async def test_unrecognised_verdict_fails_closed() -> None:
-    """The gate is an allow-list: a confirmation whose ``result`` is a value
+    """The gate is an allow-list: a confirmation whose `result` is a value
     this SDK doesn't recognise (the wire can carry values newer than our
     types) must NOT release the held call — it is resolved as a denial."""
     counter = {"calls": 0}
@@ -961,9 +961,9 @@ async def test_unrecognised_verdict_fails_closed() -> None:
 
 @pytest.mark.asyncio()
 async def test_unrecognised_permission_fails_closed() -> None:
-    """An ``evaluated_permission`` value this SDK doesn't recognise must not
-    dispatch unconfirmed — it is held like ``ask`` and released only by an
-    explicit ``allow`` verdict."""
+    """An `evaluated_permission` value this SDK doesn't recognise must not
+    dispatch unconfirmed — it is held like `ask` and released only by an
+    explicit `allow` verdict."""
     counter = {"calls": 0}
 
     async def gated(_input: dict[str, Any]) -> str:
@@ -995,8 +995,8 @@ async def test_unrecognised_permission_fails_closed() -> None:
 
 @pytest.mark.asyncio()
 async def test_pre_denied_tool_ignores_stray_allow_verdict() -> None:
-    """A call the server already evaluated to ``deny`` must never execute,
-    even if an (anomalous) ``allow`` confirmation exists for its id."""
+    """A call the server already evaluated to `deny` must never execute,
+    even if an (anomalous) `allow` confirmation exists for its id."""
     counter = {"calls": 0}
 
     async def gated(_input: dict[str, Any]) -> str:
@@ -1024,8 +1024,8 @@ async def test_pre_denied_tool_ignores_stray_allow_verdict() -> None:
 
 @pytest.mark.asyncio()
 async def test_ungated_tool_with_stray_deny_verdict_resolves_as_denied() -> None:
-    """Mirror of ``test_pre_denied_tool_ignores_stray_allow_verdict``: a stray
-    ``deny`` verdict recorded before an ungated call is routed resolves the
+    """Mirror of `test_pre_denied_tool_ignores_stray_allow_verdict`: a stray
+    `deny` verdict recorded before an ungated call is routed resolves the
     call as denied without executing it — any deny signal wins (the gate fails
     closed)."""
     counter = {"calls": 0}
@@ -1057,8 +1057,8 @@ async def test_ungated_tool_with_stray_deny_verdict_resolves_as_denied() -> None
 
 @pytest.mark.asyncio()
 async def test_deny_after_live_end_turn_resumes_idle_stop() -> None:
-    """A ``deny`` that resolves the last held call must let the idle countdown
-    resume: the session already went idle (``end_turn``) while the call was
+    """A `deny` that resolves the last held call must let the idle countdown
+    resume: the session already went idle (`end_turn`) while the call was
     held, the denial produces no further stream events, and the runner must
     stop on its own instead of waiting forever."""
     counter = {"calls": 0}
@@ -1080,7 +1080,7 @@ async def test_deny_after_live_end_turn_resumes_idle_stop() -> None:
         return [item async for item in _run_with_fakes(events=events, tools=[tool], max_idle=0.05)]
 
     # A runner that lost the end_turn while the call was held hangs here (the
-    # stream never produces another event) and ``wait_for`` would time out.
+    # stream never produces another event) and `wait_for` would time out.
     items = await asyncio.wait_for(drive(), timeout=2.0)
 
     assert counter["calls"] == 0
@@ -1093,7 +1093,7 @@ async def test_deny_after_live_end_turn_resumes_idle_stop() -> None:
 async def test_reconcile_released_call_not_cut_short_by_idle(monkeypatch: pytest.MonkeyPatch) -> None:
     """A held call released by the reconcile pass (its allow verdict only shows
     up in history after a reconnect) is in-flight work: even if that history
-    ends on an ``end_turn`` idle, the idle countdown must not run while the
+    ends on an `end_turn` idle, the idle countdown must not run while the
     released tool is still executing. Only once the call is fully dispatched
     does the deferred countdown start, granting a fresh grace window for the
     events its posted result will produce."""
@@ -1154,7 +1154,7 @@ async def test_reconcile_released_call_not_cut_short_by_idle(monkeypatch: pytest
 @pytest.mark.asyncio()
 async def test_idle_after_end_turn_ends_iteration() -> None:
     # The session goes idle with stop_reason end_turn and nothing else happens;
-    # after ``max_idle`` seconds the runner stops on its own.
+    # after `max_idle` seconds the runner stops on its own.
     events = FakeAsyncEvents(stream_events=[_idle_end_turn()])
 
     items = [item async for item in _run_with_fakes(events=events, tools=[], max_idle=0.05)]
@@ -1205,7 +1205,7 @@ async def test_terminated_event_ends_iteration() -> None:
 
 @pytest.mark.asyncio()
 async def test_runs_tool_close_hook_on_exit() -> None:
-    """The runner calls each tool's optional ``close`` cleanup hook when the
+    """The runner calls each tool's optional `close` cleanup hook when the
     iteration ends, regardless of cause."""
     closed = {"count": 0}
 
@@ -1269,8 +1269,8 @@ async def test_send_retries_past_three_attempts(monkeypatch: pytest.MonkeyPatch)
 
 @pytest.mark.asyncio()
 async def test_yields_with_posted_false_on_retry_window_exhaust(monkeypatch: pytest.MonkeyPatch) -> None:
-    """If ``events.send`` keeps failing for the whole retry window, the consumer
-    should still receive the ``DispatchedToolCall`` with ``posted=False`` so
+    """If `events.send` keeps failing for the whole retry window, the consumer
+    should still receive the `DispatchedToolCall` with `posted=False` so
     they know the tool ran but the session-side agent never saw the result."""
     monkeypatch.setattr(session_runner_mod, "SEND_BACKOFF_CAP", 0.05)
     monkeypatch.setattr(session_runner_mod, "SEND_RETRY_WINDOW", 0.5)
@@ -1300,8 +1300,8 @@ async def test_yields_with_posted_false_on_retry_window_exhaust(monkeypatch: pyt
 @pytest.mark.asyncio()
 async def test_send_retry_window_update_bounds_send_already_retrying(monkeypatch: pytest.MonkeyPatch) -> None:
     """A send retry window that changes while a send is already retrying bounds
-    that send — ``EnvironmentWorker`` keeps it equal to the lease TTL each
-    heartbeat reports (through ``_run_session_tools``)."""
+    that send — `EnvironmentWorker` keeps it equal to the lease TTL each
+    heartbeat reports (through `_run_session_tools`)."""
     monkeypatch.setattr(session_runner_mod, "SEND_BACKOFF_CAP", 0.05)
 
     async def echo(_input: dict[str, Any]) -> str:
@@ -1358,8 +1358,8 @@ async def test_yields_with_posted_false_on_permanent_4xx() -> None:
 
 @pytest.mark.asyncio()
 async def test_tool_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Tool that exceeds ``TOOL_TIMEOUT`` yields with ``is_error=True`` and a
-    ``"timed out"`` message — distinct from the generic exception path."""
+    """Tool that exceeds `TOOL_TIMEOUT` yields with `is_error=True` and a
+    `"timed out"` message — distinct from the generic exception path."""
     monkeypatch.setattr(session_runner_mod, "TOOL_TIMEOUT", 0.05)
 
     async def slow(_input: dict[str, Any]) -> str:
@@ -1399,7 +1399,7 @@ async def test_sync_tool_runs_off_the_event_loop() -> None:
 
 @pytest.mark.asyncio()
 async def test_tool_timeout_fires_for_blocking_sync_tool(monkeypatch: pytest.MonkeyPatch) -> None:
-    """A sync tool that blocks past ``TOOL_TIMEOUT`` is reported timed out at the
+    """A sync tool that blocks past `TOOL_TIMEOUT` is reported timed out at the
     deadline; its thread is abandoned rather than awaited."""
     monkeypatch.setattr(session_runner_mod, "TOOL_TIMEOUT", 0.05)
     release = threading.Event()
@@ -1421,13 +1421,13 @@ async def test_tool_timeout_fires_for_blocking_sync_tool(monkeypatch: pytest.Mon
 
 
 def test_tool_timeout_exceeds_bash_default() -> None:
-    """``TOOL_TIMEOUT`` MUST stay strictly greater than the bash tool's own
-    ``BASH_DEFAULT_TIMEOUT``.
+    """`TOOL_TIMEOUT` MUST stay strictly greater than the bash tool's own
+    `BASH_DEFAULT_TIMEOUT`.
 
-    If they were equal the outer per-tool-call ``fail_after`` could win the
-    race against the bash tool's inner ``fail_after``; anyio would then raise a
-    plain parent-scope ``Cancelled`` (not ``TimeoutError``), the bash tool's
-    ``except TimeoutError`` subprocess cleanup would never run, and the next
+    If they were equal the outer per-tool-call `fail_after` could win the
+    race against the bash tool's inner `fail_after`; anyio would then raise a
+    plain parent-scope `Cancelled` (not `TimeoutError`), the bash tool's
+    `except TimeoutError` subprocess cleanup would never run, and the next
     bash call would read the previous (timed-out) command's stale output. This
     test pins the invariant so the two constants can't silently converge.
     """
@@ -1438,8 +1438,8 @@ def test_tool_timeout_exceeds_bash_default() -> None:
 
 @pytest.mark.asyncio()
 async def test_tool_error_preserves_structured_content() -> None:
-    """``ToolError`` raised by the tool preserves its structured content rather
-    than being stringified through ``repr(e)``."""
+    """`ToolError` raised by the tool preserves its structured content rather
+    than being stringified through `repr(e)`."""
     structured = [{"type": "text", "text": "structured error"}]
 
     async def boom(_input: dict[str, Any]) -> str:
@@ -1473,7 +1473,7 @@ async def test_stream_permanent_4xx_ends_iteration() -> None:
 
 @pytest.mark.asyncio()
 async def test_reconcile_list_error_does_not_dispatch_partial() -> None:
-    """If ``events.list`` errors mid-pagination, the partial ``pending`` list
+    """If `events.list` errors mid-pagination, the partial `pending` list
     should not be enqueued — otherwise we'd risk re-running a tool whose result
     was on a page we never reached."""
     counter = {"calls": 0}
@@ -1502,10 +1502,10 @@ async def test_reconcile_list_error_does_not_dispatch_partial() -> None:
 
 @pytest.mark.asyncio()
 async def test_environment_key_threads_through_to_scoped_client(scoped_calls: list[dict[str, Any]]) -> None:
-    """When an environment key is set, the runner asks ``_scoped_client`` for a
+    """When an environment key is set, the runner asks `_scoped_client` for a
     Bearer-only sub-client keyed to that environment. The actual header shape
-    (``Authorization: Bearer …``, no ``X-Api-Key``, helper-telemetry on defaults)
-    is the responsibility of ``_scoped_client`` itself — exercised separately in
+    (`Authorization: Bearer …`, no `X-Api-Key`, helper-telemetry on defaults)
+    is the responsibility of `_scoped_client` itself — exercised separately in
     integration tests; here we just verify the runner threaded the right key."""
 
     async def echo(_input: dict[str, Any]) -> str:
@@ -1524,8 +1524,8 @@ async def test_environment_key_threads_through_to_scoped_client(scoped_calls: li
 
 @pytest.mark.asyncio()
 async def test_no_environment_key_threads_none_to_scoped_client(scoped_calls: list[dict[str, Any]]) -> None:
-    """Without an environment key the runner still asks ``_scoped_client`` for a
-    request client — passing ``None`` so the factory returns the parent client
+    """Without an environment key the runner still asks `_scoped_client` for a
+    request client — passing `None` so the factory returns the parent client
     unchanged (just with a helper-telemetry header layered on)."""
 
     async def echo(_input: dict[str, Any]) -> str:
@@ -1541,13 +1541,13 @@ async def test_no_environment_key_threads_none_to_scoped_client(scoped_calls: li
 
 @pytest.mark.asyncio()
 async def test_session_runner_threads_extra_headers_into_stream_list_and_send() -> None:
-    """A caller-supplied ``extra_headers`` is threaded, unchanged, into every
-    per-request call the runner makes: the event ``stream``, the history
-    ``list``, and each result ``send``.
+    """A caller-supplied `extra_headers` is threaded, unchanged, into every
+    per-request call the runner makes: the event `stream`, the history
+    `list`, and each result `send`.
 
     The runner does no header munging — it just passes the caller's mapping
-    to each call's ``extra_headers=``. Auth is handled by the scoped
-    sub-client the runner builds from ``environment_key``, independent of
+    to each call's `extra_headers=`. Auth is handled by the scoped
+    sub-client the runner builds from `environment_key`, independent of
     this passthrough."""
 
     async def echo(_input: dict[str, Any]) -> str:
@@ -1578,9 +1578,9 @@ async def test_session_runner_threads_extra_headers_into_stream_list_and_send() 
 @pytest.mark.asyncio()
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
 async def test_runs_context_manager_tool_cleanup_on_exit() -> None:
-    """A tool defined as an ``@asynccontextmanager`` via ``@beta_async_tool``
-    has its ``__aexit__`` driven by the runner cleanup path, additively to the
-    legacy ``close`` hook."""
+    """A tool defined as an `@asynccontextmanager` via `@beta_async_tool`
+    has its `__aexit__` driven by the runner cleanup path, additively to the
+    legacy `close` hook."""
     from contextlib import asynccontextmanager
 
     from anthropic.types.beta import BetaManagedAgentsAgentToolset20260401BashInput
@@ -1592,9 +1592,9 @@ async def test_runs_context_manager_tool_cleanup_on_exit() -> None:
     async def echo_cm() -> AsyncIterator[Callable[..., Awaitable[str]]]:
         events_seen.append("enter")
 
-        # ``Optional[str]`` (not ``str | None``) because ``@beta_async_tool``
+        # `Optional[str]` (not `str | None`) because `@beta_async_tool`
         # evaluates these annotations at runtime via pydantic, and PEP 604 union
-        # syntax can't be ``eval``'d under Python 3.9 — our minimum version.
+        # syntax can't be `eval`'d under Python 3.9 — our minimum version.
         async def echo(command: Optional[str] = None) -> str:
             return f"echo:{command}"
 
@@ -1630,8 +1630,8 @@ async def test_tool_runner_method_returns_session_tool_runner() -> None:
 
 @pytest.mark.asyncio()
 async def test_until_done_drives_runner_to_completion() -> None:
-    """``until_done()`` (renamed from ``run()`` to match ``BetaToolRunner`` and
-    avoid colliding with ``EnvironmentWorker.run``'s forever-loop) drives the
+    """`until_done()` (renamed from `run()` to match `BetaToolRunner` and
+    avoid colliding with `EnvironmentWorker.run`'s forever-loop) drives the
     runner to the session end, discarding per-call observations."""
     calls = {"n": 0}
 
@@ -1653,7 +1653,7 @@ async def test_until_done_drives_runner_to_completion() -> None:
 
 def test_environments_public_reexports() -> None:
     """A user can type their own code against the public runner API without
-    reaching into a ``_``-private module."""
+    reaching into a `_`-private module."""
     from anthropic.lib import environments as env_pkg
 
     for name in (
@@ -1667,7 +1667,7 @@ def test_environments_public_reexports() -> None:
         assert name in env_pkg.__all__, name
         assert getattr(env_pkg, name) is not None, name
 
-    # The old ``RunnableTool`` name was renamed to ``BetaAnyRunnableTool``; it
+    # The old `RunnableTool` name was renamed to `BetaAnyRunnableTool`; it
     # must be fully gone (it had no released consumers).
     assert "RunnableTool" not in env_pkg.__all__
     assert not hasattr(env_pkg, "RunnableTool")
@@ -1705,7 +1705,7 @@ def test_to_session_content_document_passthrough() -> None:
 
 
 def test_to_session_content_search_result_passthrough() -> None:
-    """A ``search_result`` block — valid on the Sessions content union — passes
+    """A `search_result` block — valid on the Sessions content union — passes
     through structurally so the model retains the typed citation metadata."""
     block = {
         "type": "search_result",
@@ -1719,7 +1719,7 @@ def test_to_session_content_search_result_passthrough() -> None:
 
 
 def test_to_session_content_tool_reference_stringified() -> None:
-    """``tool_reference`` blocks have no Sessions equivalent and must be stringified."""
+    """`tool_reference` blocks have no Sessions equivalent and must be stringified."""
     block = {"type": "tool_reference", "tool_name": "weather"}
     out = _to_session_content([block])
     assert out == [{"type": "text", "text": session_runner_mod.json.dumps(block)}]

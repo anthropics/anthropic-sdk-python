@@ -49,6 +49,10 @@ class TestMessages:
                 "type": "ephemeral",
                 "ttl": "5m",
             },
+            compaction={
+                "type": "summarize",
+                "instructions": "instructions",
+            },
             container={
                 "id": "id",
                 "skills": [
@@ -243,6 +247,10 @@ class TestMessages:
                 "type": "ephemeral",
                 "ttl": "5m",
             },
+            compaction={
+                "type": "summarize",
+                "instructions": "instructions",
+            },
             container={
                 "id": "id",
                 "skills": [
@@ -433,6 +441,10 @@ class TestMessages:
                 "type": "ephemeral",
                 "ttl": "5m",
             },
+            compaction={
+                "type": "summarize",
+                "instructions": "instructions",
+            },
             context_management={
                 "edits": [
                     {
@@ -609,6 +621,10 @@ class TestAsyncMessages:
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
+            },
+            compaction={
+                "type": "summarize",
+                "instructions": "instructions",
             },
             container={
                 "id": "id",
@@ -804,6 +820,10 @@ class TestAsyncMessages:
                 "type": "ephemeral",
                 "ttl": "5m",
             },
+            compaction={
+                "type": "summarize",
+                "instructions": "instructions",
+            },
             container={
                 "id": "id",
                 "skills": [
@@ -993,6 +1013,10 @@ class TestAsyncMessages:
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
+            },
+            compaction={
+                "type": "summarize",
+                "instructions": "instructions",
             },
             context_management={
                 "edits": [

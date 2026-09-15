@@ -61,5 +61,6 @@ from ._reflection import (
     function_has_argument as function_has_argument,
     assert_overloads_in_sync as assert_overloads_in_sync,
     assert_signatures_in_sync as assert_signatures_in_sync,
+    signature_without_evaluating_annotations as signature_without_evaluating_annotations,
 )
 from ._datetime_parse import parse_date as parse_date, parse_datetime as parse_datetime

@@ -48,7 +48,6 @@ ContentBlock: TypeAlias = Annotated[
 
 class BetaRawContentBlockStartEvent(BaseModel):
     content_block: ContentBlock
-    """Response model for a file uploaded to the container."""
 
     index: int
 

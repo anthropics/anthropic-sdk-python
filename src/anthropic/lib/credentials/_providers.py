@@ -57,7 +57,7 @@ __all__ = ["StaticToken", "EnvToken", "CredentialsFile", "InMemoryConfig", "Iden
 
 
 def _coerce_expires_at(value: Any, source: Optional[pathlib.Path]) -> Optional[int]:
-    """Parse a credentials-file ``expires_at`` field into Unix seconds."""
+    """Parse a credentials-file `expires_at` field into Unix seconds."""
     if value is None:
         return None
     try:
@@ -79,7 +79,7 @@ CREDENTIALS_FILE_TYPE = "oauth_token"
 CONFIG_FILE_VERSION = "1.0"
 CREDENTIALS_FILE_VERSION = "1.0"
 
-# Discriminator values for the config file's ``authentication.type`` field.
+# Discriminator values for the config file's `authentication.type` field.
 AUTH_TYPE_OIDC_FEDERATION = "oidc_federation"
 AUTH_TYPE_USER_OAUTH = "user_oauth"
 
@@ -116,7 +116,7 @@ def _fill_missing_from_env(config: Dict[str, Any], auth: Dict[str, Any]) -> None
 
 
 class StaticToken:
-    """An :class:`AccessTokenProvider` that always returns a fixed token with no expiry."""
+    """An `AccessTokenProvider` that always returns a fixed token with no expiry."""
 
     def __init__(self, token: str) -> None:
         self._token = token
@@ -127,7 +127,7 @@ class StaticToken:
 
 
 class EnvToken:
-    """An :class:`AccessTokenProvider` that reads ``ANTHROPIC_AUTH_TOKEN`` at call time."""
+    """An `AccessTokenProvider` that reads `ANTHROPIC_AUTH_TOKEN` at call time."""
 
     def __init__(self, env_var: str = ENV_AUTH_TOKEN) -> None:
         self._env_var = env_var
@@ -144,45 +144,45 @@ class EnvToken:
 
 
 class CredentialsFile:
-    """An :class:`AccessTokenProvider` backed by a named profile.
+    """An `AccessTokenProvider` backed by a named profile.
 
     A profile is a pair of files under the config directory
-    (``~/.config/anthropic/`` by default; override with ``ANTHROPIC_CONFIG_DIR``):
+    (`~/.config/anthropic/` by default; override with `ANTHROPIC_CONFIG_DIR`):
 
-    * ``configs/<profile>.json`` — non-secret. Holds the nested
-      ``"authentication"`` object (discriminated by its ``"type"`` field), plus
-      top-level ``organization_id``, ``workspace_id``, and ``base_url``.
-      The ``authentication`` object may contain a ``credentials_path`` field
+    * `configs/<profile>.json` — non-secret. Holds the nested
+      `"authentication"` object (discriminated by its `"type"` field), plus
+      top-level `organization_id`, `workspace_id`, and `base_url`.
+      The `authentication` object may contain a `credentials_path` field
       overriding the credentials file location.
-    * ``credentials/<profile>.json`` — secret (0600). Holds ``access_token``,
-      ``expires_at``, and (for ``user_oauth`` with a ``client_id``)
-      ``refresh_token``.
+    * `credentials/<profile>.json` — secret (0600). Holds `access_token`,
+      `expires_at`, and (for `user_oauth` with a `client_id`)
+      `refresh_token`.
 
     The split keeps secret material out of files that may need to be readable
     by config-only consumers, and lets the SDK enforce 0600 on the credentials
     file without locking out config readers.
 
-    Dispatches on the ``authentication.type`` discriminator:
+    Dispatches on the `authentication.type` discriminator:
 
-    ``"oidc_federation"``
+    `"oidc_federation"`
         OIDC workload identity federation. Lazily constructs a
-        :class:`WorkloadIdentityCredentials` delegate from the nested auth
-        fields plus the top-level ``organization_id`` and calls it to perform
+        `WorkloadIdentityCredentials` delegate from the nested auth
+        fields plus the top-level `organization_id` and calls it to perform
         the jwt-bearer exchange.
 
-    ``"user_oauth"``
+    `"user_oauth"`
         Output of an interactive PKCE login. If the auth block has a
-        ``client_id``, performs ``refresh_token`` grants on expiry and
+        `client_id`, performs `refresh_token` grants on expiry and
         writes the new tokens back to the credentials file (atomic replace,
-        refresh-token rotation supported). Without a ``client_id``, the
+        refresh-token rotation supported). Without a `client_id`, the
         credentials file is treated as externally rotated — the SDK re-reads
-        it on every invocation and returns whatever ``access_token`` is
+        it on every invocation and returns whatever `access_token` is
         there, no refresh grant attempted. This is the pattern for a
         sidecar/daemon that mints the access token out-of-band.
 
     Args:
-        profile: Profile name. ``None`` resolves via ``ANTHROPIC_PROFILE`` env
-            → ``<config_dir>/active_config`` pointer file → ``"default"``.
+        profile: Profile name. `None` resolves via `ANTHROPIC_PROFILE` env
+            → `<config_dir>/active_config` pointer file → `"default"`.
     """
 
     def __init__(
@@ -214,9 +214,9 @@ class CredentialsFile:
 
     @property
     def resolved_base_url(self) -> Optional[str]:
-        """The ``base_url`` declared in the profile config file, if any.
+        """The `base_url` declared in the profile config file, if any.
 
-        Returns ``None`` when the config has no top-level ``base_url`` key —
+        Returns `None` when the config has no top-level `base_url` key —
         callers should fall back to their own default rather than the
         provider's bound/default value, so a profile that *doesn't* pin a
         host never overrides an explicit client setting. Loads the config
@@ -227,12 +227,12 @@ class CredentialsFile:
         return str(raw).rstrip("/") if raw else None
 
     def bind_base_url(self, base_url: str) -> None:
-        """Adopt the owning client's ``base_url`` as a fallback for the token
-        exchange. Slots between the config file's own ``base_url`` field and
-        the hard-coded default; a ``base_url`` in the config file still wins.
+        """Adopt the owning client's `base_url` as a fallback for the token
+        exchange. Slots between the config file's own `base_url` field and
+        the hard-coded default; a `base_url` in the config file still wins.
 
         Rebinding affects every client holding this instance; clients bind
-        through :meth:`for_base_url` instead.
+        through `for_base_url` instead.
         """
         bound = base_url.rstrip("/")
         # Validate eagerly so an invalid bind fails at bind time, not at the
@@ -244,17 +244,17 @@ class CredentialsFile:
             _require_https(self._base_url, field=f"{self._config_path}: base_url")
 
     def for_base_url(self, base_url: str) -> "CredentialsFile":
-        """Return the provider a client with ``base_url`` should exchange through.
+        """Return the provider a client with `base_url` should exchange through.
 
         Binds in place, unless another client already bound this instance to a
-        different host (e.g. the parent of ``copy(base_url=...)``). That binding
+        different host (e.g. the parent of `copy(base_url=...)`). That binding
         is left alone, and what happens depends on the profile:
 
-        * pins its own ``base_url``: the bind is irrelevant, return ``self``.
-        * ``oidc_federation``: return a copy bound to ``base_url``. It shares the
+        * pins its own `base_url`: the bind is irrelevant, return `self`.
+        * `oidc_federation`: return a copy bound to `base_url`. It shares the
           identity token and http client, but not the on-disk token cache, whose
           tokens belong to the original deployment.
-        * ``user_oauth``: return ``self``. The refresh token is tied to the
+        * `user_oauth`: return `self`. The refresh token is tied to the
           deployment that issued it, so there is nothing per-host to copy.
         """
         bound = base_url.rstrip("/")
@@ -274,9 +274,9 @@ class CredentialsFile:
 
     def _resolve_base_url(self, config: Dict[str, Any]) -> str:
         """base_url precedence: top-level config field → bound (the owning
-        client's base_url, via :meth:`bind_base_url`) → default. Validated
+        client's base_url, via `bind_base_url`) → default. Validated
         against the scheme/TLS rules so a malicious config with
-        ``base_url="http://evil/"`` can't exfiltrate the assertion or refresh
+        `base_url="http://evil/"` can't exfiltrate the assertion or refresh
         token."""
         if config.get("base_url"):
             return str(config["base_url"]).rstrip("/")
@@ -285,7 +285,7 @@ class CredentialsFile:
         return DEFAULT_BASE_URL
 
     def extra_headers(self) -> Dict[str, str]:
-        """Return headers derived from the config file (e.g. ``workspace_id``).
+        """Return headers derived from the config file (e.g. `workspace_id`).
 
         Eagerly reads the config if not yet loaded. The returned dict is
         suitable for merging into the client's default headers.
@@ -302,7 +302,7 @@ class CredentialsFile:
         return headers
 
     def _load_config(self) -> Dict[str, Any]:
-        """Read and cache the config file, resolving ``base_url`` and ``credentials_path``."""
+        """Read and cache the config file, resolving `base_url` and `credentials_path`."""
         if self._config is not None:
             return self._config
 
@@ -356,12 +356,12 @@ class CredentialsFile:
         """Read the credentials file. Re-reads on every call — daemons rotate it.
 
         Secret values in the returned dict (every string field not in
-        ``_secrets._PLAIN_KEYS``) are :class:`SecretStr`-wrapped — unwrap
-        with ``_unwrap_secret`` at the point of use. Writing the dict back
-        through :meth:`_atomic_write_credentials` unwraps automatically.
+        `_secrets._PLAIN_KEYS`) are `SecretStr`-wrapped — unwrap
+        with `_unwrap_secret` at the point of use. Writing the dict back
+        through `_atomic_write_credentials` unwraps automatically.
 
         On Unix, refuses symlinks and any file readable or writable by group
-        or others (``mode & 0o077``). The check is skipped on Windows where
+        or others (`mode & 0o077`). The check is skipped on Windows where
         POSIX mode bits don't carry the same meaning.
         """
         assert self._credentials_path is not None  # set by _load_config
@@ -417,7 +417,7 @@ class CredentialsFile:
         return creds
 
     def _get_http_client(self) -> httpx2.Client:
-        """Return an ``httpx2.Client``, lazily creating (and tracking) one we own."""
+        """Return an `httpx2.Client`, lazily creating (and tracking) one we own."""
         if self._http_client is not None:
             return self._http_client
         if self._owned_http_client is None:
@@ -425,7 +425,7 @@ class CredentialsFile:
         return self._owned_http_client
 
     def close(self) -> None:
-        """Close the owned ``httpx2.Client`` if we created one."""
+        """Close the owned `httpx2.Client` if we created one."""
         if self._owned_http_client is not None:
             self._owned_http_client.close()
             self._owned_http_client = None
@@ -435,11 +435,11 @@ class CredentialsFile:
     def reload(self) -> None:
         """Drop the cached config so the next call re-reads it from disk.
 
-        ``CredentialsFile`` caches the parsed config across calls to keep the
+        `CredentialsFile` caches the parsed config across calls to keep the
         hot path cheap; a daemon that rotates a profile in place (e.g. flips
-        ``"type": "user_oauth"`` to ``"type": "oidc_federation"``) will not be
+        `"type": "user_oauth"` to `"type": "oidc_federation"`) will not be
         picked up automatically. Callers that need to react to such changes
-        can call ``reload()`` to force a fresh read on the next ``__call__``.
+        can call `reload()` to force a fresh read on the next `__call__`.
         """
         self._config = None
         self._workload_delegate = None
@@ -447,8 +447,8 @@ class CredentialsFile:
     def _atomic_write_credentials(self, data: Dict[str, Any]) -> None:
         """Atomic write to the credentials file (NOT the config file).
 
-        ``data`` may hold :class:`SecretStr` token values (see
-        :meth:`_read_credentials`); they are unwrapped at dump time, so the
+        `data` may hold `SecretStr` token values (see
+        `_read_credentials`); they are unwrapped at dump time, so the
         on-disk format is unchanged and this frame's locals stay redacted if
         the write fails (e.g. ENOSPC) with a crash reporter capturing them.
         """
@@ -457,7 +457,7 @@ class CredentialsFile:
         parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         # mkstemp gives a unique temp name so concurrent writers (e.g.
         # gunicorn workers cold-starting together) don't race on a fixed
-        # ``.tmp`` path; whichever os.replace lands last wins, which is fine
+        # `.tmp` path; whichever os.replace lands last wins, which is fine
         # for a best-effort cache.
         fd, tmp = tempfile.mkstemp(dir=parent, prefix=f".{self._credentials_path.name}.", suffix=".tmp")
         try:
@@ -487,7 +487,7 @@ class CredentialsFile:
             pass
 
     def _auth_block(self) -> Dict[str, Any]:
-        """Return the cached ``authentication`` sub-object from the config file."""
+        """Return the cached `authentication` sub-object from the config file."""
         config = self._load_config()
         return cast("Dict[str, Any]", config["authentication"])
 
@@ -507,7 +507,7 @@ class CredentialsFile:
         )
 
     def _call_user_oauth(self, auth: Dict[str, Any], *, force_refresh: bool = False) -> AccessToken:
-        """Interactive-login profile. With a ``client_id`` in the auth block,
+        """Interactive-login profile. With a `client_id` in the auth block,
         we run the refresh_token grant on expiry; without one, we treat the
         credentials file as externally rotated and just read it fresh.
         """
@@ -597,7 +597,7 @@ class CredentialsFile:
         raw_expires_in = payload.get("expires_in", 3600)
         try:
             expires_in = int(raw_expires_in)
-        except (TypeError, ValueError) as err:
+        except (TypeError, ValueError, OverflowError) as err:
             raise WorkloadIdentityError(
                 f"user_oauth refresh response has invalid 'expires_in' {raw_expires_in!r}; "
                 f"expected an integer number of seconds."
@@ -617,7 +617,7 @@ class CredentialsFile:
         return AccessToken(token=_unwrap_secret(new_access), expires_at=new_expires_at)
 
     def _read_credentials_if_exists(self) -> Optional[Dict[str, Any]]:
-        """``_read_credentials`` variant that returns ``None`` on absence
+        """`_read_credentials` variant that returns `None` on absence
         instead of raising — used by the federation disk-cache path where a
         missing credentials file just means "exchange now".
         """
@@ -639,9 +639,9 @@ class CredentialsFile:
         # the token there is unexpired, return it instead of re-exchanging.
         # The in-memory TokenCache layer applies the proactive 120s/30s policy
         # on top of this; the disk cache only matters across process restarts.
-        # ``_credentials_path`` is always set for ``CredentialsFile`` proper
-        # (``_load_config`` defaults it); subclasses (``InMemoryConfig``)
-        # leave it ``None`` to opt out of the disk cache entirely.
+        # `_credentials_path` is always set for `CredentialsFile` proper
+        # (`_load_config` defaults it); subclasses (`InMemoryConfig`)
+        # leave it `None` to opt out of the disk cache entirely.
         if self._credentials_path is None:
             return self._workload_delegate()
 
@@ -734,7 +734,7 @@ class CredentialsFile:
 
 
 class IdentityTokenFile:
-    """An :class:`IdentityTokenProvider` that reads a JWT from a file on every call.
+    """An `IdentityTokenProvider` that reads a JWT from a file on every call.
 
     Kubernetes projected service-account tokens (and similar) are rotated in place,
     so the file MUST be re-read on every invocation rather than cached.
@@ -785,27 +785,27 @@ class IdentityTokenFile:
 
 
 class InMemoryConfig(CredentialsFile):
-    """An :class:`AccessTokenProvider` driven by an in-memory config dict
-    (same shape as ``configs/<profile>.json``) rather than files on disk.
+    """An `AccessTokenProvider` driven by an in-memory config dict
+    (same shape as `configs/<profile>.json`) rather than files on disk.
 
-    Intended for callers that want to construct an :class:`anthropic.Anthropic`
+    Intended for callers that want to construct an `anthropic.Anthropic`
     client with a fully programmatic credentials setup — equivalent to the Go
-    SDK's ``option.WithConfig`` / TypeScript SDK's ``ClientOptions.config``.
+    SDK's `option.WithConfig` / TypeScript SDK's `ClientOptions.config`.
 
-    Both ``authentication.type`` discriminator values are supported:
+    Both `authentication.type` discriminator values are supported:
 
-    ``"oidc_federation"``
-        ``authentication.credentials_path`` is **optional**. If set, exchanged
+    `"oidc_federation"`
+        `authentication.credentials_path` is **optional**. If set, exchanged
         tokens are cached to / read from that file (same atomic 0600 write as
-        :class:`CredentialsFile`). If omitted, every call performs a fresh
+        `CredentialsFile`). If omitted, every call performs a fresh
         jwt-bearer exchange with no on-disk cache.
 
-    ``"user_oauth"``
-        ``authentication.credentials_path`` is **required** — it is where the
+    `"user_oauth"`
+        `authentication.credentials_path` is **required** — it is where the
         access/refresh tokens live. Behaviour is identical to a file-backed
-        :class:`CredentialsFile` profile of the same shape.
+        `CredentialsFile` profile of the same shape.
 
-    The implementation subclasses :class:`CredentialsFile` so the dispatch,
+    The implementation subclasses `CredentialsFile` so the dispatch,
     refresh-grant, disk-cache and atomic-write logic are shared verbatim;
     only config loading and identity-token resolution are overridden.
     """

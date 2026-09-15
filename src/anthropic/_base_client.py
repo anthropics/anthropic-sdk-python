@@ -816,10 +816,12 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     ) -> float:
         max_retries = options.get_max_retries(self.max_retries)
 
-        # If the API asks us to wait a certain amount of time (and it's a reasonable amount), just do what it says.
+        # If the API asks us to wait a certain amount of time, just do what it says.
         retry_after = self._parse_retry_after_header(response_headers)
-        if retry_after is not None and 0 < retry_after <= 60:
-            return retry_after
+        if retry_after is not None and retry_after > 0:
+            # `time.sleep` raises above a platform limit, as low as 2**32 milliseconds on Windows,
+            # so wait at most that long.
+            return min(retry_after, 4_294_967.0)
 
         # Also cap retry count to 1000 to avoid any potential overflows with `pow`
         nb_retries = min(max_retries - remaining_retries, 1000)

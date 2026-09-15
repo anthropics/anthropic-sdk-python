@@ -19,7 +19,6 @@ Content: TypeAlias = Union[WebFetchToolResultErrorBlock, WebFetchBlock]
 
 class WebFetchToolResultBlock(BaseModel):
     caller: Optional[Caller] = None
-    """Tool invocation directly from the model."""
 
     content: Content
 

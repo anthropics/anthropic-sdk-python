@@ -28,19 +28,21 @@ BetaFunctionToolResultType: TypeAlias = Union[str, Iterable[BetaContent]]
 
 
 class ToolError(Exception):
-    """Error that can be raised from a tool to return structured content with ``is_error: True``.
+    """Error that can be raised from a tool to return structured content with `is_error: True`.
 
-    When the tool runner catches this error, it will use the :attr:`content`
-    property as the tool result instead of ``repr(exc)``.
+    When the tool runner catches this error, it will use the `content`
+    property as the tool result instead of `repr(exc)`.
 
-    Example::
+    Example:
 
-        raise ToolError(
-            [
-                {"type": "text", "text": "Error details here"},
-                {"type": "image", "source": {"type": "base64", "data": "...", "media_type": "image/png"}},
-            ]
-        )
+    ```py
+    raise ToolError(
+        [
+            {"type": "text", "text": "Error details here"},
+            {"type": "image", "source": {"type": "base64", "data": "...", "media_type": "image/png"}},
+        ]
+    )
+    ```
     """
 
     content: BetaFunctionToolResultType
@@ -124,22 +126,22 @@ class BaseFunctionTool(Generic[CallableT]):
     Which runners actually invoke it differs — check before relying on it for a
     stateful tool:
 
-    - ``SessionToolRunner`` (``client.beta.sessions.events.tool_runner(...)``)
-      and the :class:`~anthropic.lib.environments.EnvironmentWorker` built on it
-      **do** call ``close`` when the run ends.
-    - The Messages :class:`BetaToolRunner` / ``BetaAsyncToolRunner``
-      (``client.beta.messages.tool_runner(...)``) does **not** call ``close``.
-      A stateful tool (e.g. the ``bash`` tool's subprocess) handed to the
+    - `SessionToolRunner` (`client.beta.sessions.events.tool_runner(...)`)
+      and the `anthropic.lib.environments.EnvironmentWorker` built on it
+      **do** call `close` when the run ends.
+    - The Messages `BetaToolRunner` / `BetaAsyncToolRunner`
+      (`client.beta.messages.tool_runner(...)`) does **not** call `close`.
+      A stateful tool (e.g. the `bash` tool's subprocess) handed to the
       Messages tool runner therefore leaks its resource — run it under
-      ``SessionToolRunner`` / the environment worker instead.
+      `SessionToolRunner` / the environment worker instead.
     """
 
     _context_manager: object | None = None
-    """Set by :func:`beta_tool` / :func:`beta_async_tool` when the tool was
+    """Set by `beta_tool` / `beta_async_tool` when the tool was
     defined as a (sync/async) context manager: the *entered* context manager
-    whose ``__exit__`` / ``__aexit__`` the tool-runner cleanup path drives on the
-    way out. Additive to :attr:`close` — both run if both are present, so other
-    tool-runner consumers that only set ``close`` keep working unchanged.
+    whose `__exit__` / `__aexit__` the tool-runner cleanup path drives on the
+    way out. Additive to `close` — both run if both are present, so other
+    tool-runner consumers that only set `close` keep working unchanged.
     """
 
     def __init__(
@@ -296,11 +298,11 @@ class BetaAsyncFunctionTool(BaseFunctionTool[AsyncFunctionT]):
 
 
 def _is_sync_cm_factory(fn: object) -> bool:
-    """True when ``fn`` is a function produced by :func:`contextlib.contextmanager`.
+    """True when `fn` is a function produced by `contextlib.contextmanager`.
 
-    ``contextmanager`` wraps the generator function with ``functools.wraps``, so
-    the original generator function is reachable as ``__wrapped__`` — the same
-    signal :mod:`inspect` itself uses. We never call ``fn`` to find out, so a
+    `contextmanager` wraps the generator function with `functools.wraps`, so
+    the original generator function is reachable as `__wrapped__` — the same
+    signal `inspect` itself uses. We never call `fn` to find out, so a
     plain tool function is never accidentally invoked during detection.
     """
     wrapped = getattr(fn, "__wrapped__", None)
@@ -308,7 +310,7 @@ def _is_sync_cm_factory(fn: object) -> bool:
 
 
 def _is_async_cm_factory(fn: object) -> bool:
-    """True when ``fn`` is a function produced by :func:`contextlib.asynccontextmanager`."""
+    """True when `fn` is a function produced by `contextlib.asynccontextmanager`."""
     wrapped = getattr(fn, "__wrapped__", None)
     return wrapped is not None and isasyncgenfunction(wrapped)
 
@@ -316,11 +318,11 @@ def _is_async_cm_factory(fn: object) -> bool:
 async def aclose_runnable_tool(tool: object) -> None:
     """Run a runnable tool's optional cleanup.
 
-    Drives the legacy ``aclose`` / ``close`` attribute (awaited if it returns an
+    Drives the legacy `aclose` / `close` attribute (awaited if it returns an
     awaitable) and, when the tool was defined as a context manager via
-    :func:`beta_tool` / :func:`beta_async_tool`, its ``__exit__`` /
-    ``__aexit__``. Both run when both are present — the context-manager support
-    is purely additive to ``close``. Exceptions are logged, never raised, so one
+    `beta_tool` / `beta_async_tool`, its `__exit__` /
+    `__aexit__`. Both run when both are present — the context-manager support
+    is purely additive to `close`. Exceptions are logged, never raised, so one
     tool's bad cleanup can't abort another tool's.
     """
     closer = getattr(tool, "aclose", None) or getattr(tool, "close", None)
@@ -414,10 +416,10 @@ def beta_tool(
     @function_tool(name="custom_name")
     def my_func(x: int) -> str: ...
 
-    ``SessionToolRunner`` and ``EnvironmentWorker`` call the function on a
-    worker thread. A ``@contextmanager`` tool is entered at decoration time and
+    `SessionToolRunner` and `EnvironmentWorker` call the function on a
+    worker thread. A `@contextmanager` tool is entered at decoration time and
     exited by the runner's cleanup, both off that thread, so avoid thread-bound
-    resources such as a default ``sqlite3`` connection in ``__enter__``.
+    resources such as a default `sqlite3` connection in `__enter__`.
     """
     if _compat.PYDANTIC_V1:
         raise RuntimeError("Tool functions are only supported with Pydantic v2")
@@ -557,7 +559,7 @@ def beta_async_tool(
             # tool callable. Entering it requires awaiting, which the decorator
             # can't do, so enter lazily on first call and cache the result; the
             # parameters can't be inferred until then, so an explicit
-            # ``input_schema`` is required.
+            # `input_schema` is required.
             if input_schema is None:
                 raise TypeError(
                     "an @asynccontextmanager tool needs an explicit input_schema= "

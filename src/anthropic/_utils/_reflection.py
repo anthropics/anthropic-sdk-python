@@ -1,13 +1,29 @@
 from __future__ import annotations
 
+import sys
 import inspect
 import typing_extensions
 from typing import Any, Callable
 
 
+def signature_without_evaluating_annotations(func: Callable[..., Any]) -> inspect.Signature:
+    """Like `inspect.signature()`, for callers that only need parameter names, kinds and defaults.
+
+    Python 3.14 evaluates annotations lazily and `inspect.signature()` evaluates them by default, so a
+    function annotated with a name that only exists under `TYPE_CHECKING` makes it raise `NameError`.
+    Here the annotations come back as strings on 3.14+ and are never evaluated. On older versions
+    they are whatever the function already holds.
+    """
+    if sys.version_info >= (3, 14):
+        import annotationlib
+
+        return inspect.signature(func, annotation_format=annotationlib.Format.STRING)
+    return inspect.signature(func)
+
+
 def function_has_argument(func: Callable[..., Any], arg_name: str) -> bool:
     """Returns whether or not the given function has a specific parameter"""
-    sig = inspect.signature(func)
+    sig = signature_without_evaluating_annotations(func)
     return arg_name in sig.parameters
 
 

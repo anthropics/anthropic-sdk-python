@@ -11,7 +11,6 @@ __all__ = ["CodeExecutionToolResultBlockParam"]
 
 class CodeExecutionToolResultBlockParam(TypedDict, total=False):
     content: Required[CodeExecutionToolResultBlockParamContentParam]
-    """Code execution result with encrypted stdout for PFC + web_search results."""
 
     tool_use_id: Required[str]
 

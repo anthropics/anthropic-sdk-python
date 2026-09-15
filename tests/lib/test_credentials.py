@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import os
+import sys
 import copy
 import json
 import time
+import asyncio
 import logging
 import pathlib
-from typing import Any, Dict, List, Callable, Optional, cast
+import functools
+import itertools
+import threading
+from typing import Any, Dict, List, Callable, Optional, NamedTuple, cast
+from unittest.mock import MagicMock
 from typing_extensions import Protocol
 
 import httpx2
@@ -35,6 +41,7 @@ from anthropic import (
 from anthropic._version import __version__
 from anthropic._base_client import FinalRequestOptions
 from anthropic.lib.credentials import BaseURLBoundProvider
+from anthropic.lib.credentials._types import is_async_token_provider
 from anthropic.lib.credentials._constants import (
     TOKEN_ENDPOINT,
     GRANT_TYPE_JWT_BEARER,
@@ -79,8 +86,8 @@ def no_default_creds_file(monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Pat
     """Point the config directory at an empty location so a real
     ~/.config/anthropic/ on the dev machine doesn't leak into tests.
 
-    Patches ``_config_dir`` directly rather than setting ``ANTHROPIC_CONFIG_DIR``
-    so that ``clean_env`` (which deletes that env var) can't clobber the isolation.
+    Patches `_config_dir` directly rather than setting `ANTHROPIC_CONFIG_DIR`
+    so that `clean_env` (which deletes that env var) can't clobber the isolation.
     """
     empty = tmp_path / "empty-config-dir"
     empty.mkdir()
@@ -88,7 +95,7 @@ def no_default_creds_file(monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Pat
 
 
 # Field names that live at the top level of the new nested config shape
-# (outside the ``authentication`` object).
+# (outside the `authentication` object).
 _TOP_LEVEL_CONFIG_KEYS = {"base_url", "organization_id", "workspace_id"}
 
 
@@ -96,10 +103,10 @@ def _migrate_legacy_config(flat: Dict[str, Any]) -> Dict[str, Any]:
     """Adapter: convert a flat legacy config dict into the new nested shape.
 
     Many tests in this file predate the schema migration and pass legacy
-    flat configs like ``{"type": "workload_identity", "federation_rule_id": ...}``.
+    flat configs like `{"type": "workload_identity", "federation_rule_id": ...}`.
     Rather than churn every caller, this helper translates at the test-helper
     layer — tests that want to assert against the new shape directly can
-    pass a config dict that already contains an ``"authentication"`` key.
+    pass a config dict that already contains an `"authentication"` key.
     """
     result: Dict[str, Any] = {}
     auth: Dict[str, Any] = {}
@@ -132,17 +139,17 @@ def _write_profile(
     config: Dict[str, Any],
     credentials: Optional[Dict[str, Any]] = None,
 ) -> None:
-    """Test helper: lay out ``configs/<profile>.json`` and optionally
-    ``credentials/<profile>.json`` under ``config_dir``.
+    """Test helper: lay out `configs/<profile>.json` and optionally
+    `credentials/<profile>.json` under `config_dir`.
 
-    Accepts either the new nested ``{"authentication": {...}}`` shape or a
-    legacy flat shape (``{"type": "workload_identity", ...}``) for backwards
+    Accepts either the new nested `{"authentication": {...}}` shape or a
+    legacy flat shape (`{"type": "workload_identity", ...}`) for backwards
     compatibility with the tests that predate the schema migration. Legacy
-    inputs are translated via :func:`_migrate_legacy_config` before being
+    inputs are translated via `_migrate_legacy_config` before being
     written to disk.
 
-    Prepends ``"type": "oauth_token"`` to the credentials dict unless the
-    caller already supplied a ``type`` key (so negative tests can override).
+    Prepends `"type": "oauth_token"` to the credentials dict unless the
+    caller already supplied a `type` key (so negative tests can override).
     """
     if "type" in config and "authentication" not in config:
         config = _migrate_legacy_config(config)
@@ -237,8 +244,8 @@ class TestIdentityTokenFile:
 
 
 class TestCredentialsFile:
-    """All tests use ``ANTHROPIC_CONFIG_DIR`` to point at a tmp directory laid
-    out as ``configs/<profile>.json`` + ``credentials/<profile>.json``."""
+    """All tests use `ANTHROPIC_CONFIG_DIR` to point at a tmp directory laid
+    out as `configs/<profile>.json` + `credentials/<profile>.json`."""
 
     @pytest.fixture(autouse=True)
     def _isolate(self, monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
@@ -293,7 +300,7 @@ class TestCredentialsFile:
             CredentialsFile()()
 
     def test_credentials_file_absent_type_is_lenient(self, tmp_path: pathlib.Path) -> None:
-        """Hand-written credentials files without ``type`` are accepted."""
+        """Hand-written credentials files without `type` are accepted."""
         _write_profile(tmp_path, "default", {"type": "external"})
         # Write credentials directly (bypass helper's type injection).
         (tmp_path / "credentials").mkdir(exist_ok=True)
@@ -377,7 +384,7 @@ class TestCredentialsFile:
 
     @pytest.mark.respx()
     def test_bind_base_url_precedence(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """``bind_base_url`` slots between the config file's own ``base_url``
+        """`bind_base_url` slots between the config file's own `base_url`
         field and the hard-coded default: config → bound → default."""
         jwt_path = tmp_path / "jwt"
         jwt_path.write_text("j")
@@ -471,7 +478,7 @@ class TestCredentialsFile:
 
     def test_for_base_url_returns_self_when_bind_is_moot(self, tmp_path: pathlib.Path) -> None:
         """No per-host provider is made when the bind can't change where the
-        tokens come from: the profile pins its own ``base_url``, or it is a
+        tokens come from: the profile pins its own `base_url`, or it is a
         user_oauth profile whose refresh token is tied to the issuing host."""
         _write_profile(
             tmp_path,
@@ -692,7 +699,7 @@ class TestCredentialsFile:
             CredentialsFile()()
 
     def test_user_oauth_without_client_id_is_static(self, tmp_path: pathlib.Path) -> None:
-        """user_oauth without a client_id is the ``external`` pattern: the
+        """user_oauth without a client_id is the `external` pattern: the
         credentials file is externally rotated, the SDK re-reads it on every
         call, no refresh grant is attempted. The spec merged this use case
         into user_oauth — a client_id is the opt-in signal for refresh."""
@@ -912,7 +919,7 @@ class TestCredentialsFile:
         assert CredentialsFile()().token == "env-tok"
 
     def test_credentials_path_override(self, tmp_path: pathlib.Path) -> None:
-        """Config's ``credentials_path`` field redirects to a custom location."""
+        """Config's `credentials_path` field redirects to a custom location."""
         custom = tmp_path / "elsewhere" / "secrets.json"
         custom.parent.mkdir()
         custom.write_text(json.dumps({"access_token": "redirected"}))
@@ -923,7 +930,7 @@ class TestCredentialsFile:
 
     @pytest.mark.respx(base_url="https://from-config.example.com")
     def test_base_url_from_config(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """Config ``base_url`` is used when no ctor override is given."""
+        """Config `base_url` is used when no ctor override is given."""
         jwt_path = tmp_path / "jwt"
         jwt_path.write_text("x")
         _write_profile(
@@ -1051,7 +1058,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_scope_is_display_only(self, respx_mock: MockRouter) -> None:
-        """``scope`` is stored on the provider for parity but never sent on the
+        """`scope` is stored on the provider for parity but never sent on the
         wire — the server derives effective scope from the federation rule."""
         respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
         creds = WorkloadIdentityCredentials(
@@ -1085,7 +1092,7 @@ class TestWorkloadIdentityCredentials:
 
     @pytest.mark.respx()
     def test_bind_base_url(self, respx_mock: MockRouter) -> None:
-        """``bind_base_url`` sets the token-exchange URL; unbound → ``DEFAULT_BASE_URL``."""
+        """`bind_base_url` sets the token-exchange URL; unbound → `DEFAULT_BASE_URL`."""
         bound = "https://bound.example"
 
         # No bind → DEFAULT_BASE_URL
@@ -1319,7 +1326,7 @@ class TestWorkloadIdentityCredentials:
 
 class TestProfileEnvFill:
     """PY-01: profile fields left empty are filled from ANTHROPIC_* env vars,
-    matching Go's ``fillMissingFromEnv`` precedence (file wins, env fills gaps)."""
+    matching Go's `fillMissingFromEnv` precedence (file wins, env fills gaps)."""
 
     @pytest.fixture(autouse=True)
     def _isolate(self, monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
@@ -1389,10 +1396,10 @@ class TestProfileEnvFill:
         assert delegate._workspace_id == "wrkspc_from_env"  # pyright: ignore[reportPrivateUsage]
 
     def test_env_workspace_id_fills_user_oauth(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """``ANTHROPIC_WORKSPACE_ID`` fills ``workspace_id`` uniformly across
+        """`ANTHROPIC_WORKSPACE_ID` fills `workspace_id` uniformly across
         profile types — not just federation. This pins the precedence model:
-        ctor override > env var > profile, regardless of ``auth.type``. For
-        ``user_oauth`` the filled value surfaces as the ``anthropic-workspace-id``
+        ctor override > env var > profile, regardless of `auth.type`. For
+        `user_oauth` the filled value surfaces as the `anthropic-workspace-id`
         request header (federation routes it into the exchange body instead)."""
         monkeypatch.setenv("ANTHROPIC_WORKSPACE_ID", "wrkspc_env")
         creds_path = tmp_path / "creds.json"
@@ -1470,6 +1477,39 @@ class TestTokenCache:
         assert cache.get_token() == "a"
         assert provider.calls == 1
 
+    def test_provider_must_return_an_access_token(self) -> None:
+        calls: List[int] = []
+
+        def provider(*, force_refresh: bool = False) -> Any:  # noqa: ARG001
+            calls.append(1)
+            return "sk-a-raw-string"
+
+        with pytest.raises(AnthropicError, match="returned str instead of an AccessToken"):
+            TokenCache(provider).get_token()
+        assert calls == [1]
+
+    def test_sync_callable_returning_a_coroutine_is_rejected(self) -> None:
+        """The coroutine is closed, so nothing warns that it was never awaited."""
+        coroutines: List[Any] = []
+
+        async def fetch() -> AccessToken:
+            return AccessToken("t")
+
+        def provider(*, force_refresh: bool = False) -> Any:  # noqa: ARG001
+            coroutines.append(fetch())
+            return coroutines[-1]
+
+        with pytest.raises(AnthropicError, match="returned a coroutine .* pass the `async def` function itself"):
+            TokenCache(provider).get_token()
+        assert coroutines[0].cr_frame is None, "the coroutine should have been closed"
+
+    def test_get_token_rejects_async_provider(self) -> None:
+        async def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            return AccessToken("t")
+
+        with pytest.raises(RuntimeError, match="async_get_token"):
+            TokenCache(provider).get_token()
+
     def test_no_expiry_never_refreshes(self) -> None:
         provider = CountingProvider([AccessToken("a", expires_at=None)])
         clock = FakeClock(1000)
@@ -1517,7 +1557,7 @@ class TestTokenCache:
         clock.now = 1000 + 600 - 60  # advisory window
         with caplog.at_level(logging.WARNING):
             assert cache.get_token() == "a"  # stale served
-        assert any("Advisory token refresh failed" in r.message for r in caplog.records)
+        assert any("Advisory token refresh failed (60s remaining)" in r.getMessage() for r in caplog.records)
         assert provider.calls == 2
 
     def test_mandatory_refresh_failure_raises(self) -> None:
@@ -1641,6 +1681,65 @@ class TestTokenCache:
         assert len(provider_calls) == 1
         assert results == ["fresh"] * 8
 
+    @pytest.mark.parametrize("expires_at", [1, 1000 - 5], ids=["epoch-plus-one", "just-expired"])
+    def test_expired_but_nonzero_expiry_keeps_single_flight(self, expires_at: int) -> None:
+        """Only exactly `expires_at=0` opts out of single-flight; any other past value is an expired token."""
+        calls = itertools.count(1)
+        release = threading.Event()
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            n = next(calls)
+            if n == 2:
+                assert release.wait(5)
+            return AccessToken(f"tok-{n}", expires_at=expires_at if n < 3 else None)
+
+        cache = TokenCache(provider, time_source=FakeClock(1000))
+        assert cache.get_token() == "tok-1"
+        tokens: List[str] = []
+        threads = [threading.Thread(target=lambda: tokens.append(cache.get_token())) for _ in range(3)]
+        for t in threads:
+            t.start()
+        release.set()
+        for t in threads:
+            t.join(timeout=5)
+            assert not t.is_alive(), "get_token() deadlocked"
+        # One caller at a time: tok-2 is expired too, so the next leader fetches tok-3, which is then cached.
+        assert sorted(tokens) == ["tok-2", "tok-3", "tok-3"]
+
+    def test_zero_expiry_token_is_not_reused(self) -> None:
+        """A token with `expires_at=0` is not reused, so the provider is called again until it returns a later expiry."""
+        clock = FakeClock(1000)
+        provider = CountingProvider(
+            [AccessToken("a", expires_at=0), AccessToken("b", expires_at=0), AccessToken("c", expires_at=1000 + 600)]
+        )
+        cache = TokenCache(provider, time_source=clock)
+        assert [cache.get_token() for _ in range(4)] == ["a", "b", "c", "c"]
+        assert provider.calls == 3
+
+    def test_zero_expiry_tokens_are_fetched_concurrently(self) -> None:
+        """Callers don't queue behind each other for a token that can't be shared."""
+        import threading as _threading
+
+        calls = itertools.count(1)
+        all_three_fetching = _threading.Barrier(3, timeout=2)  # breaks if the callers queued
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            n = next(calls)
+            if n > 1:
+                all_three_fetching.wait()
+            return AccessToken(f"tok-{n}", expires_at=0)
+
+        cache = TokenCache(provider)
+        assert cache.get_token() == "tok-1"
+        tokens: List[str] = []
+        threads = [_threading.Thread(target=lambda: tokens.append(cache.get_token())) for _ in range(3)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=5)
+            assert not t.is_alive(), "get_token() deadlocked"
+        assert sorted(tokens) == ["tok-2", "tok-3", "tok-4"]
+
     def test_advisory_caller_skips_when_refresh_in_flight(self) -> None:
         """A caller in the advisory window does NOT start a second refresh and
         does NOT wait on a running one — it just returns the cached token."""
@@ -1703,9 +1802,8 @@ class TestTokenCache:
 
     def test_zero_arg_provider_backward_compat(self) -> None:
         """Providers from before the force_refresh kwarg was added (the old
-        ``Callable[[], AccessToken]`` shape) must still work — the kwarg-
-        binding TypeError is caught and the provider is re-invoked
-        positionally."""
+        `Callable[[], AccessToken]` shape) must still work — their signature
+        has no `force_refresh`, so they are called without it."""
         calls: List[int] = []
 
         def legacy_provider() -> AccessToken:
@@ -1714,10 +1812,47 @@ class TestTokenCache:
 
         cache = TokenCache(legacy_provider)  # type: ignore[arg-type]
         assert cache.get_token() == "legacy"
-        # invalidate() sets _next_force; the zero-arg fallback must still fire.
+        # invalidate() sets _next_force; the provider is still called with no arguments.
         cache.invalidate()
         assert cache.get_token() == "legacy"
         assert len(calls) == 2
+
+    @pytest.mark.skipif(sys.version_info < (3, 14), reason="annotations are evaluated lazily from Python 3.14")
+    @pytest.mark.parametrize(
+        ("signature", "expected"),
+        [("*, force_refresh: bool = False, context: OnlyForTypeCheckers = None", [False, True]), ("", [None, None])],
+        ids=["force_refresh", "zero-arg"],
+    )
+    def test_provider_annotated_with_an_undefined_name(self, signature: str, expected: List[object]) -> None:
+        """Reading the signature must not evaluate annotations that only resolve for type checkers."""
+        force_seen: List[object] = []
+        namespace: Dict[str, Any] = {"AccessToken": AccessToken, "force_seen": force_seen}
+        source = f"""
+def provider({signature}) -> OnlyForTypeCheckers:
+    force_seen.append(locals().get("force_refresh"))
+    return AccessToken("t")
+"""
+        # dont_inherit: this module's `from __future__ import annotations` would turn the annotations into strings.
+        exec(compile(source, "<provider>", "exec", dont_inherit=True), namespace)
+
+        cache = TokenCache(namespace["provider"])
+        cache.get_token()
+        cache.invalidate()
+        cache.get_token()
+        assert force_seen == expected
+
+    def test_var_keyword_provider_receives_force_refresh(self) -> None:
+        force_seen: List[object] = []
+
+        def provider(**kwargs: object) -> AccessToken:
+            force_seen.append(kwargs.get("force_refresh"))
+            return AccessToken("t")
+
+        cache = TokenCache(provider)
+        cache.get_token()
+        cache.invalidate()
+        cache.get_token()
+        assert force_seen == [False, True]
 
     def test_next_force_preserved_on_provider_failure(self) -> None:
         """If invalidate() set the force flag and the provider then raises,
@@ -1741,6 +1876,103 @@ class TestTokenCache:
         # Retry: force flag must still be set.
         assert cache.get_token() == "ok"
         assert force_seen == [True, True], "force flag must survive provider failure"
+
+    def test_next_force_preserved_when_provider_returns_non_token(self) -> None:
+        """A rejected provider return does not consume the force flag set by invalidate()."""
+        force_seen: List[bool] = []
+        results = iter([AccessToken("a", expires_at=None), None, AccessToken("b", expires_at=None)])
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            return cast(AccessToken, next(results))
+
+        cache = TokenCache(provider)
+        assert cache.get_token() == "a"
+        cache.invalidate()
+        with pytest.raises(AnthropicError, match="credentials provider returned"):
+            cache.get_token()
+        assert cache.get_token() == "b"
+        assert force_seen == [False, True, True]
+
+    def test_per_request_mode_still_forces_after_invalidate(self) -> None:
+        """invalidate() still makes the next call pass `force_refresh=True` when nothing is cached."""
+        force_seen: List[bool] = []
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            return AccessToken(f"tok-{len(force_seen)}", expires_at=0)
+
+        cache = TokenCache(provider)
+        cache.get_token()
+        cache.get_token()
+        cache.invalidate()
+        cache.get_token()
+        cache.get_token()
+        assert force_seen == [False, False, True, False]
+
+    def test_concurrent_invalidate_survives_non_forced_call(self) -> None:
+        """An invalidate() that lands during a non-forced call still forces the next call."""
+        force_seen: List[bool] = []
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            if len(force_seen) == 2:
+                cache.invalidate()  # simulates another request's 401 arriving now
+            return AccessToken(f"tok-{len(force_seen)}", expires_at=0)
+
+        cache = TokenCache(provider)
+        cache.get_token()  # switch to per-request mode
+        cache.get_token()
+        cache.get_token()
+        assert force_seen == [False, False, True]
+
+    def test_unforced_result_is_not_cached_after_a_concurrent_invalidate(self) -> None:
+        """The token may be the one the API just rejected, so it serves this request only."""
+        force_seen: List[bool] = []
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            if len(force_seen) == 1:
+                cache.invalidate()  # simulates another request's 401 arriving now
+            return AccessToken(f"tok-{len(force_seen)}")
+
+        cache = TokenCache(provider)
+        assert cache.get_token() == "tok-1"
+        assert cache.get_token() == "tok-2"
+        assert cache.get_token() == "tok-2"
+        assert force_seen == [False, True]
+
+    def test_late_per_request_result_does_not_replace_cached_expiring_token(self) -> None:
+        import threading as _threading
+
+        clock = FakeClock(1000)
+        force_seen: List[bool] = []
+        p_in, p_release = _threading.Event(), _threading.Event()
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            if _threading.current_thread().name == "P":
+                p_in.set()
+                assert p_release.wait(5)
+                return AccessToken("tok-late", expires_at=0)
+            if force_refresh:
+                return AccessToken("tok-forced", expires_at=1000 + 3600)
+            return AccessToken(f"tok-{len(force_seen)}", expires_at=0)
+
+        cache = TokenCache(provider, time_source=clock)
+        assert cache.get_token() == "tok-1"  # per-request mode
+        late: List[str] = []
+        p = _threading.Thread(target=lambda: late.append(cache.get_token()), name="P", daemon=True)
+        p.start()
+        assert p_in.wait(5)
+        cache.invalidate()
+        assert cache.get_token() == "tok-forced"  # cached with a real expiry
+        p_release.set()
+        p.join(5)
+        assert not p.is_alive(), "the late caller deadlocked"
+        assert late == ["tok-late"]  # the late caller still uses its own token for its request
+        assert cache.get_token() == "tok-forced"  # served from cache, no provider call
+        assert force_seen == [False, False, True]
 
     def test_advisory_refresh_backoff_after_failure(self) -> None:
         """PY-07: after an advisory refresh failure, subsequent advisory
@@ -1871,8 +2103,8 @@ class TestDefaultCredentials:
     def test_workload_identity_workspace_id_env_empty_treated_unset(
         self, clean_env: pytest.MonkeyPatch, respx_mock: MockRouter
     ) -> None:
-        """``ANTHROPIC_WORKSPACE_ID=""`` (a defaulted-but-empty CI variable) is
-        treated as unset — never put ``"workspace_id": ""`` on the wire."""
+        """`ANTHROPIC_WORKSPACE_ID=""` (a defaulted-but-empty CI variable) is
+        treated as unset — never put `"workspace_id": ""` on the wire."""
         clean_env.setenv("ANTHROPIC_IDENTITY_TOKEN", "literal-jwt")
         clean_env.setenv("ANTHROPIC_FEDERATION_RULE_ID", "fdrl_01abc")
         clean_env.setenv("ANTHROPIC_ORGANIZATION_ID", "org-uuid")
@@ -1913,9 +2145,9 @@ class TestDefaultCredentials:
     ) -> None:
         """Step 4 (env federation trio) sits above step 5 (fallback on-disk
         profile) in the precedence spec: a machine with WIF env vars wired
-        up must use WIF even if a leftover ``default`` profile exists on
+        up must use WIF even if a leftover `default` profile exists on
         disk. A user who wants the on-disk profile must set
-        ``ANTHROPIC_PROFILE`` explicitly (step 3), which would win.
+        `ANTHROPIC_PROFILE` explicitly (step 3), which would win.
         """
         clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
         _write_profile(tmp_path, "default", {"type": "external"}, {"access_token": "from-on-disk-profile"})
@@ -1988,8 +2220,8 @@ def _mock_token_exchange(respx_mock: MockRouter, base_url: str, token: str) -> N
 
 
 def _mock_deployment(respx_mock: MockRouter, base_url: str, token: str) -> None:
-    """Mock one deployment: its token endpoint mints ``token`` and its
-    messages endpoint accepts anything. Pair with :func:`_requests_to` to
+    """Mock one deployment: its token endpoint mints `token` and its
+    messages endpoint accepts anything. Pair with `_requests_to` to
     check that a client only ever talks to (and presents tokens from) the
     deployment it was built for."""
     _mock_token_exchange(respx_mock, base_url, token)
@@ -2002,7 +2234,7 @@ def _requests_to(respx_mock: MockRouter, base_url: str) -> List[httpx2.Request]:
 
 
 def _assert_exchanged_and_called_own_deployment(respx_mock: MockRouter, base_url: str, token: str) -> None:
-    """The traffic seen by ``base_url`` is exactly one exchange followed by
+    """The traffic seen by `base_url` is exactly one exchange followed by
     one request bearing the token that exchange minted."""
     requests = _requests_to(respx_mock, base_url)
     assert [str(r.url) for r in requests] == [f"{base_url}{TOKEN_ENDPOINT}", f"{base_url}/v1/messages"]
@@ -2057,8 +2289,8 @@ class TestAnthropicCredentials:
 
     @pytest.mark.respx()
     def test_workload_identity_inherits_client_base_url(self, respx_mock: MockRouter) -> None:
-        """An explicitly-passed WorkloadIdentityCredentials with no ``base_url``
-        adopts the client's ``base_url`` for the token exchange, so the user
+        """An explicitly-passed WorkloadIdentityCredentials with no `base_url`
+        adopts the client's `base_url` for the token exchange, so the user
         doesn't have to pass the same URL twice."""
         custom_base = "https://api-staging.example"
         respx_mock.post(f"{custom_base}{TOKEN_ENDPOINT}").mock(
@@ -2212,9 +2444,9 @@ class TestAnthropicCredentials:
         assert req.headers["Authorization"] == "Bearer sk-ant-oat01-file"
 
     def test_profile_base_url_adopted_by_client(self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
-        """Outbound: a zero-arg ``Anthropic()`` adopts the active profile's
-        ``base_url`` when the user supplied neither ``base_url=`` nor
-        ``ANTHROPIC_BASE_URL``. Precedence: kwarg > env > profile > default."""
+        """Outbound: a zero-arg `Anthropic()` adopts the active profile's
+        `base_url` when the user supplied neither `base_url=` nor
+        `ANTHROPIC_BASE_URL`. Precedence: kwarg > env > profile > default."""
         clean_env.delenv("ANTHROPIC_BASE_URL", raising=False)
         clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
         clean_env.setenv("ANTHROPIC_CONFIG_DIR", str(tmp_path))
@@ -2249,8 +2481,8 @@ class TestAnthropicCredentials:
     def test_config_dict_base_url_adopted_by_client(
         self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
     ) -> None:
-        """Outbound, ``config=`` path: ``Anthropic(config={"base_url": ...})``
-        adopts the dict's ``base_url`` for API requests when no kwarg/env is
+        """Outbound, `config=` path: `Anthropic(config={"base_url": ...})`
+        adopts the dict's `base_url` for API requests when no kwarg/env is
         set, mirroring the disk-profile behaviour."""
         clean_env.delenv("ANTHROPIC_BASE_URL", raising=False)
         creds_path = tmp_path / "creds.json"
@@ -2354,6 +2586,57 @@ class TestAnthropicCredentials:
         assert len(provider_calls) == 2  # initial + one retry
         assert len(cast("list[MockRequestCall]", respx_mock.calls)) == 2
 
+    def test_401_retry_forces_refresh_while_another_request_is_fetching(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """A 401 retry gets a new token even when another request's non-forced provider call returns first."""
+        import threading as _threading
+
+        revoked: List[str] = []
+        force_seen: List[bool] = []
+        bearers: List[str] = []
+        s_in_provider, release_s, s_fetched, r_done = (_threading.Event() for _ in range(4))
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            if _threading.current_thread().name == "S" and not s_in_provider.is_set():
+                s_in_provider.set()
+                assert release_s.wait(5)
+            return AccessToken("tok-2" if True in force_seen else "tok-1", expires_at=0)
+
+        def handler(request: httpx2.Request) -> httpx2.Response:
+            if _threading.current_thread().name == "S":
+                s_fetched.set()
+                assert r_done.wait(5)
+            else:
+                bearers.append(request.headers["Authorization"])
+            if request.headers["Authorization"] in revoked:
+                return httpx2.Response(401, json={"error": "revoked"}, headers={"retry-after-ms": "1"})
+            return _message_response()
+
+        def invalidate_then_let_s_finish(cache: TokenCache) -> None:
+            invalidate(cache)
+            release_s.set()
+            assert s_fetched.wait(5)
+
+        invalidate = TokenCache.invalidate
+        monkeypatch.setattr(TokenCache, "invalidate", invalidate_then_let_s_finish)
+        transport = httpx2.MockTransport(handler)
+        client = Anthropic(credentials=provider, http_client=httpx2.Client(transport=transport), max_retries=2)
+        _send_message(client)
+        revoked.append("Bearer tok-1")
+        s = _threading.Thread(target=_send_message, args=(client,), name="S", daemon=True)
+        s.start()
+        assert s_in_provider.wait(5)
+        try:
+            _send_message(client)
+        finally:
+            r_done.set()
+            release_s.set()
+            s.join(timeout=5)
+        assert not s.is_alive(), "the concurrent request deadlocked"
+        assert bearers == ["Bearer tok-1", "Bearer tok-1", "Bearer tok-2"]
+        # Sliced because S's own 401 retry may or may not have made a fifth call by now.
+        assert force_seen[:4] == [False, False, False, True]
+
     @pytest.mark.respx()
     def test_api_key_precedence_preserved(
         self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
@@ -2402,7 +2685,7 @@ class TestAnthropicCredentials:
 
     @pytest.mark.respx()
     def test_copy_with_different_base_url_exchanges_per_client(self, respx_mock: MockRouter) -> None:
-        """``copy(base_url=...)`` must not move the parent's token exchange:
+        """`copy(base_url=...)` must not move the parent's token exchange:
         each client exchanges its assertion at its own host and only ever
         presents the token that host minted."""
         _mock_deployment(respx_mock, BASE_URL, "tok-primary")
@@ -2515,8 +2798,8 @@ class TestAnthropicCredentials:
 
     @pytest.mark.respx()
     def test_config_param_builds_in_memory_federation(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """``Anthropic(config={...})`` accepts a config-file-shaped dict and
-        wires it through to a federation provider, including ``workspace_id``
+        """`Anthropic(config={...})` accepts a config-file-shaped dict and
+        wires it through to a federation provider, including `workspace_id`
         as a default header."""
         jwt_path = tmp_path / "jwt"
         jwt_path.write_text("ext-jwt-value")
@@ -2551,7 +2834,7 @@ class TestAnthropicCredentials:
             )
 
     def test_explicit_api_key_shadows_explicit_config(self, tmp_path: pathlib.Path) -> None:
-        """Explicit ``api_key=`` + explicit ``config=`` is an explicit-explicit
+        """Explicit `api_key=` + explicit `config=` is an explicit-explicit
         shadow case: the static api_key wins at the header level and the
         config-derived credentials provider is silently disabled.
         """
@@ -2570,7 +2853,7 @@ class TestAnthropicCredentials:
         assert isinstance(explicit.credentials, InMemoryConfig)
 
     def test_explicit_config_beats_env_api_key(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Explicit ``config=`` is step 1 and beats env ``ANTHROPIC_API_KEY``
+        """Explicit `config=` is step 1 and beats env `ANTHROPIC_API_KEY`
         (step 2). The env api_key is ignored entirely and the config-derived
         credentials provider wins.
         """
@@ -2591,8 +2874,8 @@ class TestAnthropicCredentials:
         assert isinstance(client.credentials, InMemoryConfig)
 
     def test_profile_param_loads_named_profile(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """``Anthropic(profile="staging")`` loads ``configs/staging.json`` from
-        the config directory, equivalent to setting ``ANTHROPIC_PROFILE``."""
+        """`Anthropic(profile="staging")` loads `configs/staging.json` from
+        the config directory, equivalent to setting `ANTHROPIC_PROFILE`."""
         monkeypatch.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
         _write_profile(
             tmp_path,
@@ -2614,8 +2897,8 @@ class TestAnthropicCredentials:
             Anthropic(profile="x", credentials=StaticToken("a"))
 
     def test_explicit_profile_beats_env_api_key(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Explicit ``profile=`` is a constructor argument and beats env
-        ``ANTHROPIC_API_KEY`` — the env var is not consulted."""
+        """Explicit `profile=` is a constructor argument and beats env
+        `ANTHROPIC_API_KEY` — the env var is not consulted."""
         monkeypatch.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-from-env")
         _write_profile(tmp_path, "dev", config={"type": "external"}, credentials={"access_token": "sk-ant-oat01-dev"})
@@ -2645,6 +2928,22 @@ class TestAnthropicCredentials:
         body = cast("Dict[str, Any]", exc_info.value.body)
         assert body["error"]["type"] == "permission_error"
         assert len(provider_calls) == 1
+
+    def test_duck_typed_token_is_rejected(self) -> None:
+        class TokenTuple(NamedTuple):
+            token: str
+            expires_at: Optional[int] = None
+
+        def provider(*, force_refresh: bool = False) -> Any:  # noqa: ARG001
+            return TokenTuple("tok-duck")
+
+        def handler(request: httpx2.Request) -> httpx2.Response:  # noqa: ARG001
+            return _message_response()
+
+        client = Anthropic(credentials=provider, http_client=httpx2.Client(transport=httpx2.MockTransport(handler)))
+        with pytest.raises(AnthropicError, match="returned TokenTuple instead of an AccessToken") as exc_info:
+            _send_message(client)
+        assert type(exc_info.value) is AnthropicError  # not wrapped as APIConnectionError
 
 
 class TestInMemoryConfig:
@@ -2701,7 +3000,7 @@ class TestInMemoryConfig:
     def test_oidc_federation_no_credentials_path_no_disk_cache(
         self, respx_mock: MockRouter, tmp_path: pathlib.Path
     ) -> None:
-        """Without ``authentication.credentials_path``, every call exchanges
+        """Without `authentication.credentials_path`, every call exchanges
         fresh — nothing is written to disk."""
         token_route = respx_mock.post(TOKEN_URL).mock(
             return_value=httpx2.Response(200, json={"access_token": "tok", "expires_in": 600})
@@ -2722,7 +3021,7 @@ class TestInMemoryConfig:
     def test_oidc_federation_with_credentials_path_disk_cache(
         self, respx_mock: MockRouter, tmp_path: pathlib.Path
     ) -> None:
-        """With ``authentication.credentials_path`` set, the exchanged token is
+        """With `authentication.credentials_path` set, the exchanged token is
         written to that path and a second call returns it without re-exchanging."""
         creds_path = tmp_path / "cache.json"
         token_route = respx_mock.post(TOKEN_URL).mock(
@@ -2756,9 +3055,9 @@ class TestInMemoryConfig:
 
     @pytest.mark.respx()
     def test_user_oauth_refresh_and_writeback(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """user_oauth with ``credentials_path`` runs the refresh-token grant on
+        """user_oauth with `credentials_path` runs the refresh-token grant on
         expiry and writes the new tokens back, exactly like a file-backed
-        ``CredentialsFile`` profile."""
+        `CredentialsFile` profile."""
         creds_path = tmp_path / "creds.json"
         creds_path.write_text(
             json.dumps(
@@ -2892,7 +3191,7 @@ class TestAsyncAnthropicCredentials:
 
     @pytest.mark.respx()
     async def test_async_copy_with_different_base_url_exchanges_per_client(self, respx_mock: MockRouter) -> None:
-        """Async mirror of the sync test: ``copy(base_url=...)`` leaves the
+        """Async mirror of the sync test: `copy(base_url=...)` leaves the
         parent exchanging at, and presenting tokens from, its own host."""
         _mock_deployment(respx_mock, BASE_URL, "tok-primary")
         _mock_deployment(respx_mock, OTHER_BASE_URL, "tok-other")
@@ -3053,11 +3352,480 @@ class TestAsyncAnthropicCredentials:
         assert len(provider_calls) == 1
 
 
+def _bearer_tokens(respx_mock: MockRouter) -> List[str]:
+    """The token on each HTTP request so far, in order."""
+    return [c.request.headers["Authorization"].split(" ")[1] for c in cast("list[MockRequestCall]", respx_mock.calls)]
+
+
+async def _async_provider_function(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+    return AccessToken("t")
+
+
+class _AsyncProviderObject:
+    async def __call__(self, *, force_refresh: bool = False) -> AccessToken:  # noqa: ARG002
+        return AccessToken("t")
+
+    async def method(self, *, force_refresh: bool = False) -> AccessToken:  # noqa: ARG002
+        return AccessToken("t")
+
+
+@pytest.mark.usefixtures("clean_env", "no_default_creds_file")
+class TestAsyncAccessTokenProvider:
+    @pytest.mark.parametrize(
+        "shape",
+        [
+            _async_provider_function,
+            functools.partial(_async_provider_function),
+            _AsyncProviderObject(),
+            functools.partial(_AsyncProviderObject()),
+            functools.partial(functools.partial(_AsyncProviderObject())),
+            _AsyncProviderObject().method,
+        ],
+        ids=[
+            "function",
+            "partial-of-function",
+            "callable-object",
+            "partial-of-callable-object",
+            "nested-partial",
+            "bound-method",
+        ],
+    )
+    def test_detection(self, shape: Callable[..., Any]) -> None:
+        assert is_async_token_provider(shape)
+        with pytest.raises(TypeError, match="use `AsyncAnthropic` instead"):
+            Anthropic(credentials=shape)  # pyright: ignore[reportArgumentType]
+
+    @pytest.mark.parametrize(
+        "shape",
+        [CountingProvider([]), lambda: AccessToken("t"), functools.partial(CountingProvider([]))],
+        ids=["callable-object", "lambda", "partial-of-callable-object"],
+    )
+    def test_sync_providers_are_not_detected_as_async(self, shape: Callable[..., Any]) -> None:
+        assert not is_async_token_provider(shape)
+
+    @pytest.mark.respx()
+    async def test_partial_of_a_callable_object_is_awaited(self, respx_mock: MockRouter) -> None:
+        _mock_messages_endpoint(respx_mock)
+
+        class Provider:
+            async def __call__(self, token: str, *, force_refresh: bool = False) -> AccessToken:  # noqa: ARG002
+                return AccessToken(token)
+
+        await _send_message_async(AsyncAnthropic(credentials=functools.partial(Provider(), "tok")))
+        assert _bearer_tokens(respx_mock) == ["tok"]
+
+    @pytest.mark.respx()
+    async def test_sync_provider_runs_off_the_event_loop_thread(self, respx_mock: MockRouter) -> None:
+        _mock_messages_endpoint(respx_mock)
+        provider_threads: List[int] = []
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            provider_threads.append(threading.get_ident())
+            return AccessToken("tok")
+
+        await _send_message_async(AsyncAnthropic(credentials=provider))
+        assert provider_threads and provider_threads != [threading.get_ident()]
+
+    async def test_sync_callable_returning_a_coroutine_is_rejected(self) -> None:
+        """`lambda: fetch()` is a sync provider that hands back a coroutine. It fails before any request is sent."""
+        coroutines: List[Any] = []
+
+        def provider(*, force_refresh: bool = False) -> Any:  # noqa: ARG001
+            coroutines.append(_async_provider_function())
+            return coroutines[-1]
+
+        with pytest.raises(AnthropicError, match="pass the `async def` function itself"):
+            await _send_message_async(AsyncAnthropic(credentials=provider))
+        assert coroutines[0].cr_frame is None, "the coroutine should have been closed"
+
+    @pytest.mark.respx()
+    async def test_awaited_on_the_running_loop_and_cached(self, respx_mock: MockRouter) -> None:
+        _mock_messages_endpoint(respx_mock)
+        loops: List[asyncio.AbstractEventLoop] = []
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            loops.append(asyncio.get_running_loop())
+            return AccessToken("tok", expires_at=int(time.time()) + 3600)
+
+        client = AsyncAnthropic(credentials=provider)
+        await _send_message_async(client)
+        await _send_message_async(client)
+        assert loops == [asyncio.get_running_loop()]
+        assert _bearer_tokens(respx_mock) == ["tok", "tok"]
+
+    async def test_called_again_after_expiry(self) -> None:
+        clock = FakeClock(1000)
+        calls: List[int] = []
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            calls.append(1)
+            return AccessToken(f"tok-{len(calls)}", expires_at=int(clock.now) + 600)
+
+        cache = TokenCache(provider, time_source=clock)
+        assert await cache.async_get_token() == "tok-1"
+        clock.now += 601
+        assert await cache.async_get_token() == "tok-2"
+        assert await cache.async_get_token() == "tok-2"
+
+    @pytest.mark.respx()
+    async def test_401_invalidates_and_retries_with_new_token(self, respx_mock: MockRouter) -> None:
+        """A provider that takes no arguments still works, on the first call and on the retry after a 401."""
+        respx_mock.post(f"{BASE_URL}/v1/messages").mock(
+            side_effect=[
+                httpx2.Response(401, json={"error": "unauthorized"}, headers={"retry-after-ms": "1"}),
+                _message_response(),
+            ]
+        )
+        calls: List[int] = []
+
+        async def provider() -> AccessToken:
+            calls.append(1)
+            return AccessToken(f"tok-{len(calls)}")
+
+        await _send_message_async(AsyncAnthropic(credentials=provider))  # pyright: ignore[reportArgumentType]
+        assert _bearer_tokens(respx_mock) == ["tok-1", "tok-2"]
+
+    @pytest.mark.respx()
+    async def test_401_retry_passes_force_refresh(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(f"{BASE_URL}/v1/messages").mock(
+            side_effect=[
+                httpx2.Response(401, json={"error": "unauthorized"}, headers={"retry-after-ms": "1"}),
+                _message_response(),
+                _message_response(),
+            ]
+        )
+        force_seen: List[bool] = []
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            return AccessToken(f"tok-{len(force_seen)}")
+
+        client = AsyncAnthropic(credentials=provider)
+        await _send_message_async(client)
+        await _send_message_async(client)
+        assert force_seen == [False, True]
+        assert _bearer_tokens(respx_mock) == ["tok-1", "tok-2", "tok-2"]
+
+    async def test_zero_arg_provider_behind_a_decorator_or_call_method(self) -> None:
+        """`inspect.signature` follows `functools.wraps`, so it sees that the wrapped function takes no arguments."""
+
+        def passthrough(fn: Callable[..., Any]) -> Callable[..., Any]:
+            @functools.wraps(fn)
+            async def wrapper(*args: Any, **kwargs: Any) -> Any:
+                return await fn(*args, **kwargs)
+
+            return wrapper
+
+        @passthrough
+        async def decorated() -> AccessToken:
+            return AccessToken("decorated", expires_at=0)
+
+        class ZeroArgCall:
+            async def __call__(self) -> AccessToken:
+                return AccessToken("object", expires_at=0)
+
+        for provider, token in ((decorated, "decorated"), (ZeroArgCall(), "object")):
+            cache = TokenCache(provider)  # pyright: ignore[reportArgumentType]
+            assert await cache.async_get_token() == token
+            cache.invalidate()
+            assert await cache.async_get_token() == token
+
+    async def test_next_force_preserved_on_provider_failure(self) -> None:
+        force_seen: List[bool] = []
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            if len(force_seen) == 1:
+                raise RuntimeError("transient")
+            return AccessToken("ok")
+
+        cache = TokenCache(provider)
+        cache.invalidate()
+        with pytest.raises(RuntimeError):
+            await cache.async_get_token()
+        assert await cache.async_get_token() == "ok"
+        assert force_seen == [True, True]
+
+    async def test_next_force_preserved_when_provider_returns_non_token(self) -> None:
+        force_seen: List[bool] = []
+        results = iter([AccessToken("a"), None, AccessToken("b")])
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            return cast(AccessToken, next(results))
+
+        cache = TokenCache(provider)
+        assert await cache.async_get_token() == "a"
+        cache.invalidate()
+        with pytest.raises(AnthropicError, match="credentials provider returned"):
+            await cache.async_get_token()
+        assert await cache.async_get_token() == "b"
+        assert force_seen == [False, True, True]
+
+    async def test_per_request_mode_still_forces_after_invalidate(self) -> None:
+        force_seen: List[bool] = []
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            return AccessToken(f"tok-{len(force_seen)}", expires_at=0)
+
+        cache = TokenCache(provider)
+        await cache.async_get_token()
+        await cache.async_get_token()
+        cache.invalidate()
+        await cache.async_get_token()
+        await cache.async_get_token()
+        assert force_seen == [False, False, True, False]
+
+    async def test_concurrent_invalidate_survives_non_forced_call(self) -> None:
+        """An invalidate() that lands during a non-forced call still forces the next call."""
+        force_seen: List[bool] = []
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            if len(force_seen) == 2:
+                cache.invalidate()  # simulates another request's 401 arriving now
+            return AccessToken(f"tok-{len(force_seen)}", expires_at=0)
+
+        cache = TokenCache(provider)
+        await cache.async_get_token()  # switch to per-request mode
+        await cache.async_get_token()
+        await cache.async_get_token()
+        assert force_seen == [False, False, True]
+
+    async def test_unforced_result_is_not_cached_after_a_concurrent_invalidate(self) -> None:
+        force_seen: List[bool] = []
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            if len(force_seen) == 1:
+                cache.invalidate()  # simulates another request's 401 arriving now
+            return AccessToken(f"tok-{len(force_seen)}")
+
+        cache = TokenCache(provider)
+        assert await cache.async_get_token() == "tok-1"
+        assert await cache.async_get_token() == "tok-2"
+        assert await cache.async_get_token() == "tok-2"
+        assert force_seen == [False, True]
+
+    async def test_one_forced_call_per_invalidate_in_per_request_mode(self) -> None:
+        """P0 is a per-request call that starts before invalidate() and finishes after it."""
+        force_seen: List[bool] = []
+        p0_in, p0_release, leader_in, release_leader = (asyncio.Event() for _ in range(4))
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:
+            force_seen.append(force_refresh)
+            n = len(force_seen)
+            if n == 2:  # P0
+                p0_in.set()
+                await p0_release.wait()
+            elif force_refresh:
+                leader_in.set()
+                await release_leader.wait()
+            return AccessToken(f"tok-{n}", expires_at=0)
+
+        cache = TokenCache(provider)
+        assert await cache.async_get_token() == "tok-1"  # per-request mode
+        p0 = asyncio.ensure_future(cache.async_get_token())
+        await asyncio.wait_for(p0_in.wait(), timeout=2)
+        cache.invalidate()
+        leader = asyncio.ensure_future(cache.async_get_token())
+        await asyncio.wait_for(leader_in.wait(), timeout=2)  # the forced call is in flight
+        p0_release.set()
+        assert await asyncio.wait_for(p0, timeout=2) == "tok-2"  # P0 still uses its own token for its request
+        others = [asyncio.ensure_future(cache.async_get_token()) for _ in range(5)]
+        await asyncio.sleep(0)  # let them find the refresh in flight
+        assert not any(task.done() for task in others)
+        assert len(force_seen) == 3  # none of them has called the provider
+        release_leader.set()
+        assert await asyncio.wait_for(leader, timeout=2) == "tok-3"
+        assert sorted(await asyncio.wait_for(asyncio.gather(*others), timeout=2)) == [f"tok-{n}" for n in range(4, 9)]
+        assert force_seen == [False, False, True, False, False, False, False, False]
+
+    async def test_concurrent_cold_calls_share_one_provider_call(self) -> None:
+        calls: List[int] = []
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            calls.append(1)
+            await asyncio.sleep(0.05)  # long enough for the other callers to need the token too
+            return AccessToken("tok")
+
+        cache = TokenCache(provider)
+        assert await asyncio.gather(*(cache.async_get_token() for _ in range(8))) == ["tok"] * 8
+        assert calls == [1]
+
+    async def test_zero_expiry_token_is_not_reused(self) -> None:
+        clock = FakeClock(1000)
+        calls: List[int] = []
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            calls.append(1)
+            return AccessToken(f"tok-{len(calls)}", expires_at=0 if len(calls) < 3 else 1000 + 600)
+
+        cache = TokenCache(provider, time_source=clock)
+        assert [await cache.async_get_token() for _ in range(4)] == ["tok-1", "tok-2", "tok-3", "tok-3"]
+
+    @pytest.mark.respx()
+    async def test_zero_expiry_tokens_are_fetched_concurrently(self, respx_mock: MockRouter) -> None:
+        """Requests don't queue behind each other for a token that can't be shared."""
+        _mock_messages_endpoint(respx_mock)
+        calls: List[int] = []
+        all_three_fetching = asyncio.Event()
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            calls.append(1)
+            n = len(calls)
+            if n == 4:
+                all_three_fetching.set()
+            if n > 1:
+                await asyncio.wait_for(all_three_fetching.wait(), timeout=2)  # times out if they queued
+            return AccessToken(f"tok-{n}", expires_at=0)
+
+        client = AsyncAnthropic(credentials=provider)
+        await _send_message_async(client)
+        await asyncio.gather(*(_send_message_async(client) for _ in range(3)))
+        assert sorted(_bearer_tokens(respx_mock)) == ["tok-1", "tok-2", "tok-3", "tok-4"]
+
+    async def test_advisory_failure_serves_cached_and_mandatory_failure_raises(self) -> None:
+        clock = FakeClock(1000)
+        calls: List[int] = []
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            calls.append(1)
+            if len(calls) > 1:
+                raise AnthropicError("token service unavailable")
+            return AccessToken("a", expires_at=1000 + 600)
+
+        cache = TokenCache(provider, time_source=clock)
+        assert await cache.async_get_token() == "a"
+        clock.now = 1000 + 600 - 60  # advisory window
+        assert await cache.async_get_token() == "a"
+        clock.now = 1000 + 600 - 10  # mandatory window
+        with pytest.raises(AnthropicError, match="unavailable"):
+            await cache.async_get_token()
+        assert len(calls) == 3
+
+    async def test_cancelled_leader_releases_waiters(self) -> None:
+        calls: List[int] = []
+        first_call_started = asyncio.Event()
+
+        async def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+            calls.append(1)
+            if len(calls) == 1:
+                first_call_started.set()
+                await asyncio.sleep(3600)
+            return AccessToken("tok")
+
+        cache = TokenCache(provider)
+        leader = asyncio.ensure_future(cache.async_get_token())
+        await asyncio.wait_for(first_call_started.wait(), timeout=2)
+        waiter = asyncio.ensure_future(cache.async_get_token())
+        await asyncio.sleep(0)  # let the waiter find the refresh in flight
+        assert not waiter.done() and len(calls) == 1
+        leader.cancel()
+        assert await asyncio.wait_for(waiter, timeout=2) == "tok"
+        with pytest.raises(asyncio.CancelledError):
+            await leader
+        assert len(calls) == 2
+
+    async def test_provider_must_return_an_access_token(self) -> None:
+        async def provider(*, force_refresh: bool = False) -> Any:  # noqa: ARG001
+            return {"token": "t"}
+
+        with pytest.raises(AnthropicError, match="returned dict instead of an AccessToken"):
+            await TokenCache(provider).async_get_token()
+
+    async def test_close_awaits_aclose(self) -> None:
+        closed: List[str] = []
+
+        class Provider(_AsyncProviderObject):
+            async def aclose(self) -> None:
+                closed.append("aclose")
+
+            def close(self) -> None:
+                closed.append("close")
+
+        await AsyncAnthropic(credentials=Provider()).close()
+        assert closed == ["aclose"], "aclose() wins when a provider has both hooks"
+
+    async def test_close_awaits_an_async_close(self) -> None:
+        closed: List[str] = []
+
+        class Provider(_AsyncProviderObject):
+            async def close(self) -> None:
+                closed.append("close")
+
+        async with AsyncAnthropic(credentials=Provider()):
+            pass
+        assert closed == ["close"]
+
+    async def test_close_tolerates_hooks_that_return_nothing_to_await(self) -> None:
+        """A `Mock` has every attribute, so on Python < 3.12 it looks like it has `aclose()`."""
+        closed: List[str] = []
+
+        class SyncAclose(_AsyncProviderObject):
+            def aclose(self) -> None:
+                closed.append("aclose")
+
+        await AsyncAnthropic(credentials=SyncAclose()).close()
+        await AsyncAnthropic(credentials=MagicMock(return_value=AccessToken("t"))).close()
+        assert closed == ["aclose"]
+
+    async def test_close_reaches_a_partial_wrapped_provider(self) -> None:
+        closed: List[str] = []
+
+        class Provider:
+            async def __call__(self, tag: str, *, force_refresh: bool = False) -> AccessToken:  # noqa: ARG002
+                return AccessToken(tag)
+
+            async def aclose(self) -> None:
+                closed.append("aclose")
+
+        await AsyncAnthropic(credentials=functools.partial(Provider(), "t")).close()
+        assert closed == ["aclose"]
+
+    @pytest.mark.parametrize("in_a_partial", [False, True], ids=["bare", "partial"])
+    def test_sync_client_rejects_an_async_close(self, in_a_partial: bool) -> None:
+        class Provider(CountingProvider):
+            async def close(self) -> None:
+                pass
+
+        provider = Provider([])
+        with pytest.raises(TypeError, match=r"`async def close\(\)`; use `AsyncAnthropic` instead"):
+            Anthropic(credentials=functools.partial(provider) if in_a_partial else provider)
+
+    @pytest.mark.parametrize("in_a_partial", [False, True], ids=["bare", "partial"])
+    def test_sync_client_calls_close_and_ignores_aclose(self, in_a_partial: bool) -> None:
+        closed: List[str] = []
+
+        class Provider(CountingProvider):
+            def close(self) -> None:
+                closed.append("close")
+
+            async def aclose(self) -> None:
+                closed.append("aclose")
+
+        provider = Provider([])
+        Anthropic(credentials=functools.partial(provider) if in_a_partial else provider).close()
+        assert closed == ["close"]
+
+    def test_sync_client_accepts_a_provider_that_only_has_aclose(self) -> None:
+        """As on the sync client before async providers existed: `aclose()` is not its hook, so it is left alone."""
+        closed: List[str] = []
+
+        class Provider(CountingProvider):
+            async def aclose(self) -> None:
+                closed.append("aclose")
+
+        Anthropic(credentials=Provider([])).close()
+        assert closed == []
+
+
 @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
 class TestTypedCredentialErrors:
-    """Every exit point in the credentials subsystem raises an ``AnthropicError``
+    """Every exit point in the credentials subsystem raises an `AnthropicError`
     (or subclass). Anything outside that hierarchy is wrapped as
-    ``APIConnectionError`` and retried by the base client's ``except Exception``
+    `APIConnectionError` and retried by the base client's `except Exception`
     handler, hiding the real cause and amplifying load.
     """
 
@@ -3144,7 +3912,7 @@ class TestTypedCredentialErrors:
     def test_user_oauth_malformed_expires_at_raises_anthropic_error(
         self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
     ) -> None:
-        """An ISO8601 string in ``expires_at`` must raise AnthropicError naming the expected shape."""
+        """An ISO8601 string in `expires_at` must raise AnthropicError naming the expected shape."""
         clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
         _write_profile(
             tmp_path,
@@ -3158,8 +3926,8 @@ class TestTypedCredentialErrors:
 
 class TestTokenCacheDeadlock:
     def test_non_anthropic_error_from_provider_releases_waiters(self) -> None:
-        """A non-``AnthropicError`` / non-``httpx2.HTTPError`` from the leader
-        provider must still release ``_refresh_event`` so concurrent waiters
+        """A non-`AnthropicError` / non-`httpx2.HTTPError` from the leader
+        provider must still release `_refresh_event` so concurrent waiters
         don't deadlock."""
         import threading as _threading
 
@@ -3216,7 +3984,7 @@ class TestTokenCacheDeadlock:
         assert cache.get_token() == "fresh"
 
     def test_value_error_from_provider_propagates_cleanly(self) -> None:
-        """A ``ValueError`` (e.g. from a provider that parses a JWT) escapes
+        """A `ValueError` (e.g. from a provider that parses a JWT) escapes
         but the cache state is clean — the next call succeeds without hanging."""
 
         class P:
@@ -3242,12 +4010,12 @@ class TestCredentialPrecedence:
 
     A static env credential (step 2) shadows auto-discovery (steps 3-5),
     silently disabling profile / federation — we warn about that. It does
-    NOT shadow an explicit ``credentials=`` argument (step 1): an explicit
-    credentials provider wins over env ``ANTHROPIC_API_KEY`` /
-    ``ANTHROPIC_AUTH_TOKEN`` outright.
+    NOT shadow an explicit `credentials=` argument (step 1): an explicit
+    credentials provider wins over env `ANTHROPIC_API_KEY` /
+    `ANTHROPIC_AUTH_TOKEN` outright.
 
-    Passing an explicit ``api_key=`` or ``auth_token=`` *argument* alongside
-    an explicit ``credentials=`` is a separate shadow case: the static
+    Passing an explicit `api_key=` or `auth_token=` *argument* alongside
+    an explicit `credentials=` is a separate shadow case: the static
     credential wins at the header level and we warn.
     """
 
@@ -3276,8 +4044,8 @@ class TestCredentialPrecedence:
     def test_explicit_credentials_beats_env_api_key(
         self, clean_env: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
     ) -> None:
-        """Per spec, explicit ``credentials=`` is step 1 and beats env
-        ``ANTHROPIC_API_KEY`` (step 2). The credentials provider wins, env
+        """Per spec, explicit `credentials=` is step 1 and beats env
+        `ANTHROPIC_API_KEY` (step 2). The credentials provider wins, env
         api_key is ignored entirely, no X-Api-Key on the wire, no warning."""
         clean_env.setenv("ANTHROPIC_API_KEY", "sk-from-env")
         with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
@@ -3305,7 +4073,7 @@ class TestCredentialPrecedence:
     def test_explicit_config_beats_env_api_key(
         self, clean_env: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: pathlib.Path
     ) -> None:
-        """Explicit ``config=`` is also step 1 and beats env api_key."""
+        """Explicit `config=` is also step 1 and beats env api_key."""
         jwt = tmp_path / "jwt"
         jwt.write_text("ext-jwt.ext-jwt.ext-jwt")
         clean_env.setenv("ANTHROPIC_API_KEY", "sk-from-env")
@@ -3326,7 +4094,7 @@ class TestCredentialPrecedence:
     # -- step 1 ∩ step 1: explicit static arg + explicit credentials= --------
 
     def test_explicit_api_key_shadows_explicit_credentials_with_warning(self, caplog: pytest.LogCaptureFixture) -> None:
-        """When both explicit ``api_key=`` AND explicit ``credentials=`` are
+        """When both explicit `api_key=` AND explicit `credentials=` are
         passed, the static api_key wins at the header level and credentials
         is silently disabled. Warn."""
         with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
@@ -3354,8 +4122,8 @@ class TestCredentialPrecedence:
         assert any("`api_key=`" in r.message for r in caplog.records)
 
     def test_copy_with_explicit_api_key_shadows_inherited_credentials(self, caplog: pytest.LogCaptureFixture) -> None:
-        """Reviewer ask: copy() should warn when a new explicit ``api_key=``
-        shadows an inherited ``credentials=`` provider from the parent."""
+        """Reviewer ask: copy() should warn when a new explicit `api_key=`
+        shadows an inherited `credentials=` provider from the parent."""
         parent = Anthropic(credentials=StaticToken("bearer-parent"))
         assert parent.api_key is None
         with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
@@ -3372,7 +4140,7 @@ class TestCredentialPrecedence:
     def test_env_api_key_shadows_env_federation_trio_with_warning(
         self, clean_env: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: pathlib.Path
     ) -> None:
-        """Env ``ANTHROPIC_API_KEY`` + env federation trio → api_key wins
+        """Env `ANTHROPIC_API_KEY` + env federation trio → api_key wins
         (step 2 beats step 4), warn so the user knows WIF is being shadowed."""
         jwt = tmp_path / "jwt"
         jwt.write_text("ext-jwt.ext-jwt.ext-jwt")
@@ -3414,8 +4182,8 @@ class TestCredentialPrecedence:
     def test_empty_env_auth_token_is_unset(
         self, clean_env: pytest.MonkeyPatch, client_cls: type[Anthropic] | type[AsyncAnthropic]
     ) -> None:
-        """``ANTHROPIC_AUTH_TOKEN=`` (present but empty) must not produce a
-        malformed ``Authorization: Bearer `` header alongside the api key."""
+        """`ANTHROPIC_AUTH_TOKEN=` (present but empty) must not produce a
+        malformed `Authorization: Bearer ` header alongside the api key."""
         clean_env.setenv("ANTHROPIC_API_KEY", "sk-from-env")
         clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
         client = client_cls()
@@ -3429,7 +4197,7 @@ class TestCredentialPrecedence:
         self, clean_env: pytest.MonkeyPatch, client_cls: type[Anthropic] | type[AsyncAnthropic]
     ) -> None:
         """Both env vars empty → same "no auth configured" error as unset,
-        rather than sending empty ``X-Api-Key`` / ``Authorization: Bearer ``."""
+        rather than sending empty `X-Api-Key` / `Authorization: Bearer `."""
         clean_env.setenv("ANTHROPIC_API_KEY", "")
         clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
         client = client_cls()
@@ -3467,8 +4235,8 @@ class TestCredentialPrecedence:
 
 @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
 class TestDanglingActiveConfig:
-    """``active_config`` pointer file naming a profile with no matching
-    ``configs/<profile>.json`` should surface a clear error rather than
+    """`active_config` pointer file naming a profile with no matching
+    `configs/<profile>.json` should surface a clear error rather than
     silently falling through to "no auth configured".
     """
 
@@ -3530,7 +4298,7 @@ class TestAccessTokenReprMasking:
 
 class TestEmptySecretFieldFalsiness:
     """The missing-token guards test truthiness of SecretStr-wrapped values,
-    which rides on ``SecretStr.__len__`` (present across the supported
+    which rides on `SecretStr.__len__` (present across the supported
     pydantic range) — pin empty-string behavior through the public path so a
     pydantic regression can't silently turn the guards into passes."""
 
@@ -3561,7 +4329,7 @@ class TestEmptySecretFieldFalsiness:
 
 def _sdk_frame_locals(exc: BaseException) -> List["tuple[str, Dict[str, Any]]"]:
     """(code name, locals) for every traceback frame owned by the anthropic
-    package, across the full ``__context__`` / ``__cause__`` chain."""
+    package, across the full `__context__` / `__cause__` chain."""
     pkg_root = str(pathlib.Path(anthropic.__file__).parent)
     out: List["tuple[str, Dict[str, Any]]"] = []
     seen: "set[int]" = set()
@@ -3594,11 +4362,11 @@ def _assert_not_in_sdk_frame_locals(exc: BaseException, *secrets: str) -> None:
 
 class TestNoSecretsInTracebackFrameLocals:
     """Exceptions from the token-exchange paths must not retain credential
-    material in traceback frame locals (across the ``__traceback__`` /
-    ``__context__`` / ``__cause__`` chain). Plain ``logging.exception`` never
+    material in traceback frame locals (across the `__traceback__` /
+    `__context__` / `__cause__` chain). Plain `logging.exception` never
     prints locals, but crash reporters that capture them — stdlib
-    ``TracebackException(..., capture_locals=True)``, rich tracebacks,
-    Sentry's default local-variable capture — render each local's ``repr``,
+    `TracebackException(..., capture_locals=True)`, rich tracebacks,
+    Sentry's default local-variable capture — render each local's `repr`,
     which is why SecretStr-wrapped locals are safe to retain."""
 
     def _workload_provider(self, handler: Callable[[httpx2.Request], httpx2.Response]) -> WorkloadIdentityCredentials:
@@ -3617,9 +4385,12 @@ class TestNoSecretsInTracebackFrameLocals:
             provider()
         _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)
 
-    def test_invalid_expires_in_does_not_retain_minted_token(self) -> None:
+    @pytest.mark.parametrize("expires_in", ['"NaN"', "1e400"], ids=["nan-string", "float-overflow"])
+    def test_invalid_expires_in_does_not_retain_minted_token(self, expires_in: str) -> None:
         provider = self._workload_provider(
-            lambda _: httpx2.Response(200, json={"access_token": _SECRET_MINTED, "expires_in": "NaN"})
+            lambda _: httpx2.Response(
+                200, content=f'{{"access_token": "{_SECRET_MINTED}", "expires_in": {expires_in}}}'
+            )
         )
         with pytest.raises(WorkloadIdentityError) as exc_info:
             provider()
@@ -3704,12 +4475,15 @@ class TestNoSecretsInTracebackFrameLocals:
         _assert_not_in_sdk_frame_locals(exc_info.value, "rt-SECRET", "old-access-SECRET")
 
     @pytest.mark.respx(base_url=BASE_URL)
+    @pytest.mark.parametrize("expires_in", ['"NaN"', "1e400"], ids=["nan-string", "float-overflow"])
     def test_refresh_invalid_expires_does_not_retain_new_token(
-        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path, expires_in: str
     ) -> None:
         self._write_refresh_profile(clean_env, tmp_path)
         respx_mock.post(TOKEN_ENDPOINT).mock(
-            return_value=httpx2.Response(200, json={"access_token": _SECRET_MINTED, "expires_in": "NaN"})
+            return_value=httpx2.Response(
+                200, content=f'{{"access_token": "{_SECRET_MINTED}", "expires_in": {expires_in}}}'
+            )
         )
         with pytest.raises(WorkloadIdentityError) as exc_info:
             CredentialsFile()()
@@ -3720,7 +4494,7 @@ class TestNoSecretsInTracebackFrameLocals:
         self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
     ) -> None:
         """A non-JSON refresh response raises WorkloadIdentityError (it
-        previously escaped as a raw json ValueError whose ``.doc`` carries the
+        previously escaped as a raw json ValueError whose `.doc` carries the
         full response body) and retains no secrets."""
         self._write_refresh_profile(clean_env, tmp_path)
         respx_mock.post(TOKEN_ENDPOINT).mock(return_value=httpx2.Response(200, text="<html>gateway error</html>"))
@@ -3851,9 +4625,9 @@ class TestNoSecretsInTracebackFrameLocals:
     def test_corrupt_expires_at_does_not_retain_tokens(
         self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
     ) -> None:
-        """``_coerce_expires_at`` raises in a secret-free frame, but the error
-        propagates through ``_call_user_oauth`` whose locals hold the creds
-        dict — those locals must render redacted. The ``id_token`` field pins
+        """`_coerce_expires_at` raises in a secret-free frame, but the error
+        propagates through `_call_user_oauth` whose locals hold the creds
+        dict — those locals must render redacted. The `id_token` field pins
         the secret-by-default rule: string fields the SDK doesn't know about
         are wrapped too."""
         clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
@@ -3914,7 +4688,7 @@ class TestNoSecretsInTracebackFrameLocals:
         )
 
     def test_oneshot_exchange_failure_does_not_retain_assertion(self) -> None:
-        """``exchange_federation_assertion`` holds the caller's assertion as a
+        """`exchange_federation_assertion` holds the caller's assertion as a
         parameter in its own (SDK-owned) frame; it is rebound to SecretStr on
         entry so a failed exchange renders it redacted. The caller's own frame
         is beyond the SDK's reach."""

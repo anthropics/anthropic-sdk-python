@@ -1,10 +1,10 @@
-"""An ``AsyncAnthropic``-shaped stub backed by an in-memory store.
+"""An `AsyncAnthropic`-shaped stub backed by an in-memory store.
 
-A memory store is a folder: path → content. ``MemoryServer`` is that dict
+A memory store is a folder: path → content. `MemoryServer` is that dict
 plus a log of the writes the code under test sent it. The SDK-shaped
-resource ``SessionMemoryStores`` actually calls is a private adapter.
+resource `SessionMemoryStores` actually calls is a private adapter.
 
-Paths are bare (``"push.md"``); the leading ``/`` the wire uses is added
+Paths are bare (`"push.md"`); the leading `/` the wire uses is added
 and stripped internally so tests use one path vocabulary throughout.
 """
 
@@ -32,14 +32,14 @@ def _status_error(code: int) -> APIStatusError:
 class MemoryServer:
     """The test's view of one remote memory store.
 
-    ``files`` is its current state (path → content); ``received`` is every
-    write the code under test sent it. Arranging via :meth:`write` /
-    :meth:`delete` changes ``files`` without touching ``received`` — only
+    `files` is its current state (path → content); `received` is every
+    write the code under test sent it. Arranging via `write` /
+    `delete` changes `files` without touching `received` — only
     the sync's own requests are recorded.
     """
 
     def __init__(self, initial: Mapping[str, str | None]) -> None:
-        # A ``None`` value is a memory with null content — the wire allows it.
+        # A `None` value is a memory with null content — the wire allows it.
         self.files: dict[str, str | None] = dict(initial)
         self.received: list[tuple[Any, ...]] = []
         # Reject create/update content larger than this with a 400, like the
@@ -65,8 +65,8 @@ class MemoryServer:
         del self.files[path]
 
 
-# Requests recorded on ``server.received``, in domain terms: paths and
-# content. ``was`` is the pre-image content the request's precondition
+# Requests recorded on `server.received`, in domain terms: paths and
+# content. `was` is the pre-image content the request's precondition
 # guards on — the builder computes the sha.
 
 
@@ -83,9 +83,9 @@ def deleted(path: str, *, was: str) -> tuple[Any, ...]:
 
 
 class _Resource:
-    """Adapts a ``MemoryServer`` to the ``client.beta.memory_stores.memories`` shape.
+    """Adapts a `MemoryServer` to the `client.beta.memory_stores.memories` shape.
 
-    Items are built on the fly from ``server.files`` so there is no cached
+    Items are built on the fly from `server.files` so there is no cached
     state to drift; ids are derived from paths so there is no id table.
     """
 
@@ -107,7 +107,7 @@ class _Resource:
         async def _iter() -> AsyncIterator[Any]:
             if self._noise:
                 # Depth-limited listings roll directories up as prefixes;
-                # only ``memory`` items carry content.
+                # only `memory` items carry content.
                 yield SimpleNamespace(type="memory_prefix", path="/projects/")
             if memory_store_id == "memstore_broken":
                 # One memory is listed, then the pager explodes.
@@ -194,15 +194,15 @@ def fake_anthropic(
     mount_path: str | None = None,
     noise: bool = False,
 ) -> tuple[Any, MemoryServer]:
-    """An ``AsyncAnthropic``-shaped client with one memory store named ``notes``.
+    """An `AsyncAnthropic`-shaped client with one memory store named `notes`.
 
-    The store lands at ``{workdir}/memory/notes``. Returns the client to
-    hand to ``SessionMemoryStores`` and the server handle for the test.
-    ``broken_store`` attaches a second store, ahead of ``notes``, whose
-    listing explodes after one memory; ``broken_store_last`` puts it after,
-    so ``notes`` lands first and the failure comes later. ``no_stores``
-    attaches no memory store at all. ``noise`` adds a non-store resource
-    to the session and a ``memory_prefix`` rollup to every listing.
+    The store lands at `{workdir}/memory/notes`. Returns the client to
+    hand to `SessionMemoryStores` and the server handle for the test.
+    `broken_store` attaches a second store, ahead of `notes`, whose
+    listing explodes after one memory; `broken_store_last` puts it after,
+    so `notes` lands first and the failure comes later. `no_stores`
+    attaches no memory store at all. `noise` adds a non-store resource
+    to the session and a `memory_prefix` rollup to every listing.
     """
     server = MemoryServer(initial)
     resources: list[Any] = (

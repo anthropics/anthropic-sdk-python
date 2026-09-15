@@ -35,7 +35,7 @@ _T = TypeVar("_T")
 
 
 class WeatherTool:
-    """Stands in for a ``@beta_tool`` / toolset object: ``tools=`` takes anything with a ``to_dict()``."""
+    """Stands in for a `@beta_tool` / toolset object: `tools=` takes anything with a `to_dict()`."""
 
     def to_dict(self) -> BetaToolParam:
         return {"name": "get_weather", "description": "Weather lookup.", "input_schema": {"type": "object"}}
@@ -949,7 +949,8 @@ def test_tool_runner_method_definition_in_sync(sync: bool) -> None:
     assert_overloads_in_sync(
         client.beta.messages.create,
         client.beta.messages.tool_runner,
-        exclude_params={"stream", "tools", "max_iterations", "output_format"},
+        # A tool runner can't take `compaction`: every request of the loop would compact again.
+        exclude_params={"stream", "tools", "max_iterations", "output_format", "compaction"},
     )
 
 

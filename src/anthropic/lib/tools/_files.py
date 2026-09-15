@@ -21,7 +21,7 @@ def write_text_exact(path: Path, text: str) -> None:
 
 
 def read_line_range(path: Path, file_path: str, start_line: int, end_line: int, limit: int) -> str:
-    """Return lines ``[start_line, end_line]`` of ``path``, capping the selected bytes at ``limit``."""
+    """Return lines `[start_line, end_line]` of `path`, capping the selected bytes at `limit`."""
     lines = LineRangeCollector(file_path=file_path, start_line=start_line, end_line=end_line, limit=limit)
     if lines.range_is_empty():
         return ""
@@ -34,7 +34,7 @@ def read_line_range(path: Path, file_path: str, start_line: int, end_line: int, 
 
 
 class LineRangeCollector:
-    """Collects the bytes of lines ``[start_line, end_line]`` from consecutive file chunks, capped at ``limit``."""
+    """Collects the bytes of lines `[start_line, end_line]` from consecutive file chunks, capped at `limit`."""
 
     def __init__(self, *, file_path: str, start_line: int, end_line: int, limit: int) -> None:
         self._file_path = file_path

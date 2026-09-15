@@ -28,3 +28,6 @@ class BetaCompactionBlockParam(TypedDict, total=False):
 
     encrypted_content: Optional[str]
     """Opaque metadata from prior compaction, to be round-tripped verbatim"""
+
+    signature: Optional[str]
+    """The block's signature as returned, to be sent back verbatim"""

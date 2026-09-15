@@ -40,6 +40,5 @@ class BetaManagedAgentsSessionThreadStatusIdleEvent(BaseModel):
     """Public sthr\\__ ID of the thread that went idle."""
 
     stop_reason: StopReason
-    """The agent completed its turn naturally and is ready for the next user message."""
 
     type: Literal["session.thread_status_idle"]

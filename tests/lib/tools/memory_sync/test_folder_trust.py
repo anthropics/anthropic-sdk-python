@@ -1,7 +1,7 @@
 """Folder-trust gating: a missing, emptied, or swapped store folder is never
 trusted as a basis for deletions or uploads.
 
-``download`` stamps :data:`MARKER_PATH` (holding the store's id) into the
+`download` stamps `MARKER_PATH` (holding the store's id) into the
 folder. A sync pass that finds the folder destroyed re-downloads it and
 pushes nothing; a sync that finds files without a matching marker leaves
 the folder as found and syncs nothing at all.
@@ -30,7 +30,7 @@ def marker_stamp(local: Path) -> str:
 
 
 async def _downloaded(tmp_path: Path, initial: dict[str, str]) -> tuple[Path, MemoryServer, SessionMemoryStores]:
-    """A ``SessionMemoryStores`` with one store already downloaded to disk."""
+    """A `SessionMemoryStores` with one store already downloaded to disk."""
     client, server = fake_anthropic(initial)
     stores = SessionMemoryStores(client, workdir=tmp_path)
     await stores.download(await client.beta.sessions.retrieve("s1"))
@@ -95,7 +95,7 @@ async def test_an_emptied_folder_issues_no_deletes_and_is_repopulated(
 async def test_an_emptied_folder_with_the_marker_left_behind_issues_no_deletes(
     tmp_path: Path, caplog: pytest.LogCaptureFixture, clock: Clock
 ) -> None:
-    """``rm <mount>/*``: shell globs skip dotfiles, so the marker survives the
+    """`rm <mount>/*`: shell globs skip dotfiles, so the marker survives the
     wipe — an intact marker alone must not clear a folder whose every
     memory file vanished at once."""
     caplog.set_level("WARNING", logger=LOGGER)

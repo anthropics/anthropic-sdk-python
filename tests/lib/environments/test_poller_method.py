@@ -1,9 +1,9 @@
-"""Tests for ``iter_work`` / ``aiter_work`` (the implementations behind
-``client.beta.environments.work.poller()``).
+"""Tests for `iter_work` / `aiter_work` (the implementations behind
+`client.beta.environments.work.poller()`).
 
 We don't need a real HTTP mock here because the generators only ever talk to
-a ``Work``/``AsyncWork`` resource through three methods (``poll``, ``ack``,
-``stop``). The fakes below stand in for that resource and let each test feed
+a `Work`/`AsyncWork` resource through three methods (`poll`, `ack`,
+`stop`). The fakes below stand in for that resource and let each test feed
 a script of poll responses while recording ack/stop call sites.
 """
 
@@ -28,7 +28,7 @@ class _StubWorkData:
 
 
 class _StubWork:
-    """Minimal stand-in for ``BetaSelfHostedWork`` — only fields the poller reads."""
+    """Minimal stand-in for `BetaSelfHostedWork` — only fields the poller reads."""
 
     def __init__(self, *, id: str = "work_1") -> None:
         self.id = id
@@ -42,9 +42,9 @@ def _api_status_error(code: int) -> APIStatusError:
 
 
 class FakeWork:
-    """Sync resource fake. ``poll_script`` is consumed in order; values are
-    either ``BetaSelfHostedWork``-shaped stubs, ``None`` (no work available),
-    ``Exception`` instances (raised from poll), or callables producing one of
+    """Sync resource fake. `poll_script` is consumed in order; values are
+    either `BetaSelfHostedWork`-shaped stubs, `None` (no work available),
+    `Exception` instances (raised from poll), or callables producing one of
     those (so a script step can also move a fake clock).
     """
 
@@ -87,7 +87,7 @@ class _StopTest(BaseException):
     """Sentinel used to break a poller out of its infinite loop in tests.
 
     Inherits from BaseException so it bypasses the generator's
-    ``except Exception`` arms (which would otherwise treat the empty-script
+    `except Exception` arms (which would otherwise treat the empty-script
     error as a transient poll failure and retry forever).
     """
 
@@ -180,7 +180,7 @@ def test_iter_work_raises_on_permanent_4xx() -> None:
 
 
 def test_iter_work_stop_conflict_is_silent(caplog: pytest.LogCaptureFixture) -> None:
-    """A 409 from ``stop`` means the work already ended; it is neither logged
+    """A 409 from `stop` means the work already ended; it is neither logged
     nor allowed to break the loop."""
     fake = FakeWork(poll_script=[_StubWork(id="work_done")])
 
@@ -198,7 +198,7 @@ def test_iter_work_stop_conflict_is_silent(caplog: pytest.LogCaptureFixture) -> 
 
 
 def test_iter_work_backs_off_on_httpx_transport_error() -> None:
-    """A raw ``httpx`` transport error (not wrapped in an SDK ``APIError``) is
+    """A raw `httpx` transport error (not wrapped in an SDK `APIError`) is
     still transient and must be retried, not propagated."""
     fake = FakeWork(poll_script=[httpx2.ConnectError("connection refused"), _StubWork(id="work_2")])
     it = iter_work(cast(Any, fake), environment_id="env_1")
@@ -209,9 +209,9 @@ def test_iter_work_backs_off_on_httpx_transport_error() -> None:
 
 
 def test_iter_work_propagates_non_api_error_instead_of_retrying() -> None:
-    """A programming error (here ``KeyError``) is not a transient API/transport
+    """A programming error (here `KeyError`) is not a transient API/transport
     failure, so it must propagate immediately rather than be swallowed and
-    retried forever. ``poll`` is only called once — no backoff/retry."""
+    retried forever. `poll` is only called once — no backoff/retry."""
     fake = FakeWork(poll_script=[KeyError("bug"), _StubWork(id="work_2")])
     it = iter_work(cast(Any, fake), environment_id="env_1")
 
@@ -221,7 +221,7 @@ def test_iter_work_propagates_non_api_error_instead_of_retrying() -> None:
 
 
 def test_iter_work_propagates_non_api_error_from_ack() -> None:
-    """Same for a non-API error raised by ``ack`` — it propagates rather than
+    """Same for a non-API error raised by `ack` — it propagates rather than
     backing off and retrying."""
     fake = FakeWork(poll_script=[_StubWork(id="work_bad")])
 
@@ -324,8 +324,8 @@ def test_iter_work_block_ms_none_omits_param() -> None:
 
 
 class _FakeClock:
-    """Stands in for the ``time`` module inside the poller: a settable
-    monotonic clock plus a no-op ``sleep``."""
+    """Stands in for the `time` module inside the poller: a settable
+    monotonic clock plus a no-op `sleep`."""
 
     def __init__(self) -> None:
         self.now = 0.0
@@ -478,10 +478,10 @@ async def test_aiter_work_drain_auto_stop_false_dispatch_shape() -> None:
 
 # ---------- extra_headers per-request passthrough ---------------------------
 #
-# These assert the caller-supplied ``extra_headers`` actually reaches every
-# underlying ``poll`` / ``ack`` / ``stop`` call (the resource methods route it
-# through ``make_request_options``). The fakes record the kwargs each method
-# was called with, so a missing thread-through shows up as ``None``.
+# These assert the caller-supplied `extra_headers` actually reaches every
+# underlying `poll` / `ack` / `stop` call (the resource methods route it
+# through `make_request_options`). The fakes record the kwargs each method
+# was called with, so a missing thread-through shows up as `None`.
 
 _EXTRA = {"x-trace-id": "trace-123"}
 

@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "1.5.0"
+version = "1.6.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "MIT"
@@ -12,7 +12,7 @@ dependencies = [
   "httpx2>=2.0.0, <3",
   "pydantic>=1.9.0, <3",
   "typing-extensions>=4.14, <5",
-  "anyio>=3.5.0, <5",
+  "anyio>=4.1.0, <5",
   "sniffio>=1, <2",
     "jiter>=0.4.0, <1",
     "docstring-parser>=0.15,<1",

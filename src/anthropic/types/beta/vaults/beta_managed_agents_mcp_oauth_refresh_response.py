@@ -28,7 +28,6 @@ class BetaManagedAgentsMCPOAuthRefreshResponse(BaseModel):
     """Token endpoint URL used to refresh the access token."""
 
     token_endpoint_auth: TokenEndpointAuth
-    """Token endpoint requires no client authentication."""
 
     resource: Optional[str] = None
     """OAuth resource indicator."""
