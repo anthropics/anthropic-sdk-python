@@ -544,7 +544,7 @@ class TestBetaHeader:
 
         create_message(client)
 
-        assert beta_headers(respx_mock) == ["fallback-credit-2027-01-01, interleaved-thinking-2025-05-14"]
+        assert beta_headers(respx_mock) == ["fallback-credit-2027-01-01,interleaved-thinking-2025-05-14"]
 
     @pytest.mark.respx(base_url=base_url)
     def test_empty_betas_sends_no_beta_header(self, respx_mock: MockRouter) -> None:
@@ -571,7 +571,7 @@ class TestBetaHeader:
 
         create_message(client, betas=["interleaved-thinking-2025-05-14"])
 
-        assert beta_headers(respx_mock) == ["interleaved-thinking-2025-05-14, fallback-credit-2026-07-01"]
+        assert beta_headers(respx_mock) == ["interleaved-thinking-2025-05-14,fallback-credit-2026-07-01"]
 
 
 def helper_headers(respx_mock: MockRouter) -> list[list[str]]:

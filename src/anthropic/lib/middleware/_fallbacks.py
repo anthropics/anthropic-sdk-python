@@ -1399,7 +1399,7 @@ def _with_middleware_headers(request: APIRequest, betas: tuple[AnthropicBetaPara
     current = build_headers(request.headers)[0].get("anthropic-beta", "")
     existing = {value.strip() for value in current.split(",")}
     additions = dict.fromkeys(str(beta) for beta in betas if str(beta) not in existing)
-    beta_header = {"anthropic-beta": ", ".join(filter(None, [current, *additions]))} if current or additions else {}
+    beta_header = {"anthropic-beta": ",".join(filter(None, [current, *additions]))} if current or additions else {}
     return request.copy(
         headers=merge_headers(request.headers, beta_header, helper_header("fallback-refusal-middleware"))
     )

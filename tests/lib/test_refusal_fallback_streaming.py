@@ -315,8 +315,8 @@ class TestShapeBContinuation:
         collect(create_stream(client, betas=["interleaved-thinking-2025-05-14"]))
 
         assert beta_headers(respx_mock) == [
-            "interleaved-thinking-2025-05-14, fallback-credit-2026-07-01",
-            "interleaved-thinking-2025-05-14, fallback-credit-2026-07-01",
+            "interleaved-thinking-2025-05-14,fallback-credit-2026-07-01",
+            "interleaved-thinking-2025-05-14,fallback-credit-2026-07-01",
         ]
 
     @pytest.mark.respx(base_url=base_url)
@@ -329,8 +329,8 @@ class TestShapeBContinuation:
         collect(create_stream(client, betas=["fallback-credit-2026-06-01"]))
 
         assert beta_headers(respx_mock) == [
-            "fallback-credit-2026-06-01, fallback-credit-2027-01-01",
-            "fallback-credit-2026-06-01, fallback-credit-2027-01-01",
+            "fallback-credit-2026-06-01,fallback-credit-2027-01-01",
+            "fallback-credit-2026-06-01,fallback-credit-2027-01-01",
         ]
 
 
