@@ -417,17 +417,15 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
         return self.copy(middleware=[*self._middleware, *middleware])
 
 
-# Vertex picks a prompt-cache store by hashing the head of the request body, so
-# the fields that do not change within a conversation are serialized first.
+# Vertex picks a prompt-cache store by hashing the head of the request body, so the
+# fields constant across a conversation go first. `openapi_dumps` must keep key order.
 _CACHE_ROUTING_LEADING_KEYS = ("anthropic_version", "system", "tools")
-_CACHE_ROUTING_TRAILING_KEYS = ("messages",)
 
 
 def _order_body_for_cache_routing(json_data: dict[object, object]) -> dict[object, object]:
     leading = {key: json_data[key] for key in _CACHE_ROUTING_LEADING_KEYS if key in json_data}
-    trailing = {key: json_data[key] for key in _CACHE_ROUTING_TRAILING_KEYS if key in json_data}
-    middle = {key: value for key, value in json_data.items() if key not in leading and key not in trailing}
-    return {**leading, **middle, **trailing}
+    rest = {key: value for key, value in json_data.items() if key not in leading}
+    return {**leading, **rest}
 
 
 def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | None, region: str) -> FinalRequestOptions:
