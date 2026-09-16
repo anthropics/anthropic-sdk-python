@@ -831,6 +831,44 @@ class TestCredentialsFile:
 
     # -- security: credentials file permissions ---------------------------
 
+    def test_atomic_write_credentials_without_fchmod(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        credentials_path = tmp_path / "credentials" / "default.json"
+        provider = CredentialsFile()
+        provider._credentials_path = credentials_path  # pyright: ignore[reportPrivateUsage]
+        monkeypatch.delattr(os, "fchmod", raising=False)
+
+        provider._atomic_write_credentials(  # pyright: ignore[reportPrivateUsage]
+            {"access_token": "new-token", "refresh_token": "new-refresh"}
+        )
+
+        assert json.loads(credentials_path.read_text()) == {
+            "access_token": "new-token",
+            "refresh_token": "new-refresh",
+        }
+        assert not list(credentials_path.parent.glob(".default.json.*.tmp"))
+
+    def test_atomic_write_credentials_uses_restrictive_mode_when_fchmod_available(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        credentials_path = tmp_path / "credentials" / "default.json"
+        provider = CredentialsFile()
+        provider._credentials_path = credentials_path  # pyright: ignore[reportPrivateUsage]
+        calls: List[tuple[int, int]] = []
+
+        def record_fchmod(fd: int, mode: int) -> None:
+            calls.append((fd, mode))
+
+        monkeypatch.setattr(os, "fchmod", record_fchmod, raising=False)
+
+        provider._atomic_write_credentials(  # pyright: ignore[reportPrivateUsage]
+            {"access_token": "new-token"}
+        )
+
+        assert len(calls) == 1
+        assert calls[0][1] == 0o600
+
     @pytest.mark.parametrize("mode", [0o644, 0o640, 0o604, 0o660, 0o620, 0o602])
     def test_credentials_file_group_or_other_access_rejected(self, tmp_path: pathlib.Path, mode: int) -> None:
         if os.name != "posix":
