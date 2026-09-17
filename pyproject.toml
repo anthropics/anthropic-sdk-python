@@ -10,7 +10,7 @@ authors = [
 
 dependencies = [
   "httpx2>=2.0.0, <3",
-  "pydantic>=1.9.0, <3",
+  "pydantic>=1.10.0, <3",
   "typing-extensions>=4.14, <5",
   "anyio>=4.1.0, <5",
   "sniffio>=1, <2",
@@ -91,7 +91,7 @@ dev = [
     "httpx2>=2.9",
 ]
 pydantic-v1 = [
-    "pydantic>=1.9.0,<2",
+    "pydantic>=1.10.0,<2",
 ]
 pydantic-v2 = [
     "pydantic~=2.0 ; python_full_version < '3.14'",
