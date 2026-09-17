@@ -10,6 +10,7 @@ from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, r
 import httpx2
 
 from ._utils import is_dict, extract_type_var_from_base
+from ._exceptions import APITimeoutError, APIConnectionError
 
 if TYPE_CHECKING:
     from ._client import Anthropic, AsyncAnthropic
@@ -49,7 +50,12 @@ class Stream(Generic[_T]):
             yield item
 
     def _iter_events(self) -> Iterator[ServerSentEvent]:
-        yield from self._decoder.iter_bytes(self.response.iter_bytes())
+        try:
+            yield from self._decoder.iter_bytes(self.response.iter_bytes())
+        except httpx2.TimeoutException as err:
+            raise APITimeoutError(request=self.response.request) from err
+        except httpx2.TransportError as err:
+            raise APIConnectionError(request=self.response.request) from err
 
     @staticmethod
     def raw_events(response: httpx2.Response) -> Iterator[ServerSentEvent]:
@@ -196,8 +202,13 @@ class AsyncStream(Generic[_T]):
             yield item
 
     async def _iter_events(self) -> AsyncIterator[ServerSentEvent]:
-        async for sse in self._decoder.aiter_bytes(self.response.aiter_bytes()):
-            yield sse
+        try:
+            async for sse in self._decoder.aiter_bytes(self.response.aiter_bytes()):
+                yield sse
+        except httpx2.TimeoutException as err:
+            raise APITimeoutError(request=self.response.request) from err
+        except httpx2.TransportError as err:
+            raise APIConnectionError(request=self.response.request) from err
 
     @staticmethod
     def raw_events(response: httpx2.Response) -> AsyncIterator[ServerSentEvent]:
