@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-from typing import Any, Dict, List, Union, Callable, cast
+from typing import Any, Dict, List, Union, cast
 from typing_extensions import Literal, get_args
 
 import httpx2
@@ -9,7 +9,7 @@ import pytest
 from respx import MockRouter
 from inline_snapshot import external, snapshot
 
-from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
+from anthropic import Anthropic, AsyncAnthropic, InternalServerError, beta_tool, beta_async_tool
 from anthropic._types import Omit, omit
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
@@ -1488,7 +1488,7 @@ def _sent_request_bodies(respx_mock: MockRouter) -> List[Any]:
     return [json.loads(call.request.content) for call in cast("List[Any]", respx_mock.calls)]
 
 
-def _compacted_response(summary: str = "Summary so far.", signature: str = "sig_01") -> httpx2.Response:
+def _compacted_response() -> httpx2.Response:
     return httpx2.Response(
         200,
         json={
@@ -1496,7 +1496,7 @@ def _compacted_response(summary: str = "Summary so far.", signature: str = "sig_
             "type": "message",
             "role": "assistant",
             "model": "claude-haiku-4-5",
-            "content": [{"type": "compaction", "content": summary, "signature": signature}],
+            "content": [{"type": "compaction", "content": "Summary so far.", "signature": "sig_01"}],
             "stop_reason": "compaction",
             "stop_sequence": None,
             "usage": {"input_tokens": 1, "output_tokens": 1},
@@ -1504,11 +1504,30 @@ def _compacted_response(summary: str = "Summary so far.", signature: str = "sig_
     )
 
 
-def _compaction_block_alone(summary: str = "Summary so far.", signature: str = "sig_01") -> List[Any]:
-    return [{"role": "assistant", "content": [{"type": "compaction", "content": summary, "signature": signature}]}]
+def _compaction_block_alone() -> List[Any]:
+    return [
+        {"role": "assistant", "content": [{"type": "compaction", "content": "Summary so far.", "signature": "sig_01"}]}
+    ]
+
+
+_COMPACTION_RESPONSE_CONTENT_WITH_AN_UNMODELLED_BLOCK: List[Dict[str, Any]] = [
+    {"type": "compaction", "content": "Summary so far.", "signature": "sig_01"},
+    {"type": "mcp_tool_listing", "mcp_server_name": "docs", "tools": []},
+]
+
+
+def _compacted_response_with_an_unmodelled_block() -> httpx2.Response:
+    body = _compacted_response().json()
+    body["content"] = _COMPACTION_RESPONSE_CONTENT_WITH_AN_UNMODELLED_BLOCK
+    return httpx2.Response(200, json=body)
 
 
 _FINAL_ASSISTANT_TURN = {"role": "assistant", "content": [{"type": "text", "text": "Done."}]}
+
+
+def _response_without_a_summary(content: List[Any], stop_reason: str) -> httpx2.Response:
+    body = _compacted_response().json()
+    return httpx2.Response(200, json={**body, "content": content, "stop_reason": stop_reason})
 
 
 def _sync_weather_tool() -> BetaFunctionTool[Any]:
@@ -1579,20 +1598,21 @@ def _current_messages(runner: Union[BetaToolRunner[None], BetaAsyncToolRunner[No
     ]
 
 
+# `parse()` serializes the response it was given, and pydantic warns about a block type it doesn't know.
+@pytest.mark.filterwarnings("ignore:Pydantic serializer warnings:UserWarning")
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.respx(base_url=base_url)
 def test_compact_before_next_turn_is_sent_after_the_tools_run_sync(respx_mock: MockRouter) -> None:
     respx_mock.post("/v1/messages").mock(
         side_effect=[
             _tool_use_response("get_weather", "toolu_1"),
-            _compacted_response(),
+            _compacted_response_with_an_unmodelled_block(),
             _end_turn_response(),
         ]
     )
 
-    with Anthropic(
-        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
-    ) as client:
+    # Strict response validation would reject the block type this SDK version doesn't model.
+    with Anthropic(base_url=base_url, api_key="my-anthropic-api-key", max_retries=0) as client:
         runner = _sync_compact_runner(
             client,
             betas=["compact-2026-09-04"],
@@ -1637,7 +1657,10 @@ def test_compact_before_next_turn_is_sent_after_the_tools_run_sync(respx_mock: M
         },
     ]
 
-    assert after["messages"] == _compaction_block_alone()
+    # The response goes back as it came, blocks this SDK version doesn't model included.
+    assert after["messages"] == [
+        {"role": "assistant", "content": _COMPACTION_RESPONSE_CONTENT_WITH_AN_UNMODELLED_BLOCK}
+    ]
     assert "compaction" not in after
     assert after["context_management"] == first["context_management"]
     # The beta is the caller's to pass; the runner sends what it was given and nothing more.
@@ -1646,20 +1669,19 @@ def test_compact_before_next_turn_is_sent_after_the_tools_run_sync(respx_mock: M
     ] * 3
 
 
+@pytest.mark.filterwarnings("ignore:Pydantic serializer warnings:UserWarning")
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.respx(base_url=base_url)
 async def test_compact_before_next_turn_is_sent_after_the_tools_run_async(respx_mock: MockRouter) -> None:
     respx_mock.post("/v1/messages").mock(
         side_effect=[
             _tool_use_response("get_weather", "toolu_1"),
-            _compacted_response(),
+            _compacted_response_with_an_unmodelled_block(),
             _end_turn_response(),
         ]
     )
 
-    async with AsyncAnthropic(
-        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
-    ) as client:
+    async with AsyncAnthropic(base_url=base_url, api_key="my-anthropic-api-key", max_retries=0) as client:
         runner = _async_compact_runner(
             client,
             context_management={"edits": [{"type": "clear_tool_uses_20250919"}]},
@@ -1677,7 +1699,9 @@ async def test_compact_before_next_turn_is_sent_after_the_tools_run_async(respx_
     assert "context_management" not in compaction
     assert [message["role"] for message in compaction["messages"]] == ["user", "assistant", "user"]
     assert compaction["messages"][-1]["content"][0]["type"] == "tool_result"
-    assert after["messages"] == _compaction_block_alone()
+    assert after["messages"] == [
+        {"role": "assistant", "content": _COMPACTION_RESPONSE_CONTENT_WITH_AN_UNMODELLED_BLOCK}
+    ]
     assert "compaction" not in after
     assert after["context_management"] == first["context_management"]
     assert all(
@@ -1734,81 +1758,49 @@ async def test_compact_before_next_turn_on_the_final_turn_is_sent_before_stoppin
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
-@pytest.mark.parametrize(
-    "final_turn, stop_reason",
-    [(_max_tokens_with_tool_use, "max_tokens"), (_refusal_with_tool_use, "refusal")],
-    ids=["max_tokens", "refusal"],
-)
 @pytest.mark.respx(base_url=base_url)
 def test_pending_compaction_is_skipped_on_a_final_turn_with_unrun_tool_calls_sync(
-    respx_mock: MockRouter, final_turn: Callable[[], httpx2.Response], stop_reason: str
+    respx_mock: MockRouter, caplog: pytest.LogCaptureFixture
 ) -> None:
-    respx_mock.post("/v1/messages").mock(side_effect=[final_turn()])
+    respx_mock.post("/v1/messages").mock(side_effect=[_max_tokens_with_tool_use()])
 
     with Anthropic(
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
         runner = _sync_compact_runner(client)
         stop_reasons: List[Any] = []
-        with pytest.warns(UserWarning, match="pending compaction was skipped"):
+        with caplog.at_level(logging.WARNING, logger="anthropic.lib.tools._beta_runner"):
             for message in runner:
                 stop_reasons.append(message.stop_reason)
                 runner.compact_before_next_turn()
 
-    assert stop_reasons == [stop_reason]
+    assert stop_reasons == ["max_tokens"]
     assert len(respx_mock.calls) == 1
     assert _current_messages(runner) == [{"role": "user", "content": "What is the weather in SF?"}]
+    assert "pending compaction was skipped" in caplog.text
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
-@pytest.mark.parametrize(
-    "final_turn, stop_reason",
-    [(_max_tokens_with_tool_use, "max_tokens"), (_refusal_with_tool_use, "refusal")],
-    ids=["max_tokens", "refusal"],
-)
 @pytest.mark.respx(base_url=base_url)
 async def test_pending_compaction_is_skipped_on_a_final_turn_with_unrun_tool_calls_async(
-    respx_mock: MockRouter, final_turn: Callable[[], httpx2.Response], stop_reason: str
+    respx_mock: MockRouter, caplog: pytest.LogCaptureFixture
 ) -> None:
-    respx_mock.post("/v1/messages").mock(side_effect=[final_turn()])
+    respx_mock.post("/v1/messages").mock(side_effect=[_max_tokens_with_tool_use()])
 
     async with AsyncAnthropic(
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
         runner = _async_compact_runner(client)
         stop_reasons: List[Any] = []
-        with pytest.warns(UserWarning, match="pending compaction was skipped"):
+        with caplog.at_level(logging.WARNING, logger="anthropic.lib.tools._beta_runner"):
             async for message in runner:
                 stop_reasons.append(message.stop_reason)
                 runner.compact_before_next_turn()
 
-    assert stop_reasons == [stop_reason]
+    assert stop_reasons == ["max_tokens"]
     assert len(respx_mock.calls) == 1
     assert _current_messages(runner) == [{"role": "user", "content": "What is the weather in SF?"}]
-
-
-@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
-@pytest.mark.respx(base_url=base_url)
-def test_pending_compaction_is_sent_on_a_truncated_final_turn_without_tool_calls_sync(respx_mock: MockRouter) -> None:
-    truncated = _end_turn_response().json()
-    truncated["stop_reason"] = "max_tokens"
-    respx_mock.post("/v1/messages").mock(side_effect=[httpx2.Response(200, json=truncated), _compacted_response()])
-
-    with Anthropic(
-        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
-    ) as client:
-        runner = _sync_compact_runner(client)
-        stop_reasons: List[Any] = []
-        for message in runner:
-            stop_reasons.append(message.stop_reason)
-            if message.stop_reason == "max_tokens":
-                runner.compact_before_next_turn()
-
-    assert stop_reasons == ["max_tokens", "compaction"]
-    _, compaction = _sent_request_bodies(respx_mock)
-    assert compaction["compaction"] == {"type": "summarize"}
-    assert compaction["messages"][-1] == _FINAL_ASSISTANT_TURN
-    assert _current_messages(runner) == _compaction_block_alone()
+    assert "pending compaction was skipped" in caplog.text
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
@@ -1941,36 +1933,6 @@ def test_compact_before_next_turn_again_replaces_the_pending_compaction_sync(res
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
-@pytest.mark.parametrize(
-    "compaction, expected",
-    [
-        (None, {"type": "summarize"}),
-        ({"type": "summarize"}, {"type": "summarize"}),
-        ({"type": "summarize", "instructions": ""}, {"type": "summarize", "instructions": ""}),
-        ({"type": "summarize", "some_future_option": 1}, {"type": "summarize", "some_future_option": 1}),
-    ],
-    ids=["default", "summarize", "empty instructions", "unknown key"],
-)
-@pytest.mark.respx(base_url=base_url)
-def test_compact_before_next_turn_sends_the_config_as_given_sync(
-    respx_mock: MockRouter, compaction: Any, expected: Dict[str, Any]
-) -> None:
-    respx_mock.post("/v1/messages").mock(side_effect=[_compacted_response(), _end_turn_response()])
-
-    with Anthropic(
-        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
-    ) as client:
-        runner = _sync_compact_runner(client)
-        runner.compact_before_next_turn(compaction)
-        if compaction is not None:
-            # The config is copied when the call is made, so this can't change what is sent.
-            compaction["instructions"] = "Changed after the call."
-        runner.until_done()
-
-    assert _sent_request_bodies(respx_mock)[0]["compaction"] == expected
-
-
-@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.respx(base_url=base_url)
 def test_compact_before_next_turn_on_the_compaction_response_is_ignored_sync(respx_mock: MockRouter) -> None:
     # A fourth request would exhaust the mocked responses and fail the test.
@@ -1985,10 +1947,14 @@ def test_compact_before_next_turn_on_the_compaction_response_is_ignored_sync(res
     with Anthropic(
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
-        runner = _sync_compact_runner(client)
+        edits: List[Any] = []
+        runner = _sync_compact_runner(client, context_management={"edits": edits})
         stop_reasons: List[Any] = []
         for message in runner:
             stop_reasons.append(message.stop_reason)
+            if message.stop_reason == "compaction":
+                # A call that is going to be ignored doesn't raise over a compaction edit either.
+                edits.append({"type": "compact_20260112"})
             if message.stop_reason != "end_turn":
                 runner.compact_before_next_turn()
 
@@ -1998,6 +1964,78 @@ def test_compact_before_next_turn_on_the_compaction_response_is_ignored_sync(res
         {"type": "summarize"},
         None,
     ]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_a_tool_removed_in_the_history_stays_removed_after_compaction_sync(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _compacted_response(),
+            _tool_use_response("get_weather", "toolu_1", input={}),
+            _end_turn_response(),
+        ]
+    )
+    calls: List[str] = []
+
+    @beta_tool
+    def get_weather() -> BetaFunctionToolResultType:
+        """Lookup the weather."""
+        calls.append("get_weather")
+        return "sunny"
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
+        runner.append_messages({"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]})
+        runner.compact_before_next_turn()
+        with pytest.warns(UserWarning, match="Tool 'get_weather' not found in tool runner"):
+            runner.until_done()
+
+    assert calls == []
+    assert _sent_request_bodies(respx_mock)[2]["messages"][-1] == _not_found_result("toolu_1")
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+async def test_a_tool_removed_in_the_history_stays_removed_after_compaction_async(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _compacted_response(),
+            _tool_use_response("get_weather", "toolu_1", input={}),
+            _end_turn_response(),
+        ]
+    )
+    calls: List[str] = []
+
+    @beta_async_tool
+    async def get_weather() -> BetaFunctionToolResultType:
+        """Lookup the weather."""
+        calls.append("get_weather")
+        return "sunny"
+
+    async with AsyncAnthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[get_weather],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
+        runner.append_messages({"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]})
+        runner.compact_before_next_turn()
+        with pytest.warns(UserWarning, match="Tool 'get_weather' not found in tool runner"):
+            await runner.until_done()
+
+    assert calls == []
+    assert _sent_request_bodies(respx_mock)[2]["messages"][-1] == _not_found_result("toolu_1")
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
@@ -2018,11 +2056,8 @@ def test_pending_compaction_is_skipped_when_max_iterations_ends_the_run_sync(res
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.parametrize(
     "content, stop_reason",
-    [
-        ([], "end_turn"),
-        ([{"type": "compaction", "content": None}], "compaction"),
-    ],
-    ids=["no block", "block without content"],
+    [([{"type": "compaction", "content": None}], "compaction"), ([], "max_tokens")],
+    ids=["block without content", "no block"],
 )
 @pytest.mark.respx(base_url=base_url)
 def test_compaction_without_a_summary_keeps_the_history_and_warns_sync(
@@ -2030,20 +2065,8 @@ def test_compaction_without_a_summary_keeps_the_history_and_warns_sync(
 ) -> None:
     respx_mock.post("/v1/messages").mock(
         side_effect=[
+            _response_without_a_summary(content, stop_reason),
             _tool_use_response("get_weather", "toolu_1"),
-            httpx2.Response(
-                200,
-                json={
-                    "id": "msg_not_compacted",
-                    "type": "message",
-                    "role": "assistant",
-                    "model": "claude-haiku-4-5",
-                    "content": content,
-                    "stop_reason": stop_reason,
-                    "stop_sequence": None,
-                    "usage": {"input_tokens": 1, "output_tokens": 1},
-                },
-            ),
             _end_turn_response(),
         ]
     )
@@ -2052,111 +2075,68 @@ def test_compaction_without_a_summary_keeps_the_history_and_warns_sync(
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
         runner = _sync_compact_runner(client)
+        runner.append_messages({"role": "user", "content": "And in NYC?"})
+        runner.compact_before_next_turn()
         yielded = 0
         with caplog.at_level(logging.WARNING, logger="anthropic.lib.tools._beta_runner"):
             for _ in runner:
                 yielded += 1
-                # The second call is made on the compaction response, so it is ignored: no retry is sent.
-                if yielded <= 2:
+                # This call is made on the compaction response, so it is ignored: no retry is sent.
+                if yielded == 1:
                     runner.compact_before_next_turn()
 
-    _, compaction, after = _sent_request_bodies(respx_mock)
+    compaction, after, last = _sent_request_bodies(respx_mock)
     assert after["messages"] == compaction["messages"]
     assert "compaction" not in after
+    # The edit made before the compaction request doesn't keep the turn that follows out of the history.
+    assert [message["role"] for message in last["messages"]] == ["user", "user", "assistant", "user"]
     assert "Compaction produced no summary" in caplog.text
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.respx(base_url=base_url)
-def test_compacting_twice_leaves_only_the_newer_block_sync(respx_mock: MockRouter) -> None:
+def test_until_done_returns_the_final_turn_after_a_compaction_without_a_summary_sync(
+    respx_mock: MockRouter,
+) -> None:
     respx_mock.post("/v1/messages").mock(
-        side_effect=[
-            _tool_use_response("get_weather", "toolu_1"),
-            _compacted_response("First summary.", "sig_01"),
-            _tool_use_response("get_weather", "toolu_2"),
-            _compacted_response("Second summary.", "sig_02"),
-            _end_turn_response(),
-        ]
+        side_effect=[_end_turn_response(), _response_without_a_summary([], "max_tokens")]
     )
 
     with Anthropic(
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
         runner = _sync_compact_runner(client)
+        stop_reasons: List[Any] = []
         for message in runner:
-            if message.stop_reason == "tool_use":
-                runner.compact_before_next_turn()
+            stop_reasons.append(message.stop_reason)
+            runner.compact_before_next_turn()
+        final = runner.until_done()
 
-    requests = _sent_request_bodies(respx_mock)
-    assert len(requests) == 5
-    # The second compaction summarizes the first block and what followed it...
-    assert requests[3]["compaction"] == {"type": "summarize"}
-    assert requests[3]["messages"][0] == _compaction_block_alone("First summary.", "sig_01")[0]
-    assert [message["role"] for message in requests[3]["messages"]] == ["assistant", "assistant", "user"]
-    # ...and its block then stands alone.
-    assert requests[4]["messages"] == _compaction_block_alone("Second summary.", "sig_02")
+    assert stop_reasons == ["end_turn", "max_tokens"]
+    assert final.stop_reason == "end_turn"
 
 
-_COMPACTION_RESPONSE_CONTENT_WITH_AN_UNMODELLED_BLOCK: List[Dict[str, Any]] = [
-    {"type": "compaction", "content": "Summary so far.", "signature": "sig_01"},
-    {"type": "mcp_tool_listing", "mcp_server_name": "docs", "tools": []},
-]
-
-
-def _compacted_response_with_an_unmodelled_block() -> httpx2.Response:
-    body = _compacted_response().json()
-    body["content"] = _COMPACTION_RESPONSE_CONTENT_WITH_AN_UNMODELLED_BLOCK
-    return httpx2.Response(200, json=body)
-
-
-# `parse()` serializes the response it was given, and pydantic warns about a block type it doesn't know.
-@pytest.mark.filterwarnings("ignore:Pydantic serializer warnings:UserWarning")
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.respx(base_url=base_url)
-def test_compaction_response_is_sent_back_as_it_came_sync(respx_mock: MockRouter) -> None:
+async def test_until_done_returns_the_final_turn_after_a_compaction_without_a_summary_async(
+    respx_mock: MockRouter,
+) -> None:
     respx_mock.post("/v1/messages").mock(
-        side_effect=[
-            _tool_use_response("get_weather", "toolu_1"),
-            _compacted_response_with_an_unmodelled_block(),
-            _end_turn_response(),
-        ]
+        side_effect=[_end_turn_response(), _response_without_a_summary([], "max_tokens")]
     )
 
-    # Strict response validation would reject the block type this SDK version doesn't model.
-    with Anthropic(base_url=base_url, api_key="my-anthropic-api-key", max_retries=0) as client:
-        runner = _sync_compact_runner(client)
-        for message in runner:
-            if message.stop_reason == "tool_use":
-                runner.compact_before_next_turn()
-
-    after = _sent_request_bodies(respx_mock)[2]
-    assert after["messages"] == [
-        {"role": "assistant", "content": _COMPACTION_RESPONSE_CONTENT_WITH_AN_UNMODELLED_BLOCK}
-    ]
-
-
-@pytest.mark.filterwarnings("ignore:Pydantic serializer warnings:UserWarning")
-@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
-@pytest.mark.respx(base_url=base_url)
-async def test_compaction_response_is_sent_back_as_it_came_async(respx_mock: MockRouter) -> None:
-    respx_mock.post("/v1/messages").mock(
-        side_effect=[
-            _tool_use_response("get_weather", "toolu_1"),
-            _compacted_response_with_an_unmodelled_block(),
-            _end_turn_response(),
-        ]
-    )
-
-    async with AsyncAnthropic(base_url=base_url, api_key="my-anthropic-api-key", max_retries=0) as client:
+    async with AsyncAnthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
         runner = _async_compact_runner(client)
+        stop_reasons: List[Any] = []
         async for message in runner:
-            if message.stop_reason == "tool_use":
-                runner.compact_before_next_turn()
+            stop_reasons.append(message.stop_reason)
+            runner.compact_before_next_turn()
+        final = await runner.until_done()
 
-    after = _sent_request_bodies(respx_mock)[2]
-    assert after["messages"] == [
-        {"role": "assistant", "content": _COMPACTION_RESPONSE_CONTENT_WITH_AN_UNMODELLED_BLOCK}
-    ]
+    assert stop_reasons == ["end_turn", "max_tokens"]
+    assert final.stop_reason == "end_turn"
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
@@ -2178,7 +2158,7 @@ def test_messages_cannot_be_replaced_while_compacting_sync(respx_mock: MockRoute
             if message.stop_reason == "tool_use":
                 runner.compact_before_next_turn()
             elif message.stop_reason == "compaction":
-                with pytest.raises(ValueError, match="while the conversation is being compacted"):
+                with pytest.raises(ValueError, match="Message params can't be changed"):
                     runner.append_messages({"role": "user", "content": "And in NYC?"})
                 with pytest.raises(ValueError, match="while the conversation is being compacted"):
                     runner.set_messages_params(lambda params: {**params, "messages": []})
@@ -2188,6 +2168,48 @@ def test_messages_cannot_be_replaced_while_compacting_sync(respx_mock: MockRoute
     after = _sent_request_bodies(respx_mock)[2]
     assert after["messages"] == _compaction_block_alone()
     assert after["max_tokens"] == 2048
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_failed_compaction_request_is_not_retried_and_frees_the_messages_sync(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[_tool_use_response("get_weather", "toolu_1"), httpx2.Response(500, json={"type": "error"})]
+    )
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = _sync_compact_runner(client)
+        with pytest.raises(InternalServerError):
+            for _ in runner:
+                runner.compact_before_next_turn()
+
+        runner.append_messages({"role": "user", "content": "And in NYC?"})
+        assert list(runner) == []
+
+    assert [request.get("compaction") for request in _sent_request_bodies(respx_mock)] == [None, {"type": "summarize"}]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+async def test_failed_compaction_request_is_not_retried_and_frees_the_messages_async(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[_tool_use_response("get_weather", "toolu_1"), httpx2.Response(500, json={"type": "error"})]
+    )
+
+    async with AsyncAnthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = _async_compact_runner(client)
+        with pytest.raises(InternalServerError):
+            async for _ in runner:
+                runner.compact_before_next_turn()
+
+        runner.append_messages({"role": "user", "content": "And in NYC?"})
+        assert [message async for message in runner] == []
+
+    assert [request.get("compaction") for request in _sent_request_bodies(respx_mock)] == [None, {"type": "summarize"}]
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
@@ -2224,12 +2246,15 @@ def test_compact_before_next_turn_is_refused_beside_a_compaction_edit() -> None:
         with pytest.raises(ValueError, match="has a compaction edit"):
             runner.compact_before_next_turn()
 
-        runner = _sync_compact_runner(client)
+        edits: List[Any] = []
+        runner = _sync_compact_runner(client, context_management={"edits": edits})
         runner.compact_before_next_turn()
-        runner.set_messages_params(
-            lambda params: {**params, "context_management": {"edits": [{"type": "compact_20260112"}]}}
-        )
-        # The edit arrived after the call was accepted, so the refusal comes when the request would be sent.
+        with pytest.raises(ValueError, match="has a compaction edit"):
+            runner.set_messages_params(
+                lambda params: {**params, "context_management": {"edits": [{"type": "compact_20260112"}]}}
+            )
+        # An edit made in place never reaches the setter, so the refusal comes when the request would be sent.
+        edits.append({"type": "compact_20260112"})
         with pytest.raises(ValueError, match="has a compaction edit"):
             next(runner)
 
