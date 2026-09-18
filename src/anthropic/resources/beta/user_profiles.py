@@ -303,13 +303,10 @@ class UserProfiles(SyncAPIResource):
         List User Profiles
 
         Args:
-          limit: Query parameter for limit
+          order: ListOrder enum
 
-          order: Query parameter for order
-
-          order_by: Query parameter for order_by
-
-          page: Query parameter for page
+          order_by: Sort field for listing user profiles: `created_at` (default) or `name`
+              (case-insensitive; profiles without a name sort last).
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -676,13 +673,10 @@ class AsyncUserProfiles(AsyncAPIResource):
         List User Profiles
 
         Args:
-          limit: Query parameter for limit
+          order: ListOrder enum
 
-          order: Query parameter for order
-
-          order_by: Query parameter for order_by
-
-          page: Query parameter for page
+          order_by: Sort field for listing user profiles: `created_at` (default) or `name`
+              (case-insensitive; profiles without a name sort last).
 
           betas: Optional header to specify the beta version(s) you want to use.
 

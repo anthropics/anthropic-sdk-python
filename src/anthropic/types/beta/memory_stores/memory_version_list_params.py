@@ -14,7 +14,6 @@ __all__ = ["MemoryVersionListParams"]
 
 class MemoryVersionListParams(TypedDict, total=False):
     api_key_id: str
-    """Query parameter for api_key_id"""
 
     created_at_gte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gte]", format="iso8601")]
     """Return versions created at or after this time (inclusive)."""
@@ -23,25 +22,30 @@ class MemoryVersionListParams(TypedDict, total=False):
     """Return versions created at or before this time (inclusive)."""
 
     limit: int
-    """Query parameter for limit"""
 
     memory_id: str
-    """Query parameter for memory_id"""
 
     operation: BetaManagedAgentsMemoryVersionOperation
-    """Query parameter for operation"""
+    """The kind of mutation a `memory_version` records.
+
+    Every non-no-op mutation to a memory appends exactly one version row with one of
+    these values.
+    """
 
     page: str
-    """Query parameter for page"""
 
     service_account_id: str
-    """Query parameter for service_account_id"""
 
     session_id: str
-    """Query parameter for session_id"""
 
     view: BetaManagedAgentsMemoryView
-    """Query parameter for view"""
+    """Selects which projection of a `memory` or `memory_version` the server returns.
+
+    `basic` returns the object with `content` set to `null`; `full` populates
+    `content`. When omitted, the default is endpoint-specific: retrieve operations
+    default to `full`; list, create, and update operations default to `basic`.
+    Listing with `view=full` caps `limit` at 20.
+    """
 
     betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

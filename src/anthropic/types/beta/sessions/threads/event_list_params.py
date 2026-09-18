@@ -12,10 +12,8 @@ class EventListParams(TypedDict, total=False):
     session_id: Required[str]
 
     limit: int
-    """Query parameter for limit"""
 
     page: str
-    """Query parameter for page"""
 
     betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

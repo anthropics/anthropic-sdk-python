@@ -85,7 +85,11 @@ class Memories(SyncAPIResource):
               characters, or the Unicode line and paragraph separators (U+2028, U+2029), and
               must be NFC-normalized. Paths are case-sensitive.
 
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -149,7 +153,11 @@ class Memories(SyncAPIResource):
         Retrieve a memory
 
         Args:
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -215,7 +223,11 @@ class Memories(SyncAPIResource):
         Update a memory
 
         Args:
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           content: New UTF-8 text content for the memory. Maximum 100 kB (102,400 bytes). Omit to
               leave the content unchanged (e.g., for a rename-only update).
@@ -392,8 +404,6 @@ class Memories(SyncAPIResource):
         Delete a memory
 
         Args:
-          expected_content_sha256: Query parameter for expected_content_sha256
-
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -489,7 +499,11 @@ class AsyncMemories(AsyncAPIResource):
               characters, or the Unicode line and paragraph separators (U+2028, U+2029), and
               must be NFC-normalized. Paths are case-sensitive.
 
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -553,7 +567,11 @@ class AsyncMemories(AsyncAPIResource):
         Retrieve a memory
 
         Args:
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -619,7 +637,11 @@ class AsyncMemories(AsyncAPIResource):
         Update a memory
 
         Args:
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           content: New UTF-8 text content for the memory. Maximum 100 kB (102,400 bytes). Omit to
               leave the content unchanged (e.g., for a rename-only update).
@@ -796,8 +818,6 @@ class AsyncMemories(AsyncAPIResource):
         Delete a memory
 
         Args:
-          expected_content_sha256: Query parameter for expected_content_sha256
-
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers

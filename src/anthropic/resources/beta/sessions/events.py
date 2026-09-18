@@ -94,8 +94,6 @@ class Events(SyncAPIResource):
           created_at_lte: Return events created at or before this time (inclusive). Compared against the
               event's `processed_at` value.
 
-          limit: Query parameter for limit
-
           order: Sort direction for results, ordered by the event's `processed_at`. Defaults to
               `asc` (chronological).
 
@@ -334,8 +332,6 @@ class AsyncEvents(AsyncAPIResource):
 
           created_at_lte: Return events created at or before this time (inclusive). Compared against the
               event's `processed_at` value.
-
-          limit: Query parameter for limit
 
           order: Sort direction for results, ordered by the event's `processed_at`. Defaults to
               `asc` (chronological).

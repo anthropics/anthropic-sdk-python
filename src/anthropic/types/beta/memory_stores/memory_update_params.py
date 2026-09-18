@@ -14,7 +14,13 @@ class MemoryUpdateParams(TypedDict, total=False):
     memory_store_id: Required[str]
 
     view: BetaManagedAgentsMemoryView
-    """Query parameter for view"""
+    """Selects which projection of a `memory` or `memory_version` the server returns.
+
+    `basic` returns the object with `content` set to `null`; `full` populates
+    `content`. When omitted, the default is endpoint-specific: retrieve operations
+    default to `full`; list, create, and update operations default to `basic`.
+    Listing with `view=full` caps `limit` at 20.
+    """
 
     content: Optional[str]
     """New UTF-8 text content for the memory.

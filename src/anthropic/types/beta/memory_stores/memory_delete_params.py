@@ -12,7 +12,6 @@ class MemoryDeleteParams(TypedDict, total=False):
     memory_store_id: Required[str]
 
     expected_content_sha256: str
-    """Query parameter for expected_content_sha256"""
 
     betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

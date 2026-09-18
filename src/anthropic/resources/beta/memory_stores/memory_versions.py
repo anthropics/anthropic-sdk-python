@@ -73,7 +73,11 @@ class MemoryVersions(SyncAPIResource):
         Retrieve a memory version
 
         Args:
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -144,25 +148,18 @@ class MemoryVersions(SyncAPIResource):
         List memory versions
 
         Args:
-          api_key_id: Query parameter for api_key_id
-
           created_at_gte: Return versions created at or after this time (inclusive).
 
           created_at_lte: Return versions created at or before this time (inclusive).
 
-          limit: Query parameter for limit
+          operation: The kind of mutation a `memory_version` records. Every non-no-op mutation to a
+              memory appends exactly one version row with one of these values.
 
-          memory_id: Query parameter for memory_id
-
-          operation: Query parameter for operation
-
-          page: Query parameter for page
-
-          service_account_id: Query parameter for service_account_id
-
-          session_id: Query parameter for session_id
-
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -313,7 +310,11 @@ class AsyncMemoryVersions(AsyncAPIResource):
         Retrieve a memory version
 
         Args:
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -386,25 +387,18 @@ class AsyncMemoryVersions(AsyncAPIResource):
         List memory versions
 
         Args:
-          api_key_id: Query parameter for api_key_id
-
           created_at_gte: Return versions created at or after this time (inclusive).
 
           created_at_lte: Return versions created at or before this time (inclusive).
 
-          limit: Query parameter for limit
+          operation: The kind of mutation a `memory_version` records. Every non-no-op mutation to a
+              memory appends exactly one version row with one of these values.
 
-          memory_id: Query parameter for memory_id
-
-          operation: Query parameter for operation
-
-          page: Query parameter for page
-
-          service_account_id: Query parameter for service_account_id
-
-          session_id: Query parameter for session_id
-
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

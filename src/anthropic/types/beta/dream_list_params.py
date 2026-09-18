@@ -25,13 +25,10 @@ class DreamListParams(TypedDict, total=False):
     """
 
     include_archived: bool
-    """Query parameter for include_archived"""
 
     limit: int
-    """Query parameter for limit"""
 
     page: str
-    """Query parameter for page"""
 
     statuses: List[BetaDreamStatus]
     """Filter by lifecycle status.

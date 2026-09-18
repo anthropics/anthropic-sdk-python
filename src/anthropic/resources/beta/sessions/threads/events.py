@@ -69,10 +69,6 @@ class Events(SyncAPIResource):
         List Session Thread Events
 
         Args:
-          limit: Query parameter for limit
-
-          page: Query parameter for page
-
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers
@@ -241,10 +237,6 @@ class AsyncEvents(AsyncAPIResource):
         List Session Thread Events
 
         Args:
-          limit: Query parameter for limit
-
-          page: Query parameter for page
-
           betas: Optional header to specify the beta version(s) you want to use.
 
           extra_headers: Send extra headers

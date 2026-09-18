@@ -37,7 +37,6 @@ class EventListParams(TypedDict, total=False):
     """
 
     limit: int
-    """Query parameter for limit"""
 
     order: Literal["asc", "desc"]
     """Sort direction for results, ordered by the event's `processed_at`.

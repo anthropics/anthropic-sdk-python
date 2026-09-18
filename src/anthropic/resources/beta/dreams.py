@@ -184,12 +184,6 @@ class Dreams(SyncAPIResource):
           created_at_lt: Return dreams with `created_at` strictly before this timestamp (exclusive upper
               bound, RFC 3339). Unset applies no upper bound.
 
-          include_archived: Query parameter for include_archived
-
-          limit: Query parameter for limit
-
-          page: Query parameter for page
-
           statuses: Filter by lifecycle status. Repeat the parameter to match any of multiple
               statuses. Empty applies no status filter.
 
@@ -492,12 +486,6 @@ class AsyncDreams(AsyncAPIResource):
 
           created_at_lt: Return dreams with `created_at` strictly before this timestamp (exclusive upper
               bound, RFC 3339). Unset applies no upper bound.
-
-          include_archived: Query parameter for include_archived
-
-          limit: Query parameter for limit
-
-          page: Query parameter for page
 
           statuses: Filter by lifecycle status. Repeat the parameter to match any of multiple
               statuses. Empty applies no status filter.
