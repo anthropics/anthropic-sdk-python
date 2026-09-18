@@ -26,10 +26,7 @@ class BetaManagedAgentsSessionThread(BaseModel):
     """Unique identifier for this thread."""
 
     agent: Agent
-    """
-    The resolved agent a session thread runs: a saved-agent snapshot, the platform
-    advisor entry, or an inline-defined (ephemeral) agent snapshot.
-    """
+    """The resolved agent a `session_thread` runs."""
 
     archived_at: Optional[datetime] = None
     """A timestamp in RFC 3339 format"""
