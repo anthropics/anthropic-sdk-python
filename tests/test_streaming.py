@@ -7,7 +7,16 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._streaming import Stream, AsyncStream, ServerSentEvent
-from anthropic._exceptions import APIStatusError
+from anthropic._exceptions import (
+    NotFoundError,
+    APIStatusError,
+    RateLimitError,
+    BadRequestError,
+    OverloadedError,
+    AuthenticationError,
+    InternalServerError,
+    PermissionDeniedError,
+)
 
 _T = TypeVar("_T")
 
@@ -236,6 +245,60 @@ async def test_error_type(
 
     assert exc_info.value.type == "overloaded_error"
     assert "Overloaded" in str(exc_info.value)
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize(
+    "error_type,error_class",
+    [
+        ("invalid_request_error", BadRequestError),
+        ("authentication_error", AuthenticationError),
+        ("permission_error", PermissionDeniedError),
+        ("not_found_error", NotFoundError),
+        ("rate_limit_error", RateLimitError),
+        ("overloaded_error", OverloadedError),
+        ("api_error", InternalServerError),
+    ],
+)
+async def test_error_class_from_type(
+    sync: bool,
+    error_type: str,
+    error_class: type[APIStatusError],
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+) -> None:
+    def body() -> Iterator[bytes]:
+        yield b"event: error\n"
+        yield f'data: {{"type": "error", "error": {{"type": "{error_type}", "message": "boom"}}}}\n\n'.encode()
+
+    iterator = make_stream_iterator(content=body(), sync=sync, client=client, async_client=async_client)
+
+    with pytest.raises(error_class) as exc_info:
+        await iter_next(iterator)
+
+    # the response is the stream's own, so its status is reported as is
+    assert exc_info.value.status_code == 200
+    assert exc_info.value.type == error_type
+    assert "boom" in str(exc_info.value)
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_error_of_unknown_type_stays_generic(
+    sync: bool,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+) -> None:
+    def body() -> Iterator[bytes]:
+        yield b"event: error\n"
+        yield b'data: {"type": "error", "error": {"type": "billing_error", "message": "boom"}}\n\n'
+
+    iterator = make_stream_iterator(content=body(), sync=sync, client=client, async_client=async_client)
+
+    with pytest.raises(APIStatusError) as exc_info:
+        await iter_next(iterator)
+
+    assert type(exc_info.value) is APIStatusError
+    assert exc_info.value.type == "billing_error"
 
 
 def test_isinstance_check(client: Anthropic, async_client: AsyncAnthropic) -> None:
