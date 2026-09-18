@@ -100,6 +100,24 @@ class TestAnthropicVertex:
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
 
+    @pytest.mark.respx()
+    def test_body_moves_static_fields_first_and_keeps_the_rest_in_order(self, respx_mock: MockRouter) -> None:
+        request_url = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
+        respx_mock.post(request_url).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        self.client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+            system="You are a helpful assistant.",
+            tools=[{"name": "get_weather", "input_schema": {"type": "object"}}],
+            extra_body={"trace_id": "abc"},
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        keys = list(json.loads(calls[0].request.content))
+        assert keys == ["anthropic_version", "system", "tools", "max_tokens", "messages", "trace_id"]
+
     def test_copy(self) -> None:
         copied = self.client.copy()
         assert id(copied) != id(self.client)
@@ -293,6 +311,24 @@ class TestAsyncAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    async def test_body_moves_static_fields_first_and_keeps_the_rest_in_order(self, respx_mock: MockRouter) -> None:
+        request_url = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
+        respx_mock.post(request_url).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        await self.client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+            system="You are a helpful assistant.",
+            tools=[{"name": "get_weather", "input_schema": {"type": "object"}}],
+            extra_body={"trace_id": "abc"},
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        keys = list(json.loads(calls[0].request.content))
+        assert keys == ["anthropic_version", "system", "tools", "max_tokens", "messages", "trace_id"]
 
     def test_copy(self) -> None:
         copied = self.client.copy()
