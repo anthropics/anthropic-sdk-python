@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.7.0 (2026-09-18)
+
+Full Changelog: [v1.6.0...v1.7.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.6.0...v1.7.0)
+
+### Features
+
+* **api:** add group with display_name to rate limits, deprecate group_type ([28f0a83](https://github.com/anthropics/anthropic-sdk-python/commit/28f0a831355fa3d539fd3e1db1c63f92a39bb252))
+* **tools:** add compact_before_next_turn() to the tool runner ([#641](https://github.com/anthropics/anthropic-sdk-python/issues/641)) ([8b23fb3](https://github.com/anthropics/anthropic-sdk-python/commit/8b23fb33f326c7ffa52e8d925902af0fd94501ce))
+
+
+### Bug Fixes
+
+* **bedrock:** raise an API error for eventstream exception and error frames ([#769](https://github.com/anthropics/anthropic-sdk-python/issues/769)) ([8ec9cc9](https://github.com/anthropics/anthropic-sdk-python/commit/8ec9cc9bdf7278ce7a1557dc7d6e455c7808946e))
+* **client:** accept `X | Y` union types when parsing responses ([b366fa5](https://github.com/anthropics/anthropic-sdk-python/commit/b366fa5a1d62e4908a35415a1692f18621cf9e2c))
+* **client:** don't raise TypeError for `X | Y` fields with unknown data ([30ebd69](https://github.com/anthropics/anthropic-sdk-python/commit/30ebd6963c4b21044fc8d7f8cf33a19981c74856))
+* **client:** join multiple anthropic-beta values with a comma and no space ([#781](https://github.com/anthropics/anthropic-sdk-python/issues/781)) ([1680324](https://github.com/anthropics/anthropic-sdk-python/commit/168032429a6880ef7063de7680c7abe18e45be35))
+* **tools:** tidy compact_before_next_turn() state and failure handling ([#804](https://github.com/anthropics/anthropic-sdk-python/issues/804)) ([d3a9fc8](https://github.com/anthropics/anthropic-sdk-python/commit/d3a9fc80f9792eda4944e33efb821306e632b7c6))
+
+
+### Chores
+
+* **deps:** require pydantic 1.10 or later ([91931e1](https://github.com/anthropics/anthropic-sdk-python/commit/91931e1d205839e72b2a4c2c851b18874f935943))
+* **docs:** add descriptions for enum values and path parameters ([99184dc](https://github.com/anthropics/anthropic-sdk-python/commit/99184dc76a7a6c404478556483d2118498994a47))
+* **docs:** clarify the compaction tool_changes and tool change descriptions ([eacc0ff](https://github.com/anthropics/anthropic-sdk-python/commit/eacc0ffde324201faac42fdcb60500b2076c25b6))
+* **internal:** add more unnecessary cast comments ([9e6ce27](https://github.com/anthropics/anthropic-sdk-python/commit/9e6ce27b8d89c737bd427fc91b96f9932431f547))
+* **internal:** pass strict= to zip() in the MCP tool helpers ([13cfe64](https://github.com/anthropics/anthropic-sdk-python/commit/13cfe644920119b718e0a73085b7ecd9726fb9e9))
+* **internal:** remove an unused noqa comment from the model tests ([2c18298](https://github.com/anthropics/anthropic-sdk-python/commit/2c18298ff35a1b28b98d25b424e928b3865ef405))
+* **internal:** set ruff's target version to Python 3.10 ([2bdfd41](https://github.com/anthropics/anthropic-sdk-python/commit/2bdfd415fe4842b44f871b31328cc76135b48fbb))
+
 ## 1.6.0 (2026-09-15)
 
 Full Changelog: [v1.5.0...v1.6.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.5.0...v1.6.0)
