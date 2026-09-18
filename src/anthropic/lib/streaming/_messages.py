@@ -7,6 +7,7 @@ from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_n
 import httpx2
 from pydantic import BaseModel
 
+from anthropic.types.usage import Usage
 from anthropic.types.tool_use_block import ToolUseBlock
 from anthropic.types.server_tool_use_block import ServerToolUseBlock
 
@@ -517,20 +518,29 @@ def accumulate_event(
         current_snapshot.stop_details = event.delta.stop_details
         if event.delta.container is not None:
             current_snapshot.container = event.delta.container
-        current_snapshot.usage.output_tokens = event.usage.output_tokens
 
-        # Usage counts on a message_delta are cumulative totals, so they overwrite rather
-        # than add; optional ones are omitted when not applicable, in which case the
-        # message_start value must survive.
-        if event.usage.input_tokens is not None:
-            current_snapshot.usage.input_tokens = event.usage.input_tokens
-        if event.usage.cache_creation_input_tokens is not None:
-            current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
-        if event.usage.cache_read_input_tokens is not None:
-            current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
-        if event.usage.server_tool_use is not None:
-            current_snapshot.usage.server_tool_use = event.usage.server_tool_use
-        if event.usage.output_tokens_details is not None:
-            current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
+        if current_snapshot.usage is None:  # pyright: ignore[reportUnnecessaryComparison]  # noqa: E501
+            # `message_start` may omit usage (see the streaming docs), in which
+            # case the snapshot has no usage yet. Initialize it from the delta
+            # so the final message still carries token counts, and tolerate
+            # streams that never supply usage. Anything the delta leaves out
+            # (e.g. `input_tokens`) stays unset instead of being fabricated
+            # as 0 so an unknown count is never reported to callers; a later
+            # delta that does supply it fills it in below.
+            current_snapshot.usage = construct_type(type_=Usage, value=event.usage.to_dict())
+        else:
+            current_snapshot.usage.output_tokens = event.usage.output_tokens
+
+            # Update other usage fields if they exist in the event
+            if event.usage.input_tokens is not None:
+                current_snapshot.usage.input_tokens = event.usage.input_tokens
+            if event.usage.cache_creation_input_tokens is not None:
+                current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
+            if event.usage.cache_read_input_tokens is not None:
+                current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
+            if event.usage.server_tool_use is not None:
+                current_snapshot.usage.server_tool_use = event.usage.server_tool_use
+            if event.usage.output_tokens_details is not None:
+                current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
 
     return current_snapshot
