@@ -80,6 +80,13 @@ class Versions(SyncAPIResource):
               All files must be in the same top-level directory and must include a SKILL.md
               file at the root of that directory.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -134,6 +141,13 @@ class Versions(SyncAPIResource):
               Requests carrying the `skills-2025-10-02` beta header address versions by their
               Unix epoch timestamp instead (e.g., "1759178010641129").
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -182,6 +196,13 @@ class Versions(SyncAPIResource):
               Ranges from `1` to `1000`. Defaults to `20`.
 
           page: Optionally set to the `next_page` token from the previous response.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -238,6 +259,13 @@ class Versions(SyncAPIResource):
 
               Requests carrying the `skills-2025-10-02` beta header address versions by their
               Unix epoch timestamp instead (e.g., "1759178010641129").
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -307,6 +335,13 @@ class AsyncVersions(AsyncAPIResource):
               All files must be in the same top-level directory and must include a SKILL.md
               file at the root of that directory.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -361,6 +396,13 @@ class AsyncVersions(AsyncAPIResource):
               Requests carrying the `skills-2025-10-02` beta header address versions by their
               Unix epoch timestamp instead (e.g., "1759178010641129").
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -409,6 +451,13 @@ class AsyncVersions(AsyncAPIResource):
               Ranges from `1` to `1000`. Defaults to `20`.
 
           page: Optionally set to the `next_page` token from the previous response.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -465,6 +514,13 @@ class AsyncVersions(AsyncAPIResource):
 
               Requests carrying the `skills-2025-10-02` beta header address versions by their
               Unix epoch timestamp instead (e.g., "1759178010641129").
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 

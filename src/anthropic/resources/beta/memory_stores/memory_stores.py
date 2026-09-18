@@ -105,6 +105,13 @@ class MemoryStores(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -158,7 +165,17 @@ class MemoryStores(SyncAPIResource):
         Retrieve a memory store
 
         Args:
+          memory_store_id: ID of the memory store to retrieve (a `memstore_...` identifier). Required.
+              Enumerate IDs via `GET /v1/memory_stores`.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -210,6 +227,10 @@ class MemoryStores(SyncAPIResource):
         Update a memory store
 
         Args:
+          memory_store_id: ID of the memory store to update (a `memstore_...` identifier). Required.
+              Enumerate IDs via `GET /v1/memory_stores`. Updating an archived store
+              returns 400.
+
           description: New description for the store, up to 1024 characters. Pass an empty string to
               clear it.
 
@@ -222,6 +243,13 @@ class MemoryStores(SyncAPIResource):
               after the update.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -299,6 +327,13 @@ class MemoryStores(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -358,7 +393,18 @@ class MemoryStores(SyncAPIResource):
         Delete a memory store
 
         Args:
+          memory_store_id: ID of the memory store to permanently delete (a `memstore_...` identifier).
+              Required. Deletion cascades to all memories and memory versions in the store and
+              cannot be undone.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -407,7 +453,18 @@ class MemoryStores(SyncAPIResource):
         Archive a memory store
 
         Args:
+          memory_store_id: ID of the memory store to archive (a `memstore_...` identifier). Required.
+              Archiving is one-way and idempotent; archived stores cannot be unarchived.
+              Enumerate IDs via `GET /v1/memory_stores`.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -503,6 +560,13 @@ class AsyncMemoryStores(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -556,7 +620,17 @@ class AsyncMemoryStores(AsyncAPIResource):
         Retrieve a memory store
 
         Args:
+          memory_store_id: ID of the memory store to retrieve (a `memstore_...` identifier). Required.
+              Enumerate IDs via `GET /v1/memory_stores`.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -608,6 +682,10 @@ class AsyncMemoryStores(AsyncAPIResource):
         Update a memory store
 
         Args:
+          memory_store_id: ID of the memory store to update (a `memstore_...` identifier). Required.
+              Enumerate IDs via `GET /v1/memory_stores`. Updating an archived store
+              returns 400.
+
           description: New description for the store, up to 1024 characters. Pass an empty string to
               clear it.
 
@@ -620,6 +698,13 @@ class AsyncMemoryStores(AsyncAPIResource):
               after the update.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -697,6 +782,13 @@ class AsyncMemoryStores(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -756,7 +848,18 @@ class AsyncMemoryStores(AsyncAPIResource):
         Delete a memory store
 
         Args:
+          memory_store_id: ID of the memory store to permanently delete (a `memstore_...` identifier).
+              Required. Deletion cascades to all memories and memory versions in the store and
+              cannot be undone.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -805,7 +908,18 @@ class AsyncMemoryStores(AsyncAPIResource):
         Archive a memory store
 
         Args:
+          memory_store_id: ID of the memory store to archive (a `memstore_...` identifier). Required.
+              Archiving is one-way and idempotent; archived stores cannot be unarchived.
+              Enumerate IDs via `GET /v1/memory_stores`.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 

@@ -121,6 +121,13 @@ class Agents(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -177,15 +184,23 @@ class Agents(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Get Agent
+        """
+        Get Agent
 
         Args:
-          version: Agent version.
+          agent_id: Unique identifier of the agent to retrieve.
 
-        Omit for the most recent version. Must be at least 1 if
+          version: Agent version. Omit for the most recent version. Must be at least 1 if
               specified.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -244,12 +259,13 @@ class Agents(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Update Agent
+        """
+        Update Agent
 
         Args:
-          description: Description.
+          agent_id: Unique identifier of the agent to update.
 
-        Omit to preserve; send empty string or null to clear.
+          description: Description. Omit to preserve; send empty string or null to clear.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
               clear. Names must be unique. Maximum 20. Every server must be referenced by an
@@ -285,6 +301,13 @@ class Agents(SyncAPIResource):
               omit to apply the update unconditionally.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -364,6 +387,13 @@ class Agents(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -423,7 +453,16 @@ class Agents(SyncAPIResource):
         Archive Agent
 
         Args:
+          agent_id: Unique identifier of the agent to archive.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -535,6 +574,13 @@ class AsyncAgents(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -591,15 +637,23 @@ class AsyncAgents(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Get Agent
+        """
+        Get Agent
 
         Args:
-          version: Agent version.
+          agent_id: Unique identifier of the agent to retrieve.
 
-        Omit for the most recent version. Must be at least 1 if
+          version: Agent version. Omit for the most recent version. Must be at least 1 if
               specified.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -658,12 +712,13 @@ class AsyncAgents(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Update Agent
+        """
+        Update Agent
 
         Args:
-          description: Description.
+          agent_id: Unique identifier of the agent to update.
 
-        Omit to preserve; send empty string or null to clear.
+          description: Description. Omit to preserve; send empty string or null to clear.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
               clear. Names must be unique. Maximum 20. Every server must be referenced by an
@@ -699,6 +754,13 @@ class AsyncAgents(AsyncAPIResource):
               omit to apply the update unconditionally.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -778,6 +840,13 @@ class AsyncAgents(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -837,7 +906,16 @@ class AsyncAgents(AsyncAPIResource):
         Archive Agent
 
         Args:
+          agent_id: Unique identifier of the agent to archive.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
