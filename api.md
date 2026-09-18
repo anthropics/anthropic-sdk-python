@@ -969,6 +969,7 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsAgentAutoEvaluatedPermissionAsk,
     BetaManagedAgentsAgentAutoEvaluatedPermissionDeny,
     BetaManagedAgentsAgentCustomToolUseEvent,
+    BetaManagedAgentsAgentEvaluatedPermission,
     BetaManagedAgentsAgentMCPToolResultEvent,
     BetaManagedAgentsAgentMCPToolUseEvent,
     BetaManagedAgentsAgentMessageEvent,
