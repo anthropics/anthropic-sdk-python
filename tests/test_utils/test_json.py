@@ -101,12 +101,12 @@ class TestOpenapiDumps:
         json_bytes = openapi_dumps(data)
         assert json_bytes == b'{"user":{"name":"Diana","address":{"street":"123 Main St"}}}'
 
-        address_with_city = Address(street="456 Oak Ave", city="Boston")
+        address_with_city = Address(street="456 Elm Ave", city="Boston")
         user_verified = User(name="Eve", address=address_with_city, verified=True)
         data = {"user": user_verified}
         json_bytes = openapi_dumps(data)
         assert (
-            json_bytes == b'{"user":{"name":"Eve","address":{"street":"456 Oak Ave","city":"Boston"},"verified":true}}'
+            json_bytes == b'{"user":{"name":"Eve","address":{"street":"456 Elm Ave","city":"Boston"},"verified":true}}'
         )
 
     def test_pydantic_model_with_optional_fields(self) -> None:
