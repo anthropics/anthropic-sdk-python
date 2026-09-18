@@ -41,6 +41,23 @@ message = client.messages.create(
 print(message.content)
 ```
 
+## File Uploads
+
+The SDK supports uploading various file types including DOCX files. Files can be uploaded using the beta files API:
+
+```python
+import os
+from pathlib import Path
+from anthropic import Anthropic
+
+client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
+# Upload a DOCX file
+file = client.beta.files.upload(
+    file=Path("document.docx")
+)
+print(f"Uploaded file ID: {file.id}")
+```
 
 ## Requirements
 
