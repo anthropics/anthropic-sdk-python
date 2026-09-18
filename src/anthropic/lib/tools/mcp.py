@@ -258,7 +258,11 @@ def mcp_resource_to_content(
 
     mime_types = [_mcp_field_v1_or_v2(c, "mime_type") for c in result.contents]
     supported = next(
-        (c for c, mime_type in zip(result.contents, mime_types) if _is_supported_resource_mime_type(mime_type)),
+        (
+            c
+            for c, mime_type in zip(result.contents, mime_types, strict=True)
+            if _is_supported_resource_mime_type(mime_type)
+        ),
         None,
     )
     if supported is None:

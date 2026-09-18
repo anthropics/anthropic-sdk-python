@@ -2400,6 +2400,10 @@ class TestAnthropicCredentials:
         flags = [f.strip() for f in msg_calls[0].request.headers["anthropic-beta"].split(",")]
         assert OAUTH_API_BETA_HEADER in flags
         assert f"{OAUTH_API_BETA_HEADER}-future-variant" in flags
+        assert (
+            msg_calls[0].request.headers["anthropic-beta"]
+            == f"{OAUTH_API_BETA_HEADER}-future-variant,{OAUTH_API_BETA_HEADER}"
+        )
 
     @pytest.mark.respx()
     def test_zero_config_workload_identity_from_env(

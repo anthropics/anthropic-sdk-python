@@ -320,6 +320,37 @@ async def test_async_response_parse_expect_model_union_non_json_content(async_cl
     assert obj == "foo"
 
 
+def test_response_parse_pep604_union(client: Anthropic) -> None:
+    response = APIResponse(
+        raw=httpx2.Response(200, content=json.dumps({"a": "hello!"}), headers={"Content-Type": "application/json"}),
+        client=client,
+        stream=False,
+        stream_cls=None,
+        cast_to=str,
+        options=FinalRequestOptions.construct(method="get", url="/foo"),
+    )
+
+    obj = response.parse(to=cast(Any, CustomModel | OtherModel))
+    assert isinstance(obj, OtherModel)
+    assert obj.a == "hello!"
+
+
+@pytest.mark.asyncio
+async def test_async_response_parse_pep604_union(async_client: AsyncAnthropic) -> None:
+    response = AsyncAPIResponse(
+        raw=httpx2.Response(200, content=json.dumps({"a": "hello!"}), headers={"Content-Type": "application/json"}),
+        client=async_client,
+        stream=False,
+        stream_cls=None,
+        cast_to=str,
+        options=FinalRequestOptions.construct(method="get", url="/foo"),
+    )
+
+    obj = await response.parse(to=cast(Any, CustomModel | OtherModel))
+    assert isinstance(obj, OtherModel)
+    assert obj.a == "hello!"
+
+
 def test_response_parse_json_content_type_case_insensitive(client: Anthropic) -> None:
     response = APIResponse(
         raw=httpx2.Response(

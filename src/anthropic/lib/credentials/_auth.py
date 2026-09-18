@@ -98,7 +98,7 @@ class AccessTokenAuth(httpx2.Auth):
         existing_flags = [flag.strip() for flag in existing_beta.split(",") if flag.strip()]
         if OAUTH_API_BETA_HEADER not in existing_flags:
             existing_flags.append(OAUTH_API_BETA_HEADER)
-            request.headers["anthropic-beta"] = ", ".join(existing_flags)
+            request.headers["anthropic-beta"] = ",".join(existing_flags)
 
     @override
     def sync_auth_flow(self, request: httpx2.Request) -> Generator[httpx2.Request, httpx2.Response, None]:

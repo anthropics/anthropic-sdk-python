@@ -22,7 +22,7 @@ from typing_extensions import Literal, TypedDict, override
 import httpx2
 
 from ..._types import Body, Query, Headers, NotGiven
-from ..._utils import consume_sync_iterator, consume_async_iterator
+from ..._utils import is_given, consume_sync_iterator, consume_async_iterator
 from ...types.beta import BetaMessage, BetaMessageParam
 from ..._base_client import merge_headers
 from ._tool_dispatch import tool_registry, tool_error_content, available_tool_names
@@ -40,6 +40,7 @@ from ..streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 from ...types.beta.beta_stop_reason import BetaStopReason
 from ...types.beta.parsed_beta_message import ResponseFormatT, ParsedBetaMessage, ParsedBetaContentBlock
 from ...types.beta.message_create_params import ParseMessageCreateParamsBase
+from ...types.beta.beta_compaction_config_param import BetaCompactionConfigParam
 from ...types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
 
 if TYPE_CHECKING:
@@ -86,6 +87,15 @@ def _determine_next_step_from_stop_reason(stop_reason: BetaStopReason | None) ->
     return "stop"
 
 
+def _reject_compaction_param(params: ParseMessageCreateParamsBase[Any]) -> None:
+    compaction = params.get("compaction")
+    if compaction is not None and is_given(compaction):
+        raise ValueError(
+            "`compaction` cannot be set on a tool runner: every request in the loop would compact again. "
+            "Call `runner.compact_before_next_turn()` when the conversation should be compacted instead."
+        )
+
+
 class RequestOptions(TypedDict, total=False):
     extra_headers: Headers | None
     extra_query: Query | None
@@ -102,6 +112,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         tools: Iterable[AnyFunctionToolT],
         max_iterations: int | None = None,
     ) -> None:
+        _reject_compaction_param(params)
         self._tools_by_name = tool_registry(tools)
         self._params: ParseMessageCreateParamsBase[ResponseFormatT] = {
             **params,
@@ -119,6 +130,8 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         self._cached_tool_call_response: BetaMessageParam | None = None
         self._max_iterations = max_iterations
         self._iteration_count = 0
+        self._pending_compaction: BetaCompactionConfigParam | None = None
+        self._messages_being_compacted: Iterable[BetaMessageParam] | None = None
 
     def set_messages_params(
         self,
@@ -133,6 +146,14 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         """
         if callable(params):
             params = params(self._params)
+        _reject_compaction_param(params)
+        if self._messages_being_compacted is not None and params["messages"] is not self._messages_being_compacted:
+            raise ValueError(
+                "Message params can't be changed while the conversation is being compacted, because the compaction "
+                "response replaces them. Make the change on the next iteration."
+            )
+        if self._pending_compaction is not None or self._messages_being_compacted is not None:
+            self._check_can_compact(params)
         self._params = params
 
     def append_messages(self, *messages: BetaMessageParam | ParsedBetaMessage[ResponseFormatT]) -> None:
@@ -144,9 +165,81 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         message_params: List[BetaMessageParam] = [
             message.to_param() if isinstance(message, BetaMessage) else message for message in messages
         ]
-        self._messages_modified = True
         self.set_messages_params(lambda params: {**params, "messages": [*params["messages"], *message_params]})
+        self._messages_modified = True
         self._cached_tool_call_response = None
+
+    def compact_before_next_turn(self, compaction: BetaCompactionConfigParam | None = None) -> None:
+        """Compact the conversation before the model's next turn.
+
+        This only schedules the compaction. Once the current turn has finished, including
+        any tool calls, the runner requests a summary and replaces the message history with
+        the compaction response the API returns. That response is yielded like any other
+        message, with `stop_reason == "compaction"`, and the runner then carries on.
+
+        Calling this again before the compaction runs replaces the pending one. Requires
+        the `compact-2026-09-04` beta.
+
+        Args:
+            compaction: The compaction config to send. Defaults to `{"type": "summarize"}`.
+        """
+        if self._messages_being_compacted is not None:
+            return
+        self._check_can_compact(self._params)
+        self._pending_compaction = {"type": "summarize"} if compaction is None else compaction
+
+    def _check_can_compact(self, params: ParseMessageCreateParamsBase[ResponseFormatT]) -> None:
+        # The compaction request is sent without `context_management`, so the API can't reject this
+        # combination there: it would run and bill the compaction, then reject the next request, where
+        # the compaction response and the compaction edit meet.
+        context_management = params.get("context_management")
+        edits = context_management.get("edits") if is_given(context_management) and context_management else None
+        if any(edit["type"].startswith("compact_") for edit in edits or ()):
+            raise ValueError(
+                "`compact_before_next_turn()` can't be used while `context_management` has a compaction edit, "
+                "because the API doesn't accept a compaction block together with one. Remove the edit first."
+            )
+
+    def _take_compaction_request_params(
+        self, compaction: BetaCompactionConfigParam
+    ) -> ParseMessageCreateParamsBase[ResponseFormatT]:
+        self._check_can_compact(self._params)
+        params: ParseMessageCreateParamsBase[ResponseFormatT] = {**self._params, "compaction": compaction}
+        # The API refuses `compaction` alongside `context_management`; later requests keep it.
+        params.pop("context_management", None)
+        self._pending_compaction = None
+        self._messages_being_compacted = self._params["messages"]
+        return params
+
+    def _prepare_compaction_after_final_turn(
+        self, message: ParsedBetaMessage[ResponseFormatT]
+    ) -> BetaCompactionConfigParam | None:
+        compaction = self._pending_compaction
+        if compaction is not None and not self._messages_modified:
+            if any(block.type == "tool_use" for block in message.content):
+                # A turn that was cut short can end with tool calls that are never run, and the API
+                # can't compact a conversation whose last turn has an unanswered tool call.
+                log.warning(
+                    "The pending compaction was skipped because the last turn (stop_reason=%r) ended with tool calls "
+                    "that were not run. Call `compact_before_next_turn()` again if you continue the conversation.",
+                    message.stop_reason,
+                )
+                self._pending_compaction = None
+                return None
+            self.append_messages(message)
+        return compaction
+
+    def _register_compaction_response(self, message: ParsedBetaMessage[ResponseFormatT]) -> bool:
+        # Summary or not, the request went out with any edit made before it.
+        self._messages_modified = False
+        if not any(block.type == "compaction" and block.content for block in message.content):
+            log.warning("Compaction produced no summary; keeping the conversation as it is.")
+            return False
+        for name in self._tools_by_name.keys() - self._available_tool_names():
+            del self._tools_by_name[name]
+        # The response has to be sent back as it came, first, replacing the messages it summarizes.
+        self._params = {**self._params, "messages": [message.to_param()]}
+        return True
 
     def _should_stop(self) -> bool:
         if self._max_iterations is not None and self._iteration_count >= self._max_iterations:
@@ -195,13 +288,38 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
     @abstractmethod
     @contextmanager
-    def _handle_request(self) -> Iterator[RunnerItemT]:
+    def _handle_request(self, params: ParseMessageCreateParamsBase[ResponseFormatT]) -> Iterator[RunnerItemT]:
         raise NotImplementedError()
         yield  # type: ignore[unreachable]
 
+    def _compact(self, compaction: BetaCompactionConfigParam) -> Iterator[RunnerItemT]:
+        last_message = self._last_message
+        try:
+            with self._handle_request(self._take_compaction_request_params(compaction)) as item:
+                yield item
+                message = self._get_last_message()
+                assert message is not None
+        finally:
+            self._messages_being_compacted = None
+        if not self._register_compaction_response(message):
+            # `until_done()` still returns the turn the run ended on.
+            self._last_message = last_message
+
+    def _compact_after_final_turn(self, message: ParsedBetaMessage[ResponseFormatT]) -> Iterator[RunnerItemT]:
+        compaction = self._prepare_compaction_after_final_turn(message)
+        if compaction is not None:
+            yield from self._compact(compaction)
+
     def __run__(self) -> Iterator[RunnerItemT]:
+        turn_paused = False
         while not self._should_stop():
-            with self._handle_request() as item:
+            # The API can't compact a conversation that ends mid-turn, so a paused turn is resumed first.
+            compaction = None if turn_paused else self._pending_compaction
+            if compaction is not None:
+                yield from self._compact(compaction)
+                continue
+
+            with self._handle_request(self._params) as item:
                 yield item
                 message = self._get_last_message()
                 assert message is not None
@@ -214,8 +332,10 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             self._iteration_count += 1
 
             next_step = _determine_next_step_from_stop_reason(message.stop_reason)
+            turn_paused = next_step == "resume"
             if next_step == "stop":
                 log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
+                yield from self._compact_after_final_turn(message)
                 return
 
             if next_step == "resume":
@@ -225,6 +345,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                 response = self.generate_tool_call_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
+                    yield from self._compact_after_final_turn(message)
                     return
                 if not self._messages_modified:
                     self.append_messages(message, response)
@@ -337,8 +458,10 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 class BetaToolRunner(BaseSyncToolRunner[ParsedBetaMessage[ResponseFormatT], ResponseFormatT]):
     @override
     @contextmanager
-    def _handle_request(self) -> Iterator[ParsedBetaMessage[ResponseFormatT]]:
-        message = self._client.beta.messages.parse(**self._params, **self._options)
+    def _handle_request(
+        self, params: ParseMessageCreateParamsBase[ResponseFormatT]
+    ) -> Iterator[ParsedBetaMessage[ResponseFormatT]]:
+        message = self._client.beta.messages.parse(**params, **self._options)
         self._last_message = message
         yield message
 
@@ -346,8 +469,10 @@ class BetaToolRunner(BaseSyncToolRunner[ParsedBetaMessage[ResponseFormatT], Resp
 class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream[ResponseFormatT], ResponseFormatT]):
     @override
     @contextmanager
-    def _handle_request(self) -> Iterator[BetaMessageStream[ResponseFormatT]]:
-        with self._client.beta.messages.stream(**self._params, **self._options) as stream:
+    def _handle_request(
+        self, params: ParseMessageCreateParamsBase[ResponseFormatT]
+    ) -> Iterator[BetaMessageStream[ResponseFormatT]]:
+        with self._client.beta.messages.stream(**params, **self._options) as stream:
             self._last_message = stream.get_final_message
             yield stream
 
@@ -387,13 +512,44 @@ class BaseAsyncToolRunner(
 
     @abstractmethod
     @asynccontextmanager
-    async def _handle_request(self) -> AsyncIterator[RunnerItemT]:
+    async def _handle_request(
+        self, params: ParseMessageCreateParamsBase[ResponseFormatT]
+    ) -> AsyncIterator[RunnerItemT]:
         raise NotImplementedError()
         yield  # type: ignore[unreachable]
 
+    async def _compact(self, compaction: BetaCompactionConfigParam) -> AsyncIterator[RunnerItemT]:
+        last_message = self._last_message
+        try:
+            async with self._handle_request(self._take_compaction_request_params(compaction)) as item:
+                yield item
+                message = await self._get_last_message()
+                assert message is not None
+        finally:
+            self._messages_being_compacted = None
+        if not self._register_compaction_response(message):
+            # `until_done()` still returns the turn the run ended on.
+            self._last_message = last_message
+
+    async def _compact_after_final_turn(
+        self, message: ParsedBetaMessage[ResponseFormatT]
+    ) -> AsyncIterator[RunnerItemT]:
+        compaction = self._prepare_compaction_after_final_turn(message)
+        if compaction is not None:
+            async for item in self._compact(compaction):
+                yield item
+
     async def __run__(self) -> AsyncIterator[RunnerItemT]:
+        turn_paused = False
         while not self._should_stop():
-            async with self._handle_request() as item:
+            # The API can't compact a conversation that ends mid-turn, so a paused turn is resumed first.
+            compaction = None if turn_paused else self._pending_compaction
+            if compaction is not None:
+                async for item in self._compact(compaction):
+                    yield item
+                continue
+
+            async with self._handle_request(self._params) as item:
                 yield item
                 message = await self._get_last_message()
                 assert message is not None
@@ -406,8 +562,11 @@ class BaseAsyncToolRunner(
             self._iteration_count += 1
 
             next_step = _determine_next_step_from_stop_reason(message.stop_reason)
+            turn_paused = next_step == "resume"
             if next_step == "stop":
                 log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
+                async for item in self._compact_after_final_turn(message):
+                    yield item
                 return
 
             if next_step == "resume":
@@ -417,6 +576,8 @@ class BaseAsyncToolRunner(
                 response = await self.generate_tool_call_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
+                    async for item in self._compact_after_final_turn(message):
+                        yield item
                     return
                 if not self._messages_modified:
                     self.append_messages(message, response)
@@ -530,8 +691,10 @@ class BaseAsyncToolRunner(
 class BetaAsyncToolRunner(BaseAsyncToolRunner[ParsedBetaMessage[ResponseFormatT], ResponseFormatT]):
     @override
     @asynccontextmanager
-    async def _handle_request(self) -> AsyncIterator[ParsedBetaMessage[ResponseFormatT]]:
-        message = await self._client.beta.messages.parse(**self._params, **self._options)
+    async def _handle_request(
+        self, params: ParseMessageCreateParamsBase[ResponseFormatT]
+    ) -> AsyncIterator[ParsedBetaMessage[ResponseFormatT]]:
+        message = await self._client.beta.messages.parse(**params, **self._options)
         self._last_message = message
         yield message
 
@@ -539,7 +702,9 @@ class BetaAsyncToolRunner(BaseAsyncToolRunner[ParsedBetaMessage[ResponseFormatT]
 class BetaAsyncStreamingToolRunner(BaseAsyncToolRunner[BetaAsyncMessageStream[ResponseFormatT], ResponseFormatT]):
     @override
     @asynccontextmanager
-    async def _handle_request(self) -> AsyncIterator[BetaAsyncMessageStream[ResponseFormatT]]:
-        async with self._client.beta.messages.stream(**self._params, **self._options) as stream:
+    async def _handle_request(
+        self, params: ParseMessageCreateParamsBase[ResponseFormatT]
+    ) -> AsyncIterator[BetaAsyncMessageStream[ResponseFormatT]]:
+        async with self._client.beta.messages.stream(**params, **self._options) as stream:
             self._last_message = stream.get_final_message
             yield stream

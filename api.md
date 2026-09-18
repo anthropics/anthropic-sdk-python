@@ -1783,7 +1783,13 @@ Types:
 ```python
 from anthropic.types.beta.organization import (
     BetaOrganizationRateLimit,
+    BetaOrganizationRateLimitBatchGroup,
+    BetaOrganizationRateLimitFilesGroup,
+    BetaOrganizationRateLimitModelGroup,
+    BetaOrganizationRateLimitSkillsGroup,
+    BetaOrganizationRateLimitTokenCountGroup,
     BetaOrganizationRateLimitValue,
+    BetaOrganizationRateLimitWebSearchGroup,
 )
 ```
 

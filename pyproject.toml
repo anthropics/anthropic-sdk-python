@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "1.6.0"
+version = "1.7.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "MIT"
@@ -10,7 +10,7 @@ authors = [
 
 dependencies = [
   "httpx2>=2.0.0, <3",
-  "pydantic>=1.9.0, <3",
+  "pydantic>=1.10.0, <3",
   "typing-extensions>=4.14, <5",
   "anyio>=4.1.0, <5",
   "sniffio>=1, <2",
@@ -91,7 +91,7 @@ dev = [
     "httpx2>=2.9",
 ]
 pydantic-v1 = [
-    "pydantic>=1.9.0,<2",
+    "pydantic>=1.10.0,<2",
 ]
 pydantic-v2 = [
     "pydantic~=2.0 ; python_full_version < '3.14'",
@@ -225,7 +225,7 @@ follow_imports = "skip"
 [tool.ruff]
 line-length = 120
 output-format = "grouped"
-target-version = "py38"
+target-version = "py310"
 extend-exclude = ["src/anthropic/_vendor"]
 
 [tool.ruff.format]
@@ -239,8 +239,6 @@ select = [
   "B",
   # remove unused imports
   "F401",
-  # check for missing future annotations
-  "FA102",
   # bare except statements
   "E722",
   # unused arguments
@@ -262,8 +260,6 @@ unfixable = [
   "T201",
   "T203",
 ]
-
-extend-safe-fixes = ["FA102"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "functools.lru_cache".msg = "This function does not retain type information for the wrapped function's arguments; The `lru_cache` function from `_utils` should be used instead"
