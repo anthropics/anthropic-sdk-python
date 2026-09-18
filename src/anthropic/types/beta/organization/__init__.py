@@ -69,9 +69,27 @@ from .beta_data_residency_update_config_param import (
 from .beta_external_key_unattached_attachment import (
     BetaExternalKeyUnattachedAttachment as BetaExternalKeyUnattachedAttachment,
 )
+from .beta_organization_rate_limit_batch_group import (
+    BetaOrganizationRateLimitBatchGroup as BetaOrganizationRateLimitBatchGroup,
+)
+from .beta_organization_rate_limit_files_group import (
+    BetaOrganizationRateLimitFilesGroup as BetaOrganizationRateLimitFilesGroup,
+)
+from .beta_organization_rate_limit_model_group import (
+    BetaOrganizationRateLimitModelGroup as BetaOrganizationRateLimitModelGroup,
+)
+from .beta_organization_rate_limit_skills_group import (
+    BetaOrganizationRateLimitSkillsGroup as BetaOrganizationRateLimitSkillsGroup,
+)
 from .beta_compliance_settings_state_enabled_param import (
     BetaComplianceSettingsStateEnabledParam as BetaComplianceSettingsStateEnabledParam,
 )
 from .beta_compliance_settings_state_disabled_param import (
     BetaComplianceSettingsStateDisabledParam as BetaComplianceSettingsStateDisabledParam,
+)
+from .beta_organization_rate_limit_web_search_group import (
+    BetaOrganizationRateLimitWebSearchGroup as BetaOrganizationRateLimitWebSearchGroup,
+)
+from .beta_organization_rate_limit_token_count_group import (
+    BetaOrganizationRateLimitTokenCountGroup as BetaOrganizationRateLimitTokenCountGroup,
 )
