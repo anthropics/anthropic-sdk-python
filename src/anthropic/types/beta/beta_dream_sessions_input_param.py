@@ -8,7 +8,7 @@ __all__ = ["BetaDreamSessionsInputParam"]
 
 
 class BetaDreamSessionsInputParam(TypedDict, total=False):
-    """Input session transcripts the dream reads."""
+    """The sessions that a dream reads, given as an entry in `inputs`."""
 
     session_ids: Required[SequenceNotStr[str]]
     """The IDs of the sessions whose transcripts the dream reads (`sesn_...`).

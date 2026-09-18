@@ -13,16 +13,10 @@ __all__ = ["DreamListParams"]
 
 class DreamListParams(TypedDict, total=False):
     created_at_gt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gt]", format="iso8601")]
-    """
-    Return dreams with `created_at` strictly after this timestamp (exclusive lower
-    bound, RFC 3339). Unset applies no lower bound.
-    """
+    """Return only dreams created after this time (exclusive), in RFC 3339."""
 
     created_at_lt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lt]", format="iso8601")]
-    """
-    Return dreams with `created_at` strictly before this timestamp (exclusive upper
-    bound, RFC 3339). Unset applies no upper bound.
-    """
+    """Return only dreams created before this time (exclusive), in RFC 3339."""
 
     include_archived: bool
     """Whether to include archived dreams. Defaults to `false`."""
@@ -39,10 +33,10 @@ class DreamListParams(TypedDict, total=False):
     """
 
     statuses: List[BetaDreamStatus]
-    """Filter by lifecycle status.
+    """Return only dreams that have one of these statuses.
 
-    Repeat the parameter to match any of multiple statuses. Empty applies no status
-    filter.
+    Repeat the parameter to give more than one status. Leave it out to return dreams
+    of every status.
     """
 
     betas: List[AnthropicBetaParam]

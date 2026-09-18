@@ -238,11 +238,9 @@ class Dreams(SyncAPIResource):
         for how to page through dreams.
 
         Args:
-          created_at_gt: Return dreams with `created_at` strictly after this timestamp (exclusive lower
-              bound, RFC 3339). Unset applies no lower bound.
+          created_at_gt: Return only dreams created after this time (exclusive), in RFC 3339.
 
-          created_at_lt: Return dreams with `created_at` strictly before this timestamp (exclusive upper
-              bound, RFC 3339). Unset applies no upper bound.
+          created_at_lt: Return only dreams created before this time (exclusive), in RFC 3339.
 
           include_archived: Whether to include archived dreams. Defaults to `false`.
 
@@ -253,8 +251,10 @@ class Dreams(SyncAPIResource):
 
               Leave it out to get the first page.
 
-          statuses: Filter by lifecycle status. Repeat the parameter to match any of multiple
-              statuses. Empty applies no status filter.
+          statuses: Return only dreams that have one of these statuses.
+
+              Repeat the parameter to give more than one status. Leave it out to return dreams
+              of every status.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -653,11 +653,9 @@ class AsyncDreams(AsyncAPIResource):
         for how to page through dreams.
 
         Args:
-          created_at_gt: Return dreams with `created_at` strictly after this timestamp (exclusive lower
-              bound, RFC 3339). Unset applies no lower bound.
+          created_at_gt: Return only dreams created after this time (exclusive), in RFC 3339.
 
-          created_at_lt: Return dreams with `created_at` strictly before this timestamp (exclusive upper
-              bound, RFC 3339). Unset applies no upper bound.
+          created_at_lt: Return only dreams created before this time (exclusive), in RFC 3339.
 
           include_archived: Whether to include archived dreams. Defaults to `false`.
 
@@ -668,8 +666,10 @@ class AsyncDreams(AsyncAPIResource):
 
               Leave it out to get the first page.
 
-          statuses: Filter by lifecycle status. Repeat the parameter to match any of multiple
-              statuses. Empty applies no status filter.
+          statuses: Return only dreams that have one of these statuses.
+
+              Repeat the parameter to give more than one status. Leave it out to return dreams
+              of every status.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

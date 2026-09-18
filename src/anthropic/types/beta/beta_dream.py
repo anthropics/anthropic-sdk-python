@@ -16,7 +16,11 @@ __all__ = ["BetaDream"]
 
 class BetaDream(BaseModel):
     """
-    An asynchronous memory-consolidation job that reads a memory store plus a set of session transcripts and writes consolidated memories into an output memory store — a new store by default, or an existing store chosen via output_behavior. The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to generally-available endpoints.
+    An asynchronous job that reads a memory store and past sessions, then writes a reorganized version of that memory store.
+
+    By default the dream writes its result to a new memory store and doesn't change the input memory store. With `output_behavior` set to `update_existing`, it writes its result into the input memory store instead. The Dreams API is in research preview, so this resource can still change.
+
+    See the [Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#how-it-works) for what a dream reads and produces.
     """
 
     id: str
@@ -41,9 +45,10 @@ class BetaDream(BaseModel):
     """The guidance given when the dream was created, or `null` if none was given."""
 
     model: BetaDreamModelConfig
-    """Model identifier and configuration applied to every pipeline stage.
+    """The model that runs a dream, from the request that created it.
 
-    Same wire shape as the Agents API ModelConfig.
+    The dream uses this model for all of its work. The response always gives the
+    model as an object, even if the request gave only a model ID.
     """
 
     output_behavior: BetaOutputBehavior
@@ -80,9 +85,27 @@ class BetaDream(BaseModel):
     """
 
     status: BetaDreamStatus
-    """Lifecycle status of a Dream."""
+    """Where a dream is in its lifecycle.
+
+    `completed`, `failed`, and `canceled` are final: once a dream has one of these
+    statuses, its status doesn't change again.
+
+    See the
+    [Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#lifecycle)
+    for what each status means.
+    """
 
     type: Literal["dream"]
 
     usage: BetaDreamUsage
-    """Cumulative token usage for the dream across every pipeline stage."""
+    """The tokens that a dream has used so far.
+
+    The counts are zero while the dream is `pending` and update while it is
+    `running`. They can keep changing after a cancel.
+
+    See the
+    [Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#billing)
+    for how dreams are billed. See the
+    [prompt caching guide](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#tracking-cache-performance)
+    for how the input token counts add up.
+    """

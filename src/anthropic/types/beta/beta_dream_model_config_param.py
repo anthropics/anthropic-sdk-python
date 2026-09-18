@@ -7,10 +7,17 @@ __all__ = ["BetaDreamModelConfigParam"]
 
 
 class BetaDreamModelConfigParam(TypedDict, total=False):
-    """Model identifier and configuration applied to every pipeline stage."""
+    """The object form of `model` in a request to create a dream."""
 
     id: Required[str]
-    """Model identifier, e.g. "claude-opus-5". 1-256 characters."""
+    """The ID of the model to run the dream with.
+
+    The ID can be 1 to 256 characters long.
+
+    The
+    [limits table in the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#limits)
+    lists the supported models.
+    """
 
     speed: Optional[Literal["standard", "fast"]]
     """Inference speed mode.
