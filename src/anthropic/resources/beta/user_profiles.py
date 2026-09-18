@@ -81,6 +81,12 @@ class UserProfiles(SyncAPIResource):
               `passthrough`: the platform resells raw inference, and the profile identifies
               the resold-to company.
 
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
+
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
               characters. Accepted under the `user-profiles-2026-03-24` and
               `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
@@ -166,6 +172,8 @@ class UserProfiles(SyncAPIResource):
         Get User Profile
 
         Args:
+          user_profile_id: The ID of the user profile to get (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
@@ -228,11 +236,19 @@ class UserProfiles(SyncAPIResource):
         Update User Profile
 
         Args:
+          user_profile_id: The ID of the user profile to update (`uprof_...`).
+
           access_type: How the platform uses the API on behalf of the entity this profile represents.
               `application`: the platform sells a product that uses the API behind the scenes,
               and the profile represents an individual end-user of that product.
               `passthrough`: the platform resells raw inference, and the profile identifies
               the resold-to company.
+
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
 
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
               255 characters. Accepted under the `user-profiles-2026-03-24` and
@@ -324,10 +340,28 @@ class UserProfiles(SyncAPIResource):
         List User Profiles
 
         Args:
-          order: ListOrder enum
+          limit: The maximum number of user profiles to return, from 1 to 100. Defaults to 20.
 
-          order_by: Sort field for listing user profiles: `created_at` (default) or `name`
-              (case-insensitive; profiles without a name sort last).
+          order: The sort direction, applied to the field that `order_by` selects. Defaults to
+              `desc`.
+
+              - `asc` - Oldest first when `order_by` is `created_at`, or names in ascending
+                order when `order_by` is `name`.
+              - `desc` - Newest first when `order_by` is `created_at`, or names in descending
+                order when `order_by` is `name`. This is the default.
+
+          order_by: The field to sort user profiles by, in the direction that `order` sets. Defaults
+              to `created_at`.
+
+              - `created_at` - Sort by when each user profile was created. This is the
+                default.
+              - `name` - Sort by `name`, ignoring the case of ASCII letters. Profiles without
+                a name come last in either direction.
+
+          page: The cursor for the page to return, taken from `next_page` in a previous
+              response.
+
+              Leave it out to get the first page.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -396,6 +430,8 @@ class UserProfiles(SyncAPIResource):
         Create Enrollment URL
 
         Args:
+          user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
@@ -486,6 +522,12 @@ class AsyncUserProfiles(AsyncAPIResource):
               `passthrough`: the platform resells raw inference, and the profile identifies
               the resold-to company.
 
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
+
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
               characters. Accepted under the `user-profiles-2026-03-24` and
               `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
@@ -571,6 +613,8 @@ class AsyncUserProfiles(AsyncAPIResource):
         Get User Profile
 
         Args:
+          user_profile_id: The ID of the user profile to get (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
@@ -633,11 +677,19 @@ class AsyncUserProfiles(AsyncAPIResource):
         Update User Profile
 
         Args:
+          user_profile_id: The ID of the user profile to update (`uprof_...`).
+
           access_type: How the platform uses the API on behalf of the entity this profile represents.
               `application`: the platform sells a product that uses the API behind the scenes,
               and the profile represents an individual end-user of that product.
               `passthrough`: the platform resells raw inference, and the profile identifies
               the resold-to company.
+
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
 
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
               255 characters. Accepted under the `user-profiles-2026-03-24` and
@@ -729,10 +781,28 @@ class AsyncUserProfiles(AsyncAPIResource):
         List User Profiles
 
         Args:
-          order: ListOrder enum
+          limit: The maximum number of user profiles to return, from 1 to 100. Defaults to 20.
 
-          order_by: Sort field for listing user profiles: `created_at` (default) or `name`
-              (case-insensitive; profiles without a name sort last).
+          order: The sort direction, applied to the field that `order_by` selects. Defaults to
+              `desc`.
+
+              - `asc` - Oldest first when `order_by` is `created_at`, or names in ascending
+                order when `order_by` is `name`.
+              - `desc` - Newest first when `order_by` is `created_at`, or names in descending
+                order when `order_by` is `name`. This is the default.
+
+          order_by: The field to sort user profiles by, in the direction that `order` sets. Defaults
+              to `created_at`.
+
+              - `created_at` - Sort by when each user profile was created. This is the
+                default.
+              - `name` - Sort by `name`, ignoring the case of ASCII letters. Profiles without
+                a name come last in either direction.
+
+          page: The cursor for the page to return, taken from `next_page` in a previous
+              response.
+
+              Leave it out to get the first page.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -801,6 +871,8 @@ class AsyncUserProfiles(AsyncAPIResource):
         Create Enrollment URL
 
         Args:
+          user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a

@@ -14,6 +14,7 @@ __all__ = ["MemoryVersionListParams"]
 
 class MemoryVersionListParams(TypedDict, total=False):
     api_key_id: str
+    """Return only versions written with the API key that has this ID."""
 
     created_at_gte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gte]", format="iso8601")]
     """Return versions created at or after this time (inclusive)."""
@@ -22,21 +23,29 @@ class MemoryVersionListParams(TypedDict, total=False):
     """Return versions created at or before this time (inclusive)."""
 
     limit: int
+    """The maximum number of versions to return per page. Defaults to 20."""
 
     memory_id: str
+    """Return only versions of the memory with this ID (`mem_...`).
 
-    operation: BetaManagedAgentsMemoryVersionOperation
-    """The kind of mutation a `memory_version` records.
-
-    Every non-no-op mutation to a memory appends exactly one version row with one of
-    these values.
+    The filter still works after the memory is deleted. The results then include the
+    version whose `operation` is `deleted`.
     """
 
+    operation: BetaManagedAgentsMemoryVersionOperation
+    """Return only versions that record this kind of change."""
+
     page: str
+    """The `next_page` value from a previous response, to get the next page.
+
+    Omit it to get the first page.
+    """
 
     service_account_id: str
+    """Return only versions written by the service account with this ID (`svac_...`)."""
 
     session_id: str
+    """Return only versions written by the session with this ID."""
 
     view: BetaManagedAgentsMemoryView
     """Selects which projection of a `memory` or `memory_version` the server returns.

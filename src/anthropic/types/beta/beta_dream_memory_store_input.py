@@ -12,5 +12,10 @@ class BetaDreamMemoryStoreInput(BaseModel):
     """
 
     memory_store_id: str
+    """The ID of the memory store for the dream to read (`memstore_...`).
+
+    The memory store must be in the same workspace as the dream and must not be
+    archived.
+    """
 
     type: Literal["memory_store"]

@@ -71,12 +71,13 @@ class Memories(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemory:
-        """Create a memory
+        """
+        Create a memory
 
         Args:
-          content: UTF-8 text content for the new memory.
+          memory_store_id: The ID of the memory store to create the memory in (`memstore_...`).
 
-        Maximum 100 kB (102,400 bytes). Required;
+          content: UTF-8 text content for the new memory. Maximum 100 kB (102,400 bytes). Required;
               pass `""` explicitly to create an empty memory.
 
           path: Hierarchical path for the new memory, e.g. `/projects/foo/notes.md`. Must start
@@ -160,6 +161,10 @@ class Memories(SyncAPIResource):
         Retrieve a memory
 
         Args:
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to retrieve (`mem_...`).
+
           view: Selects which projection of a `memory` or `memory_version` the server returns.
               `basic` returns the object with `content` set to `null`; `full` populates
               `content`. When omitted, the default is endpoint-specific: retrieve operations
@@ -237,6 +242,10 @@ class Memories(SyncAPIResource):
         Update a memory
 
         Args:
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to update (`mem_...`).
+
           view: Selects which projection of a `memory` or `memory_version` the server returns.
               `basic` returns the object with `content` set to `null`; `full` populates
               `content`. When omitted, the default is endpoint-specific: retrieve operations
@@ -339,6 +348,8 @@ class Memories(SyncAPIResource):
         List memories
 
         Args:
+          memory_store_id: The ID of the memory store to list memories from (`memstore_...`).
+
           depth: `0` (or omitted) returns all descendants below `path_prefix` (recursive). `1`
               returns immediate children only; deeper entries roll up as `memory_prefix`
               items. `depth=1` behaves like `ls`; omitting `depth` behaves like `find`.
@@ -432,6 +443,16 @@ class Memories(SyncAPIResource):
         Delete a memory
 
         Args:
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to delete (`mem_...`).
+
+          expected_content_sha256: Delete the memory only if its current `content_sha256` equals this value, given
+              as 64 lowercase hexadecimal characters. Omit it to delete unconditionally.
+
+              If the hashes differ, the request fails with HTTP status 409 and nothing is
+              deleted.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
@@ -520,12 +541,13 @@ class AsyncMemories(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemory:
-        """Create a memory
+        """
+        Create a memory
 
         Args:
-          content: UTF-8 text content for the new memory.
+          memory_store_id: The ID of the memory store to create the memory in (`memstore_...`).
 
-        Maximum 100 kB (102,400 bytes). Required;
+          content: UTF-8 text content for the new memory. Maximum 100 kB (102,400 bytes). Required;
               pass `""` explicitly to create an empty memory.
 
           path: Hierarchical path for the new memory, e.g. `/projects/foo/notes.md`. Must start
@@ -609,6 +631,10 @@ class AsyncMemories(AsyncAPIResource):
         Retrieve a memory
 
         Args:
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to retrieve (`mem_...`).
+
           view: Selects which projection of a `memory` or `memory_version` the server returns.
               `basic` returns the object with `content` set to `null`; `full` populates
               `content`. When omitted, the default is endpoint-specific: retrieve operations
@@ -686,6 +712,10 @@ class AsyncMemories(AsyncAPIResource):
         Update a memory
 
         Args:
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to update (`mem_...`).
+
           view: Selects which projection of a `memory` or `memory_version` the server returns.
               `basic` returns the object with `content` set to `null`; `full` populates
               `content`. When omitted, the default is endpoint-specific: retrieve operations
@@ -788,6 +818,8 @@ class AsyncMemories(AsyncAPIResource):
         List memories
 
         Args:
+          memory_store_id: The ID of the memory store to list memories from (`memstore_...`).
+
           depth: `0` (or omitted) returns all descendants below `path_prefix` (recursive). `1`
               returns immediate children only; deeper entries roll up as `memory_prefix`
               items. `depth=1` behaves like `ls`; omitting `depth` behaves like `find`.
@@ -881,6 +913,16 @@ class AsyncMemories(AsyncAPIResource):
         Delete a memory
 
         Args:
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to delete (`mem_...`).
+
+          expected_content_sha256: Delete the memory only if its current `content_sha256` equals this value, given
+              as 64 lowercase hexadecimal characters. Omit it to delete unconditionally.
+
+              If the hashes differ, the request fails with HTTP status 409 and nothing is
+              deleted.
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a

@@ -73,6 +73,10 @@ class MemoryVersions(SyncAPIResource):
         Retrieve a memory version
 
         Args:
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
+
+          memory_version_id: The ID of the memory version to retrieve (`memver_...`).
+
           view: Selects which projection of a `memory` or `memory_version` the server returns.
               `basic` returns the object with `content` set to `null`; `full` populates
               `content`. When omitted, the default is endpoint-specific: retrieve operations
@@ -155,12 +159,29 @@ class MemoryVersions(SyncAPIResource):
         List memory versions
 
         Args:
+          memory_store_id: The ID of the memory store whose version history to list (`memstore_...`).
+
+          api_key_id: Return only versions written with the API key that has this ID.
+
           created_at_gte: Return versions created at or after this time (inclusive).
 
           created_at_lte: Return versions created at or before this time (inclusive).
 
-          operation: The kind of mutation a `memory_version` records. Every non-no-op mutation to a
-              memory appends exactly one version row with one of these values.
+          limit: The maximum number of versions to return per page. Defaults to 20.
+
+          memory_id: Return only versions of the memory with this ID (`mem_...`).
+
+              The filter still works after the memory is deleted. The results then include the
+              version whose `operation` is `deleted`.
+
+          operation: Return only versions that record this kind of change.
+
+          page: The `next_page` value from a previous response, to get the next page. Omit it to
+              get the first page.
+
+          service_account_id: Return only versions written by the service account with this ID (`svac_...`).
+
+          session_id: Return only versions written by the session with this ID.
 
           view: Selects which projection of a `memory` or `memory_version` the server returns.
               `basic` returns the object with `content` set to `null`; `full` populates
@@ -246,6 +267,10 @@ class MemoryVersions(SyncAPIResource):
         Redact a memory version
 
         Args:
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
+
+          memory_version_id: The ID of the memory version to redact (`memver_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
@@ -331,6 +356,10 @@ class AsyncMemoryVersions(AsyncAPIResource):
         Retrieve a memory version
 
         Args:
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
+
+          memory_version_id: The ID of the memory version to retrieve (`memver_...`).
+
           view: Selects which projection of a `memory` or `memory_version` the server returns.
               `basic` returns the object with `content` set to `null`; `full` populates
               `content`. When omitted, the default is endpoint-specific: retrieve operations
@@ -415,12 +444,29 @@ class AsyncMemoryVersions(AsyncAPIResource):
         List memory versions
 
         Args:
+          memory_store_id: The ID of the memory store whose version history to list (`memstore_...`).
+
+          api_key_id: Return only versions written with the API key that has this ID.
+
           created_at_gte: Return versions created at or after this time (inclusive).
 
           created_at_lte: Return versions created at or before this time (inclusive).
 
-          operation: The kind of mutation a `memory_version` records. Every non-no-op mutation to a
-              memory appends exactly one version row with one of these values.
+          limit: The maximum number of versions to return per page. Defaults to 20.
+
+          memory_id: Return only versions of the memory with this ID (`mem_...`).
+
+              The filter still works after the memory is deleted. The results then include the
+              version whose `operation` is `deleted`.
+
+          operation: Return only versions that record this kind of change.
+
+          page: The `next_page` value from a previous response, to get the next page. Omit it to
+              get the first page.
+
+          service_account_id: Return only versions written by the service account with this ID (`svac_...`).
+
+          session_id: Return only versions written by the session with this ID.
 
           view: Selects which projection of a `memory` or `memory_version` the server returns.
               `basic` returns the object with `content` set to `null`; `full` populates
@@ -506,6 +552,10 @@ class AsyncMemoryVersions(AsyncAPIResource):
         Redact a memory version
 
         Args:
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
+
+          memory_version_id: The ID of the memory version to redact (`memver_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a

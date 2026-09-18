@@ -20,6 +20,13 @@ class BetaUserProfileExternalUserDetails(BaseModel):
     restore it; or `blocked`, when the platform has barred it. It records the
     platform's decision only; the statuses in `trust_grants` are Anthropic's and do
     not follow it.
+
+    - `active` - The platform has neither restricted nor barred the account of the
+      entity that the user profile represents.
+    - `suspended` - The platform has restricted the account of the entity that the
+      user profile represents and may restore it.
+    - `blocked` - The platform has barred the account of the entity that the user
+      profile represents.
     """
 
     country: Optional[str] = None

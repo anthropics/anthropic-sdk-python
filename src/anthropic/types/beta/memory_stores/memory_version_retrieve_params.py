@@ -11,6 +11,7 @@ __all__ = ["MemoryVersionRetrieveParams"]
 
 class MemoryVersionRetrieveParams(TypedDict, total=False):
     memory_store_id: Required[str]
+    """The ID of the memory store that holds the version (`memstore_...`)."""
 
     view: BetaManagedAgentsMemoryView
     """Selects which projection of a `memory` or `memory_version` the server returns.

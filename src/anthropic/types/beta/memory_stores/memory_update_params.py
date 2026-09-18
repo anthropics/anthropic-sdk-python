@@ -12,6 +12,7 @@ __all__ = ["MemoryUpdateParams"]
 
 class MemoryUpdateParams(TypedDict, total=False):
     memory_store_id: Required[str]
+    """The ID of the memory store that holds the memory (`memstore_...`)."""
 
     view: BetaManagedAgentsMemoryView
     """Selects which projection of a `memory` or `memory_version` the server returns.

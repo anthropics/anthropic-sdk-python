@@ -12,5 +12,10 @@ class BetaDreamMemoryStoreInputParam(TypedDict, total=False):
     """
 
     memory_store_id: Required[str]
+    """The ID of the memory store for the dream to read (`memstore_...`).
+
+    The memory store must be in the same workspace as the dream and must not be
+    archived.
+    """
 
     type: Required[Literal["memory_store"]]

@@ -25,10 +25,18 @@ class DreamListParams(TypedDict, total=False):
     """
 
     include_archived: bool
+    """Whether to include archived dreams. Defaults to `false`."""
 
     limit: int
+    """The maximum number of dreams to return, from 1 to 100. Defaults to 20."""
 
     page: str
+    """
+    The cursor for the page to return, taken from `next_page` in a previous
+    response.
+
+    Leave it out to get the first page.
+    """
 
     statuses: List[BetaDreamStatus]
     """Filter by lifecycle status.

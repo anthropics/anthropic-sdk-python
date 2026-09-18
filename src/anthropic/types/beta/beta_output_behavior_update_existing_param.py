@@ -11,5 +11,10 @@ class BetaOutputBehaviorUpdateExistingParam(TypedDict, total=False):
     """
 
     memory_store_id: Required[str]
+    """The ID of the memory store for the dream to write its result to
+    (`memstore_...`).
+
+    It must be the memory store in the `memory_store` entry of `inputs`.
+    """
 
     type: Required[Literal["update_existing"]]

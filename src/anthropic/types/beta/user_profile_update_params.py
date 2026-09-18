@@ -19,6 +19,12 @@ class UserProfileUpdateParams(TypedDict, total=False):
     and the profile represents an individual end-user of that product.
     `passthrough`: the platform resells raw inference, and the profile identifies
     the resold-to company.
+
+    - `application` - The user profile represents an individual end-user of a
+      product that the platform builds on the API. New profiles get this value by
+      default.
+    - `passthrough` - The user profile represents a company that the platform
+      resells Claude access to.
     """
 
     external_id: Optional[str]
