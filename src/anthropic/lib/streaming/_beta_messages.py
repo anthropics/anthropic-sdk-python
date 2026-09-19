@@ -546,9 +546,14 @@ def accumulate_event(
         if content_block.type == "text" and is_given(output_format):
             content_block.parsed_output = parse_text(content_block.text, output_format)
     elif event.type == "message_delta":
-        current_snapshot.stop_reason = event.delta.stop_reason
-        current_snapshot.stop_sequence = event.delta.stop_sequence
-        current_snapshot.stop_details = event.delta.stop_details
+        # optional delta fields are omitted when not applicable, so a later
+        # message_delta must not overwrite a value an earlier delta already set
+        if event.delta.stop_reason is not None:
+            current_snapshot.stop_reason = event.delta.stop_reason
+        if event.delta.stop_sequence is not None:
+            current_snapshot.stop_sequence = event.delta.stop_sequence
+        if event.delta.stop_details is not None:
+            current_snapshot.stop_details = event.delta.stop_details
         if event.delta.container is not None:
             current_snapshot.container = event.delta.container
         current_snapshot.usage.output_tokens = event.usage.output_tokens
