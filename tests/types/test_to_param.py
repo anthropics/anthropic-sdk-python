@@ -4,10 +4,10 @@ from typing import Dict, Union
 
 import pytest
 
-from anthropic.types import Message, MessageParam
-from anthropic._utils import transform
+from anthropic.types import Message
 from anthropic._models import construct_type_unchecked
-from anthropic.types.beta import BetaMessage, BetaMessageParam
+from anthropic.types.beta import BetaMessage
+from anthropic._utils._prepare import prepare_request_data
 
 TEXT_BLOCK: Dict[str, object] = {
     "type": "text",
@@ -72,14 +72,15 @@ def test_message_content_list_is_copied(message_cls: type[Union[Message, BetaMes
     assert content[0] is message.content[0]
 
 
-@pytest.mark.parametrize(
-    "message_cls,param_type",
-    [(Message, MessageParam), (BetaMessage, BetaMessageParam)],
-    ids=["message", "beta_message"],
-)
-def test_message_serializes_as_request_param(
-    message_cls: type[Union[Message, BetaMessage]], param_type: object
-) -> None:
-    param = make_message(message_cls).to_param()
+@parametrize_message_cls
+def test_message_serializes_as_request_param(message_cls: type[Union[Message, BetaMessage]]) -> None:
+    message = make_message(message_cls)
+    param = message.to_param()
 
-    assert transform(param, param_type) == {"role": "assistant", "content": [TEXT_BLOCK, TOOL_USE_BLOCK]}
+    prepared = prepare_request_data(param, location="body")
+
+    # the response models in `content` are dumped to the plain data the API accepts back
+    assert prepared == {"role": "assistant", "content": [TEXT_BLOCK, TOOL_USE_BLOCK]}
+    assert all(type(block) is dict for block in prepared["content"])
+    # and the message handed in is left as it was
+    assert param["content"] == message.content

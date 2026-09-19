@@ -1345,22 +1345,6 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
 
         return options
 
-    def _copy_and_prepare(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        """A copy of `options` with `extra_body` merged into the body, and the body and query prepared.
-
-        The data is walked once per request, before the retry loop, as it may hold one-shot iterators
-        and file reads, which a retry cannot repeat. A GET sends no body, so its data is not read at all.
-        """
-        options = model_copy(options)
-        if options.method.lower() != "get":
-            _merge_extra_json(options)
-            options.json_data = prepare_request_data(options.json_data, location="body")
-
-        if options.params:
-            options.params = prepare_request_data(options.params, location="query", keep_top_level_omit=True)
-
-        return options
-
     def _sleep_for_retry(
         self, *, retries_taken: int, max_retries: int, options: FinalRequestOptions, response: httpx2.Response | None
     ) -> None:
@@ -2072,24 +2056,6 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         log.debug("workspace_id: %s", response.headers.get("anthropic-workspace-id"))
 
         return response, options
-
-    async def _copy_and_prepare(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        """A copy of `options` with `extra_body` merged into the body, and the body and query prepared.
-
-        The data is walked once per request, before the retry loop, as it may hold one-shot iterators
-        and file reads, which a retry cannot repeat. A GET sends no body, so its data is not read at all.
-        """
-        options = model_copy(options)
-        if options.method.lower() != "get":
-            _merge_extra_json(options)
-            options.json_data = await async_prepare_request_data(options.json_data, location="body")
-
-        if options.params:
-            options.params = await async_prepare_request_data(
-                options.params, location="query", keep_top_level_omit=True
-            )
-
-        return options
 
     async def _copy_and_prepare(self, options: FinalRequestOptions) -> FinalRequestOptions:
         """A copy of `options` with `extra_body` merged into the body, and the body and query prepared.
