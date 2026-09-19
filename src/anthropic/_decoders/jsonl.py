@@ -42,22 +42,27 @@ class JSONLDecoder(Generic[_T]):
 
     def __decode__(self) -> Iterator[_T]:
         buf = b""
-        for chunk in self._raw_iterator:
-            for line in chunk.splitlines(keepends=True):
-                buf += line
-                if buf.endswith((b"\r", b"\n", b"\r\n")):
-                    yield construct_type_unchecked(
-                        value=json.loads(buf),
-                        type_=self._line_type,
-                    )
-                    buf = b""
+        try:
+            for chunk in self._raw_iterator:
+                for line in chunk.splitlines(keepends=True):
+                    buf += line
+                    if buf.endswith((b"\r", b"\n", b"\r\n")):
+                        yield construct_type_unchecked(
+                            value=json.loads(buf),
+                            type_=self._line_type,
+                        )
+                        buf = b""
 
-        # flush
-        if buf:
-            yield construct_type_unchecked(
-                value=json.loads(buf),
-                type_=self._line_type,
-            )
+            # flush
+            if buf:
+                yield construct_type_unchecked(
+                    value=json.loads(buf),
+                    type_=self._line_type,
+                )
+        finally:
+            # Ensure the response is closed even if the consumer doesn't read all
+            # data, or a JSON decoding or transport-read error is raised above.
+            self.close()
 
     def __next__(self) -> _T:
         return self._iterator.__next__()
@@ -98,22 +103,27 @@ class AsyncJSONLDecoder(Generic[_T]):
 
     async def __decode__(self) -> AsyncIterator[_T]:
         buf = b""
-        async for chunk in self._raw_iterator:
-            for line in chunk.splitlines(keepends=True):
-                buf += line
-                if buf.endswith((b"\r", b"\n", b"\r\n")):
-                    yield construct_type_unchecked(
-                        value=json.loads(buf),
-                        type_=self._line_type,
-                    )
-                    buf = b""
+        try:
+            async for chunk in self._raw_iterator:
+                for line in chunk.splitlines(keepends=True):
+                    buf += line
+                    if buf.endswith((b"\r", b"\n", b"\r\n")):
+                        yield construct_type_unchecked(
+                            value=json.loads(buf),
+                            type_=self._line_type,
+                        )
+                        buf = b""
 
-        # flush
-        if buf:
-            yield construct_type_unchecked(
-                value=json.loads(buf),
-                type_=self._line_type,
-            )
+            # flush
+            if buf:
+                yield construct_type_unchecked(
+                    value=json.loads(buf),
+                    type_=self._line_type,
+                )
+        finally:
+            # Ensure the response is closed even if the consumer doesn't read all
+            # data, or a JSON decoding or transport-read error is raised above.
+            await self.close()
 
     async def __anext__(self) -> _T:
         return await self._iterator.__anext__()
