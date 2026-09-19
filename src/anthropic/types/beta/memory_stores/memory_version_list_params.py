@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import List, Union
 from datetime import datetime
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_memory_view import BetaManagedAgentsMemoryView
 from .beta_managed_agents_memory_version_operation import BetaManagedAgentsMemoryVersionOperation
@@ -16,10 +15,10 @@ class MemoryVersionListParams(TypedDict, total=False):
     api_key_id: str
     """Return only versions written with the API key that has this ID."""
 
-    created_at_gte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gte]", format="iso8601")]
+    created_at_gte: Union[str, datetime]
     """Return versions created at or after this time (inclusive)."""
 
-    created_at_lte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lte]", format="iso8601")]
+    created_at_lte: Union[str, datetime]
     """Return versions created at or before this time (inclusive)."""
 
     limit: int

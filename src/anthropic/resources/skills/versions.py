@@ -16,7 +16,7 @@ from ..._types import (
     omit,
     not_given,
 )
-from ..._utils import extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import extract_files, path_template, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -27,7 +27,6 @@ from ..._response import (
 )
 from ...pagination import SyncPageCursor, AsyncPageCursor
 from ..._base_client import AsyncPaginator, make_request_options
-from ...types.skills import version_list_params, version_create_params
 from ...types.skills.skill_version import SkillVersion
 from ...types.skills.deleted_skill_version import DeletedSkillVersion
 
@@ -106,7 +105,7 @@ class Versions(SyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
-            body=maybe_transform(body, version_create_params.VersionCreateParams),
+            body=body,
             files=extracted_files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -223,13 +222,10 @@ class Versions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    version_list_params.VersionListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=SkillVersion,
         )
@@ -361,7 +357,7 @@ class AsyncVersions(AsyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
-            body=await async_maybe_transform(body, version_create_params.VersionCreateParams),
+            body=body,
             files=extracted_files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -478,13 +474,10 @@ class AsyncVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    version_list_params.VersionListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=SkillVersion,
         )

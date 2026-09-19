@@ -15,7 +15,7 @@ from .work import (
     AsyncWorkWithStreamingResponse,
 )
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -25,7 +25,7 @@ from ...._response import (
     async_to_streamed_response_wrapper,
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
-from ....types.beta import environment_list_params, environment_create_params, environment_update_params
+from ....types.beta import environment_create_params, environment_update_params
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_environment import BetaEnvironment
@@ -123,16 +123,13 @@ class Environments(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             "/v1/environments?beta=true",
-            body=maybe_transform(
-                {
-                    "name": name,
-                    "config": config,
-                    "description": description,
-                    "metadata": metadata,
-                    "scope": scope,
-                },
-                environment_create_params.EnvironmentCreateParams,
-            ),
+            body={
+                "name": name,
+                "config": config,
+                "description": description,
+                "metadata": metadata,
+                "scope": scope,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -264,16 +261,13 @@ class Environments(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
-            body=maybe_transform(
-                {
-                    "config": config,
-                    "description": description,
-                    "metadata": metadata,
-                    "name": name,
-                    "scope": scope,
-                },
-                environment_update_params.EnvironmentUpdateParams,
-            ),
+            body={
+                "config": config,
+                "description": description,
+                "metadata": metadata,
+                "name": name,
+                "scope": scope,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -343,14 +337,11 @@ class Environments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    environment_list_params.EnvironmentListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaEnvironment,
         )
@@ -560,16 +551,13 @@ class AsyncEnvironments(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             "/v1/environments?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "name": name,
-                    "config": config,
-                    "description": description,
-                    "metadata": metadata,
-                    "scope": scope,
-                },
-                environment_create_params.EnvironmentCreateParams,
-            ),
+            body={
+                "name": name,
+                "config": config,
+                "description": description,
+                "metadata": metadata,
+                "scope": scope,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -701,16 +689,13 @@ class AsyncEnvironments(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
-            body=await async_maybe_transform(
-                {
-                    "config": config,
-                    "description": description,
-                    "metadata": metadata,
-                    "name": name,
-                    "scope": scope,
-                },
-                environment_update_params.EnvironmentUpdateParams,
-            ),
+            body={
+                "config": config,
+                "description": description,
+                "metadata": metadata,
+                "name": name,
+                "scope": scope,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -780,14 +765,11 @@ class AsyncEnvironments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    environment_list_params.EnvironmentListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaEnvironment,
         )

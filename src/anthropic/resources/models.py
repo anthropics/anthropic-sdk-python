@@ -4,9 +4,8 @@ from typing import List
 
 import httpx2
 
-from ..types import model_list_params
 from .._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from .._utils import is_given, path_template, maybe_transform, strip_not_given
+from .._utils import is_given, path_template, strip_not_given
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
@@ -167,14 +166,11 @@ class Models(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "limit": limit,
-                    },
-                    model_list_params.ModelListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "limit": limit,
+                },
             ),
             model=ModelInfo,
         )
@@ -324,14 +320,11 @@ class AsyncModels(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "limit": limit,
-                    },
-                    model_list_params.ModelListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "limit": limit,
+                },
             ),
             model=ModelInfo,
         )

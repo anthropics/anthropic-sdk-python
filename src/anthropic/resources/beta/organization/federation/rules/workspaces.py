@@ -5,7 +5,7 @@ from typing import List, Optional
 import httpx2
 
 from ......_types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ......_utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ......_utils import is_given, path_template, strip_not_given
 from ......_compat import cached_property
 from ......_resource import SyncAPIResource, AsyncAPIResource
 from ......_response import (
@@ -17,7 +17,6 @@ from ......_response import (
 from ......pagination import SyncPageCursor, AsyncPageCursor
 from ......_base_client import AsyncPaginator, make_request_options
 from ......types.anthropic_beta_param import AnthropicBetaParam
-from ......types.beta.organization.federation.rules import workspace_add_params, workspace_list_params
 from ......types.beta.organization.federation.beta_federation_rule_workspace import BetaFederationRuleWorkspace
 from ......types.beta.organization.federation.rules.workspace_remove_response import WorkspaceRemoveResponse
 
@@ -106,13 +105,10 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    workspace_list_params.WorkspaceListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaFederationRuleWorkspace,
         )
@@ -172,7 +168,7 @@ class Workspaces(SyncAPIResource):
                 "/v1/organizations/federation_rules/{federation_rule_id}/workspaces?beta=true",
                 federation_rule_id=federation_rule_id,
             ),
-            body=maybe_transform({"workspace_id": workspace_id}, workspace_add_params.WorkspaceAddParams),
+            body={"workspace_id": workspace_id},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -322,13 +318,10 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    workspace_list_params.WorkspaceListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaFederationRuleWorkspace,
         )
@@ -388,7 +381,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 "/v1/organizations/federation_rules/{federation_rule_id}/workspaces?beta=true",
                 federation_rule_id=federation_rule_id,
             ),
-            body=await async_maybe_transform({"workspace_id": workspace_id}, workspace_add_params.WorkspaceAddParams),
+            body={"workspace_id": workspace_id},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),

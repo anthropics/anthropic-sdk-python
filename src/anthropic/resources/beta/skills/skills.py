@@ -24,7 +24,7 @@ from ...._types import (
     omit,
     not_given,
 )
-from ...._utils import is_given, extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, extract_files, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -34,7 +34,6 @@ from ...._response import (
     async_to_streamed_response_wrapper,
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
-from ....types.beta import skill_list_params, skill_create_params
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.beta.beta_skill import BetaSkill
 from ....types.anthropic_beta_param import AnthropicBetaParam
@@ -134,7 +133,7 @@ class Skills(SyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             "/v1/skills?beta=true",
-            body=maybe_transform(body, skill_create_params.SkillCreateParams),
+            body=body,
             files=extracted_files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -268,14 +267,11 @@ class Skills(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                        "source": source,
-                    },
-                    skill_list_params.SkillListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "source": source,
+                },
             ),
             model=BetaSkill,
         )
@@ -429,7 +425,7 @@ class AsyncSkills(AsyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             "/v1/skills?beta=true",
-            body=await async_maybe_transform(body, skill_create_params.SkillCreateParams),
+            body=body,
             files=extracted_files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -563,14 +559,11 @@ class AsyncSkills(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                        "source": source,
-                    },
-                    skill_list_params.SkillListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "source": source,
+                },
             ),
             model=BetaSkill,
         )

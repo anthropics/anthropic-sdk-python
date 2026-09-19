@@ -7,7 +7,7 @@ from itertools import chain
 import httpx2
 
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ..._utils import is_given, path_template, maybe_transform, strip_not_given
+from ..._utils import is_given, path_template, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -17,7 +17,7 @@ from ..._response import (
     async_to_streamed_response_wrapper,
 )
 from ...pagination import SyncPageCursor, AsyncPageCursor
-from ...types.beta import BetaManagedAgentsTriggerType, deployment_run_list_params
+from ...types.beta import BetaManagedAgentsTriggerType
 from ..._base_client import AsyncPaginator, make_request_options
 from ...types.anthropic_beta_param import AnthropicBetaParam
 from ...types.beta.beta_managed_agents_trigger_type import BetaManagedAgentsTriggerType
@@ -188,20 +188,17 @@ class DeploymentRuns(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gt": created_at_gt,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lt": created_at_lt,
-                        "created_at_lte": created_at_lte,
-                        "deployment_id": deployment_id,
-                        "has_error": has_error,
-                        "limit": limit,
-                        "page": page,
-                        "trigger_type": trigger_type,
-                    },
-                    deployment_run_list_params.DeploymentRunListParams,
-                ),
+                query={
+                    "created_at[gt]": created_at_gt,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lt]": created_at_lt,
+                    "created_at[lte]": created_at_lte,
+                    "deployment_id": deployment_id,
+                    "has_error": has_error,
+                    "limit": limit,
+                    "page": page,
+                    "trigger_type": trigger_type,
+                },
             ),
             model=BetaManagedAgentsDeploymentRun,
         )
@@ -369,20 +366,17 @@ class AsyncDeploymentRuns(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gt": created_at_gt,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lt": created_at_lt,
-                        "created_at_lte": created_at_lte,
-                        "deployment_id": deployment_id,
-                        "has_error": has_error,
-                        "limit": limit,
-                        "page": page,
-                        "trigger_type": trigger_type,
-                    },
-                    deployment_run_list_params.DeploymentRunListParams,
-                ),
+                query={
+                    "created_at[gt]": created_at_gt,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lt]": created_at_lt,
+                    "created_at[lte]": created_at_lte,
+                    "deployment_id": deployment_id,
+                    "has_error": has_error,
+                    "limit": limit,
+                    "page": page,
+                    "trigger_type": trigger_type,
+                },
             ),
             model=BetaManagedAgentsDeploymentRun,
         )

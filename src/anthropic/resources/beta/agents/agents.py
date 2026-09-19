@@ -15,7 +15,7 @@ from .versions import (
     AsyncVersionsWithStreamingResponse,
 )
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -27,10 +27,8 @@ from ...._response import (
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ....types.beta import (
     BetaManagedAgentsMultiagentParams,
-    agent_list_params,
     agent_create_params,
     agent_update_params,
-    agent_retrieve_params,
 )
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.anthropic_beta_param import AnthropicBetaParam
@@ -150,20 +148,17 @@ class Agents(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             "/v1/agents?beta=true",
-            body=maybe_transform(
-                {
-                    "model": model,
-                    "name": name,
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "multiagent": multiagent,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                },
-                agent_create_params.AgentCreateParams,
-            ),
+            body={
+                "model": model,
+                "name": name,
+                "description": description,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "multiagent": multiagent,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -231,7 +226,7 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"version": version}, agent_retrieve_params.AgentRetrieveParams),
+                query={"version": version},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -333,21 +328,18 @@ class Agents(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
-            body=maybe_transform(
-                {
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "model": model,
-                    "multiagent": multiagent,
-                    "name": name,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                    "version": version,
-                },
-                agent_update_params.AgentUpdateParams,
-            ),
+            body={
+                "description": description,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "model": model,
+                "multiagent": multiagent,
+                "name": name,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+                "version": version,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -422,16 +414,13 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    agent_list_params.AgentListParams,
-                ),
+                query={
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsAgent,
         )
@@ -603,20 +592,17 @@ class AsyncAgents(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             "/v1/agents?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "model": model,
-                    "name": name,
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "multiagent": multiagent,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                },
-                agent_create_params.AgentCreateParams,
-            ),
+            body={
+                "model": model,
+                "name": name,
+                "description": description,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "multiagent": multiagent,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -684,7 +670,7 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform({"version": version}, agent_retrieve_params.AgentRetrieveParams),
+                query={"version": version},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -786,21 +772,18 @@ class AsyncAgents(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
-            body=await async_maybe_transform(
-                {
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "model": model,
-                    "multiagent": multiagent,
-                    "name": name,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                    "version": version,
-                },
-                agent_update_params.AgentUpdateParams,
-            ),
+            body={
+                "description": description,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "model": model,
+                "multiagent": multiagent,
+                "name": name,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+                "version": version,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -875,16 +858,13 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    agent_list_params.AgentListParams,
-                ),
+                query={
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsAgent,
         )

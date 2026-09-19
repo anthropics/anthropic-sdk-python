@@ -14,7 +14,7 @@ from .events import (
     AsyncEventsWithStreamingResponse,
 )
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import is_given, path_template, maybe_transform, strip_not_given
+from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from ....._resource import SyncAPIResource, AsyncAPIResource
 from ....._response import (
@@ -25,7 +25,6 @@ from ....._response import (
 )
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
-from .....types.beta.sessions import thread_list_params
 from .....types.anthropic_beta_param import AnthropicBetaParam
 from .....types.beta.sessions.beta_managed_agents_session_thread import BetaManagedAgentsSessionThread
 
@@ -180,13 +179,10 @@ class Threads(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    thread_list_params.ThreadListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsSessionThread,
         )
@@ -403,13 +399,10 @@ class AsyncThreads(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    thread_list_params.ThreadListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsSessionThread,
         )

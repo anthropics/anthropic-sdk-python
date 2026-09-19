@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from ....lib.tools._beta_session_runner import SessionToolRunner, BetaAnyRunnableTool
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -26,7 +26,6 @@ from ...._response import (
 from ...._streaming import Stream, AsyncStream
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.sessions import event_list_params, event_send_params, event_stream_params
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_managed_agents_delta_type import BetaManagedAgentsDeltaType
 from ....types.beta.sessions.beta_managed_agents_event_params import BetaManagedAgentsEventParams
@@ -141,19 +140,16 @@ class Events(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gt": created_at_gt,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lt": created_at_lt,
-                        "created_at_lte": created_at_lte,
-                        "limit": limit,
-                        "order": order,
-                        "page": page,
-                        "types": types,
-                    },
-                    event_list_params.EventListParams,
-                ),
+                query={
+                    "created_at[gt]": created_at_gt,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lt]": created_at_lt,
+                    "created_at[lte]": created_at_lte,
+                    "limit": limit,
+                    "order": order,
+                    "page": page,
+                    "types": types,
+                },
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -213,7 +209,7 @@ class Events(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/sessions/{session_id}/events?beta=true", session_id=session_id),
-            body=maybe_transform({"events": events}, event_send_params.EventSendParams),
+            body={"events": events},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -287,7 +283,7 @@ class Events(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"event_deltas": event_deltas}, event_stream_params.EventStreamParams),
+                query={"event_deltas": event_deltas},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionEvents
@@ -401,19 +397,16 @@ class AsyncEvents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gt": created_at_gt,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lt": created_at_lt,
-                        "created_at_lte": created_at_lte,
-                        "limit": limit,
-                        "order": order,
-                        "page": page,
-                        "types": types,
-                    },
-                    event_list_params.EventListParams,
-                ),
+                query={
+                    "created_at[gt]": created_at_gt,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lt]": created_at_lt,
+                    "created_at[lte]": created_at_lte,
+                    "limit": limit,
+                    "order": order,
+                    "page": page,
+                    "types": types,
+                },
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -473,7 +466,7 @@ class AsyncEvents(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/sessions/{session_id}/events?beta=true", session_id=session_id),
-            body=await async_maybe_transform({"events": events}, event_send_params.EventSendParams),
+            body={"events": events},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -547,9 +540,7 @@ class AsyncEvents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {"event_deltas": event_deltas}, event_stream_params.EventStreamParams
-                ),
+                query={"event_deltas": event_deltas},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionEvents

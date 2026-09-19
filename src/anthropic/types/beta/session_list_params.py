@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import List, Union
 from datetime import datetime
-from typing_extensions import Literal, Annotated, TypedDict
+from typing_extensions import Literal, TypedDict
 
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["SessionListParams"]
@@ -17,16 +16,16 @@ class SessionListParams(TypedDict, total=False):
     agent_version: int
     """Filter by agent version. Only applies when `agent_id` is also set."""
 
-    created_at_gt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gt]", format="iso8601")]
+    created_at_gt: Union[str, datetime]
     """Return sessions created after this time (exclusive)."""
 
-    created_at_gte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gte]", format="iso8601")]
+    created_at_gte: Union[str, datetime]
     """Return sessions created at or after this time (inclusive)."""
 
-    created_at_lt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lt]", format="iso8601")]
+    created_at_lt: Union[str, datetime]
     """Return sessions created before this time (exclusive)."""
 
-    created_at_lte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lte]", format="iso8601")]
+    created_at_lte: Union[str, datetime]
     """Return sessions created at or before this time (inclusive)."""
 
     deployment_id: str

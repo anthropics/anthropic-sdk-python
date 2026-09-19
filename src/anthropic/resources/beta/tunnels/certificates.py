@@ -6,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -17,7 +17,6 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.tunnels import certificate_list_params, certificate_create_params
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.tunnels.beta_tunnel_certificate import BetaTunnelCertificate
 
@@ -108,9 +107,7 @@ class Certificates(SyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
             path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
-            body=maybe_transform(
-                {"ca_certificate_pem": ca_certificate_pem}, certificate_create_params.CertificateCreateParams
-            ),
+            body={"ca_certificate_pem": ca_certificate_pem},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -264,14 +261,11 @@ class Certificates(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    certificate_list_params.CertificateListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaTunnelCertificate,
         )
@@ -437,9 +431,7 @@ class AsyncCertificates(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
-            body=await async_maybe_transform(
-                {"ca_certificate_pem": ca_certificate_pem}, certificate_create_params.CertificateCreateParams
-            ),
+            body={"ca_certificate_pem": ca_certificate_pem},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -593,14 +585,11 @@ class AsyncCertificates(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    certificate_list_params.CertificateListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaTunnelCertificate,
         )

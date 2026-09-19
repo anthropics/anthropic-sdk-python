@@ -6,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -19,11 +19,6 @@ from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.beta.memory_stores import (
     BetaManagedAgentsMemoryView,
-    memory_list_params,
-    memory_create_params,
-    memory_delete_params,
-    memory_update_params,
-    memory_retrieve_params,
 )
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.memory_stores.beta_managed_agents_memory import BetaManagedAgentsMemory
@@ -125,19 +120,16 @@ class Memories(SyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             path_template("/v1/memory_stores/{memory_store_id}/memories?beta=true", memory_store_id=memory_store_id),
-            body=maybe_transform(
-                {
-                    "content": content,
-                    "path": path,
-                },
-                memory_create_params.MemoryCreateParams,
-            ),
+            body={
+                "content": content,
+                "path": path,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"view": view}, memory_create_params.MemoryCreateParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -215,7 +207,7 @@ class Memories(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"view": view}, memory_retrieve_params.MemoryRetrieveParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -308,20 +300,17 @@ class Memories(SyncAPIResource):
                 memory_store_id=memory_store_id,
                 memory_id=memory_id,
             ),
-            body=maybe_transform(
-                {
-                    "content": content,
-                    "path": path,
-                    "precondition": precondition,
-                },
-                memory_update_params.MemoryUpdateParams,
-            ),
+            body={
+                "content": content,
+                "path": path,
+                "precondition": precondition,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"view": view}, memory_update_params.MemoryUpdateParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -408,16 +397,13 @@ class Memories(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "depth": depth,
-                        "limit": limit,
-                        "page": page,
-                        "path_prefix": path_prefix,
-                        "view": view,
-                    },
-                    memory_list_params.MemoryListParams,
-                ),
+                query={
+                    "depth": depth,
+                    "limit": limit,
+                    "page": page,
+                    "path_prefix": path_prefix,
+                    "view": view,
+                },
             ),
             model=cast(
                 Any, BetaManagedAgentsMemoryListItem
@@ -497,9 +483,7 @@ class Memories(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {"expected_content_sha256": expected_content_sha256}, memory_delete_params.MemoryDeleteParams
-                ),
+                query={"expected_content_sha256": expected_content_sha256},
             ),
             cast_to=BetaManagedAgentsDeletedMemory,
         )
@@ -595,19 +579,16 @@ class AsyncMemories(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/memory_stores/{memory_store_id}/memories?beta=true", memory_store_id=memory_store_id),
-            body=await async_maybe_transform(
-                {
-                    "content": content,
-                    "path": path,
-                },
-                memory_create_params.MemoryCreateParams,
-            ),
+            body={
+                "content": content,
+                "path": path,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform({"view": view}, memory_create_params.MemoryCreateParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -685,7 +666,7 @@ class AsyncMemories(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform({"view": view}, memory_retrieve_params.MemoryRetrieveParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -778,20 +759,17 @@ class AsyncMemories(AsyncAPIResource):
                 memory_store_id=memory_store_id,
                 memory_id=memory_id,
             ),
-            body=await async_maybe_transform(
-                {
-                    "content": content,
-                    "path": path,
-                    "precondition": precondition,
-                },
-                memory_update_params.MemoryUpdateParams,
-            ),
+            body={
+                "content": content,
+                "path": path,
+                "precondition": precondition,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform({"view": view}, memory_update_params.MemoryUpdateParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -878,16 +856,13 @@ class AsyncMemories(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "depth": depth,
-                        "limit": limit,
-                        "page": page,
-                        "path_prefix": path_prefix,
-                        "view": view,
-                    },
-                    memory_list_params.MemoryListParams,
-                ),
+                query={
+                    "depth": depth,
+                    "limit": limit,
+                    "page": page,
+                    "path_prefix": path_prefix,
+                    "view": view,
+                },
             ),
             model=cast(
                 Any, BetaManagedAgentsMemoryListItem
@@ -967,9 +942,7 @@ class AsyncMemories(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {"expected_content_sha256": expected_content_sha256}, memory_delete_params.MemoryDeleteParams
-                ),
+                query={"expected_content_sha256": expected_content_sha256},
             ),
             cast_to=BetaManagedAgentsDeletedMemory,
         )

@@ -4,10 +4,9 @@ from typing import Mapping, Optional, cast
 
 import httpx2
 
-from ..types import file_list_params, file_upload_params
 from .._files import deepcopy_with_paths
 from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, SequenceNotStr, omit, not_given
-from .._utils import extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from .._utils import extract_files, path_template, strip_not_given
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
@@ -112,14 +111,11 @@ class Files(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "ids": ids,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    file_list_params.FileListParams,
-                ),
+                query={
+                    "ids": ids,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=FileMetadata,
         )
@@ -313,7 +309,7 @@ class Files(SyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             "/v1/files",
-            body=maybe_transform(body, file_upload_params.FileUploadParams),
+            body=body,
             files=files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -397,14 +393,11 @@ class AsyncFiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "ids": ids,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    file_list_params.FileListParams,
-                ),
+                query={
+                    "ids": ids,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=FileMetadata,
         )
@@ -598,7 +591,7 @@ class AsyncFiles(AsyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             "/v1/files",
-            body=await async_maybe_transform(body, file_upload_params.FileUploadParams),
+            body=body,
             files=files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout

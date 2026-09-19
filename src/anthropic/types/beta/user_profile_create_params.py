@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import Dict, List, Union, Optional
 from datetime import datetime
-from typing_extensions import Literal, Annotated, TypedDict
+from typing_extensions import Literal, TypedDict
 
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_user_profile_external_user_details_params import BetaUserProfileExternalUserDetailsParams
 
@@ -42,7 +41,7 @@ class UserProfileCreateParams(TypedDict, total=False):
     header only.
     """
 
-    external_user_onboarded_at: Annotated[Union[str, datetime], PropertyInfo(format="iso8601")]
+    external_user_onboarded_at: Union[str, datetime]
     """A timestamp in RFC 3339 format"""
 
     metadata: Dict[str, str]

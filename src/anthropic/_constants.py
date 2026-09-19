@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import httpx2
 
 RAW_RESPONSE_HEADER = "X-Stainless-Raw-Response"
@@ -10,6 +12,9 @@ DEFAULT_CONNECTION_LIMITS = httpx2.Limits(max_connections=1000, max_keepalive_co
 
 INITIAL_RETRY_DELAY = 0.5
 MAX_RETRY_DELAY = 8.0
+
+# (discriminator key, discriminator value, file key): a matching object's file is read and sent as base64
+FILE_INPUT_MARKERS: tuple[tuple[str, str, str], ...] = (("type", "base64", "data"),)
 
 MODEL_NONSTREAMING_TOKENS = {
     "claude-opus-4-20250514": 8_192,

@@ -6,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from .credentials import (
     Credentials,
@@ -24,7 +24,6 @@ from ...._response import (
     async_to_streamed_response_wrapper,
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
-from ....types.beta import vault_list_params, vault_create_params, vault_update_params
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_managed_agents_vault import BetaManagedAgentsVault
@@ -112,13 +111,10 @@ class Vaults(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             "/v1/vaults?beta=true",
-            body=maybe_transform(
-                {
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                vault_create_params.VaultCreateParams,
-            ),
+            body={
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -242,13 +238,10 @@ class Vaults(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
-            body=maybe_transform(
-                {
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                vault_update_params.VaultUpdateParams,
-            ),
+            body={
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -317,14 +310,11 @@ class Vaults(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    vault_list_params.VaultListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsVault,
         )
@@ -525,13 +515,10 @@ class AsyncVaults(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             "/v1/vaults?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                vault_create_params.VaultCreateParams,
-            ),
+            body={
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -655,13 +642,10 @@ class AsyncVaults(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
-            body=await async_maybe_transform(
-                {
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                vault_update_params.VaultUpdateParams,
-            ),
+            body={
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -730,14 +714,11 @@ class AsyncVaults(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    vault_list_params.VaultListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsVault,
         )

@@ -6,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from ....._resource import SyncAPIResource, AsyncAPIResource
 from ....._response import (
@@ -19,7 +19,6 @@ from ....._streaming import Stream, AsyncStream
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.anthropic_beta_param import AnthropicBetaParam
-from .....types.beta.sessions.threads import event_list_params, event_stream_params
 from .....types.beta.beta_managed_agents_delta_type import BetaManagedAgentsDeltaType
 from .....types.beta.sessions.beta_managed_agents_session_event import BetaManagedAgentsSessionEvent
 from .....types.beta.sessions.beta_managed_agents_stream_session_thread_events import (
@@ -114,13 +113,10 @@ class Events(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    event_list_params.EventListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -201,7 +197,7 @@ class Events(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"event_deltas": event_deltas}, event_stream_params.EventStreamParams),
+                query={"event_deltas": event_deltas},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionThreadEvents
@@ -296,13 +292,10 @@ class AsyncEvents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    event_list_params.EventListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -383,9 +376,7 @@ class AsyncEvents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {"event_deltas": event_deltas}, event_stream_params.EventStreamParams
-                ),
+                query={"event_deltas": event_deltas},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionThreadEvents

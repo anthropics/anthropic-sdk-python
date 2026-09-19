@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import List, Union
 from datetime import datetime
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_trigger_type import BetaManagedAgentsTriggerType
 
@@ -12,16 +11,16 @@ __all__ = ["DeploymentRunListParams"]
 
 
 class DeploymentRunListParams(TypedDict, total=False):
-    created_at_gt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gt]", format="iso8601")]
+    created_at_gt: Union[str, datetime]
     """Return runs created strictly after this time (exclusive)."""
 
-    created_at_gte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gte]", format="iso8601")]
+    created_at_gte: Union[str, datetime]
     """Return runs created at or after this time (inclusive)."""
 
-    created_at_lt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lt]", format="iso8601")]
+    created_at_lt: Union[str, datetime]
     """Return runs created strictly before this time (exclusive)."""
 
-    created_at_lte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lte]", format="iso8601")]
+    created_at_lte: Union[str, datetime]
     """Return runs created at or before this time (inclusive)."""
 
     deployment_id: str

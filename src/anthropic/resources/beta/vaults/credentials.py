@@ -6,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -17,7 +17,7 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.vaults import credential_list_params, credential_create_params, credential_update_params
+from ....types.beta.vaults import credential_create_params, credential_update_params
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.vaults.beta_managed_agents_credential import BetaManagedAgentsCredential
 from ....types.beta.vaults.beta_managed_agents_deleted_credential import BetaManagedAgentsDeletedCredential
@@ -108,14 +108,11 @@ class Credentials(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/vaults/{vault_id}/credentials?beta=true", vault_id=vault_id),
-            body=maybe_transform(
-                {
-                    "auth": auth,
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                credential_create_params.CredentialCreateParams,
-            ),
+            body={
+                "auth": auth,
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -260,14 +257,11 @@ class Credentials(SyncAPIResource):
                 vault_id=vault_id,
                 credential_id=credential_id,
             ),
-            body=maybe_transform(
-                {
-                    "auth": auth,
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                credential_update_params.CredentialUpdateParams,
-            ),
+            body={
+                "auth": auth,
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -341,14 +335,11 @@ class Credentials(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    credential_list_params.CredentialListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsCredential,
         )
@@ -637,14 +628,11 @@ class AsyncCredentials(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/vaults/{vault_id}/credentials?beta=true", vault_id=vault_id),
-            body=await async_maybe_transform(
-                {
-                    "auth": auth,
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                credential_create_params.CredentialCreateParams,
-            ),
+            body={
+                "auth": auth,
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -789,14 +777,11 @@ class AsyncCredentials(AsyncAPIResource):
                 vault_id=vault_id,
                 credential_id=credential_id,
             ),
-            body=await async_maybe_transform(
-                {
-                    "auth": auth,
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                credential_update_params.CredentialUpdateParams,
-            ),
+            body={
+                "auth": auth,
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -870,14 +855,11 @@ class AsyncCredentials(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    credential_list_params.CredentialListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsCredential,
         )

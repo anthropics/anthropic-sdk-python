@@ -1,4 +1,5 @@
 from typing import Any, cast
+from datetime import date, datetime, timezone
 from functools import partial
 from urllib.parse import unquote
 
@@ -20,6 +21,15 @@ def test_basic() -> None:
     assert stringify({"a": False}) == "a=false"
     assert stringify({"a": 1.23456}) == "a=1.23456"
     assert stringify({"a": None}) == ""
+
+
+def test_datetime() -> None:
+    assert unquote(stringify({"a": datetime(2024, 1, 2, 3, 4, 5)})) == "a=2024-01-02T03:04:05"
+    assert (
+        unquote(stringify({"a": {"gte": datetime(2024, 1, 2, 3, 4, 5, 600, tzinfo=timezone.utc)}}))
+        == "a[gte]=2024-01-02T03:04:05.000600+00:00"
+    )
+    assert unquote(stringify({"a": date(2024, 1, 2)})) == "a=2024-01-02"
 
 
 @pytest.mark.parametrize("method", ["class", "function"])

@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import List, Union
 from datetime import datetime
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ..._utils import PropertyInfo
 from .beta_dream_status import BetaDreamStatus
 from ..anthropic_beta_param import AnthropicBetaParam
 
@@ -12,10 +11,10 @@ __all__ = ["DreamListParams"]
 
 
 class DreamListParams(TypedDict, total=False):
-    created_at_gt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gt]", format="iso8601")]
+    created_at_gt: Union[str, datetime]
     """Return only dreams created after this time (exclusive), in RFC 3339."""
 
-    created_at_lt: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lt]", format="iso8601")]
+    created_at_lt: Union[str, datetime]
     """Return only dreams created before this time (exclusive), in RFC 3339."""
 
     include_archived: bool

@@ -7,7 +7,7 @@ from itertools import chain
 import httpx2
 
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import is_given, path_template, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -17,7 +17,7 @@ from ..._response import (
     async_to_streamed_response_wrapper,
 )
 from ...pagination import SyncPageCursor, AsyncPageCursor
-from ...types.beta import dream_list_params, dream_create_params
+from ...types.beta import dream_create_params
 from ..._base_client import AsyncPaginator, make_request_options
 from ...types.beta.beta_dream import BetaDream
 from ...types.anthropic_beta_param import AnthropicBetaParam
@@ -131,15 +131,12 @@ class Dreams(SyncAPIResource):
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._post(
             "/v1/dreams?beta=true",
-            body=maybe_transform(
-                {
-                    "inputs": inputs,
-                    "model": model,
-                    "instructions": instructions,
-                    "output_behavior": output_behavior,
-                },
-                dream_create_params.DreamCreateParams,
-            ),
+            body={
+                "inputs": inputs,
+                "model": model,
+                "instructions": instructions,
+                "output_behavior": output_behavior,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -293,17 +290,14 @@ class Dreams(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gt": created_at_gt,
-                        "created_at_lt": created_at_lt,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                        "statuses": statuses,
-                    },
-                    dream_list_params.DreamListParams,
-                ),
+                query={
+                    "created_at[gt]": created_at_gt,
+                    "created_at[lt]": created_at_lt,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                    "statuses": statuses,
+                },
             ),
             model=BetaDream,
         )
@@ -546,15 +540,12 @@ class AsyncDreams(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._post(
             "/v1/dreams?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "inputs": inputs,
-                    "model": model,
-                    "instructions": instructions,
-                    "output_behavior": output_behavior,
-                },
-                dream_create_params.DreamCreateParams,
-            ),
+            body={
+                "inputs": inputs,
+                "model": model,
+                "instructions": instructions,
+                "output_behavior": output_behavior,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -708,17 +699,14 @@ class AsyncDreams(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gt": created_at_gt,
-                        "created_at_lt": created_at_lt,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                        "statuses": statuses,
-                    },
-                    dream_list_params.DreamListParams,
-                ),
+                query={
+                    "created_at[gt]": created_at_gt,
+                    "created_at[lt]": created_at_lt,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                    "statuses": statuses,
+                },
             ),
             model=BetaDream,
         )

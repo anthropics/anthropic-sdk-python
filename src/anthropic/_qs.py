@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, List, Tuple, Union, Mapping, TypeVar
+from datetime import date, datetime
 from urllib.parse import parse_qs, urlencode
 from typing_extensions import get_args
 
@@ -9,7 +10,7 @@ from ._utils import flatten
 
 _T = TypeVar("_T")
 
-PrimitiveData = Union[str, int, float, bool, None]
+PrimitiveData = Union[str, int, float, bool, date, datetime, None]
 # this should be Data = Union[PrimitiveData, "List[Data]", "Tuple[Data]", "Mapping[str, Data]"]
 # https://github.com/microsoft/pyright/issues/3555
 Data = Union[PrimitiveData, List[Any], Tuple[Any], "Mapping[str, Any]"]
@@ -125,6 +126,8 @@ class Querystring:
             return "false"
         elif value is None:
             return ""
+        elif isinstance(value, (datetime, date)):
+            return value.isoformat()
         return str(value)
 
 

@@ -7,7 +7,7 @@ from itertools import chain
 import httpx2
 
 from ..._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import is_given, path_template, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -20,7 +20,6 @@ from ...pagination import SyncPageCursor, AsyncPageCursor
 from ...types.beta import (
     BetaManagedAgentsScheduleParams,
     BetaManagedAgentsDeploymentStatus,
-    deployment_list_params,
     deployment_create_params,
     deployment_update_params,
 )
@@ -145,21 +144,18 @@ class Deployments(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             "/v1/deployments?beta=true",
-            body=maybe_transform(
-                {
-                    "agent": agent,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "name": name,
-                    "budget": budget,
-                    "description": description,
-                    "metadata": metadata,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_create_params.DeploymentCreateParams,
-            ),
+            body={
+                "agent": agent,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "name": name,
+                "budget": budget,
+                "description": description,
+                "metadata": metadata,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -315,21 +311,18 @@ class Deployments(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
-            body=maybe_transform(
-                {
-                    "agent": agent,
-                    "budget": budget,
-                    "description": description,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "metadata": metadata,
-                    "name": name,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_update_params.DeploymentUpdateParams,
-            ),
+            body={
+                "agent": agent,
+                "budget": budget,
+                "description": description,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "metadata": metadata,
+                "name": name,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -411,18 +404,15 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "agent_id": agent_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                        "status": status,
-                    },
-                    deployment_list_params.DeploymentListParams,
-                ),
+                query={
+                    "agent_id": agent_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                    "status": status,
+                },
             ),
             model=BetaManagedAgentsDeployment,
         )
@@ -767,21 +757,18 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             "/v1/deployments?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "agent": agent,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "name": name,
-                    "budget": budget,
-                    "description": description,
-                    "metadata": metadata,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_create_params.DeploymentCreateParams,
-            ),
+            body={
+                "agent": agent,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "name": name,
+                "budget": budget,
+                "description": description,
+                "metadata": metadata,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -937,21 +924,18 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
-            body=await async_maybe_transform(
-                {
-                    "agent": agent,
-                    "budget": budget,
-                    "description": description,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "metadata": metadata,
-                    "name": name,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_update_params.DeploymentUpdateParams,
-            ),
+            body={
+                "agent": agent,
+                "budget": budget,
+                "description": description,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "metadata": metadata,
+                "name": name,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -1033,18 +1017,15 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "agent_id": agent_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                        "status": status,
-                    },
-                    deployment_list_params.DeploymentListParams,
-                ),
+                query={
+                    "agent_id": agent_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                    "status": status,
+                },
             ),
             model=BetaManagedAgentsDeployment,
         )

@@ -3,7 +3,6 @@ from __future__ import annotations
 import httpx2
 
 from ...._types import Body, Query, Headers, NotGiven, not_given
-from ...._utils import maybe_transform, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -13,7 +12,7 @@ from ...._response import (
     async_to_streamed_response_wrapper,
 )
 from ...._base_client import make_request_options
-from ....types.beta.organization import BetaComplianceSettingsStateParam, compliance_setting_update_params
+from ....types.beta.organization import BetaComplianceSettingsStateParam
 from ....types.beta.organization.beta_compliance_settings import BetaComplianceSettings
 from ....types.beta.organization.beta_compliance_settings_state_param import BetaComplianceSettingsStateParam
 
@@ -106,7 +105,7 @@ class ComplianceSettings(SyncAPIResource):
         """
         return self._post(
             "/v1/organizations/compliance_settings?beta=true",
-            body=maybe_transform({"state": state}, compliance_setting_update_params.ComplianceSettingUpdateParams),
+            body={"state": state},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -200,9 +199,7 @@ class AsyncComplianceSettings(AsyncAPIResource):
         """
         return await self._post(
             "/v1/organizations/compliance_settings?beta=true",
-            body=await async_maybe_transform(
-                {"state": state}, compliance_setting_update_params.ComplianceSettingUpdateParams
-            ),
+            body={"state": state},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),

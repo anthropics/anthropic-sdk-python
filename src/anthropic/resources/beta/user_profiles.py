@@ -8,7 +8,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import is_given, path_template, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -20,9 +20,6 @@ from ..._response import (
 from ...pagination import SyncPageCursor, AsyncPageCursor
 from ...types.beta import (
     BetaUserProfileExternalUserDetailsParams,
-    user_profile_list_params,
-    user_profile_create_params,
-    user_profile_update_params,
 )
 from ..._base_client import AsyncPaginator, make_request_options
 from ...types.anthropic_beta_param import AnthropicBetaParam
@@ -138,17 +135,14 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             "/v1/user_profiles?beta=true",
-            body=maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_details": external_user_details,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_create_params.UserProfileCreateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -303,17 +297,14 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
-            body=maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_details": external_user_details,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_update_params.UserProfileUpdateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -400,15 +391,12 @@ class UserProfiles(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "order": order,
-                        "order_by": order_by,
-                        "page": page,
-                    },
-                    user_profile_list_params.UserProfileListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "order": order,
+                    "order_by": order_by,
+                    "page": page,
+                },
             ),
             model=BetaUserProfile,
         )
@@ -579,17 +567,14 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             "/v1/user_profiles?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_details": external_user_details,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_create_params.UserProfileCreateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -744,17 +729,14 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
-            body=await async_maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_details": external_user_details,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_update_params.UserProfileUpdateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -841,15 +823,12 @@ class AsyncUserProfiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "order": order,
-                        "order_by": order_by,
-                        "page": page,
-                    },
-                    user_profile_list_params.UserProfileListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "order": order,
+                    "order_by": order_by,
+                    "page": page,
+                },
             ),
             model=BetaUserProfile,
         )

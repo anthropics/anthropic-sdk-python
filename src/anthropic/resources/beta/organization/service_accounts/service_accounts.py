@@ -6,7 +6,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ....._utils import is_given, path_template, strip_not_given
 from .workspaces import (
     Workspaces,
     AsyncWorkspaces,
@@ -25,11 +25,6 @@ from ....._response import (
 )
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
-from .....types.beta.organization import (
-    service_account_list_params,
-    service_account_create_params,
-    service_account_update_params,
-)
 from .....types.anthropic_beta_param import AnthropicBetaParam
 from .....types.beta.organization.beta_service_account import BetaServiceAccount
 
@@ -113,14 +108,11 @@ class ServiceAccounts(SyncAPIResource):
         }
         return self._post(
             "/v1/organizations/service_accounts?beta=true",
-            body=maybe_transform(
-                {
-                    "name": name,
-                    "description": description,
-                    "organization_role": organization_role,
-                },
-                service_account_create_params.ServiceAccountCreateParams,
-            ),
+            body={
+                "name": name,
+                "description": description,
+                "organization_role": organization_role,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -233,13 +225,10 @@ class ServiceAccounts(SyncAPIResource):
                 "/v1/organizations/service_accounts/{service_account_id}?beta=true",
                 service_account_id=service_account_id,
             ),
-            body=maybe_transform(
-                {
-                    "description": description,
-                    "organization_role": organization_role,
-                },
-                service_account_update_params.ServiceAccountUpdateParams,
-            ),
+            body={
+                "description": description,
+                "organization_role": organization_role,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -301,14 +290,11 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    service_account_list_params.ServiceAccountListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaServiceAccount,
         )
@@ -446,14 +432,11 @@ class AsyncServiceAccounts(AsyncAPIResource):
         }
         return await self._post(
             "/v1/organizations/service_accounts?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "name": name,
-                    "description": description,
-                    "organization_role": organization_role,
-                },
-                service_account_create_params.ServiceAccountCreateParams,
-            ),
+            body={
+                "name": name,
+                "description": description,
+                "organization_role": organization_role,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -566,13 +549,10 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 "/v1/organizations/service_accounts/{service_account_id}?beta=true",
                 service_account_id=service_account_id,
             ),
-            body=await async_maybe_transform(
-                {
-                    "description": description,
-                    "organization_role": organization_role,
-                },
-                service_account_update_params.ServiceAccountUpdateParams,
-            ),
+            body={
+                "description": description,
+                "organization_role": organization_role,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -634,14 +614,11 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    service_account_list_params.ServiceAccountListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaServiceAccount,
         )

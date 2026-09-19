@@ -5,7 +5,7 @@ from typing import Iterable
 import httpx2
 
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ..._utils import path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import path_template, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -17,7 +17,7 @@ from ..._response import (
 from ...pagination import SyncPage, AsyncPage
 from ..._exceptions import AnthropicError
 from ..._base_client import AsyncPaginator, make_request_options
-from ...types.messages import batch_list_params, batch_create_params
+from ...types.messages import batch_create_params
 from ..._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
 from ...types.messages.message_batch import MessageBatch
 from ...types.messages.deleted_message_batch import DeletedMessageBatch
@@ -104,7 +104,7 @@ class Batches(SyncAPIResource):
         }
         return self._post(
             "/v1/messages/batches",
-            body=maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
+            body={"requests": requests},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -218,14 +218,11 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "limit": limit,
-                    },
-                    batch_list_params.BatchListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "limit": limit,
+                },
             ),
             model=MessageBatch,
         )
@@ -475,7 +472,7 @@ class AsyncBatches(AsyncAPIResource):
         }
         return await self._post(
             "/v1/messages/batches",
-            body=await async_maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
+            body={"requests": requests},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -589,14 +586,11 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "limit": limit,
-                    },
-                    batch_list_params.BatchListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "limit": limit,
+                },
             ),
             model=MessageBatch,
         )

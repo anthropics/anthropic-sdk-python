@@ -7,7 +7,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -18,7 +18,6 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.sessions import resource_add_params, resource_list_params, resource_update_params
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.sessions.resource_update_response import ResourceUpdateResponse
 from ....types.beta.sessions.resource_retrieve_response import ResourceRetrieveResponse
@@ -180,9 +179,7 @@ class Resources(SyncAPIResource):
                     session_id=session_id,
                     resource_id=resource_id,
                 ),
-                body=maybe_transform(
-                    {"authorization_token": authorization_token}, resource_update_params.ResourceUpdateParams
-                ),
+                body={"authorization_token": authorization_token},
                 options=make_request_options(
                     extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
                 ),
@@ -255,13 +252,10 @@ class Resources(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    resource_list_params.ResourceListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionResource
@@ -388,14 +382,11 @@ class Resources(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/sessions/{session_id}/resources?beta=true", session_id=session_id),
-            body=maybe_transform(
-                {
-                    "file_id": file_id,
-                    "type": type,
-                    "mount_path": mount_path,
-                },
-                resource_add_params.ResourceAddParams,
-            ),
+            body={
+                "file_id": file_id,
+                "type": type,
+                "mount_path": mount_path,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -554,9 +545,7 @@ class AsyncResources(AsyncAPIResource):
                     session_id=session_id,
                     resource_id=resource_id,
                 ),
-                body=await async_maybe_transform(
-                    {"authorization_token": authorization_token}, resource_update_params.ResourceUpdateParams
-                ),
+                body={"authorization_token": authorization_token},
                 options=make_request_options(
                     extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
                 ),
@@ -629,13 +618,10 @@ class AsyncResources(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    resource_list_params.ResourceListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionResource
@@ -762,14 +748,11 @@ class AsyncResources(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/sessions/{session_id}/resources?beta=true", session_id=session_id),
-            body=await async_maybe_transform(
-                {
-                    "file_id": file_id,
-                    "type": type,
-                    "mount_path": mount_path,
-                },
-                resource_add_params.ResourceAddParams,
-            ),
+            body={
+                "file_id": file_id,
+                "type": type,
+                "mount_path": mount_path,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),

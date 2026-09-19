@@ -15,7 +15,7 @@ from .memories import (
     AsyncMemoriesWithStreamingResponse,
 )
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -25,7 +25,6 @@ from ...._response import (
     async_to_streamed_response_wrapper,
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
-from ....types.beta import memory_store_list_params, memory_store_create_params, memory_store_update_params
 from ...._base_client import AsyncPaginator, make_request_options
 from .memory_versions import (
     MemoryVersions,
@@ -134,14 +133,11 @@ class MemoryStores(SyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             "/v1/memory_stores?beta=true",
-            body=maybe_transform(
-                {
-                    "name": name,
-                    "description": description,
-                    "metadata": metadata,
-                },
-                memory_store_create_params.MemoryStoreCreateParams,
-            ),
+            body={
+                "name": name,
+                "description": description,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -275,14 +271,11 @@ class MemoryStores(SyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
-            body=maybe_transform(
-                {
-                    "description": description,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                memory_store_update_params.MemoryStoreUpdateParams,
-            ),
+            body={
+                "description": description,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -362,16 +355,13 @@ class MemoryStores(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    memory_store_list_params.MemoryStoreListParams,
-                ),
+                query={
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsMemoryStore,
         )
@@ -589,14 +579,11 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             "/v1/memory_stores?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "name": name,
-                    "description": description,
-                    "metadata": metadata,
-                },
-                memory_store_create_params.MemoryStoreCreateParams,
-            ),
+            body={
+                "name": name,
+                "description": description,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -730,14 +717,11 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
-            body=await async_maybe_transform(
-                {
-                    "description": description,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                memory_store_update_params.MemoryStoreUpdateParams,
-            ),
+            body={
+                "description": description,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -817,16 +801,13 @@ class AsyncMemoryStores(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    memory_store_list_params.MemoryStoreListParams,
-                ),
+                query={
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsMemoryStore,
         )

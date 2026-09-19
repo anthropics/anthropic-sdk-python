@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from ....lib.environments._worker import EnvironmentWorker, EnvironmentWorkerTools
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -27,13 +27,6 @@ from ...._response import (
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
 from ....lib.tools._deprecations import UNRESTRICTED_PATHS_DEPRECATION, reject_unrestricted_paths
-from ....types.beta.environments import (
-    work_list_params,
-    work_poll_params,
-    work_stop_params,
-    work_update_params,
-    work_heartbeat_params,
-)
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.environments.beta_self_hosted_work import BetaSelfHostedWork
 from ....types.beta.environments.beta_self_hosted_work_queue_stats import BetaSelfHostedWorkQueueStats
@@ -196,7 +189,7 @@ class Work(SyncAPIResource):
                 environment_id=environment_id,
                 work_id=work_id,
             ),
-            body=maybe_transform({"metadata": metadata}, work_update_params.WorkUpdateParams),
+            body={"metadata": metadata},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -261,13 +254,10 @@ class Work(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    work_list_params.WorkListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaSelfHostedWork,
         )
@@ -399,13 +389,10 @@ class Work(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "desired_ttl_seconds": desired_ttl_seconds,
-                        "expected_last_heartbeat": expected_last_heartbeat,
-                    },
-                    work_heartbeat_params.WorkHeartbeatParams,
-                ),
+                query={
+                    "desired_ttl_seconds": desired_ttl_seconds,
+                    "expected_last_heartbeat": expected_last_heartbeat,
+                },
             ),
             cast_to=BetaSelfHostedWorkHeartbeatResponse,
         )
@@ -475,13 +462,10 @@ class Work(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "block_ms": block_ms,
-                        "reclaim_older_than_ms": reclaim_older_than_ms,
-                    },
-                    work_poll_params.WorkPollParams,
-                ),
+                query={
+                    "block_ms": block_ms,
+                    "reclaim_older_than_ms": reclaim_older_than_ms,
+                },
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -607,7 +591,7 @@ class Work(SyncAPIResource):
                 environment_id=environment_id,
                 work_id=work_id,
             ),
-            body=maybe_transform({"force": force}, work_stop_params.WorkStopParams),
+            body={"force": force},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -769,7 +753,7 @@ class AsyncWork(AsyncAPIResource):
                 environment_id=environment_id,
                 work_id=work_id,
             ),
-            body=await async_maybe_transform({"metadata": metadata}, work_update_params.WorkUpdateParams),
+            body={"metadata": metadata},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -834,13 +818,10 @@ class AsyncWork(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    work_list_params.WorkListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaSelfHostedWork,
         )
@@ -972,13 +953,10 @@ class AsyncWork(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {
-                        "desired_ttl_seconds": desired_ttl_seconds,
-                        "expected_last_heartbeat": expected_last_heartbeat,
-                    },
-                    work_heartbeat_params.WorkHeartbeatParams,
-                ),
+                query={
+                    "desired_ttl_seconds": desired_ttl_seconds,
+                    "expected_last_heartbeat": expected_last_heartbeat,
+                },
             ),
             cast_to=BetaSelfHostedWorkHeartbeatResponse,
         )
@@ -1048,13 +1026,10 @@ class AsyncWork(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {
-                        "block_ms": block_ms,
-                        "reclaim_older_than_ms": reclaim_older_than_ms,
-                    },
-                    work_poll_params.WorkPollParams,
-                ),
+                query={
+                    "block_ms": block_ms,
+                    "reclaim_older_than_ms": reclaim_older_than_ms,
+                },
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -1180,7 +1155,7 @@ class AsyncWork(AsyncAPIResource):
                 environment_id=environment_id,
                 work_id=work_id,
             ),
-            body=await async_maybe_transform({"force": force}, work_stop_params.WorkStopParams),
+            body={"force": force},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),

@@ -4,7 +4,6 @@ from typing import Mapping, Optional, cast
 
 import httpx2
 
-from ...types import skill_list_params, skill_create_params
 from ..._files import deepcopy_with_paths
 from ..._types import (
     Body,
@@ -17,7 +16,7 @@ from ..._types import (
     omit,
     not_given,
 )
-from ..._utils import extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import extract_files, path_template, strip_not_given
 from .versions import (
     Versions,
     AsyncVersions,
@@ -122,7 +121,7 @@ class Skills(SyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             "/v1/skills",
-            body=maybe_transform(body, skill_create_params.SkillCreateParams),
+            body=body,
             files=extracted_files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -234,14 +233,11 @@ class Skills(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                        "source": source,
-                    },
-                    skill_list_params.SkillListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "source": source,
+                },
             ),
             model=Skill,
         )
@@ -373,7 +369,7 @@ class AsyncSkills(AsyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             "/v1/skills",
-            body=await async_maybe_transform(body, skill_create_params.SkillCreateParams),
+            body=body,
             files=extracted_files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -485,14 +481,11 @@ class AsyncSkills(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                        "source": source,
-                    },
-                    skill_list_params.SkillListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "source": source,
+                },
             ),
             model=Skill,
         )

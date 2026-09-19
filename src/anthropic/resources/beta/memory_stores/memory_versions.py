@@ -7,7 +7,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -21,8 +21,6 @@ from ...._base_client import AsyncPaginator, make_request_options
 from ....types.beta.memory_stores import (
     BetaManagedAgentsMemoryView,
     BetaManagedAgentsMemoryVersionOperation,
-    memory_version_list_params,
-    memory_version_retrieve_params,
 )
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.memory_stores.beta_managed_agents_memory_view import BetaManagedAgentsMemoryView
@@ -127,7 +125,7 @@ class MemoryVersions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"view": view}, memory_version_retrieve_params.MemoryVersionRetrieveParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -230,21 +228,18 @@ class MemoryVersions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "api_key_id": api_key_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "limit": limit,
-                        "memory_id": memory_id,
-                        "operation": operation,
-                        "page": page,
-                        "service_account_id": service_account_id,
-                        "session_id": session_id,
-                        "view": view,
-                    },
-                    memory_version_list_params.MemoryVersionListParams,
-                ),
+                query={
+                    "api_key_id": api_key_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "limit": limit,
+                    "memory_id": memory_id,
+                    "operation": operation,
+                    "page": page,
+                    "service_account_id": service_account_id,
+                    "session_id": session_id,
+                    "view": view,
+                },
             ),
             model=BetaManagedAgentsMemoryVersion,
         )
@@ -410,9 +405,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {"view": view}, memory_version_retrieve_params.MemoryVersionRetrieveParams
-                ),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -515,21 +508,18 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "api_key_id": api_key_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "limit": limit,
-                        "memory_id": memory_id,
-                        "operation": operation,
-                        "page": page,
-                        "service_account_id": service_account_id,
-                        "session_id": session_id,
-                        "view": view,
-                    },
-                    memory_version_list_params.MemoryVersionListParams,
-                ),
+                query={
+                    "api_key_id": api_key_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "limit": limit,
+                    "memory_id": memory_id,
+                    "operation": operation,
+                    "page": page,
+                    "service_account_id": service_account_id,
+                    "session_id": session_id,
+                    "view": view,
+                },
             ),
             model=BetaManagedAgentsMemoryVersion,
         )
