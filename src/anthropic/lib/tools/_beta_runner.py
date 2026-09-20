@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import warnings
 from abc import ABC, abstractmethod
+from copy import copy
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -23,7 +24,13 @@ import httpx2
 
 from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import is_given, consume_sync_iterator, consume_async_iterator
-from ...types.beta import BetaMessage, BetaMessageParam
+from ...types.beta import (
+    BetaMessage,
+    BetaMessageParam,
+    BetaToolUnionParam,
+    BetaRequestToolRemovalBlockParam,
+    BetaRequestToolAdditionBlockParam,
+)
 from ..._base_client import merge_headers
 from ._tool_dispatch import tool_registry, tool_error_content, available_tool_names
 from ._beta_functions import (
@@ -54,6 +61,7 @@ AnyFunctionToolT = TypeVar(
     ],
 )
 RunnerItemT = TypeVar("RunnerItemT")
+
 
 log = logging.getLogger(__name__)
 
@@ -132,6 +140,8 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         self._iteration_count = 0
         self._pending_compaction: BetaCompactionConfigParam | None = None
         self._messages_being_compacted: Iterable[BetaMessageParam] | None = None
+        self._pending_tool_changes: list[BetaRequestToolAdditionBlockParam | BetaRequestToolRemovalBlockParam] = []
+        self._pending_tool_additions: list[AnyFunctionToolT] = []
 
     def set_messages_params(
         self,
@@ -241,6 +251,63 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         self._params = {**self._params, "messages": [message.to_param()]}
         return True
 
+    def add_tools(self, *tools: AnyFunctionToolT | BetaToolUnionParam) -> None:
+        """Give the model more tools without changing the `tools` param, which would miss the prompt cache.
+
+        The definitions are sent in `tool_addition` blocks with the next request, and a function tool can be
+        called from then on. A raw definition is for server tools, such as web search: the tool runner never
+        runs it, and it stops running a function tool of the same name. Requires the `inline-tools-2026-09-15` beta.
+
+        Args:
+            *tools: Function tools, such as `@beta_tool` functions, or raw tool definitions.
+        """
+        for tool in tools:
+            if isinstance(tool, dict):
+                definition: BetaToolUnionParam = copy(tool)
+                name = tool.get("name")
+                if isinstance(name, str):
+                    self._stop_running(name)
+            else:
+                definition = tool.to_dict()
+                self._pending_tool_additions.append(tool)
+            self._pending_tool_changes.append(
+                {"type": "tool_addition", "tool": {"type": "tool_definition", "definition": definition}}
+            )
+
+    def remove_tools(self, *tools: AnyFunctionToolT | str) -> None:
+        """Take tools away from the model without changing the `tools` param, which would miss the prompt cache.
+
+        The tools stop being run at once, and the model is told in `tool_removal` blocks with the next request.
+        Requires the `inline-tools-2026-09-15` beta.
+
+        Args:
+            *tools: The tools to remove, or their names.
+        """
+        for tool in tools:
+            name = tool if isinstance(tool, str) else tool.name
+            self._stop_running(name)
+            self._pending_tool_changes.append(
+                {"type": "tool_removal", "tool": {"type": "tool_reference", "name": name}}
+            )
+
+    def _stop_running(self, name: str) -> None:
+        self._tools_by_name.pop(name, None)
+        self._pending_tool_additions = [tool for tool in self._pending_tool_additions if tool.name != name]
+
+    def _send_pending_tool_changes(self, hold: bool) -> None:
+        # A turn that stopped on `pause_turn` is sent back to be continued, so it has to stay last.
+        if hold or not self._pending_tool_changes:
+            return
+        for tool in self._pending_tool_additions:
+            self._tools_by_name[tool.name] = tool
+        # Not `append_messages()`: that would make the runner leave this turn's messages for the caller to append.
+        self._params = {
+            **self._params,
+            "messages": [*self._params["messages"], {"role": "system", "content": self._pending_tool_changes}],
+        }
+        self._pending_tool_changes = []
+        self._pending_tool_additions = []
+
     def _should_stop(self) -> bool:
         if self._max_iterations is not None and self._iteration_count >= self._max_iterations:
             return True
@@ -311,9 +378,11 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             yield from self._compact(compaction)
 
     def __run__(self) -> Iterator[RunnerItemT]:
-        turn_paused = False
+        stop_reason: BetaStopReason | None = None
         while not self._should_stop():
+            self._send_pending_tool_changes(hold=stop_reason == "pause_turn")
             # The API can't compact a conversation that ends mid-turn, so a paused turn is resumed first.
+            turn_paused = _determine_next_step_from_stop_reason(stop_reason) == "resume"
             compaction = None if turn_paused else self._pending_compaction
             if compaction is not None:
                 yield from self._compact(compaction)
@@ -331,8 +400,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
             self._iteration_count += 1
 
-            next_step = _determine_next_step_from_stop_reason(message.stop_reason)
-            turn_paused = next_step == "resume"
+            stop_reason = message.stop_reason
+            next_step = _determine_next_step_from_stop_reason(stop_reason)
             if next_step == "stop":
                 log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
                 yield from self._compact_after_final_turn(message)
@@ -540,9 +609,11 @@ class BaseAsyncToolRunner(
                 yield item
 
     async def __run__(self) -> AsyncIterator[RunnerItemT]:
-        turn_paused = False
+        stop_reason: BetaStopReason | None = None
         while not self._should_stop():
+            self._send_pending_tool_changes(hold=stop_reason == "pause_turn")
             # The API can't compact a conversation that ends mid-turn, so a paused turn is resumed first.
+            turn_paused = _determine_next_step_from_stop_reason(stop_reason) == "resume"
             compaction = None if turn_paused else self._pending_compaction
             if compaction is not None:
                 async for item in self._compact(compaction):
@@ -561,8 +632,8 @@ class BaseAsyncToolRunner(
 
             self._iteration_count += 1
 
-            next_step = _determine_next_step_from_stop_reason(message.stop_reason)
-            turn_paused = next_step == "resume"
+            stop_reason = message.stop_reason
+            next_step = _determine_next_step_from_stop_reason(stop_reason)
             if next_step == "stop":
                 log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
                 async for item in self._compact_after_final_turn(message):
