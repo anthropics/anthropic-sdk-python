@@ -2,12 +2,13 @@ import os
 import json
 import logging
 from copy import copy
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, Type, Union, cast
 from collections.abc import Callable
 from typing_extensions import Literal, get_args
 
 import httpx2
 import pytest
+import pydantic
 from respx import MockRouter
 from inline_snapshot import external, snapshot
 
@@ -26,8 +27,12 @@ from anthropic.types.anthropic_beta_param import AnthropicBetaParam
 from anthropic.types.beta.beta_tool_param import BetaToolParam
 from anthropic.types.beta.beta_stop_reason import BetaStopReason
 from anthropic.types.beta.beta_message_param import BetaMessageParam
+from anthropic.types.beta.beta_fallback_param import BetaFallbackParam
+from anthropic.types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from anthropic.types.beta.beta_content_block_param import BetaContentBlockParam
+from anthropic.types.beta.beta_output_config_param import BetaOutputConfigParam
 from anthropic.types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
+from anthropic.types.beta.beta_json_output_format_param import BetaJSONOutputFormatParam
 from anthropic.types.beta.beta_web_search_tool_20250305_param import BetaWebSearchTool20250305Param
 from anthropic.types.beta.beta_context_management_config_param import BetaContextManagementConfigParam
 from anthropic.types.beta.beta_tool_change_tool_reference_param import BetaToolChangeToolReferenceParam
@@ -2906,6 +2911,175 @@ def test_compact_before_next_turn_is_refused_beside_a_compaction_edit() -> None:
         edits.append({"type": "compact_20260112"})
         with pytest.raises(ValueError, match="has a compaction edit"):
             next(runner)
+
+
+class _Forecast(pydantic.BaseModel):
+    summary: str
+
+
+_FORECAST_FORMAT: BetaJSONOutputFormatParam = {
+    "type": "json_schema",
+    "schema": {
+        "type": "object",
+        "properties": {"summary": {"type": "string"}},
+        "required": ["summary"],
+        "additionalProperties": False,
+    },
+}
+
+_REPLY_PARAMS_CASES = pytest.mark.parametrize(
+    "tool_choice, output_format, output_config, fallbacks, tool_choice_on_compaction",
+    [
+        pytest.param(
+            {"type": "tool", "name": "get_weather"},
+            _Forecast,
+            {"effort": "low"},
+            omit,
+            None,
+            id="forced tool and output_format",
+        ),
+        pytest.param(
+            {"type": "any"},
+            omit,
+            {"effort": "low", "format": _FORECAST_FORMAT},
+            omit,
+            None,
+            id="any tool and output_config.format",
+        ),
+        pytest.param(
+            {"type": "auto"},
+            omit,
+            {"effort": "low", "format": _FORECAST_FORMAT},
+            omit,
+            {"type": "auto"},
+            id="auto tool_choice stays",
+        ),
+        pytest.param(
+            {"type": "auto"},
+            omit,
+            {"effort": "low", "format": _FORECAST_FORMAT},
+            [
+                {"model": "claude-sonnet-4-5", "output_config": {"effort": "medium", "format": _FORECAST_FORMAT}},
+                {"model": "claude-opus-4-5", "max_tokens": 512},
+            ],
+            {"type": "auto"},
+            id="fallback output_config.format",
+        ),
+    ],
+)
+
+
+def _compaction_then_forecast_responses() -> List[httpx2.Response]:
+    forecast = {**_end_turn_response().json(), "content": [{"type": "text", "text": '{"summary": "Sunny"}'}]}
+    return [_compacted_response(), httpx2.Response(200, json=forecast)]
+
+
+def _assert_reply_params_are_left_off_the_compaction_request_only(
+    respx_mock: MockRouter,
+    tool_choice: BetaToolChoiceParam,
+    fallbacks: Union[List[BetaFallbackParam], Omit],
+    tool_choice_on_compaction: Union[BetaToolChoiceParam, None],
+) -> None:
+    compaction, after = _sent_request_bodies(respx_mock)
+    assert compaction["compaction"] == {"type": "summarize"}
+    assert "stop_sequences" not in compaction
+    assert "output_format" not in compaction
+    assert compaction["output_config"] == {"effort": "low"}
+    assert compaction.get("tool_choice") == tool_choice_on_compaction
+    if isinstance(fallbacks, Omit):
+        assert "fallbacks" not in compaction
+    else:
+        assert compaction["fallbacks"] == [
+            {"model": "claude-sonnet-4-5", "output_config": {"effort": "medium"}},
+            {"model": "claude-opus-4-5", "max_tokens": 512},
+        ]
+        assert after["fallbacks"] == fallbacks
+    for kept in ("max_tokens", "system", "tools"):
+        assert compaction[kept] == after[kept]
+    assert compaction["system"] == "Be brief."
+    assert [tool["name"] for tool in compaction["tools"]] == ["get_weather"]
+
+    assert after["stop_sequences"] == ["STOP"]
+    assert after["tool_choice"] == tool_choice
+    assert after["output_config"]["effort"] == "low"
+    assert after["output_config"]["format"]["type"] == "json_schema"
+    assert [call.request.headers.get("anthropic-beta") for call in cast("List[Any]", respx_mock.calls)] == [
+        "compact-2026-09-04"
+    ] * 2
+
+
+@_REPLY_PARAMS_CASES
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_compaction_request_leaves_off_reply_params_sync(
+    respx_mock: MockRouter,
+    tool_choice: BetaToolChoiceParam,
+    output_format: Union[Type[_Forecast], Omit],
+    output_config: BetaOutputConfigParam,
+    fallbacks: Union[List[BetaFallbackParam], Omit],
+    tool_choice_on_compaction: Union[BetaToolChoiceParam, None],
+) -> None:
+    respx_mock.post("/v1/messages").mock(side_effect=_compaction_then_forecast_responses())
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            system="Be brief.",
+            tools=[_sync_weather_tool()],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+            betas=["compact-2026-09-04"],
+            stop_sequences=["STOP"],
+            tool_choice=tool_choice,
+            output_format=output_format,
+            output_config=output_config,
+            fallbacks=fallbacks,
+        )
+        runner.compact_before_next_turn()
+        runner.until_done()
+
+    _assert_reply_params_are_left_off_the_compaction_request_only(
+        respx_mock, tool_choice, fallbacks, tool_choice_on_compaction
+    )
+
+
+@_REPLY_PARAMS_CASES
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+async def test_compaction_request_leaves_off_reply_params_async(
+    respx_mock: MockRouter,
+    tool_choice: BetaToolChoiceParam,
+    output_format: Union[Type[_Forecast], Omit],
+    output_config: BetaOutputConfigParam,
+    fallbacks: Union[List[BetaFallbackParam], Omit],
+    tool_choice_on_compaction: Union[BetaToolChoiceParam, None],
+) -> None:
+    respx_mock.post("/v1/messages").mock(side_effect=_compaction_then_forecast_responses())
+
+    async with AsyncAnthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            system="Be brief.",
+            tools=[_async_weather_tool()],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+            betas=["compact-2026-09-04"],
+            stop_sequences=["STOP"],
+            tool_choice=tool_choice,
+            output_format=output_format,
+            output_config=output_config,
+            fallbacks=fallbacks,
+        )
+        runner.compact_before_next_turn()
+        await runner.until_done()
+
+    _assert_reply_params_are_left_off_the_compaction_request_only(
+        respx_mock, tool_choice, fallbacks, tool_choice_on_compaction
+    )
 
 
 def _sse_message(content_block: Dict[str, Any], stop_reason: str, *deltas: Dict[str, Any]) -> httpx2.Response:

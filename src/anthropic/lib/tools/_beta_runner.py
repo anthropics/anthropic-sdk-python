@@ -7,6 +7,7 @@ from copy import copy
 from typing import (
     TYPE_CHECKING,
     Any,
+    Dict,
     List,
     Union,
     Generic,
@@ -16,6 +17,7 @@ from typing import (
     Iterator,
     Coroutine,
     AsyncIterator,
+    cast,
 )
 from contextlib import contextmanager, asynccontextmanager
 from typing_extensions import Literal, TypedDict, override
@@ -47,6 +49,7 @@ from ..streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 from ...types.beta.beta_stop_reason import BetaStopReason
 from ...types.beta.parsed_beta_message import ResponseFormatT, ParsedBetaMessage, ParsedBetaContentBlock
 from ...types.beta.message_create_params import ParseMessageCreateParamsBase
+from ...types.beta.beta_output_config_param import BetaOutputConfigParam
 from ...types.beta.beta_compaction_config_param import BetaCompactionConfigParam
 from ...types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
 
@@ -102,6 +105,34 @@ def _reject_compaction_param(params: ParseMessageCreateParamsBase[Any]) -> None:
             "`compaction` cannot be set on a tool runner: every request in the loop would compact again. "
             "Call `runner.compact_before_next_turn()` when the conversation should be compacted instead."
         )
+
+
+def _without_format(output_config: BetaOutputConfigParam) -> Dict[str, Any]:
+    return {key: value for key, value in output_config.items() if key != "format"}
+
+
+def _without_compaction_incompatible_params(params: ParseMessageCreateParamsBase[Any]) -> Dict[str, Any]:
+    """A compaction request returns only the compaction block, never a reply, so the API rejects the
+    params that only shape a reply. The runner's later requests keep them.
+    """
+    trimmed: Dict[str, Any] = {**params}
+    for name in ("context_management", "stop_sequences", "output_format"):
+        trimmed.pop(name, None)
+    tool_choice = params.get("tool_choice")
+    if is_given(tool_choice) and tool_choice and tool_choice["type"] in ("any", "tool"):
+        del trimmed["tool_choice"]
+    output_config = params.get("output_config")
+    if is_given(output_config) and output_config:
+        trimmed["output_config"] = _without_format(output_config)
+    fallbacks = params.get("fallbacks")
+    if is_given(fallbacks) and fallbacks and not isinstance(fallbacks, str):
+        trimmed["fallbacks"] = [
+            {**fallback, "output_config": _without_format(fallback_output_config)}
+            if (fallback_output_config := fallback.get("output_config"))
+            else fallback
+            for fallback in fallbacks
+        ]
+    return trimmed
 
 
 class RequestOptions(TypedDict, total=False):
@@ -210,16 +241,14 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
                 "because the API doesn't accept a compaction block together with one. Remove the edit first."
             )
 
-    def _take_compaction_request_params(
+    def _pop_compaction_request_params(
         self, compaction: BetaCompactionConfigParam
     ) -> ParseMessageCreateParamsBase[ResponseFormatT]:
         self._check_can_compact(self._params)
-        params: ParseMessageCreateParamsBase[ResponseFormatT] = {**self._params, "compaction": compaction}
-        # The API refuses `compaction` alongside `context_management`; later requests keep it.
-        params.pop("context_management", None)
+        params = {**_without_compaction_incompatible_params(self._params), "compaction": compaction}
         self._pending_compaction = None
         self._messages_being_compacted = self._params["messages"]
-        return params
+        return cast("ParseMessageCreateParamsBase[ResponseFormatT]", params)
 
     def _prepare_compaction_after_final_turn(
         self, message: ParsedBetaMessage[ResponseFormatT]
@@ -362,7 +391,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
     def _compact(self, compaction: BetaCompactionConfigParam) -> Iterator[RunnerItemT]:
         last_message = self._last_message
         try:
-            with self._handle_request(self._take_compaction_request_params(compaction)) as item:
+            with self._handle_request(self._pop_compaction_request_params(compaction)) as item:
                 yield item
                 message = self._get_last_message()
                 assert message is not None
@@ -590,7 +619,7 @@ class BaseAsyncToolRunner(
     async def _compact(self, compaction: BetaCompactionConfigParam) -> AsyncIterator[RunnerItemT]:
         last_message = self._last_message
         try:
-            async with self._handle_request(self._take_compaction_request_params(compaction)) as item:
+            async with self._handle_request(self._pop_compaction_request_params(compaction)) as item:
                 yield item
                 message = await self._get_last_message()
                 assert message is not None

@@ -95,7 +95,7 @@ for message in runner:
 
 The call only schedules the compaction. Once the current turn has finished, including any tool calls, the runner requests a summary, replaces its message history with the compaction response the API returns, and carries on. A turn that was paused (`pause_turn`) is resumed and finished first. If the current turn is the last one, the runner compacts and then stops. If you call it before iterating, the compaction is the first request.
 
-The compaction response is yielded like any other message and doesn't count towards `max_iterations`. It has `stop_reason == "compaction"`, the summary is in `message.content[0].content`, and its `usage.input_tokens` is the size of the history that was just summarized. Calling `compact_before_next_turn()` while handling that message does nothing, so a threshold like the one above doesn't compact twice.
+The compaction response is yielded like any other message and doesn't count towards `max_iterations`. It has `stop_reason == "compaction"`, the summary is in `message.content[0].content`, and its top-level `usage.input_tokens` and `usage.output_tokens` are 0: what the compaction cost is in `usage.iterations`. Calling `compact_before_next_turn()` while handling that message does nothing, so a threshold like the one above doesn't compact twice.
 
 `compact_before_next_turn()` takes the same config as the `compaction` param of `messages.create()`, for example to give your own summarization instructions:
 
@@ -107,7 +107,7 @@ A few things to know:
 
 - Calling it again before the compaction runs replaces the pending one.
 - The runner doesn't add the beta for you, so pass `betas=["compact-2026-09-04"]`.
-- `context_management` is left out of the compaction request, because the API doesn't accept the two together, and is sent again afterwards. `compact_before_next_turn()` raises if `context_management` has a `compact_*` edit.
+- `context_management`, `stop_sequences`, a `tool_choice` that forces a tool (`any` or `tool`) and the output format (`output_format` or `output_config["format"]`, including the one in each of the `fallbacks`) are left out of the compaction request, because the API doesn't accept them together with `compaction`, and are sent again afterwards. `compact_before_next_turn()` raises if `context_management` has a `compact_*` edit.
 - While you're handling the compaction response, `append_messages()` and replacing `messages` with `set_messages_params()` raise, because the compaction response is about to replace the messages. Other params can still be changed.
 - If the API returns no summary, the runner logs a warning and keeps the history as it is.
 - If the run ends on a turn that was cut short with tool calls that never ran (`stop_reason == "max_tokens"`, for example), the pending compaction is skipped with a warning. It is also skipped if the run stops at `max_iterations` or you `break` out of the loop.
