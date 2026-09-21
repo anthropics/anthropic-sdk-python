@@ -1701,7 +1701,7 @@ def _leave_tools_alone(runner: Any) -> None:
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @_sync_and_async
 @pytest.mark.respx(base_url=base_url)
-async def test_add_tools_registers_the_callable_with_the_request_that_carries_it(
+async def test_add_tools_sends_the_definition_with_the_next_request(
     sync: bool, client: Anthropic, async_client: AsyncAnthropic, respx_mock: MockRouter
 ) -> None:
     respx_mock.post("/v1/messages").mock(
@@ -1884,7 +1884,7 @@ async def test_tool_changes_in_one_turn_are_sent_together_in_call_order(
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @_sync_and_async
 @pytest.mark.respx(base_url=base_url)
-async def test_add_tools_replaces_a_tool_of_the_same_name_from_the_next_request(
+async def test_add_tools_replaces_a_tool_of_the_same_name_straight_away(
     sync: bool, client: Anthropic, async_client: AsyncAnthropic, respx_mock: MockRouter
 ) -> None:
     respx_mock.post("/v1/messages").mock(
@@ -1904,8 +1904,93 @@ async def test_add_tools_replaces_a_tool_of_the_same_name_from_the_next_request(
         script={"msg_toolu_weather": lambda runner: runner.add_tools(new_get_weather)},
     )
 
-    # The call the model made before the swap still ran the old function.
-    assert calls == ["old get_weather", "new get_weather"]
+    # Even the call the model made before the swap ran the new function.
+    assert calls == ["new get_weather", "new get_weather"]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_a_call_already_in_the_turn_gets_the_input_error_of_the_tool_added_under_its_name(
+    sync: bool, client: Anthropic, async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[_calls_tool("get_weather", "toolu_weather"), _end_turn_response()]
+    )
+    calls: list[str] = []
+    old_get_weather = _recording_tool(sync, "get_weather", calls)
+
+    def get_weather(city: str) -> str:
+        calls.append(city)
+        return f"Raining in {city}"
+
+    async def get_weather_async(city: str) -> str:
+        return get_weather(city)
+
+    description = "Lookup the weather for a given city."
+    new_get_weather: Any = (
+        beta_tool(get_weather, description=description)
+        if sync
+        else beta_async_tool(get_weather_async, name="get_weather", description=description)
+    )
+
+    await _run_with_tool_changes(
+        client if sync else async_client,
+        tools=[old_get_weather],
+        script={"msg_toolu_weather": lambda runner: runner.add_tools(new_get_weather)},
+    )
+
+    assert calls == []
+    assert _sent_request_bodies(respx_mock)[1]["messages"][-2:] == [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": "toolu_weather",
+                    "content": "ValueError('Invalid arguments for function get_weather')",
+                    "is_error": True,
+                }
+            ],
+        },
+        _tool_changes_message(_addition(new_get_weather.to_dict())),
+    ]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_a_removed_tool_added_back_while_handling_a_call_to_it_is_run(
+    sync: bool, client: Anthropic, async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _calls_tool("get_time", "toolu_time"),
+            _calls_tool("get_weather", "toolu_weather"),
+            _end_turn_response(),
+        ]
+    )
+    calls: list[str] = []
+    get_time = _recording_tool(sync, "get_time", calls)
+    get_weather = _recording_tool(sync, "get_weather", calls)
+
+    await _run_with_tool_changes(
+        client if sync else async_client,
+        tools=[get_time, get_weather],
+        script={
+            "msg_toolu_time": lambda runner: runner.remove_tools(get_weather),
+            "msg_toolu_weather": lambda runner: runner.add_tools(get_weather),
+        },
+    )
+
+    assert calls == ["get_time", "get_weather"]
+    requests = _sent_request_bodies(respx_mock)
+    # The removal is in the history when the model calls the tool anyway.
+    assert requests[1]["messages"][-1] == _tool_changes_message(_tool_reference_block("tool_removal", "get_weather"))
+    assert requests[2]["messages"][-2:] == [
+        _ran_result("toolu_weather", "get_weather"),
+        _tool_changes_message(_addition(get_weather.to_dict())),
+    ]
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
@@ -2029,6 +2114,43 @@ async def test_tool_changes_go_out_with_the_compaction_request_and_follow_its_re
         _tool_changes_message(_addition(get_weather.to_dict())),
     ]
     assert after["messages"] == [*_compaction_block_alone(), _tool_changes_message(_addition(get_forecast.to_dict()))]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_a_removed_tool_added_back_while_handling_the_compaction_response_is_run(
+    sync: bool, client: Anthropic, async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _calls_tool("get_time", "toolu_time"),
+            _compacted_response(),
+            _calls_tool("get_weather", "toolu_weather"),
+            _end_turn_response(),
+        ]
+    )
+    calls: list[str] = []
+    get_time = _recording_tool(sync, "get_time", calls)
+    get_weather = _recording_tool(sync, "get_weather", calls)
+
+    def remove_weather_and_compact(runner: Any) -> None:
+        runner.remove_tools(get_weather)
+        runner.compact_before_next_turn()
+
+    await _run_with_tool_changes(
+        client if sync else async_client,
+        tools=[get_time, get_weather],
+        script={
+            "msg_toolu_time": remove_weather_and_compact,
+            "msg_compacted": lambda runner: runner.add_tools(get_weather),
+        },
+    )
+
+    assert calls == ["get_time", "get_weather"]
+    _, compaction, after, _ = _sent_request_bodies(respx_mock)
+    assert compaction["messages"][-1] == _tool_changes_message(_tool_reference_block("tool_removal", "get_weather"))
+    assert after["messages"] == [*_compaction_block_alone(), _tool_changes_message(_addition(get_weather.to_dict()))]
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")

@@ -134,7 +134,7 @@ for message in runner:
 
 `add_tools()` takes what `tool_runner(tools=...)` takes: function tools and raw tool definitions. The whole definition is sent to the model either way.
 
-- A function tool can be called from the request that carries its definition. If a tool of the same name is already there, the new function replaces it from that request on; a call the model made before then still runs the old one.
+- A function tool can be called from the request that carries its definition. If a tool of the same name is already there, the new function replaces it straight away: a call the model has already made in the message you're handling runs the new one.
 - Raw definitions are for server tools, such as `{"type": "web_search_20250305", "name": "web_search"}`, which the API runs. The tool runner never runs one: a call to it gets a "not found" error result and a warning, and it stops running a function tool of the same name straight away.
 - An `mcp_toolset` definition also needs its server in `mcp_servers`, which `add_tools()` doesn't change.
 

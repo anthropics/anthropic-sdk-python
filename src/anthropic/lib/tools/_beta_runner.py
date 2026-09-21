@@ -172,7 +172,6 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         self._pending_compaction: BetaCompactionConfigParam | None = None
         self._messages_being_compacted: Iterable[BetaMessageParam] | None = None
         self._pending_tool_changes: list[BetaRequestToolAdditionBlockParam | BetaRequestToolRemovalBlockParam] = []
-        self._pending_tool_additions: list[AnyFunctionToolT] = []
 
     def set_messages_params(
         self,
@@ -283,9 +282,10 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
     def add_tools(self, *tools: AnyFunctionToolT | BetaToolUnionParam) -> None:
         """Give the model more tools without changing the `tools` param, which would miss the prompt cache.
 
-        The definitions are sent in `tool_addition` blocks with the next request, and a function tool can be
-        called from then on. A raw definition is for server tools, such as web search: the tool runner never
-        runs it, and it stops running a function tool of the same name. Requires the `inline-tools-2026-09-15` beta.
+        The definitions are sent in `tool_addition` blocks with the next request. A function tool is run straight
+        away, in place of any tool of the same name, even for a call already in the message being handled. A raw
+        definition is for server tools, such as web search: the tool runner never runs it, and it stops running a
+        function tool of the same name. Requires the `inline-tools-2026-09-15` beta.
 
         Args:
             *tools: Function tools, such as `@beta_tool` functions, or raw tool definitions.
@@ -295,10 +295,10 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
                 definition: BetaToolUnionParam = copy(tool)
                 name = tool.get("name")
                 if isinstance(name, str):
-                    self._stop_running(name)
+                    self._tools_by_name.pop(name, None)
             else:
                 definition = tool.to_dict()
-                self._pending_tool_additions.append(tool)
+                self._tools_by_name[tool.name] = tool
             self._pending_tool_changes.append(
                 {"type": "tool_addition", "tool": {"type": "tool_definition", "definition": definition}}
             )
@@ -314,28 +314,21 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         """
         for tool in tools:
             name = tool if isinstance(tool, str) else tool.name
-            self._stop_running(name)
+            self._tools_by_name.pop(name, None)
             self._pending_tool_changes.append(
                 {"type": "tool_removal", "tool": {"type": "tool_reference", "name": name}}
             )
-
-    def _stop_running(self, name: str) -> None:
-        self._tools_by_name.pop(name, None)
-        self._pending_tool_additions = [tool for tool in self._pending_tool_additions if tool.name != name]
 
     def _send_pending_tool_changes(self, hold: bool) -> None:
         # A turn that stopped on `pause_turn` is sent back to be continued, so it has to stay last.
         if hold or not self._pending_tool_changes:
             return
-        for tool in self._pending_tool_additions:
-            self._tools_by_name[tool.name] = tool
         # Not `append_messages()`: that would make the runner leave this turn's messages for the caller to append.
         self._params = {
             **self._params,
             "messages": [*self._params["messages"], {"role": "system", "content": self._pending_tool_changes}],
         }
         self._pending_tool_changes = []
-        self._pending_tool_additions = []
 
     def _should_stop(self) -> bool:
         if self._max_iterations is not None and self._iteration_count >= self._max_iterations:
@@ -350,7 +343,9 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         for a withdrawn tool; a name absent from this set routes that call down
         the same unknown-tool path as a tool that was never declared.
         """
-        return available_tool_names(self._params["messages"], self._tools_by_name)
+        # Changes made since the last request are not in the history yet.
+        pending: BetaMessageParam = {"role": "system", "content": self._pending_tool_changes}
+        return available_tool_names([*self._params["messages"], pending], self._tools_by_name)
 
 
 class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Generic[RunnerItemT, ResponseFormatT], ABC):
