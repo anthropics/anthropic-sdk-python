@@ -923,6 +923,68 @@ def test_message_delta_fields_are_all_accumulated() -> None:
     }
 
 
+def test_message_delta_omitted_stop_fields_keep_earlier_values() -> None:
+    # regression test for https://github.com/anthropics/anthropic-sdk-python/issues/1940
+    # a message_delta that omits stop_reason/stop_sequence/stop_details must not wipe
+    # values an earlier delta already set, mirroring the existing container guard
+    import httpx2
+
+    from anthropic.lib.streaming import _beta_messages
+    from anthropic.types.beta.beta_raw_message_start_event import BetaRawMessageStartEvent
+
+    headers = httpx2.Headers({"anthropic-beta": "x"})
+
+    snapshot = _beta_messages.accumulate_event(
+        request_headers=headers,
+        event=BetaRawMessageStartEvent.model_validate(
+            {
+                "type": "message_start",
+                "message": {
+                    "id": "msg_1",
+                    "type": "message",
+                    "role": "assistant",
+                    "model": "claude-haiku-4-5",
+                    "content": [],
+                    "stop_reason": None,
+                    "stop_sequence": None,
+                    "usage": {"input_tokens": 10, "output_tokens": 0},
+                },
+            }
+        ),
+        current_snapshot=None,
+        json_bufs={},
+    )
+
+    snapshot = _beta_messages.accumulate_event(
+        request_headers=headers,
+        event=BetaRawMessageDeltaEvent.model_validate(
+            {
+                "type": "message_delta",
+                "delta": {"stop_reason": "end_turn", "stop_sequence": None},
+                "usage": {"output_tokens": 5},
+            }
+        ),
+        current_snapshot=snapshot,
+        json_bufs={},
+    )
+    assert snapshot.stop_reason == "end_turn"
+
+    snapshot = _beta_messages.accumulate_event(
+        request_headers=headers,
+        event=BetaRawMessageDeltaEvent.model_validate(
+            {
+                "type": "message_delta",
+                "delta": {},
+                "usage": {"output_tokens": 9},
+            }
+        ),
+        current_snapshot=snapshot,
+        json_bufs={},
+    )
+    assert snapshot.stop_reason == "end_turn"
+    assert snapshot.usage.output_tokens == 9
+
+
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
 def test_stream_method_definition_in_sync(sync: bool) -> None:
     client: Anthropic | AsyncAnthropic = sync_client if sync else async_client
