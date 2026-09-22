@@ -279,11 +279,8 @@ New code uses modern syntax and names.
 - **Inline a helper that has one caller.** Keep one helper when the same logic appears twice.
 - **Use the named constant.** A default that appears in a signature or docstring uses the named constant, not a copy of its value.
 
-### Comments and docstrings
+### Whitespace
 
-- **Write no comment by default.** When one is needed, keep it to a line or two stating a non-obvious why. Prefer a clearer name to a comment.
-- **Docstrings use plain, complete sentences.**
-- **Non-obvious attributes get a docstring.** An attribute whose use isn't obvious, such as a lock or a completion flag, gets a short `"""` docstring under it saying what it is for.
 - **Attribute docstrings decide the spacing.** If any attribute in a class body has a docstring, put a blank line between every attribute, documented or not. If none has one, keep them packed with no blank lines.
 
   ```python
@@ -297,6 +294,23 @@ New code uses modern syntax and names.
       """Errors worth retrying. Anything else is raised on the first failure."""
   ```
 
+- **One blank line between conceptual blocks.** In a function body, keep the statements that do one step together and put a single blank line between steps: the guard clauses, the setup, the call, the handling of its result. A `return` stays with the statements that compute its value. A short body that does one thing stays packed. Don't use a comment as a separator where a blank line will do.
+
+  ```python
+  def retry_delay(self, attempt: int, *, response: httpx2.Response | None = None) -> float:
+      if response is not None and (retry_after := parse_retry_after(response)) is not None:
+          return min(retry_after, MAX_RETRY_DELAY)
+
+      delay = min(INITIAL_RETRY_DELAY * 2**attempt, MAX_RETRY_DELAY)
+      jitter = 1 - 0.25 * random()
+      return delay * jitter
+  ```
+
+### Comments and docstrings
+
+- **Write no comment by default.** When one is needed, keep it to a line or two stating a non-obvious why. Prefer a clearer name to a comment.
+- **Docstrings use plain, complete sentences.**
+- **Non-obvious attributes get a docstring.** An attribute whose use isn't obvious, such as a lock or a completion flag, gets a short `"""` docstring under it saying what it is for.
 - **Document constructor arguments in `__init__`.** Put them in the `__init__` docstring, even when that repeats the class docstring, so that IDEs show them.
 - **Link, don't name a file.** A docstring points users at a docs page or a file's GitHub URL, not at a bare repository file name such as `tools.md`.
 - **Keep docs accurate.** Keep docstrings, `helpers.md`, and `tools.md` accurate when the API changes. Public docs are for users: call the package "Claude SDK for Python" and leave out internal layout.
