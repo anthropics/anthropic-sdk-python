@@ -395,7 +395,10 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
 
     def _validate_path(self, path: str) -> Path:
         """Validate and resolve memory paths"""
-        if not path.startswith("/memories"):
+        # The separator matters: without it "/memoriesX" passes the prefix check and
+        # then slices down to "X", so a path that names something outside the store
+        # is silently re-pointed at <root>/X.
+        if path != "/memories" and not path.startswith("/memories/"):
             raise ToolError(f"Path must start with /memories, got: {path}")
 
         relative_path = path[len("/memories") :].lstrip("/")
@@ -681,7 +684,10 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
 
     async def _validate_path(self, path: str) -> AsyncPath:
         """Validate and resolve memory paths"""
-        if not path.startswith("/memories"):
+        # The separator matters: without it "/memoriesX" passes the prefix check and
+        # then slices down to "X", so a path that names something outside the store
+        # is silently re-pointed at <root>/X.
+        if path != "/memories" and not path.startswith("/memories/"):
             raise ToolError(f"Path must start with /memories, got: {path}")
 
         relative_path = path[len("/memories") :].lstrip("/")

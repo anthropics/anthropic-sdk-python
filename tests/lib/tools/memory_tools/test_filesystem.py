@@ -449,6 +449,27 @@ class TestBetaLocalFilesystemMemoryTool:
         with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
             sync_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories"))
 
+    @pytest.mark.parametrize("path", ["/memoriesX", "/memoriesXY/z.md", "/memoriessub", "/memories."])
+    def test_paths_sharing_the_prefix_without_a_separator_are_rejected(
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool, temp_directory: str, path: str
+    ) -> None:
+        """Paths that share the prefix without a separator name nothing inside the
+        store. Unchecked, they slice down to a relative path and land on a real
+        entry: delete "/memoriessub" removes <root>/sub and reports success."""
+        sync_local_filesystem_tool.create(
+            BetaMemoryTool20250818CreateCommand(command="create", file_text="keep me", path="/memories/sub/a.txt")
+        )
+
+        with pytest.raises(ToolError, match="Path must start with /memories"):
+            sync_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path=path))
+
+        with pytest.raises(ToolError, match="Path must start with /memories"):
+            sync_local_filesystem_tool.create(
+                BetaMemoryTool20250818CreateCommand(command="create", file_text="written", path=path)
+            )
+
+        assert get_directory_snapshot(temp_directory) == {"memories/sub/a.txt": "keep me"}
+
     def test_rename(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
         sync_local_filesystem_tool.create(
             BetaMemoryTool20250818CreateCommand(
@@ -987,6 +1008,27 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
             await async_local_filesystem_tool.delete(
                 BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories")
             )
+
+    @pytest.mark.parametrize("path", ["/memoriesX", "/memoriesXY/z.md", "/memoriessub", "/memories."])
+    async def test_paths_sharing_the_prefix_without_a_separator_are_rejected(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool, temp_directory: str, path: str
+    ) -> None:
+        """Paths that share the prefix without a separator name nothing inside the
+        store. Unchecked, they slice down to a relative path and land on a real
+        entry: delete "/memoriessub" removes <root>/sub and reports success."""
+        await async_local_filesystem_tool.create(
+            BetaMemoryTool20250818CreateCommand(command="create", file_text="keep me", path="/memories/sub/a.txt")
+        )
+
+        with pytest.raises(ToolError, match="Path must start with /memories"):
+            await async_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path=path))
+
+        with pytest.raises(ToolError, match="Path must start with /memories"):
+            await async_local_filesystem_tool.create(
+                BetaMemoryTool20250818CreateCommand(command="create", file_text="written", path=path)
+            )
+
+        assert get_directory_snapshot(temp_directory) == {"memories/sub/a.txt": "keep me"}
 
     async def test_rename(self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool) -> None:
         await async_local_filesystem_tool.create(
