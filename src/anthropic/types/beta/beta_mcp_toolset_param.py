@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Dict, Iterable, Optional
 from typing_extensions import Literal, Required, TypedDict
 
+from .beta_mcp_tool_param_param import BetaMCPToolParamParam
 from .beta_mcp_tool_config_param import BetaMCPToolConfigParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 from .beta_mcp_tool_default_config_param import BetaMCPToolDefaultConfigParam
@@ -30,3 +31,11 @@ class BetaMCPToolsetParam(TypedDict, total=False):
 
     default_config: BetaMCPToolDefaultConfigParam
     """Default configuration applied to all tools from this server"""
+
+    tools: Optional[Iterable[BetaMCPToolParamParam]]
+    """
+    The server's tool listing, pinned: when present, the server is not asked for its
+    tools before sampling and exactly these entries, with `default_config` and
+    `configs` applied, are the toolset's tools. Copy it from the `mcp_tool_listing`
+    block of an earlier response.
+    """

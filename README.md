@@ -35,7 +35,7 @@ message = client.messages.create(
         }
     ],
 
-    model="claude-opus-5",
+    model="claude-opus-5-5",
 )
 
 print(message.content)

@@ -13,6 +13,7 @@ __all__ = ["CredentialUpdateParams", "Auth"]
 
 class CredentialUpdateParams(TypedDict, total=False):
     vault_id: Required[str]
+    """Identifier of the vault containing the credential."""
 
     auth: Auth
     """Updated authentication details for a credential."""
@@ -31,6 +32,14 @@ class CredentialUpdateParams(TypedDict, total=False):
     """Optional header to specify the beta version(s) you want to use."""
 
     workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """
 
 
 Auth: TypeAlias = Union[

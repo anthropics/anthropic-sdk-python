@@ -16,7 +16,7 @@ from .events import (
     AsyncEventsWithStreamingResponse,
 )
 from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from .resources import (
     Resources,
     AsyncResources,
@@ -35,9 +35,7 @@ from ...._response import (
 )
 from ....pagination import SyncBidirectionalPageCursor, AsyncBidirectionalPageCursor
 from ....types.beta import (
-    session_list_params,
     session_create_params,
-    session_update_params,
 )
 from ...._base_client import AsyncPaginator, make_request_options
 from .threads.threads import (
@@ -136,6 +134,13 @@ class Sessions(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -158,19 +163,16 @@ class Sessions(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             "/v1/sessions?beta=true",
-            body=maybe_transform(
-                {
-                    "agent": agent,
-                    "environment_id": environment_id,
-                    "budget": budget,
-                    "initial_events": initial_events,
-                    "metadata": metadata,
-                    "resources": resources,
-                    "title": title,
-                    "vault_ids": vault_ids,
-                },
-                session_create_params.SessionCreateParams,
-            ),
+            body={
+                "agent": agent,
+                "environment_id": environment_id,
+                "budget": budget,
+                "initial_events": initial_events,
+                "metadata": metadata,
+                "resources": resources,
+                "title": title,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -195,6 +197,13 @@ class Sessions(SyncAPIResource):
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -266,6 +275,13 @@ class Sessions(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -290,16 +306,13 @@ class Sessions(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/sessions/{session_id}?beta=true", session_id=session_id),
-            body=maybe_transform(
-                {
-                    "agent": agent,
-                    "budget": budget,
-                    "metadata": metadata,
-                    "title": title,
-                    "vault_ids": vault_ids,
-                },
-                session_update_params.SessionUpdateParams,
-            ),
+            body={
+                "agent": agent,
+                "budget": budget,
+                "metadata": metadata,
+                "title": title,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -366,6 +379,13 @@ class Sessions(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -394,24 +414,21 @@ class Sessions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "agent_id": agent_id,
-                        "agent_version": agent_version,
-                        "created_at_gt": created_at_gt,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lt": created_at_lt,
-                        "created_at_lte": created_at_lte,
-                        "deployment_id": deployment_id,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "memory_store_id": memory_store_id,
-                        "order": order,
-                        "page": page,
-                        "statuses": statuses,
-                    },
-                    session_list_params.SessionListParams,
-                ),
+                query={
+                    "agent_id": agent_id,
+                    "agent_version": agent_version,
+                    "created_at[gt]": created_at_gt,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lt]": created_at_lt,
+                    "created_at[lte]": created_at_lte,
+                    "deployment_id": deployment_id,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "memory_store_id": memory_store_id,
+                    "order": order,
+                    "page": page,
+                    "statuses": statuses,
+                },
             ),
             model=BetaManagedAgentsSession,
         )
@@ -434,6 +451,13 @@ class Sessions(SyncAPIResource):
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -483,6 +507,13 @@ class Sessions(SyncAPIResource):
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -594,6 +625,13 @@ class AsyncSessions(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -616,19 +654,16 @@ class AsyncSessions(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             "/v1/sessions?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "agent": agent,
-                    "environment_id": environment_id,
-                    "budget": budget,
-                    "initial_events": initial_events,
-                    "metadata": metadata,
-                    "resources": resources,
-                    "title": title,
-                    "vault_ids": vault_ids,
-                },
-                session_create_params.SessionCreateParams,
-            ),
+            body={
+                "agent": agent,
+                "environment_id": environment_id,
+                "budget": budget,
+                "initial_events": initial_events,
+                "metadata": metadata,
+                "resources": resources,
+                "title": title,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -653,6 +688,13 @@ class AsyncSessions(AsyncAPIResource):
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -724,6 +766,13 @@ class AsyncSessions(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -748,16 +797,13 @@ class AsyncSessions(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/sessions/{session_id}?beta=true", session_id=session_id),
-            body=await async_maybe_transform(
-                {
-                    "agent": agent,
-                    "budget": budget,
-                    "metadata": metadata,
-                    "title": title,
-                    "vault_ids": vault_ids,
-                },
-                session_update_params.SessionUpdateParams,
-            ),
+            body={
+                "agent": agent,
+                "budget": budget,
+                "metadata": metadata,
+                "title": title,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -824,6 +870,13 @@ class AsyncSessions(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -852,24 +905,21 @@ class AsyncSessions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "agent_id": agent_id,
-                        "agent_version": agent_version,
-                        "created_at_gt": created_at_gt,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lt": created_at_lt,
-                        "created_at_lte": created_at_lte,
-                        "deployment_id": deployment_id,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "memory_store_id": memory_store_id,
-                        "order": order,
-                        "page": page,
-                        "statuses": statuses,
-                    },
-                    session_list_params.SessionListParams,
-                ),
+                query={
+                    "agent_id": agent_id,
+                    "agent_version": agent_version,
+                    "created_at[gt]": created_at_gt,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lt]": created_at_lt,
+                    "created_at[lte]": created_at_lte,
+                    "deployment_id": deployment_id,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "memory_store_id": memory_store_id,
+                    "order": order,
+                    "page": page,
+                    "statuses": statuses,
+                },
             ),
             model=BetaManagedAgentsSession,
         )
@@ -892,6 +942,13 @@ class AsyncSessions(AsyncAPIResource):
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -941,6 +998,13 @@ class AsyncSessions(AsyncAPIResource):
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 

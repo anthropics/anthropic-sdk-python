@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import Dict, List, Union, Optional
 from datetime import datetime
-from typing_extensions import Literal, Annotated, TypedDict
+from typing_extensions import Literal, TypedDict
 
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_user_profile_external_user_details_params import BetaUserProfileExternalUserDetailsParams
 
@@ -19,6 +18,12 @@ class UserProfileCreateParams(TypedDict, total=False):
     and the profile represents an individual end-user of that product.
     `passthrough`: the platform resells raw inference, and the profile identifies
     the resold-to company.
+
+    - `application` - The user profile represents an individual end-user of a
+      product that the platform builds on the API. New profiles get this value by
+      default.
+    - `passthrough` - The user profile represents a company that the platform
+      resells Claude access to.
     """
 
     external_id: Optional[str]
@@ -36,7 +41,7 @@ class UserProfileCreateParams(TypedDict, total=False):
     header only.
     """
 
-    external_user_onboarded_at: Annotated[Union[str, datetime], PropertyInfo(format="iso8601")]
+    external_user_onboarded_at: Union[str, datetime]
     """A timestamp in RFC 3339 format"""
 
     metadata: Dict[str, str]
@@ -58,3 +63,11 @@ class UserProfileCreateParams(TypedDict, total=False):
     """Optional header to specify the beta version(s) you want to use."""
 
     workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """

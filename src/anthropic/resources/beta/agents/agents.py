@@ -15,7 +15,7 @@ from .versions import (
     AsyncVersionsWithStreamingResponse,
 )
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -27,10 +27,8 @@ from ...._response import (
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ....types.beta import (
     BetaManagedAgentsMultiagentParams,
-    agent_list_params,
     agent_create_params,
     agent_update_params,
-    agent_retrieve_params,
 )
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.anthropic_beta_param import AnthropicBetaParam
@@ -121,6 +119,13 @@ class Agents(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -143,20 +148,17 @@ class Agents(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             "/v1/agents?beta=true",
-            body=maybe_transform(
-                {
-                    "model": model,
-                    "name": name,
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "multiagent": multiagent,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                },
-                agent_create_params.AgentCreateParams,
-            ),
+            body={
+                "model": model,
+                "name": name,
+                "description": description,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "multiagent": multiagent,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -177,15 +179,23 @@ class Agents(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Get Agent
+        """
+        Get Agent
 
         Args:
-          version: Agent version.
+          agent_id: Unique identifier of the agent to retrieve.
 
-        Omit for the most recent version. Must be at least 1 if
+          version: Agent version. Omit for the most recent version. Must be at least 1 if
               specified.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -216,7 +226,7 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"version": version}, agent_retrieve_params.AgentRetrieveParams),
+                query={"version": version},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -244,12 +254,13 @@ class Agents(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Update Agent
+        """
+        Update Agent
 
         Args:
-          description: Description.
+          agent_id: Unique identifier of the agent to update.
 
-        Omit to preserve; send empty string or null to clear.
+          description: Description. Omit to preserve; send empty string or null to clear.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
               clear. Names must be unique. Maximum 20. Every server must be referenced by an
@@ -286,6 +297,13 @@ class Agents(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -310,21 +328,18 @@ class Agents(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
-            body=maybe_transform(
-                {
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "model": model,
-                    "multiagent": multiagent,
-                    "name": name,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                    "version": version,
-                },
-                agent_update_params.AgentUpdateParams,
-            ),
+            body={
+                "description": description,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "model": model,
+                "multiagent": multiagent,
+                "name": name,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+                "version": version,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -364,6 +379,13 @@ class Agents(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -392,16 +414,13 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    agent_list_params.AgentListParams,
-                ),
+                query={
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsAgent,
         )
@@ -423,7 +442,16 @@ class Agents(SyncAPIResource):
         Archive Agent
 
         Args:
+          agent_id: Unique identifier of the agent to archive.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -535,6 +563,13 @@ class AsyncAgents(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -557,20 +592,17 @@ class AsyncAgents(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             "/v1/agents?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "model": model,
-                    "name": name,
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "multiagent": multiagent,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                },
-                agent_create_params.AgentCreateParams,
-            ),
+            body={
+                "model": model,
+                "name": name,
+                "description": description,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "multiagent": multiagent,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -591,15 +623,23 @@ class AsyncAgents(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Get Agent
+        """
+        Get Agent
 
         Args:
-          version: Agent version.
+          agent_id: Unique identifier of the agent to retrieve.
 
-        Omit for the most recent version. Must be at least 1 if
+          version: Agent version. Omit for the most recent version. Must be at least 1 if
               specified.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -630,7 +670,7 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform({"version": version}, agent_retrieve_params.AgentRetrieveParams),
+                query={"version": version},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -658,12 +698,13 @@ class AsyncAgents(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Update Agent
+        """
+        Update Agent
 
         Args:
-          description: Description.
+          agent_id: Unique identifier of the agent to update.
 
-        Omit to preserve; send empty string or null to clear.
+          description: Description. Omit to preserve; send empty string or null to clear.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
               clear. Names must be unique. Maximum 20. Every server must be referenced by an
@@ -700,6 +741,13 @@ class AsyncAgents(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -724,21 +772,18 @@ class AsyncAgents(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
-            body=await async_maybe_transform(
-                {
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "model": model,
-                    "multiagent": multiagent,
-                    "name": name,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                    "version": version,
-                },
-                agent_update_params.AgentUpdateParams,
-            ),
+            body={
+                "description": description,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "model": model,
+                "multiagent": multiagent,
+                "name": name,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+                "version": version,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -778,6 +823,13 @@ class AsyncAgents(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -806,16 +858,13 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    agent_list_params.AgentListParams,
-                ),
+                query={
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsAgent,
         )
@@ -837,7 +886,16 @@ class AsyncAgents(AsyncAPIResource):
         Archive Agent
 
         Args:
+          agent_id: Unique identifier of the agent to archive.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 

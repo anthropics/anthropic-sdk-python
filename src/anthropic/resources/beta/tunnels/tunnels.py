@@ -6,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -24,7 +24,6 @@ from .certificates import (
     AsyncCertificatesWithStreamingResponse,
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
-from ....types.beta import tunnel_list_params, tunnel_create_params, tunnel_rotate_token_params
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.beta.beta_tunnel import BetaTunnel
 from ....types.anthropic_beta_param import AnthropicBetaParam
@@ -86,6 +85,13 @@ class Tunnels(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -108,7 +114,7 @@ class Tunnels(SyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
             "/v1/tunnels?beta=true",
-            body=maybe_transform({"display_name": display_name}, tunnel_create_params.TunnelCreateParams),
+            body={"display_name": display_name},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -138,7 +144,16 @@ class Tunnels(SyncAPIResource):
         Fetches a tunnel by ID.
 
         Args:
+          tunnel_id: ID of the tunnel (`tnl_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -204,6 +219,13 @@ class Tunnels(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -232,14 +254,11 @@ class Tunnels(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    tunnel_list_params.TunnelListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaTunnel,
         )
@@ -270,7 +289,16 @@ class Tunnels(SyncAPIResource):
         already-archived tunnel returns the existing record unchanged.
 
         Args:
+          tunnel_id: ID of the tunnel (`tnl_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -328,7 +356,16 @@ class Tunnels(SyncAPIResource):
         access logs.
 
         Args:
+          tunnel_id: ID of the tunnel (`tnl_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -386,9 +423,18 @@ class Tunnels(SyncAPIResource):
         severed. A connector restarted after rotation must use the new value.
 
         Args:
+          tunnel_id: ID of the tunnel (`tnl_...`).
+
           reason: Optional free-text reason for the rotation, recorded for audit.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -414,7 +460,7 @@ class Tunnels(SyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
             path_template("/v1/tunnels/{tunnel_id}/rotate_token?beta=true", tunnel_id=tunnel_id),
-            body=maybe_transform({"reason": reason}, tunnel_rotate_token_params.TunnelRotateTokenParams),
+            body={"reason": reason},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -475,6 +521,13 @@ class AsyncTunnels(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -497,7 +550,7 @@ class AsyncTunnels(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
             "/v1/tunnels?beta=true",
-            body=await async_maybe_transform({"display_name": display_name}, tunnel_create_params.TunnelCreateParams),
+            body={"display_name": display_name},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -527,7 +580,16 @@ class AsyncTunnels(AsyncAPIResource):
         Fetches a tunnel by ID.
 
         Args:
+          tunnel_id: ID of the tunnel (`tnl_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -593,6 +655,13 @@ class AsyncTunnels(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -621,14 +690,11 @@ class AsyncTunnels(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    tunnel_list_params.TunnelListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaTunnel,
         )
@@ -659,7 +725,16 @@ class AsyncTunnels(AsyncAPIResource):
         already-archived tunnel returns the existing record unchanged.
 
         Args:
+          tunnel_id: ID of the tunnel (`tnl_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -717,7 +792,16 @@ class AsyncTunnels(AsyncAPIResource):
         access logs.
 
         Args:
+          tunnel_id: ID of the tunnel (`tnl_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -775,9 +859,18 @@ class AsyncTunnels(AsyncAPIResource):
         severed. A connector restarted after rotation must use the new value.
 
         Args:
+          tunnel_id: ID of the tunnel (`tnl_...`).
+
           reason: Optional free-text reason for the rotation, recorded for audit.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -803,7 +896,7 @@ class AsyncTunnels(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/tunnels/{tunnel_id}/rotate_token?beta=true", tunnel_id=tunnel_id),
-            body=await async_maybe_transform({"reason": reason}, tunnel_rotate_token_params.TunnelRotateTokenParams),
+            body={"reason": reason},
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),

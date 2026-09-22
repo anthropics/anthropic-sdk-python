@@ -6,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -17,7 +17,7 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.vaults import credential_list_params, credential_create_params, credential_update_params
+from ....types.beta.vaults import credential_create_params, credential_update_params
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.vaults.beta_managed_agents_credential import BetaManagedAgentsCredential
 from ....types.beta.vaults.beta_managed_agents_deleted_credential import BetaManagedAgentsDeletedCredential
@@ -66,6 +66,8 @@ class Credentials(SyncAPIResource):
         Create Credential
 
         Args:
+          vault_id: Identifier of the vault to create the credential in.
+
           auth: Authentication details for creating a credential.
 
           display_name: Human-readable name for the credential. Up to 255 characters.
@@ -74,6 +76,13 @@ class Credentials(SyncAPIResource):
               up to 64 chars, values up to 512 chars.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -99,14 +108,11 @@ class Credentials(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/vaults/{vault_id}/credentials?beta=true", vault_id=vault_id),
-            body=maybe_transform(
-                {
-                    "auth": auth,
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                credential_create_params.CredentialCreateParams,
-            ),
+            body={
+                "auth": auth,
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -131,7 +137,18 @@ class Credentials(SyncAPIResource):
         Get Credential
 
         Args:
+          vault_id: Identifier of the vault containing the credential.
+
+          credential_id: Unique identifier of the credential to retrieve.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -190,6 +207,10 @@ class Credentials(SyncAPIResource):
         Update Credential
 
         Args:
+          vault_id: Identifier of the vault containing the credential.
+
+          credential_id: Unique identifier of the credential to update.
+
           auth: Updated authentication details for a credential.
 
           display_name: Updated human-readable name for the credential. 1-255 characters.
@@ -198,6 +219,13 @@ class Credentials(SyncAPIResource):
               Omitted keys are preserved.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -229,14 +257,11 @@ class Credentials(SyncAPIResource):
                 vault_id=vault_id,
                 credential_id=credential_id,
             ),
-            body=maybe_transform(
-                {
-                    "auth": auth,
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                credential_update_params.CredentialUpdateParams,
-            ),
+            body={
+                "auth": auth,
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -263,6 +288,8 @@ class Credentials(SyncAPIResource):
         List Credentials
 
         Args:
+          vault_id: Identifier of the vault to list credentials for.
+
           include_archived: Whether to include archived credentials in the results.
 
           limit: Maximum number of credentials to return per page. Defaults to 20, maximum 100.
@@ -270,6 +297,13 @@ class Credentials(SyncAPIResource):
           page: Opaque pagination token from a previous `list_credentials` response.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -301,14 +335,11 @@ class Credentials(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    credential_list_params.CredentialListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsCredential,
         )
@@ -331,7 +362,18 @@ class Credentials(SyncAPIResource):
         Delete Credential
 
         Args:
+          vault_id: Identifier of the vault containing the credential.
+
+          credential_id: Unique identifier of the credential to delete.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -387,7 +429,18 @@ class Credentials(SyncAPIResource):
         Archive Credential
 
         Args:
+          vault_id: Identifier of the vault containing the credential.
+
+          credential_id: Unique identifier of the credential to archive.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -443,7 +496,18 @@ class Credentials(SyncAPIResource):
         Validate Credential
 
         Args:
+          vault_id: Identifier of the vault containing the credential.
+
+          credential_id: Unique identifier of the credential to validate.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -522,6 +586,8 @@ class AsyncCredentials(AsyncAPIResource):
         Create Credential
 
         Args:
+          vault_id: Identifier of the vault to create the credential in.
+
           auth: Authentication details for creating a credential.
 
           display_name: Human-readable name for the credential. Up to 255 characters.
@@ -530,6 +596,13 @@ class AsyncCredentials(AsyncAPIResource):
               up to 64 chars, values up to 512 chars.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -555,14 +628,11 @@ class AsyncCredentials(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/vaults/{vault_id}/credentials?beta=true", vault_id=vault_id),
-            body=await async_maybe_transform(
-                {
-                    "auth": auth,
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                credential_create_params.CredentialCreateParams,
-            ),
+            body={
+                "auth": auth,
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -587,7 +657,18 @@ class AsyncCredentials(AsyncAPIResource):
         Get Credential
 
         Args:
+          vault_id: Identifier of the vault containing the credential.
+
+          credential_id: Unique identifier of the credential to retrieve.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -646,6 +727,10 @@ class AsyncCredentials(AsyncAPIResource):
         Update Credential
 
         Args:
+          vault_id: Identifier of the vault containing the credential.
+
+          credential_id: Unique identifier of the credential to update.
+
           auth: Updated authentication details for a credential.
 
           display_name: Updated human-readable name for the credential. 1-255 characters.
@@ -654,6 +739,13 @@ class AsyncCredentials(AsyncAPIResource):
               Omitted keys are preserved.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -685,14 +777,11 @@ class AsyncCredentials(AsyncAPIResource):
                 vault_id=vault_id,
                 credential_id=credential_id,
             ),
-            body=await async_maybe_transform(
-                {
-                    "auth": auth,
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                credential_update_params.CredentialUpdateParams,
-            ),
+            body={
+                "auth": auth,
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -719,6 +808,8 @@ class AsyncCredentials(AsyncAPIResource):
         List Credentials
 
         Args:
+          vault_id: Identifier of the vault to list credentials for.
+
           include_archived: Whether to include archived credentials in the results.
 
           limit: Maximum number of credentials to return per page. Defaults to 20, maximum 100.
@@ -726,6 +817,13 @@ class AsyncCredentials(AsyncAPIResource):
           page: Opaque pagination token from a previous `list_credentials` response.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -757,14 +855,11 @@ class AsyncCredentials(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    credential_list_params.CredentialListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaManagedAgentsCredential,
         )
@@ -787,7 +882,18 @@ class AsyncCredentials(AsyncAPIResource):
         Delete Credential
 
         Args:
+          vault_id: Identifier of the vault containing the credential.
+
+          credential_id: Unique identifier of the credential to delete.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -843,7 +949,18 @@ class AsyncCredentials(AsyncAPIResource):
         Archive Credential
 
         Args:
+          vault_id: Identifier of the vault containing the credential.
+
+          credential_id: Unique identifier of the credential to archive.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -899,7 +1016,18 @@ class AsyncCredentials(AsyncAPIResource):
         Validate Credential
 
         Args:
+          vault_id: Identifier of the vault containing the credential.
+
+          credential_id: Unique identifier of the credential to validate.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 

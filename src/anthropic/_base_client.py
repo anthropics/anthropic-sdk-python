@@ -64,7 +64,17 @@ from ._types import (
     omit,
     not_given,
 )
-from ._utils import is_dict, is_list, asyncify, is_given, lru_cache, is_mapping
+from ._utils import (
+    is_dict,
+    is_list,
+    asyncify,
+    is_given,
+    lru_cache,
+    is_mapping,
+    strip_omit,
+    prepare_request_data,
+    async_prepare_request_data,
+)
 from ._compat import PYDANTIC_V1, model_copy, model_dump
 from ._models import GenericModel, FinalRequestOptions, validate_type, construct_type
 from ._request import APIRequest
@@ -320,17 +330,20 @@ class AsyncPaginator(Generic[_T, AsyncPageT]):
         return self._get_page().__await__()
 
     async def _get_page(self) -> AsyncPageT:
+        # the page sends its options again for the next page, so it has to keep the prepared ones
+        self._options = options = await self._client._copy_and_prepare(self._options)
+
         def _parser(resp: AsyncPageT) -> AsyncPageT:
             resp._set_private_attributes(
                 model=self._model,
-                options=self._options,
+                options=options,
                 client=self._client,
             )
             return resp
 
-        self._options.post_parser = _parser
+        options.post_parser = _parser
 
-        return await self._client.request(self._page_cls, self._options)
+        return await self._client.request(self._page_cls, options)
 
     async def __aiter__(self) -> AsyncIterator[_T]:
         # https://github.com/microsoft/pyright/issues/3464
@@ -520,9 +533,11 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
                 model_dump(
                     options,
                     exclude_unset=True,
-                    # Pydantic v1 can't dump every type we support in content, so we exclude it for now.
+                    # Pydantic v1's `.dict()` can't copy every value these fields may hold: some `content`
+                    # types, and the `extra_body` of a GET, which is left unprepared (e.g. a generator).
                     exclude={
                         "content",
+                        "extra_json",
                     }
                     if PYDANTIC_V1
                     else {},
@@ -1119,9 +1134,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         # create a copy of the options we were given so that if the
         # options are mutated later & we then retry, the retries are
         # given the original options
-        input_options = model_copy(options)
-        # merged ahead of `_prepare_options` so that client hooks and middleware see `extra_body` too
-        _merge_extra_json(input_options)
+        input_options = self._copy_and_prepare(options)
         if input_options.idempotency_key is None and input_options.method.lower() != "get":
             # ensure the idempotency key is reused between requests
             input_options.idempotency_key = self._idempotency_key()
@@ -1316,6 +1329,22 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
 
         return response, options
 
+    def _copy_and_prepare(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        """A copy of `options` with `extra_body` merged into the body, and the body and query prepared.
+
+        The data is walked once per request, before the retry loop, as it may hold one-shot iterators
+        and file reads, which a retry cannot repeat. A GET sends no body, so its data is not read at all.
+        """
+        options = model_copy(options)
+        if options.method.lower() != "get":
+            _merge_extra_json(options)
+            options.json_data = prepare_request_data(options.json_data, location="body")
+
+        if options.params:
+            options.params = prepare_request_data(options.params, location="query", keep_top_level_omit=True)
+
+        return options
+
     def _sleep_for_retry(
         self, *, retries_taken: int, max_retries: int, options: FinalRequestOptions, response: httpx2.Response | None
     ) -> None:
@@ -1390,6 +1419,9 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         page: Type[SyncPageT],
         options: FinalRequestOptions,
     ) -> SyncPageT:
+        # the page sends its options again for the next page, so it has to keep the prepared ones
+        options = self._copy_and_prepare(options)
+
         def _parser(resp: SyncPageT) -> SyncPageT:
             resp._set_private_attributes(
                 client=self,
@@ -1822,9 +1854,7 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         # create a copy of the options we were given so that if the
         # options are mutated later & we then retry, the retries are
         # given the original options
-        input_options = model_copy(options)
-        # merged ahead of `_prepare_options` so that client hooks and middleware see `extra_body` too
-        _merge_extra_json(input_options)
+        input_options = await self._copy_and_prepare(options)
         if input_options.idempotency_key is None and input_options.method.lower() != "get":
             # ensure the idempotency key is reused between requests
             input_options.idempotency_key = self._idempotency_key()
@@ -2026,6 +2056,24 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         log.debug("workspace_id: %s", response.headers.get("anthropic-workspace-id"))
 
         return response, options
+
+    async def _copy_and_prepare(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        """A copy of `options` with `extra_body` merged into the body, and the body and query prepared.
+
+        The data is walked once per request, before the retry loop, as it may hold one-shot iterators
+        and file reads, which a retry cannot repeat. A GET sends no body, so its data is not read at all.
+        """
+        options = model_copy(options)
+        if options.method.lower() != "get":
+            _merge_extra_json(options)
+            options.json_data = await async_prepare_request_data(options.json_data, location="body")
+
+        if options.params:
+            options.params = await async_prepare_request_data(
+                options.params, location="query", keep_top_level_omit=True
+            )
+
+        return options
 
     async def _sleep_for_retry(
         self, *, retries_taken: int, max_retries: int, options: FinalRequestOptions, response: httpx2.Response | None
@@ -2298,7 +2346,7 @@ def make_request_options(
         options["extra_json"] = cast(AnyMapping, extra_body)
 
     if query is not None:
-        options["params"] = query
+        options["params"] = strip_omit(query)
 
     if extra_query is not None:
         options["params"] = {**options.get("params", {}), **extra_query}

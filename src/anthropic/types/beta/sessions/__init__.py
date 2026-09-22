@@ -163,6 +163,9 @@ from .beta_managed_agents_user_define_outcome_event import (
 from .beta_managed_agents_user_message_event_params import (
     BetaManagedAgentsUserMessageEventParams as BetaManagedAgentsUserMessageEventParams,
 )
+from .beta_managed_agents_agent_evaluated_permission import (
+    BetaManagedAgentsAgentEvaluatedPermission as BetaManagedAgentsAgentEvaluatedPermission,
+)
 from .beta_managed_agents_agent_tool_evaluation_auto import (
     BetaManagedAgentsAgentToolEvaluationAuto as BetaManagedAgentsAgentToolEvaluationAuto,
 )

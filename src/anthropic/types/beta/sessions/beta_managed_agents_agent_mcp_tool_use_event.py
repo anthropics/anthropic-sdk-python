@@ -4,6 +4,7 @@ from typing_extensions import Literal
 
 from ...._models import BaseModel
 from .beta_managed_agents_agent_tool_evaluation import BetaManagedAgentsAgentToolEvaluation
+from .beta_managed_agents_agent_evaluated_permission import BetaManagedAgentsAgentEvaluatedPermission
 
 __all__ = ["BetaManagedAgentsAgentMCPToolUseEvent"]
 
@@ -28,7 +29,7 @@ class BetaManagedAgentsAgentMCPToolUseEvent(BaseModel):
 
     type: Literal["agent.mcp_tool_use"]
 
-    evaluated_permission: Optional[Literal["allow", "ask", "deny"]] = None
+    evaluated_permission: Optional[BetaManagedAgentsAgentEvaluatedPermission] = None
     """AgentEvaluatedPermission enum"""
 
     evaluation: Optional[BetaManagedAgentsAgentToolEvaluation] = None

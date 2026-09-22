@@ -74,15 +74,10 @@ markdown-it-py==4.0.0
     # via rich
 mdurl==0.1.2
     # via markdown-it-py
-mypy==1.17.0
-mypy-extensions==1.1.0
-    # via mypy
 nodeenv==1.10.0
     # via pyright
 packaging==26.0
     # via pytest
-pathspec==1.0.4
-    # via mypy
 pluggy==1.6.0
     # via pytest
 pydantic==2.12.5
@@ -113,7 +108,6 @@ time-machine==3.2.0
 tomli==2.4.0 ; python_full_version < '3.11'
     # via
     #   inline-snapshot
-    #   mypy
     #   pytest
 truststore==0.10.4
     # via
@@ -131,7 +125,6 @@ typing-extensions==4.15.0
     #   exceptiongroup
     #   httpx2
     #   inline-snapshot
-    #   mypy
     #   pydantic
     #   pydantic-core
     #   pyright

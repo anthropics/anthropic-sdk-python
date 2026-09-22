@@ -30,6 +30,7 @@ from anthropic import (
     AsyncAnthropicBedrock,
     AnthropicBedrockMantle,
     AsyncAnthropicBedrockMantle,
+    omit,
 )
 from anthropic._models import FinalRequestOptions
 from anthropic.lib.aws import AnthropicAWS, AsyncAnthropicAWS
@@ -619,6 +620,53 @@ class TestSyncMiddleware:
         response = recorder.results[0]
         assert isinstance(response, APIResponse)
         assert response.parse() is message
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_middleware_sees_prepared_body(self, respx_mock: MockRouter, tmp_path: Path) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
+
+        recorder = RecordingMiddleware()
+        client = make_sync_client(middleware=[recorder])
+
+        image = tmp_path / "image.png"
+        image.write_bytes(b"abc")
+
+        client.messages.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": image}}
+                    ],
+                }
+            ],
+            model="claude-opus-4-6",
+            system=omit,
+            extra_body={"zzz": 1},
+            extra_query={"q": omit, "r": 1},
+        )
+
+        # by the time middleware runs the file has been read, omitted values are gone
+        # and `extra_body` / `extra_query` have been merged in
+        assert len(recorder.requests) == 1
+        request = recorder.requests[0]
+        body = middleware_request_body(request)
+        assert body["messages"][0]["content"][0]["source"]["data"] == "YWJj"
+        assert "system" not in body
+        assert body["zzz"] == 1
+        # a top-level `omit` in the query stays until the request is built, as it may unset one of
+        # the client's default query params
+        assert request.query_params["r"] == 1
+        assert {key: value for key, value in request.query_params.items() if value is not omit} == {"r": 1}
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 1
+        sent = request_body(calls[0])
+        assert sent["messages"][0]["content"][0]["source"]["data"] == "YWJj"
+        assert sent["zzz"] == 1
+        assert calls[0].request.url.params.get("r") == "1"
+        assert "q" not in calls[0].request.url.params
 
     @pytest.mark.respx(base_url=base_url)
     def test_middleware_ordering(self, respx_mock: MockRouter) -> None:
@@ -1332,6 +1380,53 @@ class TestAsyncMiddleware:
         response = recorder.results[0]
         assert isinstance(response, AsyncAPIResponse)
         assert await response.parse() is message
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_middleware_sees_prepared_body(self, respx_mock: MockRouter, tmp_path: Path) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
+
+        recorder = RecordingMiddleware()
+        client = make_async_client(middleware=[recorder])
+
+        image = tmp_path / "image.png"
+        image.write_bytes(b"abc")
+
+        await client.messages.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": image}}
+                    ],
+                }
+            ],
+            model="claude-opus-4-6",
+            system=omit,
+            extra_body={"zzz": 1},
+            extra_query={"q": omit, "r": 1},
+        )
+
+        # by the time middleware runs the file has been read, omitted values are gone
+        # and `extra_body` / `extra_query` have been merged in
+        assert len(recorder.requests) == 1
+        request = recorder.requests[0]
+        body = middleware_request_body(request)
+        assert body["messages"][0]["content"][0]["source"]["data"] == "YWJj"
+        assert "system" not in body
+        assert body["zzz"] == 1
+        # a top-level `omit` in the query stays until the request is built, as it may unset one of
+        # the client's default query params
+        assert request.query_params["r"] == 1
+        assert {key: value for key, value in request.query_params.items() if value is not omit} == {"r": 1}
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 1
+        sent = request_body(calls[0])
+        assert sent["messages"][0]["content"][0]["source"]["data"] == "YWJj"
+        assert sent["zzz"] == 1
+        assert calls[0].request.url.params.get("r") == "1"
+        assert "q" not in calls[0].request.url.params
 
     @pytest.mark.respx(base_url=base_url)
     async def test_middleware_ordering(self, respx_mock: MockRouter) -> None:

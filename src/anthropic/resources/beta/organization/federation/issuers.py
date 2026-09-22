@@ -5,7 +5,7 @@ from typing import List, Optional
 import httpx2
 
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from ....._resource import SyncAPIResource, AsyncAPIResource
 from ....._response import (
@@ -17,7 +17,7 @@ from ....._response import (
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.anthropic_beta_param import AnthropicBetaParam
-from .....types.beta.organization.federation import issuer_list_params, issuer_create_params, issuer_update_params
+from .....types.beta.organization.federation import issuer_create_params, issuer_update_params
 from .....types.beta.organization.federation.beta_federation_issuer import BetaFederationIssuer
 
 __all__ = ["Issuers", "AsyncIssuers"]
@@ -109,16 +109,13 @@ class Issuers(SyncAPIResource):
         }
         return self._post(
             "/v1/organizations/federation_issuers?beta=true",
-            body=maybe_transform(
-                {
-                    "issuer_url": issuer_url,
-                    "name": name,
-                    "check_jti": check_jti,
-                    "jwks": jwks,
-                    "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
-                },
-                issuer_create_params.IssuerCreateParams,
-            ),
+            body={
+                "issuer_url": issuer_url,
+                "name": name,
+                "check_jti": check_jti,
+                "jwks": jwks,
+                "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -257,17 +254,14 @@ class Issuers(SyncAPIResource):
                 "/v1/organizations/federation_issuers/{federation_issuer_id}?beta=true",
                 federation_issuer_id=federation_issuer_id,
             ),
-            body=maybe_transform(
-                {
-                    "check_jti": check_jti,
-                    "issuer_url": issuer_url,
-                    "jwks": jwks,
-                    "jwks_polling_disabled": jwks_polling_disabled,
-                    "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
-                    "name": name,
-                },
-                issuer_update_params.IssuerUpdateParams,
-            ),
+            body={
+                "check_jti": check_jti,
+                "issuer_url": issuer_url,
+                "jwks": jwks,
+                "jwks_polling_disabled": jwks_polling_disabled,
+                "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -327,14 +321,11 @@ class Issuers(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    issuer_list_params.IssuerListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaFederationIssuer,
         )
@@ -483,16 +474,13 @@ class AsyncIssuers(AsyncAPIResource):
         }
         return await self._post(
             "/v1/organizations/federation_issuers?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "issuer_url": issuer_url,
-                    "name": name,
-                    "check_jti": check_jti,
-                    "jwks": jwks,
-                    "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
-                },
-                issuer_create_params.IssuerCreateParams,
-            ),
+            body={
+                "issuer_url": issuer_url,
+                "name": name,
+                "check_jti": check_jti,
+                "jwks": jwks,
+                "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -631,17 +619,14 @@ class AsyncIssuers(AsyncAPIResource):
                 "/v1/organizations/federation_issuers/{federation_issuer_id}?beta=true",
                 federation_issuer_id=federation_issuer_id,
             ),
-            body=await async_maybe_transform(
-                {
-                    "check_jti": check_jti,
-                    "issuer_url": issuer_url,
-                    "jwks": jwks,
-                    "jwks_polling_disabled": jwks_polling_disabled,
-                    "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
-                    "name": name,
-                },
-                issuer_update_params.IssuerUpdateParams,
-            ),
+            body={
+                "check_jti": check_jti,
+                "issuer_url": issuer_url,
+                "jwks": jwks,
+                "jwks_polling_disabled": jwks_polling_disabled,
+                "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -701,14 +686,11 @@ class AsyncIssuers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    issuer_list_params.IssuerListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaFederationIssuer,
         )

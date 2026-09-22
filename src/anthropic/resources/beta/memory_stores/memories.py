@@ -6,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -19,11 +19,6 @@ from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.beta.memory_stores import (
     BetaManagedAgentsMemoryView,
-    memory_list_params,
-    memory_create_params,
-    memory_delete_params,
-    memory_update_params,
-    memory_retrieve_params,
 )
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.memory_stores.beta_managed_agents_memory import BetaManagedAgentsMemory
@@ -71,12 +66,13 @@ class Memories(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemory:
-        """Create a memory
+        """
+        Create a memory
 
         Args:
-          content: UTF-8 text content for the new memory.
+          memory_store_id: The ID of the memory store to create the memory in (`memstore_...`).
 
-        Maximum 100 kB (102,400 bytes). Required;
+          content: UTF-8 text content for the new memory. Maximum 100 kB (102,400 bytes). Required;
               pass `""` explicitly to create an empty memory.
 
           path: Hierarchical path for the new memory, e.g. `/projects/foo/notes.md`. Must start
@@ -85,9 +81,20 @@ class Memories(SyncAPIResource):
               characters, or the Unicode line and paragraph separators (U+2028, U+2029), and
               must be NFC-normalized. Paths are case-sensitive.
 
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -113,19 +120,16 @@ class Memories(SyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             path_template("/v1/memory_stores/{memory_store_id}/memories?beta=true", memory_store_id=memory_store_id),
-            body=maybe_transform(
-                {
-                    "content": content,
-                    "path": path,
-                },
-                memory_create_params.MemoryCreateParams,
-            ),
+            body={
+                "content": content,
+                "path": path,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"view": view}, memory_create_params.MemoryCreateParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -149,9 +153,24 @@ class Memories(SyncAPIResource):
         Retrieve a memory
 
         Args:
-          view: Query parameter for view
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to retrieve (`mem_...`).
+
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -188,7 +207,7 @@ class Memories(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"view": view}, memory_retrieve_params.MemoryRetrieveParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -215,7 +234,15 @@ class Memories(SyncAPIResource):
         Update a memory
 
         Args:
-          view: Query parameter for view
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to update (`mem_...`).
+
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           content: New UTF-8 text content for the memory. Maximum 100 kB (102,400 bytes). Omit to
               leave the content unchanged (e.g., for a rename-only update).
@@ -235,6 +262,13 @@ class Memories(SyncAPIResource):
               200 instead of 409.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -266,20 +300,17 @@ class Memories(SyncAPIResource):
                 memory_store_id=memory_store_id,
                 memory_id=memory_id,
             ),
-            body=maybe_transform(
-                {
-                    "content": content,
-                    "path": path,
-                    "precondition": precondition,
-                },
-                memory_update_params.MemoryUpdateParams,
-            ),
+            body={
+                "content": content,
+                "path": path,
+                "precondition": precondition,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"view": view}, memory_update_params.MemoryUpdateParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -306,6 +337,8 @@ class Memories(SyncAPIResource):
         List memories
 
         Args:
+          memory_store_id: The ID of the memory store to list memories from (`memstore_...`).
+
           depth: `0` (or omitted) returns all descendants below `path_prefix` (recursive). `1`
               returns immediate children only; deeper entries roll up as `memory_prefix`
               items. `depth=1` behaves like `ls`; omitting `depth` behaves like `find`.
@@ -326,6 +359,13 @@ class Memories(SyncAPIResource):
               this as the bulk-read path for export and sync.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -357,16 +397,13 @@ class Memories(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "depth": depth,
-                        "limit": limit,
-                        "page": page,
-                        "path_prefix": path_prefix,
-                        "view": view,
-                    },
-                    memory_list_params.MemoryListParams,
-                ),
+                query={
+                    "depth": depth,
+                    "limit": limit,
+                    "page": page,
+                    "path_prefix": path_prefix,
+                    "view": view,
+                },
             ),
             model=cast(
                 Any, BetaManagedAgentsMemoryListItem
@@ -392,9 +429,24 @@ class Memories(SyncAPIResource):
         Delete a memory
 
         Args:
-          expected_content_sha256: Query parameter for expected_content_sha256
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to delete (`mem_...`).
+
+          expected_content_sha256: Delete the memory only if its current `content_sha256` equals this value, given
+              as 64 lowercase hexadecimal characters. Omit it to delete unconditionally.
+
+              If the hashes differ, the request fails with HTTP status 409 and nothing is
+              deleted.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -431,9 +483,7 @@ class Memories(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {"expected_content_sha256": expected_content_sha256}, memory_delete_params.MemoryDeleteParams
-                ),
+                query={"expected_content_sha256": expected_content_sha256},
             ),
             cast_to=BetaManagedAgentsDeletedMemory,
         )
@@ -475,12 +525,13 @@ class AsyncMemories(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemory:
-        """Create a memory
+        """
+        Create a memory
 
         Args:
-          content: UTF-8 text content for the new memory.
+          memory_store_id: The ID of the memory store to create the memory in (`memstore_...`).
 
-        Maximum 100 kB (102,400 bytes). Required;
+          content: UTF-8 text content for the new memory. Maximum 100 kB (102,400 bytes). Required;
               pass `""` explicitly to create an empty memory.
 
           path: Hierarchical path for the new memory, e.g. `/projects/foo/notes.md`. Must start
@@ -489,9 +540,20 @@ class AsyncMemories(AsyncAPIResource):
               characters, or the Unicode line and paragraph separators (U+2028, U+2029), and
               must be NFC-normalized. Paths are case-sensitive.
 
-          view: Query parameter for view
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -517,19 +579,16 @@ class AsyncMemories(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/memory_stores/{memory_store_id}/memories?beta=true", memory_store_id=memory_store_id),
-            body=await async_maybe_transform(
-                {
-                    "content": content,
-                    "path": path,
-                },
-                memory_create_params.MemoryCreateParams,
-            ),
+            body={
+                "content": content,
+                "path": path,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform({"view": view}, memory_create_params.MemoryCreateParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -553,9 +612,24 @@ class AsyncMemories(AsyncAPIResource):
         Retrieve a memory
 
         Args:
-          view: Query parameter for view
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to retrieve (`mem_...`).
+
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -592,7 +666,7 @@ class AsyncMemories(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform({"view": view}, memory_retrieve_params.MemoryRetrieveParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -619,7 +693,15 @@ class AsyncMemories(AsyncAPIResource):
         Update a memory
 
         Args:
-          view: Query parameter for view
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to update (`mem_...`).
+
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           content: New UTF-8 text content for the memory. Maximum 100 kB (102,400 bytes). Omit to
               leave the content unchanged (e.g., for a rename-only update).
@@ -639,6 +721,13 @@ class AsyncMemories(AsyncAPIResource):
               200 instead of 409.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -670,20 +759,17 @@ class AsyncMemories(AsyncAPIResource):
                 memory_store_id=memory_store_id,
                 memory_id=memory_id,
             ),
-            body=await async_maybe_transform(
-                {
-                    "content": content,
-                    "path": path,
-                    "precondition": precondition,
-                },
-                memory_update_params.MemoryUpdateParams,
-            ),
+            body={
+                "content": content,
+                "path": path,
+                "precondition": precondition,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform({"view": view}, memory_update_params.MemoryUpdateParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -710,6 +796,8 @@ class AsyncMemories(AsyncAPIResource):
         List memories
 
         Args:
+          memory_store_id: The ID of the memory store to list memories from (`memstore_...`).
+
           depth: `0` (or omitted) returns all descendants below `path_prefix` (recursive). `1`
               returns immediate children only; deeper entries roll up as `memory_prefix`
               items. `depth=1` behaves like `ls`; omitting `depth` behaves like `find`.
@@ -730,6 +818,13 @@ class AsyncMemories(AsyncAPIResource):
               this as the bulk-read path for export and sync.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -761,16 +856,13 @@ class AsyncMemories(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "depth": depth,
-                        "limit": limit,
-                        "page": page,
-                        "path_prefix": path_prefix,
-                        "view": view,
-                    },
-                    memory_list_params.MemoryListParams,
-                ),
+                query={
+                    "depth": depth,
+                    "limit": limit,
+                    "page": page,
+                    "path_prefix": path_prefix,
+                    "view": view,
+                },
             ),
             model=cast(
                 Any, BetaManagedAgentsMemoryListItem
@@ -796,9 +888,24 @@ class AsyncMemories(AsyncAPIResource):
         Delete a memory
 
         Args:
-          expected_content_sha256: Query parameter for expected_content_sha256
+          memory_store_id: The ID of the memory store that holds the memory (`memstore_...`).
+
+          memory_id: The ID of the memory to delete (`mem_...`).
+
+          expected_content_sha256: Delete the memory only if its current `content_sha256` equals this value, given
+              as 64 lowercase hexadecimal characters. Omit it to delete unconditionally.
+
+              If the hashes differ, the request fails with HTTP status 409 and nothing is
+              deleted.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -835,9 +942,7 @@ class AsyncMemories(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {"expected_content_sha256": expected_content_sha256}, memory_delete_params.MemoryDeleteParams
-                ),
+                query={"expected_content_sha256": expected_content_sha256},
             ),
             cast_to=BetaManagedAgentsDeletedMemory,
         )

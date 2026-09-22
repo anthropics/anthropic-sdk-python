@@ -10,8 +10,6 @@ import pydantic
 
 from ...types import (
     ThinkingConfigParam,
-    message_create_params,
-    message_count_tokens_params,
 )
 from .batches import (
     Batches,
@@ -22,7 +20,7 @@ from .batches import (
     AsyncBatchesWithStreamingResponse,
 )
 from ..._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ..._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import is_given, required_args, strip_not_given
 from ..._compat import cached_property
 from ..._models import TypeAdapter
 from ..._resource import SyncAPIResource, AsyncAPIResource
@@ -373,6 +371,13 @@ class Messages(SyncAPIResource):
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -640,6 +645,13 @@ class Messages(SyncAPIResource):
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -909,6 +921,13 @@ class Messages(SyncAPIResource):
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -977,28 +996,23 @@ class Messages(SyncAPIResource):
         }
         return self._post(
             "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "container": container,
-                    "inference_geo": inference_geo,
-                    "metadata": metadata,
-                    "output_config": output_config,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "stream": stream,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_create_params.MessageCreateParamsStreaming
-                if stream
-                else message_create_params.MessageCreateParamsNonStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "container": container,
+                "inference_geo": inference_geo,
+                "metadata": metadata,
+                "output_config": output_config,
+                "service_tier": service_tier,
+                "stop_sequences": stop_sequences,
+                "stream": stream,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -1094,26 +1108,23 @@ class Messages(SyncAPIResource):
         make_request = partial(
             self._post,
             "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "inference_geo": inference_geo,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "container": container,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "tools": tools,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "stream": True,
-                },
-                message_create_params.MessageCreateParamsStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "inference_geo": inference_geo,
+                "metadata": metadata,
+                "output_config": merged_output_config,
+                "container": container,
+                "service_tier": service_tier,
+                "stop_sequences": stop_sequences,
+                "system": system,
+                "tools": tools,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "stream": True,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -1213,22 +1224,19 @@ class Messages(SyncAPIResource):
 
         return self._post(
             "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_create_params.MessageCreateParamsNonStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "metadata": metadata,
+                "output_config": merged_output_config,
+                "service_tier": service_tier,
+                "stop_sequences": stop_sequences,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -1449,6 +1457,13 @@ class Messages(SyncAPIResource):
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -1500,19 +1515,16 @@ class Messages(SyncAPIResource):
 
         return self._post(
             "/v1/messages/count_tokens",
-            body=maybe_transform(
-                {
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "output_config": merged_output_config,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_count_tokens_params.MessageCountTokensParams,
-            ),
+            body={
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "output_config": merged_output_config,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -1802,6 +1814,13 @@ class AsyncMessages(AsyncAPIResource):
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -2069,6 +2088,13 @@ class AsyncMessages(AsyncAPIResource):
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -2338,6 +2364,13 @@ class AsyncMessages(AsyncAPIResource):
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -2406,28 +2439,23 @@ class AsyncMessages(AsyncAPIResource):
         }
         return await self._post(
             "/v1/messages",
-            body=await async_maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "container": container,
-                    "inference_geo": inference_geo,
-                    "metadata": metadata,
-                    "output_config": output_config,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "stream": stream,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_create_params.MessageCreateParamsStreaming
-                if stream
-                else message_create_params.MessageCreateParamsNonStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "container": container,
+                "inference_geo": inference_geo,
+                "metadata": metadata,
+                "output_config": output_config,
+                "service_tier": service_tier,
+                "stop_sequences": stop_sequences,
+                "stream": stream,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -2522,26 +2550,23 @@ class AsyncMessages(AsyncAPIResource):
 
         request = self._post(
             "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "inference_geo": inference_geo,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "container": container,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "tools": tools,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "stream": True,
-                },
-                message_create_params.MessageCreateParamsStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "inference_geo": inference_geo,
+                "metadata": metadata,
+                "output_config": merged_output_config,
+                "container": container,
+                "service_tier": service_tier,
+                "stop_sequences": stop_sequences,
+                "system": system,
+                "tools": tools,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "stream": True,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -2641,22 +2666,19 @@ class AsyncMessages(AsyncAPIResource):
 
         return await self._post(
             "/v1/messages",
-            body=await async_maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_create_params.MessageCreateParamsNonStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "metadata": metadata,
+                "output_config": merged_output_config,
+                "service_tier": service_tier,
+                "stop_sequences": stop_sequences,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -2877,6 +2899,13 @@ class AsyncMessages(AsyncAPIResource):
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
               party other than your organization. Requires the `user-profiles` beta header.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -2928,19 +2957,16 @@ class AsyncMessages(AsyncAPIResource):
 
         return await self._post(
             "/v1/messages/count_tokens",
-            body=await async_maybe_transform(
-                {
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "output_config": merged_output_config,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_count_tokens_params.MessageCountTokensParams,
-            ),
+            body={
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "output_config": merged_output_config,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),

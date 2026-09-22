@@ -1,6 +1,7 @@
 # Note: initially copied from https://github.com/florimondmanca/httpx-sse/blob/master/src/httpx_sse/_decoders.py
 from __future__ import annotations
 
+import sys
 import json
 import inspect
 from types import TracebackType
@@ -143,8 +144,12 @@ class Stream(Generic[_T]):
                         response=self.response,
                     )
         finally:
-            # Ensure the response is closed even if the consumer doesn't read all data
-            response.close()
+            if sys.is_finalizing():
+                # Closing at interpreter shutdown can crash CPython 3.13; mark it closed instead.
+                response.is_closed = True
+            else:
+                # Ensure the response is closed even if the consumer doesn't read all data
+                response.close()
 
     def __enter__(self) -> Self:
         return self
@@ -291,8 +296,12 @@ class AsyncStream(Generic[_T]):
                         response=self.response,
                     )
         finally:
-            # Ensure the response is closed even if the consumer doesn't read all data
-            await response.aclose()
+            if sys.is_finalizing():
+                # Closing at interpreter shutdown can crash CPython 3.13; mark it closed instead.
+                response.is_closed = True
+            else:
+                # Ensure the response is closed even if the consumer doesn't read all data
+                await response.aclose()
 
     async def __aenter__(self) -> Self:
         return self

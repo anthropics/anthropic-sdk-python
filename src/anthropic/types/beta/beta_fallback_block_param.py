@@ -9,7 +9,7 @@ __all__ = ["BetaFallbackBlockParam"]
 _BetaFallbackBlockParamReservedKeywords = TypedDict(
     "_BetaFallbackBlockParamReservedKeywords",
     {
-        "from": BetaFallbackInfoParam,
+        "from": Required[BetaFallbackInfoParam],
     },
     total=False,
 )

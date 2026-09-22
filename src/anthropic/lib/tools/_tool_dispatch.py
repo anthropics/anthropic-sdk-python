@@ -12,19 +12,20 @@ instead of each carrying its own copy. Consumed by the runner helpers only.
 from __future__ import annotations
 
 import inspect
-from typing import Union, TypeVar, Iterable, Awaitable
+from typing import Union, TypeVar, Iterable, Awaitable, cast
 from typing_extensions import Protocol
 
 from anyio.to_thread import run_sync
 
 from ._beta_functions import ToolError, BetaFunctionTool, BetaBuiltinFunctionTool, BetaFunctionToolResultType
 from ...types.beta.beta_message_param import BetaMessageParam
+from ...types.beta.beta_compaction_block import BetaCompactionBlock
 from ...types.beta.beta_content_block_param import BetaContentBlockParam
-from ...types.beta.beta_request_tool_removal_block_param import (
-    Tool as _ToolChangeReference,
-    BetaRequestToolRemovalBlockParam,
+from ...types.beta.beta_request_tool_removal_block_param import BetaRequestToolRemovalBlockParam
+from ...types.beta.beta_request_tool_addition_block_param import (
+    Tool as _ToolChangeTool,
+    BetaRequestToolAdditionBlockParam,
 )
-from ...types.beta.beta_request_tool_addition_block_param import BetaRequestToolAdditionBlockParam
 
 __all__ = ["tool_registry", "tool_error_content", "run_runnable_tool", "available_tool_names"]
 
@@ -58,19 +59,38 @@ def available_tool_names(messages: Iterable[BetaMessageParam], tool_names: Itera
     """Fold mid-conversation `tool_removal` / `tool_addition` blocks over
     the locally runnable `tool_names`.
 
-    Only `role: "system"` messages carry these blocks, and only a
-    `tool_reference` can name a locally runnable tool — MCP references are
-    executed server-side, so they (and any unknown block/reference type) are
+    These blocks arrive in `role: "system"` messages, and in the
+    `tool_changes` of a `compaction` block, which stands in for the system
+    messages of the turns it summarized. A `tool_reference` or a by-value
+    `tool_definition` can name a locally runnable tool; MCP references
+    execute server-side, so they (and any unknown block or tool type) are
     ignored rather than raising.
     """
     available = set(tool_names)
     for message in messages:
         content = message["content"]
-        if message["role"] != "system" or isinstance(content, str):
+        if isinstance(content, str):
             continue
         for block in content:
-            _apply_tool_change(block, available)
+            if message["role"] == "system":
+                _apply_tool_change(block, available)
+            elif message["role"] == "assistant":
+                for change in _compaction_tool_changes(block):
+                    _apply_tool_change(change, available)
     return available
+
+
+def _compaction_tool_changes(block: BetaContentBlockParam) -> Iterable[BetaContentBlockParam]:
+    """The ``tool_changes`` of a ``compaction`` block, whichever shape it has in history.
+
+    A caller-written block is a dict; one the runner echoed from a response is
+    still the response model, with response-model entries.
+    """
+    if isinstance(block, BetaCompactionBlock):
+        return [cast(BetaContentBlockParam, change.to_dict()) for change in block.tool_changes or ()]
+    if isinstance(block, dict) and block["type"] == "compaction":
+        return block.get("tool_changes") or ()
+    return ()
 
 
 def _apply_tool_change(block: BetaContentBlockParam, available: set[str]) -> None:
@@ -88,7 +108,7 @@ def _apply_tool_reference_change(
     block: Union[BetaRequestToolRemovalBlockParam, BetaRequestToolAdditionBlockParam], available: set[str]
 ) -> None:
     """Fold one `tool_removal` / `tool_addition` block into `available`."""
-    name = _referenced_tool_name(block["tool"])
+    name = _changed_tool_name(block["tool"])
     if name is None:
         return
     if block["type"] == "tool_removal":
@@ -97,15 +117,19 @@ def _apply_tool_reference_change(
         available.add(name)  # add unconditionally: dispatch still requires a registry hit
 
 
-def _referenced_tool_name(ref: _ToolChangeReference) -> str | None:
-    """The locally runnable tool name a tool-change reference resolves to.
+def _changed_tool_name(tool: _ToolChangeTool) -> str | None:
+    """The locally runnable tool name a tool-change ``tool`` resolves to.
 
-    Only `tool_reference` names a runnable tool; `mcp_tool_reference` /
-    `mcp_toolset_reference` execute server-side and unknown reference types
-    are ignored (forward compatibility), so all of those resolve to `None`.
+    `tool_reference` names one directly and `tool_definition` carries one
+    by value; MCP references execute server-side, and unknown types are
+    ignored (forward compatibility), so those resolve to `None`.
     """
-    if ref["type"] == "tool_reference":
-        return ref["name"]
+    if tool["type"] == "tool_reference":
+        return tool["name"]
+    if tool["type"] == "tool_definition":
+        # Not every `tools[]` entry has a `name` (e.g. `mcp_toolset`); those are never locally runnable.
+        name = cast("dict[str, object]", tool["definition"]).get("name")
+        return name if isinstance(name, str) else None
     return None
 
 

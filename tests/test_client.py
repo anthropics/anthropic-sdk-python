@@ -10,6 +10,8 @@ import inspect
 import dataclasses
 import tracemalloc
 from typing import Any, Union, TypeVar, Callable, Iterable, Iterator, Optional, Coroutine, cast
+from pathlib import Path
+from datetime import date, datetime, timezone
 from typing_extensions import Literal, AsyncIterator, override
 
 import httpx2
@@ -640,6 +642,73 @@ class TestAnthropic:
         assert seen[0].json_data == {"foo": "bar", "baz": None}
         assert seen[0].extra_json is None
         assert json.loads(response.request.content) == {"foo": "bar", "baz": None}
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_request_data_prepared_before_prepare_options(
+        self, respx_mock: MockRouter, client: Anthropic, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # client hooks see the data as it is sent: files read, omitted keys dropped, iterables materialised, dates formatted
+        seen: list[FinalRequestOptions] = []
+        prepare_options = client._prepare_options
+
+        def record(options: FinalRequestOptions) -> FinalRequestOptions:
+            seen.append(copy.deepcopy(options))
+            return prepare_options(options)
+
+        monkeypatch.setattr(client, "_prepare_options", record)
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={}))
+        monkeypatch.setattr("anthropic._utils._prepare.FILE_INPUT_MARKERS", (("type", "base64", "data"),))
+        path = tmp_path / "file.bin"
+        path.write_bytes(b"Hello")
+
+        client.post(
+            "/foo",
+            cast_to=httpx2.Response,
+            body={
+                "source": {"type": "base64", "data": path},
+                "dropped": Omit(),
+                "at": datetime(2024, 1, 2, 3, 4, 5, tzinfo=timezone.utc),
+            },
+            options=make_request_options(
+                query={"since": datetime(2024, 1, 2, 3, 4, 5)},
+                extra_body={"baz": (1, 2), "on": date(2024, 1, 2)},
+                extra_query={"filter": {"q": Omit(), "r": 1}},
+            ),
+        )
+
+        assert len(seen) == 1
+        assert seen[0].json_data == {
+            "source": {"type": "base64", "data": "SGVsbG8="},
+            "at": "2024-01-02T03:04:05+00:00",
+            "baz": [1, 2],
+            "on": "2024-01-02",
+        }
+        assert seen[0].params == {"since": "2024-01-02T03:04:05", "filter": {"r": 1}}
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_request_does_not_modify_the_options_it_is_given(self, respx_mock: MockRouter, client: Anthropic) -> None:
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={}))
+        options = FinalRequestOptions.construct(
+            method="post",
+            url="/foo",
+            json_data={"foo": "bar", "at": datetime(2024, 1, 2, 3, 4, 5, tzinfo=timezone.utc)},
+            extra_json={"baz": (1, 2)},
+            params={"since": date(2024, 1, 2)},
+        )
+        json_data, extra_json, params = options.json_data, options.extra_json, options.params
+
+        response = client.request(httpx2.Response, options)
+
+        # what is sent is merged and prepared
+        assert json.loads(response.request.content) == {"foo": "bar", "at": "2024-01-02T03:04:05+00:00", "baz": [1, 2]}
+        assert response.request.url.params["since"] == "2024-01-02"
+        # on a copy: the caller's options still hold the objects they were given, unchanged
+        assert options.json_data is json_data
+        assert options.extra_json is extra_json
+        assert options.params is params
+        assert json_data == {"foo": "bar", "at": datetime(2024, 1, 2, 3, 4, 5, tzinfo=timezone.utc)}
+        assert extra_json == {"baz": (1, 2)}
+        assert params == {"since": date(2024, 1, 2)}
 
     def test_request_extra_headers(self, client: Anthropic) -> None:
         request = client._build_request(
@@ -1872,6 +1941,75 @@ class TestAsyncAnthropic:
         assert seen[0].json_data == {"foo": "bar", "baz": None}
         assert seen[0].extra_json is None
         assert json.loads(response.request.content) == {"foo": "bar", "baz": None}
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_request_data_prepared_before_prepare_options(
+        self, respx_mock: MockRouter, async_client: AsyncAnthropic, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # client hooks see the data as it is sent: files read, omitted keys dropped, iterables materialised, dates formatted
+        seen: list[FinalRequestOptions] = []
+        prepare_options = async_client._prepare_options
+
+        async def record(options: FinalRequestOptions) -> FinalRequestOptions:
+            seen.append(copy.deepcopy(options))
+            return await prepare_options(options)
+
+        monkeypatch.setattr(async_client, "_prepare_options", record)
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={}))
+        monkeypatch.setattr("anthropic._utils._prepare.FILE_INPUT_MARKERS", (("type", "base64", "data"),))
+        path = tmp_path / "file.bin"
+        path.write_bytes(b"Hello")
+
+        await async_client.post(
+            "/foo",
+            cast_to=httpx2.Response,
+            body={
+                "source": {"type": "base64", "data": path},
+                "dropped": Omit(),
+                "at": datetime(2024, 1, 2, 3, 4, 5, tzinfo=timezone.utc),
+            },
+            options=make_request_options(
+                query={"since": datetime(2024, 1, 2, 3, 4, 5)},
+                extra_body={"baz": (1, 2), "on": date(2024, 1, 2)},
+                extra_query={"filter": {"q": Omit(), "r": 1}},
+            ),
+        )
+
+        assert len(seen) == 1
+        assert seen[0].json_data == {
+            "source": {"type": "base64", "data": "SGVsbG8="},
+            "at": "2024-01-02T03:04:05+00:00",
+            "baz": [1, 2],
+            "on": "2024-01-02",
+        }
+        assert seen[0].params == {"since": "2024-01-02T03:04:05", "filter": {"r": 1}}
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_request_does_not_modify_the_options_it_is_given(
+        self, respx_mock: MockRouter, async_client: AsyncAnthropic
+    ) -> None:
+        respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={}))
+        options = FinalRequestOptions.construct(
+            method="post",
+            url="/foo",
+            json_data={"foo": "bar", "at": datetime(2024, 1, 2, 3, 4, 5, tzinfo=timezone.utc)},
+            extra_json={"baz": (1, 2)},
+            params={"since": date(2024, 1, 2)},
+        )
+        json_data, extra_json, params = options.json_data, options.extra_json, options.params
+
+        response = await async_client.request(httpx2.Response, options)
+
+        # what is sent is merged and prepared
+        assert json.loads(response.request.content) == {"foo": "bar", "at": "2024-01-02T03:04:05+00:00", "baz": [1, 2]}
+        assert response.request.url.params["since"] == "2024-01-02"
+        # on a copy: the caller's options still hold the objects they were given, unchanged
+        assert options.json_data is json_data
+        assert options.extra_json is extra_json
+        assert options.params is params
+        assert json_data == {"foo": "bar", "at": datetime(2024, 1, 2, 3, 4, 5, tzinfo=timezone.utc)}
+        assert extra_json == {"baz": (1, 2)}
+        assert params == {"since": date(2024, 1, 2)}
 
     def test_request_extra_headers(self, client: Anthropic) -> None:
         request = client._build_request(

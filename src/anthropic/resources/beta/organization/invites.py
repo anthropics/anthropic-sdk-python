@@ -6,7 +6,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ...._utils import path_template, maybe_transform, async_maybe_transform
+from ...._utils import path_template
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -17,7 +17,6 @@ from ...._response import (
 )
 from ....pagination import SyncPage, AsyncPage
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.organization import invite_list_params, invite_create_params
 from ....types.beta.organization.invite_delete_response import InviteDeleteResponse
 from ....types.beta.organization.beta_organization_invite import BetaOrganizationInvite
 
@@ -89,14 +88,11 @@ class Invites(SyncAPIResource):
         """
         return self._post(
             "/v1/organizations/invites?beta=true",
-            body=maybe_transform(
-                {
-                    "email": email,
-                    "role": role,
-                    "rbac_group_ids": rbac_group_ids,
-                },
-                invite_create_params.InviteCreateParams,
-            ),
+            body={
+                "email": email,
+                "role": role,
+                "rbac_group_ids": rbac_group_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -198,17 +194,14 @@ class Invites(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "email": email,
-                        "limit": limit,
-                        "roles": roles,
-                        "statuses": statuses,
-                    },
-                    invite_list_params.InviteListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "email": email,
+                    "limit": limit,
+                    "roles": roles,
+                    "statuses": statuses,
+                },
             ),
             model=BetaOrganizationInvite,
         )
@@ -314,14 +307,11 @@ class AsyncInvites(AsyncAPIResource):
         """
         return await self._post(
             "/v1/organizations/invites?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "email": email,
-                    "role": role,
-                    "rbac_group_ids": rbac_group_ids,
-                },
-                invite_create_params.InviteCreateParams,
-            ),
+            body={
+                "email": email,
+                "role": role,
+                "rbac_group_ids": rbac_group_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -423,17 +413,14 @@ class AsyncInvites(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "email": email,
-                        "limit": limit,
-                        "roles": roles,
-                        "statuses": statuses,
-                    },
-                    invite_list_params.InviteListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "email": email,
+                    "limit": limit,
+                    "roles": roles,
+                    "statuses": statuses,
+                },
             ),
             model=BetaOrganizationInvite,
         )

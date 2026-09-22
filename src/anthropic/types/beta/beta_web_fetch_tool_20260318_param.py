@@ -4,8 +4,8 @@ from typing import List, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from ..._types import SequenceNotStr
-from .beta_citations_config_param import BetaCitationsConfigParam
 from .beta_web_fetch_url_sources_param import BetaWebFetchURLSourcesParam
+from .beta_citations_config_param_param import BetaCitationsConfigParamParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
 __all__ = ["BetaWebFetchTool20260318Param"]
@@ -33,7 +33,7 @@ class BetaWebFetchTool20260318Param(TypedDict, total=False):
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
 
-    citations: Optional[BetaCitationsConfigParam]
+    citations: Optional[BetaCitationsConfigParamParam]
     """Citations configuration for fetched documents.
 
     Citations are disabled by default.

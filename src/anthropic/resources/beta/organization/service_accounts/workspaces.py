@@ -5,7 +5,7 @@ from typing import List, Optional
 import httpx2
 
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from ....._resource import SyncAPIResource, AsyncAPIResource
 from ....._response import (
@@ -18,7 +18,6 @@ from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization import BetaNoBillingWorkspaceRole
 from .....types.anthropic_beta_param import AnthropicBetaParam
-from .....types.beta.organization.service_accounts import workspace_add_params, workspace_list_params
 from .....types.beta.organization.beta_no_billing_workspace_role import BetaNoBillingWorkspaceRole
 from .....types.beta.organization.beta_service_account_workspace_member import BetaServiceAccountWorkspaceMember
 from .....types.beta.organization.service_accounts.workspace_remove_response import WorkspaceRemoveResponse
@@ -114,13 +113,10 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    workspace_list_params.WorkspaceListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaServiceAccountWorkspaceMember,
         )
@@ -181,13 +177,10 @@ class Workspaces(SyncAPIResource):
                 "/v1/organizations/service_accounts/{service_account_id}/workspaces?beta=true",
                 service_account_id=service_account_id,
             ),
-            body=maybe_transform(
-                {
-                    "workspace_id": workspace_id,
-                    "workspace_role": workspace_role,
-                },
-                workspace_add_params.WorkspaceAddParams,
-            ),
+            body={
+                "workspace_id": workspace_id,
+                "workspace_role": workspace_role,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -347,13 +340,10 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    workspace_list_params.WorkspaceListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaServiceAccountWorkspaceMember,
         )
@@ -414,13 +404,10 @@ class AsyncWorkspaces(AsyncAPIResource):
                 "/v1/organizations/service_accounts/{service_account_id}/workspaces?beta=true",
                 service_account_id=service_account_id,
             ),
-            body=await async_maybe_transform(
-                {
-                    "workspace_id": workspace_id,
-                    "workspace_role": workspace_role,
-                },
-                workspace_add_params.WorkspaceAddParams,
-            ),
+            body={
+                "workspace_id": workspace_id,
+                "workspace_role": workspace_role,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),

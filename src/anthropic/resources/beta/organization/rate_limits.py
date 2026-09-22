@@ -6,7 +6,6 @@ from typing_extensions import Literal
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -17,7 +16,6 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.organization import rate_limit_list_params
 from ....types.beta.organization.beta_organization_rate_limit import BetaOrganizationRateLimit
 
 __all__ = ["RateLimits", "AsyncRateLimits"]
@@ -98,15 +96,12 @@ class RateLimits(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "group_type": group_type,
-                        "limit": limit,
-                        "model": model,
-                        "page": page,
-                    },
-                    rate_limit_list_params.RateLimitListParams,
-                ),
+                query={
+                    "group_type": group_type,
+                    "limit": limit,
+                    "model": model,
+                    "page": page,
+                },
             ),
             model=BetaOrganizationRateLimit,
         )
@@ -187,15 +182,12 @@ class AsyncRateLimits(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "group_type": group_type,
-                        "limit": limit,
-                        "model": model,
-                        "page": page,
-                    },
-                    rate_limit_list_params.RateLimitListParams,
-                ),
+                query={
+                    "group_type": group_type,
+                    "limit": limit,
+                    "model": model,
+                    "page": page,
+                },
             ),
             model=BetaOrganizationRateLimit,
         )

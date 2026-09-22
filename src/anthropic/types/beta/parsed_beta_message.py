@@ -18,6 +18,7 @@ from .beta_mcp_tool_use_block import BetaMCPToolUseBlock
 from .beta_mcp_tool_result_block import BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock
 from .beta_container_upload_block import BetaContainerUploadBlock
+from .beta_mcp_tool_listing_block import BetaMCPToolListingBlock
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock
 from .beta_advisor_tool_result_block import BetaAdvisorToolResultBlock
 from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock
@@ -72,6 +73,7 @@ ParsedBetaContentBlock: TypeAlias = Annotated[
         BetaMCPToolResultBlock,
         BetaContainerUploadBlock,
         BetaCompactionBlock,
+        BetaMCPToolListingBlock,
         BetaFallbackBlock,
     ],
     UnionDiscriminator("type"),

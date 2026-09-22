@@ -7,13 +7,16 @@ __all__ = ["BetaDreamModelConfig"]
 
 
 class BetaDreamModelConfig(BaseModel):
-    """Model identifier and configuration applied to every pipeline stage.
+    """The model that runs a dream, from the request that created it.
 
-    Same wire shape as the Agents API ModelConfig.
+    The dream uses this model for all of its work. The response always gives the model as an object, even if the request gave only a model ID.
     """
 
     id: str
-    """Model identifier, e.g. "claude-opus-5". 1-256 characters."""
+    """
+    The ID of the model that runs the dream, as given in the request that created
+    it.
+    """
 
     speed: Optional[Literal["standard", "fast"]] = None
     """Inference speed mode.

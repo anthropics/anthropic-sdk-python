@@ -7,7 +7,7 @@ from itertools import chain
 import httpx2
 
 from ..._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import is_given, path_template, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -20,7 +20,6 @@ from ...pagination import SyncPageCursor, AsyncPageCursor
 from ...types.beta import (
     BetaManagedAgentsScheduleParams,
     BetaManagedAgentsDeploymentStatus,
-    deployment_list_params,
     deployment_create_params,
     deployment_update_params,
 )
@@ -116,6 +115,13 @@ class Deployments(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -138,21 +144,18 @@ class Deployments(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             "/v1/deployments?beta=true",
-            body=maybe_transform(
-                {
-                    "agent": agent,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "name": name,
-                    "budget": budget,
-                    "description": description,
-                    "metadata": metadata,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_create_params.DeploymentCreateParams,
-            ),
+            body={
+                "agent": agent,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "name": name,
+                "budget": budget,
+                "description": description,
+                "metadata": metadata,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -176,7 +179,16 @@ class Deployments(SyncAPIResource):
         Get Deployment
 
         Args:
+          deployment_id: Unique identifier of the deployment.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -231,12 +243,13 @@ class Deployments(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
-        """Update Deployment
+        """
+        Update Deployment
 
         Args:
-          agent: Agent to deploy.
+          deployment_id: Unique identifier of the deployment to update.
 
-        Accepts the `agent` ID string, which re-pins to the latest
+          agent: Agent to deploy. Accepts the `agent` ID string, which re-pins to the latest
               version, or an `agent` object with both id and version specified. Omit to
               preserve. Cannot be cleared.
 
@@ -267,6 +280,13 @@ class Deployments(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -291,21 +311,18 @@ class Deployments(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
-            body=maybe_transform(
-                {
-                    "agent": agent,
-                    "budget": budget,
-                    "description": description,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "metadata": metadata,
-                    "name": name,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_update_params.DeploymentUpdateParams,
-            ),
+            body={
+                "agent": agent,
+                "budget": budget,
+                "description": description,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "metadata": metadata,
+                "name": name,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -352,6 +369,13 @@ class Deployments(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -380,18 +404,15 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "agent_id": agent_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                        "status": status,
-                    },
-                    deployment_list_params.DeploymentListParams,
-                ),
+                query={
+                    "agent_id": agent_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                    "status": status,
+                },
             ),
             model=BetaManagedAgentsDeployment,
         )
@@ -413,7 +434,16 @@ class Deployments(SyncAPIResource):
         Archive Deployment
 
         Args:
+          deployment_id: Unique identifier of the deployment to archive.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -462,7 +492,16 @@ class Deployments(SyncAPIResource):
         Pause Deployment
 
         Args:
+          deployment_id: Unique identifier of the deployment to pause.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -511,7 +550,16 @@ class Deployments(SyncAPIResource):
         Run Deployment Now
 
         Args:
+          deployment_id: Unique identifier of the deployment to run.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -560,7 +608,16 @@ class Deployments(SyncAPIResource):
         Unpause Deployment
 
         Args:
+          deployment_id: Unique identifier of the deployment to unpause.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -671,6 +728,13 @@ class AsyncDeployments(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -693,21 +757,18 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             "/v1/deployments?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "agent": agent,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "name": name,
-                    "budget": budget,
-                    "description": description,
-                    "metadata": metadata,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_create_params.DeploymentCreateParams,
-            ),
+            body={
+                "agent": agent,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "name": name,
+                "budget": budget,
+                "description": description,
+                "metadata": metadata,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -731,7 +792,16 @@ class AsyncDeployments(AsyncAPIResource):
         Get Deployment
 
         Args:
+          deployment_id: Unique identifier of the deployment.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -786,12 +856,13 @@ class AsyncDeployments(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
-        """Update Deployment
+        """
+        Update Deployment
 
         Args:
-          agent: Agent to deploy.
+          deployment_id: Unique identifier of the deployment to update.
 
-        Accepts the `agent` ID string, which re-pins to the latest
+          agent: Agent to deploy. Accepts the `agent` ID string, which re-pins to the latest
               version, or an `agent` object with both id and version specified. Omit to
               preserve. Cannot be cleared.
 
@@ -822,6 +893,13 @@ class AsyncDeployments(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -846,21 +924,18 @@ class AsyncDeployments(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
-            body=await async_maybe_transform(
-                {
-                    "agent": agent,
-                    "budget": budget,
-                    "description": description,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "metadata": metadata,
-                    "name": name,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_update_params.DeploymentUpdateParams,
-            ),
+            body={
+                "agent": agent,
+                "budget": budget,
+                "description": description,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "metadata": metadata,
+                "name": name,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -907,6 +982,13 @@ class AsyncDeployments(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -935,18 +1017,15 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "agent_id": agent_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                        "status": status,
-                    },
-                    deployment_list_params.DeploymentListParams,
-                ),
+                query={
+                    "agent_id": agent_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                    "status": status,
+                },
             ),
             model=BetaManagedAgentsDeployment,
         )
@@ -968,7 +1047,16 @@ class AsyncDeployments(AsyncAPIResource):
         Archive Deployment
 
         Args:
+          deployment_id: Unique identifier of the deployment to archive.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -1017,7 +1105,16 @@ class AsyncDeployments(AsyncAPIResource):
         Pause Deployment
 
         Args:
+          deployment_id: Unique identifier of the deployment to pause.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -1066,7 +1163,16 @@ class AsyncDeployments(AsyncAPIResource):
         Run Deployment Now
 
         Args:
+          deployment_id: Unique identifier of the deployment to run.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -1115,7 +1221,16 @@ class AsyncDeployments(AsyncAPIResource):
         Unpause Deployment
 
         Args:
+          deployment_id: Unique identifier of the deployment to unpause.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 

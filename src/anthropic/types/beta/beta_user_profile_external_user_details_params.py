@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from typing import Union, Optional
 from datetime import datetime
-from typing_extensions import Literal, Annotated, TypedDict
-
-from ..._utils import PropertyInfo
+from typing_extensions import Literal, TypedDict
 
 __all__ = ["BetaUserProfileExternalUserDetailsParams"]
 
@@ -17,6 +15,13 @@ class BetaUserProfileExternalUserDetailsParams(TypedDict, total=False):
     restore it; or `blocked`, when the platform has barred it. It records the
     platform's decision only; the statuses in `trust_grants` are Anthropic's and do
     not follow it.
+
+    - `active` - The platform has neither restricted nor barred the account of the
+      entity that the user profile represents.
+    - `suspended` - The platform has restricted the account of the entity that the
+      user profile represents and may restore it.
+    - `blocked` - The platform has barred the account of the entity that the user
+      profile represents.
     """
 
     country: Optional[str]
@@ -46,7 +51,7 @@ class BetaUserProfileExternalUserDetailsParams(TypedDict, total=False):
     function. 1 to 255 characters.
     """
 
-    onboarded_at: Annotated[Union[str, datetime], PropertyInfo(format="iso8601")]
+    onboarded_at: Union[str, datetime]
     """A timestamp in RFC 3339 format"""
 
     reference_id: Optional[str]

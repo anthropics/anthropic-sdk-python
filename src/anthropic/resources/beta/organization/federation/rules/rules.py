@@ -13,7 +13,7 @@ from .workspaces import (
     AsyncWorkspacesWithStreamingResponse,
 )
 from ......_types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ......_utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ......_utils import is_given, path_template, strip_not_given
 from ......_compat import cached_property
 from ......_resource import SyncAPIResource, AsyncAPIResource
 from ......_response import (
@@ -25,11 +25,6 @@ from ......_response import (
 from ......pagination import SyncPageCursor, AsyncPageCursor
 from ......_base_client import AsyncPaginator, make_request_options
 from ......types.anthropic_beta_param import AnthropicBetaParam
-from ......types.beta.organization.federation import (
-    rule_list_params,
-    rule_create_params,
-    rule_update_params,
-)
 from ......types.beta.organization.federation.beta_federation_rule import BetaFederationRule
 from ......types.beta.organization.federation.beta_federation_rule_match_param import BetaFederationRuleMatchParam
 from ......types.beta.organization.federation.beta_service_account_target_param import BetaServiceAccountTargetParam
@@ -152,21 +147,18 @@ class Rules(SyncAPIResource):
         }
         return self._post(
             "/v1/organizations/federation_rules?beta=true",
-            body=maybe_transform(
-                {
-                    "issuer_id": issuer_id,
-                    "match": match,
-                    "name": name,
-                    "oauth_scope": oauth_scope,
-                    "target": target,
-                    "applies_to_all_workspaces": applies_to_all_workspaces,
-                    "attributes": attributes,
-                    "description": description,
-                    "token_lifetime_seconds": token_lifetime_seconds,
-                    "workspace_id": workspace_id,
-                },
-                rule_create_params.RuleCreateParams,
-            ),
+            body={
+                "issuer_id": issuer_id,
+                "match": match,
+                "name": name,
+                "oauth_scope": oauth_scope,
+                "target": target,
+                "applies_to_all_workspaces": applies_to_all_workspaces,
+                "attributes": attributes,
+                "description": description,
+                "token_lifetime_seconds": token_lifetime_seconds,
+                "workspace_id": workspace_id,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -326,20 +318,17 @@ class Rules(SyncAPIResource):
                 "/v1/organizations/federation_rules/{federation_rule_id}?beta=true",
                 federation_rule_id=federation_rule_id,
             ),
-            body=maybe_transform(
-                {
-                    "applies_to_all_workspaces": applies_to_all_workspaces,
-                    "attributes": attributes,
-                    "description": description,
-                    "match": match,
-                    "name": name,
-                    "oauth_scope": oauth_scope,
-                    "target": target,
-                    "token_lifetime_seconds": token_lifetime_seconds,
-                    "workspace_id": workspace_id,
-                },
-                rule_update_params.RuleUpdateParams,
-            ),
+            body={
+                "applies_to_all_workspaces": applies_to_all_workspaces,
+                "attributes": attributes,
+                "description": description,
+                "match": match,
+                "name": name,
+                "oauth_scope": oauth_scope,
+                "target": target,
+                "token_lifetime_seconds": token_lifetime_seconds,
+                "workspace_id": workspace_id,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -403,15 +392,12 @@ class Rules(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "issuer_id": issuer_id,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    rule_list_params.RuleListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "issuer_id": issuer_id,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaFederationRule,
         )
@@ -589,21 +575,18 @@ class AsyncRules(AsyncAPIResource):
         }
         return await self._post(
             "/v1/organizations/federation_rules?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "issuer_id": issuer_id,
-                    "match": match,
-                    "name": name,
-                    "oauth_scope": oauth_scope,
-                    "target": target,
-                    "applies_to_all_workspaces": applies_to_all_workspaces,
-                    "attributes": attributes,
-                    "description": description,
-                    "token_lifetime_seconds": token_lifetime_seconds,
-                    "workspace_id": workspace_id,
-                },
-                rule_create_params.RuleCreateParams,
-            ),
+            body={
+                "issuer_id": issuer_id,
+                "match": match,
+                "name": name,
+                "oauth_scope": oauth_scope,
+                "target": target,
+                "applies_to_all_workspaces": applies_to_all_workspaces,
+                "attributes": attributes,
+                "description": description,
+                "token_lifetime_seconds": token_lifetime_seconds,
+                "workspace_id": workspace_id,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -763,20 +746,17 @@ class AsyncRules(AsyncAPIResource):
                 "/v1/organizations/federation_rules/{federation_rule_id}?beta=true",
                 federation_rule_id=federation_rule_id,
             ),
-            body=await async_maybe_transform(
-                {
-                    "applies_to_all_workspaces": applies_to_all_workspaces,
-                    "attributes": attributes,
-                    "description": description,
-                    "match": match,
-                    "name": name,
-                    "oauth_scope": oauth_scope,
-                    "target": target,
-                    "token_lifetime_seconds": token_lifetime_seconds,
-                    "workspace_id": workspace_id,
-                },
-                rule_update_params.RuleUpdateParams,
-            ),
+            body={
+                "applies_to_all_workspaces": applies_to_all_workspaces,
+                "attributes": attributes,
+                "description": description,
+                "match": match,
+                "name": name,
+                "oauth_scope": oauth_scope,
+                "target": target,
+                "token_lifetime_seconds": token_lifetime_seconds,
+                "workspace_id": workspace_id,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -840,15 +820,12 @@ class AsyncRules(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "issuer_id": issuer_id,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    rule_list_params.RuleListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "issuer_id": issuer_id,
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaFederationRule,
         )

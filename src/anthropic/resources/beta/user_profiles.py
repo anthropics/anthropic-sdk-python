@@ -8,7 +8,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import is_given, path_template, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -20,9 +20,6 @@ from ..._response import (
 from ...pagination import SyncPageCursor, AsyncPageCursor
 from ...types.beta import (
     BetaUserProfileExternalUserDetailsParams,
-    user_profile_list_params,
-    user_profile_create_params,
-    user_profile_update_params,
 )
 from ..._base_client import AsyncPaginator, make_request_options
 from ...types.anthropic_beta_param import AnthropicBetaParam
@@ -81,6 +78,12 @@ class UserProfiles(SyncAPIResource):
               `passthrough`: the platform resells raw inference, and the profile identifies
               the resold-to company.
 
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
+
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
               characters. Accepted under the `user-profiles-2026-03-24` and
               `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
@@ -102,6 +105,13 @@ class UserProfiles(SyncAPIResource):
               characters.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -125,17 +135,14 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             "/v1/user_profiles?beta=true",
-            body=maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_details": external_user_details,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_create_params.UserProfileCreateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -159,7 +166,16 @@ class UserProfiles(SyncAPIResource):
         Get User Profile
 
         Args:
+          user_profile_id: The ID of the user profile to get (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -214,11 +230,19 @@ class UserProfiles(SyncAPIResource):
         Update User Profile
 
         Args:
+          user_profile_id: The ID of the user profile to update (`uprof_...`).
+
           access_type: How the platform uses the API on behalf of the entity this profile represents.
               `application`: the platform sells a product that uses the API behind the scenes,
               and the profile represents an individual end-user of that product.
               `passthrough`: the platform resells raw inference, and the profile identifies
               the resold-to company.
+
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
 
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
               255 characters. Accepted under the `user-profiles-2026-03-24` and
@@ -241,6 +265,13 @@ class UserProfiles(SyncAPIResource):
               characters.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -266,17 +297,14 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
-            body=maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_details": external_user_details,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_update_params.UserProfileUpdateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -303,15 +331,37 @@ class UserProfiles(SyncAPIResource):
         List User Profiles
 
         Args:
-          limit: Query parameter for limit
+          limit: The maximum number of user profiles to return, from 1 to 100. Defaults to 20.
 
-          order: Query parameter for order
+          order: The sort direction, applied to the field that `order_by` selects. Defaults to
+              `desc`.
 
-          order_by: Query parameter for order_by
+              - `asc` - Oldest first when `order_by` is `created_at`, or names in ascending
+                order when `order_by` is `name`.
+              - `desc` - Newest first when `order_by` is `created_at`, or names in descending
+                order when `order_by` is `name`. This is the default.
 
-          page: Query parameter for page
+          order_by: The field to sort user profiles by, in the direction that `order` sets. Defaults
+              to `created_at`.
+
+              - `created_at` - Sort by when each user profile was created. This is the
+                default.
+              - `name` - Sort by `name`, ignoring the case of ASCII letters. Profiles without
+                a name come last in either direction.
+
+          page: The cursor for the page to return, taken from `next_page` in a previous
+              response.
+
+              Leave it out to get the first page.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -341,15 +391,12 @@ class UserProfiles(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "order": order,
-                        "order_by": order_by,
-                        "page": page,
-                    },
-                    user_profile_list_params.UserProfileListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "order": order,
+                    "order_by": order_by,
+                    "page": page,
+                },
             ),
             model=BetaUserProfile,
         )
@@ -371,7 +418,16 @@ class UserProfiles(SyncAPIResource):
         Create Enrollment URL
 
         Args:
+          user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -454,6 +510,12 @@ class AsyncUserProfiles(AsyncAPIResource):
               `passthrough`: the platform resells raw inference, and the profile identifies
               the resold-to company.
 
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
+
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
               characters. Accepted under the `user-profiles-2026-03-24` and
               `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
@@ -475,6 +537,13 @@ class AsyncUserProfiles(AsyncAPIResource):
               characters.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -498,17 +567,14 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             "/v1/user_profiles?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_details": external_user_details,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_create_params.UserProfileCreateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -532,7 +598,16 @@ class AsyncUserProfiles(AsyncAPIResource):
         Get User Profile
 
         Args:
+          user_profile_id: The ID of the user profile to get (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -587,11 +662,19 @@ class AsyncUserProfiles(AsyncAPIResource):
         Update User Profile
 
         Args:
+          user_profile_id: The ID of the user profile to update (`uprof_...`).
+
           access_type: How the platform uses the API on behalf of the entity this profile represents.
               `application`: the platform sells a product that uses the API behind the scenes,
               and the profile represents an individual end-user of that product.
               `passthrough`: the platform resells raw inference, and the profile identifies
               the resold-to company.
+
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
 
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
               255 characters. Accepted under the `user-profiles-2026-03-24` and
@@ -614,6 +697,13 @@ class AsyncUserProfiles(AsyncAPIResource):
               characters.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -639,17 +729,14 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
-            body=await async_maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_details": external_user_details,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_update_params.UserProfileUpdateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -676,15 +763,37 @@ class AsyncUserProfiles(AsyncAPIResource):
         List User Profiles
 
         Args:
-          limit: Query parameter for limit
+          limit: The maximum number of user profiles to return, from 1 to 100. Defaults to 20.
 
-          order: Query parameter for order
+          order: The sort direction, applied to the field that `order_by` selects. Defaults to
+              `desc`.
 
-          order_by: Query parameter for order_by
+              - `asc` - Oldest first when `order_by` is `created_at`, or names in ascending
+                order when `order_by` is `name`.
+              - `desc` - Newest first when `order_by` is `created_at`, or names in descending
+                order when `order_by` is `name`. This is the default.
 
-          page: Query parameter for page
+          order_by: The field to sort user profiles by, in the direction that `order` sets. Defaults
+              to `created_at`.
+
+              - `created_at` - Sort by when each user profile was created. This is the
+                default.
+              - `name` - Sort by `name`, ignoring the case of ASCII letters. Profiles without
+                a name come last in either direction.
+
+          page: The cursor for the page to return, taken from `next_page` in a previous
+              response.
+
+              Leave it out to get the first page.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -714,15 +823,12 @@ class AsyncUserProfiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "order": order,
-                        "order_by": order_by,
-                        "page": page,
-                    },
-                    user_profile_list_params.UserProfileListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "order": order,
+                    "order_by": order_by,
+                    "page": page,
+                },
             ),
             model=BetaUserProfile,
         )
@@ -744,7 +850,16 @@ class AsyncUserProfiles(AsyncAPIResource):
         Create Enrollment URL
 
         Args:
+          user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 

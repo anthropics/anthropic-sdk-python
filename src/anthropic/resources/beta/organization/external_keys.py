@@ -6,7 +6,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import path_template, maybe_transform, async_maybe_transform
+from ...._utils import path_template
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -17,7 +17,7 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.organization import external_key_list_params, external_key_create_params, external_key_update_params
+from ....types.beta.organization import external_key_create_params, external_key_update_params
 from ....types.beta.organization.beta_external_key import BetaExternalKey
 from ....types.beta.organization.external_key_delete_response import ExternalKeyDeleteResponse
 from ....types.beta.organization.external_key_validate_response import ExternalKeyValidateResponse
@@ -78,14 +78,11 @@ class ExternalKeys(SyncAPIResource):
         """
         return self._post(
             "/v1/organizations/external_keys?beta=true",
-            body=maybe_transform(
-                {
-                    "provider_config": provider_config,
-                    "display_name": display_name,
-                    "geo": geo,
-                },
-                external_key_create_params.ExternalKeyCreateParams,
-            ),
+            body={
+                "provider_config": provider_config,
+                "display_name": display_name,
+                "geo": geo,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -174,14 +171,11 @@ class ExternalKeys(SyncAPIResource):
             path_template(
                 "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
             ),
-            body=maybe_transform(
-                {
-                    "display_name": display_name,
-                    "geo": geo,
-                    "provider_config": provider_config,
-                },
-                external_key_update_params.ExternalKeyUpdateParams,
-            ),
+            body={
+                "display_name": display_name,
+                "geo": geo,
+                "provider_config": provider_config,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -227,13 +221,10 @@ class ExternalKeys(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    external_key_list_params.ExternalKeyListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaExternalKey,
         )
@@ -373,14 +364,11 @@ class AsyncExternalKeys(AsyncAPIResource):
         """
         return await self._post(
             "/v1/organizations/external_keys?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "provider_config": provider_config,
-                    "display_name": display_name,
-                    "geo": geo,
-                },
-                external_key_create_params.ExternalKeyCreateParams,
-            ),
+            body={
+                "provider_config": provider_config,
+                "display_name": display_name,
+                "geo": geo,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -469,14 +457,11 @@ class AsyncExternalKeys(AsyncAPIResource):
             path_template(
                 "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
             ),
-            body=await async_maybe_transform(
-                {
-                    "display_name": display_name,
-                    "geo": geo,
-                    "provider_config": provider_config,
-                },
-                external_key_update_params.ExternalKeyUpdateParams,
-            ),
+            body={
+                "display_name": display_name,
+                "geo": geo,
+                "provider_config": provider_config,
+            },
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -522,13 +507,10 @@ class AsyncExternalKeys(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    external_key_list_params.ExternalKeyListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
             ),
             model=BetaExternalKey,
         )

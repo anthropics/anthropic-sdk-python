@@ -4,7 +4,7 @@ from typing import Iterable, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from .beta_text_block_param import BetaTextBlockParam
-from .beta_citations_config_param import BetaCitationsConfigParam
+from .beta_citations_config_param_param import BetaCitationsConfigParamParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 
 __all__ = ["BetaSearchResultBlockParam"]
@@ -22,4 +22,4 @@ class BetaSearchResultBlockParam(TypedDict, total=False):
     cache_control: Optional[BetaCacheControlEphemeralParam]
     """Create a cache control breakpoint at this content block."""
 
-    citations: BetaCitationsConfigParam
+    citations: BetaCitationsConfigParamParam

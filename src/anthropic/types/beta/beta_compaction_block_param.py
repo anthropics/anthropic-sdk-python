@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from typing import Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing import Union, Iterable, Optional
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
+from .beta_request_tool_removal_block_param import BetaRequestToolRemovalBlockParam
+from .beta_request_tool_addition_block_param import BetaRequestToolAdditionBlockParam
 
-__all__ = ["BetaCompactionBlockParam"]
+__all__ = ["BetaCompactionBlockParam", "ToolChange"]
+
+ToolChange: TypeAlias = Union[BetaRequestToolAdditionBlockParam, BetaRequestToolRemovalBlockParam]
 
 
 class BetaCompactionBlockParam(TypedDict, total=False):
@@ -31,3 +35,11 @@ class BetaCompactionBlockParam(TypedDict, total=False):
 
     signature: Optional[str]
     """The block's signature as returned, to be sent back verbatim"""
+
+    tool_changes: Optional[Iterable[ToolChange]]
+    """
+    The tool changes of the compacted range, as the server returned them on this
+    block: the `tool_addition` and `tool_removal` entries that take the request's
+    `tools` to the tool set in effect at the end of the range. Send them back
+    unchanged with the block.
+    """

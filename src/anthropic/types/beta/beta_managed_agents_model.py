@@ -5,6 +5,7 @@ __all__ = ["BetaManagedAgentsModel"]
 
 BetaManagedAgentsModel: TypeAlias = Union[
     Literal[
+        "claude-opus-5-5",
         "claude-fable-5-1",
         "claude-sonnet-5",
         "claude-fable-5",

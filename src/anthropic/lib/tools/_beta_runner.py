@@ -3,9 +3,11 @@ from __future__ import annotations
 import logging
 import warnings
 from abc import ABC, abstractmethod
+from copy import copy
 from typing import (
     TYPE_CHECKING,
     Any,
+    Dict,
     List,
     Union,
     Generic,
@@ -15,6 +17,7 @@ from typing import (
     Iterator,
     Coroutine,
     AsyncIterator,
+    cast,
 )
 from contextlib import contextmanager, asynccontextmanager
 from typing_extensions import Literal, TypedDict, override
@@ -23,7 +26,13 @@ import httpx2
 
 from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import is_given, consume_sync_iterator, consume_async_iterator
-from ...types.beta import BetaMessage, BetaMessageParam
+from ...types.beta import (
+    BetaMessage,
+    BetaMessageParam,
+    BetaToolUnionParam,
+    BetaRequestToolRemovalBlockParam,
+    BetaRequestToolAdditionBlockParam,
+)
 from ..._base_client import merge_headers
 from ._tool_dispatch import tool_registry, tool_error_content, available_tool_names
 from ._beta_functions import (
@@ -40,6 +49,7 @@ from ..streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 from ...types.beta.beta_stop_reason import BetaStopReason
 from ...types.beta.parsed_beta_message import ResponseFormatT, ParsedBetaMessage, ParsedBetaContentBlock
 from ...types.beta.message_create_params import ParseMessageCreateParamsBase
+from ...types.beta.beta_output_config_param import BetaOutputConfigParam
 from ...types.beta.beta_compaction_config_param import BetaCompactionConfigParam
 from ...types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
 
@@ -54,6 +64,7 @@ AnyFunctionToolT = TypeVar(
     ],
 )
 RunnerItemT = TypeVar("RunnerItemT")
+
 
 log = logging.getLogger(__name__)
 
@@ -96,6 +107,34 @@ def _reject_compaction_param(params: ParseMessageCreateParamsBase[Any]) -> None:
         )
 
 
+def _without_format(output_config: BetaOutputConfigParam) -> Dict[str, Any]:
+    return {key: value for key, value in output_config.items() if key != "format"}
+
+
+def _without_compaction_incompatible_params(params: ParseMessageCreateParamsBase[Any]) -> Dict[str, Any]:
+    """A compaction request returns only the compaction block, never a reply, so the API rejects the
+    params that only shape a reply. The runner's later requests keep them.
+    """
+    trimmed: Dict[str, Any] = {**params}
+    for name in ("context_management", "stop_sequences", "output_format"):
+        trimmed.pop(name, None)
+    tool_choice = params.get("tool_choice")
+    if is_given(tool_choice) and tool_choice and tool_choice["type"] in ("any", "tool"):
+        del trimmed["tool_choice"]
+    output_config = params.get("output_config")
+    if is_given(output_config) and output_config:
+        trimmed["output_config"] = _without_format(output_config)
+    fallbacks = params.get("fallbacks")
+    if is_given(fallbacks) and fallbacks and not isinstance(fallbacks, str):
+        trimmed["fallbacks"] = [
+            {**fallback, "output_config": _without_format(fallback_output_config)}
+            if (fallback_output_config := fallback.get("output_config"))
+            else fallback
+            for fallback in fallbacks
+        ]
+    return trimmed
+
+
 class RequestOptions(TypedDict, total=False):
     extra_headers: Headers | None
     extra_query: Query | None
@@ -132,6 +171,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         self._iteration_count = 0
         self._pending_compaction: BetaCompactionConfigParam | None = None
         self._messages_being_compacted: Iterable[BetaMessageParam] | None = None
+        self._pending_tool_changes: list[BetaRequestToolAdditionBlockParam | BetaRequestToolRemovalBlockParam] = []
 
     def set_messages_params(
         self,
@@ -200,16 +240,14 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
                 "because the API doesn't accept a compaction block together with one. Remove the edit first."
             )
 
-    def _take_compaction_request_params(
+    def _pop_compaction_request_params(
         self, compaction: BetaCompactionConfigParam
     ) -> ParseMessageCreateParamsBase[ResponseFormatT]:
         self._check_can_compact(self._params)
-        params: ParseMessageCreateParamsBase[ResponseFormatT] = {**self._params, "compaction": compaction}
-        # The API refuses `compaction` alongside `context_management`; later requests keep it.
-        params.pop("context_management", None)
+        params = {**_without_compaction_incompatible_params(self._params), "compaction": compaction}
         self._pending_compaction = None
         self._messages_being_compacted = self._params["messages"]
-        return params
+        return cast("ParseMessageCreateParamsBase[ResponseFormatT]", params)
 
     def _prepare_compaction_after_final_turn(
         self, message: ParsedBetaMessage[ResponseFormatT]
@@ -241,6 +279,57 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         self._params = {**self._params, "messages": [message.to_param()]}
         return True
 
+    def add_tools(self, *tools: AnyFunctionToolT | BetaToolUnionParam) -> None:
+        """Give the model more tools without changing the `tools` param, which would miss the prompt cache.
+
+        The definitions are sent in `tool_addition` blocks with the next request. A function tool is run straight
+        away, in place of any tool of the same name, even for a call already in the message being handled. A raw
+        definition is for server tools, such as web search: the tool runner never runs it, and it stops running a
+        function tool of the same name. Requires the `inline-tools-2026-09-15` beta.
+
+        Args:
+            *tools: Function tools, such as `@beta_tool` functions, or raw tool definitions.
+        """
+        for tool in tools:
+            if isinstance(tool, dict):
+                definition: BetaToolUnionParam = copy(tool)
+                name = tool.get("name")
+                if isinstance(name, str):
+                    self._tools_by_name.pop(name, None)
+            else:
+                definition = tool.to_dict()
+                self._tools_by_name[tool.name] = tool
+            self._pending_tool_changes.append(
+                {"type": "tool_addition", "tool": {"type": "tool_definition", "definition": definition}}
+            )
+
+    def remove_tools(self, *tools: AnyFunctionToolT | str) -> None:
+        """Take tools away from the model without changing the `tools` param, which would miss the prompt cache.
+
+        The tools stop being run at once, and the model is told in `tool_removal` blocks with the next request.
+        Requires the `inline-tools-2026-09-15` beta.
+
+        Args:
+            *tools: The tools to remove, or their names.
+        """
+        for tool in tools:
+            name = tool if isinstance(tool, str) else tool.name
+            self._tools_by_name.pop(name, None)
+            self._pending_tool_changes.append(
+                {"type": "tool_removal", "tool": {"type": "tool_reference", "name": name}}
+            )
+
+    def _send_pending_tool_changes(self, hold: bool) -> None:
+        # A turn that stopped on `pause_turn` is sent back to be continued, so it has to stay last.
+        if hold or not self._pending_tool_changes:
+            return
+        # Not `append_messages()`: that would make the runner leave this turn's messages for the caller to append.
+        self._params = {
+            **self._params,
+            "messages": [*self._params["messages"], {"role": "system", "content": self._pending_tool_changes}],
+        }
+        self._pending_tool_changes = []
+
     def _should_stop(self) -> bool:
         if self._max_iterations is not None and self._iteration_count >= self._max_iterations:
             return True
@@ -254,7 +343,9 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         for a withdrawn tool; a name absent from this set routes that call down
         the same unknown-tool path as a tool that was never declared.
         """
-        return available_tool_names(self._params["messages"], self._tools_by_name)
+        # Changes made since the last request are not in the history yet.
+        pending: BetaMessageParam = {"role": "system", "content": self._pending_tool_changes}
+        return available_tool_names([*self._params["messages"], pending], self._tools_by_name)
 
 
 class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Generic[RunnerItemT, ResponseFormatT], ABC):
@@ -295,7 +386,7 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
     def _compact(self, compaction: BetaCompactionConfigParam) -> Iterator[RunnerItemT]:
         last_message = self._last_message
         try:
-            with self._handle_request(self._take_compaction_request_params(compaction)) as item:
+            with self._handle_request(self._pop_compaction_request_params(compaction)) as item:
                 yield item
                 message = self._get_last_message()
                 assert message is not None
@@ -311,9 +402,11 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
             yield from self._compact(compaction)
 
     def __run__(self) -> Iterator[RunnerItemT]:
-        turn_paused = False
+        stop_reason: BetaStopReason | None = None
         while not self._should_stop():
+            self._send_pending_tool_changes(hold=stop_reason == "pause_turn")
             # The API can't compact a conversation that ends mid-turn, so a paused turn is resumed first.
+            turn_paused = _determine_next_step_from_stop_reason(stop_reason) == "resume"
             compaction = None if turn_paused else self._pending_compaction
             if compaction is not None:
                 yield from self._compact(compaction)
@@ -331,8 +424,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
             self._iteration_count += 1
 
-            next_step = _determine_next_step_from_stop_reason(message.stop_reason)
-            turn_paused = next_step == "resume"
+            stop_reason = message.stop_reason
+            next_step = _determine_next_step_from_stop_reason(stop_reason)
             if next_step == "stop":
                 log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
                 yield from self._compact_after_final_turn(message)
@@ -521,7 +614,7 @@ class BaseAsyncToolRunner(
     async def _compact(self, compaction: BetaCompactionConfigParam) -> AsyncIterator[RunnerItemT]:
         last_message = self._last_message
         try:
-            async with self._handle_request(self._take_compaction_request_params(compaction)) as item:
+            async with self._handle_request(self._pop_compaction_request_params(compaction)) as item:
                 yield item
                 message = await self._get_last_message()
                 assert message is not None
@@ -540,9 +633,11 @@ class BaseAsyncToolRunner(
                 yield item
 
     async def __run__(self) -> AsyncIterator[RunnerItemT]:
-        turn_paused = False
+        stop_reason: BetaStopReason | None = None
         while not self._should_stop():
+            self._send_pending_tool_changes(hold=stop_reason == "pause_turn")
             # The API can't compact a conversation that ends mid-turn, so a paused turn is resumed first.
+            turn_paused = _determine_next_step_from_stop_reason(stop_reason) == "resume"
             compaction = None if turn_paused else self._pending_compaction
             if compaction is not None:
                 async for item in self._compact(compaction):
@@ -561,8 +656,8 @@ class BaseAsyncToolRunner(
 
             self._iteration_count += 1
 
-            next_step = _determine_next_step_from_stop_reason(message.stop_reason)
-            turn_paused = next_step == "resume"
+            stop_reason = message.stop_reason
+            next_step = _determine_next_step_from_stop_reason(stop_reason)
             if next_step == "stop":
                 log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
                 async for item in self._compact_after_final_turn(message):

@@ -7,7 +7,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -21,8 +21,6 @@ from ...._base_client import AsyncPaginator, make_request_options
 from ....types.beta.memory_stores import (
     BetaManagedAgentsMemoryView,
     BetaManagedAgentsMemoryVersionOperation,
-    memory_version_list_params,
-    memory_version_retrieve_params,
 )
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.memory_stores.beta_managed_agents_memory_view import BetaManagedAgentsMemoryView
@@ -73,9 +71,24 @@ class MemoryVersions(SyncAPIResource):
         Retrieve a memory version
 
         Args:
-          view: Query parameter for view
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
+
+          memory_version_id: The ID of the memory version to retrieve (`memver_...`).
+
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -112,7 +125,7 @@ class MemoryVersions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"view": view}, memory_version_retrieve_params.MemoryVersionRetrieveParams),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -144,27 +157,44 @@ class MemoryVersions(SyncAPIResource):
         List memory versions
 
         Args:
-          api_key_id: Query parameter for api_key_id
+          memory_store_id: The ID of the memory store whose version history to list (`memstore_...`).
+
+          api_key_id: Return only versions written with the API key that has this ID.
 
           created_at_gte: Return versions created at or after this time (inclusive).
 
           created_at_lte: Return versions created at or before this time (inclusive).
 
-          limit: Query parameter for limit
+          limit: The maximum number of versions to return per page. Defaults to 20.
 
-          memory_id: Query parameter for memory_id
+          memory_id: Return only versions of the memory with this ID (`mem_...`).
 
-          operation: Query parameter for operation
+              The filter still works after the memory is deleted. The results then include the
+              version whose `operation` is `deleted`.
 
-          page: Query parameter for page
+          operation: Return only versions that record this kind of change.
 
-          service_account_id: Query parameter for service_account_id
+          page: The `next_page` value from a previous response, to get the next page. Omit it to
+              get the first page.
 
-          session_id: Query parameter for session_id
+          service_account_id: Return only versions written by the service account with this ID (`svac_...`).
 
-          view: Query parameter for view
+          session_id: Return only versions written by the session with this ID.
+
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -198,21 +228,18 @@ class MemoryVersions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "api_key_id": api_key_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "limit": limit,
-                        "memory_id": memory_id,
-                        "operation": operation,
-                        "page": page,
-                        "service_account_id": service_account_id,
-                        "session_id": session_id,
-                        "view": view,
-                    },
-                    memory_version_list_params.MemoryVersionListParams,
-                ),
+                query={
+                    "api_key_id": api_key_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "limit": limit,
+                    "memory_id": memory_id,
+                    "operation": operation,
+                    "page": page,
+                    "service_account_id": service_account_id,
+                    "session_id": session_id,
+                    "view": view,
+                },
             ),
             model=BetaManagedAgentsMemoryVersion,
         )
@@ -235,7 +262,18 @@ class MemoryVersions(SyncAPIResource):
         Redact a memory version
 
         Args:
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
+
+          memory_version_id: The ID of the memory version to redact (`memver_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -313,9 +351,24 @@ class AsyncMemoryVersions(AsyncAPIResource):
         Retrieve a memory version
 
         Args:
-          view: Query parameter for view
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
+
+          memory_version_id: The ID of the memory version to retrieve (`memver_...`).
+
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -352,9 +405,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {"view": view}, memory_version_retrieve_params.MemoryVersionRetrieveParams
-                ),
+                query={"view": view},
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -386,27 +437,44 @@ class AsyncMemoryVersions(AsyncAPIResource):
         List memory versions
 
         Args:
-          api_key_id: Query parameter for api_key_id
+          memory_store_id: The ID of the memory store whose version history to list (`memstore_...`).
+
+          api_key_id: Return only versions written with the API key that has this ID.
 
           created_at_gte: Return versions created at or after this time (inclusive).
 
           created_at_lte: Return versions created at or before this time (inclusive).
 
-          limit: Query parameter for limit
+          limit: The maximum number of versions to return per page. Defaults to 20.
 
-          memory_id: Query parameter for memory_id
+          memory_id: Return only versions of the memory with this ID (`mem_...`).
 
-          operation: Query parameter for operation
+              The filter still works after the memory is deleted. The results then include the
+              version whose `operation` is `deleted`.
 
-          page: Query parameter for page
+          operation: Return only versions that record this kind of change.
 
-          service_account_id: Query parameter for service_account_id
+          page: The `next_page` value from a previous response, to get the next page. Omit it to
+              get the first page.
 
-          session_id: Query parameter for session_id
+          service_account_id: Return only versions written by the service account with this ID (`svac_...`).
 
-          view: Query parameter for view
+          session_id: Return only versions written by the session with this ID.
+
+          view: Selects which projection of a `memory` or `memory_version` the server returns.
+              `basic` returns the object with `content` set to `null`; `full` populates
+              `content`. When omitted, the default is endpoint-specific: retrieve operations
+              default to `full`; list, create, and update operations default to `basic`.
+              Listing with `view=full` caps `limit` at 20.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -440,21 +508,18 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "api_key_id": api_key_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "limit": limit,
-                        "memory_id": memory_id,
-                        "operation": operation,
-                        "page": page,
-                        "service_account_id": service_account_id,
-                        "session_id": session_id,
-                        "view": view,
-                    },
-                    memory_version_list_params.MemoryVersionListParams,
-                ),
+                query={
+                    "api_key_id": api_key_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "limit": limit,
+                    "memory_id": memory_id,
+                    "operation": operation,
+                    "page": page,
+                    "service_account_id": service_account_id,
+                    "session_id": session_id,
+                    "view": view,
+                },
             ),
             model=BetaManagedAgentsMemoryVersion,
         )
@@ -477,7 +542,18 @@ class AsyncMemoryVersions(AsyncAPIResource):
         Redact a memory version
 
         Args:
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
+
+          memory_version_id: The ID of the memory version to redact (`memver_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
