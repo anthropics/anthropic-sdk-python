@@ -284,6 +284,19 @@ New code uses modern syntax and names.
 - **Write no comment by default.** When one is needed, keep it to a line or two stating a non-obvious why. Prefer a clearer name to a comment.
 - **Docstrings use plain, complete sentences.**
 - **Non-obvious attributes get a docstring.** An attribute whose use isn't obvious, such as a lock or a completion flag, gets a short `"""` docstring under it saying what it is for.
+- **Attribute docstrings decide the spacing.** If any attribute in a class body has a docstring, put a blank line between every attribute, documented or not. If none has one, keep them packed with no blank lines.
+
+  ```python
+  class RetryConfig(BaseModel):
+      max_retries: int = DEFAULT_MAX_RETRIES
+      """How many times a failed request is retried."""
+
+      timeout: float | None = None
+
+      retry_on: tuple[type[Exception], ...] = TRANSIENT_ERRORS
+      """Errors worth retrying. Anything else is raised on the first failure."""
+  ```
+
 - **Document constructor arguments in `__init__`.** Put them in the `__init__` docstring, even when that repeats the class docstring, so that IDEs show them.
 - **Link, don't name a file.** A docstring points users at a docs page or a file's GitHub URL, not at a bare repository file name such as `tools.md`.
 - **Keep docs accurate.** Keep docstrings, `helpers.md`, and `tools.md` accurate when the API changes. Public docs are for users: call the package "Claude SDK for Python" and leave out internal layout.
