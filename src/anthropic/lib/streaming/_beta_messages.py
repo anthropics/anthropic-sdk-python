@@ -535,7 +535,8 @@ def accumulate_event(
                 content.signature = event.delta.signature
         elif event.delta.type == "compaction_delta":
             if content.type == "compaction":
-                content.content = event.delta.content
+                if event.delta.content is not None:
+                    content.content = (content.content or "") + event.delta.content
                 content.encrypted_content = event.delta.encrypted_content
         else:
             # we only want exhaustive checking for linters, not at runtime
