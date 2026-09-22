@@ -202,6 +202,43 @@ class TestAuthPrecedence:
         )
         assert client.auth_headers == {}
 
+    def test_sigv4_mode_ignores_ambient_api_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "ambient-key")
+        monkeypatch.setenv("ANTHROPIC_AWS_API_KEY", "fallback-key")
+
+        client = AnthropicBedrockMantle(
+            auth_mode="sigv4",
+            aws_region="us-east-1",
+        )
+
+        assert client.auth_mode == "sigv4"
+        assert client._use_sigv4 is True
+        assert client.api_key is None
+
+    def test_api_key_mode_uses_key_even_with_aws_credentials(self) -> None:
+        client = AnthropicBedrockMantle(
+            auth_mode="api_key",
+            api_key="my-key",
+            aws_access_key="AKID",
+            aws_secret_key="secret",
+            aws_region="us-east-1",
+        )
+
+        assert client.auth_mode == "api_key"
+        assert client._use_sigv4 is False
+        assert client.auth_headers == {"Authorization": "Bearer my-key"}
+
+    def test_api_key_mode_requires_a_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("AWS_BEARER_TOKEN_BEDROCK", raising=False)
+        monkeypatch.delenv("ANTHROPIC_AWS_API_KEY", raising=False)
+
+        with pytest.raises(ValueError, match="auth_mode='api_key'.*requires an API key"):
+            AnthropicBedrockMantle(auth_mode="api_key", base_url="https://example.com")
+
+    def test_skip_auth_cannot_be_combined_with_explicit_mode(self) -> None:
+        with pytest.raises(ValueError, match="skip_auth.*mutually exclusive"):
+            AnthropicBedrockMantle(skip_auth=True, auth_mode="sigv4", base_url="https://example.com")
+
 
 class TestSkipAuth:
     def test_skip_auth_does_not_sign_request(self, get_auth_headers_recorder: GetAuthHeadersRecorder) -> None:
@@ -278,6 +315,14 @@ class TestAsyncClient:
         assert signing_threads[0] != threading.get_ident()
         assert request.headers["Authorization"] == "AWS4-HMAC-SHA256 stub"
 
+    def test_explicit_auth_mode(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "ambient-key")
+        client = AsyncAnthropicBedrockMantle(auth_mode="sigv4", aws_region="us-east-1")
+
+        assert client.auth_mode == "sigv4"
+        assert client._use_sigv4 is True
+        assert client.api_key is None
+
 
 class TestCopy:
     def test_copy_preserves_config(self) -> None:
@@ -296,6 +341,29 @@ class TestCopy:
         )
         copied = client.copy(aws_region="us-west-2")
         assert copied.aws_region == "us-west-2"
+
+    def test_copy_preserves_auth_mode(self) -> None:
+        client = AnthropicBedrockMantle(auth_mode="sigv4", aws_region="us-east-1")
+        copied = client.copy()
+
+        assert copied.auth_mode == "sigv4"
+        assert copied._use_sigv4 is True
+
+    def test_copy_can_switch_to_sigv4(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "ambient-key")
+        client = AnthropicBedrockMantle(api_key="my-key", aws_region="us-east-1")
+        copied = client.copy(auth_mode="sigv4")
+
+        assert copied.auth_mode == "sigv4"
+        assert copied._use_sigv4 is True
+        assert copied.api_key is None
+
+    def test_async_copy_preserves_auth_mode(self) -> None:
+        client = AsyncAnthropicBedrockMantle(auth_mode="sigv4", aws_region="us-east-1")
+        copied = client.copy()
+
+        assert copied.auth_mode == "sigv4"
+        assert copied._use_sigv4 is True
 
     def test_copy_x_stainless_helper_header_appends(self) -> None:
         # `x-stainless-helper` accumulates across copies instead of being clobbered
