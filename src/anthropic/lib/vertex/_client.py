@@ -417,6 +417,17 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
         return self.copy(middleware=[*self._middleware, *middleware])
 
 
+# Vertex picks a prompt-cache store by hashing the head of the request body, so the
+# fields constant across a conversation go first. `openapi_dumps` must keep key order.
+_CACHE_ROUTING_LEADING_KEYS = ("anthropic_version", "system", "tools")
+
+
+def _order_body_for_cache_routing(json_data: dict[object, object]) -> dict[object, object]:
+    leading = {key: json_data[key] for key in _CACHE_ROUTING_LEADING_KEYS if key in json_data}
+    rest = {key: value for key, value in json_data.items() if key not in leading}
+    return {**leading, **rest}
+
+
 def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | None, region: str) -> FinalRequestOptions:
     options = model_copy(input_options, deep=True)
 
@@ -448,5 +459,8 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
 
     if options.url.startswith("/v1/messages/batches"):
         raise AnthropicError("The Batch API is not supported in the Vertex client yet")
+
+    if is_dict(options.json_data):
+        options.json_data = _order_body_for_cache_routing(options.json_data)
 
     return options
