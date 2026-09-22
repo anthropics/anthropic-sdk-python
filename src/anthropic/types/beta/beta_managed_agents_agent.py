@@ -30,7 +30,7 @@ class BetaManagedAgentsAgent(BaseModel):
     id: str
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the agent was archived. Null if not archived."""
 
     created_at: datetime
     """A timestamp in RFC 3339 format"""
@@ -45,7 +45,7 @@ class BetaManagedAgentsAgent(BaseModel):
     """Model identifier and configuration."""
 
     multiagent: Optional[BetaManagedAgentsMultiagent] = None
-    """Resolved coordinator topology with a concrete agent roster."""
+    """Multiagent orchestration configuration. Null when the agent is single-threaded."""
 
     name: str
 

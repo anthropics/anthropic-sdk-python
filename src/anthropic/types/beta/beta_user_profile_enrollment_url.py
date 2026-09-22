@@ -12,7 +12,7 @@ class BetaUserProfileEnrollmentURL(BaseModel):
     """
 
     expires_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When this enrollment URL expires, in RFC 3339 format."""
 
     type: Literal["enrollment_url"]
     """Object type. Always `enrollment_url`."""

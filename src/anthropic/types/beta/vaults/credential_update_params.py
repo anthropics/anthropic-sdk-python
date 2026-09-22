@@ -16,7 +16,11 @@ class CredentialUpdateParams(TypedDict, total=False):
     """Identifier of the vault containing the credential."""
 
     auth: Auth
-    """Updated authentication details for a credential."""
+    """Updated authentication configuration.
+
+    The `type` is immutable; the variant sent must match the stored credential's
+    type.
+    """
 
     display_name: Optional[str]
     """Updated human-readable name for the credential. 1-255 characters."""

@@ -17,7 +17,12 @@ class BetaMessageDeltaUsage(BaseModel):
     """The cumulative number of input tokens read from the cache."""
 
     fallback_credit: Optional[BetaFallbackCreditUsage] = None
-    """Outcome of the `fallback_credit_token` presented on this request."""
+    """Outcome of the `fallback_credit_token` presented on this request.
+
+    Present on every response to a non-batch request that carried a
+    `fallback_credit_token`, in either redemption mode; absent otherwise (batch
+    items accept and ignore the token and carry no outcome object).
+    """
 
     input_tokens: Optional[int] = None
     """The cumulative number of input tokens which were used."""

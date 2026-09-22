@@ -6,10 +6,7 @@ __all__ = ["BetaManagedAgentsScheduleParams"]
 
 
 class BetaManagedAgentsScheduleParams(TypedDict, total=False):
-    """5-field POSIX cron schedule.
-
-    Literal wall-clock matching in the configured timezone.
-    """
+    """A recurring schedule. Discriminated union — only cron is supported currently."""
 
     expression: Required[str]
     """

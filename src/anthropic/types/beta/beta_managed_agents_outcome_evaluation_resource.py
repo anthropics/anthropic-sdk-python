@@ -11,7 +11,10 @@ class BetaManagedAgentsOutcomeEvaluationResource(BaseModel):
     """Evaluation state for a single outcome defined via a `define_outcome` event."""
 
     completed_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the outcome reached a terminal result.
+
+    Null while `pending`/`running`/`evaluating`.
+    """
 
     description: str
     """What the agent should produce."""

@@ -24,4 +24,7 @@ class BetaManagedAgentsAgentToolsetDefaultConfigParams(TypedDict, total=False):
     """
 
     permission_policy: Optional[PermissionPolicy]
-    """Permission policy for tool execution."""
+    """Default permission policy for tools.
+
+    Controls whether tool calls are auto-approved or require confirmation.
+    """

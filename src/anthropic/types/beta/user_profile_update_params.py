@@ -12,12 +12,7 @@ __all__ = ["UserProfileUpdateParams"]
 
 class UserProfileUpdateParams(TypedDict, total=False):
     access_type: Optional[Literal["application", "passthrough"]]
-    """How the platform uses the API on behalf of the entity this profile represents.
-
-    `application`: the platform sells a product that uses the API behind the scenes,
-    and the profile represents an individual end-user of that product.
-    `passthrough`: the platform resells raw inference, and the profile identifies
-    the resold-to company.
+    """If present, replaces the stored access type. Omit to leave unchanged.
 
     - `application` - The user profile represents an individual end-user of a
       product that the platform builds on the API. New profiles get this value by
@@ -43,7 +38,13 @@ class UserProfileUpdateParams(TypedDict, total=False):
     """
 
     external_user_onboarded_at: Union[str, datetime]
-    """A timestamp in RFC 3339 format"""
+    """If present, replaces the stored account creation time.
+
+    Omit to leave unchanged; once set, the value cannot be cleared and `null` is
+    rejected. Must be a complete RFC 3339 timestamp no more than 1 minute in the
+    future. Accepted under the `user-profiles-2026-08-18` beta header; under
+    `user-profiles-2026-09-04` send `external_user_details.onboarded_at` instead.
+    """
 
     metadata: Dict[str, str]
     """Key-value pairs to merge into the stored metadata.

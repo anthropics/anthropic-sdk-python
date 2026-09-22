@@ -16,6 +16,6 @@ class BetaManagedAgentsSessionDeletedEvent(BaseModel):
     """Unique identifier for this event."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the session was deleted."""
 
     type: Literal["session.deleted"]

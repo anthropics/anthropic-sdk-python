@@ -20,7 +20,7 @@ class BetaUserProfile(BaseModel):
     """Unique identifier for this user profile, prefixed `uprof_`."""
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When this user profile was created, in RFC 3339 format."""
 
     metadata: Dict[str, str]
     """Arbitrary key-value metadata.
@@ -38,15 +38,16 @@ class BetaUserProfile(BaseModel):
     """Object type. Always `user_profile`."""
 
     updated_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When this user profile was last modified, in RFC 3339 format.
+
+    Trust-grant status changes also bump this timestamp.
+    """
 
     access_type: Optional[Literal["application", "passthrough"]] = None
-    """How the platform uses the API on behalf of the entity this profile represents.
-
-    `application`: the platform sells a product that uses the API behind the scenes,
-    and the profile represents an individual end-user of that product.
-    `passthrough`: the platform resells raw inference, and the profile identifies
-    the resold-to company.
+    """
+    How the platform uses the API for this entity: `application` (default) or
+    `passthrough`. Present under the `user-profiles-2026-08-18` and later beta
+    headers.
 
     - `application` - The user profile represents an individual end-user of a
       product that the platform builds on the API. New profiles get this value by
@@ -64,14 +65,22 @@ class BetaUserProfile(BaseModel):
     """
 
     external_user_details: Optional[BetaUserProfileExternalUserDetails] = None
-    """Details about the entity this profile represents, as the platform states them.
-
-    Anthropic does not verify them. Every field is present, `null` until the
-    platform supplies a value.
+    """
+    Details about the entity this profile represents, as the platform states them;
+    not verified by Anthropic. Present under the `user-profiles-2026-09-04` beta
+    header, with every field present and `null` until the platform supplies a value;
+    the earlier beta headers serve `reference_id` as the top-level `external_id`,
+    and `user-profiles-2026-08-18` serves `onboarded_at` as
+    `external_user_onboarded_at`.
     """
 
     external_user_onboarded_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """
+    When the entity this profile represents opened its account with the platform, as
+    stated by the platform, in RFC 3339 format (UTC). `null` until the platform
+    supplies one. Present under the `user-profiles-2026-08-18` beta header; under
+    `user-profiles-2026-09-04` the value is `external_user_details.onboarded_at`.
+    """
 
     name: Optional[str] = None
     """Real-world name of the entity this profile represents (company or individual).

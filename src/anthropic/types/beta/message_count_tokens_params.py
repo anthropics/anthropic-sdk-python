@@ -130,15 +130,15 @@ class MessageCountTokensParams(TypedDict, total=False):
     """
 
     compaction: Optional[BetaCompactionConfigParam]
-    """
-    Compact the whole conversation and return a signed `compaction` block, alone,
-    that a later request sends back first in `messages`, in place of the messages it
-    summarizes. There is no trigger and no pause flag: sending the parameter
-    compacts, and nothing is sampled after the block.
+    """Compaction configuration.
 
-    The summarization prompt is the server's own unless `instructions` are given,
-    which then replace it for this request; a value that is empty or only whitespace
-    counts as absent.
+    When set on `POST /v1/messages`, the request is a compaction request: the
+    conversation in `messages` is summarized and the response holds only the
+    resulting `compaction` block (`stop_reason` `"compaction"`), which later
+    requests send first in `messages` in place of the messages it summarizes.
+    `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+    count it returns is for the conversation in `messages` as sent. Cannot be
+    combined with `context_management`.
     """
 
     context_management: Optional[BetaContextManagementConfigParam]
@@ -155,10 +155,9 @@ class MessageCountTokensParams(TypedDict, total=False):
     """Configuration options for the model's output, such as the output format."""
 
     speed: Optional[Literal["standard", "fast"]]
-    """Inference speed mode.
+    """The inference speed mode for this request.
 
-    `fast` provides significantly faster output token generation at premium pricing.
-    Not all models support `fast`; invalid combinations are rejected at create time.
+    `"fast"` enables high output-tokens-per-second inference.
     """
 
     system: Union[str, Iterable[BetaTextBlockParam]]

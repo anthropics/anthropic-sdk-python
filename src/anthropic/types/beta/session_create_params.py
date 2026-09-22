@@ -29,10 +29,11 @@ class SessionCreateParams(TypedDict, total=False):
     """ID of the `environment` defining the container configuration for this session."""
 
     budget: BetaManagedAgentsBudgetLimitParam
-    """A hard spend ceiling.
+    """Enforced spend ceiling for the session.
 
-    The session stops issuing new model requests once the tracked list cost reaches
-    `max_list_cost`.
+    Omit to create an uncapped session. Every model the session can run — the
+    agent's model and each callable agent's model — must have a public list price,
+    or the request is rejected with reason `model_not_budgetable`.
     """
 
     initial_events: Iterable[InitialEvent]

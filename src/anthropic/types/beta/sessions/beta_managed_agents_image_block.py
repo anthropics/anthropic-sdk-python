@@ -18,6 +18,6 @@ class BetaManagedAgentsImageBlock(BaseModel):
     """Image content specified directly as base64 data or as a reference via a URL."""
 
     source: Source
-    """Union type for image source variants."""
+    """The source of the image data."""
 
     type: Literal["image"]

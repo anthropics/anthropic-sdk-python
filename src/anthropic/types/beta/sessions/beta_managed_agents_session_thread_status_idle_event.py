@@ -34,7 +34,7 @@ class BetaManagedAgentsSessionThreadStatusIdleEvent(BaseModel):
     """Name of the agent the thread runs."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp of the status transition."""
 
     session_thread_id: str
     """Public sthr\\__ ID of the thread that went idle."""

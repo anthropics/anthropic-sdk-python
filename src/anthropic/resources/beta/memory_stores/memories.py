@@ -254,12 +254,10 @@ class Memories(SyncAPIResource):
               case-sensitive. The memory's `id` is preserved across renames. Omit to leave the
               path unchanged.
 
-          precondition: Optimistic-concurrency precondition: the update applies only if the memory's
-              stored `content_sha256` equals the supplied value. On mismatch, the request
-              returns `memory_precondition_failed_error` (HTTP 409); re-read the memory and
-              retry against the fresh state. If the precondition fails but the stored state
-              already exactly matches the requested `content` and `path`, the server returns
-              200 instead of 409.
+          precondition: Optional optimistic-concurrency precondition. When supplied, the update applies
+              only if the memory's current state matches; on mismatch the request returns
+              `memory_precondition_failed_error` (HTTP 409). When omitted, the update is
+              unconditional.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -713,12 +711,10 @@ class AsyncMemories(AsyncAPIResource):
               case-sensitive. The memory's `id` is preserved across renames. Omit to leave the
               path unchanged.
 
-          precondition: Optimistic-concurrency precondition: the update applies only if the memory's
-              stored `content_sha256` equals the supplied value. On mismatch, the request
-              returns `memory_precondition_failed_error` (HTTP 409); re-read the memory and
-              retry against the fresh state. If the precondition fails but the stored state
-              already exactly matches the requested `content` and `path`, the server returns
-              200 instead of 409.
+          precondition: Optional optimistic-concurrency precondition. When supplied, the update applies
+              only if the memory's current state matches; on mismatch the request returns
+              `memory_precondition_failed_error` (HTTP 409). When omitted, the update is
+              unconditional.
 
           betas: Optional header to specify the beta version(s) you want to use.
 

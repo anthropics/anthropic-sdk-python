@@ -19,7 +19,7 @@ class BetaManagedAgentsSessionThreadCreatedEvent(BaseModel):
     """Name of the callable agent the thread runs."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the thread was created."""
 
     session_thread_id: str
     """Public `sthr_` ID of the newly created thread."""

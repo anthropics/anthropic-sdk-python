@@ -13,7 +13,10 @@ class ModelInfo(BaseModel):
     """Unique model identifier."""
 
     capabilities: Optional[ModelCapabilities] = None
-    """Model capability information."""
+    """Object mapping capability names to their support details.
+
+    Keys are always present for all known capabilities.
+    """
 
     created_at: datetime
     """RFC 3339 datetime string representing the time at which the model was released.

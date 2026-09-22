@@ -14,7 +14,7 @@ class BetaManagedAgentsUserToolConfirmationEvent(BaseModel):
     """Unique identifier for this event."""
 
     result: Literal["allow", "deny"]
-    """UserToolConfirmationResult enum"""
+    """The confirmation result: 'allow' or 'deny'."""
 
     tool_use_id: str
     """
@@ -33,7 +33,7 @@ class BetaManagedAgentsUserToolConfirmationEvent(BaseModel):
     """
 
     processed_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the confirmation was processed."""
 
     session_thread_id: Optional[str] = None
     """Set by the server to the subagent thread this confirmation was routed to.

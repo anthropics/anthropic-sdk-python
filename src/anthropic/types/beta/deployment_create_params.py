@@ -41,10 +41,12 @@ class DeploymentCreateParams(TypedDict, total=False):
     """Human-readable name for the deployment."""
 
     budget: Optional[BetaManagedAgentsBudgetLimitParam]
-    """A hard spend ceiling.
-
-    The session stops issuing new model requests once the tracked list cost reaches
-    `max_list_cost`.
+    """
+    Enforced spend ceiling stamped onto each session created from this deployment,
+    copied at session-creation time. Omit to leave sessions uncapped. The deployment
+    agent's model must have a public list price, or the request is rejected; a
+    multiagent roster is re-validated in full when each fire copies the cap, which
+    fails closed the same way.
     """
 
     description: Optional[str]
@@ -63,9 +65,10 @@ class DeploymentCreateParams(TypedDict, total=False):
     """
 
     schedule: Optional[BetaManagedAgentsScheduleParams]
-    """5-field POSIX cron schedule.
+    """Optional recurring cron schedule.
 
-    Literal wall-clock matching in the configured timezone.
+    When present, the deployment fires automatically. Both expression and timezone
+    are required when schedule is set.
     """
 
     vault_ids: SequenceNotStr[str]

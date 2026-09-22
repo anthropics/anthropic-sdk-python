@@ -22,10 +22,10 @@ class BetaManagedAgentsSpanModelRequestEndEvent(BaseModel):
     """The id of the corresponding `span.model_request_start` event."""
 
     model_usage: BetaManagedAgentsSpanModelUsage
-    """Token usage for a single model request."""
+    """Token usage for this model request."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the model request completed."""
 
     type: Literal["span.model_request_end"]
 

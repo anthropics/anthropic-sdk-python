@@ -253,14 +253,15 @@ class Messages(SyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -269,8 +270,9 @@ class Messages(SyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -313,9 +315,8 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -591,14 +592,15 @@ class Messages(SyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -607,8 +609,9 @@ class Messages(SyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -651,9 +654,8 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -924,14 +926,15 @@ class Messages(SyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -940,8 +943,9 @@ class Messages(SyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -984,9 +988,8 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1856,14 +1859,15 @@ class Messages(SyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           context_management: Context management configuration.
 
@@ -1874,9 +1878,8 @@ class Messages(SyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           system: System prompt.
 
@@ -2191,14 +2194,15 @@ class AsyncMessages(AsyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -2207,8 +2211,9 @@ class AsyncMessages(AsyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -2251,9 +2256,8 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2529,14 +2533,15 @@ class AsyncMessages(AsyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -2545,8 +2550,9 @@ class AsyncMessages(AsyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -2589,9 +2595,8 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2862,14 +2867,15 @@ class AsyncMessages(AsyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -2878,8 +2884,9 @@ class AsyncMessages(AsyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -2922,9 +2929,8 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -3784,14 +3790,15 @@ class AsyncMessages(AsyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           context_management: Context management configuration.
 
@@ -3802,9 +3809,8 @@ class AsyncMessages(AsyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           system: System prompt.
 

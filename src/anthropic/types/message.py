@@ -21,9 +21,9 @@ class Message(BaseModel):
     """
 
     container: Optional[Container] = None
-    """
-    Information about the container used in the request (for the code execution
-    tool)
+    """Information about the container used in this request.
+
+    This will be non-null if a container tool (e.g. code execution) was used.
     """
 
     content: List[ContentBlock]
@@ -75,7 +75,10 @@ class Message(BaseModel):
     """
 
     stop_details: Optional[RefusalStopDetails] = None
-    """Structured information about a refusal."""
+    """Structured information about why model output stopped.
+
+    This is `null` when the `stop_reason` has no additional detail to report.
+    """
 
     stop_reason: Optional[StopReason] = None
     """The reason that we stopped.

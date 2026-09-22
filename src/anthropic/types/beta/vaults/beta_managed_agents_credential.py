@@ -29,10 +29,10 @@ class BetaManagedAgentsCredential(BaseModel):
     """Unique identifier for the credential."""
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the credential was archived. Null if not archived."""
 
     auth: Auth
-    """Authentication details for a credential."""
+    """Authentication configuration for this credential."""
 
     created_at: datetime
     """A timestamp in RFC 3339 format"""

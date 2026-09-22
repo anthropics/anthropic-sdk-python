@@ -23,7 +23,7 @@ class BetaManagedAgentsAgentCustomToolUseEvent(BaseModel):
     """Name of the custom tool being called."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this tool use was processed."""
 
     type: Literal["agent.custom_tool_use"]
 

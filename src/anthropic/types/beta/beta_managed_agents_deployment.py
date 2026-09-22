@@ -23,13 +23,13 @@ class BetaManagedAgentsDeployment(BaseModel):
     """Unique identifier for this deployment."""
 
     agent: BetaManagedAgentsAgentReference
-    """A resolved agent reference with a concrete version."""
+    """Reference to the agent this deployment runs, resolved to a concrete version."""
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Time the deployment was archived. Null if not archived."""
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Time the deployment was created."""
 
     description: Optional[str] = None
     """Description of what the deployment does."""
@@ -47,7 +47,10 @@ class BetaManagedAgentsDeployment(BaseModel):
     """Human-readable name."""
 
     paused_reason: Optional[BetaManagedAgentsDeploymentPausedReason] = None
-    """Why a deployment is paused. Non-null exactly when `status` is `paused`."""
+    """Why the deployment is `paused`.
+
+    Non-null exactly when `status` is `paused`; null otherwise.
+    """
 
     resources: List[BetaManagedAgentsSessionResourceConfig]
     """Resources attached to sessions created from this deployment.
@@ -56,15 +59,22 @@ class BetaManagedAgentsDeployment(BaseModel):
     """
 
     schedule: Optional[BetaManagedAgentsSchedule] = None
-    """5-field POSIX cron schedule with computed runtime timestamps."""
+    """Recurring cron schedule.
+
+    Presence enables scheduled execution; null means manual-only. Includes computed
+    timestamps (next fire times, last run) on the cron variant.
+    """
 
     status: BetaManagedAgentsDeploymentStatus
-    """Lifecycle status of a deployment."""
+    """Computed status of the deployment: `active` or `paused`.
+
+    Archived deployments report `active` with `archived_at` set.
+    """
 
     type: Literal["deployment"]
 
     updated_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Time the deployment was last updated."""
 
     vault_ids: List[str]
     """
@@ -73,8 +83,7 @@ class BetaManagedAgentsDeployment(BaseModel):
     """
 
     budget: Optional[BetaManagedAgentsBudgetLimit] = None
-    """A hard spend ceiling.
+    """Spend ceiling stamped onto each session created from this deployment.
 
-    The session stops issuing new model requests once the tracked list cost reaches
-    `max_list_cost`.
+    Absent when no budget is set.
     """

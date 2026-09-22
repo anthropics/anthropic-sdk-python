@@ -36,7 +36,7 @@ class BetaManagedAgentsAgentThreadMessageReceivedEvent(BaseModel):
     """Public `sthr_` ID of the thread that sent the message."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the message was received."""
 
     type: Literal["agent.thread_message_received"]
 

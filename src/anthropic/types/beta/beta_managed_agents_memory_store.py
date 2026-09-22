@@ -21,7 +21,7 @@ class BetaManagedAgentsMemoryStore(BaseModel):
     """
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the store was created."""
 
     name: str
     """Human-readable name for the store.
@@ -33,10 +33,17 @@ class BetaManagedAgentsMemoryStore(BaseModel):
     type: Literal["memory_store"]
 
     updated_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """
+    Timestamp when the store's `name`, `description`, or `metadata` was last
+    modified. Memory writes inside the store do not advance this.
+    """
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the store was archived, or `null` if active.
+
+    Set once and never cleared; archiving is one-way. Archived stores are read-only
+    and cannot be attached to new sessions.
+    """
 
     description: Optional[str] = None
     """Free-text description of what the store contains, up to 1024 characters.

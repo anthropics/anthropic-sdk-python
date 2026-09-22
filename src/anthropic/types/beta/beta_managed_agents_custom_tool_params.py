@@ -20,7 +20,7 @@ class BetaManagedAgentsCustomToolParams(TypedDict, total=False):
     """
 
     input_schema: Required[BetaManagedAgentsCustomToolInputSchemaParam]
-    """JSON Schema for custom tool input parameters."""
+    """JSON Schema defining the expected input parameters for the tool."""
 
     name: Required[str]
     """Unique name for the tool.

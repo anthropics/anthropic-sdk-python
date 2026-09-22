@@ -6,6 +6,7 @@ from typing_extensions import Literal, TypeAlias
 __all__ = ["BetaManagedAgentsModelParam"]
 
 BetaManagedAgentsModelParam: TypeAlias = Union[
+    str,
     Literal[
         "claude-opus-5-5",
         "claude-fable-5-1",
@@ -23,5 +24,4 @@ BetaManagedAgentsModelParam: TypeAlias = Union[
         "claude-sonnet-4-5",
         "claude-sonnet-4-5-20250929",
     ],
-    str,
 ]

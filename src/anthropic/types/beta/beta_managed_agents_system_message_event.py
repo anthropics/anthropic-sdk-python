@@ -23,4 +23,4 @@ class BetaManagedAgentsSystemMessageEvent(BaseModel):
     type: Literal["system.message"]
 
     processed_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this system message was processed."""
