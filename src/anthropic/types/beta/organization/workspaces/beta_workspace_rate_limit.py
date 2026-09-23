@@ -41,10 +41,11 @@ class BetaWorkspaceRateLimit(BaseModel):
     """
 
     limits: List[BetaWorkspaceRateLimitValue]
-    """The limiter values overridden for this group in this workspace.
+    """The workspace's limiter values for this group.
 
-    Limiter types without a workspace override are omitted and inherit the
-    organization value.
+    By default only the limiter types with a workspace-level override are listed.
+    With `include_inherited` set to `true`, the limiter types the workspace inherits
+    from the organization are listed too, each marked by `source`.
     """
 
     models: Optional[List[str]] = None
@@ -54,10 +55,10 @@ class BetaWorkspaceRateLimit(BaseModel):
     """
 
     rate_limit_id: str
-    """The `id` of the organization's RateLimit entry this override applies to."""
+    """The `id` of the organization's RateLimit entry this entry applies to."""
 
     type: Literal["workspace_rate_limit"]
     """Object type. Always `workspace_rate_limit` for workspace rate-limit entries."""
 
     workspace_id: str
-    """ID of the Workspace this override applies to."""
+    """ID of the Workspace this entry applies to."""

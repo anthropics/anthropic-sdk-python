@@ -1751,7 +1751,9 @@ Types:
 ```python
 from anthropic.types.beta.organization.workspaces import (
     BetaWorkspaceRateLimit,
+    BetaWorkspaceRateLimitOrganizationSource,
     BetaWorkspaceRateLimitValue,
+    BetaWorkspaceRateLimitWorkspaceSource,
 )
 ```
 
