@@ -7,11 +7,11 @@ __all__ = ["BetaManagedAgentsAPIActor"]
 
 class BetaManagedAgentsAPIActor(BaseModel):
     """
-    Attribution for a write made directly via the public API (outside of any session).
+    A direct caller of the public API, identified by the API key that authenticated the request.
     """
 
     api_key_id: str
-    """ID of the API key that performed the write.
+    """ID of the API key (an `apikey_...` value).
 
     This identifies the key, not the secret.
     """
