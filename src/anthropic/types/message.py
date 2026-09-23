@@ -5,6 +5,7 @@ from .model import Model
 from .usage import Usage
 from .._models import BaseModel
 from .container import Container
+from .diagnostics import Diagnostics
 from .stop_reason import StopReason
 from .content_block import ContentBlock, ContentBlock as ContentBlock
 from .message_param import MessageParam
@@ -59,6 +60,13 @@ class Message(BaseModel):
     ```json
     [{ "type": "text", "text": "B)" }]
     ```
+    """
+
+    diagnostics: Optional[Diagnostics] = None
+    """Request-level diagnostics.
+
+    `null` when the request did not supply `diagnostics`, or when it did and no
+    prompt-cache divergence was detected.
     """
 
     model: Model

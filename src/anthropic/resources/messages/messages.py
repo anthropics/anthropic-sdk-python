@@ -9,6 +9,7 @@ import httpx2
 import pydantic
 
 from ...types import (
+    DiagnosticsParam,
     ThinkingConfigParam,
 )
 from .batches import (
@@ -52,6 +53,7 @@ from ...lib._stainless_helpers import (
 )
 from ...types.text_block_param import TextBlockParam
 from ...types.tool_union_param import ToolUnionParam
+from ...types.diagnostics_param import DiagnosticsParam
 from ...types.tool_choice_param import ToolChoiceParam
 from ...types.output_config_param import OutputConfigParam
 from ...types.message_tokens_count import MessageTokensCount
@@ -122,6 +124,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -241,6 +244,10 @@ class Messages(SyncAPIResource):
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -398,6 +405,7 @@ class Messages(SyncAPIResource):
         stream: Literal[True],
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -521,6 +529,10 @@ class Messages(SyncAPIResource):
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -673,6 +685,7 @@ class Messages(SyncAPIResource):
         stream: bool,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -796,6 +809,10 @@ class Messages(SyncAPIResource):
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -947,6 +964,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -1002,6 +1020,7 @@ class Messages(SyncAPIResource):
                 "model": model,
                 "cache_control": cache_control,
                 "container": container,
+                "diagnostics": diagnostics,
                 "inference_geo": inference_geo,
                 "metadata": metadata,
                 "output_config": output_config,
@@ -1565,6 +1584,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -1684,6 +1704,10 @@ class AsyncMessages(AsyncAPIResource):
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1841,6 +1865,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[True],
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -1964,6 +1989,10 @@ class AsyncMessages(AsyncAPIResource):
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2116,6 +2145,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: bool,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -2239,6 +2269,10 @@ class AsyncMessages(AsyncAPIResource):
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2390,6 +2424,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
@@ -2445,6 +2480,7 @@ class AsyncMessages(AsyncAPIResource):
                 "model": model,
                 "cache_control": cache_control,
                 "container": container,
+                "diagnostics": diagnostics,
                 "inference_geo": inference_geo,
                 "metadata": metadata,
                 "output_config": output_config,
