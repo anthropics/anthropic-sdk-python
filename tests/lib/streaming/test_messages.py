@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import copy
 import os
 import json
-from typing import Any, Set, TypeVar, Iterator, cast
+from typing import Any, Iterator, List, Set, TypeVar, cast
 
 import httpx2
 import pytest
@@ -12,9 +13,15 @@ from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1, get_model_fields
 from anthropic.lib.streaming import InputJsonEvent, ParsedMessageStreamEvent
+from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT, accumulate_event
 from anthropic.types.message import Message
+from anthropic.types.direct_caller import DirectCaller
+from anthropic.types.tool_use_block import ToolUseBlock
+from anthropic.types.usage import Usage
+from anthropic.types.input_json_delta import InputJSONDelta
+from anthropic.types.raw_content_block_delta_event import RawContentBlockDeltaEvent
+from anthropic.types.parsed_message import ParsedMessage
 from anthropic.resources.messages import DEPRECATED_MODELS
-from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
 from anthropic.types.message_delta_usage import MessageDeltaUsage
 from anthropic.types.raw_message_delta_event import Delta as RawMessageDelta, RawMessageDeltaEvent
 
@@ -702,3 +709,98 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+def _make_tool_use_snapshot() -> ParsedMessage[None]:
+    return ParsedMessage.construct(
+        id="msg_123",
+        type="message",
+        role="assistant",
+        content=[
+            ToolUseBlock.model_construct(
+                type="tool_use",
+                input={},
+                id="tool_123",
+                name="test_tool",
+                caller=DirectCaller(type="direct"),
+            )
+        ],
+        model="claude-sonnet-4-5",
+        stop_reason=None,
+        stop_sequence=None,
+        usage=Usage(input_tokens=10, output_tokens=10),
+    )
+
+
+def _make_input_json_event(partial_json: str) -> RawContentBlockDeltaEvent:
+    return RawContentBlockDeltaEvent(
+        type="content_block_delta",
+        index=0,
+        delta=InputJSONDelta(type="input_json_delta", partial_json=partial_json),
+    )
+
+
+class TestAccumulateEvent:
+    def test_complete_json_no_headers(self) -> None:
+        """Complete JSON parses correctly when no request headers are provided."""
+        result = accumulate_event(
+            event=_make_input_json_event('{"key": "value"}'),
+            current_snapshot=_make_tool_use_snapshot(),
+        )
+        assert cast(ToolUseBlock, result.content[0]).input == {"key": "value"}
+
+    def test_complete_json_with_headers(self) -> None:
+        """Complete JSON parses correctly with generic request headers."""
+        result = accumulate_event(
+            event=_make_input_json_event('{"key": "value"}'),
+            current_snapshot=_make_tool_use_snapshot(),
+            request_headers=httpx2.Headers({"some-header": "value"}),
+        )
+        assert cast(ToolUseBlock, result.content[0]).input == {"key": "value"}
+
+    def test_trailing_strings_mode_with_beta_header(self) -> None:
+        """Incomplete trailing string is preserved when fine-grained-tool-streaming beta is active."""
+        incomplete_json = '{"items": ["a", "b"], "partial": "incomplete value'
+        result_standard = accumulate_event(
+            event=_make_input_json_event(incomplete_json),
+            current_snapshot=_make_tool_use_snapshot(),
+            request_headers=httpx2.Headers({"some-header": "value"}),
+        )
+        result_trailing = accumulate_event(
+            event=_make_input_json_event(incomplete_json),
+            current_snapshot=_make_tool_use_snapshot(),
+            request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
+        )
+
+        standard_input = cast(ToolUseBlock, result_standard.content[0]).input
+        trailing_input = cast(ToolUseBlock, result_trailing.content[0]).input
+
+        # Both modes preserve the complete array
+        assert cast(List[str], standard_input["items"]) == ["a", "b"]  # type: ignore
+        assert cast(List[str], trailing_input["items"]) == ["a", "b"]  # type: ignore
+
+        # Standard mode drops the incomplete trailing string
+        assert "partial" not in standard_input  # type: ignore
+
+        # Trailing-strings mode preserves the incomplete string
+        assert trailing_input["partial"] == "incomplete value"  # type: ignore
+
+    def test_invalid_json_raises_with_helpful_message(self) -> None:
+        """Truly invalid JSON raises ValueError with a helpful message."""
+        invalid_json = '{"key": bad_value'
+        with pytest.raises(ValueError, match="Unable to parse tool parameter JSON from model"):
+            accumulate_event(
+                event=_make_input_json_event(invalid_json),
+                current_snapshot=_make_tool_use_snapshot(),
+                request_headers=httpx2.Headers({"anthropic-beta": "fine-grained-tool-streaming-2025-05-14"}),
+            )
+
+    def test_invalid_json_raises_without_beta_header(self) -> None:
+        """Truly invalid JSON raises ValueError regardless of beta header."""
+        invalid_json = '{"key": bad_value'
+        with pytest.raises(ValueError, match="Unable to parse tool parameter JSON from model"):
+            accumulate_event(
+                event=_make_input_json_event(invalid_json),
+                current_snapshot=_make_tool_use_snapshot(),
+                request_headers=httpx2.Headers({"some-header": "value"}),
+            )
