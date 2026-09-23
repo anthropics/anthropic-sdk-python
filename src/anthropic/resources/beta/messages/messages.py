@@ -1277,12 +1277,6 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
-        betas = [beta for beta in betas] if is_given(betas) else []
-
-        if "structured-outputs-2025-12-15" not in betas:
-            # Ensure structured outputs beta is included for parse method
-            betas.append("structured-outputs-2025-12-15")
-
         tools = _to_tool_params(tools)
         extra_headers = merge_headers(
             _helper_header("beta.messages.parse"),
@@ -3217,11 +3211,6 @@ class AsyncMessages(AsyncAPIResource):
                 UserWarning,
                 stacklevel=3,
             )
-        betas = [beta for beta in betas] if is_given(betas) else []
-
-        if "structured-outputs-2025-12-15" not in betas:
-            # Ensure structured outputs beta is included for parse method
-            betas.append("structured-outputs-2025-12-15")
 
         tools = _to_tool_params(tools)
         extra_headers = merge_headers(

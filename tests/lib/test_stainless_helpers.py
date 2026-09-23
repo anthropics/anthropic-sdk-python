@@ -122,8 +122,7 @@ class TestSyncWireHeaders:
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
     def test_parse_merges_caller_extra_headers(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
         # caller-supplied betas, user_profile_id, and extra_headers must all
-        # survive parse()'s hand-written merge alongside the injected
-        # structured-outputs beta and the helper tag
+        # survive parse()'s merge alongside the helper tag
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         client.beta.messages.parse(
@@ -136,8 +135,7 @@ class TestSyncWireHeaders:
         )
 
         headers = respx_mock.calls.last.request.headers
-        # injected structured-outputs beta is appended to caller betas, not dropped
-        assert headers["anthropic-beta"] == "fake-beta-2026-01-01,structured-outputs-2025-12-15"
+        assert headers["anthropic-beta"] == "fake-beta-2026-01-01"
         assert headers["anthropic-user-profile-id"] == "upi_123"
         assert headers["X-Custom"] == "1"
         # helper tag accumulates with the caller's on one line (append-header semantics)
@@ -238,7 +236,7 @@ class TestAsyncWireHeaders:
         )
 
         headers = respx_mock.calls.last.request.headers
-        assert headers["anthropic-beta"] == "fake-beta-2026-01-01,structured-outputs-2025-12-15"
+        assert headers["anthropic-beta"] == "fake-beta-2026-01-01"
         assert headers["anthropic-user-profile-id"] == "upi_123"
         assert headers["X-Custom"] == "1"
         assert headers.get_list(STAINLESS_HELPER_HEADER) == ["beta.messages.parse, caller-tag"]
