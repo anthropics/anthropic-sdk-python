@@ -139,6 +139,16 @@ class AnthropicAWS(Anthropic):
             return {}
         return super()._api_key_auth
 
+    @property
+    @override
+    def _bearer_auth(self) -> dict[str, str]:
+        # skip_auth must also silence ambient bearer credentials: the parent
+        # constructor falls back to ANTHROPIC_AUTH_TOKEN from the environment,
+        # and a leaked Authorization header defeats the point of skip_auth.
+        if self._skip_auth:
+            return {}
+        return super()._bearer_auth
+
     @override
     def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         if self._use_sigv4 or self._skip_auth:
@@ -352,6 +362,16 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         if self._use_sigv4 or self._skip_auth:
             return {}
         return super()._api_key_auth
+
+    @property
+    @override
+    def _bearer_auth(self) -> dict[str, str]:
+        # skip_auth must also silence ambient bearer credentials: the parent
+        # constructor falls back to ANTHROPIC_AUTH_TOKEN from the environment,
+        # and a leaked Authorization header defeats the point of skip_auth.
+        if self._skip_auth:
+            return {}
+        return super()._bearer_auth
 
     @override
     def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
