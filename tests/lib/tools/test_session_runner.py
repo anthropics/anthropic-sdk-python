@@ -1723,3 +1723,48 @@ def test_to_session_content_tool_reference_stringified() -> None:
     block = {"type": "tool_reference", "tool_name": "weather"}
     out = _to_session_content([block])
     assert out == [{"type": "text", "text": session_runner_mod.json.dumps(block)}]
+
+
+@pytest.mark.asyncio()
+async def test_reconnect_does_not_re_execute_tool_after_failed_send(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A tool whose result post permanently failed must not be re-executed when
+    a later stream reconnect re-runs ``_reconcile``.
+
+    ``_reconcile`` re-enqueues every ``agent.tool_use`` not yet in ``_answered``,
+    which is exactly the state of a call whose ``_send_result`` hit a permanent
+    4xx. The other duplicate-delivery sources this file guards against are
+    duplicates of already-settled work; this one is not, so the same event was
+    dispatched again and ``_execute`` re-ran the tool rather than just retrying
+    the post. For a side-effecting tool that is at-least-once instead of
+    at-most-once execution.
+    """
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.001)
+    counter = {"calls": 0}
+
+    async def increment(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "done"
+
+    tool = _FakeTool("inc", increment)
+    # Both reconcile passes see the same still-unanswered agent.tool_use, since
+    # the first send permanently fails. The retry on the second pass has no
+    # scripted failure, so it succeeds.
+    events = FakeAsyncEvents(
+        list_events=[_tool_use("tu_1", "inc", {})],
+        streams=[
+            _FakeStream([_StubEvent("noop")], raise_after=1, raise_with=_api_status_error(500)),
+            _FakeStream([_terminated()]),
+        ],
+        send_failures=[_api_status_error(400)],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert counter["calls"] == 1, "the tool must not be re-executed for the same tool_use_id"
+    # First yield reports the failed post; the reconcile-triggered retry succeeds
+    # without recomputing the result.
+    assert [item.posted for item in items] == [False, True]
+    assert all(item.tool_use_id == "tu_1" and _result_text(item) == "done" for item in items)
+    assert len(events.send_calls) == 2
