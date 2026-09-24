@@ -332,15 +332,20 @@ def mcp_tool(
     Example:
 
     ```py
+    import asyncio
+
+    from anthropic import Anthropic
     from anthropic.lib.tools.mcp import mcp_tool
 
-    tools_result = await mcp_client.list_tools()
-    runner = client.beta.messages.tool_runner(
+    tools_result = asyncio.run(mcp_client.list_tools())
+
+    client = Anthropic()
+    message = client.beta.messages.tool_runner(
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
         tools=[mcp_tool(t, mcp_client) for t in tools_result.tools],
         messages=[{"role": "user", "content": "Use the available tools"}],
-    )
+    ).until_done()
     ```
 
     Args:
