@@ -229,3 +229,107 @@ def test_original_schema_not_mutated():
     transform_schema(original_schema)
 
     assert original_schema == original_schema_backup
+
+
+def test_type_array():
+    schema = {
+        "type": ["string", "null"],
+        "description": "Optional text",
+    }
+    result = transform_schema(schema)
+    assert result == {
+        "anyOf": [{"type": "string"}, {"type": "null"}],
+        "description": "Optional text",
+    }
+
+
+def test_type_array_in_object():
+    schema = {
+        "type": "object",
+        "properties": {
+            "name": {
+                "type": ["string", "null"],
+                "description": "Optional name",
+            }
+        },
+        "required": ["name"],
+    }
+    result = transform_schema(schema)
+    assert result == {
+        "type": "object",
+        "properties": {
+            "name": {
+                "anyOf": [{"type": "string"}, {"type": "null"}],
+                "description": "Optional name",
+            }
+        },
+        "required": ["name"],
+        "additionalProperties": False,
+    }
+
+
+def test_type_array_with_items():
+    schema = {
+        "type": ["array", "null"],
+        "items": {"type": "string"},
+        "description": "Optional list of strings",
+    }
+    result = transform_schema(schema)
+    assert result == {
+        "anyOf": [
+            {"type": "array", "items": {"type": "string"}},
+            {"type": "null"},
+        ],
+        "description": "Optional list of strings",
+    }
+
+
+def test_type_array_with_object_properties():
+    schema = {
+        "type": ["object", "null"],
+        "properties": {
+            "title": {"type": "string"},
+        },
+        "required": ["title"],
+    }
+    result = transform_schema(schema)
+    assert result == {
+        "anyOf": [
+            {
+                "type": "object",
+                "properties": {"title": {"type": "string"}},
+                "required": ["title"],
+                "additionalProperties": False,
+            },
+            {"type": "null"},
+        ],
+    }
+
+
+def test_type_array_nested_in_object_with_items():
+    schema = {
+        "type": "object",
+        "properties": {
+            "tags": {
+                "type": ["array", "null"],
+                "items": {"type": "string"},
+            }
+        },
+        "required": ["tags"],
+    }
+    result = transform_schema(schema)
+    assert result == {
+        "type": "object",
+        "properties": {
+            "tags": {
+                "anyOf": [
+                    {"type": "array", "items": {"type": "string"}},
+                    {"type": "null"},
+                ],
+            }
+        },
+        "required": ["tags"],
+        "additionalProperties": False,
+    }
+
+
