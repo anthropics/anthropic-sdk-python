@@ -77,7 +77,7 @@ class BetaAbstractMemoryTool(BetaBuiltinFunctionTool):
 
     client = Anthropic()
     memory_tool = MyMemoryTool()
-    message = client.beta.messages.run_tools(
+    message = client.beta.messages.tool_runner(
         model="claude-sonnet-4-5",
         messages=[{"role": "user", "content": "Remember that I like coffee"}],
         tools=[memory_tool],
@@ -176,25 +176,40 @@ class BetaAsyncAbstractMemoryTool(BetaAsyncBuiltinFunctionTool):
     Example usage:
 
     ```py
-    class MyMemoryTool(BetaAbstractMemoryTool):
-        def view(self, command: BetaMemoryTool20250818ViewCommand) -> BetaFunctionToolResultType:
+    import asyncio
+
+    from anthropic import AsyncAnthropic
+    from anthropic.lib.tools import BetaFunctionToolResultType
+    from anthropic.tools import BetaAsyncAbstractMemoryTool
+    from anthropic.types.beta import (
+        BetaMemoryTool20250818ViewCommand,
+        BetaMemoryTool20250818CreateCommand,
+    )
+
+
+    class MyMemoryTool(BetaAsyncAbstractMemoryTool):
+        async def view(self, command: BetaMemoryTool20250818ViewCommand) -> BetaFunctionToolResultType:
             ...
             return "view result"
 
-        def create(self, command: BetaMemoryTool20250818CreateCommand) -> BetaFunctionToolResultType:
+        async def create(self, command: BetaMemoryTool20250818CreateCommand) -> BetaFunctionToolResultType:
             ...
             return "created successfully"
 
         # ... implement other abstract methods
 
 
-    client = Anthropic()
-    memory_tool = MyMemoryTool()
-    message = client.beta.messages.run_tools(
-        model="claude-sonnet-4-5",
-        messages=[{"role": "user", "content": "Remember that I like coffee"}],
-        tools=[memory_tool],
-    ).until_done()
+    async def main() -> None:
+        client = AsyncAnthropic()
+        memory_tool = MyMemoryTool()
+        message = await client.beta.messages.tool_runner(
+            model="claude-sonnet-4-5",
+            messages=[{"role": "user", "content": "Remember that I like coffee"}],
+            tools=[memory_tool],
+        ).until_done()
+
+
+    asyncio.run(main())
     ```
     """
 
