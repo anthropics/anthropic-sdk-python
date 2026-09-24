@@ -74,7 +74,7 @@ class AnthropicAWS(Anthropic):
             )
             resolved_api_key = resolve_api_key(api_key=api_key, use_sigv4=self._use_sigv4)
 
-        resolved_region = resolve_region(aws_region)
+        resolved_region = resolve_region(aws_region, aws_profile=aws_profile)
 
         if self._use_sigv4 and resolved_region is None:
             raise AnthropicError(
@@ -299,7 +299,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
             )
             resolved_api_key = resolve_api_key(api_key=api_key, use_sigv4=self._use_sigv4)
 
-        resolved_region = resolve_region(aws_region)
+        resolved_region = resolve_region(aws_region, aws_profile=aws_profile)
 
         if self._use_sigv4 and resolved_region is None:
             raise AnthropicError(

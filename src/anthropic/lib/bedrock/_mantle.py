@@ -125,7 +125,7 @@ def _resolve_mantle_config(
             api_key_env_vars=_MANTLE_API_KEY_ENV_VARS,
         )
 
-    resolved_region = resolve_region(aws_region)
+    resolved_region = resolve_region(aws_region, aws_profile=aws_profile)
 
     if base_url is None:
         base_url = os.environ.get("ANTHROPIC_BEDROCK_MANTLE_BASE_URL")
@@ -187,7 +187,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
             default_headers=default_headers,
         )
 
-        resolved_region = resolve_region(aws_region)
+        resolved_region = resolve_region(aws_region, aws_profile=aws_profile)
 
         super().__init__(
             version=__version__,
@@ -377,7 +377,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
             default_headers=default_headers,
         )
 
-        resolved_region = resolve_region(aws_region)
+        resolved_region = resolve_region(aws_region, aws_profile=aws_profile)
 
         super().__init__(
             version=__version__,
