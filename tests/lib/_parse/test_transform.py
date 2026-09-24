@@ -124,6 +124,59 @@ def test_object_schema():
     )
 
 
+@pytest.mark.parametrize(
+    ("keyword", "value"),
+    [
+        ("patternProperties", {"^S_": {"type": "string"}}),
+        ("propertyNames", {"type": "string"}),
+        ("unevaluatedProperties", {"type": "string"}),
+    ],
+)
+def test_object_schema_with_dynamic_keys_is_not_silently_emptied(keyword, value):
+    schema = {"type": "object", keyword: value}
+
+    with pytest.raises(ValueError, match=keyword):
+        transform_schema(schema)
+
+
+def test_object_schema_with_explicit_properties_keeps_dynamic_key_constraints_as_description():
+    schema = {
+        "type": "object",
+        "properties": {"name": {"type": "string"}},
+        "patternProperties": {"^S_": {"type": "string"}},
+    }
+
+    result = transform_schema(schema)
+
+    assert result == snapshot(
+        {
+            "type": "object",
+            "properties": {"name": {"type": "string"}},
+            "additionalProperties": False,
+            "description": "{patternProperties: {'^S_': {'type': 'string'}}}",
+        }
+    )
+
+
+def test_object_schema_with_empty_explicit_properties_keeps_dynamic_key_constraints_as_description():
+    schema = {
+        "type": "object",
+        "properties": {},
+        "patternProperties": {"^S_": {"type": "string"}},
+    }
+
+    result = transform_schema(schema)
+
+    assert result == snapshot(
+        {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": False,
+            "description": "{patternProperties: {'^S_': {'type': 'string'}}}",
+        }
+    )
+
+
 def test_array_schema():
     schema = {
         "type": "array",
