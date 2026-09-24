@@ -11,6 +11,7 @@ from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, r
 import httpx2
 
 from ._utils import is_dict, extract_type_var_from_base
+from ._exceptions import APITimeoutError, APIConnectionError
 
 if TYPE_CHECKING:
     from ._client import Anthropic, AsyncAnthropic
@@ -143,6 +144,10 @@ class Stream(Generic[_T]):
                         body=body,
                         response=self.response,
                     )
+        except httpx2.TimeoutException as err:
+            raise APITimeoutError(request=response.request) from err
+        except httpx2.TransportError as err:
+            raise APIConnectionError(request=response.request) from err
         finally:
             if sys.is_finalizing():
                 # Closing at interpreter shutdown can crash CPython 3.13; mark it closed instead.
@@ -295,6 +300,10 @@ class AsyncStream(Generic[_T]):
                         body=body,
                         response=self.response,
                     )
+        except httpx2.TimeoutException as err:
+            raise APITimeoutError(request=response.request) from err
+        except httpx2.TransportError as err:
+            raise APIConnectionError(request=response.request) from err
         finally:
             if sys.is_finalizing():
                 # Closing at interpreter shutdown can crash CPython 3.13; mark it closed instead.
