@@ -77,7 +77,7 @@ class BetaAbstractMemoryTool(BetaBuiltinFunctionTool):
 
     client = Anthropic()
     memory_tool = MyMemoryTool()
-    message = client.beta.messages.run_tools(
+    message = client.beta.messages.tool_runner(
         model="claude-sonnet-4-5",
         messages=[{"role": "user", "content": "Remember that I like coffee"}],
         tools=[memory_tool],
