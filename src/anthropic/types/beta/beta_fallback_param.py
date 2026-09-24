@@ -9,10 +9,18 @@ from .beta_thinking_config_enabled_param import BetaThinkingConfigEnabledParam
 from .beta_thinking_config_adaptive_param import BetaThinkingConfigAdaptiveParam
 from .beta_thinking_config_disabled_param import BetaThinkingConfigDisabledParam
 
-__all__ = ["BetaFallbackParam", "Thinking"]
+__all__ = ["BetaFallbackParam", "Thinking", "ThinkingBetaThinkingConfigBetweenTools"]
+
+
+class ThinkingBetaThinkingConfigBetweenTools(TypedDict, total=False):
+    type: Required[Literal["between_tools"]]
+
 
 Thinking: TypeAlias = Union[
-    BetaThinkingConfigEnabledParam, BetaThinkingConfigDisabledParam, BetaThinkingConfigAdaptiveParam
+    BetaThinkingConfigEnabledParam,
+    BetaThinkingConfigDisabledParam,
+    ThinkingBetaThinkingConfigBetweenTools,
+    BetaThinkingConfigAdaptiveParam,
 ]
 
 
