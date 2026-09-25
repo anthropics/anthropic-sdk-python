@@ -6,10 +6,9 @@ import pytest
 from pydantic import BaseModel, ValidationError
 
 from anthropic import _compat
-from anthropic.lib._parse._response import parse_beta_response, parse_response
-from anthropic.types import Message, TextBlock, Usage
-from anthropic.types.beta import BetaMessage, BetaTextBlock, BetaUsage
-
+from anthropic.types import Usage, Message, TextBlock
+from anthropic.types.beta import BetaUsage, BetaMessage, BetaTextBlock
+from anthropic.lib._parse._response import parse_response, parse_beta_response
 
 pytestmark = pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
 
