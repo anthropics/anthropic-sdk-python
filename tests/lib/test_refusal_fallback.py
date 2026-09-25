@@ -310,6 +310,40 @@ class TestRefusalFallback:
         assert "max_tokens" not in bodies[1]
 
     @pytest.mark.respx(base_url=base_url)
+    def test_between_tools_thinking_degrades_to_disabled_on_the_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model", "tok"), message("fallback-model")])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        client.beta.messages.create(
+            model="primary-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            thinking={"type": "between_tools"},
+        )
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[0]["thinking"] == {"type": "between_tools"}
+        assert bodies[1]["thinking"] == {"type": "disabled"}
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_an_entry_that_sets_thinking_overrides_between_tools(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model", "tok"), message("fallback-model")])
+        client = make_sync_client(
+            middleware=[
+                BetaRefusalFallbackMiddleware([{"model": "fallback-model", "thinking": {"type": "between_tools"}}])
+            ]
+        )
+
+        client.beta.messages.create(
+            model="primary-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            thinking={"type": "between_tools"},
+        )
+
+        assert request_bodies(respx_mock)[1]["thinking"] == {"type": "between_tools"}
+
+    @pytest.mark.respx(base_url=base_url)
     def test_each_hop_patches_the_original_params_not_the_previous_hop(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             side_effect=[refusal("primary-model"), refusal("mid-model"), message("last-model")]
@@ -664,6 +698,20 @@ class TestAsyncRefusalFallback:
 
         bodies = request_bodies(respx_mock)
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model", "fallback-model"]
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_between_tools_thinking_degrades_to_disabled_on_the_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model", "tok"), message("fallback-model")])
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        await client.beta.messages.create(
+            model="primary-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            thinking={"type": "between_tools"},
+        )
+
+        assert request_bodies(respx_mock)[1]["thinking"] == {"type": "disabled"}
 
     @pytest.mark.respx(base_url=base_url)
     async def test_walks_each_hop_through_the_chain_until_a_model_accepts(self, respx_mock: MockRouter) -> None:
