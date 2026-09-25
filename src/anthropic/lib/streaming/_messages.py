@@ -501,8 +501,13 @@ def accumulate_event(
         if content_block.type == "text" and is_given(output_format):
             content_block.parsed_output = parse_text(content_block.text, output_format)
     elif event.type == "message_delta":
-        current_snapshot.stop_reason = event.delta.stop_reason
-        current_snapshot.stop_sequence = event.delta.stop_sequence
+        # Stop fields are optional on Delta and omitted when not applicable,
+        # so only overwrite a previously accumulated value when the delta
+        # actually carries one (same rule as the usage block below).
+        if event.delta.stop_reason is not None:
+            current_snapshot.stop_reason = event.delta.stop_reason
+        if event.delta.stop_sequence is not None:
+            current_snapshot.stop_sequence = event.delta.stop_sequence
         if event.delta.stop_details is not None:
             current_snapshot.stop_details = event.delta.stop_details
         current_snapshot.usage.output_tokens = event.usage.output_tokens
