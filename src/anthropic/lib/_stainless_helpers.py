@@ -9,6 +9,7 @@ we only carry the constants and the per-object tagging machinery.
 from __future__ import annotations
 
 from typing import Any, Dict, Mapping, TypeVar, cast
+from collections.abc import Sequence
 from typing_extensions import Literal
 
 __all__ = [
@@ -112,6 +113,18 @@ def carry_helper_tag(source: object, params: _MappingT) -> _MappingT:
     return cast(_MappingT, tagged)
 
 
+def _replayable_sequence(value: Any) -> Sequence[Any] | None:
+    """Return a safely re-iterable helper collection, if available.
+
+    Request parameters accept arbitrary ``Iterable`` values, including generators.
+    Helper telemetry must not consume a one-shot iterable before request
+    serialization gets a chance to read it.
+    """
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return value
+    return None
+
+
 def collect_helpers(
     tools: Any = None,
     messages: Any = None,
@@ -123,12 +136,14 @@ def collect_helpers(
         if tag is not None and tag not in helpers:
             helpers.append(tag)
 
-    if tools:
-        for tool in tools:
+    tool_items = _replayable_sequence(tools)
+    if tool_items:
+        for tool in tool_items:
             _add(get_helper_tag(tool))
 
-    if messages:
-        for message in messages:
+    message_items = _replayable_sequence(messages)
+    if message_items:
+        for message in message_items:
             _add(get_helper_tag(message))
 
             if isinstance(message, dict):
