@@ -4,7 +4,6 @@ from typing_extensions import Literal, TypeAlias
 __all__ = ["BetaManagedAgentsModel"]
 
 BetaManagedAgentsModel: TypeAlias = Union[
-    str,
     Literal[
         "claude-opus-5-5",
         "claude-fable-5-1",
@@ -22,4 +21,5 @@ BetaManagedAgentsModel: TypeAlias = Union[
         "claude-sonnet-4-5",
         "claude-sonnet-4-5-20250929",
     ],
+    str,
 ]
