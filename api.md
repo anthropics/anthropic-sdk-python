@@ -1160,6 +1160,7 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsSessionEndTurn,
     BetaManagedAgentsSessionErrorEvent,
     BetaManagedAgentsSessionEvent,
+    BetaManagedAgentsSessionEventType,
     BetaManagedAgentsSessionRequiresAction,
     BetaManagedAgentsSessionRetriesExhausted,
     BetaManagedAgentsSessionStatusIdleEvent,

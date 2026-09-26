@@ -4,8 +4,8 @@ from typing import List, Union
 from datetime import datetime
 from typing_extensions import Literal, TypedDict
 
-from ...._types import SequenceNotStr
 from ...anthropic_beta_param import AnthropicBetaParam
+from .beta_managed_agents_session_event_type import BetaManagedAgentsSessionEventType
 
 __all__ = ["EventListParams"]
 
@@ -46,7 +46,7 @@ class EventListParams(TypedDict, total=False):
     page: str
     """Opaque pagination cursor from a previous response's `next_page`."""
 
-    types: SequenceNotStr[str]
+    types: List[BetaManagedAgentsSessionEventType]
     """Filter by event type.
 
     Values match the `type` field on returned events (for example, `user.message` or
