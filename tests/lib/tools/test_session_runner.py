@@ -286,6 +286,7 @@ async def _run_with_fakes(
     events: FakeAsyncEvents,
     tools: list[Any],
     max_idle: float | None = None,
+    tool_timeout: float | None = session_runner_mod.TOOL_TIMEOUT,
     environment_key: str | None = None,
     extra_headers: dict[str, Any] | None = None,
 ) -> AsyncIterator[DispatchedToolCall]:
@@ -295,6 +296,7 @@ async def _run_with_fakes(
         "s_1",
         tools=tools,
         max_idle=max_idle,
+        tool_timeout=tool_timeout,
         environment_key=environment_key,
         extra_headers=extra_headers,
     )
@@ -1426,10 +1428,9 @@ async def test_yields_with_posted_false_on_permanent_4xx() -> None:
 
 
 @pytest.mark.asyncio()
-async def test_tool_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Tool that exceeds `TOOL_TIMEOUT` yields with `is_error=True` and a
+async def test_tool_timeout() -> None:
+    """Tool that exceeds `tool_timeout` yields with `is_error=True` and a
     `"timed out"` message — distinct from the generic exception path."""
-    monkeypatch.setattr(session_runner_mod, "TOOL_TIMEOUT", 0.05)
 
     async def slow(_input: dict[str, Any]) -> str:
         await asyncio.Event().wait()  # never resolves
@@ -1438,11 +1439,46 @@ async def test_tool_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
     tool = _FakeTool("slow", slow)
     events = FakeAsyncEvents(stream_events=[_tool_use("tu_1", "slow", {}), _terminated()])
 
-    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool], tool_timeout=0.05)]
 
     assert len(items) == 1
     assert items[0].is_error is True
     assert "timed out" in _result_text(items[0])
+
+
+@pytest.mark.asyncio()
+async def test_tool_timeout_can_be_disabled() -> None:
+    async def slow(_input: dict[str, Any]) -> str:
+        await asyncio.sleep(0.05)
+        return "done"
+
+    events = FakeAsyncEvents(stream_events=[_tool_use("tu_1", "slow", {}), _terminated()])
+    items = [item async for item in _run_with_fakes(events=events, tools=[_FakeTool("slow", slow)], tool_timeout=None)]
+
+    assert len(items) == 1
+    assert items[0].is_error is False
+    assert _result_text(items[0]) == "done"
+
+
+def test_tool_timeout_rejects_nonpositive_values() -> None:
+    for timeout in (0.0, -1.0):
+        with pytest.raises(ValueError, match="tool_timeout must be positive"):
+            SessionToolRunner(cast(Any, _FakeClient(FakeAsyncEvents())), "s_1", tools=[], tool_timeout=timeout)
+
+
+def test_tool_timeout_must_exceed_bash_default() -> None:
+    from anthropic.lib.tools.agent_toolset import BASH_DEFAULT_TIMEOUT
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "done"
+
+    with pytest.raises(ValueError, match="must exceed the bash tool's default timeout"):
+        SessionToolRunner(
+            cast(Any, _FakeClient(FakeAsyncEvents())),
+            "s_1",
+            tools=cast(Any, [_FakeTool("bash", echo)]),
+            tool_timeout=BASH_DEFAULT_TIMEOUT,
+        )
 
 
 @pytest.mark.asyncio()
@@ -1467,10 +1503,9 @@ async def test_sync_tool_runs_off_the_event_loop() -> None:
 
 
 @pytest.mark.asyncio()
-async def test_tool_timeout_fires_for_blocking_sync_tool(monkeypatch: pytest.MonkeyPatch) -> None:
-    """A sync tool that blocks past `TOOL_TIMEOUT` is reported timed out at the
+async def test_tool_timeout_fires_for_blocking_sync_tool() -> None:
+    """A sync tool that blocks past `tool_timeout` is reported timed out at the
     deadline; its thread is abandoned rather than awaited."""
-    monkeypatch.setattr(session_runner_mod, "TOOL_TIMEOUT", 0.05)
     release = threading.Event()
 
     def slow(_input: object) -> str:
@@ -1479,7 +1514,9 @@ async def test_tool_timeout_fires_for_blocking_sync_tool(monkeypatch: pytest.Mon
 
     events = FakeAsyncEvents(stream_events=[_custom_tool_use("ctu_1", "slow", {}), _terminated()])
     try:
-        items = [item async for item in _run_with_fakes(events=events, tools=[_SyncTool("slow", slow)])]
+        items = [
+            item async for item in _run_with_fakes(events=events, tools=[_SyncTool("slow", slow)], tool_timeout=0.05)
+        ]
     finally:
         release.set()
 
@@ -1692,9 +1729,13 @@ async def test_tool_runner_method_returns_session_tool_runner() -> None:
     from anthropic import AsyncAnthropic
 
     client = AsyncAnthropic(api_key="dummy")
-    runner = client.beta.sessions.events.tool_runner("s_1", tools=[])
+    runner = client.beta.sessions.events.tool_runner("s_1", tools=[], tool_timeout=300.0)
     assert isinstance(runner, SessionToolRunner)
     assert runner.session_id == "s_1"
+    assert runner.tool_timeout == 300.0
+
+    default_runner = client.beta.sessions.events.tool_runner("s_1", tools=[])
+    assert default_runner.tool_timeout == session_runner_mod.TOOL_TIMEOUT
 
 
 @pytest.mark.asyncio()
