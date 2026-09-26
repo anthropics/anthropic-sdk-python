@@ -66,6 +66,9 @@ def _transform_file(file: FileTypes) -> HttpxFileTypes:
             path = pathlib.Path(file)
             return (path.name, path.read_bytes())
 
+        if file_name(file) is None:
+            return unnamed_file(file)
+
         return file
 
     if is_tuple_t(file):
@@ -79,6 +82,11 @@ def file_name(file: FileContent) -> str | None:
     if isinstance(name, (str, bytes)):
         return pathlib.Path(os.fsdecode(name)).name
     return None
+
+
+def unnamed_file(file: HttpxFileContent) -> HttpxFileTypes:
+    # Passed bare, httpx would name the file "upload"; the content type is the one that name implied.
+    return (None, file, "application/octet-stream")
 
 
 def read_file_content(file: FileContent) -> HttpxFileContent:
@@ -114,6 +122,9 @@ async def _async_transform_file(file: FileTypes) -> HttpxFileTypes:
         if isinstance(file, os.PathLike):
             path = anyio.Path(file)
             return (path.name, await path.read_bytes())
+
+        if file_name(file) is None:
+            return unnamed_file(file)
 
         return file
 
