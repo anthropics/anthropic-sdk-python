@@ -1422,6 +1422,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -1459,6 +1460,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
         stream: bool,
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1495,6 +1497,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1523,8 +1526,21 @@ class Messages(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaStreamingToolRunner[ResponseFormatT] | BetaToolRunner[ResponseFormatT]:
-        """Create a Message stream"""
+        """Create a Message stream
+
+        Args:
+          run_tools_eagerly: Run each tool as soon as its call is complete, before the reply finishes, instead of
+              once you are done with the reply. This is optimistic: if the reply is interrupted or changes
+              course, the tool may have already run, so use `runner.defer_tool_call()` to hold the calls that
+              aren't safe to run twice. The calls run one at a time, and reading the stream waits while one
+              runs. Requires `stream=True`.
+
+              This will be the default in a future version.
+        """
         _validate_output_config_conflict(output_config, output_format)
+
+        if run_tools_eagerly and not stream:
+            raise ValueError("`run_tools_eagerly=True` and `stream=False` are mutually exclusive")
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -1608,6 +1624,7 @@ class Messages(SyncAPIResource):
                 },
                 client=cast("Anthropic", self._client),
                 max_iterations=max_iterations if is_given(max_iterations) else None,
+                run_tools_eagerly=run_tools_eagerly,
             )
         return BetaToolRunner[ResponseFormatT](
             tools=runnable_tools,
@@ -3368,6 +3385,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         stream: Literal[True],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3406,6 +3424,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         stream: bool,
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3442,6 +3461,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3470,8 +3490,21 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaAsyncToolRunner[ResponseFormatT] | BetaAsyncStreamingToolRunner[ResponseFormatT]:
-        """Create a Message stream"""
+        """Create a Message stream
+
+        Args:
+          run_tools_eagerly: Run each tool as soon as its call is complete, before the reply finishes, instead of
+              once you are done with the reply. This is optimistic: if the reply is interrupted or changes
+              course, the tool may have already run, so use `runner.defer_tool_call()` to hold the calls that
+              aren't safe to run twice. The calls run one at a time, and reading the stream waits while one
+              runs. Requires `stream=True`.
+
+              This will be the default in a future version.
+        """
         _validate_output_config_conflict(output_config, output_format)
+
+        if run_tools_eagerly and not stream:
+            raise ValueError("`run_tools_eagerly=True` and `stream=False` are mutually exclusive")
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -3548,6 +3581,7 @@ class AsyncMessages(AsyncAPIResource):
                 },
                 client=cast("AsyncAnthropic", self._client),
                 max_iterations=max_iterations if is_given(max_iterations) else None,
+                run_tools_eagerly=run_tools_eagerly,
             )
         return BetaAsyncToolRunner[ResponseFormatT](
             tools=runnable_tools,

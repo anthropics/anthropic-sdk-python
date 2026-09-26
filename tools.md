@@ -76,6 +76,34 @@ for message in runner:
     rich.print(message)
 ```
 
+### Running tools while the reply streams
+
+By default, the runner runs a reply's tools after your loop body for that reply ends. With `run_tools_eagerly=True` and `stream=True`, each tool runs as soon as the model finishes writing its call. To hold a call until your loop body ends, pass it to `runner.defer_tool_call()` when you see it. It won't have run yet. `runner.deferred_tool_calls` lists the held calls, so read it after the stream ends.
+
+```py
+runner = client.beta.messages.tool_runner(
+    max_tokens=1024,
+    model="claude-sonnet-4-5-20250929",
+    tools=[list_files, delete_file],
+    messages=[{"role": "user", "content": "Clean up the log files in /tmp/demo."}],
+    stream=True,
+    run_tools_eagerly=True,
+)
+for stream in runner:
+    for event in stream:
+        if event.type == "content_block_start" and event.content_block.type == "tool_use":
+            if event.content_block.name == "delete_file":
+                runner.defer_tool_call(event.content_block)
+
+    held = runner.deferred_tool_calls
+    if held and not confirm(held):
+        break
+```
+
+Here, `break` means the held call never runs. A call that ran while the reply streamed can't be taken back: if the reply is then cut short, or you replace the history, the model never gets its result and may ask for the same call again. So defer calls that aren't safe to run twice. See [`examples/tools_runner_deferred_streaming.py`](examples/tools_runner_deferred_streaming.py).
+
+The calls run one at a time, in the order the model has moved on from them, and reading the stream waits while one runs.
+
 ### Compacting the conversation
 
 With the `compact-2026-09-04` beta you decide when a conversation is compacted: a request with the `compaction` param returns a single `compaction` block, which then replaces the messages it summarizes. In a tool runner, call `runner.compact_before_next_turn()` and the runner does this for you.
@@ -110,7 +138,7 @@ A few things to know:
 - `context_management`, `stop_sequences`, a `tool_choice` that forces a tool (`any` or `tool`) and the output format (`output_format` or `output_config["format"]`, including the one in each of the `fallbacks`) are left out of the compaction request, because the API doesn't accept them together with `compaction`, and are sent again afterwards. `compact_before_next_turn()` raises if `context_management` has a `compact_*` edit.
 - While you're handling the compaction response, `append_messages()` and replacing `messages` with `set_messages_params()` raise, because the compaction response is about to replace the messages. Other params can still be changed.
 - If the API returns no summary, the runner logs a warning and keeps the history as it is.
-- If the run ends on a turn that was cut short with tool calls that never ran (`stop_reason == "max_tokens"`, for example), the pending compaction is skipped with a warning. It is also skipped if the run stops at `max_iterations` or you `break` out of the loop.
+- If the run ends on a turn that was cut short with tool calls whose results were never sent (`stop_reason == "max_tokens"`, for example), the pending compaction is skipped with a warning. It is also skipped if the run stops at `max_iterations` or you `break` out of the loop.
 - The `compaction` param itself can't be set on a tool runner, because every request in the loop would compact again.
 
 ### Adding and removing tools during a run

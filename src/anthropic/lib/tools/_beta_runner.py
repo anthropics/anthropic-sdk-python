@@ -26,9 +26,11 @@ import httpx2
 
 from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import is_given, consume_sync_iterator, consume_async_iterator
+from ..streaming import BetaMessageStream, BetaAsyncMessageStream, ParsedBetaMessageStreamEvent
 from ...types.beta import (
     BetaMessage,
     BetaMessageParam,
+    BetaToolUseBlock,
     BetaToolUnionParam,
     BetaRequestToolRemovalBlockParam,
     BetaRequestToolAdditionBlockParam,
@@ -45,7 +47,6 @@ from ._beta_functions import (
     BetaAsyncBuiltinFunctionTool,
 )
 from .._stainless_helpers import stainless_helper_header
-from ..streaming._beta_messages import BetaMessageStream, BetaAsyncMessageStream
 from ...types.beta.beta_stop_reason import BetaStopReason
 from ...types.beta.parsed_beta_message import ResponseFormatT, ParsedBetaMessage, ParsedBetaContentBlock
 from ...types.beta.message_create_params import ParseMessageCreateParamsBase
@@ -172,6 +173,8 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         self._pending_compaction: BetaCompactionConfigParam | None = None
         self._messages_being_compacted: Iterable[BetaMessageParam] | None = None
         self._pending_tool_changes: list[BetaRequestToolAdditionBlockParam | BetaRequestToolRemovalBlockParam] = []
+        self._eager_tool_calls: EagerToolCalls | None = None
+        """The tool calls of the streamed reply being handled. It is `None` without `run_tools_eagerly`."""
 
     def set_messages_params(
         self,
@@ -179,7 +182,8 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         | Callable[[ParseMessageCreateParamsBase[ResponseFormatT]], ParseMessageCreateParamsBase[ResponseFormatT]],
     ) -> None:
         """
-        Update the parameters for the next API call. This invalidates any cached tool responses.
+        Update the parameters for the next API call. This invalidates any cached tool responses. With
+        `run_tools_eagerly`, a tool call of the reply that has run doesn't run again.
 
         Args:
             params (ParsedMessageCreateParamsBase[ResponseFormatT] | Callable): Either new parameters or a function to mutate existing parameters
@@ -200,7 +204,8 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         """Add one or more messages to the conversation history.
 
         This invalidates the cached tool response, i.e. if tools were already called, then they will
-        be called again on the next loop iteration.
+        be called again on the next loop iteration. With `run_tools_eagerly`, a tool call of the reply
+        that has run doesn't run again.
         """
         message_params: List[BetaMessageParam] = [
             message.to_param() if isinstance(message, BetaMessage) else message for message in messages
@@ -259,7 +264,8 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
                 # can't compact a conversation whose last turn has an unanswered tool call.
                 log.warning(
                     "The pending compaction was skipped because the last turn (stop_reason=%r) ended with tool calls "
-                    "that were not run. Call `compact_before_next_turn()` again if you continue the conversation.",
+                    "whose results were not sent. Call `compact_before_next_turn()` again if you continue the "
+                    "conversation.",
                     message.stop_reason,
                 )
                 self._pending_compaction = None
@@ -283,9 +289,10 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         """Give the model more tools without changing the `tools` param, which would miss the prompt cache.
 
         The definitions are sent in `tool_addition` blocks with the next request. A function tool is run straight
-        away, in place of any tool of the same name, even for a call already in the message being handled. A raw
-        definition is for server tools, such as web search: the tool runner never runs it, and it stops running a
-        function tool of the same name. Requires the `inline-tools-2026-09-15` beta.
+        away, in place of any tool of the same name, even for a call already in the message being handled. A call
+        that ran while the reply streamed keeps its result. A raw definition is for server tools, such as web
+        search: the tool runner never runs it, and it stops running a function tool of the same name. Requires the
+        `inline-tools-2026-09-15` beta.
 
         Args:
             *tools: Function tools, such as `@beta_tool` functions, or raw tool definitions.
@@ -306,8 +313,8 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
     def remove_tools(self, *tools: AnyFunctionToolT | str) -> None:
         """Take tools away from the model without changing the `tools` param, which would miss the prompt cache.
 
-        The tools stop being run at once, and the model is told in `tool_removal` blocks with the next request.
-        Requires the `inline-tools-2026-09-15` beta.
+        The tools stop being run at once, and the model is told in `tool_removal` blocks with the next request. A
+        call that ran while the reply streamed keeps its result. Requires the `inline-tools-2026-09-15` beta.
 
         Args:
             *tools: The tools to remove, or their names.
@@ -460,6 +467,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
         """Generate a MessageParam by calling tool functions with any tool use blocks from the last message.
 
         Note the tool call response is cached, repeated calls to this method will return the same response.
+        With `run_tools_eagerly`, it reuses the results of the reply's calls that have run and runs the rest,
+        including the ones `defer_tool_call()` is holding, so that no call runs twice.
 
         None can be returned if no tool call was applicable.
         """
@@ -481,52 +490,57 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
         results: list[BetaToolResultBlockParam] = []
         available = self._available_tool_names()
+        eager_calls = self._eager_tool_calls
 
         for tool_use in tool_use_blocks:
-            tool = self._tools_by_name.get(tool_use.name) if tool_use.name in available else None
-            if tool is None:
-                warnings.warn(
-                    f"Tool '{tool_use.name}' not found in tool runner. "
-                    f"Available tools: {list(self._tools_by_name.keys())}. "
-                    f"If using a raw tool definition, handle the tool call manually and use `append_messages()` to add the result. "
-                    f"Otherwise, pass the tool using `beta_tool(func)` or a `@beta_tool` decorated function.",
-                    UserWarning,
-                    stacklevel=3,
-                )
-                results.append(
-                    {
+            result: BetaToolResultBlockParam | None = None
+            if eager_calls is not None:
+                result = eager_calls.results.get(tool_use.id)
+            if result is None:
+                tool = self._tools_by_name.get(tool_use.name) if tool_use.name in available else None
+                if tool is None:
+                    warnings.warn(
+                        f"Tool '{tool_use.name}' not found in tool runner. "
+                        f"Available tools: {list(self._tools_by_name.keys())}. "
+                        f"If using a raw tool definition, handle the tool call manually and use `append_messages()` to add the result. "
+                        f"Otherwise, pass the tool using `beta_tool(func)` or a `@beta_tool` decorated function.",
+                        UserWarning,
+                        stacklevel=3,
+                    )
+                    result = {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
                         "content": f"Error: Tool '{tool_use.name}' not found",
                         "is_error": True,
                     }
-                )
-                continue
+                else:
+                    result = self._run_tool(tool, tool_use)
 
-            try:
-                result = tool.call(tool_use.input)
-                results.append({"type": "tool_result", "tool_use_id": tool_use.id, "content": result})
-            except ToolError as exc:
-                results.append(
-                    {
-                        "type": "tool_result",
-                        "tool_use_id": tool_use.id,
-                        "content": tool_error_content(exc),
-                        "is_error": True,
-                    }
-                )
-            except Exception as exc:
-                log.exception(f"Error occurred while calling tool: {tool.name}", exc_info=exc)
-                results.append(
-                    {
-                        "type": "tool_result",
-                        "tool_use_id": tool_use.id,
-                        "content": tool_error_content(exc),
-                        "is_error": True,
-                    }
-                )
+                if eager_calls is not None:
+                    eager_calls.record(tool_use, result)
+
+            results.append(result)
 
         return {"role": "user", "content": results}
+
+    def _run_tool(self, tool: BetaRunnableTool, tool_use: BetaToolUseBlock) -> BetaToolResultBlockParam:
+        try:
+            return {"type": "tool_result", "tool_use_id": tool_use.id, "content": tool.call(tool_use.input)}
+        except ToolError as exc:
+            return {
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": tool_error_content(exc),
+                "is_error": True,
+            }
+        except Exception as exc:
+            log.exception(f"Error occurred while calling tool: {tool.name}", exc_info=exc)
+            return {
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": tool_error_content(exc),
+                "is_error": True,
+            }
 
     def _get_last_message(self) -> ParsedBetaMessage[ResponseFormatT] | None:
         if callable(self._last_message):
@@ -560,6 +574,69 @@ class BetaToolRunner(BaseSyncToolRunner[ParsedBetaMessage[ResponseFormatT], Resp
 
 
 class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream[ResponseFormatT], ResponseFormatT]):
+    def __init__(
+        self,
+        *,
+        params: ParseMessageCreateParamsBase[ResponseFormatT],
+        options: RequestOptions,
+        tools: Iterable[BetaRunnableTool],
+        client: Anthropic,
+        max_iterations: int | None = None,
+        run_tools_eagerly: bool = False,
+    ) -> None:
+        super().__init__(params=params, options=options, tools=tools, client=client, max_iterations=max_iterations)
+        self._run_tools_eagerly = run_tools_eagerly
+
+    def defer_tool_call(self, tool_use: BetaToolUseBlock | str) -> None:
+        """Hold a tool call of the current reply until you are done with the reply, which is when it runs without
+        `run_tools_eagerly`: at the end of the loop body, or when you call `generate_tool_call_response()`.
+
+        With `run_tools_eagerly` the runner otherwise runs each call while the reply streams, once the model has
+        moved on from it: when the next block starts, or the reply stops with `tool_use`. The call runs when you ask
+        for the event after that one, so you can hold it while you handle any event up to and including that one.
+        The other calls of the reply still run early. It does nothing for a call that has run, outside the loop
+        body, and without `run_tools_eagerly`.
+
+        ```py
+        for stream in runner:
+            for event in stream:
+                if event.type == "content_block_start" and event.content_block.type == "tool_use":
+                    if event.content_block.name == "delete_file":
+                        runner.defer_tool_call(event.content_block)
+            # No `delete_file` call has run yet.
+        ```
+
+        Args:
+            tool_use: The `tool_use` block of the call, or its id.
+        """
+        if self._eager_tool_calls is not None:
+            self._eager_tool_calls.hold(tool_use)
+
+    @property
+    def deferred_tool_calls(self) -> list[BetaToolUseBlock]:
+        """The tool calls of the current reply that `defer_tool_call()` is holding, in the model's order, as their
+        `tool_use` blocks.
+
+        A call is in the list once its block has finished streaming, so read the list when you are done with the
+        stream. A call that has run is not in it. It is empty without `run_tools_eagerly`.
+
+        Held calls are listed whatever the reply's `stop_reason`, because `generate_tool_call_response()` runs them
+        whatever it is. After `max_tokens` the input of the last call can be cut off.
+
+        ```py
+        for stream in runner:
+            for event in stream:
+                if event.type == "content_block_start" and event.content_block.type == "tool_use":
+                    if event.content_block.name == "delete_file":
+                        runner.defer_tool_call(event.content_block)
+
+            held = runner.deferred_tool_calls
+            if held and not confirm(held):
+                break
+        ```
+        """
+        return [] if self._eager_tool_calls is None else self._eager_tool_calls.held()
+
     @override
     @contextmanager
     def _handle_request(
@@ -567,7 +644,29 @@ class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream[ResponseForma
     ) -> Iterator[BetaMessageStream[ResponseFormatT]]:
         with self._client.beta.messages.stream(**params, **self._options) as stream:
             self._last_message = stream.get_final_message
+            if self._run_tools_eagerly:
+                self._eager_tool_calls = EagerToolCalls()
+                stream._iterator = self._run_tools_while_streaming(stream._iterator, self._eager_tool_calls)
             yield stream
+
+    def _run_tools_while_streaming(
+        self, events: Iterator[ParsedBetaMessageStreamEvent[ResponseFormatT]], calls: EagerToolCalls
+    ) -> Iterator[ParsedBetaMessageStreamEvent[ResponseFormatT]]:
+        """Passes on the reply's events, and runs each tool call once the reader is done with the event that shows
+        the model has moved on from it. Asking for the next event is how the reader says it is done with the one it
+        holds."""
+        moved_on_from: BetaToolUseBlock | None = None
+        # The next event is read first, so that no call runs once reading the reply has failed.
+        for event in events:
+            if moved_on_from is not None and not calls.is_held(moved_on_from):
+                name = moved_on_from.name
+                tool = self._tools_by_name.get(name) if name in self._available_tool_names() else None
+                # A call to a tool the runner doesn't have gets its error result with the tool response.
+                if tool is not None:
+                    calls.record(moved_on_from, self._run_tool(tool, moved_on_from))
+
+            moved_on_from = calls.track(event)
+            yield event
 
 
 class BaseAsyncToolRunner(
@@ -694,6 +793,8 @@ class BaseAsyncToolRunner(
         """Generate a MessageParam by calling tool functions with any tool use blocks from the last message.
 
         Note the tool call response is cached, repeated calls to this method will return the same response.
+        With `run_tools_eagerly`, it reuses the results of the reply's calls that have run and runs the rest,
+        including the ones `defer_tool_call()` is holding, so that no call runs twice.
 
         None can be returned if no tool call was applicable.
         """
@@ -735,52 +836,57 @@ class BaseAsyncToolRunner(
 
         results: list[BetaToolResultBlockParam] = []
         available = self._available_tool_names()
+        eager_calls = self._eager_tool_calls
 
         for tool_use in tool_use_blocks:
-            tool = self._tools_by_name.get(tool_use.name) if tool_use.name in available else None
-            if tool is None:
-                warnings.warn(
-                    f"Tool '{tool_use.name}' not found in tool runner. "
-                    f"Available tools: {list(self._tools_by_name.keys())}. "
-                    f"If using a raw tool definition, handle the tool call manually and use `append_messages()` to add the result. "
-                    f"Otherwise, pass the tool using `beta_async_tool(func)` or a `@beta_async_tool` decorated function.",
-                    UserWarning,
-                    stacklevel=3,
-                )
-                results.append(
-                    {
+            result: BetaToolResultBlockParam | None = None
+            if eager_calls is not None:
+                result = eager_calls.results.get(tool_use.id)
+            if result is None:
+                tool = self._tools_by_name.get(tool_use.name) if tool_use.name in available else None
+                if tool is None:
+                    warnings.warn(
+                        f"Tool '{tool_use.name}' not found in tool runner. "
+                        f"Available tools: {list(self._tools_by_name.keys())}. "
+                        f"If using a raw tool definition, handle the tool call manually and use `append_messages()` to add the result. "
+                        f"Otherwise, pass the tool using `beta_async_tool(func)` or a `@beta_async_tool` decorated function.",
+                        UserWarning,
+                        stacklevel=3,
+                    )
+                    result = {
                         "type": "tool_result",
                         "tool_use_id": tool_use.id,
                         "content": f"Error: Tool '{tool_use.name}' not found",
                         "is_error": True,
                     }
-                )
-                continue
+                else:
+                    result = await self._run_tool(tool, tool_use)
 
-            try:
-                result = await tool.call(tool_use.input)
-                results.append({"type": "tool_result", "tool_use_id": tool_use.id, "content": result})
-            except ToolError as exc:
-                results.append(
-                    {
-                        "type": "tool_result",
-                        "tool_use_id": tool_use.id,
-                        "content": tool_error_content(exc),
-                        "is_error": True,
-                    }
-                )
-            except Exception as exc:
-                log.exception(f"Error occurred while calling tool: {tool.name}", exc_info=exc)
-                results.append(
-                    {
-                        "type": "tool_result",
-                        "tool_use_id": tool_use.id,
-                        "content": tool_error_content(exc),
-                        "is_error": True,
-                    }
-                )
+                if eager_calls is not None:
+                    eager_calls.record(tool_use, result)
+
+            results.append(result)
 
         return {"role": "user", "content": results}
+
+    async def _run_tool(self, tool: BetaAsyncRunnableTool, tool_use: BetaToolUseBlock) -> BetaToolResultBlockParam:
+        try:
+            return {"type": "tool_result", "tool_use_id": tool_use.id, "content": await tool.call(tool_use.input)}
+        except ToolError as exc:
+            return {
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": tool_error_content(exc),
+                "is_error": True,
+            }
+        except Exception as exc:
+            log.exception(f"Error occurred while calling tool: {tool.name}", exc_info=exc)
+            return {
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": tool_error_content(exc),
+                "is_error": True,
+            }
 
 
 class BetaAsyncToolRunner(BaseAsyncToolRunner[ParsedBetaMessage[ResponseFormatT], ResponseFormatT]):
@@ -795,6 +901,69 @@ class BetaAsyncToolRunner(BaseAsyncToolRunner[ParsedBetaMessage[ResponseFormatT]
 
 
 class BetaAsyncStreamingToolRunner(BaseAsyncToolRunner[BetaAsyncMessageStream[ResponseFormatT], ResponseFormatT]):
+    def __init__(
+        self,
+        *,
+        params: ParseMessageCreateParamsBase[ResponseFormatT],
+        options: RequestOptions,
+        tools: Iterable[BetaAsyncRunnableTool],
+        client: AsyncAnthropic,
+        max_iterations: int | None = None,
+        run_tools_eagerly: bool = False,
+    ) -> None:
+        super().__init__(params=params, options=options, tools=tools, client=client, max_iterations=max_iterations)
+        self._run_tools_eagerly = run_tools_eagerly
+
+    def defer_tool_call(self, tool_use: BetaToolUseBlock | str) -> None:
+        """Hold a tool call of the current reply until you are done with the reply, which is when it runs without
+        `run_tools_eagerly`: at the end of the loop body, or when you call `generate_tool_call_response()`.
+
+        With `run_tools_eagerly` the runner otherwise runs each call while the reply streams, once the model has
+        moved on from it: when the next block starts, or the reply stops with `tool_use`. The call runs when you ask
+        for the event after that one, so you can hold it while you handle any event up to and including that one.
+        The other calls of the reply still run early. It does nothing for a call that has run, outside the loop
+        body, and without `run_tools_eagerly`.
+
+        ```py
+        async for stream in runner:
+            async for event in stream:
+                if event.type == "content_block_start" and event.content_block.type == "tool_use":
+                    if event.content_block.name == "delete_file":
+                        runner.defer_tool_call(event.content_block)
+            # No `delete_file` call has run yet.
+        ```
+
+        Args:
+            tool_use: The `tool_use` block of the call, or its id.
+        """
+        if self._eager_tool_calls is not None:
+            self._eager_tool_calls.hold(tool_use)
+
+    @property
+    def deferred_tool_calls(self) -> list[BetaToolUseBlock]:
+        """The tool calls of the current reply that `defer_tool_call()` is holding, in the model's order, as their
+        `tool_use` blocks.
+
+        A call is in the list once its block has finished streaming, so read the list when you are done with the
+        stream. A call that has run is not in it. It is empty without `run_tools_eagerly`.
+
+        Held calls are listed whatever the reply's `stop_reason`, because `generate_tool_call_response()` runs them
+        whatever it is. After `max_tokens` the input of the last call can be cut off.
+
+        ```py
+        async for stream in runner:
+            async for event in stream:
+                if event.type == "content_block_start" and event.content_block.type == "tool_use":
+                    if event.content_block.name == "delete_file":
+                        runner.defer_tool_call(event.content_block)
+
+            held = runner.deferred_tool_calls
+            if held and not await confirm(held):
+                break
+        ```
+        """
+        return [] if self._eager_tool_calls is None else self._eager_tool_calls.held()
+
     @override
     @asynccontextmanager
     async def _handle_request(
@@ -802,4 +971,88 @@ class BetaAsyncStreamingToolRunner(BaseAsyncToolRunner[BetaAsyncMessageStream[Re
     ) -> AsyncIterator[BetaAsyncMessageStream[ResponseFormatT]]:
         async with self._client.beta.messages.stream(**params, **self._options) as stream:
             self._last_message = stream.get_final_message
+            if self._run_tools_eagerly:
+                self._eager_tool_calls = EagerToolCalls()
+                stream._iterator = self._run_tools_while_streaming(stream._iterator, self._eager_tool_calls)
             yield stream
+
+    async def _run_tools_while_streaming(
+        self, events: AsyncIterator[ParsedBetaMessageStreamEvent[ResponseFormatT]], calls: EagerToolCalls
+    ) -> AsyncIterator[ParsedBetaMessageStreamEvent[ResponseFormatT]]:
+        """Passes on the reply's events, and runs each tool call once the reader is done with the event that shows
+        the model has moved on from it. Asking for the next event is how the reader says it is done with the one it
+        holds."""
+        moved_on_from: BetaToolUseBlock | None = None
+        # The next event is read first, so that no call runs once reading the reply has failed.
+        async for event in events:
+            if moved_on_from is not None and not calls.is_held(moved_on_from):
+                name = moved_on_from.name
+                tool = self._tools_by_name.get(name) if name in self._available_tool_names() else None
+                # A call to a tool the runner doesn't have gets its error result with the tool response.
+                if tool is not None:
+                    calls.record(moved_on_from, await self._run_tool(tool, moved_on_from))
+
+            moved_on_from = calls.track(event)
+            yield event
+
+
+class EagerToolCalls:
+    """The tool calls of one streamed reply, for a tool runner with `run_tools_eagerly`."""
+
+    def __init__(self) -> None:
+        self.results: dict[str, BetaToolResultBlockParam] = {}
+        """The result of each call that has run, by `tool_use` id."""
+
+        self._finished: list[BetaToolUseBlock] = []
+        """The `tool_use` blocks that have finished streaming, in the model's order."""
+
+        self._held_ids: set[str] = set()
+        """The ids of the calls that `defer_tool_call()` is holding."""
+
+        self._closed: BetaToolUseBlock | None = None
+        """The last `tool_use` block to close, until the model moves on from it."""
+
+        self._fallback = False
+        """Whether a refusal has handed the reply to a fallback model."""
+
+    def hold(self, tool_use: BetaToolUseBlock | str) -> None:
+        tool_use_id = tool_use if isinstance(tool_use, str) else tool_use.id
+        if tool_use_id not in self.results:
+            self._held_ids.add(tool_use_id)
+
+    def is_held(self, tool_use: BetaToolUseBlock) -> bool:
+        return tool_use.id in self._held_ids
+
+    def held(self) -> list[BetaToolUseBlock]:
+        return [tool_use for tool_use in self._finished if tool_use.id in self._held_ids]
+
+    def record(self, tool_use: BetaToolUseBlock, result: BetaToolResultBlockParam) -> None:
+        self._held_ids.discard(tool_use.id)
+        self.results[tool_use.id] = result
+
+    def track(self, event: ParsedBetaMessageStreamEvent[Any]) -> BetaToolUseBlock | None:
+        """Follows the reply, and returns the call that `event` shows the model has moved on from, if any.
+
+        A call's own `content_block_stop` isn't enough, because a reply that is cut off closes its last call too.
+        After a `fallback` block no call is returned, so the rest wait for the reply to end.
+        """
+        if event.type == "content_block_stop":
+            if event.content_block.type == "tool_use":
+                self._finished.append(event.content_block)
+                self._closed = None if self._fallback else event.content_block
+            return None
+
+        if event.type == "content_block_start" and event.content_block.type == "fallback":
+            # The refusal that led to the fallback may have cut off the call before it.
+            self._fallback = True
+            self._closed = None
+            return None
+
+        moved_on = event.type == "content_block_start" or (
+            event.type == "message_delta" and event.delta.stop_reason == "tool_use"
+        )
+        if not moved_on:
+            return None
+
+        moved_on_from, self._closed = self._closed, None
+        return moved_on_from
