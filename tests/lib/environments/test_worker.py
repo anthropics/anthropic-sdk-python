@@ -199,6 +199,7 @@ def _install_run_session_tools(
         *,
         tools: Any,
         max_idle: Any = None,
+        tool_timeout: Any = None,
         environment_key: Any = None,
         extra_headers: Any = None,
         send_retry_window: Any = None,
@@ -207,6 +208,7 @@ def _install_run_session_tools(
             "session_id": session_id,
             "tools": tools,
             "max_idle": max_idle,
+            "tool_timeout": tool_timeout,
             "environment_key": environment_key,
             "extra_headers": extra_headers,
         }
@@ -247,6 +249,7 @@ async def test_environment_worker_serves_session(monkeypatch: pytest.MonkeyPatch
         environment_key="env_key",
         workdir=".",
         max_idle=12.0,
+        tool_timeout=300.0,
     )
     await asyncio.wait_for(worker.run(), timeout=5)
 
@@ -257,6 +260,7 @@ async def test_environment_worker_serves_session(monkeypatch: pytest.MonkeyPatch
     # tools) was bound.
     assert record["run"]["session_id"] == "s_1"
     assert record["run"]["max_idle"] == 12.0
+    assert record["run"]["tool_timeout"] == 300.0
     assert record["run"]["environment_key"] == "env_key"
     assert [t.name for t in record["run"]["tools"]] == ["bash", "read", "write", "edit", "glob", "grep"]
     # The lease was heartbeated, and the lease TTL it reported (60s) became the
@@ -913,6 +917,7 @@ def test_work_resource_worker_builds_environment_worker() -> None:
         environment_key="env_key",
         workdir="/workspace",
         max_idle=12.0,
+        tool_timeout=300.0,
         memory_sync_interval=45.0,
         memory_sync_deletions="log_only",
         worker_id="w-test",
@@ -924,6 +929,7 @@ def test_work_resource_worker_builds_environment_worker() -> None:
     assert worker._environment_key == "env_key"
     assert worker._workdir == "/workspace"
     assert worker._max_idle == 12.0
+    assert worker._tool_timeout == 300.0
     assert worker._memory_sync_interval == 45.0
     assert worker._memory_sync_deletions == "log_only"
     assert worker._worker_id == "w-test"
@@ -949,6 +955,7 @@ def test_work_resource_worker_defaults() -> None:
     # resolved ".") — TS parity with process.cwd()-at-construction.
     assert worker._workdir == os.getcwd()
     assert worker._max_idle == 60.0
+    assert worker._tool_timeout == 150.0
     assert worker._memory_sync_interval == 15.0
     assert worker._memory_sync_deletions == "enabled"
 
@@ -1022,6 +1029,7 @@ async def test_heartbeat_starts_before_skill_download(monkeypatch: pytest.Monkey
         *,
         tools: Any,  # noqa: ARG001
         max_idle: Any = None,  # noqa: ARG001
+        tool_timeout: Any = None,  # noqa: ARG001
         environment_key: Any = None,  # noqa: ARG001
         extra_headers: Any = None,  # noqa: ARG001
         send_retry_window: Any = None,  # noqa: ARG001
