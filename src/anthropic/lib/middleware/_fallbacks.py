@@ -415,7 +415,9 @@ class BetaRefusalFallbackMiddleware(Middleware):
             pin=pin,
         )
         return APIResponse(
-            raw=_spliced_http_response(response.http_response, _FrameByteStream(frames)),
+            raw=_spliced_http_response(
+                response.http_response, _FrameByteStream(frames, response=response.http_response)
+            ),
             cast_to=response._cast_to,
             client=response._client,
             stream=True,
@@ -445,7 +447,9 @@ class BetaRefusalFallbackMiddleware(Middleware):
             pin=pin,
         )
         return AsyncAPIResponse(
-            raw=_spliced_http_response(response.http_response, _AsyncFrameByteStream(frames)),
+            raw=_spliced_http_response(
+                response.http_response, _AsyncFrameByteStream(frames, response=response.http_response)
+            ),
             cast_to=response._cast_to,
             client=response._client,
             stream=True,
@@ -1627,8 +1631,9 @@ def _spliced_http_response(
 
 
 class _FrameByteStream(httpx2.SyncByteStream):
-    def __init__(self, frames: Generator[bytes, None, None]) -> None:
+    def __init__(self, frames: Generator[bytes, None, None], *, response: httpx2.Response) -> None:
         self._frames = frames
+        self._response = response
 
     @override
     def __iter__(self) -> Iterator[bytes]:
@@ -1636,12 +1641,17 @@ class _FrameByteStream(httpx2.SyncByteStream):
 
     @override
     def close(self) -> None:
-        self._frames.close()
+        try:
+            self._frames.close()
+        finally:
+            # An unread generator never enters its finally block.
+            self._response.close()
 
 
 class _AsyncFrameByteStream(httpx2.AsyncByteStream):
-    def __init__(self, frames: AsyncGenerator[bytes, None]) -> None:
+    def __init__(self, frames: AsyncGenerator[bytes, None], *, response: httpx2.Response) -> None:
         self._frames = frames
+        self._response = response
 
     @override
     def __aiter__(self) -> AsyncIterator[bytes]:
@@ -1649,4 +1659,8 @@ class _AsyncFrameByteStream(httpx2.AsyncByteStream):
 
     @override
     async def aclose(self) -> None:
-        await self._frames.aclose()
+        try:
+            await self._frames.aclose()
+        finally:
+            # An unread generator never enters its finally block.
+            await self._response.aclose()

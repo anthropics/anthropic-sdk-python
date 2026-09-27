@@ -6,6 +6,7 @@ import json
 import logging
 from typing import Any, List, Protocol, cast
 from pathlib import Path
+from unittest.mock import Mock
 
 import httpx2
 import pytest
@@ -1271,6 +1272,36 @@ class TestPerHopOverrides:
 
 
 class TestCancellation:
+    def test_closing_an_unread_stream_closes_the_underlying_response(self) -> None:
+        response = httpx2.Response(
+            200, headers={"content-type": "text/event-stream"}, stream=httpx2.ByteStream(STREAM_A.encode())
+        )
+        handler = Mock(return_value=response)
+        with make_sync_client(
+            http_client=httpx2.Client(transport=httpx2.MockTransport(handler)),
+            middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)],
+        ) as client:
+            with create_stream(client):
+                assert not response.is_closed
+
+            assert response.is_closed
+        handler.assert_called_once()
+
+    async def test_closing_an_unread_async_stream_closes_the_underlying_response(self) -> None:
+        response = httpx2.Response(
+            200, headers={"content-type": "text/event-stream"}, stream=httpx2.ByteStream(STREAM_A.encode())
+        )
+        handler = Mock(return_value=response)
+        async with make_async_client(
+            http_client=httpx2.AsyncClient(transport=httpx2.MockTransport(handler)),
+            middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)],
+        ) as client:
+            async with await create_stream_async(client):
+                assert not response.is_closed
+
+            assert response.is_closed
+        handler.assert_called_once()
+
     @pytest.mark.respx(base_url=base_url)
     def test_closing_the_stream_mid_passthrough_tears_down_without_a_fallback_request(
         self, respx_mock: MockRouter
