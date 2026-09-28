@@ -47,7 +47,7 @@ class BetaManagedAgentsUserToolResultEvent(BaseModel):
     """Whether the tool execution resulted in an error."""
 
     processed_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this result was processed."""
 
     session_thread_id: Optional[str] = None
     """Set by the server to the subagent thread this result was routed to.

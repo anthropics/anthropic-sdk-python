@@ -31,7 +31,7 @@ class BetaManagedAgentsAgentMCPToolResultEvent(BaseModel):
     """The id of the `agent.mcp_tool_use` event this result corresponds to."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this event was processed."""
 
     type: Literal["agent.mcp_tool_result"]
 

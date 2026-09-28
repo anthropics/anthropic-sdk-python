@@ -21,4 +21,4 @@ class BetaManagedAgentsMCPToolsetDefaultConfigParams(TypedDict, total=False):
     """Whether tools are enabled by default. Defaults to true if not specified."""
 
     permission_policy: Optional[PermissionPolicy]
-    """Permission policy for tool execution."""
+    """Default permission policy for tools from this server."""

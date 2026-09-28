@@ -253,14 +253,15 @@ class Messages(SyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -269,8 +270,9 @@ class Messages(SyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -313,9 +315,8 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -327,10 +328,14 @@ class Messages(SyncAPIResource):
               the custom sequences, the response `stop_reason` value will be `"stop_sequence"`
               and the response `stop_sequence` value will contain the matched stop sequence.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           system: System prompt.
 
@@ -583,22 +588,27 @@ class Messages(SyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -607,8 +617,9 @@ class Messages(SyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -651,9 +662,8 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -916,22 +926,27 @@ class Messages(SyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -940,8 +955,9 @@ class Messages(SyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -984,9 +1000,8 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1274,12 +1289,6 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
-        betas = [beta for beta in betas] if is_given(betas) else []
-
-        if "structured-outputs-2025-12-15" not in betas:
-            # Ensure structured outputs beta is included for parse method
-            betas.append("structured-outputs-2025-12-15")
-
         tools = _to_tool_params(tools)
         extra_headers = merge_headers(
             _helper_header("beta.messages.parse"),
@@ -1413,6 +1422,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -1450,6 +1460,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
         stream: bool,
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1486,6 +1497,7 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1514,8 +1526,21 @@ class Messages(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaStreamingToolRunner[ResponseFormatT] | BetaToolRunner[ResponseFormatT]:
-        """Create a Message stream"""
+        """Create a Message stream
+
+        Args:
+          run_tools_eagerly: Run each tool as soon as its call is complete, before the reply finishes, instead of
+              once you are done with the reply. This is optimistic: if the reply is interrupted or changes
+              course, the tool may have already run, so use `runner.defer_tool_call()` to hold the calls that
+              aren't safe to run twice. The calls run one at a time, and reading the stream waits while one
+              runs. Requires `stream=True`.
+
+              This will be the default in a future version.
+        """
         _validate_output_config_conflict(output_config, output_format)
+
+        if run_tools_eagerly and not stream:
+            raise ValueError("`run_tools_eagerly=True` and `stream=False` are mutually exclusive")
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -1599,6 +1624,7 @@ class Messages(SyncAPIResource):
                 },
                 client=cast("Anthropic", self._client),
                 max_iterations=max_iterations if is_given(max_iterations) else None,
+                run_tools_eagerly=run_tools_eagerly,
             )
         return BetaToolRunner[ResponseFormatT](
             tools=runnable_tools,
@@ -1856,14 +1882,15 @@ class Messages(SyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           context_management: Context management configuration.
 
@@ -1874,9 +1901,8 @@ class Messages(SyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           system: System prompt.
 
@@ -2191,14 +2217,15 @@ class AsyncMessages(AsyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -2207,8 +2234,9 @@ class AsyncMessages(AsyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -2251,9 +2279,8 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2265,10 +2292,14 @@ class AsyncMessages(AsyncAPIResource):
               the custom sequences, the response `stop_reason` value will be `"stop_sequence"`
               and the response `stop_sequence` value will contain the matched stop sequence.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           system: System prompt.
 
@@ -2521,22 +2552,27 @@ class AsyncMessages(AsyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -2545,8 +2581,9 @@ class AsyncMessages(AsyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -2589,9 +2626,8 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2854,22 +2890,27 @@ class AsyncMessages(AsyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -2878,8 +2919,9 @@ class AsyncMessages(AsyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -2922,9 +2964,8 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -3211,11 +3252,6 @@ class AsyncMessages(AsyncAPIResource):
                 UserWarning,
                 stacklevel=3,
             )
-        betas = [beta for beta in betas] if is_given(betas) else []
-
-        if "structured-outputs-2025-12-15" not in betas:
-            # Ensure structured outputs beta is included for parse method
-            betas.append("structured-outputs-2025-12-15")
 
         tools = _to_tool_params(tools)
         extra_headers = merge_headers(
@@ -3349,6 +3385,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         stream: Literal[True],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3387,6 +3424,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         stream: bool,
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3423,6 +3461,7 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3451,8 +3490,21 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaAsyncToolRunner[ResponseFormatT] | BetaAsyncStreamingToolRunner[ResponseFormatT]:
-        """Create a Message stream"""
+        """Create a Message stream
+
+        Args:
+          run_tools_eagerly: Run each tool as soon as its call is complete, before the reply finishes, instead of
+              once you are done with the reply. This is optimistic: if the reply is interrupted or changes
+              course, the tool may have already run, so use `runner.defer_tool_call()` to hold the calls that
+              aren't safe to run twice. The calls run one at a time, and reading the stream waits while one
+              runs. Requires `stream=True`.
+
+              This will be the default in a future version.
+        """
         _validate_output_config_conflict(output_config, output_format)
+
+        if run_tools_eagerly and not stream:
+            raise ValueError("`run_tools_eagerly=True` and `stream=False` are mutually exclusive")
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -3529,6 +3581,7 @@ class AsyncMessages(AsyncAPIResource):
                 },
                 client=cast("AsyncAnthropic", self._client),
                 max_iterations=max_iterations if is_given(max_iterations) else None,
+                run_tools_eagerly=run_tools_eagerly,
             )
         return BetaAsyncToolRunner[ResponseFormatT](
             tools=runnable_tools,
@@ -3784,14 +3837,15 @@ class AsyncMessages(AsyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           context_management: Context management configuration.
 
@@ -3802,9 +3856,8 @@ class AsyncMessages(AsyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
 
           system: System prompt.
 

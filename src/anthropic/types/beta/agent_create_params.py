@@ -48,9 +48,9 @@ class AgentCreateParams(TypedDict, total=False):
     """
 
     multiagent: Optional[BetaManagedAgentsMultiagentParams]
-    """
-    A coordinator topology: the session's primary thread orchestrates work by
-    spawning session threads, each running an agent drawn from the `agents` roster.
+    """Multiagent orchestration configuration.
+
+    Currently supports the `coordinator` topology with a roster of 1-20 agents.
     """
 
     skills: Iterable[BetaManagedAgentsSkillParams]

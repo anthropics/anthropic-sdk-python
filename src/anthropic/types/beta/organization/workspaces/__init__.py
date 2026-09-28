@@ -11,3 +11,9 @@ from .service_account_list_params import ServiceAccountListParams as ServiceAcco
 from .service_account_update_params import ServiceAccountUpdateParams as ServiceAccountUpdateParams
 from .beta_workspace_rate_limit_value import BetaWorkspaceRateLimitValue as BetaWorkspaceRateLimitValue
 from .service_account_remove_response import ServiceAccountRemoveResponse as ServiceAccountRemoveResponse
+from .beta_workspace_rate_limit_workspace_source import (
+    BetaWorkspaceRateLimitWorkspaceSource as BetaWorkspaceRateLimitWorkspaceSource,
+)
+from .beta_workspace_rate_limit_organization_source import (
+    BetaWorkspaceRateLimitOrganizationSource as BetaWorkspaceRateLimitOrganizationSource,
+)

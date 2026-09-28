@@ -13,6 +13,10 @@ class BetaManagedAgentsBudgetLimit(BaseModel):
     """
 
     max_list_cost: BetaMonetaryAmount
-    """A monetary amount in a specific currency."""
+    """Maximum list cost the session may accrue.
+
+    List price is used regardless of any negotiated discount, so the cap fires at or
+    before the actual charge.
+    """
 
     type: Literal["limit"]

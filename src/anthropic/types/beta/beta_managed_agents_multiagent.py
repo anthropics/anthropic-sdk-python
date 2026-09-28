@@ -13,7 +13,7 @@ Agent: TypeAlias = Annotated[
 
 
 class BetaManagedAgentsMultiagent(BaseModel):
-    """Resolved coordinator topology with a concrete agent roster."""
+    """Resolved multiagent orchestration configuration as returned in API responses."""
 
     agents: List[Agent]
     """

@@ -68,7 +68,7 @@ class Credentials(SyncAPIResource):
         Args:
           vault_id: Identifier of the vault to create the credential in.
 
-          auth: Authentication details for creating a credential.
+          auth: Authentication configuration for the credential.
 
           display_name: Human-readable name for the credential. Up to 255 characters.
 
@@ -211,7 +211,8 @@ class Credentials(SyncAPIResource):
 
           credential_id: Unique identifier of the credential to update.
 
-          auth: Updated authentication details for a credential.
+          auth: Updated authentication configuration. The `type` is immutable; the variant sent
+              must match the stored credential's type.
 
           display_name: Updated human-readable name for the credential. 1-255 characters.
 
@@ -588,7 +589,7 @@ class AsyncCredentials(AsyncAPIResource):
         Args:
           vault_id: Identifier of the vault to create the credential in.
 
-          auth: Authentication details for creating a credential.
+          auth: Authentication configuration for the credential.
 
           display_name: Human-readable name for the credential. Up to 255 characters.
 
@@ -731,7 +732,8 @@ class AsyncCredentials(AsyncAPIResource):
 
           credential_id: Unique identifier of the credential to update.
 
-          auth: Updated authentication details for a credential.
+          auth: Updated authentication configuration. The `type` is immutable; the variant sent
+              must match the stored credential's type.
 
           display_name: Updated human-readable name for the credential. 1-255 characters.
 

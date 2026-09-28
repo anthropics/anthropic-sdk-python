@@ -18,7 +18,9 @@ class BetaDream(BaseModel):
     """
     An asynchronous job that reads a memory store and past sessions, then writes a reorganized version of that memory store.
 
-    By default the dream writes its result to a new memory store and doesn't change the input memory store. With `output_behavior` set to `update_existing`, it writes its result into the input memory store instead. The Dreams API is in research preview, so this resource can still change.
+    By default the dream writes its result to a new memory store and doesn't change the input memory store. With `output_behavior` set to `update_existing`, it writes its result into the input memory store instead.
+
+    The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to generally-available endpoints.
 
     See the [Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#how-it-works) for what a dream reads and produces.
     """
@@ -27,16 +29,22 @@ class BetaDream(BaseModel):
     """The unique ID of the dream (`drm_...`)."""
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the dream was archived, in RFC 3339, or `null` if it hasn't been archived."""
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When the dream was created, in RFC 3339.
+
+    Lists of dreams are sorted by this time, newest first.
+    """
 
     ended_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """
+    When the dream reached `completed`, `failed`, or `canceled`, in RFC 3339, or
+    `null` if it is still `pending` or `running`.
+    """
 
     error: Optional[BetaDreamError] = None
-    """Failure detail for a Dream whose `status` is `failed`."""
+    """Why the dream failed, or `null` if `status` isn't `failed`."""
 
     inputs: List[BetaDreamInput]
     """The sources that the dream reads, from the request that created it."""
@@ -52,9 +60,10 @@ class BetaDream(BaseModel):
     """
 
     output_behavior: BetaOutputBehavior
-    """Which memory store a dream writes its result to.
+    """Where the dream writes its result, as set in the request that created the dream.
 
-    Defaults to `create_new` when left out of a create request.
+    If that request left out `output_behavior`, the dream used the `create_new`
+    behavior.
     """
 
     outputs: List[BetaDreamOutput]
@@ -98,14 +107,7 @@ class BetaDream(BaseModel):
     type: Literal["dream"]
 
     usage: BetaDreamUsage
-    """The tokens that a dream has used so far.
-
-    The counts are zero while the dream is `pending` and update while it is
-    `running`. They can keep changing after a cancel.
-
-    See the
-    [Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#billing)
-    for how dreams are billed. See the
-    [prompt caching guide](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#tracking-cache-performance)
-    for how the input token counts add up.
+    """
+    The dream's token counts, which stop changing once its `status` is `completed`
+    or `failed`. After a cancel, they can keep changing.
     """

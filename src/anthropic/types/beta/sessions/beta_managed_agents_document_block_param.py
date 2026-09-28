@@ -24,7 +24,7 @@ class BetaManagedAgentsDocumentBlockParam(TypedDict, total=False):
     """
 
     source: Required[Source]
-    """Union type for document source variants."""
+    """The source of the document data."""
 
     type: Required[Literal["document"]]
 

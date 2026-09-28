@@ -24,6 +24,7 @@ from .model_info import ModelInfo as ModelInfo
 from .text_block import TextBlock as TextBlock
 from .text_delta import TextDelta as TextDelta
 from .tool_param import ToolParam as ToolParam
+from .diagnostics import Diagnostics as Diagnostics
 from .model_param import ModelParam as ModelParam
 from .stop_reason import StopReason as StopReason
 from .deleted_file import DeletedFile as DeletedFile
@@ -60,6 +61,8 @@ from .input_json_delta import InputJSONDelta as InputJSONDelta
 from .text_block_param import TextBlockParam as TextBlockParam
 from .tool_union_param import ToolUnionParam as ToolUnionParam
 from .base64_pdf_source import Base64PDFSource as Base64PDFSource
+from .cache_miss_reason import CacheMissReason as CacheMissReason
+from .diagnostics_param import DiagnosticsParam as DiagnosticsParam
 from .effort_capability import EffortCapability as EffortCapability
 from .image_block_param import ImageBlockParam as ImageBlockParam
 from .model_list_params import ModelListParams as ModelListParams
@@ -104,6 +107,7 @@ from .server_tool_use_block import ServerToolUseBlock as ServerToolUseBlock
 from .thinking_config_param import ThinkingConfigParam as ThinkingConfigParam
 from .tool_choice_any_param import ToolChoiceAnyParam as ToolChoiceAnyParam
 from .web_fetch_block_param import WebFetchBlockParam as WebFetchBlockParam
+from .cache_miss_unavailable import CacheMissUnavailable as CacheMissUnavailable
 from .citation_char_location import CitationCharLocation as CitationCharLocation
 from .citation_page_location import CitationPageLocation as CitationPageLocation
 from .citations_config_param import CitationsConfigParam as CitationsConfigParam
@@ -123,6 +127,8 @@ from .redacted_thinking_block import RedactedThinkingBlock as RedactedThinkingBl
 from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockParam
 from .web_search_result_block import WebSearchResultBlock as WebSearchResultBlock
 from .browser_key_config_param import BrowserKeyConfigParam as BrowserKeyConfigParam
+from .cache_miss_model_changed import CacheMissModelChanged as CacheMissModelChanged
+from .cache_miss_tools_changed import CacheMissToolsChanged as CacheMissToolsChanged
 from .content_block_stop_event import ContentBlockStopEvent as ContentBlockStopEvent
 from .json_output_format_param import JSONOutputFormatParam as JSONOutputFormatParam
 from .raw_message_stream_event import RawMessageStreamEvent as RawMessageStreamEvent
@@ -135,6 +141,7 @@ from .browser_state_block_param import BrowserStateBlockParam as BrowserStateBlo
 from .browser_type_config_param import BrowserTypeConfigParam as BrowserTypeConfigParam
 from .browser_wait_config_param import BrowserWaitConfigParam as BrowserWaitConfigParam
 from .browser_zoom_config_param import BrowserZoomConfigParam as BrowserZoomConfigParam
+from .cache_miss_system_changed import CacheMissSystemChanged as CacheMissSystemChanged
 from .computer_key_config_param import ComputerKeyConfigParam as ComputerKeyConfigParam
 from .content_block_delta_event import ContentBlockDeltaEvent as ContentBlockDeltaEvent
 from .content_block_start_event import ContentBlockStartEvent as ContentBlockStartEvent
@@ -152,6 +159,7 @@ from .file_document_source_param import FileDocumentSourceParam as FileDocumentS
 from .memory_tool_20250818_param import MemoryTool20250818Param as MemoryTool20250818Param
 from .tool_reference_block_param import ToolReferenceBlockParam as ToolReferenceBlockParam
 from .browser_scroll_config_param import BrowserScrollConfigParam as BrowserScrollConfigParam
+from .cache_miss_messages_changed import CacheMissMessagesChanged as CacheMissMessagesChanged
 from .code_execution_output_block import CodeExecutionOutputBlock as CodeExecutionOutputBlock
 from .code_execution_result_block import CodeExecutionResultBlock as CodeExecutionResultBlock
 from .image_transformations_param import ImageTransformationsParam as ImageTransformationsParam
@@ -248,6 +256,7 @@ from .content_block_source_content_param import ContentBlockSourceContentParam a
 from .tool_search_tool_result_error_code import ToolSearchToolResultErrorCode as ToolSearchToolResultErrorCode
 from .web_search_tool_result_block_param import WebSearchToolResultBlockParam as WebSearchToolResultBlockParam
 from .computer_left_mouse_up_config_param import ComputerLeftMouseUpConfigParam as ComputerLeftMouseUpConfigParam
+from .thinking_config_between_tools_param import ThinkingConfigBetweenToolsParam as ThinkingConfigBetweenToolsParam
 from .tool_search_tool_result_block_param import ToolSearchToolResultBlockParam as ToolSearchToolResultBlockParam
 from .tool_search_tool_result_error_param import ToolSearchToolResultErrorParam as ToolSearchToolResultErrorParam
 from .web_search_tool_request_error_param import WebSearchToolRequestErrorParam as WebSearchToolRequestErrorParam
@@ -261,6 +270,7 @@ from .web_search_tool_result_block_content import WebSearchToolResultBlockConten
 from .bash_code_execution_tool_result_block import BashCodeExecutionToolResultBlock as BashCodeExecutionToolResultBlock
 from .bash_code_execution_tool_result_error import BashCodeExecutionToolResultError as BashCodeExecutionToolResultError
 from .browser_state_change_tab_opened_param import BrowserStateChangeTabOpenedParam as BrowserStateChangeTabOpenedParam
+from .cache_miss_previous_message_not_found import CacheMissPreviousMessageNotFound as CacheMissPreviousMessageNotFound
 from .citation_content_block_location_param import (
     CitationContentBlockLocationParam as CitationContentBlockLocationParam,
 )

@@ -9,6 +9,7 @@ from .message_param import MessageParam
 from .metadata_param import MetadataParam
 from .text_block_param import TextBlockParam
 from .tool_union_param import ToolUnionParam
+from .diagnostics_param import DiagnosticsParam
 from .tool_choice_param import ToolChoiceParam
 from .output_config_param import OutputConfigParam
 from .thinking_config_param import ThinkingConfigParam
@@ -130,6 +131,14 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     container: Optional[MessageCreateParamsContainerParam]
     """Container identifier for reuse across requests."""
+
+    diagnostics: Optional[DiagnosticsParam]
+    """Request-level diagnostics.
+
+    Supply `previous_message_id` to have the response include
+    `diagnostics.cache_miss_reason` explaining any prompt-cache divergence from that
+    prior request.
+    """
 
     inference_geo: Optional[str]
     """Specifies the geographic region for inference processing.
@@ -310,8 +319,13 @@ class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-    for details.
+    When `true`, SDKs return a raw event stream.
+
+    In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+    `messages.stream()`. It sets `stream` for you and accumulates the events into
+    the final message. See
+    [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+    for an example in each language.
     """
 
 
@@ -319,8 +333,13 @@ class MessageCreateParamsStreaming(MessageCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-    for details.
+    When `true`, SDKs return a raw event stream.
+
+    In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+    `messages.stream()`. It sets `stream` for you and accumulates the events into
+    the final message. See
+    [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+    for an example in each language.
     """
 
 

@@ -26,13 +26,16 @@ class BetaManagedAgentsSessionThread(BaseModel):
     """Unique identifier for this thread."""
 
     agent: Agent
-    """The resolved agent a `session_thread` runs."""
+    """Resolved agent definition for this thread.
+
+    Snapshot of the agent at thread creation time.
+    """
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the thread was archived. Null if not archived."""
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When the thread was created."""
 
     parent_thread_id: Optional[str] = None
     """Parent thread that spawned this thread. Null for the primary thread."""
@@ -41,15 +44,21 @@ class BetaManagedAgentsSessionThread(BaseModel):
     """The session this thread belongs to."""
 
     stats: Optional[BetaManagedAgentsSessionThreadStats] = None
-    """Timing statistics for a session thread."""
+    """Timing statistics for this thread.
+
+    Null until the thread's first status transition.
+    """
 
     status: BetaManagedAgentsSessionThreadStatus
-    """SessionThreadStatus enum"""
+    """Current execution status of the thread."""
 
     type: Literal["session_thread"]
 
     updated_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When the thread was last updated."""
 
     usage: Optional[BetaManagedAgentsSessionThreadUsage] = None
-    """Cumulative token usage for a session thread across all turns."""
+    """Cumulative token usage for this thread.
+
+    Null until the thread's first idle transition.
+    """

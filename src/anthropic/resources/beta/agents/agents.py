@@ -107,8 +107,8 @@ class Agents(SyncAPIResource):
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
 
-          multiagent: A coordinator topology: the session's primary thread orchestrates work by
-              spawning session threads, each running an agent drawn from the `agents` roster.
+          multiagent: Multiagent orchestration configuration. Currently supports the `coordinator`
+              topology with a roster of 1-20 agents.
 
           skills: Skills available to the agent.
 
@@ -277,8 +277,8 @@ class Agents(SyncAPIResource):
               e.g. `claude-opus-5`, or a `model_config` object for additional configuration
               control. Omit to preserve. Cannot be cleared.
 
-          multiagent: A coordinator topology: the session's primary thread orchestrates work by
-              spawning session threads, each running an agent drawn from the `agents` roster.
+          multiagent: Multiagent orchestration configuration. Full replacement. Omit to preserve; send
+              null to clear.
 
           name: Human-readable name. Must be non-empty. Omit to preserve. Cannot be cleared.
 
@@ -551,8 +551,8 @@ class AsyncAgents(AsyncAPIResource):
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
 
-          multiagent: A coordinator topology: the session's primary thread orchestrates work by
-              spawning session threads, each running an agent drawn from the `agents` roster.
+          multiagent: Multiagent orchestration configuration. Currently supports the `coordinator`
+              topology with a roster of 1-20 agents.
 
           skills: Skills available to the agent.
 
@@ -721,8 +721,8 @@ class AsyncAgents(AsyncAPIResource):
               e.g. `claude-opus-5`, or a `model_config` object for additional configuration
               control. Omit to preserve. Cannot be cleared.
 
-          multiagent: A coordinator topology: the session's primary thread orchestrates work by
-              spawning session threads, each running an agent drawn from the `agents` roster.
+          multiagent: Multiagent orchestration configuration. Full replacement. Omit to preserve; send
+              null to clear.
 
           name: Human-readable name. Must be non-empty. Omit to preserve. Cannot be cleared.
 

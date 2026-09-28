@@ -5,6 +5,7 @@ from .model import Model
 from .usage import Usage
 from .._models import BaseModel
 from .container import Container
+from .diagnostics import Diagnostics
 from .stop_reason import StopReason
 from .content_block import ContentBlock, ContentBlock as ContentBlock
 from .message_param import MessageParam
@@ -21,9 +22,9 @@ class Message(BaseModel):
     """
 
     container: Optional[Container] = None
-    """
-    Information about the container used in the request (for the code execution
-    tool)
+    """Information about the container used in this request.
+
+    This will be non-null if a container tool (e.g. code execution) was used.
     """
 
     content: List[ContentBlock]
@@ -61,6 +62,13 @@ class Message(BaseModel):
     ```
     """
 
+    diagnostics: Optional[Diagnostics] = None
+    """Request-level diagnostics.
+
+    `null` when the request did not supply `diagnostics`, or when it did and no
+    prompt-cache divergence was detected.
+    """
+
     model: Model
     """The model that will complete your prompt.
 
@@ -75,7 +83,10 @@ class Message(BaseModel):
     """
 
     stop_details: Optional[RefusalStopDetails] = None
-    """Structured information about a refusal."""
+    """Structured information about why model output stopped.
+
+    This is `null` when the `stop_reason` has no additional detail to report.
+    """
 
     stop_reason: Optional[StopReason] = None
     """The reason that we stopped.

@@ -31,6 +31,9 @@ from .beta_managed_agents_image_block_param import BetaManagedAgentsImageBlockPa
 from .beta_managed_agents_file_rubric_params import (
     BetaManagedAgentsFileRubricParams as BetaManagedAgentsFileRubricParams,
 )
+from .beta_managed_agents_session_event_type import (
+    BetaManagedAgentsSessionEventType as BetaManagedAgentsSessionEventType,
+)
 from .beta_managed_agents_text_rubric_params import (
     BetaManagedAgentsTextRubricParams as BetaManagedAgentsTextRubricParams,
 )

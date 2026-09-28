@@ -16,6 +16,6 @@ class BetaManagedAgentsAgentThinkingEvent(BaseModel):
     """Unique identifier for this event."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this thinking was produced."""
 
     type: Literal["agent.thinking"]

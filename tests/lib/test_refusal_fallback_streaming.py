@@ -305,6 +305,17 @@ class TestShapeBContinuation:
         assert "signature" in appended["content"][0]
 
     @pytest.mark.respx(base_url=base_url)
+    def test_between_tools_thinking_degrades_to_disabled_on_the_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(STREAM_B)])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        collect(client.beta.messages.create(**PARAMS, thinking={"type": "between_tools"}, stream=True))
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[0]["thinking"] == {"type": "between_tools"}
+        assert bodies[1]["thinking"] == {"type": "disabled"}
+
+    @pytest.mark.respx(base_url=base_url)
     def test_appends_the_fallback_credit_beta_to_both_the_original_and_hop_requests(
         self, respx_mock: MockRouter
     ) -> None:

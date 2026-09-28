@@ -87,6 +87,7 @@ from .message_create_params import MessageCreateParams as MessageCreateParams
 from .session_create_params import SessionCreateParams as SessionCreateParams
 from .session_update_params import SessionUpdateParams as SessionUpdateParams
 from .beta_base64_pdf_source import BetaBase64PDFSource as BetaBase64PDFSource
+from .beta_cache_miss_reason import BetaCacheMissReason as BetaCacheMissReason
 from .beta_diagnostics_param import BetaDiagnosticsParam as BetaDiagnosticsParam
 from .beta_dream_input_param import BetaDreamInputParam as BetaDreamInputParam
 from .beta_effort_capability import BetaEffortCapability as BetaEffortCapability
@@ -666,6 +667,9 @@ from .beta_request_mcp_tool_result_block_param import (
 )
 from .beta_response_tool_change_tool_reference import (
     BetaResponseToolChangeToolReference as BetaResponseToolChangeToolReference,
+)
+from .beta_thinking_config_between_tools_param import (
+    BetaThinkingConfigBetweenToolsParam as BetaThinkingConfigBetweenToolsParam,
 )
 from .beta_tool_search_tool_result_block_param import (
     BetaToolSearchToolResultBlockParam as BetaToolSearchToolResultBlockParam,

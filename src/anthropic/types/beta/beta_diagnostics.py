@@ -1,28 +1,9 @@
-from typing import Union, Optional
-from typing_extensions import Annotated, TypeAlias
+from typing import Optional
 
-from ..._models import BaseModel, UnionDiscriminator
-from .beta_cache_miss_unavailable import BetaCacheMissUnavailable
-from .beta_cache_miss_model_changed import BetaCacheMissModelChanged
-from .beta_cache_miss_tools_changed import BetaCacheMissToolsChanged
-from .beta_cache_miss_system_changed import BetaCacheMissSystemChanged
-from .beta_cache_miss_messages_changed import BetaCacheMissMessagesChanged
-from .beta_cache_miss_previous_message_not_found import BetaCacheMissPreviousMessageNotFound
+from ..._models import BaseModel
+from .beta_cache_miss_reason import BetaCacheMissReason
 
-__all__ = ["BetaDiagnostics", "CacheMissReason"]
-
-CacheMissReason: TypeAlias = Annotated[
-    Union[
-        BetaCacheMissModelChanged,
-        BetaCacheMissSystemChanged,
-        BetaCacheMissToolsChanged,
-        BetaCacheMissMessagesChanged,
-        BetaCacheMissPreviousMessageNotFound,
-        BetaCacheMissUnavailable,
-        None,
-    ],
-    UnionDiscriminator("type"),
-]
+__all__ = ["BetaDiagnostics"]
 
 
 class BetaDiagnostics(BaseModel):
@@ -31,7 +12,7 @@ class BetaDiagnostics(BaseModel):
     the prefix of the request named by `diagnostics.previous_message_id`.
     """
 
-    cache_miss_reason: Optional[CacheMissReason] = None
+    cache_miss_reason: Optional[BetaCacheMissReason] = None
     """
     Explains why the prompt cache could not fully reuse the prefix from the request
     identified by `diagnostics.previous_message_id`. `null` means diagnosis is still

@@ -20,4 +20,4 @@ class BetaManagedAgentsMCPOAuthAuthResponse(BaseModel):
     """A timestamp in RFC 3339 format"""
 
     refresh: Optional[BetaManagedAgentsMCPOAuthRefreshResponse] = None
-    """OAuth refresh token configuration returned in credential responses."""
+    """Refresh token configuration, if the credential supports token refresh."""

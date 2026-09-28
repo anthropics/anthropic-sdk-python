@@ -68,11 +68,11 @@ class BetaFederationIssuer(BaseModel):
     """Admin-chosen slug identifier."""
 
     poll_status: Optional[BetaFederationIssuerPollStatus] = None
-    """Status of automatic JWKS polling for a federation issuer.
+    """Live state of Anthropic's JWKS polling for this issuer.
 
-    Anthropic periodically fetches the issuer's signing keys in the background.
-    These fields summarize the most recent fetches so the health of the JWKS
-    endpoint can be monitored.
+    Populated on both single-issuer retrieval and list responses, including archived
+    issuers. Typically null for inline-key issuers (no polling), or when poll status
+    is temporarily unavailable or polling has not started yet.
     """
 
     type: Literal["federation_issuer"]

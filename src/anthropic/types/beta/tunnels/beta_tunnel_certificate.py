@@ -14,13 +14,19 @@ class BetaTunnelCertificate(BaseModel):
     """Unique identifier for the certificate, prefixed with `tcrt_`."""
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """RFC 3339 datetime string indicating when the certificate was archived.
+
+    Null if it is still in the trusted set.
+    """
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """RFC 3339 datetime string indicating when the certificate was registered."""
 
     expires_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """
+    RFC 3339 datetime string indicating when the certificate expires, or `null` if
+    it does not expire.
+    """
 
     fingerprint: str
     """Lowercase hex SHA-256 fingerprint of the certificate's DER encoding."""

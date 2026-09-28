@@ -39,9 +39,9 @@ class BetaManagedAgentsSessionAgent(BaseModel):
     """Model identifier and configuration."""
 
     multiagent: Optional[BetaManagedAgentsSessionMultiagentCoordinator] = None
-    """
-    Resolved coordinator topology with full agent definitions for each roster
-    member.
+    """Resolved multiagent orchestration configuration.
+
+    Null when the agent is single-threaded.
     """
 
     name: str

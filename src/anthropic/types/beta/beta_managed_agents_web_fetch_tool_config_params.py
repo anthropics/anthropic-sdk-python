@@ -50,6 +50,9 @@ class BetaManagedAgentsWebFetchToolConfigParams(TypedDict, total=False):
     """
 
     permission_policy: Optional[PermissionPolicy]
-    """Permission policy for tool execution."""
+    """Permission policy for this tool.
+
+    Controls whether tool calls are auto-approved or require confirmation.
+    """
 
     type: Literal["web_fetch"]

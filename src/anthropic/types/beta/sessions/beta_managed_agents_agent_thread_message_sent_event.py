@@ -33,7 +33,7 @@ class BetaManagedAgentsAgentThreadMessageSentEvent(BaseModel):
     """Message content blocks."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the message was sent."""
 
     to_session_thread_id: str
     """Public `sthr_` ID of the thread the message was sent to."""

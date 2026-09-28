@@ -18,7 +18,7 @@ class BetaManagedAgentsMemoryVersion(BaseModel):
     """Unique identifier for this version (a `memver_...` value)."""
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When this version was written, in RFC 3339 format."""
 
     memory_id: str
     """ID of the memory this version snapshots (a `mem_...` value).
@@ -33,11 +33,7 @@ class BetaManagedAgentsMemoryVersion(BaseModel):
     """ID of the memory store this version belongs to (a `memstore_...` value)."""
 
     operation: BetaManagedAgentsMemoryVersionOperation
-    """The kind of mutation a `memory_version` records.
-
-    Every non-no-op mutation to a memory appends exactly one version row with one of
-    these values.
-    """
+    """The kind of mutation this version records: `created`, `modified`, or `deleted`."""
 
     type: Literal["memory_version"]
 
@@ -63,12 +59,14 @@ class BetaManagedAgentsMemoryVersion(BaseModel):
     """
 
     created_by: Optional[BetaManagedAgentsActor] = None
-    """Identifies who performed a write or redact operation.
-
-    Captured at write time on the `memory_version` row. The API key that created a
-    session is not recorded on agent writes; attribution answers who made the write,
-    not who is ultimately responsible. Look up session provenance separately via the
-    [Sessions API](/en/api/beta/sessions/retrieve).
+    """
+    Who performed this write: one of `session_actor`, `api_actor`, `user_actor`, or
+    `service_account_actor`; `null` when no writer is recorded. Captured at write
+    time and preserved through redaction. A `session_actor` is an agent writing
+    through the store's mounted filesystem at `/mnt/memory/`. The API key that
+    created that session is not recorded on agent writes, so attribution names who
+    made the write, not who is ultimately responsible; look up session provenance
+    via the [Sessions API](/en/api/beta/sessions/retrieve).
     """
 
     path: Optional[str] = None
@@ -78,13 +76,16 @@ class BetaManagedAgentsMemoryVersion(BaseModel):
     """
 
     redacted_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """
+    When this version was redacted, in RFC 3339 format, or `null` if it has not been
+    redacted. When set, `content`, `path`, `content_size_bytes`, and
+    `content_sha256` are all `null`. See
+    [Redact a memory version](/en/api/beta/memory_stores/memory_versions/redact).
+    """
 
     redacted_by: Optional[BetaManagedAgentsActor] = None
-    """Identifies who performed a write or redact operation.
+    """Who redacted this version, or `null` if it has not been redacted.
 
-    Captured at write time on the `memory_version` row. The API key that created a
-    session is not recorded on agent writes; attribution answers who made the write,
-    not who is ultimately responsible. Look up session provenance separately via the
-    [Sessions API](/en/api/beta/sessions/retrieve).
+    In practice always an `api_actor`, `user_actor`, or `service_account_actor`
+    (agents do not have a redact capability).
     """

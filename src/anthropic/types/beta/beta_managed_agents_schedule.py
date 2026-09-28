@@ -8,7 +8,10 @@ __all__ = ["BetaManagedAgentsSchedule"]
 
 
 class BetaManagedAgentsSchedule(BaseModel):
-    """5-field POSIX cron schedule with computed runtime timestamps."""
+    """A recurring schedule with computed runtime timestamps.
+
+    Discriminated union — only cron is supported currently.
+    """
 
     expression: str
     """
@@ -25,7 +28,11 @@ class BetaManagedAgentsSchedule(BaseModel):
     type: Literal["cron"]
 
     last_run_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Time the most recent scheduled run actually started.
+
+    Null until one completes; preserved after the deployment is archived. Manual
+    runs do not update this.
+    """
 
     upcoming_runs_at: Optional[List[datetime]] = None
     """Up to 5 timestamps of upcoming cron occurrences.

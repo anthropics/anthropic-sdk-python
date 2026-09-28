@@ -14,13 +14,16 @@ __all__ = ["BetaRawMessageDeltaEvent", "Delta"]
 
 class Delta(BaseModel):
     container: Optional[BetaContainer] = None
-    """
-    Information about the container used in the request (for the code execution
-    tool)
+    """Information about the container used in this request.
+
+    This will be non-null if a container tool (e.g. code execution) was used.
     """
 
     stop_details: Optional[BetaRefusalStopDetails] = None
-    """Structured information about a refusal."""
+    """Structured information about why model output stopped.
+
+    This is `null` when the `stop_reason` has no additional detail to report.
+    """
 
     stop_reason: Optional[BetaStopReason] = None
 

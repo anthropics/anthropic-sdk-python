@@ -13,7 +13,7 @@ __all__ = ["CredentialCreateParams", "Auth"]
 
 class CredentialCreateParams(TypedDict, total=False):
     auth: Required[Auth]
-    """Authentication details for creating a credential."""
+    """Authentication configuration for the credential."""
 
     display_name: Optional[str]
     """Human-readable name for the credential. Up to 255 characters."""

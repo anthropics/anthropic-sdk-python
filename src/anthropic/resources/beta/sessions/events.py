@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from ...._client import AsyncAnthropic
     from ....lib.tools._beta_session_runner import SessionToolRunner, BetaAnyRunnableTool
 
-from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
+from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
@@ -30,6 +30,7 @@ from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_managed_agents_delta_type import BetaManagedAgentsDeltaType
 from ....types.beta.sessions.beta_managed_agents_event_params import BetaManagedAgentsEventParams
 from ....types.beta.sessions.beta_managed_agents_session_event import BetaManagedAgentsSessionEvent
+from ....types.beta.sessions.beta_managed_agents_session_event_type import BetaManagedAgentsSessionEventType
 from ....types.beta.sessions.beta_managed_agents_send_session_events import BetaManagedAgentsSendSessionEvents
 from ....types.beta.sessions.beta_managed_agents_stream_session_events import BetaManagedAgentsStreamSessionEvents
 
@@ -67,7 +68,7 @@ class Events(SyncAPIResource):
         limit: int | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
         page: str | Omit = omit,
-        types: SequenceNotStr[str] | Omit = omit,
+        types: List[BetaManagedAgentsSessionEventType] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -324,7 +325,7 @@ class AsyncEvents(AsyncAPIResource):
         limit: int | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
         page: str | Omit = omit,
-        types: SequenceNotStr[str] | Omit = omit,
+        types: List[BetaManagedAgentsSessionEventType] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.

@@ -11,7 +11,7 @@ async def main() -> None:
 
     # Create an async stream with web search enabled
     async with client.beta.messages.stream(
-        model="claude-sonnet-5",
+        model="claude-sonnet-5-5",
         max_tokens=1024,
         messages=[{"role": "user", "content": "What's the weather in New York?"}],
         tools=[

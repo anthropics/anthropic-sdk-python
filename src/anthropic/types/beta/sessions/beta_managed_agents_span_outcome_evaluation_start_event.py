@@ -22,6 +22,6 @@ class BetaManagedAgentsSpanOutcomeEvaluationStartEvent(BaseModel):
     """The `outc_` ID of the outcome being evaluated."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when outcome evaluation started."""
 
     type: Literal["span.outcome_evaluation_start"]

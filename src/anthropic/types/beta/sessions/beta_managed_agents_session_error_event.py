@@ -38,6 +38,6 @@ class BetaManagedAgentsSessionErrorEvent(BaseModel):
     error: Error
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the error occurred."""
 
     type: Literal["session.error"]

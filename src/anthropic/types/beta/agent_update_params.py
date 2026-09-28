@@ -47,9 +47,9 @@ class AgentUpdateParams(TypedDict, total=False):
     """
 
     multiagent: Optional[BetaManagedAgentsMultiagentParams]
-    """
-    A coordinator topology: the session's primary thread orchestrates work by
-    spawning session threads, each running an agent drawn from the `agents` roster.
+    """Multiagent orchestration configuration.
+
+    Full replacement. Omit to preserve; send null to clear.
     """
 
     name: str

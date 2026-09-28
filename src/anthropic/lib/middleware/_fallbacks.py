@@ -115,6 +115,8 @@ class BetaRefusalFallbackMiddleware(Middleware):
     absent field keeps the original value; `output_config` patches its
     subfields the same way one level deep. Hops never compound — every hop
     patches the original params, never the previous hop's patched request.
+    A `between_tools` thinking config is sent to a hop as `disabled` unless
+    the entry sets `thinking` itself.
 
     Non-streaming: when a response comes back with `stop_reason: "refusal"`, the
     request is retried with each entry of `fallbacks` applied as a patch to the
@@ -1490,8 +1492,14 @@ def _apply_hop(body: dict[str, Any], entry: BetaFallbackParam) -> dict[str, Any]
     set / `None`-unsets / absent-keeps rule against the original request's
     `output_config`; the whole object is dropped when nothing is left.
 
+    A carried `between_tools` thinking config becomes `disabled` unless the
+    entry sets `thinking`: the fallback model may not accept `between_tools`.
+
     Always a fresh dict; `body` is never mutated."""
     patched = _patch(body, cast("Dict[str, Any]", entry))
+    thinking = _as_dict(body.get("thinking"))
+    if "thinking" not in entry and thinking is not None and thinking.get("type") == "between_tools":
+        patched["thinking"] = {"type": "disabled"}
     output_config = _as_dict(entry.get("output_config"))
     if output_config is not None:
         merged = _patch(_as_dict(body.get("output_config")) or {}, output_config)

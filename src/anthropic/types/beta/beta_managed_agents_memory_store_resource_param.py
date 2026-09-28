@@ -18,7 +18,10 @@ class BetaManagedAgentsMemoryStoreResourceParam(TypedDict, total=False):
     type: Required[Literal["memory_store"]]
 
     access: Optional[Literal["read_write", "read_only"]]
-    """Access mode for an attached memory store."""
+    """Access mode for the mounted store.
+
+    Defaults to read_write. read_only mounts the store as a read-only filesystem.
+    """
 
     instructions: Optional[str]
     """Per-attachment guidance for the agent on how to use this store.

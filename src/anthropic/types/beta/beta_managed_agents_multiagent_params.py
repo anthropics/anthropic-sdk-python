@@ -9,8 +9,9 @@ __all__ = ["BetaManagedAgentsMultiagentParams"]
 
 
 class BetaManagedAgentsMultiagentParams(TypedDict, total=False):
-    """
-    A coordinator topology: the session's primary thread orchestrates work by spawning session threads, each running an agent drawn from the `agents` roster.
+    """Multiagent orchestration configuration.
+
+    Currently supports the `coordinator` topology.
     """
 
     agents: Required[SequenceNotStr[BetaManagedAgentsMultiagentRosterEntryParams]]

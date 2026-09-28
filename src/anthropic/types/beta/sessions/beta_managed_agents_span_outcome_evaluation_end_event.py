@@ -35,7 +35,7 @@ class BetaManagedAgentsSpanOutcomeEvaluationEndEvent(BaseModel):
     """The `outc_` ID of the outcome being evaluated."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when outcome evaluation ended."""
 
     result: str
     """Evaluation verdict.
@@ -51,4 +51,7 @@ class BetaManagedAgentsSpanOutcomeEvaluationEndEvent(BaseModel):
     type: Literal["span.outcome_evaluation_end"]
 
     usage: BetaManagedAgentsSpanModelUsage
-    """Token usage for a single model request."""
+    """Aggregate token usage for this evaluation cycle.
+
+    Sums across all grader model requests within the cycle.
+    """
