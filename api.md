@@ -1982,3 +1982,97 @@ Methods:
 
 - <code title="get /v1/organizations/compliance_settings?beta=true">client.beta.organization.compliance_settings.<a href="./src/anthropic/resources/beta/organization/compliance_settings.py">retrieve</a>() -> <a href="./src/anthropic/types/beta/organization/beta_compliance_settings.py">BetaComplianceSettings</a></code>
 - <code title="post /v1/organizations/compliance_settings?beta=true">client.beta.organization.compliance_settings.<a href="./src/anthropic/resources/beta/organization/compliance_settings.py">update</a>(\*\*<a href="src/anthropic/types/beta/organization/compliance_setting_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_compliance_settings.py">BetaComplianceSettings</a></code>
+
+### Plugins
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaDeletedPlugin,
+    BetaPlugin,
+    BetaPluginAPIActor,
+    BetaPluginComponent,
+    BetaPluginContentScan,
+    BetaPluginOwnerOrganization,
+    BetaPluginOwnerUser,
+    BetaPluginTargetOrganization,
+    BetaPluginTargetOrganizationMember,
+    BetaPluginTargetRBACGroup,
+    BetaPluginUserActor,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/plugins?beta=true">client.beta.organization.plugins.<a href="./src/anthropic/resources/beta/organization/plugins/plugins.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/plugin_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin.py">BetaPlugin</a></code>
+- <code title="get /v1/organizations/plugins/{plugin_id}?beta=true">client.beta.organization.plugins.<a href="./src/anthropic/resources/beta/organization/plugins/plugins.py">retrieve</a>(plugin_id, \*\*<a href="src/anthropic/types/beta/organization/plugin_retrieve_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin.py">BetaPlugin</a></code>
+- <code title="post /v1/organizations/plugins/{plugin_id}?beta=true">client.beta.organization.plugins.<a href="./src/anthropic/resources/beta/organization/plugins/plugins.py">update</a>(plugin_id, \*\*<a href="src/anthropic/types/beta/organization/plugin_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin.py">BetaPlugin</a></code>
+- <code title="get /v1/organizations/plugins?beta=true">client.beta.organization.plugins.<a href="./src/anthropic/resources/beta/organization/plugins/plugins.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/plugin_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin.py">SyncPageCursor[BetaPlugin]</a></code>
+- <code title="delete /v1/organizations/plugins/{plugin_id}?beta=true">client.beta.organization.plugins.<a href="./src/anthropic/resources/beta/organization/plugins/plugins.py">delete</a>(plugin_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_plugin.py">BetaDeletedPlugin</a></code>
+
+#### Versions
+
+Types:
+
+```python
+from anthropic.types.beta.organization.plugins import BetaPluginVersion
+```
+
+Methods:
+
+- <code title="post /v1/organizations/plugins/{plugin_id}/versions?beta=true">client.beta.organization.plugins.versions.<a href="./src/anthropic/resources/beta/organization/plugins/versions.py">create</a>(plugin_id, \*\*<a href="src/anthropic/types/beta/organization/plugins/version_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/plugins/beta_plugin_version.py">BetaPluginVersion</a></code>
+- <code title="get /v1/organizations/plugins/{plugin_id}/versions/{version}?beta=true">client.beta.organization.plugins.versions.<a href="./src/anthropic/resources/beta/organization/plugins/versions.py">retrieve</a>(version, \*, plugin_id, \*\*<a href="src/anthropic/types/beta/organization/plugins/version_retrieve_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/plugins/beta_plugin_version.py">BetaPluginVersion</a></code>
+- <code title="get /v1/organizations/plugins/{plugin_id}/versions?beta=true">client.beta.organization.plugins.versions.<a href="./src/anthropic/resources/beta/organization/plugins/versions.py">list</a>(plugin_id, \*\*<a href="src/anthropic/types/beta/organization/plugins/version_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/plugins/beta_plugin_version.py">SyncPageCursor[BetaPluginVersion]</a></code>
+- <code title="get /v1/organizations/plugins/{plugin_id}/versions/{version}/content?beta=true">client.beta.organization.plugins.versions.<a href="./src/anthropic/resources/beta/organization/plugins/versions.py">download</a>(version, \*, plugin_id, \*\*<a href="src/anthropic/types/beta/organization/plugins/version_download_params.py">params</a>) -> BinaryAPIResponse</code>
+
+#### InstallationSettings
+
+Types:
+
+```python
+from anthropic.types.beta.organization.plugins import (
+    BetaDeletedPluginInstallationSetting,
+    BetaPluginInstallationSetting,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/plugins/{plugin_id}/installation_settings?beta=true">client.beta.organization.plugins.installation_settings.<a href="./src/anthropic/resources/beta/organization/plugins/installation_settings.py">list</a>(plugin_id, \*\*<a href="src/anthropic/types/beta/organization/plugins/installation_setting_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/plugins/beta_plugin_installation_setting.py">SyncPageCursor[BetaPluginInstallationSetting]</a></code>
+- <code title="delete /v1/organizations/plugins/{plugin_id}/installation_settings/{target}?beta=true">client.beta.organization.plugins.installation_settings.<a href="./src/anthropic/resources/beta/organization/plugins/installation_settings.py">remove</a>(target, \*, plugin_id) -> <a href="./src/anthropic/types/beta/organization/plugins/beta_deleted_plugin_installation_setting.py">BetaDeletedPluginInstallationSetting</a></code>
+- <code title="post /v1/organizations/plugins/{plugin_id}/installation_settings/{target}?beta=true">client.beta.organization.plugins.installation_settings.<a href="./src/anthropic/resources/beta/organization/plugins/installation_settings.py">set</a>(target, \*, plugin_id, \*\*<a href="src/anthropic/types/beta/organization/plugins/installation_setting_set_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/plugins/beta_plugin_installation_setting.py">BetaPluginInstallationSetting</a></code>
+
+#### Shares
+
+Types:
+
+```python
+from anthropic.types.beta.organization.plugins import BetaPluginShare
+```
+
+Methods:
+
+- <code title="get /v1/organizations/plugins/{plugin_id}/shares?beta=true">client.beta.organization.plugins.shares.<a href="./src/anthropic/resources/beta/organization/plugins/shares.py">list</a>(plugin_id, \*\*<a href="src/anthropic/types/beta/organization/plugins/share_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/plugins/beta_plugin_share.py">SyncPageCursor[BetaPluginShare]</a></code>
+
+### PluginMarketplaces
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaPluginMarketplace,
+    BetaPluginMarketplaceValidationPluginError,
+    BetaPluginMarketplaceValidationPluginWarning,
+    BetaPluginMarketplaceValidationPluginWarnings,
+    BetaPluginMarketplaceValidationReport,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true">client.beta.organization.plugin_marketplaces.<a href="./src/anthropic/resources/beta/organization/plugin_marketplaces.py">retrieve</a>(marketplace_id, \*\*<a href="src/anthropic/types/beta/organization/plugin_marketplace_retrieve_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin_marketplace.py">BetaPluginMarketplace</a></code>
+- <code title="post /v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true">client.beta.organization.plugin_marketplaces.<a href="./src/anthropic/resources/beta/organization/plugin_marketplaces.py">update</a>(marketplace_id, \*\*<a href="src/anthropic/types/beta/organization/plugin_marketplace_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin_marketplace.py">BetaPluginMarketplace</a></code>
+- <code title="get /v1/organizations/plugin_marketplaces?beta=true">client.beta.organization.plugin_marketplaces.<a href="./src/anthropic/resources/beta/organization/plugin_marketplaces.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/plugin_marketplace_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin_marketplace.py">SyncPageCursor[BetaPluginMarketplace]</a></code>
+- <code title="post /v1/organizations/plugin_marketplaces/validate_archive?beta=true">client.beta.organization.plugin_marketplaces.<a href="./src/anthropic/resources/beta/organization/plugin_marketplaces.py">validate_archive</a>(\*\*<a href="src/anthropic/types/beta/organization/plugin_marketplace_validate_archive_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin_marketplace_validation_report.py">BetaPluginMarketplaceValidationReport</a></code>
+- <code title="post /v1/organizations/plugin_marketplaces/validate_repository?beta=true">client.beta.organization.plugin_marketplaces.<a href="./src/anthropic/resources/beta/organization/plugin_marketplaces.py">validate_repository</a>(\*\*<a href="src/anthropic/types/beta/organization/plugin_marketplace_validate_repository_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin_marketplace_validation_report.py">BetaPluginMarketplaceValidationReport</a></code>

@@ -52,6 +52,14 @@ from .external_keys import (
     AsyncExternalKeysWithStreamingResponse,
 )
 from ...._base_client import make_request_options
+from .plugins.plugins import (
+    Plugins,
+    AsyncPlugins,
+    PluginsWithRawResponse,
+    AsyncPluginsWithRawResponse,
+    PluginsWithStreamingResponse,
+    AsyncPluginsWithStreamingResponse,
+)
 from .compliance_settings import (
     ComplianceSettings,
     AsyncComplianceSettings,
@@ -59,6 +67,14 @@ from .compliance_settings import (
     AsyncComplianceSettingsWithRawResponse,
     ComplianceSettingsWithStreamingResponse,
     AsyncComplianceSettingsWithStreamingResponse,
+)
+from .plugin_marketplaces import (
+    PluginMarketplaces,
+    AsyncPluginMarketplaces,
+    PluginMarketplacesWithRawResponse,
+    AsyncPluginMarketplacesWithRawResponse,
+    PluginMarketplacesWithStreamingResponse,
+    AsyncPluginMarketplacesWithStreamingResponse,
 )
 from .federation.federation import (
     Federation,
@@ -125,6 +141,14 @@ class Organization(SyncAPIResource):
     @cached_property
     def compliance_settings(self) -> ComplianceSettings:
         return ComplianceSettings(self._client)
+
+    @cached_property
+    def plugins(self) -> Plugins:
+        return Plugins(self._client)
+
+    @cached_property
+    def plugin_marketplaces(self) -> PluginMarketplaces:
+        return PluginMarketplaces(self._client)
 
     @cached_property
     def with_raw_response(self) -> OrganizationWithRawResponse:
@@ -204,6 +228,14 @@ class AsyncOrganization(AsyncAPIResource):
     @cached_property
     def compliance_settings(self) -> AsyncComplianceSettings:
         return AsyncComplianceSettings(self._client)
+
+    @cached_property
+    def plugins(self) -> AsyncPlugins:
+        return AsyncPlugins(self._client)
+
+    @cached_property
+    def plugin_marketplaces(self) -> AsyncPluginMarketplaces:
+        return AsyncPluginMarketplaces(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncOrganizationWithRawResponse:
@@ -291,6 +323,14 @@ class OrganizationWithRawResponse:
     def compliance_settings(self) -> ComplianceSettingsWithRawResponse:
         return ComplianceSettingsWithRawResponse(self._organization.compliance_settings)
 
+    @cached_property
+    def plugins(self) -> PluginsWithRawResponse:
+        return PluginsWithRawResponse(self._organization.plugins)
+
+    @cached_property
+    def plugin_marketplaces(self) -> PluginMarketplacesWithRawResponse:
+        return PluginMarketplacesWithRawResponse(self._organization.plugin_marketplaces)
+
 
 class AsyncOrganizationWithRawResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -335,6 +375,14 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def compliance_settings(self) -> AsyncComplianceSettingsWithRawResponse:
         return AsyncComplianceSettingsWithRawResponse(self._organization.compliance_settings)
+
+    @cached_property
+    def plugins(self) -> AsyncPluginsWithRawResponse:
+        return AsyncPluginsWithRawResponse(self._organization.plugins)
+
+    @cached_property
+    def plugin_marketplaces(self) -> AsyncPluginMarketplacesWithRawResponse:
+        return AsyncPluginMarketplacesWithRawResponse(self._organization.plugin_marketplaces)
 
 
 class OrganizationWithStreamingResponse:
@@ -381,6 +429,14 @@ class OrganizationWithStreamingResponse:
     def compliance_settings(self) -> ComplianceSettingsWithStreamingResponse:
         return ComplianceSettingsWithStreamingResponse(self._organization.compliance_settings)
 
+    @cached_property
+    def plugins(self) -> PluginsWithStreamingResponse:
+        return PluginsWithStreamingResponse(self._organization.plugins)
+
+    @cached_property
+    def plugin_marketplaces(self) -> PluginMarketplacesWithStreamingResponse:
+        return PluginMarketplacesWithStreamingResponse(self._organization.plugin_marketplaces)
+
 
 class AsyncOrganizationWithStreamingResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -425,3 +481,11 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def compliance_settings(self) -> AsyncComplianceSettingsWithStreamingResponse:
         return AsyncComplianceSettingsWithStreamingResponse(self._organization.compliance_settings)
+
+    @cached_property
+    def plugins(self) -> AsyncPluginsWithStreamingResponse:
+        return AsyncPluginsWithStreamingResponse(self._organization.plugins)
+
+    @cached_property
+    def plugin_marketplaces(self) -> AsyncPluginMarketplacesWithStreamingResponse:
+        return AsyncPluginMarketplacesWithStreamingResponse(self._organization.plugin_marketplaces)
