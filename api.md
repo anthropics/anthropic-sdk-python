@@ -1648,7 +1648,13 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta import BetaTunnel, BetaTunnelToken
+from anthropic.types.beta import (
+    BetaCloudflareTunnelTransport,
+    BetaRelayTunnelTransport,
+    BetaTunnel,
+    BetaTunnelToken,
+    BetaTunnelTransport,
+)
 ```
 
 Methods:

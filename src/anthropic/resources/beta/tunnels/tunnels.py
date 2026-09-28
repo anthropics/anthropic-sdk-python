@@ -350,10 +350,14 @@ class Tunnels(SyncAPIResource):
         deprecation period. It supersedes the Admin API endpoints at
         `/v1/organizations/tunnels`, which remain available during a migration window.
 
-        Reveals a tunnel's connector token. The value is fetched live on each call;
-        Anthropic does not store it. Repeated calls return the same value until the
-        token is rotated. Exposed as POST so the token does not appear in intermediary
-        access logs.
+        Reveals a `cloudflare` tunnel's connector token. The value is fetched live on
+        each call; Anthropic does not store it. Repeated calls return the same value
+        until the token is rotated. Exposed as POST so the token does not appear in
+        intermediary access logs. A tunnel on the `relay` transport has no token to
+        reveal: its relay token was returned once when it was issued and only a hash is
+        kept, so the request is refused with an `invalid_request_error` whose error code
+        is `tunnel_token_not_revealable`, and `rotate_token` is the way to obtain a new
+        value.
 
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
@@ -418,9 +422,14 @@ class Tunnels(SyncAPIResource):
         deprecation period. It supersedes the Admin API endpoints at
         `/v1/organizations/tunnels`, which remain available during a migration window.
 
-        Rotates a tunnel's connector token. Rotation invalidates the current token for
-        new connections and returns a fresh value; established connections are not
-        severed. A connector restarted after rotation must use the new value.
+        Rotates a tunnel's connector token and returns the fresh value. On the
+        `cloudflare` transport the previous token stops working for new connections and
+        established connections are not severed; a connector restarted after rotation
+        must use the new value. On the `relay` transport the new relay token is returned
+        in this response and never again (only a hash is kept), and the relay
+        connections established with the previous token are closed, so the relay
+        connector keeps carrying traffic only after it is redeployed with the new token;
+        relay token rotations are also rate limited per tunnel.
 
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
@@ -786,10 +795,14 @@ class AsyncTunnels(AsyncAPIResource):
         deprecation period. It supersedes the Admin API endpoints at
         `/v1/organizations/tunnels`, which remain available during a migration window.
 
-        Reveals a tunnel's connector token. The value is fetched live on each call;
-        Anthropic does not store it. Repeated calls return the same value until the
-        token is rotated. Exposed as POST so the token does not appear in intermediary
-        access logs.
+        Reveals a `cloudflare` tunnel's connector token. The value is fetched live on
+        each call; Anthropic does not store it. Repeated calls return the same value
+        until the token is rotated. Exposed as POST so the token does not appear in
+        intermediary access logs. A tunnel on the `relay` transport has no token to
+        reveal: its relay token was returned once when it was issued and only a hash is
+        kept, so the request is refused with an `invalid_request_error` whose error code
+        is `tunnel_token_not_revealable`, and `rotate_token` is the way to obtain a new
+        value.
 
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
@@ -854,9 +867,14 @@ class AsyncTunnels(AsyncAPIResource):
         deprecation period. It supersedes the Admin API endpoints at
         `/v1/organizations/tunnels`, which remain available during a migration window.
 
-        Rotates a tunnel's connector token. Rotation invalidates the current token for
-        new connections and returns a fresh value; established connections are not
-        severed. A connector restarted after rotation must use the new value.
+        Rotates a tunnel's connector token and returns the fresh value. On the
+        `cloudflare` transport the previous token stops working for new connections and
+        established connections are not severed; a connector restarted after rotation
+        must use the new value. On the `relay` transport the new relay token is returned
+        in this response and never again (only a hash is kept), and the relay
+        connections established with the previous token are closed, so the relay
+        connector keeps carrying traffic only after it is redeployed with the new token;
+        relay token rotations are also rate limited per tunnel.
 
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
