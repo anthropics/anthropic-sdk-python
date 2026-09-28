@@ -1251,6 +1251,7 @@ class AsyncWork(AsyncAPIResource):
         workdir: str | os.PathLike[str] | None = None,
         max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None | NotGiven = not_given,
+        tool_timeout: float | None | NotGiven = not_given,
         memory_sync_interval: float | None | NotGiven = not_given,
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
@@ -1269,6 +1270,7 @@ class AsyncWork(AsyncAPIResource):
         unrestricted_paths: bool,
         max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None | NotGiven = not_given,
+        tool_timeout: float | None | NotGiven = not_given,
         memory_sync_interval: float | None | NotGiven = not_given,
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
@@ -1285,6 +1287,7 @@ class AsyncWork(AsyncAPIResource):
         unrestricted_paths: bool | NotGiven = not_given,
         max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None | NotGiven = not_given,
+        tool_timeout: float | None | NotGiven = not_given,
         memory_sync_interval: float | None | NotGiven = not_given,
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
@@ -1329,6 +1332,9 @@ class AsyncWork(AsyncAPIResource):
           max_idle: Seconds to keep running after the session goes idle with
             `stop_reason` `end_turn`. Defaults to `DEFAULT_MAX_IDLE` (60s)
             when not given. `None` disables it.
+          tool_timeout: Maximum seconds for each tool call. Defaults to 150
+            when not given; `None` disables the outer timeout. With the bundled
+            bash tool, this must exceed its 120-second default timeout.
           memory_sync_interval: How often (seconds) to sync the session's
             attached memory stores; `None` disables memory. Defaults to
             `DEFAULT_MEMORY_SYNC_INTERVAL` (15s) when not given.
@@ -1351,11 +1357,13 @@ class AsyncWork(AsyncAPIResource):
         # default so the value can't drift from the constant; the lazy import
         # also keeps the host-only environment lib out of `import anthropic`.
         from ....lib.environments._worker import DEFAULT_MEMORY_SYNC_INTERVAL, EnvironmentWorker
-        from ....lib.tools._beta_session_runner import DEFAULT_MAX_IDLE
+        from ....lib.tools._beta_session_runner import TOOL_TIMEOUT, DEFAULT_MAX_IDLE
 
         reject_unrestricted_paths(unrestricted_paths)
         if not is_given(max_idle):
             max_idle = DEFAULT_MAX_IDLE
+        if not is_given(tool_timeout):
+            tool_timeout = TOOL_TIMEOUT
         if not is_given(memory_sync_interval):
             memory_sync_interval = DEFAULT_MEMORY_SYNC_INTERVAL
 
@@ -1367,6 +1375,7 @@ class AsyncWork(AsyncAPIResource):
             workdir=workdir,
             max_file_bytes=max_file_bytes,
             max_idle=max_idle,
+            tool_timeout=tool_timeout,
             memory_sync_interval=memory_sync_interval,
             memory_sync_deletions=memory_sync_deletions,
             worker_id=worker_id,

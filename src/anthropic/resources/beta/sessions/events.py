@@ -556,6 +556,7 @@ class AsyncEvents(AsyncAPIResource):
         *,
         tools: Sequence[BetaAnyRunnableTool],
         max_idle: float | None | NotGiven = not_given,
+        tool_timeout: float | None | NotGiven = not_given,
         environment_key: str | None = None,
         extra_headers: Headers | None = None,
     ) -> SessionToolRunner:
@@ -613,6 +614,9 @@ class AsyncEvents(AsyncAPIResource):
             `stop_reason` `end_turn` before stopping; any new event resets
             the countdown. Defaults to `DEFAULT_MAX_IDLE` (60s) when not
             given. `None` disables it.
+          tool_timeout: Maximum seconds for each tool call. Defaults to 150
+            when not given; `None` disables the outer timeout. With the bundled
+            bash tool, this must exceed its 120-second default timeout.
           environment_key: The self-hosted environment key. When set, the
             runner builds a Bearer-only scoped sub-client keyed to that
             environment for the event stream / list / send calls; leave it
@@ -631,16 +635,19 @@ class AsyncEvents(AsyncAPIResource):
         # DEFAULT_MAX_IDLE resolved here rather than as a literal signature
         # default so the value can't drift from the constant; the lazy import
         # also keeps the host-only environment lib out of `import anthropic`.
-        from ....lib.tools._beta_session_runner import DEFAULT_MAX_IDLE, SessionToolRunner
+        from ....lib.tools._beta_session_runner import TOOL_TIMEOUT, DEFAULT_MAX_IDLE, SessionToolRunner
 
         if not is_given(max_idle):
             max_idle = DEFAULT_MAX_IDLE
+        if not is_given(tool_timeout):
+            tool_timeout = TOOL_TIMEOUT
 
         return SessionToolRunner(
             cast("AsyncAnthropic", self._client),
             session_id,
             tools=tools,
             max_idle=max_idle,
+            tool_timeout=tool_timeout,
             environment_key=environment_key,
             extra_headers=extra_headers,
         )
