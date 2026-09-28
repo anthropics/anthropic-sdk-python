@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.9.0 (2026-09-28)
+
+Full Changelog: [v1.8.0...v1.9.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.8.0...v1.9.0)
+
+### Features
+
+* **api:** add between_tools thinking type ([a9a577d](https://github.com/anthropics/anthropic-sdk-python/commit/a9a577d5a98cb2e133c1f8362f69fff856808da1))
+* **api:** add claude-sonnet-5-5 ([a5a25e9](https://github.com/anthropics/anthropic-sdk-python/commit/a5a25e9e35ac32f100149d1dfa0fbf8cac42a8b4))
+* **api:** add include_inherited and source to workspace rate limits ([0bf4af8](https://github.com/anthropics/anthropic-sdk-python/commit/0bf4af824331c424a03d9f486de2f53a656d3bba))
+* **api:** add typed event type values to the Managed Agents events list filter ([1b82cd9](https://github.com/anthropics/anthropic-sdk-python/commit/1b82cd91ddd0874fb59a020fabc76618cb036ced))
+* **api:** cache diagnostics GA — diagnostics on Message / MessageCreateParams ([22062b8](https://github.com/anthropics/anthropic-sdk-python/commit/22062b8fd130d3f90159845c1bde444ba1887f37))
+* **tools:** optionally run tool calls while the reply streams ([26d0812](https://github.com/anthropics/anthropic-sdk-python/commit/26d08121bc80427665834f1b3fe767f813b4e4a4))
+
+
+### Bug Fixes
+
+* **client:** send no placeholder filename for unnamed file uploads ([9e9709d](https://github.com/anthropics/anthropic-sdk-python/commit/9e9709d7dc4202953a1935e8930b0f0fd80fa8b6))
+* **helpers:** degrade between_tools thinking to disabled on fallback hops ([#952](https://github.com/anthropics/anthropic-sdk-python/issues/952)) ([a3834d4](https://github.com/anthropics/anthropic-sdk-python/commit/a3834d4cd849bc6a01a2bf4e292c5cd3893e1ca9))
+* **messages:** accept diagnostics in stream() and parse() ([#929](https://github.com/anthropics/anthropic-sdk-python/issues/929)) ([fad840c](https://github.com/anthropics/anthropic-sdk-python/commit/fad840c2eeea413df35df8f79d41b92922c8ee89))
+
+
+### Chores
+
+* **api:** list the known model ids first in the Model types ([e5a082a](https://github.com/anthropics/anthropic-sdk-python/commit/e5a082a709950d2cbcc8add3351172942bcfaee5))
+* **ci:** choose the CI runner by repository ([39ccf62](https://github.com/anthropics/anthropic-sdk-python/commit/39ccf62b127348f5ac8f3a78e6c1896aaa7cb746))
+* **client:** stop sending beta header from parse and tool runner ([#907](https://github.com/anthropics/anthropic-sdk-python/issues/907)) ([1428100](https://github.com/anthropics/anthropic-sdk-python/commit/142810093d685841e6058b8c6cf61e4c449fc2a1))
+* **docs:** clarify that stream: true returns the raw event stream ([82918fa](https://github.com/anthropics/anthropic-sdk-python/commit/82918fa9eb24d9d6bc63dcba23f9db396f4fd769))
+* **docs:** make Managed Agents actor descriptions resource-neutral ([34ef524](https://github.com/anthropics/anthropic-sdk-python/commit/34ef5243ca062d7878f4c673503c57c84dfdbaa2))
+* **docs:** restore the research-preview notice on the Dream type ([f03e32e](https://github.com/anthropics/anthropic-sdk-python/commit/f03e32e0d5e5a8df05f5966e0fcba0fd23845a00))
+
+
+### Documentation
+
+* add field docstring spacing rule to CLAUDE.md ([e5c35f4](https://github.com/anthropics/anthropic-sdk-python/commit/e5c35f4a70c38289286e16fe3d5e4ef0d3a3731a))
+* **api:** prefer each field's own description over its shared type's ([d79a2e7](https://github.com/anthropics/anthropic-sdk-python/commit/d79a2e75c2b36f3620c6eb2c646de827da80b9d1))
+* **claude.md:** add function body spacing rule ([3174f8f](https://github.com/anthropics/anthropic-sdk-python/commit/3174f8f4215edefa2dfe5d895ae003c292c5dd2a))
+* list importable type names in api.md ([56a42ab](https://github.com/anthropics/anthropic-sdk-python/commit/56a42ab6ecca901939d41f1604bd98c162d52def))
+
 ## 1.8.0 (2026-09-22)
 
 Full Changelog: [v1.7.0...v1.8.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.7.0...v1.8.0)
