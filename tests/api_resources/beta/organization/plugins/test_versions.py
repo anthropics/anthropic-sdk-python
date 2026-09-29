@@ -188,9 +188,9 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_method_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content?beta=true").mock(
-            return_value=httpx2.Response(200, json={"foo": "bar"})
-        )
+        respx_mock.get(
+            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
+        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         version = client.beta.organization.plugins.versions.download(
             version="version",
             plugin_id="plugin_id",
@@ -203,9 +203,9 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_method_download_with_all_params(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content?beta=true").mock(
-            return_value=httpx2.Response(200, json={"foo": "bar"})
-        )
+        respx_mock.get(
+            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
+        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         version = client.beta.organization.plugins.versions.download(
             version="version",
             plugin_id="plugin_id",
@@ -220,9 +220,9 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content?beta=true").mock(
-            return_value=httpx2.Response(200, json={"foo": "bar"})
-        )
+        respx_mock.get(
+            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
+        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
         version = client.beta.organization.plugins.versions.with_raw_response.download(
             version="version",
@@ -237,9 +237,9 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_streaming_response_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content?beta=true").mock(
-            return_value=httpx2.Response(200, json={"foo": "bar"})
-        )
+        respx_mock.get(
+            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
+        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         with client.beta.organization.plugins.versions.with_streaming_response.download(
             version="version",
             plugin_id="plugin_id",
@@ -436,9 +436,9 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_method_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content?beta=true").mock(
-            return_value=httpx2.Response(200, json={"foo": "bar"})
-        )
+        respx_mock.get(
+            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
+        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         version = await async_client.beta.organization.plugins.versions.download(
             version="version",
             plugin_id="plugin_id",
@@ -451,9 +451,9 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_method_download_with_all_params(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content?beta=true").mock(
-            return_value=httpx2.Response(200, json={"foo": "bar"})
-        )
+        respx_mock.get(
+            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
+        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         version = await async_client.beta.organization.plugins.versions.download(
             version="version",
             plugin_id="plugin_id",
@@ -468,9 +468,9 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_raw_response_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content?beta=true").mock(
-            return_value=httpx2.Response(200, json={"foo": "bar"})
-        )
+        respx_mock.get(
+            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
+        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
         version = await async_client.beta.organization.plugins.versions.with_raw_response.download(
             version="version",
@@ -485,9 +485,9 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_streaming_response_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content?beta=true").mock(
-            return_value=httpx2.Response(200, json={"foo": "bar"})
-        )
+        respx_mock.get(
+            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
+        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         async with async_client.beta.organization.plugins.versions.with_streaming_response.download(
             version="version",
             plugin_id="plugin_id",
