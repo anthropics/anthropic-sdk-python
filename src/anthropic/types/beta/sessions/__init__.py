@@ -112,6 +112,9 @@ from .beta_managed_agents_base64_document_source import (
 from .beta_managed_agents_model_overloaded_error import (
     BetaManagedAgentsModelOverloadedError as BetaManagedAgentsModelOverloadedError,
 )
+from .beta_managed_agents_repository_clone_error import (
+    BetaManagedAgentsRepositoryCloneError as BetaManagedAgentsRepositoryCloneError,
+)
 from .beta_managed_agents_retry_status_exhausted import (
     BetaManagedAgentsRetryStatusExhausted as BetaManagedAgentsRetryStatusExhausted,
 )
@@ -148,6 +151,9 @@ from .beta_managed_agents_model_rate_limited_error import (
 from .beta_managed_agents_base64_image_source_param import (
     BetaManagedAgentsBase64ImageSourceParam as BetaManagedAgentsBase64ImageSourceParam,
 )
+from .beta_managed_agents_repository_checkout_error import (
+    BetaManagedAgentsRepositoryCheckoutError as BetaManagedAgentsRepositoryCheckoutError,
+)
 from .beta_managed_agents_search_result_block_param import (
     BetaManagedAgentsSearchResultBlockParam as BetaManagedAgentsSearchResultBlockParam,
 )
@@ -183,6 +189,12 @@ from .beta_managed_agents_model_request_failed_error import (
 )
 from .beta_managed_agents_plain_text_document_source import (
     BetaManagedAgentsPlainTextDocumentSource as BetaManagedAgentsPlainTextDocumentSource,
+)
+from .beta_managed_agents_repository_forbidden_error import (
+    BetaManagedAgentsRepositoryForbiddenError as BetaManagedAgentsRepositoryForbiddenError,
+)
+from .beta_managed_agents_repository_not_found_error import (
+    BetaManagedAgentsRepositoryNotFoundError as BetaManagedAgentsRepositoryNotFoundError,
 )
 from .beta_managed_agents_agent_custom_tool_use_event import (
     BetaManagedAgentsAgentCustomToolUseEvent as BetaManagedAgentsAgentCustomToolUseEvent,
@@ -240,6 +252,9 @@ from .beta_managed_agents_agent_thread_message_sent_event import (
 )
 from .beta_managed_agents_mcp_authentication_failed_error import (
     BetaManagedAgentsMCPAuthenticationFailedError as BetaManagedAgentsMCPAuthenticationFailedError,
+)
+from .beta_managed_agents_repository_authentication_error import (
+    BetaManagedAgentsRepositoryAuthenticationError as BetaManagedAgentsRepositoryAuthenticationError,
 )
 from .beta_managed_agents_session_status_terminated_event import (
     BetaManagedAgentsSessionStatusTerminatedEvent as BetaManagedAgentsSessionStatusTerminatedEvent,
