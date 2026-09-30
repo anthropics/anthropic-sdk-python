@@ -29,7 +29,7 @@ from ._beta_types import (
 from ..._streaming import Stream, AsyncStream
 from ...types.beta import BetaRawMessageStreamEvent
 from ..._utils._utils import is_given
-from .._parse._response import ResponseFormatT, parse_text
+from .._parse._response import ResponseFormatT, parse_text, _parse_text_for_stop_reason
 from ...types.beta.parsed_beta_message import ParsedBetaMessage, ParsedBetaContentBlock
 
 
@@ -544,7 +544,13 @@ def accumulate_event(
     elif event.type == "content_block_stop":
         content_block = current_snapshot.content[event.index]
         if content_block.type == "text" and is_given(output_format):
-            content_block.parsed_output = parse_text(content_block.text, output_format)
+            try:
+                content_block.parsed_output = parse_text(content_block.text, output_format)
+            except ValueError:
+                # The stop reason arrives after the content block closes. Defer
+                # validation failures until message_stop so truncated/refused
+                # output can preserve the terminal stop reason.
+                pass
     elif event.type == "message_delta":
         current_snapshot.stop_reason = event.delta.stop_reason
         current_snapshot.stop_sequence = event.delta.stop_sequence
@@ -576,5 +582,15 @@ def accumulate_event(
             current_snapshot.usage.iterations = event.usage.iterations
         if event.usage.fallback_credit is not None:
             current_snapshot.usage.fallback_credit = event.usage.fallback_credit
+
+    elif event.type == "message_stop":
+        if is_given(output_format):
+            for content_block in current_snapshot.content:
+                if content_block.type == "text":
+                    content_block.parsed_output = _parse_text_for_stop_reason(
+                        content_block.text,
+                        output_format,
+                        current_snapshot.stop_reason,
+                    )
 
     return current_snapshot
