@@ -21,6 +21,7 @@ from .beta_managed_agents_unknown_error import BetaManagedAgentsUnknownError as 
 from .beta_managed_agents_document_block import BetaManagedAgentsDocumentBlock as BetaManagedAgentsDocumentBlock
 from .beta_managed_agents_redacted_block import BetaManagedAgentsRedactedBlock as BetaManagedAgentsRedactedBlock
 from .beta_managed_agents_session_thread import BetaManagedAgentsSessionThread as BetaManagedAgentsSessionThread
+from .beta_managed_agents_session_refusal import BetaManagedAgentsSessionRefusal as BetaManagedAgentsSessionRefusal
 from .beta_managed_agents_session_end_turn import BetaManagedAgentsSessionEndTurn as BetaManagedAgentsSessionEndTurn
 from .beta_managed_agents_session_resource import BetaManagedAgentsSessionResource as BetaManagedAgentsSessionResource
 from .beta_managed_agents_span_model_usage import BetaManagedAgentsSpanModelUsage as BetaManagedAgentsSpanModelUsage
@@ -216,6 +217,9 @@ from .beta_managed_agents_user_interrupt_event_params import (
 )
 from .beta_managed_agents_base64_document_source_param import (
     BetaManagedAgentsBase64DocumentSourceParam as BetaManagedAgentsBase64DocumentSourceParam,
+)
+from .beta_managed_agents_session_refusal_stop_details import (
+    BetaManagedAgentsSessionRefusalStopDetails as BetaManagedAgentsSessionRefusalStopDetails,
 )
 from .beta_managed_agents_session_status_running_event import (
     BetaManagedAgentsSessionStatusRunningEvent as BetaManagedAgentsSessionStatusRunningEvent,
