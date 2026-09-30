@@ -329,18 +329,32 @@ def mcp_tool(
 ) -> BetaFunctionTool[Any]:
     """Convert an MCP tool to a sync runnable tool for `tool_runner()`.
 
+    The MCP `ClientSession` is async, so the returned tool has to call back into the
+    event loop that owns the session, which is only possible from an AnyIO worker
+    thread. Prefer `async_mcp_tool()` with the async client unless you specifically
+    need the sync `tool_runner()`.
+
     Example:
 
     ```py
+    import anyio.to_thread
+
     from anthropic.lib.tools.mcp import mcp_tool
 
+
+    def run_tools(tools):
+        runner = client.beta.messages.tool_runner(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            tools=tools,
+            messages=[{"role": "user", "content": "Use the available tools"}],
+        )
+        return runner.until_done()
+
+
     tools_result = await mcp_client.list_tools()
-    runner = client.beta.messages.tool_runner(
-        model="claude-sonnet-4-20250514",
-        max_tokens=1024,
-        tools=[mcp_tool(t, mcp_client) for t in tools_result.tools],
-        messages=[{"role": "user", "content": "Use the available tools"}],
-    )
+    tools = [mcp_tool(t, mcp_client) for t in tools_result.tools]
+    message = await anyio.to_thread.run_sync(run_tools, tools)
     ```
 
     Args:
@@ -358,7 +372,29 @@ def mcp_tool(
     tool_name = tool.name
 
     def call_mcp(**kwargs: Any) -> BetaFunctionToolResultType:
-        result = anyio.from_thread.run(client.call_tool, tool_name, kwargs)
+        # `anyio.from_thread.run()` only works from a thread started by
+        # `anyio.to_thread.run_sync()`; anywhere else it fails before the session is
+        # ever reached, which `dispatched` tells apart so that a `RuntimeError` raised
+        # by the session itself is left alone.
+        dispatched = False
+
+        async def call_tool() -> CallToolResult:
+            nonlocal dispatched
+            dispatched = True
+            return await client.call_tool(name=tool_name, arguments=kwargs)
+
+        try:
+            result = anyio.from_thread.run(call_tool)
+        except RuntimeError as err:
+            if dispatched:
+                raise
+            raise RuntimeError(
+                f"`mcp_tool()` can only call {tool_name!r} from an AnyIO worker thread, because the MCP "
+                "`ClientSession` must be driven by the event loop that owns it. Either use `async_mcp_tool()` "
+                "with the async client's `tool_runner()`, or run the sync `tool_runner()` inside "
+                "`anyio.to_thread.run_sync()`."
+            ) from err
+
         return _convert_tool_result(result)
 
     result = beta_tool(
