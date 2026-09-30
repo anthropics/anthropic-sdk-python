@@ -1992,8 +1992,8 @@ def provider({signature}) -> OnlyForTypeCheckers:
         cache.get_token()
         assert force_seen == [False, False, True]
 
-    def test_unforced_result_is_not_cached_after_a_concurrent_invalidate(self) -> None:
-        """The token may be the one the API just rejected, so it serves this request only."""
+    def test_unforced_result_is_not_returned_after_a_concurrent_invalidate(self) -> None:
+        """An invalidated in-flight token is discarded before returning to the caller."""
         force_seen: List[bool] = []
 
         def provider(*, force_refresh: bool = False) -> AccessToken:
@@ -2003,7 +2003,7 @@ def provider({signature}) -> OnlyForTypeCheckers:
             return AccessToken(f"tok-{len(force_seen)}")
 
         cache = TokenCache(provider)
-        assert cache.get_token() == "tok-1"
+        assert cache.get_token() == "tok-2"
         assert cache.get_token() == "tok-2"
         assert cache.get_token() == "tok-2"
         assert force_seen == [False, True]
@@ -3663,7 +3663,7 @@ class TestAsyncAccessTokenProvider:
         await cache.async_get_token()
         assert force_seen == [False, False, True]
 
-    async def test_unforced_result_is_not_cached_after_a_concurrent_invalidate(self) -> None:
+    async def test_unforced_result_is_not_returned_after_a_concurrent_invalidate(self) -> None:
         force_seen: List[bool] = []
 
         async def provider(*, force_refresh: bool = False) -> AccessToken:
@@ -3673,7 +3673,7 @@ class TestAsyncAccessTokenProvider:
             return AccessToken(f"tok-{len(force_seen)}")
 
         cache = TokenCache(provider)
-        assert await cache.async_get_token() == "tok-1"
+        assert await cache.async_get_token() == "tok-2"
         assert await cache.async_get_token() == "tok-2"
         assert await cache.async_get_token() == "tok-2"
         assert force_seen == [False, True]
