@@ -238,6 +238,26 @@ async def test_error_type(
     assert "Overloaded" in str(exc_info.value)
 
 
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_error_type_without_an_event_name(
+    sync: bool,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+) -> None:
+    # The `type` in the payload is what identifies an event. The `event:` line is
+    # optional, and an error sent without one used to pass through unnoticed.
+    def body() -> Iterator[bytes]:
+        yield b'data: {"type": "error", "error": {"type": "overloaded_error", "message": "Overloaded"}}\n\n'
+
+    iterator = make_stream_iterator(content=body(), sync=sync, client=client, async_client=async_client)
+
+    with pytest.raises(APIStatusError) as exc_info:
+        await iter_next(iterator)
+
+    assert exc_info.value.type == "overloaded_error"
+    assert "Overloaded" in str(exc_info.value)
+
+
 def test_isinstance_check(client: Anthropic, async_client: AsyncAnthropic) -> None:
     async_stream = AsyncStream(cast_to=object, client=async_client, response=httpx2.Response(200, content=b"foo"))
     assert isinstance(async_stream, AsyncStream)
