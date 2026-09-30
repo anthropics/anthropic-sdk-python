@@ -4,6 +4,7 @@ import os
 import sys
 import pathlib
 from typing import Optional
+from urllib.parse import urlsplit
 
 from ..._exceptions import AnthropicError, CredentialsError
 
@@ -51,6 +52,9 @@ ENV_SERVICE_ACCOUNT_ID = "ANTHROPIC_SERVICE_ACCOUNT_ID"
 ENV_WORKSPACE_ID = "ANTHROPIC_WORKSPACE_ID"
 ENV_SCOPE = "ANTHROPIC_SCOPE"
 ENV_BASE_URL = "ANTHROPIC_BASE_URL"
+
+# The only hosts `_require_https` exempts from TLS, for a local oauth_server.
+_LOOPBACK_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
 
 
 def _user_agent() -> str:  # pyright: ignore[reportUnusedFunction] — used by _workload/_providers
@@ -124,7 +128,11 @@ def _require_https(url: str, *, field: str) -> None:  # pyright: ignore[reportUn
     lowered = url.lower().rstrip("/")
     if lowered.startswith("https://"):
         return
-    if lowered.startswith(("http://localhost", "http://127.0.0.1", "http://[::1]")):
+    # Compare the parsed host, not a prefix of the URL string: `startswith`
+    # also matched `http://localhost.evil.example` and
+    # `http://localhost:8080@evil.example`, whose request actually goes to
+    # evil.example — handing it the assertion in cleartext.
+    if urlsplit(lowered).hostname in _LOOPBACK_HOSTS:
         return
     raise CredentialsError(
         f"{field} must use https (got {url!r}); the token-exchange endpoint "
