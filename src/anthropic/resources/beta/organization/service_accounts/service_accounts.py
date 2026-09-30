@@ -114,7 +114,10 @@ class ServiceAccounts(SyncAPIResource):
                 "organization_role": organization_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaServiceAccount,
         )
@@ -164,7 +167,10 @@ class ServiceAccounts(SyncAPIResource):
                 service_account_id=service_account_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaServiceAccount,
         )
@@ -230,7 +236,10 @@ class ServiceAccounts(SyncAPIResource):
                 "organization_role": organization_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaServiceAccount,
         )
@@ -349,7 +358,10 @@ class ServiceAccounts(SyncAPIResource):
                 service_account_id=service_account_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaServiceAccount,
         )
@@ -438,7 +450,10 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 "organization_role": organization_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaServiceAccount,
         )
@@ -488,7 +503,10 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 service_account_id=service_account_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaServiceAccount,
         )
@@ -554,7 +572,10 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 "organization_role": organization_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaServiceAccount,
         )
@@ -673,7 +694,10 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 service_account_id=service_account_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaServiceAccount,
         )

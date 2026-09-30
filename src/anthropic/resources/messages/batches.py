@@ -106,7 +106,10 @@ class Batches(SyncAPIResource):
             "/v1/messages/batches",
             body={"requests": requests},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=MessageBatch,
         )
@@ -156,7 +159,10 @@ class Batches(SyncAPIResource):
         return self._get(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=MessageBatch,
         )
@@ -272,7 +278,10 @@ class Batches(SyncAPIResource):
         return self._delete(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DeletedMessageBatch,
         )
@@ -328,7 +337,10 @@ class Batches(SyncAPIResource):
         return self._post(
             path_template("/v1/messages/batches/{message_batch_id}/cancel", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=MessageBatch,
         )
@@ -387,7 +399,10 @@ class Batches(SyncAPIResource):
         return self._get(
             path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=JSONLDecoder[MessageBatchIndividualResponse],
             stream=True,
@@ -474,7 +489,10 @@ class AsyncBatches(AsyncAPIResource):
             "/v1/messages/batches",
             body={"requests": requests},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=MessageBatch,
         )
@@ -524,7 +542,10 @@ class AsyncBatches(AsyncAPIResource):
         return await self._get(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=MessageBatch,
         )
@@ -640,7 +661,10 @@ class AsyncBatches(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DeletedMessageBatch,
         )
@@ -696,7 +720,10 @@ class AsyncBatches(AsyncAPIResource):
         return await self._post(
             path_template("/v1/messages/batches/{message_batch_id}/cancel", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=MessageBatch,
         )
@@ -755,7 +782,10 @@ class AsyncBatches(AsyncAPIResource):
         return await self._get(
             path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=AsyncJSONLDecoder[MessageBatchIndividualResponse],
             stream=True,

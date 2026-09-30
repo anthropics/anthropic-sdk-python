@@ -124,7 +124,10 @@ class Skills(SyncAPIResource):
             body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=Skill,
         )
@@ -170,7 +173,10 @@ class Skills(SyncAPIResource):
         return self._get(
             path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=Skill,
         )
@@ -283,7 +289,10 @@ class Skills(SyncAPIResource):
         return self._delete(
             path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DeletedSkill,
         )
@@ -372,7 +381,10 @@ class AsyncSkills(AsyncAPIResource):
             body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=Skill,
         )
@@ -418,7 +430,10 @@ class AsyncSkills(AsyncAPIResource):
         return await self._get(
             path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=Skill,
         )
@@ -531,7 +546,10 @@ class AsyncSkills(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DeletedSkill,
         )

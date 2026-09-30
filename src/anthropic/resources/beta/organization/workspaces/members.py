@@ -82,7 +82,10 @@ class Members(SyncAPIResource):
                 user_id=user_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -130,7 +133,10 @@ class Members(SyncAPIResource):
             ),
             body={"workspace_role": workspace_role},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -232,7 +238,10 @@ class Members(SyncAPIResource):
                 "workspace_role": workspace_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -276,7 +285,10 @@ class Members(SyncAPIResource):
                 user_id=user_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=MemberRemoveResponse,
         )
@@ -341,7 +353,10 @@ class AsyncMembers(AsyncAPIResource):
                 user_id=user_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -389,7 +404,10 @@ class AsyncMembers(AsyncAPIResource):
             ),
             body={"workspace_role": workspace_role},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -491,7 +509,10 @@ class AsyncMembers(AsyncAPIResource):
                 "workspace_role": workspace_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -535,7 +556,10 @@ class AsyncMembers(AsyncAPIResource):
                 user_id=user_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=MemberRemoveResponse,
         )

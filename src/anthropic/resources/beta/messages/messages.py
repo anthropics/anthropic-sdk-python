@@ -1226,7 +1226,10 @@ class Messages(SyncAPIResource):
                 "tools": tools,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaMessage,
             stream=stream or False,
@@ -2052,7 +2055,10 @@ class Messages(SyncAPIResource):
                 "tools": tools,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaMessageTokensCount,
         )
@@ -3190,7 +3196,10 @@ class AsyncMessages(AsyncAPIResource):
                 "tools": tools,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaMessage,
             stream=stream or False,
@@ -4007,7 +4016,10 @@ class AsyncMessages(AsyncAPIResource):
                 "tools": tools,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaMessageTokensCount,
         )

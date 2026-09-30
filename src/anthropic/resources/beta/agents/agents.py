@@ -160,7 +160,10 @@ class Agents(SyncAPIResource):
                 "tools": tools,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -341,7 +344,10 @@ class Agents(SyncAPIResource):
                 "version": version,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -478,7 +484,10 @@ class Agents(SyncAPIResource):
         return self._post(
             path_template("/v1/agents/{agent_id}/archive?beta=true", agent_id=agent_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -604,7 +613,10 @@ class AsyncAgents(AsyncAPIResource):
                 "tools": tools,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -785,7 +797,10 @@ class AsyncAgents(AsyncAPIResource):
                 "version": version,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -922,7 +937,10 @@ class AsyncAgents(AsyncAPIResource):
         return await self._post(
             path_template("/v1/agents/{agent_id}/archive?beta=true", agent_id=agent_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsAgent,
         )

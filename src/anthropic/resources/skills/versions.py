@@ -108,7 +108,10 @@ class Versions(SyncAPIResource):
             body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=SkillVersion,
         )
@@ -163,7 +166,10 @@ class Versions(SyncAPIResource):
         return self._get(
             path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=SkillVersion,
         )
@@ -279,7 +285,10 @@ class Versions(SyncAPIResource):
         return self._delete(
             path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DeletedSkillVersion,
         )
@@ -360,7 +369,10 @@ class AsyncVersions(AsyncAPIResource):
             body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=SkillVersion,
         )
@@ -415,7 +427,10 @@ class AsyncVersions(AsyncAPIResource):
         return await self._get(
             path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=SkillVersion,
         )
@@ -531,7 +546,10 @@ class AsyncVersions(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=DeletedSkillVersion,
         )

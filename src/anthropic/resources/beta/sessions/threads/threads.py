@@ -111,7 +111,10 @@ class Threads(SyncAPIResource):
                 "/v1/sessions/{session_id}/threads/{thread_id}?beta=true", session_id=session_id, thread_id=thread_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -245,7 +248,10 @@ class Threads(SyncAPIResource):
                 thread_id=thread_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -331,7 +337,10 @@ class AsyncThreads(AsyncAPIResource):
                 "/v1/sessions/{session_id}/threads/{thread_id}?beta=true", session_id=session_id, thread_id=thread_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -465,7 +474,10 @@ class AsyncThreads(AsyncAPIResource):
                 thread_id=thread_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )

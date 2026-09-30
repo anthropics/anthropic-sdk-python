@@ -227,7 +227,10 @@ class InstallationSettings(SyncAPIResource):
                 target=target,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDeletedPluginInstallationSetting,
         )
@@ -316,7 +319,10 @@ class InstallationSettings(SyncAPIResource):
             ),
             body={"installation_preference": installation_preference},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPluginInstallationSetting,
         )
@@ -522,7 +528,10 @@ class AsyncInstallationSettings(AsyncAPIResource):
                 target=target,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDeletedPluginInstallationSetting,
         )
@@ -611,7 +620,10 @@ class AsyncInstallationSettings(AsyncAPIResource):
             ),
             body={"installation_preference": installation_preference},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPluginInstallationSetting,
         )

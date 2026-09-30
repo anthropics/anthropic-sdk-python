@@ -202,7 +202,10 @@ class Plugins(SyncAPIResource):
             body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPlugin,
         )
@@ -361,7 +364,10 @@ class Plugins(SyncAPIResource):
             path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
             body={"served_version_id": served_version_id},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPlugin,
         )
@@ -550,7 +556,10 @@ class Plugins(SyncAPIResource):
         return self._delete(
             path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDeletedPlugin,
         )
@@ -697,7 +706,10 @@ class AsyncPlugins(AsyncAPIResource):
             body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPlugin,
         )
@@ -856,7 +868,10 @@ class AsyncPlugins(AsyncAPIResource):
             path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
             body={"served_version_id": served_version_id},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPlugin,
         )
@@ -1045,7 +1060,10 @@ class AsyncPlugins(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDeletedPlugin,
         )

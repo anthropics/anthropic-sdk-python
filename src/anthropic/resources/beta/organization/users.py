@@ -72,7 +72,10 @@ class Users(SyncAPIResource):
         return self._get(
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -116,7 +119,10 @@ class Users(SyncAPIResource):
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
             body={"role": role},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -217,7 +223,10 @@ class Users(SyncAPIResource):
         return self._delete(
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=UserRemoveResponse,
         )
@@ -273,7 +282,10 @@ class AsyncUsers(AsyncAPIResource):
         return await self._get(
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -317,7 +329,10 @@ class AsyncUsers(AsyncAPIResource):
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
             body={"role": role},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -418,7 +433,10 @@ class AsyncUsers(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=UserRemoveResponse,
         )

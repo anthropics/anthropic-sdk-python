@@ -162,7 +162,10 @@ class Versions(SyncAPIResource):
             body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPluginVersion,
         )
@@ -563,7 +566,10 @@ class AsyncVersions(AsyncAPIResource):
             body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPluginVersion,
         )

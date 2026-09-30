@@ -118,7 +118,10 @@ class Work(SyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -191,7 +194,10 @@ class Work(SyncAPIResource):
             ),
             body={"metadata": metadata},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -317,7 +323,10 @@ class Work(SyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -521,7 +530,10 @@ class Work(SyncAPIResource):
         return self._get(
             path_template("/v1/environments/{environment_id}/work/stats?beta=true", environment_id=environment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSelfHostedWorkQueueStats,
         )
@@ -593,7 +605,10 @@ class Work(SyncAPIResource):
             ),
             body={"force": force},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -682,7 +697,10 @@ class AsyncWork(AsyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -755,7 +773,10 @@ class AsyncWork(AsyncAPIResource):
             ),
             body={"metadata": metadata},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -881,7 +902,10 @@ class AsyncWork(AsyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -1085,7 +1109,10 @@ class AsyncWork(AsyncAPIResource):
         return await self._get(
             path_template("/v1/environments/{environment_id}/work/stats?beta=true", environment_id=environment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSelfHostedWorkQueueStats,
         )
@@ -1157,7 +1184,10 @@ class AsyncWork(AsyncAPIResource):
             ),
             body={"force": force},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSelfHostedWork,
         )

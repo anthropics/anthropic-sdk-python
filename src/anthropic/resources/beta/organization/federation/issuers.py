@@ -117,7 +117,10 @@ class Issuers(SyncAPIResource):
                 "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -169,7 +172,10 @@ class Issuers(SyncAPIResource):
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -263,7 +269,10 @@ class Issuers(SyncAPIResource):
                 "name": name,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -382,7 +391,10 @@ class Issuers(SyncAPIResource):
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -482,7 +494,10 @@ class AsyncIssuers(AsyncAPIResource):
                 "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -534,7 +549,10 @@ class AsyncIssuers(AsyncAPIResource):
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -628,7 +646,10 @@ class AsyncIssuers(AsyncAPIResource):
                 "name": name,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -747,7 +768,10 @@ class AsyncIssuers(AsyncAPIResource):
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaFederationIssuer,
         )

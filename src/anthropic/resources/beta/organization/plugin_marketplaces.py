@@ -189,7 +189,10 @@ class PluginMarketplaces(SyncAPIResource):
             ),
             body={"default_installation_preference": default_installation_preference},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPluginMarketplace,
         )
@@ -379,7 +382,10 @@ class PluginMarketplaces(SyncAPIResource):
             body=body,
             files=files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )
@@ -470,7 +476,10 @@ class PluginMarketplaces(SyncAPIResource):
                 "ref": ref,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )
@@ -639,7 +648,10 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
             ),
             body={"default_installation_preference": default_installation_preference},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPluginMarketplace,
         )
@@ -829,7 +841,10 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
             body=body,
             files=files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )
@@ -920,7 +935,10 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                 "ref": ref,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )

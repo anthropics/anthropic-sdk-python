@@ -94,7 +94,10 @@ class Invites(SyncAPIResource):
                 "rbac_group_ids": rbac_group_ids,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaOrganizationInvite,
         )
@@ -129,7 +132,10 @@ class Invites(SyncAPIResource):
         return self._get(
             path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaOrganizationInvite,
         )
@@ -236,7 +242,10 @@ class Invites(SyncAPIResource):
         return self._delete(
             path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=InviteDeleteResponse,
         )
@@ -313,7 +322,10 @@ class AsyncInvites(AsyncAPIResource):
                 "rbac_group_ids": rbac_group_ids,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaOrganizationInvite,
         )
@@ -348,7 +360,10 @@ class AsyncInvites(AsyncAPIResource):
         return await self._get(
             path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaOrganizationInvite,
         )
@@ -455,7 +470,10 @@ class AsyncInvites(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=InviteDeleteResponse,
         )

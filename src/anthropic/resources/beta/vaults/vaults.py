@@ -116,7 +116,10 @@ class Vaults(SyncAPIResource):
                 "metadata": metadata,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -174,7 +177,10 @@ class Vaults(SyncAPIResource):
         return self._get(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -243,7 +249,10 @@ class Vaults(SyncAPIResource):
                 "metadata": metadata,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -372,7 +381,10 @@ class Vaults(SyncAPIResource):
         return self._delete(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeletedVault,
         )
@@ -430,7 +442,10 @@ class Vaults(SyncAPIResource):
         return self._post(
             path_template("/v1/vaults/{vault_id}/archive?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -520,7 +535,10 @@ class AsyncVaults(AsyncAPIResource):
                 "metadata": metadata,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -578,7 +596,10 @@ class AsyncVaults(AsyncAPIResource):
         return await self._get(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -647,7 +668,10 @@ class AsyncVaults(AsyncAPIResource):
                 "metadata": metadata,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -776,7 +800,10 @@ class AsyncVaults(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeletedVault,
         )
@@ -834,7 +861,10 @@ class AsyncVaults(AsyncAPIResource):
         return await self._post(
             path_template("/v1/vaults/{vault_id}/archive?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsVault,
         )
