@@ -103,13 +103,14 @@ def _is_supported_image_type(mime_type: str) -> bool:
     return mime_type in _SUPPORTED_IMAGE_TYPES
 
 
-def _is_supported_resource_mime_type(mime_type: str | None) -> bool:
-    return (
-        mime_type is None
-        or mime_type.startswith("text/")
-        or mime_type == "application/pdf"
-        or _is_supported_image_type(mime_type)
-    )
+def _is_supported_resource(resource: TextResourceContents | BlobResourceContents) -> bool:
+    mime_type = _mcp_field_v1_or_v2(resource, "mime_type")
+    if mime_type is None:
+        # Missing MIME metadata is safe to interpret as text only when MCP has
+        # already classified the resource as text. A blob may contain arbitrary
+        # bytes and must not be decoded as UTF-8 without an explicit text type.
+        return isinstance(resource, TextResourceContents)
+    return mime_type.startswith("text/") or mime_type == "application/pdf" or _is_supported_image_type(mime_type)
 
 
 class UnsupportedMCPValueError(Exception):
@@ -204,27 +205,32 @@ def _resource_contents_to_block(
         tag_helper(pdf_block, "mcp_resource_to_content")
         return pdf_block  # type: ignore[return-value]
 
-    if mime_type is None or mime_type.startswith("text/"):
+    if mime_type is None:
+        if not isinstance(resource, TextResourceContents):
+            raise UnsupportedMCPValueError(f"Blob resource has no MIME type: {resource.uri}")
+        data = resource.text
+    elif mime_type.startswith("text/"):
         if isinstance(resource, TextResourceContents):
             data = resource.text
         else:
             data = base64.b64decode(resource.blob).decode("utf-8")
-        text_block = _TaggedDict(
-            {
-                "type": "document",
-                "source": BetaPlainTextSourceParam(
-                    type="text",
-                    data=data,
-                    media_type="text/plain",
-                ),
-            }
-        )
-        if cache_control is not None:
-            text_block["cache_control"] = cache_control
-        tag_helper(text_block, "mcp_resource_to_content")
-        return text_block  # type: ignore[return-value]
+    else:
+        raise UnsupportedMCPValueError(f'Unsupported MIME type "{mime_type}" for resource: {resource.uri}')
 
-    raise UnsupportedMCPValueError(f'Unsupported MIME type "{mime_type}" for resource: {resource.uri}')
+    text_block = _TaggedDict(
+        {
+            "type": "document",
+            "source": BetaPlainTextSourceParam(
+                type="text",
+                data=data,
+                media_type="text/plain",
+            ),
+        }
+    )
+    if cache_control is not None:
+        text_block["cache_control"] = cache_control
+    tag_helper(text_block, "mcp_resource_to_content")
+    return text_block  # type: ignore[return-value]
 
 
 def mcp_message(
@@ -256,17 +262,9 @@ def mcp_resource_to_content(
     if not result.contents:
         raise UnsupportedMCPValueError("Resource contents array must contain at least one item")
 
-    mime_types = [_mcp_field_v1_or_v2(c, "mime_type") for c in result.contents]
-    supported = next(
-        (
-            c
-            for c, mime_type in zip(result.contents, mime_types, strict=True)
-            if _is_supported_resource_mime_type(mime_type)
-        ),
-        None,
-    )
+    supported = next((content for content in result.contents if _is_supported_resource(content)), None)
     if supported is None:
-        mime_types = [m for m in mime_types if m is not None]
+        mime_types = [_mcp_field_v1_or_v2(content, "mime_type") or "<missing>" for content in result.contents]
         raise UnsupportedMCPValueError(
             f"No supported MIME type found in resource contents. Available: {', '.join(mime_types)}"
         )
