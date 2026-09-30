@@ -9,8 +9,8 @@ and yields one `DispatchedToolCall` per completed call. A call the
 server gated behind user confirmation (`evaluated_permission` `ask`, e.g.
 an `always_ask` tool) is held until its `user.tool_confirmation` event
 arrives — executed on `allow`, never executed on `deny`. It also stops
-itself once the session has been idle (`stop_reason` `end_turn`) for
-`max_idle` seconds. It does **not** touch the work-item lease — wrap it in
+itself once the session has been idle (any `stop_reason` but `requires_action`)
+for `max_idle` seconds. It does **not** touch the work-item lease — wrap it in
 `anthropic.lib.environments.EnvironmentWorker` if you need heartbeating /
 force-stop.
 """
@@ -131,21 +131,20 @@ SEND_BACKOFF_CAP = 30.0
 # can no longer be ours.
 SEND_RETRY_WINDOW = 300.0
 # Grace period, in seconds, that the runner keeps running after the session goes
-# idle with stop_reason `end_turn` before it stops; any new event in that
-# window resets it. `max_idle=None` disables it (run until the session ends).
+# idle with any stop_reason but `requires_action` before it stops; any new event
+# in that window resets it. `max_idle=None` disables it (run until the session ends).
 DEFAULT_MAX_IDLE = 60.0
 
 log = logging.getLogger(__name__)
 
 
 class _IdleClock:
-    """Tracks how long the session has been idle after an `end_turn` stop.
+    """Tracks how long the session has been idle since its turn ended.
 
-    `end_turn_at` is the monotonic timestamp of the most recent
-    `session.status_idle` event with `stop_reason.type == "end_turn"` for
-    which no newer event has since arrived; `None` whenever the session is not
-    in that state. `SessionToolRunner._idle_watchdog` stops the runner
-    once it has been set for `max_idle` seconds.
+    `turn_ended_at` is the monotonic timestamp of the most recent event that
+    `ends_turn` and that no newer event has followed; `None` whenever the
+    session is not in that state. `SessionToolRunner._idle_watchdog` stops the
+    runner once it has been set for `max_idle` seconds.
 
     Confirmation-gated calls pause the clock while they are unresolved:
     `hold` / `release` count them — from the moment a call is held
@@ -158,14 +157,14 @@ class _IdleClock:
     The clock is event-driven, not polled: every armed-state change signals the
     `wake` event so the watchdog wakes immediately instead of waiting out
     a poll interval. The watchdog captures `wake` *before* it reads
-    `end_turn_at`, so a change landing between the read and the wait still
+    `turn_ended_at`, so a change landing between the read and the wait still
     wakes it.
     """
 
-    __slots__ = ("end_turn_at", "wake", "_holds", "_arm_deferred")
+    __slots__ = ("turn_ended_at", "wake", "_holds", "_arm_deferred")
 
     def __init__(self) -> None:
-        self.end_turn_at: float | None = None
+        self.turn_ended_at: float | None = None
         self.wake = anyio.Event()
         self._holds = 0
         self._arm_deferred = False
@@ -176,17 +175,16 @@ class _IdleClock:
         self.wake = anyio.Event()
 
     def note_event(self, ev: object) -> None:
-        """Arm the clock on an `end_turn` idle, disarm it on anything else.
+        """Arm the clock on an idle that ends the turn, disarm it on anything else.
 
         `user.tool_confirmation` events are neutral: they signal neither agent
         activity nor an idle, and their effect on the clock flows through
         `hold` / `release` instead — disarming here would discard
         the deferred arm the verdict is about to settle.
         """
-        ev_type = getattr(ev, "type", None)
-        if ev_type == "user.tool_confirmation":
+        if getattr(ev, "type", None) == "user.tool_confirmation":
             return
-        if ev_type == "session.status_idle" and getattr(getattr(ev, "stop_reason", None), "type", None) == "end_turn":
+        if ends_turn(ev):
             self.arm()
         else:
             self.disarm()
@@ -201,32 +199,32 @@ class _IdleClock:
         if self._holds:
             self._arm_deferred = True
             return
-        self.end_turn_at = time.monotonic()
+        self.turn_ended_at = time.monotonic()
         self._signal()
 
     def disarm(self) -> None:
         """Cancel the idle countdown; only signals on an actual transition."""
         self._arm_deferred = False
-        if self.end_turn_at is not None:
-            self.end_turn_at = None
+        if self.turn_ended_at is not None:
+            self.turn_ended_at = None
             self._signal()
 
     def hold(self) -> None:
         """Pause the countdown while a gated call is held or in flight."""
         self._holds += 1
-        if self.end_turn_at is not None:
+        if self.turn_ended_at is not None:
             # Defensive: a hold taken while armed converts the running
             # countdown into a deferred one.
             self._arm_deferred = True
-            self.end_turn_at = None
+            self.turn_ended_at = None
             self._signal()
 
     def release(self) -> None:
         """Drop one hold; the last release applies any deferred arm.
 
-        Once nothing gated is held or in flight, a deferred `end_turn`
-        countdown starts now (with a fresh grace window) so the runner can
-        still time out — any newer event disarms it again as usual.
+        Once nothing gated is held or in flight, a deferred countdown starts
+        now (with a fresh grace window) so the runner can still time out — any
+        newer event disarms it again as usual.
         """
         self._holds -= 1
         if self._holds == 0 and self._arm_deferred:
@@ -373,9 +371,9 @@ class SessionToolRunner:
 
     Iteration ends when the session terminates (`session.status_terminated` /
     `session.deleted`), when the consumer breaks out of the loop, or — once
-    the session has gone idle with `stop_reason` `end_turn` — when
+    the session has gone idle with any `stop_reason` but `requires_action` — when
     `max_idle` seconds elapse with no new event (any new event resets the
-    countdown; it re-arms on the next `end_turn` idle). `max_idle=None`
+    countdown; it re-arms on the next such idle). `max_idle=None`
     disables that last condition. On exit it runs each tool's optional cleanup:
     the `close` hook and, for tools defined as an (async) context manager, its
     `__exit__` / `__aexit__`. It does **not** touch the work-item lease —
@@ -580,7 +578,7 @@ class SessionToolRunner:
         with `user.custom_tool_result` when computing which calls are answered.
         """
         pending: list[DispatchedToolUseEvent] = []
-        last_was_end_turn = False
+        last_ended_turn = False
         list_failed = False
         try:
             async for ev in self._events.list(self.session_id, limit=1000, extra_headers=self.extra_headers):
@@ -605,10 +603,10 @@ class SessionToolRunner:
                     # their verdict on every reconcile.
                     if ev.tool_use_id not in self._answered:
                         self._confirmations[ev.tool_use_id] = ev.result
-                last_was_end_turn = (
-                    ev.type == "session.status_idle"
-                    and getattr(getattr(ev, "stop_reason", None), "type", None) == "end_turn"
-                )
+                # Neutral here as in `_IdleClock.note_event`: a verdict is neither
+                # agent activity nor an idle.
+                if ev.type != "user.tool_confirmation":
+                    last_ended_turn = ends_turn(ev)
         except Exception as e:
             # Pagination may have failed partway through; the `_answered` set
             # could be incomplete, so dispatching `pending` now would risk
@@ -637,16 +635,21 @@ class SessionToolRunner:
             await self._apply_verdict(held, self._confirmations[held.id])
         # Routing resolves denied calls in place (marking them answered) and
         # holds ask-gated calls for their `user.tool_confirmation`. If the
-        # most recent event in history is an `end_turn` idle and no tool work
+        # most recent event in history ends the turn and no tool work
         # is outstanding, the session is done — arm the idle clock so the
-        # watchdog counts down even if that `end_turn` arrived during a
+        # watchdog counts down even if that idle arrived during a
         # disconnect. Gated calls don't count as outstanding here whether still
         # held or just released to the dispatch queue: the clock holds them
         # (`_IdleClock.hold`), so this `arm` is deferred until they resolve.
+        # A released call this runner doesn't own still waits on its owner.
         outstanding = [
-            ev for ev in unanswered if ev.id not in self._answered and ev.id not in self._awaiting_confirmation
+            ev
+            for ev in unanswered
+            if ev.id not in self._answered
+            and ev.id not in self._awaiting_confirmation
+            and not (ev.id in self._confirmations and ev.name in self._tools_by_name)
         ]
-        if last_was_end_turn and not outstanding:
+        if last_ended_turn and not outstanding:
             self._idle_clock.arm()
 
     async def _stream_loop(self) -> None:
@@ -661,7 +664,7 @@ class SessionToolRunner:
                     await self._reconcile()
                     async for ev in stream:
                         backoff = STREAM_BACKOFF_START
-                        # Arm/disarm the idle clock: an `end_turn` idle starts
+                        # Arm/disarm the idle clock: an idle that ends the turn starts
                         # the grace countdown, any other event cancels it. The
                         # clock itself defers the countdown while gated calls
                         # are held or in flight (see `_IdleClock.hold`).
@@ -868,6 +871,10 @@ class SessionToolRunner:
                 ev.name,
                 ev.id,
             )
+            if confirmation == "allow":
+                # The approval kept the idle countdown deferred on this call.
+                # Drop it instead of starting it: the owner still has to answer.
+                self._idle_clock.disarm()
             tool_result = None
             is_error = False
             sent = False
@@ -943,11 +950,11 @@ class SessionToolRunner:
         return False
 
     async def _idle_watchdog(self) -> None:
-        """Stop the runner once the session has been idle (`end_turn`) for
-        `max_idle` seconds with no new events.
+        """Stop the runner once `max_idle` seconds have passed since the turn
+        ended with no new events.
 
         Event-driven: it blocks on the idle clock's wake event rather than
-        polling. Capturing `clock.wake` *before* reading `clock.end_turn_at`
+        polling. Capturing `clock.wake` *before* reading `clock.turn_ended_at`
         closes the race where the clock changes between the read and the wait.
         """
         max_idle = self.max_idle
@@ -955,14 +962,14 @@ class SessionToolRunner:
         clock = self._idle_clock
         while not self._stop.is_set():
             wake = clock.wake
-            at = clock.end_turn_at
+            at = clock.turn_ended_at
             if at is None:
                 # Not armed: block until the clock arms (or the runner stops).
                 await _wait_first(wake, self._stop)
                 continue
             remaining = max_idle - (time.monotonic() - at)
             if remaining <= 0:
-                log.info("session idle after end_turn for %.0fs; stopping", max_idle)
+                log.info("session idle for %.0fs after its turn ended; stopping", max_idle)
                 self._stop.set()
                 return
             # Armed: wait out the remaining grace, waking early if the clock
@@ -975,6 +982,18 @@ class SessionToolRunner:
         """When `_stop` is set, close the work stream so `_dispatch_loop` exits."""
         await self._stop.wait()
         await self._send_work.aclose()
+
+
+def ends_turn(ev: object) -> bool:
+    """Whether `ev` is a `session.status_idle` whose turn is over.
+
+    Only `requires_action` leaves the turn open: the session resumes once a
+    client resolves the events it names. Every other stop reason ends the turn,
+    including one newer than this SDK's types.
+    """
+    if getattr(ev, "type", None) != "session.status_idle":
+        return False
+    return getattr(getattr(ev, "stop_reason", None), "type", None) != "requires_action"
 
 
 async def _wait_first(*events: anyio.Event) -> None:

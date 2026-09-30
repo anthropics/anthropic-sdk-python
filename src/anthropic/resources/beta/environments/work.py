@@ -1357,8 +1357,8 @@ class AsyncWork(AsyncAPIResource):
             (default) uses the built-in 256 KiB cap; a positive int sets a custom
             cap; `None` disables the cap.
           max_idle: Seconds to keep running after the session goes idle with
-            `stop_reason` `end_turn`. Defaults to `DEFAULT_MAX_IDLE` (60s)
-            when not given. `None` disables it.
+            any `stop_reason` but `requires_action`. Defaults to
+            `DEFAULT_MAX_IDLE` (60s) when not given. `None` disables it.
           memory_sync_interval: How often (seconds) to sync the session's
             attached memory stores; `None` disables memory. Defaults to
             `DEFAULT_MEMORY_SYNC_INTERVAL` (15s) when not given.

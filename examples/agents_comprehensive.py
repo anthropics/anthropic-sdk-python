@@ -119,7 +119,9 @@ def main() -> None:
                         }
                     ],
                 )
-            if event.type == "session.status_idle" and event.stop_reason and event.stop_reason.type == "end_turn":
+            # A `requires_action` idle waits on the tool result sent above; after any
+            # other idle nothing more arrives, so stop reading.
+            if event.type == "session.status_idle" and event.stop_reason.type != "requires_action":
                 break
 
 
