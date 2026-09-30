@@ -102,9 +102,6 @@ class MessageStream(Generic[ResponseFormatT]):
     def get_final_text(self) -> str:
         """Returns all `text` content blocks concatenated together.
 
-        > [!NOTE]
-        > Currently the API will only respond with a single content block.
-
         Will raise an error if no `text` content blocks were returned.
         """
         message = self.get_final_message()
@@ -254,9 +251,6 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
 
     async def get_final_text(self) -> str:
         """Returns all `text` content blocks concatenated together.
-
-        > [!NOTE]
-        > Currently the API will only respond with a single content block.
 
         Will raise an error if no `text` content blocks were returned.
         """
