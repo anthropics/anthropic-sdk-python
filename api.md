@@ -382,6 +382,308 @@ Methods:
 - <code title="get /v1/skills/{skill_id}/versions">client.skills.versions.<a href="./src/anthropic/resources/skills/versions.py">list</a>(skill_id, \*\*<a href="src/anthropic/types/skills/version_list_params.py">params</a>) -> <a href="./src/anthropic/types/skills/skill_version.py">SyncPageCursor[SkillVersion]</a></code>
 - <code title="delete /v1/skills/{skill_id}/versions/{version}">client.skills.versions.<a href="./src/anthropic/resources/skills/versions.py">delete</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/skills/deleted_skill_version.py">DeletedSkillVersion</a></code>
 
+# Organization
+
+Types:
+
+```python
+from anthropic.types import OrganizationInfo, OrganizationRole
+```
+
+Methods:
+
+- <code title="get /v1/organizations/me">client.organization.<a href="./src/anthropic/resources/organization/organization.py">retrieve</a>() -> <a href="./src/anthropic/types/organization_info.py">OrganizationInfo</a></code>
+
+## APIKeys
+
+Types:
+
+```python
+from anthropic.types.organization import (
+    APIKey,
+    APIKeyCreatedBy,
+    APIKeyOrganizationScope,
+    APIKeyServiceAccountActor,
+    APIKeyUserActor,
+    APIKeyWorkspaceScope,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/api_keys/{api_key_id}">client.organization.api_keys.<a href="./src/anthropic/resources/organization/api_keys.py">retrieve</a>(api_key_id) -> <a href="./src/anthropic/types/organization/api_key.py">APIKey</a></code>
+- <code title="post /v1/organizations/api_keys/{api_key_id}">client.organization.api_keys.<a href="./src/anthropic/resources/organization/api_keys.py">update</a>(api_key_id, \*\*<a href="src/anthropic/types/organization/api_key_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/api_key.py">APIKey</a></code>
+- <code title="get /v1/organizations/api_keys">client.organization.api_keys.<a href="./src/anthropic/resources/organization/api_keys.py">list</a>(\*\*<a href="src/anthropic/types/organization/api_key_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/api_key.py">SyncPage[APIKey]</a></code>
+
+## ExternalKeys
+
+Types:
+
+```python
+from anthropic.types.organization import (
+    AWSExternalKeyConfig,
+    AWSExternalKeyConfigParam,
+    AzureExternalKeyConfig,
+    AzureExternalKeyConfigParam,
+    ExternalKey,
+    ExternalKeyAttachedAttachment,
+    ExternalKeyUnattachedAttachment,
+    GCPExternalKeyConfig,
+    GCPExternalKeyConfigParam,
+    ExternalKeyDeleteResponse,
+    ExternalKeyValidateResponse,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/external_keys">client.organization.external_keys.<a href="./src/anthropic/resources/organization/external_keys.py">create</a>(\*\*<a href="src/anthropic/types/organization/external_key_create_params.py">params</a>) -> <a href="./src/anthropic/types/organization/external_key.py">ExternalKey</a></code>
+- <code title="get /v1/organizations/external_keys/{external_key_id}">client.organization.external_keys.<a href="./src/anthropic/resources/organization/external_keys.py">retrieve</a>(external_key_id) -> <a href="./src/anthropic/types/organization/external_key.py">ExternalKey</a></code>
+- <code title="post /v1/organizations/external_keys/{external_key_id}">client.organization.external_keys.<a href="./src/anthropic/resources/organization/external_keys.py">update</a>(external_key_id, \*\*<a href="src/anthropic/types/organization/external_key_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/external_key.py">ExternalKey</a></code>
+- <code title="get /v1/organizations/external_keys">client.organization.external_keys.<a href="./src/anthropic/resources/organization/external_keys.py">list</a>(\*\*<a href="src/anthropic/types/organization/external_key_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/external_key.py">SyncPageCursor[ExternalKey]</a></code>
+- <code title="delete /v1/organizations/external_keys/{external_key_id}">client.organization.external_keys.<a href="./src/anthropic/resources/organization/external_keys.py">delete</a>(external_key_id) -> <a href="./src/anthropic/types/organization/external_key_delete_response.py">ExternalKeyDeleteResponse</a></code>
+- <code title="post /v1/organizations/external_keys/{external_key_id}/validate">client.organization.external_keys.<a href="./src/anthropic/resources/organization/external_keys.py">validate</a>(external_key_id) -> <a href="./src/anthropic/types/organization/external_key_validate_response.py">ExternalKeyValidateResponse</a></code>
+
+## Federation
+
+### Issuers
+
+Types:
+
+```python
+from anthropic.types.organization.federation import (
+    FederationIssuer,
+    FederationIssuerPollStatus,
+    JWKSDiscovery,
+    JWKSDiscoveryParam,
+    JWKSExplicitURL,
+    JWKSExplicitURLParam,
+    JWKSInline,
+    JWKSInlineParam,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/federation_issuers">client.organization.federation.issuers.<a href="./src/anthropic/resources/organization/federation/issuers.py">create</a>(\*\*<a href="src/anthropic/types/organization/federation/issuer_create_params.py">params</a>) -> <a href="./src/anthropic/types/organization/federation/federation_issuer.py">FederationIssuer</a></code>
+- <code title="get /v1/organizations/federation_issuers/{federation_issuer_id}">client.organization.federation.issuers.<a href="./src/anthropic/resources/organization/federation/issuers.py">retrieve</a>(federation_issuer_id) -> <a href="./src/anthropic/types/organization/federation/federation_issuer.py">FederationIssuer</a></code>
+- <code title="post /v1/organizations/federation_issuers/{federation_issuer_id}">client.organization.federation.issuers.<a href="./src/anthropic/resources/organization/federation/issuers.py">update</a>(federation_issuer_id, \*\*<a href="src/anthropic/types/organization/federation/issuer_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/federation/federation_issuer.py">FederationIssuer</a></code>
+- <code title="get /v1/organizations/federation_issuers">client.organization.federation.issuers.<a href="./src/anthropic/resources/organization/federation/issuers.py">list</a>(\*\*<a href="src/anthropic/types/organization/federation/issuer_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/federation/federation_issuer.py">SyncPageCursor[FederationIssuer]</a></code>
+- <code title="post /v1/organizations/federation_issuers/{federation_issuer_id}/archive">client.organization.federation.issuers.<a href="./src/anthropic/resources/organization/federation/issuers.py">archive</a>(federation_issuer_id) -> <a href="./src/anthropic/types/organization/federation/federation_issuer.py">FederationIssuer</a></code>
+
+### Rules
+
+Types:
+
+```python
+from anthropic.types.organization.federation import (
+    FederationRule,
+    FederationRuleMatch,
+    FederationRuleMatchParam,
+    FederationRuleWorkspace,
+    ServiceAccountTarget,
+    ServiceAccountTargetParam,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/federation_rules">client.organization.federation.rules.<a href="./src/anthropic/resources/organization/federation/rules/rules.py">create</a>(\*\*<a href="src/anthropic/types/organization/federation/rule_create_params.py">params</a>) -> <a href="./src/anthropic/types/organization/federation/federation_rule.py">FederationRule</a></code>
+- <code title="get /v1/organizations/federation_rules/{federation_rule_id}">client.organization.federation.rules.<a href="./src/anthropic/resources/organization/federation/rules/rules.py">retrieve</a>(federation_rule_id) -> <a href="./src/anthropic/types/organization/federation/federation_rule.py">FederationRule</a></code>
+- <code title="post /v1/organizations/federation_rules/{federation_rule_id}">client.organization.federation.rules.<a href="./src/anthropic/resources/organization/federation/rules/rules.py">update</a>(federation_rule_id, \*\*<a href="src/anthropic/types/organization/federation/rule_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/federation/federation_rule.py">FederationRule</a></code>
+- <code title="get /v1/organizations/federation_rules">client.organization.federation.rules.<a href="./src/anthropic/resources/organization/federation/rules/rules.py">list</a>(\*\*<a href="src/anthropic/types/organization/federation/rule_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/federation/federation_rule.py">SyncPageCursor[FederationRule]</a></code>
+- <code title="post /v1/organizations/federation_rules/{federation_rule_id}/archive">client.organization.federation.rules.<a href="./src/anthropic/resources/organization/federation/rules/rules.py">archive</a>(federation_rule_id) -> <a href="./src/anthropic/types/organization/federation/federation_rule.py">FederationRule</a></code>
+
+#### Workspaces
+
+Types:
+
+```python
+from anthropic.types.organization.federation.rules import WorkspaceRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/federation_rules/{federation_rule_id}/workspaces">client.organization.federation.rules.workspaces.<a href="./src/anthropic/resources/organization/federation/rules/workspaces.py">list</a>(federation_rule_id, \*\*<a href="src/anthropic/types/organization/federation/rules/workspace_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/federation/federation_rule_workspace.py">SyncPageCursor[FederationRuleWorkspace]</a></code>
+- <code title="post /v1/organizations/federation_rules/{federation_rule_id}/workspaces">client.organization.federation.rules.workspaces.<a href="./src/anthropic/resources/organization/federation/rules/workspaces.py">add</a>(federation_rule_id, \*\*<a href="src/anthropic/types/organization/federation/rules/workspace_add_params.py">params</a>) -> <a href="./src/anthropic/types/organization/federation/federation_rule_workspace.py">FederationRuleWorkspace</a></code>
+- <code title="delete /v1/organizations/federation_rules/{federation_rule_id}/workspaces/{workspace_id}">client.organization.federation.rules.workspaces.<a href="./src/anthropic/resources/organization/federation/rules/workspaces.py">remove</a>(workspace_id, \*, federation_rule_id) -> <a href="./src/anthropic/types/organization/federation/rules/workspace_remove_response.py">WorkspaceRemoveResponse</a></code>
+
+## Invites
+
+Types:
+
+```python
+from anthropic.types.organization import OrganizationInvite, InviteDeleteResponse
+```
+
+Methods:
+
+- <code title="post /v1/organizations/invites">client.organization.invites.<a href="./src/anthropic/resources/organization/invites.py">create</a>(\*\*<a href="src/anthropic/types/organization/invite_create_params.py">params</a>) -> <a href="./src/anthropic/types/organization/organization_invite.py">OrganizationInvite</a></code>
+- <code title="get /v1/organizations/invites/{invite_id}">client.organization.invites.<a href="./src/anthropic/resources/organization/invites.py">retrieve</a>(invite_id) -> <a href="./src/anthropic/types/organization/organization_invite.py">OrganizationInvite</a></code>
+- <code title="get /v1/organizations/invites">client.organization.invites.<a href="./src/anthropic/resources/organization/invites.py">list</a>(\*\*<a href="src/anthropic/types/organization/invite_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/organization_invite.py">SyncPage[OrganizationInvite]</a></code>
+- <code title="delete /v1/organizations/invites/{invite_id}">client.organization.invites.<a href="./src/anthropic/resources/organization/invites.py">delete</a>(invite_id) -> <a href="./src/anthropic/types/organization/invite_delete_response.py">InviteDeleteResponse</a></code>
+
+## ServiceAccounts
+
+Types:
+
+```python
+from anthropic.types.organization import ServiceAccount, ServiceAccountWorkspaceMember
+```
+
+Methods:
+
+- <code title="post /v1/organizations/service_accounts">client.organization.service_accounts.<a href="./src/anthropic/resources/organization/service_accounts/service_accounts.py">create</a>(\*\*<a href="src/anthropic/types/organization/service_account_create_params.py">params</a>) -> <a href="./src/anthropic/types/organization/service_account.py">ServiceAccount</a></code>
+- <code title="get /v1/organizations/service_accounts/{service_account_id}">client.organization.service_accounts.<a href="./src/anthropic/resources/organization/service_accounts/service_accounts.py">retrieve</a>(service_account_id) -> <a href="./src/anthropic/types/organization/service_account.py">ServiceAccount</a></code>
+- <code title="post /v1/organizations/service_accounts/{service_account_id}">client.organization.service_accounts.<a href="./src/anthropic/resources/organization/service_accounts/service_accounts.py">update</a>(service_account_id, \*\*<a href="src/anthropic/types/organization/service_account_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/service_account.py">ServiceAccount</a></code>
+- <code title="get /v1/organizations/service_accounts">client.organization.service_accounts.<a href="./src/anthropic/resources/organization/service_accounts/service_accounts.py">list</a>(\*\*<a href="src/anthropic/types/organization/service_account_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/service_account.py">SyncPageCursor[ServiceAccount]</a></code>
+- <code title="post /v1/organizations/service_accounts/{service_account_id}/archive">client.organization.service_accounts.<a href="./src/anthropic/resources/organization/service_accounts/service_accounts.py">archive</a>(service_account_id) -> <a href="./src/anthropic/types/organization/service_account.py">ServiceAccount</a></code>
+
+### Workspaces
+
+Types:
+
+```python
+from anthropic.types.organization.service_accounts import WorkspaceRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/service_accounts/{service_account_id}/workspaces">client.organization.service_accounts.workspaces.<a href="./src/anthropic/resources/organization/service_accounts/workspaces.py">list</a>(service_account_id, \*\*<a href="src/anthropic/types/organization/service_accounts/workspace_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/service_account_workspace_member.py">SyncPageCursor[ServiceAccountWorkspaceMember]</a></code>
+- <code title="post /v1/organizations/service_accounts/{service_account_id}/workspaces">client.organization.service_accounts.workspaces.<a href="./src/anthropic/resources/organization/service_accounts/workspaces.py">add</a>(service_account_id, \*\*<a href="src/anthropic/types/organization/service_accounts/workspace_add_params.py">params</a>) -> <a href="./src/anthropic/types/organization/service_account_workspace_member.py">ServiceAccountWorkspaceMember</a></code>
+- <code title="delete /v1/organizations/service_accounts/{service_account_id}/workspaces/{workspace_id}">client.organization.service_accounts.workspaces.<a href="./src/anthropic/resources/organization/service_accounts/workspaces.py">remove</a>(workspace_id, \*, service_account_id) -> <a href="./src/anthropic/types/organization/service_accounts/workspace_remove_response.py">WorkspaceRemoveResponse</a></code>
+
+## Users
+
+Types:
+
+```python
+from anthropic.types.organization import OrganizationUser, UserRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/users/{user_id}">client.organization.users.<a href="./src/anthropic/resources/organization/users.py">retrieve</a>(user_id) -> <a href="./src/anthropic/types/organization/organization_user.py">OrganizationUser</a></code>
+- <code title="post /v1/organizations/users/{user_id}">client.organization.users.<a href="./src/anthropic/resources/organization/users.py">update</a>(user_id, \*\*<a href="src/anthropic/types/organization/user_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/organization_user.py">OrganizationUser</a></code>
+- <code title="get /v1/organizations/users">client.organization.users.<a href="./src/anthropic/resources/organization/users.py">list</a>(\*\*<a href="src/anthropic/types/organization/user_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/organization_user.py">SyncPage[OrganizationUser]</a></code>
+- <code title="delete /v1/organizations/users/{user_id}">client.organization.users.<a href="./src/anthropic/resources/organization/users.py">remove</a>(user_id) -> <a href="./src/anthropic/types/organization/user_remove_response.py">UserRemoveResponse</a></code>
+
+## Workspaces
+
+Types:
+
+```python
+from anthropic.types.organization import (
+    AllowedInferenceGeo,
+    DataResidency,
+    DataResidencyCreateConfigParam,
+    DataResidencyUpdateConfigParam,
+    NoBillingWorkspaceRole,
+    Workspace,
+    WorkspaceMember,
+    WorkspaceRole,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/workspaces">client.organization.workspaces.<a href="./src/anthropic/resources/organization/workspaces/workspaces.py">create</a>(\*\*<a href="src/anthropic/types/organization/workspace_create_params.py">params</a>) -> <a href="./src/anthropic/types/organization/workspace.py">Workspace</a></code>
+- <code title="get /v1/organizations/workspaces/{workspace_id}">client.organization.workspaces.<a href="./src/anthropic/resources/organization/workspaces/workspaces.py">retrieve</a>(workspace_id) -> <a href="./src/anthropic/types/organization/workspace.py">Workspace</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}">client.organization.workspaces.<a href="./src/anthropic/resources/organization/workspaces/workspaces.py">update</a>(workspace_id, \*\*<a href="src/anthropic/types/organization/workspace_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/workspace.py">Workspace</a></code>
+- <code title="get /v1/organizations/workspaces">client.organization.workspaces.<a href="./src/anthropic/resources/organization/workspaces/workspaces.py">list</a>(\*\*<a href="src/anthropic/types/organization/workspace_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/workspace.py">SyncPage[Workspace]</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}/archive">client.organization.workspaces.<a href="./src/anthropic/resources/organization/workspaces/workspaces.py">archive</a>(workspace_id) -> <a href="./src/anthropic/types/organization/workspace.py">Workspace</a></code>
+
+### RateLimits
+
+Types:
+
+```python
+from anthropic.types.organization.workspaces import (
+    WorkspaceRateLimit,
+    WorkspaceRateLimitOrganizationSource,
+    WorkspaceRateLimitValue,
+    WorkspaceRateLimitWorkspaceSource,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/workspaces/{workspace_id}/rate_limits">client.organization.workspaces.rate_limits.<a href="./src/anthropic/resources/organization/workspaces/rate_limits.py">list</a>(workspace_id, \*\*<a href="src/anthropic/types/organization/workspaces/rate_limit_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/workspaces/workspace_rate_limit.py">SyncPageCursor[WorkspaceRateLimit]</a></code>
+
+### Members
+
+Types:
+
+```python
+from anthropic.types.organization.workspaces import MemberRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/workspaces/{workspace_id}/members/{user_id}">client.organization.workspaces.members.<a href="./src/anthropic/resources/organization/workspaces/members.py">retrieve</a>(user_id, \*, workspace_id) -> <a href="./src/anthropic/types/organization/workspace_member.py">WorkspaceMember</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}/members/{user_id}">client.organization.workspaces.members.<a href="./src/anthropic/resources/organization/workspaces/members.py">update</a>(user_id, \*, workspace_id, \*\*<a href="src/anthropic/types/organization/workspaces/member_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/workspace_member.py">WorkspaceMember</a></code>
+- <code title="get /v1/organizations/workspaces/{workspace_id}/members">client.organization.workspaces.members.<a href="./src/anthropic/resources/organization/workspaces/members.py">list</a>(workspace_id, \*\*<a href="src/anthropic/types/organization/workspaces/member_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/workspace_member.py">SyncPage[WorkspaceMember]</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}/members">client.organization.workspaces.members.<a href="./src/anthropic/resources/organization/workspaces/members.py">add</a>(workspace_id, \*\*<a href="src/anthropic/types/organization/workspaces/member_add_params.py">params</a>) -> <a href="./src/anthropic/types/organization/workspace_member.py">WorkspaceMember</a></code>
+- <code title="delete /v1/organizations/workspaces/{workspace_id}/members/{user_id}">client.organization.workspaces.members.<a href="./src/anthropic/resources/organization/workspaces/members.py">remove</a>(user_id, \*, workspace_id) -> <a href="./src/anthropic/types/organization/workspaces/member_remove_response.py">MemberRemoveResponse</a></code>
+
+### ServiceAccounts
+
+Types:
+
+```python
+from anthropic.types.organization.workspaces import ServiceAccountRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}">client.organization.workspaces.service_accounts.<a href="./src/anthropic/resources/organization/workspaces/service_accounts.py">retrieve</a>(service_account_id, \*, workspace_id) -> <a href="./src/anthropic/types/organization/service_account_workspace_member.py">ServiceAccountWorkspaceMember</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}">client.organization.workspaces.service_accounts.<a href="./src/anthropic/resources/organization/workspaces/service_accounts.py">update</a>(service_account_id, \*, workspace_id, \*\*<a href="src/anthropic/types/organization/workspaces/service_account_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/service_account_workspace_member.py">ServiceAccountWorkspaceMember</a></code>
+- <code title="get /v1/organizations/workspaces/{workspace_id}/service_accounts">client.organization.workspaces.service_accounts.<a href="./src/anthropic/resources/organization/workspaces/service_accounts.py">list</a>(workspace_id, \*\*<a href="src/anthropic/types/organization/workspaces/service_account_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/service_account_workspace_member.py">SyncPageCursor[ServiceAccountWorkspaceMember]</a></code>
+- <code title="post /v1/organizations/workspaces/{workspace_id}/service_accounts">client.organization.workspaces.service_accounts.<a href="./src/anthropic/resources/organization/workspaces/service_accounts.py">add</a>(workspace_id, \*\*<a href="src/anthropic/types/organization/workspaces/service_account_add_params.py">params</a>) -> <a href="./src/anthropic/types/organization/service_account_workspace_member.py">ServiceAccountWorkspaceMember</a></code>
+- <code title="delete /v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}">client.organization.workspaces.service_accounts.<a href="./src/anthropic/resources/organization/workspaces/service_accounts.py">remove</a>(service_account_id, \*, workspace_id) -> <a href="./src/anthropic/types/organization/workspaces/service_account_remove_response.py">ServiceAccountRemoveResponse</a></code>
+
+## RateLimits
+
+Types:
+
+```python
+from anthropic.types.organization import (
+    OrganizationRateLimit,
+    OrganizationRateLimitBatchGroup,
+    OrganizationRateLimitFilesGroup,
+    OrganizationRateLimitModelGroup,
+    OrganizationRateLimitSkillsGroup,
+    OrganizationRateLimitTokenCountGroup,
+    OrganizationRateLimitValue,
+    OrganizationRateLimitWebSearchGroup,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/rate_limits">client.organization.rate_limits.<a href="./src/anthropic/resources/organization/rate_limits.py">list</a>(\*\*<a href="src/anthropic/types/organization/rate_limit_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/organization_rate_limit.py">SyncPageCursor[OrganizationRateLimit]</a></code>
+
+## ComplianceSettings
+
+Types:
+
+```python
+from anthropic.types.organization import (
+    ComplianceSettingsState,
+    ComplianceSettingsStateDisabled,
+    ComplianceSettingsStateDisabledParam,
+    ComplianceSettingsStateEnabled,
+    ComplianceSettingsStateEnabledParam,
+    ComplianceSettingsStateParam,
+    OrganizationComplianceSettings,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/compliance_settings">client.organization.compliance_settings.<a href="./src/anthropic/resources/organization/compliance_settings.py">retrieve</a>() -> <a href="./src/anthropic/types/organization/organization_compliance_settings.py">OrganizationComplianceSettings</a></code>
+- <code title="post /v1/organizations/compliance_settings">client.organization.compliance_settings.<a href="./src/anthropic/resources/organization/compliance_settings.py">update</a>(\*\*<a href="src/anthropic/types/organization/compliance_setting_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/organization_compliance_settings.py">OrganizationComplianceSettings</a></code>
+
 # Beta
 
 Types:
