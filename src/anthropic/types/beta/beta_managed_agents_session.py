@@ -49,8 +49,7 @@ class BetaManagedAgentsSession(BaseModel):
     """Timing statistics for the session."""
 
     status: Literal["rescheduling", "running", "idle", "terminated"]
-    """SessionStatus enum
-
+    """
     - `rescheduling` - Transient error occurred, retrying automatically.
     - `running` - Agent is actively executing.
     - `idle` - Agent is waiting for input, including user messages or tool
