@@ -54,7 +54,7 @@ message = client.beta.messages.create(
     tools=[get_weather],
     # ...
     max_tokens=1024,
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5-5",
     messages=[{"role": "user", "content": "What is 2 + 2?"}],
 )
 ```
@@ -68,7 +68,7 @@ We provide a `client.beta.messages.tool_runner()` method that can automatically 
 ```py
 runner = client.beta.messages.tool_runner(
     max_tokens=1024,
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5-5",
     tools=[sum],
     messages=[{"role": "user", "content": "What is 9 + 10?"}],
 )
@@ -83,7 +83,7 @@ By default, the runner runs a reply's tools after your loop body for that reply 
 ```py
 runner = client.beta.messages.tool_runner(
     max_tokens=1024,
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5-5",
     tools=[list_files, delete_file],
     messages=[{"role": "user", "content": "Clean up the log files in /tmp/demo."}],
     stream=True,
@@ -111,7 +111,7 @@ With the `compact-2026-09-04` beta you decide when a conversation is compacted: 
 ```py
 runner = client.beta.messages.tool_runner(
     max_tokens=1024,
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5-5",
     betas=["compact-2026-09-04"],
     tools=[search_docs],
     messages=[{"role": "user", "content": "Find every page that mentions rate limits."}],
@@ -148,7 +148,7 @@ Changing the `tools` param in the middle of a conversation misses the prompt cac
 ```py
 runner = client.beta.messages.tool_runner(
     max_tokens=1024,
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5-5",
     betas=["inline-tools-2026-09-15"],
     tools=[get_time],
     messages=[{"role": "user", "content": "Find a slot for a 30 minute call with Sam next week."}],

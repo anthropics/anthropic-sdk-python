@@ -30,7 +30,7 @@ class TestSyncParse:
         """Test sync messages.parse() with a Pydantic model output_format."""
 
         response = snapshot_client.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",
@@ -57,7 +57,7 @@ class TestSyncParse:
         """Test sync messages.parse() with nested Pydantic models."""
 
         response = snapshot_client.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",
@@ -87,7 +87,7 @@ class TestAsyncParse:
         """Test async messages.parse() with a Pydantic model output_format."""
 
         response = await async_snapshot_client.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",
@@ -114,7 +114,7 @@ class TestAsyncParse:
         """Test async messages.parse() with nested Pydantic models."""
 
         response = await async_snapshot_client.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",
@@ -144,7 +144,7 @@ class TestAsyncStream:
         """Test async messages.stream() with raw JSON schema via output_config."""
 
         async with async_snapshot_client.messages.stream(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",

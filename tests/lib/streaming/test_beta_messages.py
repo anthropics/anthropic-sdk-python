@@ -420,7 +420,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             tools=[WeatherTool()],
         ) as stream:
             assert isinstance(cast(Any, stream), BetaMessageStream)
@@ -441,7 +441,7 @@ class TestSyncMessages:
         with sync_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "What is the weather in Paris?"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             message = stream.get_final_message()
 
@@ -458,7 +458,7 @@ class TestSyncMessages:
                     ],
                 },
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         )
 
         request_body = json.loads(route.calls.last.request.content)
@@ -473,7 +473,7 @@ class TestSyncMessages:
         with sync_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_server_tool_use_response([event for event in stream], stream.get_final_message())
 
@@ -593,7 +593,7 @@ class TestSyncMessages:
         with sync_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_fallback_credit_response(stream.get_final_message())
 
@@ -606,7 +606,7 @@ class TestSyncMessages:
         with sync_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_fields_response(stream.get_final_message())
 
@@ -619,7 +619,7 @@ class TestSyncMessages:
         with sync_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_context_management_response(stream.get_final_message())
 
@@ -633,7 +633,7 @@ class TestSyncMessages:
         with sync_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_input_transformations_response(stream.get_final_message(), expected)
 
@@ -720,7 +720,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             tools=[WeatherTool()],
         ) as stream:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
@@ -739,7 +739,7 @@ class TestAsyncMessages:
         async with async_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_server_tool_use_response([event async for event in stream], await stream.get_final_message())
 
@@ -760,7 +760,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
@@ -846,7 +846,7 @@ class TestAsyncMessages:
         async with async_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_fallback_credit_response(await stream.get_final_message())
 
@@ -860,7 +860,7 @@ class TestAsyncMessages:
         async with async_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_fields_response(await stream.get_final_message())
 
@@ -874,7 +874,7 @@ class TestAsyncMessages:
         async with async_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_context_management_response(await stream.get_final_message())
 
@@ -891,7 +891,7 @@ class TestAsyncMessages:
         async with async_client.beta.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_input_transformations_response(await stream.get_final_message(), expected)
 

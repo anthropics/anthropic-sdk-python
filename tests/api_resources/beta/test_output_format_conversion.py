@@ -40,7 +40,7 @@ class TestOutputFormatConversion:
         client.beta.messages.parse(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Test"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             output_format=User,
         )
 
@@ -64,7 +64,7 @@ class TestOutputFormatConversion:
             client.beta.messages.stream(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 output_format={"type": "json_schema", "schema": {"type": "string"}},  # type: ignore[arg-type]
             )
 
@@ -99,7 +99,7 @@ class TestOutputFormatNoDeprecationWarning:
             client.beta.messages.parse(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 output_format=SimpleModel,
             )
 
@@ -129,7 +129,7 @@ class TestOutputFormatNoDeprecationWarning:
             with client.beta.messages.stream(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 output_format=Answer,
             ):
                 pass
@@ -161,7 +161,7 @@ class TestOutputFormatNoDeprecationWarning:
             client.beta.messages.create(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
             )
 
     def test_no_warning_when_using_output_config(self, client: Anthropic, respx_mock: MockRouter) -> None:
@@ -187,7 +187,7 @@ class TestOutputFormatNoDeprecationWarning:
             client.beta.messages.create(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 output_config={"format": {"type": "json_schema", "schema": {"type": "object"}}},
             )
 
@@ -205,7 +205,7 @@ class TestOutputConfigConflict:
             client.beta.messages.parse(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 output_format=TestModel,
                 output_config={"format": {"type": "json_schema", "schema": {"type": "string"}}},
             )
@@ -239,7 +239,7 @@ class TestStructuredOutputsBetaHeader:
         client.beta.messages.parse(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Test"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             output_format=DataModel,
         )
 
@@ -271,7 +271,7 @@ class TestStructuredOutputsBetaHeader:
         client.beta.messages.parse(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Test"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             output_format=DataModel,
             betas=["some-other-beta-feature"],
         )
@@ -304,7 +304,7 @@ class TestStructuredOutputsBetaHeader:
         client.beta.messages.parse(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Test"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             output_format=DataModel,
             betas=["structured-outputs-2025-12-15"],
         )
@@ -341,7 +341,7 @@ class TestAsyncOutputFormatConversion:
         await async_client.beta.messages.parse(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Test"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             output_format=User,
         )
 

@@ -3081,7 +3081,7 @@ _REPLY_PARAMS_CASES = pytest.mark.parametrize(
             omit,
             {"effort": "low", "format": _FORECAST_FORMAT},
             [
-                {"model": "claude-sonnet-4-5", "output_config": {"effort": "medium", "format": _FORECAST_FORMAT}},
+                {"model": "claude-sonnet-5-5", "output_config": {"effort": "medium", "format": _FORECAST_FORMAT}},
                 {"model": "claude-opus-4-5", "max_tokens": 512},
             ],
             {"type": "auto"},
@@ -3112,7 +3112,7 @@ def _assert_reply_params_are_left_off_the_compaction_request_only(
         assert "fallbacks" not in compaction
     else:
         assert compaction["fallbacks"] == [
-            {"model": "claude-sonnet-4-5", "output_config": {"effort": "medium"}},
+            {"model": "claude-sonnet-5-5", "output_config": {"effort": "medium"}},
             {"model": "claude-opus-4-5", "max_tokens": 512},
         ]
         assert after["fallbacks"] == fallbacks

@@ -302,7 +302,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert not isinstance(cast(Any, stream), Stream)
 
@@ -317,7 +317,7 @@ class TestSyncMessages:
         with sync_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_server_tool_use_response([event for event in stream], stream.get_final_message())
 
@@ -331,7 +331,7 @@ class TestSyncMessages:
             with sync_client.messages.stream(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "What's the weather in Paris?"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
             ) as stream:
                 stream.until_done()
 
@@ -344,7 +344,7 @@ class TestSyncMessages:
         with sync_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "What is the weather in Paris?"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_tool_use_caller_unset(stream.get_final_message())
 
@@ -360,7 +360,7 @@ class TestSyncMessages:
         with sync_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "What is the weather in Paris?"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             message = stream.get_final_message()
 
@@ -377,7 +377,7 @@ class TestSyncMessages:
                     ],
                 },
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         )
 
         request_body = json.loads(route.calls.last.request.content)
@@ -405,7 +405,7 @@ class TestSyncMessages:
         with sync_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_fields_response(stream.get_final_message())
 
@@ -418,7 +418,7 @@ class TestSyncMessages:
         with sync_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_omitted_usage_response(stream.get_final_message())
 
@@ -526,7 +526,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert not isinstance(cast(Any, stream), AsyncStream)
 
@@ -542,7 +542,7 @@ class TestAsyncMessages:
         async with async_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_server_tool_use_response([event async for event in stream], await stream.get_final_message())
 
@@ -557,7 +557,7 @@ class TestAsyncMessages:
             async with async_client.messages.stream(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "What's the weather in Paris?"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
             ) as stream:
                 await stream.until_done()
 
@@ -571,7 +571,7 @@ class TestAsyncMessages:
         async with async_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "What is the weather in Paris?"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_tool_use_caller_unset(await stream.get_final_message())
 
@@ -599,7 +599,7 @@ class TestAsyncMessages:
         async with async_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_fields_response(await stream.get_final_message())
 
@@ -615,7 +615,7 @@ class TestAsyncMessages:
         async with async_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_omitted_usage_response(await stream.get_final_message())
 
