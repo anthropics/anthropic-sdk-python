@@ -9,6 +9,7 @@ import httpx2
 
 from ._cache import TokenCache
 from ._constants import OAUTH_API_BETA_HEADER
+from ..._exceptions import CredentialsError
 
 __all__ = ["AccessTokenAuth"]
 
@@ -84,7 +85,12 @@ class AccessTokenAuth(httpx2.Auth):
     def _has_static_credential(request: httpx2.Request) -> bool:
         return bool(request.headers.get("X-Api-Key") or request.headers.get("Authorization"))
 
-    def _apply(self, request: httpx2.Request, token: str) -> None:
+    def _apply(self, request: httpx2.Request, token: object) -> None:
+        if not isinstance(token, str) or not token or token != token.strip():
+            raise CredentialsError(
+                "Credentials provider returned an invalid access token; expected a non-empty string "
+                "without surrounding whitespace."
+            )
         request.headers["Authorization"] = f"Bearer {token}"
         existing_beta = request.headers.get("anthropic-beta", "")
         # Tokenize the comma-separated header so dedupe matches whole flag
