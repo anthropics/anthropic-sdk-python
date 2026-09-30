@@ -30,6 +30,14 @@ from .api_keys import (
     APIKeysWithStreamingResponse,
     AsyncAPIKeysWithStreamingResponse,
 )
+from .analytics import (
+    Analytics,
+    AsyncAnalytics,
+    AnalyticsWithRawResponse,
+    AsyncAnalyticsWithRawResponse,
+    AnalyticsWithStreamingResponse,
+    AsyncAnalyticsWithStreamingResponse,
+)
 from .federation import (
     Federation,
     AsyncFederation,
@@ -37,6 +45,14 @@ from .federation import (
     AsyncFederationWithRawResponse,
     FederationWithStreamingResponse,
     AsyncFederationWithStreamingResponse,
+)
+from .rbac_roles import (
+    RBACRoles,
+    AsyncRBACRoles,
+    RBACRolesWithRawResponse,
+    AsyncRBACRolesWithRawResponse,
+    RBACRolesWithStreamingResponse,
+    AsyncRBACRolesWithStreamingResponse,
 )
 from .workspaces import (
     Workspaces,
@@ -54,6 +70,14 @@ from .rate_limits import (
     RateLimitsWithStreamingResponse,
     AsyncRateLimitsWithStreamingResponse,
 )
+from .rbac_groups import (
+    RBACGroups,
+    AsyncRBACGroups,
+    RBACGroupsWithRawResponse,
+    AsyncRBACGroupsWithRawResponse,
+    RBACGroupsWithStreamingResponse,
+    AsyncRBACGroupsWithStreamingResponse,
+)
 from .organization import (
     Organization,
     AsyncOrganization,
@@ -61,6 +85,14 @@ from .organization import (
     AsyncOrganizationWithRawResponse,
     OrganizationWithStreamingResponse,
     AsyncOrganizationWithStreamingResponse,
+)
+from .spend_limits import (
+    SpendLimits,
+    AsyncSpendLimits,
+    SpendLimitsWithRawResponse,
+    AsyncSpendLimitsWithRawResponse,
+    SpendLimitsWithStreamingResponse,
+    AsyncSpendLimitsWithStreamingResponse,
 )
 from .external_keys import (
     ExternalKeys,
@@ -150,6 +182,30 @@ __all__ = [
     "AsyncComplianceSettingsWithRawResponse",
     "ComplianceSettingsWithStreamingResponse",
     "AsyncComplianceSettingsWithStreamingResponse",
+    "Analytics",
+    "AsyncAnalytics",
+    "AnalyticsWithRawResponse",
+    "AsyncAnalyticsWithRawResponse",
+    "AnalyticsWithStreamingResponse",
+    "AsyncAnalyticsWithStreamingResponse",
+    "SpendLimits",
+    "AsyncSpendLimits",
+    "SpendLimitsWithRawResponse",
+    "AsyncSpendLimitsWithRawResponse",
+    "SpendLimitsWithStreamingResponse",
+    "AsyncSpendLimitsWithStreamingResponse",
+    "RBACGroups",
+    "AsyncRBACGroups",
+    "RBACGroupsWithRawResponse",
+    "AsyncRBACGroupsWithRawResponse",
+    "RBACGroupsWithStreamingResponse",
+    "AsyncRBACGroupsWithStreamingResponse",
+    "RBACRoles",
+    "AsyncRBACRoles",
+    "RBACRolesWithRawResponse",
+    "AsyncRBACRolesWithRawResponse",
+    "RBACRolesWithStreamingResponse",
+    "AsyncRBACRolesWithStreamingResponse",
     "Plugins",
     "AsyncPlugins",
     "PluginsWithRawResponse",

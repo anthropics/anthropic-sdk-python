@@ -2286,6 +2286,232 @@ Methods:
 - <code title="get /v1/organizations/compliance_settings?beta=true">client.beta.organization.compliance_settings.<a href="./src/anthropic/resources/beta/organization/compliance_settings.py">retrieve</a>() -> <a href="./src/anthropic/types/beta/organization/beta_compliance_settings.py">BetaComplianceSettings</a></code>
 - <code title="post /v1/organizations/compliance_settings?beta=true">client.beta.organization.compliance_settings.<a href="./src/anthropic/resources/beta/organization/compliance_settings.py">update</a>(\*\*<a href="src/anthropic/types/beta/organization/compliance_setting_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_compliance_settings.py">BetaComplianceSettings</a></code>
 
+### Analytics
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaAnalyticsArtifactActivity,
+    BetaAnalyticsChatMetrics,
+    BetaAnalyticsClaudeCodeMetrics,
+    BetaAnalyticsClaudeTagCategory,
+    BetaAnalyticsConnectorActivity,
+    BetaAnalyticsConnectorChatMetrics,
+    BetaAnalyticsConnectorClaudeCodeMetrics,
+    BetaAnalyticsConnectorCoworkMetrics,
+    BetaAnalyticsConnectorOfficeMetrics,
+    BetaAnalyticsConnectorOfficeProductMetrics,
+    BetaAnalyticsContextWindow,
+    BetaAnalyticsCoreCodeMetrics,
+    BetaAnalyticsCostBucketedResult,
+    BetaAnalyticsCostReportTimeBucket,
+    BetaAnalyticsCostType,
+    BetaAnalyticsCoworkMetrics,
+    BetaAnalyticsDesignMetrics,
+    BetaAnalyticsInferenceGeoFilter,
+    BetaAnalyticsLinesOfCode,
+    BetaAnalyticsOfficeMetrics,
+    BetaAnalyticsOfficeProductMetrics,
+    BetaAnalyticsPluginActivity,
+    BetaAnalyticsPluginClaudeCodeMetrics,
+    BetaAnalyticsPluginCoworkMetrics,
+    BetaAnalyticsProductFilter,
+    BetaAnalyticsProjectActivity,
+    BetaAnalyticsScienceMetrics,
+    BetaAnalyticsServerToolUse,
+    BetaAnalyticsSingleDayActivitySummary,
+    BetaAnalyticsSkillActivity,
+    BetaAnalyticsSkillChatMetrics,
+    BetaAnalyticsSkillClaudeCodeMetrics,
+    BetaAnalyticsSkillCoworkMetrics,
+    BetaAnalyticsSkillOfficeMetrics,
+    BetaAnalyticsSkillOfficeProductMetrics,
+    BetaAnalyticsTokenType,
+    BetaAnalyticsToolActionCounts,
+    BetaAnalyticsToolActions,
+    BetaAnalyticsUsageBucketedResult,
+    BetaAnalyticsUsageReportTimeBucket,
+    BetaAnalyticsUser,
+    BetaAnalyticsUserActivity,
+)
+```
+
+#### Summaries
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/summaries?beta=true">client.beta.organization.analytics.summaries.<a href="./src/anthropic/resources/beta/organization/analytics/summaries.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/summary_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_single_day_activity_summary.py">SyncPageCursor[BetaAnalyticsSingleDayActivitySummary]</a></code>
+
+#### Users
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/users?beta=true">client.beta.organization.analytics.users.<a href="./src/anthropic/resources/beta/organization/analytics/users.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/user_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_user_activity.py">SyncPageCursor[BetaAnalyticsUserActivity]</a></code>
+
+#### Apps
+
+##### Chat
+
+###### Projects
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/apps/chat/projects?beta=true">client.beta.organization.analytics.apps.chat.projects.<a href="./src/anthropic/resources/beta/organization/analytics/apps/chat/projects.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/apps/chat/project_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_project_activity.py">SyncPageCursor[BetaAnalyticsProjectActivity]</a></code>
+
+#### Connectors
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/connectors?beta=true">client.beta.organization.analytics.connectors.<a href="./src/anthropic/resources/beta/organization/analytics/connectors.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/connector_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_connector_activity.py">SyncPageCursor[BetaAnalyticsConnectorActivity]</a></code>
+
+#### Plugins
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/plugins?beta=true">client.beta.organization.analytics.plugins.<a href="./src/anthropic/resources/beta/organization/analytics/plugins.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/plugin_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_plugin_activity.py">SyncPageCursor[BetaAnalyticsPluginActivity]</a></code>
+
+#### Skills
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/skills?beta=true">client.beta.organization.analytics.skills.<a href="./src/anthropic/resources/beta/organization/analytics/skills.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/skill_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_skill_activity.py">SyncPageCursor[BetaAnalyticsSkillActivity]</a></code>
+
+#### Artifacts
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/artifacts?beta=true">client.beta.organization.analytics.artifacts.<a href="./src/anthropic/resources/beta/organization/analytics/artifacts.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/artifact_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_artifact_activity.py">SyncPageCursor[BetaAnalyticsArtifactActivity]</a></code>
+
+#### UsageReport
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/usage_report?beta=true">client.beta.organization.analytics.usage_report.<a href="./src/anthropic/resources/beta/organization/analytics/usage_report.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/usage_report_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_usage_report_time_bucket.py">SyncPageCursor[BetaAnalyticsUsageReportTimeBucket]</a></code>
+
+#### CostReport
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/cost_report?beta=true">client.beta.organization.analytics.cost_report.<a href="./src/anthropic/resources/beta/organization/analytics/cost_report.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/cost_report_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_cost_report_time_bucket.py">SyncPageCursor[BetaAnalyticsCostReportTimeBucket]</a></code>
+
+### SpendLimits
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaSpendLimit,
+    BetaSpendLimitOrganizationScope,
+    BetaSpendLimitOrganizationScopeParam,
+    BetaSpendLimitOrganizationServiceScope,
+    BetaSpendLimitPeriod,
+    BetaSpendLimitRBACGroupScope,
+    BetaSpendLimitScopedAPIKeyActor,
+    BetaSpendLimitSeatTierScope,
+    BetaSpendLimitUserActor,
+    BetaSpendLimitUserScope,
+    BetaSpendLimitUserScopeParam,
+    BetaSpendLimitWorkspaceScope,
+    BetaSpendLimitWorkspaceScopeParam,
+    BetaSpendSummary,
+    SpendLimitDeleteResponse,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/spend_limits/{spend_limit_id}?beta=true">client.beta.organization.spend_limits.<a href="./src/anthropic/resources/beta/organization/spend_limits/spend_limits.py">retrieve</a>(spend_limit_id) -> <a href="./src/anthropic/types/beta/organization/beta_spend_limit.py">BetaSpendLimit</a></code>
+- <code title="delete /v1/organizations/spend_limits/{spend_limit_id}?beta=true">client.beta.organization.spend_limits.<a href="./src/anthropic/resources/beta/organization/spend_limits/spend_limits.py">delete</a>(spend_limit_id) -> <a href="./src/anthropic/types/beta/organization/spend_limit_delete_response.py">SpendLimitDeleteResponse</a></code>
+- <code title="post /v1/organizations/spend_limits?beta=true">client.beta.organization.spend_limits.<a href="./src/anthropic/resources/beta/organization/spend_limits/spend_limits.py">set</a>(\*\*<a href="src/anthropic/types/beta/organization/spend_limit_set_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_spend_limit.py">BetaSpendLimit</a></code>
+
+#### Effective
+
+Methods:
+
+- <code title="get /v1/organizations/spend_limits/effective?beta=true">client.beta.organization.spend_limits.effective.<a href="./src/anthropic/resources/beta/organization/spend_limits/effective.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/spend_limits/effective_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_spend_summary.py">SyncPageCursor[BetaSpendSummary]</a></code>
+
+#### IncreaseRequests
+
+Types:
+
+```python
+from anthropic.types.beta.organization.spend_limits import (
+    BetaSpendLimitIncreaseRequest,
+    BetaSpendLimitIncreaseRequestStatus,
+    IncreaseRequestApproveResponse,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}?beta=true">client.beta.organization.spend_limits.increase_requests.<a href="./src/anthropic/resources/beta/organization/spend_limits/increase_requests.py">retrieve</a>(spend_limit_increase_request_id) -> <a href="./src/anthropic/types/beta/organization/spend_limits/beta_spend_limit_increase_request.py">BetaSpendLimitIncreaseRequest</a></code>
+- <code title="get /v1/organizations/spend_limit_increase_requests?beta=true">client.beta.organization.spend_limits.increase_requests.<a href="./src/anthropic/resources/beta/organization/spend_limits/increase_requests.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/spend_limits/increase_request_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/spend_limits/beta_spend_limit_increase_request.py">SyncPageCursor[BetaSpendLimitIncreaseRequest]</a></code>
+- <code title="post /v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve?beta=true">client.beta.organization.spend_limits.increase_requests.<a href="./src/anthropic/resources/beta/organization/spend_limits/increase_requests.py">approve</a>(spend_limit_increase_request_id, \*\*<a href="src/anthropic/types/beta/organization/spend_limits/increase_request_approve_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/spend_limits/increase_request_approve_response.py">IncreaseRequestApproveResponse</a></code>
+- <code title="post /v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny?beta=true">client.beta.organization.spend_limits.increase_requests.<a href="./src/anthropic/resources/beta/organization/spend_limits/increase_requests.py">deny</a>(spend_limit_increase_request_id, \*\*<a href="src/anthropic/types/beta/organization/spend_limits/increase_request_deny_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/spend_limits/beta_spend_limit_increase_request.py">BetaSpendLimitIncreaseRequest</a></code>
+
+### RBACGroups
+
+Types:
+
+```python
+from anthropic.types.beta.organization import BetaRBACGroup, RBACGroupDeleteResponse
+```
+
+Methods:
+
+- <code title="post /v1/organizations/rbac_groups?beta=true">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/rbac_group_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_group.py">BetaRBACGroup</a></code>
+- <code title="get /v1/organizations/rbac_groups/{rbac_group_id}?beta=true">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">retrieve</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_group.py">BetaRBACGroup</a></code>
+- <code title="post /v1/organizations/rbac_groups/{rbac_group_id}?beta=true">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">update</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/rbac_group_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_group.py">BetaRBACGroup</a></code>
+- <code title="get /v1/organizations/rbac_groups?beta=true">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/rbac_group_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_group.py">SyncPageCursor[BetaRBACGroup]</a></code>
+- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}?beta=true">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">delete</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/rbac_group_delete_response.py">RBACGroupDeleteResponse</a></code>
+
+#### Members
+
+Types:
+
+```python
+from anthropic.types.beta.organization.rbac_groups import BetaRBACGroupMember, MemberRemoveResponse
+```
+
+Methods:
+
+- <code title="get /v1/organizations/rbac_groups/{rbac_group_id}/members?beta=true">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">list</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/rbac_groups/member_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/beta_rbac_group_member.py">SyncPageCursor[BetaRBACGroupMember]</a></code>
+- <code title="post /v1/organizations/rbac_groups/{rbac_group_id}/members?beta=true">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">add</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/rbac_groups/member_add_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/beta_rbac_group_member.py">BetaRBACGroupMember</a></code>
+- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}?beta=true">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">remove</a>(user_id, \*, rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/member_remove_response.py">MemberRemoveResponse</a></code>
+
+### RBACRoles
+
+Types:
+
+```python
+from anthropic.types.beta.organization import BetaRBACRole
+```
+
+Methods:
+
+- <code title="get /v1/organizations/rbac_roles/{rbac_role_id}?beta=true">client.beta.organization.rbac_roles.<a href="./src/anthropic/resources/beta/organization/rbac_roles/rbac_roles.py">retrieve</a>(rbac_role_id) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_role.py">BetaRBACRole</a></code>
+- <code title="get /v1/organizations/rbac_roles?beta=true">client.beta.organization.rbac_roles.<a href="./src/anthropic/resources/beta/organization/rbac_roles/rbac_roles.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/rbac_role_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_role.py">SyncPageCursor[BetaRBACRole]</a></code>
+
+#### Permissions
+
+Types:
+
+```python
+from anthropic.types.beta.organization.rbac_roles import (
+    BetaRBACAllConnectorsPermissionResource,
+    BetaRBACConnectorPermissionResource,
+    BetaRBACConnectorScopePermissionResource,
+    BetaRBACConnectorToolPermissionResource,
+    BetaRBACOrganizationPermissionResource,
+    BetaRBACRolePermission,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/rbac_roles/{rbac_role_id}/permissions?beta=true">client.beta.organization.rbac_roles.permissions.<a href="./src/anthropic/resources/beta/organization/rbac_roles/permissions.py">list</a>(rbac_role_id, \*\*<a href="src/anthropic/types/beta/organization/rbac_roles/permission_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/rbac_roles/beta_rbac_role_permission.py">SyncPageCursor[BetaRBACRolePermission]</a></code>
+
 ### Plugins
 
 Types:
