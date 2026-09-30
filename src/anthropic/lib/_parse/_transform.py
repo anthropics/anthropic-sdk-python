@@ -117,6 +117,10 @@ def transform_schema(
     if is_list(enum):
         strict_schema["enum"] = enum
 
+    # Use a key-presence check because `const: null` is a valid constraint.
+    if "const" in json_schema:
+        strict_schema["const"] = json_schema.pop("const")
+
     description = json_schema.pop("description", None)
     if description is not None:
         strict_schema["description"] = description

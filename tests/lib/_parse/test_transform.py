@@ -73,6 +73,22 @@ def test_enum_schema():
     assert result == snapshot({"type": "string", "enum": ["foo", "bar"]})
 
 
+def test_const_schema():
+    # Pydantic v2 emits `const` for single-value `Literal` fields, e.g.
+    # `Literal["ok"]` -> `{"type": "string", "const": "ok"}`.
+    schema = {"type": "string", "const": "ok"}
+    result = transform_schema(schema)
+    assert result == snapshot({"type": "string", "const": "ok"})
+
+
+def test_const_null_schema():
+    # A present `const: None` constraint must not be confused with an
+    # absent `const` key.
+    schema = {"type": "null", "const": None}
+    result = transform_schema(schema)
+    assert result == snapshot({"type": "null", "const": None})
+
+
 def test_allof():
     schema = {
         "allOf": [
