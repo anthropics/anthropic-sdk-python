@@ -74,6 +74,22 @@ from .usage_report import (
     AsyncUsageReportWithStreamingResponse,
 )
 from ....._resource import SyncAPIResource, AsyncAPIResource
+from .user_cost_report import (
+    UserCostReport,
+    AsyncUserCostReport,
+    UserCostReportWithRawResponse,
+    AsyncUserCostReportWithRawResponse,
+    UserCostReportWithStreamingResponse,
+    AsyncUserCostReportWithStreamingResponse,
+)
+from .user_usage_report import (
+    UserUsageReport,
+    AsyncUserUsageReport,
+    UserUsageReportWithRawResponse,
+    AsyncUserUsageReportWithRawResponse,
+    UserUsageReportWithStreamingResponse,
+    AsyncUserUsageReportWithStreamingResponse,
+)
 
 __all__ = ["Analytics", "AsyncAnalytics"]
 
@@ -112,8 +128,16 @@ class Analytics(SyncAPIResource):
         return UsageReport(self._client)
 
     @cached_property
+    def user_usage_report(self) -> UserUsageReport:
+        return UserUsageReport(self._client)
+
+    @cached_property
     def cost_report(self) -> CostReport:
         return CostReport(self._client)
+
+    @cached_property
+    def user_cost_report(self) -> UserCostReport:
+        return UserCostReport(self._client)
 
     @cached_property
     def with_raw_response(self) -> AnalyticsWithRawResponse:
@@ -169,8 +193,16 @@ class AsyncAnalytics(AsyncAPIResource):
         return AsyncUsageReport(self._client)
 
     @cached_property
+    def user_usage_report(self) -> AsyncUserUsageReport:
+        return AsyncUserUsageReport(self._client)
+
+    @cached_property
     def cost_report(self) -> AsyncCostReport:
         return AsyncCostReport(self._client)
+
+    @cached_property
+    def user_cost_report(self) -> AsyncUserCostReport:
+        return AsyncUserCostReport(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncAnalyticsWithRawResponse:
@@ -229,8 +261,16 @@ class AnalyticsWithRawResponse:
         return UsageReportWithRawResponse(self._analytics.usage_report)
 
     @cached_property
+    def user_usage_report(self) -> UserUsageReportWithRawResponse:
+        return UserUsageReportWithRawResponse(self._analytics.user_usage_report)
+
+    @cached_property
     def cost_report(self) -> CostReportWithRawResponse:
         return CostReportWithRawResponse(self._analytics.cost_report)
+
+    @cached_property
+    def user_cost_report(self) -> UserCostReportWithRawResponse:
+        return UserCostReportWithRawResponse(self._analytics.user_cost_report)
 
 
 class AsyncAnalyticsWithRawResponse:
@@ -270,8 +310,16 @@ class AsyncAnalyticsWithRawResponse:
         return AsyncUsageReportWithRawResponse(self._analytics.usage_report)
 
     @cached_property
+    def user_usage_report(self) -> AsyncUserUsageReportWithRawResponse:
+        return AsyncUserUsageReportWithRawResponse(self._analytics.user_usage_report)
+
+    @cached_property
     def cost_report(self) -> AsyncCostReportWithRawResponse:
         return AsyncCostReportWithRawResponse(self._analytics.cost_report)
+
+    @cached_property
+    def user_cost_report(self) -> AsyncUserCostReportWithRawResponse:
+        return AsyncUserCostReportWithRawResponse(self._analytics.user_cost_report)
 
 
 class AnalyticsWithStreamingResponse:
@@ -311,8 +359,16 @@ class AnalyticsWithStreamingResponse:
         return UsageReportWithStreamingResponse(self._analytics.usage_report)
 
     @cached_property
+    def user_usage_report(self) -> UserUsageReportWithStreamingResponse:
+        return UserUsageReportWithStreamingResponse(self._analytics.user_usage_report)
+
+    @cached_property
     def cost_report(self) -> CostReportWithStreamingResponse:
         return CostReportWithStreamingResponse(self._analytics.cost_report)
+
+    @cached_property
+    def user_cost_report(self) -> UserCostReportWithStreamingResponse:
+        return UserCostReportWithStreamingResponse(self._analytics.user_cost_report)
 
 
 class AsyncAnalyticsWithStreamingResponse:
@@ -352,5 +408,13 @@ class AsyncAnalyticsWithStreamingResponse:
         return AsyncUsageReportWithStreamingResponse(self._analytics.usage_report)
 
     @cached_property
+    def user_usage_report(self) -> AsyncUserUsageReportWithStreamingResponse:
+        return AsyncUserUsageReportWithStreamingResponse(self._analytics.user_usage_report)
+
+    @cached_property
     def cost_report(self) -> AsyncCostReportWithStreamingResponse:
         return AsyncCostReportWithStreamingResponse(self._analytics.cost_report)
+
+    @cached_property
+    def user_cost_report(self) -> AsyncUserCostReportWithStreamingResponse:
+        return AsyncUserCostReportWithStreamingResponse(self._analytics.user_cost_report)

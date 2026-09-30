@@ -8,3 +8,5 @@ from .artifact_list_params import ArtifactListParams as ArtifactListParams
 from .connector_list_params import ConnectorListParams as ConnectorListParams
 from .cost_report_list_params import CostReportListParams as CostReportListParams
 from .usage_report_list_params import UsageReportListParams as UsageReportListParams
+from .user_cost_report_list_params import UserCostReportListParams as UserCostReportListParams
+from .user_usage_report_list_params import UserUsageReportListParams as UserUsageReportListParams

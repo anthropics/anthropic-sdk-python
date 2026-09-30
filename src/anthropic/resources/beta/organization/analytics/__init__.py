@@ -78,6 +78,22 @@ from .usage_report import (
     UsageReportWithStreamingResponse,
     AsyncUsageReportWithStreamingResponse,
 )
+from .user_cost_report import (
+    UserCostReport,
+    AsyncUserCostReport,
+    UserCostReportWithRawResponse,
+    AsyncUserCostReportWithRawResponse,
+    UserCostReportWithStreamingResponse,
+    AsyncUserCostReportWithStreamingResponse,
+)
+from .user_usage_report import (
+    UserUsageReport,
+    AsyncUserUsageReport,
+    UserUsageReportWithRawResponse,
+    AsyncUserUsageReportWithRawResponse,
+    UserUsageReportWithStreamingResponse,
+    AsyncUserUsageReportWithStreamingResponse,
+)
 
 __all__ = [
     "Summaries",
@@ -128,12 +144,24 @@ __all__ = [
     "AsyncUsageReportWithRawResponse",
     "UsageReportWithStreamingResponse",
     "AsyncUsageReportWithStreamingResponse",
+    "UserUsageReport",
+    "AsyncUserUsageReport",
+    "UserUsageReportWithRawResponse",
+    "AsyncUserUsageReportWithRawResponse",
+    "UserUsageReportWithStreamingResponse",
+    "AsyncUserUsageReportWithStreamingResponse",
     "CostReport",
     "AsyncCostReport",
     "CostReportWithRawResponse",
     "AsyncCostReportWithRawResponse",
     "CostReportWithStreamingResponse",
     "AsyncCostReportWithStreamingResponse",
+    "UserCostReport",
+    "AsyncUserCostReport",
+    "UserCostReportWithRawResponse",
+    "AsyncUserCostReportWithRawResponse",
+    "UserCostReportWithStreamingResponse",
+    "AsyncUserCostReportWithStreamingResponse",
     "Analytics",
     "AsyncAnalytics",
     "AnalyticsWithRawResponse",
