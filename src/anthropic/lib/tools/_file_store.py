@@ -242,7 +242,19 @@ class FileStore:
             except FileNotFoundError:
                 return
             if stat.S_ISDIR(st.st_mode):
-                shutil.rmtree(dest, ignore_errors=True)
+
+                def on_error(
+                    _function: object,
+                    _path: str,
+                    exc_info: tuple[type[BaseException], BaseException, object],
+                ) -> None:
+                    # Concurrent disappearance is still idempotent. Permission,
+                    # I/O and other failures must not be reported as success.
+                    error = exc_info[1]
+                    if not isinstance(error, FileNotFoundError):
+                        raise error
+
+                shutil.rmtree(dest, onerror=on_error)
             else:
                 with suppress(FileNotFoundError):
                     os.unlink(dest)
