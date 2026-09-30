@@ -20,10 +20,15 @@ def validate_credentials(
 
 
 def _read_env(*env_vars: str) -> str | None:
-    """Return the first non-None value from the given env vars, or None."""
+    """Return the first non-empty value from the given env vars, or None.
+
+    Empty-string environment variables are common in CI and container
+    manifests where optional secrets are declared but not populated. Treat
+    them as unset so they do not override later fallbacks or switch auth modes.
+    """
     for var in env_vars:
         value = os.environ.get(var)
-        if value is not None:
+        if value:
             return value
     return None
 
