@@ -61,6 +61,7 @@ class Refresh(Generic[_EventT]):
         force: bool,
         advisory_fallback: Optional[AccessToken],
         remaining_seconds: int,
+        invalidation_generation: int,
     ) -> None:
         self.owned_event: Optional[_EventT] = owned_event
         """The single-flight event this caller created and must release. `None` for a
@@ -70,6 +71,7 @@ class Refresh(Generic[_EventT]):
         self.advisory_fallback = advisory_fallback
         """The cached token to serve if this is an advisory refresh and it fails."""
         self.remaining_seconds = remaining_seconds
+        self.invalidation_generation = invalidation_generation
 
 
 class TokenCache:
@@ -140,6 +142,10 @@ class TokenCache:
         # One-shot: invalidate() sets it; the next single-flight leader passes
         # force_refresh=True so on-disk providers don't re-serve a stale token.
         self._next_force = False
+        # A single-flight refresh snapshots this value before leaving the lock.
+        # If invalidate() advances it while the provider is running, that result
+        # must not be published or returned.
+        self._invalidation_generation = 0
         # Time of last advisory-refresh failure (never reset on success —
         # only distance-from-now matters).
         self._last_advisory_failure_time: float = 0.0
@@ -205,7 +211,10 @@ class TokenCache:
                 if stale_token is None:
                     raise
                 return stale_token
-            return self._end_refresh(fresh, step)
+            token = self._end_refresh(fresh, step)
+            if token is None:
+                continue
+            return token
 
     async def async_get_token(self) -> str:
         """Async version of `get_token`.
@@ -232,7 +241,10 @@ class TokenCache:
                 if stale_token is None:
                     raise
                 return stale_token
-            return self._end_refresh(fresh, step)
+            token = self._end_refresh(fresh, step)
+            if token is None:
+                continue
+            return token
 
     def _next_step(self, event_class: Callable[[], _EventT]) -> Union[str, _EventT, Refresh[_EventT]]:
         """Decide under the lock what the caller does next.
@@ -251,7 +263,13 @@ class TokenCache:
                 if cached.expires_at == 0:
                     # Per-request: no single-flight, and never forced. invalidate() empties
                     # the cache, so the forced call after a 401 is always made by a leader.
-                    return Refresh(owned_event=None, force=False, advisory_fallback=None, remaining_seconds=0)
+                    return Refresh(
+                        owned_event=None,
+                        force=False,
+                        advisory_fallback=None,
+                        remaining_seconds=0,
+                        invalidation_generation=self._invalidation_generation,
+                    )
                 remaining = cached.expires_at - self._time_source()
                 if remaining > self._advisory:
                     return cached.token
@@ -280,9 +298,11 @@ class TokenCache:
                 force=self._next_force,
                 advisory_fallback=advisory_fallback,
                 remaining_seconds=remaining_seconds,
+                invalidation_generation=self._invalidation_generation,
             )
 
-    def _end_refresh(self, fresh: AccessToken, refresh: Refresh[_EventT]) -> str:
+    def _end_refresh(self, fresh: AccessToken, refresh: Refresh[_EventT]) -> Optional[str]:
+        invalidated = False
         with self._lock:
             if refresh.owned_event is None:
                 # A per-request caller may only overwrite another per-request token. After
@@ -291,25 +311,32 @@ class TokenCache:
                 if self._cached is not None and self._cached.expires_at == 0:
                     self._cached = fresh
             else:
-                # The same goes for a leader whose unforced call overlapped an invalidate():
-                # its token may be the rejected one, so it is used for this request only.
-                if refresh.force or not self._next_force:
+                invalidated = refresh.invalidation_generation != self._invalidation_generation
+                if not invalidated:
                     self._cached = fresh
-                if refresh.force:
-                    # Cleared only after a forced call succeeds, so a failure still forces the next call.
-                    self._next_force = False
+                    if refresh.force:
+                        # Cleared only after a forced call succeeds, so a failure
+                        # still forces the next call.
+                        self._next_force = False
                 self._refresh_event = None
         if refresh.owned_event is not None:
             refresh.owned_event.set()
+        if invalidated:
+            log.debug("Discarding token refresh result invalidated while provider call was in flight")
+            return None
         return fresh.token
 
     def _end_failed_refresh(self, err: BaseException, refresh: Refresh[_EventT]) -> Optional[str]:
-        """Release any waiters. Returns the stale token to serve if this was an advisory
-        refresh, or `None` if the caller should re-raise `err`."""
+        # Release waiters and return a stale advisory token only if this refresh
+        # still belongs to the current invalidation generation.
+        invalidated = False
         if refresh.owned_event is not None:
             with self._lock:
+                invalidated = refresh.invalidation_generation != self._invalidation_generation
                 self._refresh_event = None
             refresh.owned_event.set()
+        if invalidated:
+            return None
         if refresh.advisory_fallback is None or not isinstance(err, (AnthropicError, httpx2.HTTPError)):
             return None
         log.warning(
@@ -328,5 +355,8 @@ class TokenCache:
         their freshness short-circuit instead of re-serving the revoked token.
         """
         with self._lock:
+            already_invalidated = self._cached is None and self._next_force
             self._cached = None
             self._next_force = True
+            if not already_invalidated:
+                self._invalidation_generation += 1

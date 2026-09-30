@@ -4,10 +4,10 @@ requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "(python_full_version < '3.14' and sys_platform != 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2') or (python_full_version < '3.12' and sys_platform == 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')",
     "python_full_version >= '3.12' and sys_platform == 'emscripten' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
-    "(python_full_version < '3.12' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2') or (sys_platform != 'emscripten' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2')",
     "python_full_version >= '3.12' and sys_platform == 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "(python_full_version < '3.14' and sys_platform != 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2') or (python_full_version < '3.12' and sys_platform == 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')",
+    "(python_full_version < '3.12' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2') or (sys_platform != 'emscripten' and extra != 'extra-9-anthropic-mcp' and extra == 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2')",
     "(python_full_version < '3.12' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2') or (sys_platform != 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2')",
 ]
 conflicts = [[
@@ -188,7 +188,7 @@ wheels = [
 
 [[package]]
 name = "anthropic"
-version = "1.4.0"
+version = "1.8.0"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },
@@ -1672,8 +1672,8 @@ source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.14' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
     "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2'",
-    "(python_full_version < '3.14' and sys_platform != 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2') or (python_full_version < '3.12' and sys_platform == 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')",
     "python_full_version >= '3.12' and sys_platform == 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2'",
+    "(python_full_version < '3.14' and sys_platform != 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2') or (python_full_version < '3.12' and sys_platform == 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra == 'group-9-anthropic-pydantic-v2')",
     "(python_full_version < '3.12' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2') or (sys_platform != 'emscripten' and extra != 'group-9-anthropic-pydantic-v1' and extra != 'group-9-anthropic-pydantic-v2')",
 ]
 dependencies = [
