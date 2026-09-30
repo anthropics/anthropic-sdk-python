@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import List, Optional
+from typing_extensions import Literal
 
 import httpx2
 
@@ -13,7 +14,7 @@ from .effective import (
     AsyncEffectiveWithStreamingResponse,
 )
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import path_template
+from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from ....._resource import SyncAPIResource, AsyncAPIResource
 from ....._response import (
@@ -22,7 +23,8 @@ from ....._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from ....._base_client import make_request_options
+from .....pagination import SyncPageCursor, AsyncPageCursor
+from ....._base_client import AsyncPaginator, make_request_options
 from .increase_requests import (
     IncreaseRequests,
     AsyncIncreaseRequests,
@@ -32,6 +34,7 @@ from .increase_requests import (
     AsyncIncreaseRequestsWithStreamingResponse,
 )
 from .....types.beta.organization import BetaSpendLimitPeriod, spend_limit_set_params
+from .....types.anthropic_beta_param import AnthropicBetaParam
 from .....types.beta.organization.beta_spend_limit import BetaSpendLimit
 from .....types.beta.organization.beta_spend_limit_period import BetaSpendLimitPeriod
 from .....types.beta.organization.spend_limit_delete_response import SpendLimitDeleteResponse
@@ -103,6 +106,73 @@ class SpendLimits(SyncAPIResource):
                 timeout=timeout,
             ),
             cast_to=BetaSpendLimit,
+        )
+
+    def list(
+        self,
+        *,
+        limit: int | Omit = omit,
+        page: Optional[str] | Omit = omit,
+        scope_type: Optional[
+            List[Literal["organization", "organization_service", "rbac_group", "seat_tier", "user", "workspace"]]
+        ]
+        | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> SyncPageCursor[BetaSpendLimit]:
+        """
+        List the organization's spend limits.
+
+        A Claude Console organization's limits come in an order that is stable across
+        pages. A Claude Enterprise organization's are grouped by scope type, in the
+        order `organization`, `seat_tier`, `rbac_group`, `organization_service`, `user`;
+        within a type they come in a fixed order that is not creation order.
+
+        Args:
+          limit: Maximum number of limits per page. Defaults to `20`.
+
+          page: Opaque cursor from a previous response's `next_page` field.
+
+          scope_type: Return only limits with these scope types. A Claude Console organization has
+              `organization` and `workspace` limits; a Claude Enterprise organization has
+              `organization`, `seat_tier`, `rbac_group`, `organization_service` and `user`
+              limits. Omit for all.
+
+          betas: This endpoint is in beta: requests must send `spend-limit-reads-2026-09-26` in
+              this header.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **(extra_headers or {}),
+        }
+        return self._get_api_list(
+            "/v1/organizations/spend_limits?beta=true",
+            page=SyncPageCursor[BetaSpendLimit],
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "scope_type": scope_type,
+                },
+            ),
+            model=BetaSpendLimit,
         )
 
     def delete(
@@ -275,6 +345,73 @@ class AsyncSpendLimits(AsyncAPIResource):
             cast_to=BetaSpendLimit,
         )
 
+    def list(
+        self,
+        *,
+        limit: int | Omit = omit,
+        page: Optional[str] | Omit = omit,
+        scope_type: Optional[
+            List[Literal["organization", "organization_service", "rbac_group", "seat_tier", "user", "workspace"]]
+        ]
+        | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> AsyncPaginator[BetaSpendLimit, AsyncPageCursor[BetaSpendLimit]]:
+        """
+        List the organization's spend limits.
+
+        A Claude Console organization's limits come in an order that is stable across
+        pages. A Claude Enterprise organization's are grouped by scope type, in the
+        order `organization`, `seat_tier`, `rbac_group`, `organization_service`, `user`;
+        within a type they come in a fixed order that is not creation order.
+
+        Args:
+          limit: Maximum number of limits per page. Defaults to `20`.
+
+          page: Opaque cursor from a previous response's `next_page` field.
+
+          scope_type: Return only limits with these scope types. A Claude Console organization has
+              `organization` and `workspace` limits; a Claude Enterprise organization has
+              `organization`, `seat_tier`, `rbac_group`, `organization_service` and `user`
+              limits. Omit for all.
+
+          betas: This endpoint is in beta: requests must send `spend-limit-reads-2026-09-26` in
+              this header.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **(extra_headers or {}),
+        }
+        return self._get_api_list(
+            "/v1/organizations/spend_limits?beta=true",
+            page=AsyncPageCursor[BetaSpendLimit],
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "scope_type": scope_type,
+                },
+            ),
+            model=BetaSpendLimit,
+        )
+
     async def delete(
         self,
         spend_limit_id: str,
@@ -386,6 +523,9 @@ class SpendLimitsWithRawResponse:
         self.retrieve = to_raw_response_wrapper(
             spend_limits.retrieve,
         )
+        self.list = to_raw_response_wrapper(
+            spend_limits.list,
+        )
         self.delete = to_raw_response_wrapper(
             spend_limits.delete,
         )
@@ -408,6 +548,9 @@ class AsyncSpendLimitsWithRawResponse:
 
         self.retrieve = async_to_raw_response_wrapper(
             spend_limits.retrieve,
+        )
+        self.list = async_to_raw_response_wrapper(
+            spend_limits.list,
         )
         self.delete = async_to_raw_response_wrapper(
             spend_limits.delete,
@@ -432,6 +575,9 @@ class SpendLimitsWithStreamingResponse:
         self.retrieve = to_streamed_response_wrapper(
             spend_limits.retrieve,
         )
+        self.list = to_streamed_response_wrapper(
+            spend_limits.list,
+        )
         self.delete = to_streamed_response_wrapper(
             spend_limits.delete,
         )
@@ -454,6 +600,9 @@ class AsyncSpendLimitsWithStreamingResponse:
 
         self.retrieve = async_to_streamed_response_wrapper(
             spend_limits.retrieve,
+        )
+        self.list = async_to_streamed_response_wrapper(
+            spend_limits.list,
         )
         self.delete = async_to_streamed_response_wrapper(
             spend_limits.delete,
