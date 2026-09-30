@@ -302,12 +302,23 @@ class CredentialsFile:
         return headers
 
     def _load_config(self) -> Dict[str, Any]:
-        """Read and cache the config file, resolving `base_url` and `credentials_path`."""
+        """Read and cache the config file, resolving `base_url` and `credentials_path`.
+
+        On Unix, refuses a file that group or others can write.
+        """
         if self._config is not None:
             return self._config
 
         try:
-            raw = self._config_path.read_text(encoding="utf-8")
+            with self._config_path.open(encoding="utf-8") as config_file:
+                if os.name == "posix":
+                    mode = stat.S_IMODE(os.fstat(config_file.fileno()).st_mode)
+                    if mode & 0o022:
+                        raise CredentialsError(
+                            f"Config file at {self._config_path} is writable by group or others (mode {mode:#o}); "
+                            f"run `chmod go-w {self._config_path}` before retrying."
+                        )
+                raw = config_file.read()
         except FileNotFoundError as err:
             raise CredentialsError(
                 f"Config file not found at {self._config_path} (profile {self._profile!r}). "

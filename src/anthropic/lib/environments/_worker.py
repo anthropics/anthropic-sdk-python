@@ -379,8 +379,8 @@ class EnvironmentWorker:
       unrestricted_paths: Deprecated and no longer accepted; passing either value
         raises `TypeError` (see `AgentToolContext`).
       max_idle: Forwarded to the session tool runner — seconds to keep running
-        after the session goes idle with `stop_reason` `end_turn`. Defaults
-        to `anthropic.lib.environments.DEFAULT_MAX_IDLE` (60s). `None`
+        after the session goes idle with any `stop_reason` but `requires_action`.
+        Defaults to `anthropic.lib.environments.DEFAULT_MAX_IDLE` (60s). `None`
         disables it.
       memory_sync_interval: How often (seconds) to sync the session's
         attached memory stores back while it runs — checked after each

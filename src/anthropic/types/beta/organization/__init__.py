@@ -1,61 +1,156 @@
 from __future__ import annotations
 
+from .beta_plugin import BetaPlugin as BetaPlugin
 from .beta_api_key import BetaAPIKey as BetaAPIKey
+from .beta_rbac_role import BetaRBACRole as BetaRBACRole
 from .beta_workspace import BetaWorkspace as BetaWorkspace
+from .beta_rbac_group import BetaRBACGroup as BetaRBACGroup
+from .beta_spend_limit import BetaSpendLimit as BetaSpendLimit
 from .user_list_params import UserListParams as UserListParams
 from .beta_external_key import BetaExternalKey as BetaExternalKey
+from .beta_spend_summary import BetaSpendSummary as BetaSpendSummary
 from .invite_list_params import InviteListParams as InviteListParams
+from .plugin_list_params import PluginListParams as PluginListParams
 from .user_update_params import UserUpdateParams as UserUpdateParams
 from .api_key_list_params import APIKeyListParams as APIKeyListParams
+from .beta_analytics_user import BetaAnalyticsUser as BetaAnalyticsUser
 from .beta_data_residency import BetaDataResidency as BetaDataResidency
+from .beta_deleted_plugin import BetaDeletedPlugin as BetaDeletedPlugin
 from .beta_workspace_role import BetaWorkspaceRole as BetaWorkspaceRole
 from .beta_service_account import BetaServiceAccount as BetaServiceAccount
 from .invite_create_params import InviteCreateParams as InviteCreateParams
+from .plugin_create_params import PluginCreateParams as PluginCreateParams
+from .plugin_update_params import PluginUpdateParams as PluginUpdateParams
 from .user_remove_response import UserRemoveResponse as UserRemoveResponse
 from .api_key_update_params import APIKeyUpdateParams as APIKeyUpdateParams
+from .beta_plugin_api_actor import BetaPluginAPIActor as BetaPluginAPIActor
+from .beta_plugin_component import BetaPluginComponent as BetaPluginComponent
 from .beta_workspace_member import BetaWorkspaceMember as BetaWorkspaceMember
+from .rbac_role_list_params import RBACRoleListParams as RBACRoleListParams
 from .workspace_list_params import WorkspaceListParams as WorkspaceListParams
 from .beta_organization_user import BetaOrganizationUser as BetaOrganizationUser
+from .beta_plugin_owner_user import BetaPluginOwnerUser as BetaPluginOwnerUser
+from .beta_plugin_user_actor import BetaPluginUserActor as BetaPluginUserActor
 from .invite_delete_response import InviteDeleteResponse as InviteDeleteResponse
+from .plugin_retrieve_params import PluginRetrieveParams as PluginRetrieveParams
 from .rate_limit_list_params import RateLimitListParams as RateLimitListParams
+from .rbac_group_list_params import RBACGroupListParams as RBACGroupListParams
+from .spend_limit_set_params import SpendLimitSetParams as SpendLimitSetParams
 from .beta_api_key_created_by import BetaAPIKeyCreatedBy as BetaAPIKeyCreatedBy
 from .beta_api_key_user_actor import BetaAPIKeyUserActor as BetaAPIKeyUserActor
+from .beta_plugin_marketplace import BetaPluginMarketplace as BetaPluginMarketplace
+from .beta_spend_limit_period import BetaSpendLimitPeriod as BetaSpendLimitPeriod
 from .workspace_create_params import WorkspaceCreateParams as WorkspaceCreateParams
 from .workspace_update_params import WorkspaceUpdateParams as WorkspaceUpdateParams
+from .beta_analytics_cost_type import BetaAnalyticsCostType as BetaAnalyticsCostType
 from .beta_compliance_settings import BetaComplianceSettings as BetaComplianceSettings
 from .beta_organization_invite import BetaOrganizationInvite as BetaOrganizationInvite
+from .beta_plugin_content_scan import BetaPluginContentScan as BetaPluginContentScan
 from .external_key_list_params import ExternalKeyListParams as ExternalKeyListParams
+from .rbac_group_create_params import RBACGroupCreateParams as RBACGroupCreateParams
+from .rbac_group_update_params import RBACGroupUpdateParams as RBACGroupUpdateParams
+from .beta_analytics_token_type import BetaAnalyticsTokenType as BetaAnalyticsTokenType
+from .beta_analytics_user_actor import BetaAnalyticsUserActor as BetaAnalyticsUserActor
 from .beta_allowed_inference_geo import BetaAllowedInferenceGeo as BetaAllowedInferenceGeo
 from .external_key_create_params import ExternalKeyCreateParams as ExternalKeyCreateParams
 from .external_key_update_params import ExternalKeyUpdateParams as ExternalKeyUpdateParams
+from .rbac_group_delete_response import RBACGroupDeleteResponse as RBACGroupDeleteResponse
+from .beta_analytics_chat_metrics import BetaAnalyticsChatMetrics as BetaAnalyticsChatMetrics
+from .beta_analytics_tool_actions import BetaAnalyticsToolActions as BetaAnalyticsToolActions
+from .beta_spend_limit_user_actor import BetaSpendLimitUserActor as BetaSpendLimitUserActor
+from .beta_spend_limit_user_scope import BetaSpendLimitUserScope as BetaSpendLimitUserScope
 from .service_account_list_params import ServiceAccountListParams as ServiceAccountListParams
+from .spend_limit_delete_response import SpendLimitDeleteResponse as SpendLimitDeleteResponse
+from .beta_analytics_lines_of_code import BetaAnalyticsLinesOfCode as BetaAnalyticsLinesOfCode
+from .beta_analytics_user_activity import BetaAnalyticsUserActivity as BetaAnalyticsUserActivity
 from .beta_api_key_workspace_scope import BetaAPIKeyWorkspaceScope as BetaAPIKeyWorkspaceScope
 from .beta_aws_external_key_config import BetaAWSExternalKeyConfig as BetaAWSExternalKeyConfig
 from .beta_gcp_external_key_config import BetaGCPExternalKeyConfig as BetaGCPExternalKeyConfig
 from .beta_organization_rate_limit import BetaOrganizationRateLimit as BetaOrganizationRateLimit
 from .external_key_delete_response import ExternalKeyDeleteResponse as ExternalKeyDeleteResponse
+from .beta_analytics_context_window import BetaAnalyticsContextWindow as BetaAnalyticsContextWindow
+from .beta_analytics_cowork_metrics import BetaAnalyticsCoworkMetrics as BetaAnalyticsCoworkMetrics
+from .beta_analytics_design_metrics import BetaAnalyticsDesignMetrics as BetaAnalyticsDesignMetrics
+from .beta_analytics_office_metrics import BetaAnalyticsOfficeMetrics as BetaAnalyticsOfficeMetrics
+from .beta_analytics_product_filter import BetaAnalyticsProductFilter as BetaAnalyticsProductFilter
+from .beta_analytics_skill_activity import BetaAnalyticsSkillActivity as BetaAnalyticsSkillActivity
+from .beta_plugin_target_rbac_group import BetaPluginTargetRBACGroup as BetaPluginTargetRBACGroup
 from .service_account_create_params import ServiceAccountCreateParams as ServiceAccountCreateParams
 from .service_account_update_params import ServiceAccountUpdateParams as ServiceAccountUpdateParams
+from .beta_analytics_cost_users_item import BetaAnalyticsCostUsersItem as BetaAnalyticsCostUsersItem
+from .beta_analytics_plugin_activity import BetaAnalyticsPluginActivity as BetaAnalyticsPluginActivity
+from .beta_analytics_science_metrics import BetaAnalyticsScienceMetrics as BetaAnalyticsScienceMetrics
+from .beta_analytics_server_tool_use import BetaAnalyticsServerToolUse as BetaAnalyticsServerToolUse
 from .beta_azure_external_key_config import BetaAzureExternalKeyConfig as BetaAzureExternalKeyConfig
 from .beta_compliance_settings_state import BetaComplianceSettingsState as BetaComplianceSettingsState
 from .beta_no_billing_workspace_role import BetaNoBillingWorkspaceRole as BetaNoBillingWorkspaceRole
+from .beta_plugin_owner_organization import BetaPluginOwnerOrganization as BetaPluginOwnerOrganization
 from .external_key_validate_response import ExternalKeyValidateResponse as ExternalKeyValidateResponse
+from .plugin_marketplace_list_params import PluginMarketplaceListParams as PluginMarketplaceListParams
+from .beta_analytics_project_activity import BetaAnalyticsProjectActivity as BetaAnalyticsProjectActivity
+from .beta_analytics_usage_users_item import BetaAnalyticsUsageUsersItem as BetaAnalyticsUsageUsersItem
 from .beta_api_key_organization_scope import BetaAPIKeyOrganizationScope as BetaAPIKeyOrganizationScope
+from .beta_plugin_target_organization import BetaPluginTargetOrganization as BetaPluginTargetOrganization
+from .beta_analytics_artifact_activity import BetaAnalyticsArtifactActivity as BetaAnalyticsArtifactActivity
+from .beta_analytics_core_code_metrics import BetaAnalyticsCoreCodeMetrics as BetaAnalyticsCoreCodeMetrics
+from .beta_spend_limit_seat_tier_scope import BetaSpendLimitSeatTierScope as BetaSpendLimitSeatTierScope
+from .beta_spend_limit_workspace_scope import BetaSpendLimitWorkspaceScope as BetaSpendLimitWorkspaceScope
 from .compliance_setting_update_params import ComplianceSettingUpdateParams as ComplianceSettingUpdateParams
+from .plugin_marketplace_update_params import PluginMarketplaceUpdateParams as PluginMarketplaceUpdateParams
+from .beta_analytics_connector_activity import BetaAnalyticsConnectorActivity as BetaAnalyticsConnectorActivity
+from .beta_analytics_skill_chat_metrics import BetaAnalyticsSkillChatMetrics as BetaAnalyticsSkillChatMetrics
+from .beta_analytics_tool_action_counts import BetaAnalyticsToolActionCounts as BetaAnalyticsToolActionCounts
+from .beta_spend_limit_rbac_group_scope import BetaSpendLimitRBACGroupScope as BetaSpendLimitRBACGroupScope
+from .beta_spend_limit_user_scope_param import BetaSpendLimitUserScopeParam as BetaSpendLimitUserScopeParam
+from .beta_analytics_claude_code_metrics import BetaAnalyticsClaudeCodeMetrics as BetaAnalyticsClaudeCodeMetrics
+from .beta_analytics_claude_tag_category import BetaAnalyticsClaudeTagCategory as BetaAnalyticsClaudeTagCategory
 from .beta_api_key_service_account_actor import BetaAPIKeyServiceAccountActor as BetaAPIKeyServiceAccountActor
 from .beta_aws_external_key_config_param import BetaAWSExternalKeyConfigParam as BetaAWSExternalKeyConfigParam
 from .beta_gcp_external_key_config_param import BetaGCPExternalKeyConfigParam as BetaGCPExternalKeyConfigParam
 from .beta_organization_rate_limit_value import BetaOrganizationRateLimitValue as BetaOrganizationRateLimitValue
+from .plugin_marketplace_retrieve_params import PluginMarketplaceRetrieveParams as PluginMarketplaceRetrieveParams
+from .beta_analytics_cost_bucketed_result import BetaAnalyticsCostBucketedResult as BetaAnalyticsCostBucketedResult
+from .beta_analytics_inference_geo_filter import BetaAnalyticsInferenceGeoFilter as BetaAnalyticsInferenceGeoFilter
+from .beta_analytics_skill_cowork_metrics import BetaAnalyticsSkillCoworkMetrics as BetaAnalyticsSkillCoworkMetrics
+from .beta_analytics_skill_office_metrics import BetaAnalyticsSkillOfficeMetrics as BetaAnalyticsSkillOfficeMetrics
+from .beta_spend_limit_organization_scope import BetaSpendLimitOrganizationScope as BetaSpendLimitOrganizationScope
+from .beta_analytics_plugin_cowork_metrics import BetaAnalyticsPluginCoworkMetrics as BetaAnalyticsPluginCoworkMetrics
+from .beta_analytics_usage_bucketed_result import BetaAnalyticsUsageBucketedResult as BetaAnalyticsUsageBucketedResult
 from .beta_azure_external_key_config_param import BetaAzureExternalKeyConfigParam as BetaAzureExternalKeyConfigParam
 from .beta_compliance_settings_state_param import BetaComplianceSettingsStateParam as BetaComplianceSettingsStateParam
+from .beta_analytics_connector_chat_metrics import (
+    BetaAnalyticsConnectorChatMetrics as BetaAnalyticsConnectorChatMetrics,
+)
+from .beta_analytics_office_product_metrics import (
+    BetaAnalyticsOfficeProductMetrics as BetaAnalyticsOfficeProductMetrics,
+)
 from .beta_external_key_attached_attachment import (
     BetaExternalKeyAttachedAttachment as BetaExternalKeyAttachedAttachment,
 )
 from .beta_service_account_workspace_member import (
     BetaServiceAccountWorkspaceMember as BetaServiceAccountWorkspaceMember,
 )
+from .beta_spend_limit_scoped_api_key_actor import BetaSpendLimitScopedAPIKeyActor as BetaSpendLimitScopedAPIKeyActor
+from .beta_analytics_cost_report_time_bucket import (
+    BetaAnalyticsCostReportTimeBucket as BetaAnalyticsCostReportTimeBucket,
+)
 from .beta_compliance_settings_state_enabled import (
     BetaComplianceSettingsStateEnabled as BetaComplianceSettingsStateEnabled,
+)
+from .beta_plugin_target_organization_member import (
+    BetaPluginTargetOrganizationMember as BetaPluginTargetOrganizationMember,
+)
+from .beta_spend_limit_workspace_scope_param import (
+    BetaSpendLimitWorkspaceScopeParam as BetaSpendLimitWorkspaceScopeParam,
+)
+from .beta_analytics_connector_cowork_metrics import (
+    BetaAnalyticsConnectorCoworkMetrics as BetaAnalyticsConnectorCoworkMetrics,
+)
+from .beta_analytics_connector_office_metrics import (
+    BetaAnalyticsConnectorOfficeMetrics as BetaAnalyticsConnectorOfficeMetrics,
+)
+from .beta_analytics_usage_report_time_bucket import (
+    BetaAnalyticsUsageReportTimeBucket as BetaAnalyticsUsageReportTimeBucket,
 )
 from .beta_compliance_settings_state_disabled import (
     BetaComplianceSettingsStateDisabled as BetaComplianceSettingsStateDisabled,
@@ -69,6 +164,9 @@ from .beta_data_residency_update_config_param import (
 from .beta_external_key_unattached_attachment import (
     BetaExternalKeyUnattachedAttachment as BetaExternalKeyUnattachedAttachment,
 )
+from .beta_analytics_skill_claude_code_metrics import (
+    BetaAnalyticsSkillClaudeCodeMetrics as BetaAnalyticsSkillClaudeCodeMetrics,
+)
 from .beta_organization_rate_limit_batch_group import (
     BetaOrganizationRateLimitBatchGroup as BetaOrganizationRateLimitBatchGroup,
 )
@@ -78,8 +176,32 @@ from .beta_organization_rate_limit_files_group import (
 from .beta_organization_rate_limit_model_group import (
     BetaOrganizationRateLimitModelGroup as BetaOrganizationRateLimitModelGroup,
 )
+from .beta_analytics_plugin_claude_code_metrics import (
+    BetaAnalyticsPluginClaudeCodeMetrics as BetaAnalyticsPluginClaudeCodeMetrics,
+)
 from .beta_organization_rate_limit_skills_group import (
     BetaOrganizationRateLimitSkillsGroup as BetaOrganizationRateLimitSkillsGroup,
+)
+from .beta_plugin_marketplace_validation_report import (
+    BetaPluginMarketplaceValidationReport as BetaPluginMarketplaceValidationReport,
+)
+from .beta_spend_limit_organization_scope_param import (
+    BetaSpendLimitOrganizationScopeParam as BetaSpendLimitOrganizationScopeParam,
+)
+from .beta_analytics_single_day_activity_summary import (
+    BetaAnalyticsSingleDayActivitySummary as BetaAnalyticsSingleDayActivitySummary,
+)
+from .plugin_marketplace_validate_archive_params import (
+    PluginMarketplaceValidateArchiveParams as PluginMarketplaceValidateArchiveParams,
+)
+from .beta_analytics_skill_office_product_metrics import (
+    BetaAnalyticsSkillOfficeProductMetrics as BetaAnalyticsSkillOfficeProductMetrics,
+)
+from .beta_spend_limit_organization_service_scope import (
+    BetaSpendLimitOrganizationServiceScope as BetaSpendLimitOrganizationServiceScope,
+)
+from .beta_analytics_connector_claude_code_metrics import (
+    BetaAnalyticsConnectorClaudeCodeMetrics as BetaAnalyticsConnectorClaudeCodeMetrics,
 )
 from .beta_compliance_settings_state_enabled_param import (
     BetaComplianceSettingsStateEnabledParam as BetaComplianceSettingsStateEnabledParam,
@@ -90,6 +212,21 @@ from .beta_compliance_settings_state_disabled_param import (
 from .beta_organization_rate_limit_web_search_group import (
     BetaOrganizationRateLimitWebSearchGroup as BetaOrganizationRateLimitWebSearchGroup,
 )
+from .plugin_marketplace_validate_repository_params import (
+    PluginMarketplaceValidateRepositoryParams as PluginMarketplaceValidateRepositoryParams,
+)
 from .beta_organization_rate_limit_token_count_group import (
     BetaOrganizationRateLimitTokenCountGroup as BetaOrganizationRateLimitTokenCountGroup,
+)
+from .beta_analytics_connector_office_product_metrics import (
+    BetaAnalyticsConnectorOfficeProductMetrics as BetaAnalyticsConnectorOfficeProductMetrics,
+)
+from .beta_plugin_marketplace_validation_plugin_error import (
+    BetaPluginMarketplaceValidationPluginError as BetaPluginMarketplaceValidationPluginError,
+)
+from .beta_plugin_marketplace_validation_plugin_warning import (
+    BetaPluginMarketplaceValidationPluginWarning as BetaPluginMarketplaceValidationPluginWarning,
+)
+from .beta_plugin_marketplace_validation_plugin_warnings import (
+    BetaPluginMarketplaceValidationPluginWarnings as BetaPluginMarketplaceValidationPluginWarnings,
 )

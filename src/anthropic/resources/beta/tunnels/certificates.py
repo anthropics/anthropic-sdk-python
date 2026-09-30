@@ -109,7 +109,10 @@ class Certificates(SyncAPIResource):
             path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
             body={"ca_certificate_pem": ca_certificate_pem},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -182,7 +185,10 @@ class Certificates(SyncAPIResource):
                 certificate_id=certificate_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -341,7 +347,10 @@ class Certificates(SyncAPIResource):
                 certificate_id=certificate_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -433,7 +442,10 @@ class AsyncCertificates(AsyncAPIResource):
             path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
             body={"ca_certificate_pem": ca_certificate_pem},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -506,7 +518,10 @@ class AsyncCertificates(AsyncAPIResource):
                 certificate_id=certificate_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -665,7 +680,10 @@ class AsyncCertificates(AsyncAPIResource):
                 certificate_id=certificate_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnelCertificate,
         )

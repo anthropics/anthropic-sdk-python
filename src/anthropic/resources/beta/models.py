@@ -95,7 +95,10 @@ class Models(SyncAPIResource):
         return self._get(
             path_template("/v1/models/{model_id}?beta=true", model_id=model_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaModelInfo,
         )
@@ -249,7 +252,10 @@ class AsyncModels(AsyncAPIResource):
         return await self._get(
             path_template("/v1/models/{model_id}?beta=true", model_id=model_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaModelInfo,
         )

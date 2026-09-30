@@ -154,7 +154,10 @@ def _write_profile(
     if "type" in config and "authentication" not in config:
         config = _migrate_legacy_config(config)
     (config_dir / "configs").mkdir(parents=True, exist_ok=True)
-    (config_dir / "configs" / f"{profile}.json").write_text(json.dumps(config))
+    config_path = config_dir / "configs" / f"{profile}.json"
+    config_path.write_text(json.dumps(config))
+    # The config reader refuses files that group or others can write.
+    config_path.chmod(0o644)
     if credentials is not None:
         if "type" not in credentials:
             credentials = {"type": "oauth_token", **credentials}
@@ -777,6 +780,7 @@ class TestCredentialsFile:
         clean_env.setenv("ANTHROPIC_PROFILE", "broken")
         (tmp_path / "configs").mkdir()
         (tmp_path / "configs" / "broken.json").write_text("this is not JSON")
+        (tmp_path / "configs" / "broken.json").chmod(0o644)
         with pytest.raises(AnthropicError, match="not valid JSON"):
             default_credentials()
 
@@ -865,6 +869,67 @@ class TestCredentialsFile:
         with pytest.raises(AnthropicError, match="symlink"):
             CredentialsFile()()
 
+    # -- security: config file permissions --------------------------------
+
+    @pytest.mark.parametrize("mode", [0o664, 0o646, 0o666, 0o620, 0o602], ids=oct)
+    def test_config_file_group_or_other_writable_rejected(self, tmp_path: pathlib.Path, mode: int) -> None:
+        if os.name != "posix":
+            pytest.skip("POSIX mode bits only")
+        _write_profile(tmp_path, "default", {"type": "external"}, {"access_token": "x"})
+        (tmp_path / "configs" / "default.json").chmod(mode)
+        with pytest.raises(AnthropicError, match=rf"writable by group or others \(mode {mode:#o}\)"):
+            CredentialsFile()()
+
+    @pytest.mark.parametrize("mode", [0o644, 0o640, 0o600], ids=oct)
+    def test_config_file_not_writable_by_others_accepted(self, tmp_path: pathlib.Path, mode: int) -> None:
+        if os.name != "posix":
+            pytest.skip("POSIX mode bits only")
+        _write_profile(
+            tmp_path,
+            "default",
+            {"type": "external"},
+            {"access_token": "x", "expires_at": int(time.time()) + 3600},
+        )
+        (tmp_path / "configs" / "default.json").chmod(mode)
+        assert CredentialsFile()().token == "x"
+
+    def test_config_file_symlink_checks_target_mode(self, tmp_path: pathlib.Path) -> None:
+        if os.name != "posix":
+            pytest.skip("symlink semantics")
+        _write_profile(
+            tmp_path,
+            "default",
+            {"type": "external"},
+            {"access_token": "x", "expires_at": int(time.time()) + 3600},
+        )
+        # Like a Kubernetes ConfigMap volume, where each file is a symlink into `..data/`.
+        link = tmp_path / "configs" / "default.json"
+        target = tmp_path / "configs" / "..data" / "default.json"
+        target.parent.mkdir()
+        link.rename(target)
+        link.symlink_to(pathlib.Path("..data") / "default.json")
+        target.chmod(0o644)
+        assert CredentialsFile()().token == "x"
+
+        target.chmod(0o666)
+        with pytest.raises(AnthropicError, match="writable by group or others"):
+            CredentialsFile()()
+
+    def test_config_file_symlink_outside_config_dir_rejected(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        if os.name != "posix":
+            pytest.skip("symlink semantics")
+        config_dir = tmp_path / "config-dir"
+        monkeypatch.setenv("ANTHROPIC_CONFIG_DIR", str(config_dir))
+        _write_profile(config_dir, "default", {"type": "external"}, {"access_token": "x"})
+        link = config_dir / "configs" / "default.json"
+        target = tmp_path / "elsewhere.json"
+        link.rename(target)
+        link.symlink_to(target)
+        with pytest.raises(AnthropicError, match="escapes config directory"):
+            CredentialsFile()()
+
     # -- security: redacted error bodies ----------------------------------
 
     def test_workload_identity_error_body_redacted(self) -> None:
@@ -890,6 +955,7 @@ class TestCredentialsFile:
     def test_bad_config_json(self, tmp_path: pathlib.Path) -> None:
         (tmp_path / "configs").mkdir()
         (tmp_path / "configs" / "default.json").write_text("{not json")
+        (tmp_path / "configs" / "default.json").chmod(0o644)
         with pytest.raises(AnthropicError, match="not valid JSON"):
             CredentialsFile()()
 

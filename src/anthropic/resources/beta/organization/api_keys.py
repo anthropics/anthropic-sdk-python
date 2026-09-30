@@ -72,7 +72,10 @@ class APIKeys(SyncAPIResource):
         return self._get(
             path_template("/v1/organizations/api_keys/{api_key_id}?beta=true", api_key_id=api_key_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaAPIKey,
         )
@@ -117,7 +120,10 @@ class APIKeys(SyncAPIResource):
                 "status": status,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaAPIKey,
         )
@@ -237,7 +243,10 @@ class AsyncAPIKeys(AsyncAPIResource):
         return await self._get(
             path_template("/v1/organizations/api_keys/{api_key_id}?beta=true", api_key_id=api_key_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaAPIKey,
         )
@@ -282,7 +291,10 @@ class AsyncAPIKeys(AsyncAPIResource):
                 "status": status,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaAPIKey,
         )

@@ -161,6 +161,10 @@ class SyncPageCursor(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
         return data
 
     @override
+    def has_next_page(self) -> bool:
+        return self.next_page_info() is not None
+
+    @override
     def next_page_info(self) -> Optional[PageInfo]:
         next_page = self.next_page
         if not next_page:
@@ -179,6 +183,10 @@ class AsyncPageCursor(BaseAsyncPage[_T], BasePage[_T], Generic[_T]):
         if not data:
             return []
         return data
+
+    @override
+    def has_next_page(self) -> bool:
+        return self.next_page_info() is not None
 
     @override
     def next_page_info(self) -> Optional[PageInfo]:
@@ -202,6 +210,10 @@ class SyncBidirectionalPageCursor(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
         return data
 
     @override
+    def has_next_page(self) -> bool:
+        return self.next_page_info() is not None
+
+    @override
     def next_page_info(self) -> Optional[PageInfo]:
         next_page = self.next_page
         if not next_page:
@@ -221,6 +233,10 @@ class AsyncBidirectionalPageCursor(BaseAsyncPage[_T], BasePage[_T], Generic[_T])
         if not data:
             return []
         return data
+
+    @override
+    def has_next_page(self) -> bool:
+        return self.next_page_info() is not None
 
     @override
     def next_page_info(self) -> Optional[PageInfo]:

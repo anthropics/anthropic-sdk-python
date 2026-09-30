@@ -84,7 +84,10 @@ class ExternalKeys(SyncAPIResource):
                 "geo": geo,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaExternalKey,
         )
@@ -121,7 +124,10 @@ class ExternalKeys(SyncAPIResource):
                 "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaExternalKey,
         )
@@ -177,7 +183,10 @@ class ExternalKeys(SyncAPIResource):
                 "provider_config": provider_config,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaExternalKey,
         )
@@ -263,7 +272,10 @@ class ExternalKeys(SyncAPIResource):
                 "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ExternalKeyDeleteResponse,
         )
@@ -305,7 +317,10 @@ class ExternalKeys(SyncAPIResource):
                 "/v1/organizations/external_keys/{external_key_id}/validate?beta=true", external_key_id=external_key_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ExternalKeyValidateResponse,
         )
@@ -370,7 +385,10 @@ class AsyncExternalKeys(AsyncAPIResource):
                 "geo": geo,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaExternalKey,
         )
@@ -407,7 +425,10 @@ class AsyncExternalKeys(AsyncAPIResource):
                 "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaExternalKey,
         )
@@ -463,7 +484,10 @@ class AsyncExternalKeys(AsyncAPIResource):
                 "provider_config": provider_config,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaExternalKey,
         )
@@ -549,7 +573,10 @@ class AsyncExternalKeys(AsyncAPIResource):
                 "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ExternalKeyDeleteResponse,
         )
@@ -591,7 +618,10 @@ class AsyncExternalKeys(AsyncAPIResource):
                 "/v1/organizations/external_keys/{external_key_id}/validate?beta=true", external_key_id=external_key_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=ExternalKeyValidateResponse,
         )

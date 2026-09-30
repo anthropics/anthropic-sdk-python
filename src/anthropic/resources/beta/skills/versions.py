@@ -128,7 +128,10 @@ class Versions(SyncAPIResource):
             body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSkillVersion,
         )
@@ -194,7 +197,10 @@ class Versions(SyncAPIResource):
         return self._get(
             path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSkillVersion,
         )
@@ -332,7 +338,10 @@ class Versions(SyncAPIResource):
         return self._delete(
             path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDeletedSkillVersion,
         )
@@ -400,7 +409,10 @@ class Versions(SyncAPIResource):
                 "/v1/skills/{skill_id}/versions/{version}/content?beta=true", skill_id=skill_id, version=version
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BinaryAPIResponse,
         )
@@ -492,7 +504,10 @@ class AsyncVersions(AsyncAPIResource):
             body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSkillVersion,
         )
@@ -558,7 +573,10 @@ class AsyncVersions(AsyncAPIResource):
         return await self._get(
             path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaSkillVersion,
         )
@@ -696,7 +714,10 @@ class AsyncVersions(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDeletedSkillVersion,
         )
@@ -764,7 +785,10 @@ class AsyncVersions(AsyncAPIResource):
                 "/v1/skills/{skill_id}/versions/{version}/content?beta=true", skill_id=skill_id, version=version
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=AsyncBinaryAPIResponse,
         )

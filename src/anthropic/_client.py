@@ -111,12 +111,13 @@ def _warn_env_shadow(*, api_key: str | None, auth_token: str | None) -> None:
 # --- end credentials support ---
 
 if TYPE_CHECKING:
-    from .resources import beta, files, models, skills, messages
+    from .resources import beta, files, models, skills, messages, organization
     from .resources.files import Files, AsyncFiles
     from .resources.models import Models, AsyncModels
     from .resources.beta.beta import Beta, AsyncBeta
     from .resources.skills.skills import Skills, AsyncSkills
     from .resources.messages.messages import Messages, AsyncMessages
+    from .resources.organization.organization import Organization, AsyncOrganization
 
 __all__ = ["Timeout", "RequestOptions", "Anthropic", "AsyncAnthropic", "Client", "AsyncClient"]
 
@@ -334,6 +335,12 @@ class Anthropic(SyncAPIClient):
         from .resources.skills import Skills
 
         return Skills(self)
+
+    @cached_property
+    def organization(self) -> Organization:
+        from .resources.organization import Organization
+
+        return Organization(self)
 
     @cached_property
     def beta(self) -> Beta:
@@ -762,6 +769,12 @@ class AsyncAnthropic(AsyncAPIClient):
         return AsyncSkills(self)
 
     @cached_property
+    def organization(self) -> AsyncOrganization:
+        from .resources.organization import AsyncOrganization
+
+        return AsyncOrganization(self)
+
+    @cached_property
     def beta(self) -> AsyncBeta:
         from .resources.beta import AsyncBeta
 
@@ -1028,6 +1041,12 @@ class AnthropicWithRawResponse:
         return SkillsWithRawResponse(self._client.skills)
 
     @cached_property
+    def organization(self) -> organization.OrganizationWithRawResponse:
+        from .resources.organization import OrganizationWithRawResponse
+
+        return OrganizationWithRawResponse(self._client.organization)
+
+    @cached_property
     def beta(self) -> beta.BetaWithRawResponse:
         from .resources.beta import BetaWithRawResponse
 
@@ -1063,6 +1082,12 @@ class AsyncAnthropicWithRawResponse:
         from .resources.skills import AsyncSkillsWithRawResponse
 
         return AsyncSkillsWithRawResponse(self._client.skills)
+
+    @cached_property
+    def organization(self) -> organization.AsyncOrganizationWithRawResponse:
+        from .resources.organization import AsyncOrganizationWithRawResponse
+
+        return AsyncOrganizationWithRawResponse(self._client.organization)
 
     @cached_property
     def beta(self) -> beta.AsyncBetaWithRawResponse:
@@ -1102,6 +1127,12 @@ class AnthropicWithStreamedResponse:
         return SkillsWithStreamingResponse(self._client.skills)
 
     @cached_property
+    def organization(self) -> organization.OrganizationWithStreamingResponse:
+        from .resources.organization import OrganizationWithStreamingResponse
+
+        return OrganizationWithStreamingResponse(self._client.organization)
+
+    @cached_property
     def beta(self) -> beta.BetaWithStreamingResponse:
         from .resources.beta import BetaWithStreamingResponse
 
@@ -1137,6 +1168,12 @@ class AsyncAnthropicWithStreamedResponse:
         from .resources.skills import AsyncSkillsWithStreamingResponse
 
         return AsyncSkillsWithStreamingResponse(self._client.skills)
+
+    @cached_property
+    def organization(self) -> organization.AsyncOrganizationWithStreamingResponse:
+        from .resources.organization import AsyncOrganizationWithStreamingResponse
+
+        return AsyncOrganizationWithStreamingResponse(self._client.organization)
 
     @cached_property
     def beta(self) -> beta.AsyncBetaWithStreamingResponse:

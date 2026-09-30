@@ -160,7 +160,10 @@ class Deployments(SyncAPIResource):
                 "vault_ids": vault_ids,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -218,7 +221,10 @@ class Deployments(SyncAPIResource):
         return self._get(
             path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -330,7 +336,10 @@ class Deployments(SyncAPIResource):
                 "vault_ids": vault_ids,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -476,7 +485,10 @@ class Deployments(SyncAPIResource):
         return self._post(
             path_template("/v1/deployments/{deployment_id}/archive?beta=true", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -534,7 +546,10 @@ class Deployments(SyncAPIResource):
         return self._post(
             path_template("/v1/deployments/{deployment_id}/pause?beta=true", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -592,7 +607,10 @@ class Deployments(SyncAPIResource):
         return self._post(
             path_template("/v1/deployments/{deployment_id}/run?beta=true", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeploymentRun,
         )
@@ -650,7 +668,10 @@ class Deployments(SyncAPIResource):
         return self._post(
             path_template("/v1/deployments/{deployment_id}/unpause?beta=true", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -779,7 +800,10 @@ class AsyncDeployments(AsyncAPIResource):
                 "vault_ids": vault_ids,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -837,7 +861,10 @@ class AsyncDeployments(AsyncAPIResource):
         return await self._get(
             path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -949,7 +976,10 @@ class AsyncDeployments(AsyncAPIResource):
                 "vault_ids": vault_ids,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -1095,7 +1125,10 @@ class AsyncDeployments(AsyncAPIResource):
         return await self._post(
             path_template("/v1/deployments/{deployment_id}/archive?beta=true", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -1153,7 +1186,10 @@ class AsyncDeployments(AsyncAPIResource):
         return await self._post(
             path_template("/v1/deployments/{deployment_id}/pause?beta=true", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -1211,7 +1247,10 @@ class AsyncDeployments(AsyncAPIResource):
         return await self._post(
             path_template("/v1/deployments/{deployment_id}/run?beta=true", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeploymentRun,
         )
@@ -1269,7 +1308,10 @@ class AsyncDeployments(AsyncAPIResource):
         return await self._post(
             path_template("/v1/deployments/{deployment_id}/unpause?beta=true", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeployment,
         )

@@ -52,6 +52,22 @@ from .external_keys import (
     AsyncExternalKeysWithStreamingResponse,
 )
 from ...._base_client import make_request_options
+from .plugins.plugins import (
+    Plugins,
+    AsyncPlugins,
+    PluginsWithRawResponse,
+    AsyncPluginsWithRawResponse,
+    PluginsWithStreamingResponse,
+    AsyncPluginsWithStreamingResponse,
+)
+from .analytics.analytics import (
+    Analytics,
+    AsyncAnalytics,
+    AnalyticsWithRawResponse,
+    AsyncAnalyticsWithRawResponse,
+    AnalyticsWithStreamingResponse,
+    AsyncAnalyticsWithStreamingResponse,
+)
 from .compliance_settings import (
     ComplianceSettings,
     AsyncComplianceSettings,
@@ -59,6 +75,14 @@ from .compliance_settings import (
     AsyncComplianceSettingsWithRawResponse,
     ComplianceSettingsWithStreamingResponse,
     AsyncComplianceSettingsWithStreamingResponse,
+)
+from .plugin_marketplaces import (
+    PluginMarketplaces,
+    AsyncPluginMarketplaces,
+    PluginMarketplacesWithRawResponse,
+    AsyncPluginMarketplacesWithRawResponse,
+    PluginMarketplacesWithStreamingResponse,
+    AsyncPluginMarketplacesWithStreamingResponse,
 )
 from .federation.federation import (
     Federation,
@@ -68,6 +92,14 @@ from .federation.federation import (
     FederationWithStreamingResponse,
     AsyncFederationWithStreamingResponse,
 )
+from .rbac_roles.rbac_roles import (
+    RBACRoles,
+    AsyncRBACRoles,
+    RBACRolesWithRawResponse,
+    AsyncRBACRolesWithRawResponse,
+    RBACRolesWithStreamingResponse,
+    AsyncRBACRolesWithStreamingResponse,
+)
 from .workspaces.workspaces import (
     Workspaces,
     AsyncWorkspaces,
@@ -75,6 +107,22 @@ from .workspaces.workspaces import (
     AsyncWorkspacesWithRawResponse,
     WorkspacesWithStreamingResponse,
     AsyncWorkspacesWithStreamingResponse,
+)
+from .rbac_groups.rbac_groups import (
+    RBACGroups,
+    AsyncRBACGroups,
+    RBACGroupsWithRawResponse,
+    AsyncRBACGroupsWithRawResponse,
+    RBACGroupsWithStreamingResponse,
+    AsyncRBACGroupsWithStreamingResponse,
+)
+from .spend_limits.spend_limits import (
+    SpendLimits,
+    AsyncSpendLimits,
+    SpendLimitsWithRawResponse,
+    AsyncSpendLimitsWithRawResponse,
+    SpendLimitsWithStreamingResponse,
+    AsyncSpendLimitsWithStreamingResponse,
 )
 from ....types.beta.beta_organization import BetaOrganization
 from .service_accounts.service_accounts import (
@@ -127,6 +175,30 @@ class Organization(SyncAPIResource):
         return ComplianceSettings(self._client)
 
     @cached_property
+    def analytics(self) -> Analytics:
+        return Analytics(self._client)
+
+    @cached_property
+    def spend_limits(self) -> SpendLimits:
+        return SpendLimits(self._client)
+
+    @cached_property
+    def rbac_groups(self) -> RBACGroups:
+        return RBACGroups(self._client)
+
+    @cached_property
+    def rbac_roles(self) -> RBACRoles:
+        return RBACRoles(self._client)
+
+    @cached_property
+    def plugins(self) -> Plugins:
+        return Plugins(self._client)
+
+    @cached_property
+    def plugin_marketplaces(self) -> PluginMarketplaces:
+        return PluginMarketplaces(self._client)
+
+    @cached_property
     def with_raw_response(self) -> OrganizationWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
@@ -162,7 +234,10 @@ class Organization(SyncAPIResource):
         return self._get(
             "/v1/organizations/me?beta=true",
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaOrganization,
         )
@@ -206,6 +281,30 @@ class AsyncOrganization(AsyncAPIResource):
         return AsyncComplianceSettings(self._client)
 
     @cached_property
+    def analytics(self) -> AsyncAnalytics:
+        return AsyncAnalytics(self._client)
+
+    @cached_property
+    def spend_limits(self) -> AsyncSpendLimits:
+        return AsyncSpendLimits(self._client)
+
+    @cached_property
+    def rbac_groups(self) -> AsyncRBACGroups:
+        return AsyncRBACGroups(self._client)
+
+    @cached_property
+    def rbac_roles(self) -> AsyncRBACRoles:
+        return AsyncRBACRoles(self._client)
+
+    @cached_property
+    def plugins(self) -> AsyncPlugins:
+        return AsyncPlugins(self._client)
+
+    @cached_property
+    def plugin_marketplaces(self) -> AsyncPluginMarketplaces:
+        return AsyncPluginMarketplaces(self._client)
+
+    @cached_property
     def with_raw_response(self) -> AsyncOrganizationWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
@@ -241,7 +340,10 @@ class AsyncOrganization(AsyncAPIResource):
         return await self._get(
             "/v1/organizations/me?beta=true",
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaOrganization,
         )
@@ -291,6 +393,30 @@ class OrganizationWithRawResponse:
     def compliance_settings(self) -> ComplianceSettingsWithRawResponse:
         return ComplianceSettingsWithRawResponse(self._organization.compliance_settings)
 
+    @cached_property
+    def analytics(self) -> AnalyticsWithRawResponse:
+        return AnalyticsWithRawResponse(self._organization.analytics)
+
+    @cached_property
+    def spend_limits(self) -> SpendLimitsWithRawResponse:
+        return SpendLimitsWithRawResponse(self._organization.spend_limits)
+
+    @cached_property
+    def rbac_groups(self) -> RBACGroupsWithRawResponse:
+        return RBACGroupsWithRawResponse(self._organization.rbac_groups)
+
+    @cached_property
+    def rbac_roles(self) -> RBACRolesWithRawResponse:
+        return RBACRolesWithRawResponse(self._organization.rbac_roles)
+
+    @cached_property
+    def plugins(self) -> PluginsWithRawResponse:
+        return PluginsWithRawResponse(self._organization.plugins)
+
+    @cached_property
+    def plugin_marketplaces(self) -> PluginMarketplacesWithRawResponse:
+        return PluginMarketplacesWithRawResponse(self._organization.plugin_marketplaces)
+
 
 class AsyncOrganizationWithRawResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -335,6 +461,30 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def compliance_settings(self) -> AsyncComplianceSettingsWithRawResponse:
         return AsyncComplianceSettingsWithRawResponse(self._organization.compliance_settings)
+
+    @cached_property
+    def analytics(self) -> AsyncAnalyticsWithRawResponse:
+        return AsyncAnalyticsWithRawResponse(self._organization.analytics)
+
+    @cached_property
+    def spend_limits(self) -> AsyncSpendLimitsWithRawResponse:
+        return AsyncSpendLimitsWithRawResponse(self._organization.spend_limits)
+
+    @cached_property
+    def rbac_groups(self) -> AsyncRBACGroupsWithRawResponse:
+        return AsyncRBACGroupsWithRawResponse(self._organization.rbac_groups)
+
+    @cached_property
+    def rbac_roles(self) -> AsyncRBACRolesWithRawResponse:
+        return AsyncRBACRolesWithRawResponse(self._organization.rbac_roles)
+
+    @cached_property
+    def plugins(self) -> AsyncPluginsWithRawResponse:
+        return AsyncPluginsWithRawResponse(self._organization.plugins)
+
+    @cached_property
+    def plugin_marketplaces(self) -> AsyncPluginMarketplacesWithRawResponse:
+        return AsyncPluginMarketplacesWithRawResponse(self._organization.plugin_marketplaces)
 
 
 class OrganizationWithStreamingResponse:
@@ -381,6 +531,30 @@ class OrganizationWithStreamingResponse:
     def compliance_settings(self) -> ComplianceSettingsWithStreamingResponse:
         return ComplianceSettingsWithStreamingResponse(self._organization.compliance_settings)
 
+    @cached_property
+    def analytics(self) -> AnalyticsWithStreamingResponse:
+        return AnalyticsWithStreamingResponse(self._organization.analytics)
+
+    @cached_property
+    def spend_limits(self) -> SpendLimitsWithStreamingResponse:
+        return SpendLimitsWithStreamingResponse(self._organization.spend_limits)
+
+    @cached_property
+    def rbac_groups(self) -> RBACGroupsWithStreamingResponse:
+        return RBACGroupsWithStreamingResponse(self._organization.rbac_groups)
+
+    @cached_property
+    def rbac_roles(self) -> RBACRolesWithStreamingResponse:
+        return RBACRolesWithStreamingResponse(self._organization.rbac_roles)
+
+    @cached_property
+    def plugins(self) -> PluginsWithStreamingResponse:
+        return PluginsWithStreamingResponse(self._organization.plugins)
+
+    @cached_property
+    def plugin_marketplaces(self) -> PluginMarketplacesWithStreamingResponse:
+        return PluginMarketplacesWithStreamingResponse(self._organization.plugin_marketplaces)
+
 
 class AsyncOrganizationWithStreamingResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -425,3 +599,27 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def compliance_settings(self) -> AsyncComplianceSettingsWithStreamingResponse:
         return AsyncComplianceSettingsWithStreamingResponse(self._organization.compliance_settings)
+
+    @cached_property
+    def analytics(self) -> AsyncAnalyticsWithStreamingResponse:
+        return AsyncAnalyticsWithStreamingResponse(self._organization.analytics)
+
+    @cached_property
+    def spend_limits(self) -> AsyncSpendLimitsWithStreamingResponse:
+        return AsyncSpendLimitsWithStreamingResponse(self._organization.spend_limits)
+
+    @cached_property
+    def rbac_groups(self) -> AsyncRBACGroupsWithStreamingResponse:
+        return AsyncRBACGroupsWithStreamingResponse(self._organization.rbac_groups)
+
+    @cached_property
+    def rbac_roles(self) -> AsyncRBACRolesWithStreamingResponse:
+        return AsyncRBACRolesWithStreamingResponse(self._organization.rbac_roles)
+
+    @cached_property
+    def plugins(self) -> AsyncPluginsWithStreamingResponse:
+        return AsyncPluginsWithStreamingResponse(self._organization.plugins)
+
+    @cached_property
+    def plugin_marketplaces(self) -> AsyncPluginMarketplacesWithStreamingResponse:
+        return AsyncPluginMarketplacesWithStreamingResponse(self._organization.plugin_marketplaces)

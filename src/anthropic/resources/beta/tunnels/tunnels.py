@@ -116,7 +116,10 @@ class Tunnels(SyncAPIResource):
             "/v1/tunnels?beta=true",
             body={"display_name": display_name},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnel,
         )
@@ -180,7 +183,10 @@ class Tunnels(SyncAPIResource):
         return self._get(
             path_template("/v1/tunnels/{tunnel_id}?beta=true", tunnel_id=tunnel_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnel,
         )
@@ -325,7 +331,10 @@ class Tunnels(SyncAPIResource):
         return self._post(
             path_template("/v1/tunnels/{tunnel_id}/archive?beta=true", tunnel_id=tunnel_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnel,
         )
@@ -392,7 +401,10 @@ class Tunnels(SyncAPIResource):
         return self._post(
             path_template("/v1/tunnels/{tunnel_id}/reveal_token?beta=true", tunnel_id=tunnel_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnelToken,
         )
@@ -462,7 +474,10 @@ class Tunnels(SyncAPIResource):
             path_template("/v1/tunnels/{tunnel_id}/rotate_token?beta=true", tunnel_id=tunnel_id),
             body={"reason": reason},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnelToken,
         )
@@ -552,7 +567,10 @@ class AsyncTunnels(AsyncAPIResource):
             "/v1/tunnels?beta=true",
             body={"display_name": display_name},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnel,
         )
@@ -616,7 +634,10 @@ class AsyncTunnels(AsyncAPIResource):
         return await self._get(
             path_template("/v1/tunnels/{tunnel_id}?beta=true", tunnel_id=tunnel_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnel,
         )
@@ -761,7 +782,10 @@ class AsyncTunnels(AsyncAPIResource):
         return await self._post(
             path_template("/v1/tunnels/{tunnel_id}/archive?beta=true", tunnel_id=tunnel_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnel,
         )
@@ -828,7 +852,10 @@ class AsyncTunnels(AsyncAPIResource):
         return await self._post(
             path_template("/v1/tunnels/{tunnel_id}/reveal_token?beta=true", tunnel_id=tunnel_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnelToken,
         )
@@ -898,7 +925,10 @@ class AsyncTunnels(AsyncAPIResource):
             path_template("/v1/tunnels/{tunnel_id}/rotate_token?beta=true", tunnel_id=tunnel_id),
             body={"reason": reason},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaTunnelToken,
         )

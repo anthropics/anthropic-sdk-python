@@ -139,7 +139,10 @@ class MemoryStores(SyncAPIResource):
                 "metadata": metadata,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -198,7 +201,10 @@ class MemoryStores(SyncAPIResource):
         return self._get(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -277,7 +283,10 @@ class MemoryStores(SyncAPIResource):
                 "name": name,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -421,7 +430,10 @@ class MemoryStores(SyncAPIResource):
         return self._delete(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeletedMemoryStore,
         )
@@ -481,7 +493,10 @@ class MemoryStores(SyncAPIResource):
         return self._post(
             path_template("/v1/memory_stores/{memory_store_id}/archive?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -585,7 +600,10 @@ class AsyncMemoryStores(AsyncAPIResource):
                 "metadata": metadata,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -644,7 +662,10 @@ class AsyncMemoryStores(AsyncAPIResource):
         return await self._get(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -723,7 +744,10 @@ class AsyncMemoryStores(AsyncAPIResource):
                 "name": name,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -867,7 +891,10 @@ class AsyncMemoryStores(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeletedMemoryStore,
         )
@@ -927,7 +954,10 @@ class AsyncMemoryStores(AsyncAPIResource):
         return await self._post(
             path_template("/v1/memory_stores/{memory_store_id}/archive?beta=true", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )

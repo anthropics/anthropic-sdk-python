@@ -1,0 +1,726 @@
+from __future__ import annotations
+
+from typing import Optional
+from typing_extensions import Literal
+
+import httpx2
+
+from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
+from ...._utils import path_template
+from ...._compat import cached_property
+from .workspaces import (
+    Workspaces,
+    AsyncWorkspaces,
+    WorkspacesWithRawResponse,
+    AsyncWorkspacesWithRawResponse,
+    WorkspacesWithStreamingResponse,
+    AsyncWorkspacesWithStreamingResponse,
+)
+from ...._resource import SyncAPIResource, AsyncAPIResource
+from ...._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
+from ....pagination import SyncPageCursor, AsyncPageCursor
+from ...._base_client import AsyncPaginator, make_request_options
+from ....types.organization.service_account import ServiceAccount
+
+__all__ = ["ServiceAccounts", "AsyncServiceAccounts"]
+
+
+class ServiceAccounts(SyncAPIResource):
+    @cached_property
+    def workspaces(self) -> Workspaces:
+        return Workspaces(self._client)
+
+    @cached_property
+    def with_raw_response(self) -> ServiceAccountsWithRawResponse:
+        """
+        This property can be used as a prefix for any HTTP method call to return
+        the raw response object instead of the parsed content.
+
+        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        """
+        return ServiceAccountsWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> ServiceAccountsWithStreamingResponse:
+        """
+        An alternative to `.with_raw_response` that doesn't eagerly read the response body.
+
+        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        """
+        return ServiceAccountsWithStreamingResponse(self)
+
+    def create(
+        self,
+        *,
+        name: str,
+        description: Optional[str] | Omit = omit,
+        organization_role: Literal["admin", "developer"] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> ServiceAccount:
+        """
+        **Requires an OAuth access token with the `org:admin` scope**, from
+        `ant auth login --scope org:admin` or a workload identity federation rule; Admin
+        API keys are not accepted. See
+        [Manage WIF with the Admin API](/docs/en/manage-claude/wif-admin-api).
+
+        Create a service account.
+
+        A service account is a named workload identity that federation rules target.
+        `organization_role` is `developer` (default) or `admin`; a rule may only be
+        created or retargeted to grant `org:admin` scope when the target's
+        `organization_role` is `admin`. Creating an `admin`-role service account
+        requires an interactive credential (a user OAuth token or a Console session) — a
+        workload may only create `developer`-role service accounts.
+
+        Args:
+          name: Slug identifier (lowercase, digits, hyphens). Unique within the organization; a
+              duplicate name returns 409.
+
+          description: Optional free-text description.
+
+          organization_role: Org-level role. Defaults to `developer`.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._post(
+            "/v1/organizations/service_accounts",
+            body={
+                "name": name,
+                "description": description,
+                "organization_role": organization_role,
+            },
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=ServiceAccount,
+        )
+
+    def retrieve(
+        self,
+        service_account_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> ServiceAccount:
+        """
+        **Requires an OAuth access token with the `org:admin` scope**, from
+        `ant auth login --scope org:admin` or a workload identity federation rule; Admin
+        API keys are not accepted. See
+        [Manage WIF with the Admin API](/docs/en/manage-claude/wif-admin-api).
+
+        Retrieve a service account by its ID (`svac_...`).
+
+        Args:
+          service_account_id: ID of the service account.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not service_account_id:
+            raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
+        return self._get(
+            path_template(
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=ServiceAccount,
+        )
+
+    def update(
+        self,
+        service_account_id: str,
+        *,
+        description: Optional[str] | Omit = omit,
+        organization_role: Optional[Literal["admin", "developer"]] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> ServiceAccount:
+        """
+        **Requires an OAuth access token with the `org:admin` scope**, from
+        `ant auth login --scope org:admin` or a workload identity federation rule; Admin
+        API keys are not accepted. See
+        [Manage WIF with the Admin API](/docs/en/manage-claude/wif-admin-api).
+
+        Update a service account.
+
+        Only `description` and `organization_role` are mutable; `name` cannot be
+        changed. Archived service accounts cannot be updated; this returns 400. Setting
+        `organization_role` to `admin` (even when unchanged) requires an interactive
+        credential (a user OAuth token or a Console session).
+
+        Args:
+          service_account_id: ID of the service account to update.
+
+          description: Replaces the description. Omit to leave unchanged; send `null` to clear (the
+              field is stored as an empty string).
+
+          organization_role: Replaces the org-level role. Omit or send `null` to leave unchanged.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not service_account_id:
+            raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
+        return self._post(
+            path_template(
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
+            ),
+            body={
+                "description": description,
+                "organization_role": organization_role,
+            },
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=ServiceAccount,
+        )
+
+    def list(
+        self,
+        *,
+        include_archived: bool | Omit = omit,
+        limit: int | Omit = omit,
+        page: Optional[str] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> SyncPageCursor[ServiceAccount]:
+        """
+        **Requires an OAuth access token with the `org:admin` scope**, from
+        `ant auth login --scope org:admin` or a workload identity federation rule; Admin
+        API keys are not accepted. See
+        [Manage WIF with the Admin API](/docs/en/manage-claude/wif-admin-api).
+
+        List service accounts in the caller's organization.
+
+        Results are ordered by creation time, newest first. Use `limit` and the
+        `next_page` cursor to paginate; set `include_archived=true` to include archived
+        service accounts.
+
+        Args:
+          include_archived: Include archived resources. Defaults to false.
+
+          limit: Number of results per page.
+
+          page: Opaque cursor from a previous response's `next_page`.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._get_api_list(
+            "/v1/organizations/service_accounts",
+            page=SyncPageCursor[ServiceAccount],
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
+            ),
+            model=ServiceAccount,
+        )
+
+    def archive(
+        self,
+        service_account_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> ServiceAccount:
+        """
+        **Requires an OAuth access token with the `org:admin` scope**, from
+        `ant auth login --scope org:admin` or a workload identity federation rule; Admin
+        API keys are not accepted. See
+        [Manage WIF with the Admin API](/docs/en/manage-claude/wif-admin-api).
+
+        Archive a service account.
+
+        Idempotent; re-archiving returns the service account with its original
+        `archived_at`. Rejected with 400 if any live (non-archived) federation rule
+        still targets this service account, same as issuer archival; archive those rules
+        first or change their target to another service account.
+
+        Args:
+          service_account_id: ID of the service account to archive.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not service_account_id:
+            raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
+        return self._post(
+            path_template(
+                "/v1/organizations/service_accounts/{service_account_id}/archive", service_account_id=service_account_id
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=ServiceAccount,
+        )
+
+
+class AsyncServiceAccounts(AsyncAPIResource):
+    @cached_property
+    def workspaces(self) -> AsyncWorkspaces:
+        return AsyncWorkspaces(self._client)
+
+    @cached_property
+    def with_raw_response(self) -> AsyncServiceAccountsWithRawResponse:
+        """
+        This property can be used as a prefix for any HTTP method call to return
+        the raw response object instead of the parsed content.
+
+        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        """
+        return AsyncServiceAccountsWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> AsyncServiceAccountsWithStreamingResponse:
+        """
+        An alternative to `.with_raw_response` that doesn't eagerly read the response body.
+
+        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        """
+        return AsyncServiceAccountsWithStreamingResponse(self)
+
+    async def create(
+        self,
+        *,
+        name: str,
+        description: Optional[str] | Omit = omit,
+        organization_role: Literal["admin", "developer"] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> ServiceAccount:
+        """
+        **Requires an OAuth access token with the `org:admin` scope**, from
+        `ant auth login --scope org:admin` or a workload identity federation rule; Admin
+        API keys are not accepted. See
+        [Manage WIF with the Admin API](/docs/en/manage-claude/wif-admin-api).
+
+        Create a service account.
+
+        A service account is a named workload identity that federation rules target.
+        `organization_role` is `developer` (default) or `admin`; a rule may only be
+        created or retargeted to grant `org:admin` scope when the target's
+        `organization_role` is `admin`. Creating an `admin`-role service account
+        requires an interactive credential (a user OAuth token or a Console session) — a
+        workload may only create `developer`-role service accounts.
+
+        Args:
+          name: Slug identifier (lowercase, digits, hyphens). Unique within the organization; a
+              duplicate name returns 409.
+
+          description: Optional free-text description.
+
+          organization_role: Org-level role. Defaults to `developer`.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return await self._post(
+            "/v1/organizations/service_accounts",
+            body={
+                "name": name,
+                "description": description,
+                "organization_role": organization_role,
+            },
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=ServiceAccount,
+        )
+
+    async def retrieve(
+        self,
+        service_account_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> ServiceAccount:
+        """
+        **Requires an OAuth access token with the `org:admin` scope**, from
+        `ant auth login --scope org:admin` or a workload identity federation rule; Admin
+        API keys are not accepted. See
+        [Manage WIF with the Admin API](/docs/en/manage-claude/wif-admin-api).
+
+        Retrieve a service account by its ID (`svac_...`).
+
+        Args:
+          service_account_id: ID of the service account.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not service_account_id:
+            raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
+        return await self._get(
+            path_template(
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=ServiceAccount,
+        )
+
+    async def update(
+        self,
+        service_account_id: str,
+        *,
+        description: Optional[str] | Omit = omit,
+        organization_role: Optional[Literal["admin", "developer"]] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> ServiceAccount:
+        """
+        **Requires an OAuth access token with the `org:admin` scope**, from
+        `ant auth login --scope org:admin` or a workload identity federation rule; Admin
+        API keys are not accepted. See
+        [Manage WIF with the Admin API](/docs/en/manage-claude/wif-admin-api).
+
+        Update a service account.
+
+        Only `description` and `organization_role` are mutable; `name` cannot be
+        changed. Archived service accounts cannot be updated; this returns 400. Setting
+        `organization_role` to `admin` (even when unchanged) requires an interactive
+        credential (a user OAuth token or a Console session).
+
+        Args:
+          service_account_id: ID of the service account to update.
+
+          description: Replaces the description. Omit to leave unchanged; send `null` to clear (the
+              field is stored as an empty string).
+
+          organization_role: Replaces the org-level role. Omit or send `null` to leave unchanged.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not service_account_id:
+            raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
+        return await self._post(
+            path_template(
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
+            ),
+            body={
+                "description": description,
+                "organization_role": organization_role,
+            },
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=ServiceAccount,
+        )
+
+    def list(
+        self,
+        *,
+        include_archived: bool | Omit = omit,
+        limit: int | Omit = omit,
+        page: Optional[str] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> AsyncPaginator[ServiceAccount, AsyncPageCursor[ServiceAccount]]:
+        """
+        **Requires an OAuth access token with the `org:admin` scope**, from
+        `ant auth login --scope org:admin` or a workload identity federation rule; Admin
+        API keys are not accepted. See
+        [Manage WIF with the Admin API](/docs/en/manage-claude/wif-admin-api).
+
+        List service accounts in the caller's organization.
+
+        Results are ordered by creation time, newest first. Use `limit` and the
+        `next_page` cursor to paginate; set `include_archived=true` to include archived
+        service accounts.
+
+        Args:
+          include_archived: Include archived resources. Defaults to false.
+
+          limit: Number of results per page.
+
+          page: Opaque cursor from a previous response's `next_page`.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._get_api_list(
+            "/v1/organizations/service_accounts",
+            page=AsyncPageCursor[ServiceAccount],
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
+            ),
+            model=ServiceAccount,
+        )
+
+    async def archive(
+        self,
+        service_account_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> ServiceAccount:
+        """
+        **Requires an OAuth access token with the `org:admin` scope**, from
+        `ant auth login --scope org:admin` or a workload identity federation rule; Admin
+        API keys are not accepted. See
+        [Manage WIF with the Admin API](/docs/en/manage-claude/wif-admin-api).
+
+        Archive a service account.
+
+        Idempotent; re-archiving returns the service account with its original
+        `archived_at`. Rejected with 400 if any live (non-archived) federation rule
+        still targets this service account, same as issuer archival; archive those rules
+        first or change their target to another service account.
+
+        Args:
+          service_account_id: ID of the service account to archive.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not service_account_id:
+            raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
+        return await self._post(
+            path_template(
+                "/v1/organizations/service_accounts/{service_account_id}/archive", service_account_id=service_account_id
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=ServiceAccount,
+        )
+
+
+class ServiceAccountsWithRawResponse:
+    def __init__(self, service_accounts: ServiceAccounts) -> None:
+        self._service_accounts = service_accounts
+
+        self.create = to_raw_response_wrapper(
+            service_accounts.create,
+        )
+        self.retrieve = to_raw_response_wrapper(
+            service_accounts.retrieve,
+        )
+        self.update = to_raw_response_wrapper(
+            service_accounts.update,
+        )
+        self.list = to_raw_response_wrapper(
+            service_accounts.list,
+        )
+        self.archive = to_raw_response_wrapper(
+            service_accounts.archive,
+        )
+
+    @cached_property
+    def workspaces(self) -> WorkspacesWithRawResponse:
+        return WorkspacesWithRawResponse(self._service_accounts.workspaces)
+
+
+class AsyncServiceAccountsWithRawResponse:
+    def __init__(self, service_accounts: AsyncServiceAccounts) -> None:
+        self._service_accounts = service_accounts
+
+        self.create = async_to_raw_response_wrapper(
+            service_accounts.create,
+        )
+        self.retrieve = async_to_raw_response_wrapper(
+            service_accounts.retrieve,
+        )
+        self.update = async_to_raw_response_wrapper(
+            service_accounts.update,
+        )
+        self.list = async_to_raw_response_wrapper(
+            service_accounts.list,
+        )
+        self.archive = async_to_raw_response_wrapper(
+            service_accounts.archive,
+        )
+
+    @cached_property
+    def workspaces(self) -> AsyncWorkspacesWithRawResponse:
+        return AsyncWorkspacesWithRawResponse(self._service_accounts.workspaces)
+
+
+class ServiceAccountsWithStreamingResponse:
+    def __init__(self, service_accounts: ServiceAccounts) -> None:
+        self._service_accounts = service_accounts
+
+        self.create = to_streamed_response_wrapper(
+            service_accounts.create,
+        )
+        self.retrieve = to_streamed_response_wrapper(
+            service_accounts.retrieve,
+        )
+        self.update = to_streamed_response_wrapper(
+            service_accounts.update,
+        )
+        self.list = to_streamed_response_wrapper(
+            service_accounts.list,
+        )
+        self.archive = to_streamed_response_wrapper(
+            service_accounts.archive,
+        )
+
+    @cached_property
+    def workspaces(self) -> WorkspacesWithStreamingResponse:
+        return WorkspacesWithStreamingResponse(self._service_accounts.workspaces)
+
+
+class AsyncServiceAccountsWithStreamingResponse:
+    def __init__(self, service_accounts: AsyncServiceAccounts) -> None:
+        self._service_accounts = service_accounts
+
+        self.create = async_to_streamed_response_wrapper(
+            service_accounts.create,
+        )
+        self.retrieve = async_to_streamed_response_wrapper(
+            service_accounts.retrieve,
+        )
+        self.update = async_to_streamed_response_wrapper(
+            service_accounts.update,
+        )
+        self.list = async_to_streamed_response_wrapper(
+            service_accounts.list,
+        )
+        self.archive = async_to_streamed_response_wrapper(
+            service_accounts.archive,
+        )
+
+    @cached_property
+    def workspaces(self) -> AsyncWorkspacesWithStreamingResponse:
+        return AsyncWorkspacesWithStreamingResponse(self._service_accounts.workspaces)

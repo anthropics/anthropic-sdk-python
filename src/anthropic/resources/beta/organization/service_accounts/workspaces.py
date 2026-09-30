@@ -182,7 +182,10 @@ class Workspaces(SyncAPIResource):
                 "workspace_role": workspace_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -246,7 +249,10 @@ class Workspaces(SyncAPIResource):
                 workspace_id=workspace_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=WorkspaceRemoveResponse,
         )
@@ -409,7 +415,10 @@ class AsyncWorkspaces(AsyncAPIResource):
                 "workspace_role": workspace_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -473,7 +482,10 @@ class AsyncWorkspaces(AsyncAPIResource):
                 workspace_id=workspace_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=WorkspaceRemoveResponse,
         )

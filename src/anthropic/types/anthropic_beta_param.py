@@ -56,5 +56,6 @@ AnthropicBetaParam: TypeAlias = Union[
         "compact-2026-09-04",
         "inline-tools-2026-09-15",
         "mcp-client-2026-09-15",
+        "ce-plugins-2026-09-01",
     ],
 ]

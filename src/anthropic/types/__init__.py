@@ -66,6 +66,8 @@ from .diagnostics_param import DiagnosticsParam as DiagnosticsParam
 from .effort_capability import EffortCapability as EffortCapability
 from .image_block_param import ImageBlockParam as ImageBlockParam
 from .model_list_params import ModelListParams as ModelListParams
+from .organization_info import OrganizationInfo as OrganizationInfo
+from .organization_role import OrganizationRole as OrganizationRole
 from .plain_text_source import PlainTextSource as PlainTextSource
 from .server_tool_usage import ServerToolUsage as ServerToolUsage
 from .skill_list_params import SkillListParams as SkillListParams

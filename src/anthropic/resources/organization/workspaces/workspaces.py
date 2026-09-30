@@ -1,0 +1,779 @@
+from __future__ import annotations
+
+from typing import Dict, Optional
+
+import httpx2
+
+from .members import (
+    Members,
+    AsyncMembers,
+    MembersWithRawResponse,
+    AsyncMembersWithRawResponse,
+    MembersWithStreamingResponse,
+    AsyncMembersWithStreamingResponse,
+)
+from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
+from ...._utils import path_template
+from ...._compat import cached_property
+from .rate_limits import (
+    RateLimits,
+    AsyncRateLimits,
+    RateLimitsWithRawResponse,
+    AsyncRateLimitsWithRawResponse,
+    RateLimitsWithStreamingResponse,
+    AsyncRateLimitsWithStreamingResponse,
+)
+from ...._resource import SyncAPIResource, AsyncAPIResource
+from ...._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
+from ....pagination import SyncPage, AsyncPage
+from ...._base_client import AsyncPaginator, make_request_options
+from .service_accounts import (
+    ServiceAccounts,
+    AsyncServiceAccounts,
+    ServiceAccountsWithRawResponse,
+    AsyncServiceAccountsWithRawResponse,
+    ServiceAccountsWithStreamingResponse,
+    AsyncServiceAccountsWithStreamingResponse,
+)
+from ....types.organization.workspace import Workspace
+from ....types.organization.data_residency_create_config_param import DataResidencyCreateConfigParam
+from ....types.organization.data_residency_update_config_param import DataResidencyUpdateConfigParam
+
+__all__ = ["Workspaces", "AsyncWorkspaces"]
+
+
+class Workspaces(SyncAPIResource):
+    @cached_property
+    def rate_limits(self) -> RateLimits:
+        return RateLimits(self._client)
+
+    @cached_property
+    def members(self) -> Members:
+        return Members(self._client)
+
+    @cached_property
+    def service_accounts(self) -> ServiceAccounts:
+        return ServiceAccounts(self._client)
+
+    @cached_property
+    def with_raw_response(self) -> WorkspacesWithRawResponse:
+        """
+        This property can be used as a prefix for any HTTP method call to return
+        the raw response object instead of the parsed content.
+
+        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        """
+        return WorkspacesWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> WorkspacesWithStreamingResponse:
+        """
+        An alternative to `.with_raw_response` that doesn't eagerly read the response body.
+
+        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        """
+        return WorkspacesWithStreamingResponse(self)
+
+    def create(
+        self,
+        *,
+        name: str,
+        data_residency: Optional[DataResidencyCreateConfigParam] | Omit = omit,
+        display_color: Optional[str] | Omit = omit,
+        external_key_id: Optional[str] | Omit = omit,
+        tags: Optional[Dict[str, str]] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> Workspace:
+        """
+        Create Workspace
+
+        Args:
+          name: Name of the Workspace.
+
+          data_residency: Data residency configuration for the workspace. If omitted, defaults to
+              `workspace_geo: "us"`, `allowed_inference_geos: "unrestricted"`, and
+              `default_inference_geo: "global"`.
+
+          display_color: Hex color code representing the Workspace in the Anthropic Console.
+
+          external_key_id: ID of the customer-managed encryption key (CMEK) configuration to use for this
+              Workspace. Setting this field requires CMEK to be enabled for your organization.
+              When set, data stored for this Workspace is encrypted with the referenced key.
+              Create key configurations with the External Keys API. On Claude Platform on AWS
+              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
+              same AWS account and Region as the Workspace. On that platform the key is
+              validated against this Workspace when it is attached, so a key-policy problem is
+              reported as an error on this request. This field is write-once: once a key is
+              attached to a Workspace it cannot be detached or replaced. To rotate key
+              material, rotate the underlying key on your cloud KMS; the `external_key_id`
+              stays the same.
+
+          tags: User-defined tags as string key-value pairs. Keys may not begin with
+              `anthropic`.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._post(
+            "/v1/organizations/workspaces",
+            body={
+                "name": name,
+                "data_residency": data_residency,
+                "display_color": display_color,
+                "external_key_id": external_key_id,
+                "tags": tags,
+            },
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=Workspace,
+        )
+
+    def retrieve(
+        self,
+        workspace_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> Workspace:
+        """
+        Get Workspace
+
+        Args:
+          workspace_id: ID of the Workspace.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not workspace_id:
+            raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        return self._get(
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=Workspace,
+        )
+
+    def update(
+        self,
+        workspace_id: str,
+        *,
+        data_residency: Optional[DataResidencyUpdateConfigParam] | Omit = omit,
+        display_color: str | Omit = omit,
+        external_key_id: str | Omit = omit,
+        name: str | Omit = omit,
+        tags: Optional[Dict[str, Optional[str]]] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> Workspace:
+        """
+        Update Workspace
+
+        Args:
+          data_residency: Data residency configuration for the workspace.
+
+          display_color: Hex color code representing the Workspace in the Anthropic Console.
+
+          external_key_id: ID of the customer-managed encryption key (CMEK) configuration to use for this
+              Workspace. Setting this field requires CMEK to be enabled for your organization.
+              When set, data stored for this Workspace is encrypted with the referenced key.
+              Create key configurations with the External Keys API. On Claude Platform on AWS
+              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
+              same AWS account and Region as the Workspace. On that platform the key is
+              validated against this Workspace when it is attached, so a key-policy problem is
+              reported as an error on this request. This field is write-once: once a key is
+              attached to a Workspace it cannot be detached or replaced. To rotate key
+              material, rotate the underlying key on your cloud KMS; the `external_key_id`
+              stays the same.
+
+          name: Name of the Workspace.
+
+          tags: User-defined tags as string key-value pairs. Keys may not begin with
+              `anthropic`.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not workspace_id:
+            raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        return self._post(
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
+            body={
+                "data_residency": data_residency,
+                "display_color": display_color,
+                "external_key_id": external_key_id,
+                "name": name,
+                "tags": tags,
+            },
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=Workspace,
+        )
+
+    def list(
+        self,
+        *,
+        after_id: str | Omit = omit,
+        before_id: str | Omit = omit,
+        include_archived: bool | Omit = omit,
+        limit: int | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> SyncPage[Workspace]:
+        """
+        List Workspaces
+
+        Args:
+          after_id: ID of the object to use as a cursor for pagination. When provided, returns the
+              page of results immediately after this object.
+
+          before_id: ID of the object to use as a cursor for pagination. When provided, returns the
+              page of results immediately before this object.
+
+          include_archived: Whether to include Workspaces that have been archived in the response
+
+          limit: Number of items to return per page.
+
+              Defaults to `20`. Ranges from `1` to `1000`.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._get_api_list(
+            "/v1/organizations/workspaces",
+            page=SyncPage[Workspace],
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                },
+            ),
+            model=Workspace,
+        )
+
+    def archive(
+        self,
+        workspace_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> Workspace:
+        """
+        Archive Workspace
+
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not workspace_id:
+            raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        return self._post(
+            path_template("/v1/organizations/workspaces/{workspace_id}/archive", workspace_id=workspace_id),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=Workspace,
+        )
+
+
+class AsyncWorkspaces(AsyncAPIResource):
+    @cached_property
+    def rate_limits(self) -> AsyncRateLimits:
+        return AsyncRateLimits(self._client)
+
+    @cached_property
+    def members(self) -> AsyncMembers:
+        return AsyncMembers(self._client)
+
+    @cached_property
+    def service_accounts(self) -> AsyncServiceAccounts:
+        return AsyncServiceAccounts(self._client)
+
+    @cached_property
+    def with_raw_response(self) -> AsyncWorkspacesWithRawResponse:
+        """
+        This property can be used as a prefix for any HTTP method call to return
+        the raw response object instead of the parsed content.
+
+        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        """
+        return AsyncWorkspacesWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> AsyncWorkspacesWithStreamingResponse:
+        """
+        An alternative to `.with_raw_response` that doesn't eagerly read the response body.
+
+        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        """
+        return AsyncWorkspacesWithStreamingResponse(self)
+
+    async def create(
+        self,
+        *,
+        name: str,
+        data_residency: Optional[DataResidencyCreateConfigParam] | Omit = omit,
+        display_color: Optional[str] | Omit = omit,
+        external_key_id: Optional[str] | Omit = omit,
+        tags: Optional[Dict[str, str]] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> Workspace:
+        """
+        Create Workspace
+
+        Args:
+          name: Name of the Workspace.
+
+          data_residency: Data residency configuration for the workspace. If omitted, defaults to
+              `workspace_geo: "us"`, `allowed_inference_geos: "unrestricted"`, and
+              `default_inference_geo: "global"`.
+
+          display_color: Hex color code representing the Workspace in the Anthropic Console.
+
+          external_key_id: ID of the customer-managed encryption key (CMEK) configuration to use for this
+              Workspace. Setting this field requires CMEK to be enabled for your organization.
+              When set, data stored for this Workspace is encrypted with the referenced key.
+              Create key configurations with the External Keys API. On Claude Platform on AWS
+              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
+              same AWS account and Region as the Workspace. On that platform the key is
+              validated against this Workspace when it is attached, so a key-policy problem is
+              reported as an error on this request. This field is write-once: once a key is
+              attached to a Workspace it cannot be detached or replaced. To rotate key
+              material, rotate the underlying key on your cloud KMS; the `external_key_id`
+              stays the same.
+
+          tags: User-defined tags as string key-value pairs. Keys may not begin with
+              `anthropic`.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return await self._post(
+            "/v1/organizations/workspaces",
+            body={
+                "name": name,
+                "data_residency": data_residency,
+                "display_color": display_color,
+                "external_key_id": external_key_id,
+                "tags": tags,
+            },
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=Workspace,
+        )
+
+    async def retrieve(
+        self,
+        workspace_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> Workspace:
+        """
+        Get Workspace
+
+        Args:
+          workspace_id: ID of the Workspace.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not workspace_id:
+            raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        return await self._get(
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=Workspace,
+        )
+
+    async def update(
+        self,
+        workspace_id: str,
+        *,
+        data_residency: Optional[DataResidencyUpdateConfigParam] | Omit = omit,
+        display_color: str | Omit = omit,
+        external_key_id: str | Omit = omit,
+        name: str | Omit = omit,
+        tags: Optional[Dict[str, Optional[str]]] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> Workspace:
+        """
+        Update Workspace
+
+        Args:
+          data_residency: Data residency configuration for the workspace.
+
+          display_color: Hex color code representing the Workspace in the Anthropic Console.
+
+          external_key_id: ID of the customer-managed encryption key (CMEK) configuration to use for this
+              Workspace. Setting this field requires CMEK to be enabled for your organization.
+              When set, data stored for this Workspace is encrypted with the referenced key.
+              Create key configurations with the External Keys API. On Claude Platform on AWS
+              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
+              same AWS account and Region as the Workspace. On that platform the key is
+              validated against this Workspace when it is attached, so a key-policy problem is
+              reported as an error on this request. This field is write-once: once a key is
+              attached to a Workspace it cannot be detached or replaced. To rotate key
+              material, rotate the underlying key on your cloud KMS; the `external_key_id`
+              stays the same.
+
+          name: Name of the Workspace.
+
+          tags: User-defined tags as string key-value pairs. Keys may not begin with
+              `anthropic`.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not workspace_id:
+            raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        return await self._post(
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
+            body={
+                "data_residency": data_residency,
+                "display_color": display_color,
+                "external_key_id": external_key_id,
+                "name": name,
+                "tags": tags,
+            },
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=Workspace,
+        )
+
+    def list(
+        self,
+        *,
+        after_id: str | Omit = omit,
+        before_id: str | Omit = omit,
+        include_archived: bool | Omit = omit,
+        limit: int | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> AsyncPaginator[Workspace, AsyncPage[Workspace]]:
+        """
+        List Workspaces
+
+        Args:
+          after_id: ID of the object to use as a cursor for pagination. When provided, returns the
+              page of results immediately after this object.
+
+          before_id: ID of the object to use as a cursor for pagination. When provided, returns the
+              page of results immediately before this object.
+
+          include_archived: Whether to include Workspaces that have been archived in the response
+
+          limit: Number of items to return per page.
+
+              Defaults to `20`. Ranges from `1` to `1000`.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._get_api_list(
+            "/v1/organizations/workspaces",
+            page=AsyncPage[Workspace],
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                },
+            ),
+            model=Workspace,
+        )
+
+    async def archive(
+        self,
+        workspace_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> Workspace:
+        """
+        Archive Workspace
+
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not workspace_id:
+            raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        return await self._post(
+            path_template("/v1/organizations/workspaces/{workspace_id}/archive", workspace_id=workspace_id),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+            ),
+            cast_to=Workspace,
+        )
+
+
+class WorkspacesWithRawResponse:
+    def __init__(self, workspaces: Workspaces) -> None:
+        self._workspaces = workspaces
+
+        self.create = to_raw_response_wrapper(
+            workspaces.create,
+        )
+        self.retrieve = to_raw_response_wrapper(
+            workspaces.retrieve,
+        )
+        self.update = to_raw_response_wrapper(
+            workspaces.update,
+        )
+        self.list = to_raw_response_wrapper(
+            workspaces.list,
+        )
+        self.archive = to_raw_response_wrapper(
+            workspaces.archive,
+        )
+
+    @cached_property
+    def rate_limits(self) -> RateLimitsWithRawResponse:
+        return RateLimitsWithRawResponse(self._workspaces.rate_limits)
+
+    @cached_property
+    def members(self) -> MembersWithRawResponse:
+        return MembersWithRawResponse(self._workspaces.members)
+
+    @cached_property
+    def service_accounts(self) -> ServiceAccountsWithRawResponse:
+        return ServiceAccountsWithRawResponse(self._workspaces.service_accounts)
+
+
+class AsyncWorkspacesWithRawResponse:
+    def __init__(self, workspaces: AsyncWorkspaces) -> None:
+        self._workspaces = workspaces
+
+        self.create = async_to_raw_response_wrapper(
+            workspaces.create,
+        )
+        self.retrieve = async_to_raw_response_wrapper(
+            workspaces.retrieve,
+        )
+        self.update = async_to_raw_response_wrapper(
+            workspaces.update,
+        )
+        self.list = async_to_raw_response_wrapper(
+            workspaces.list,
+        )
+        self.archive = async_to_raw_response_wrapper(
+            workspaces.archive,
+        )
+
+    @cached_property
+    def rate_limits(self) -> AsyncRateLimitsWithRawResponse:
+        return AsyncRateLimitsWithRawResponse(self._workspaces.rate_limits)
+
+    @cached_property
+    def members(self) -> AsyncMembersWithRawResponse:
+        return AsyncMembersWithRawResponse(self._workspaces.members)
+
+    @cached_property
+    def service_accounts(self) -> AsyncServiceAccountsWithRawResponse:
+        return AsyncServiceAccountsWithRawResponse(self._workspaces.service_accounts)
+
+
+class WorkspacesWithStreamingResponse:
+    def __init__(self, workspaces: Workspaces) -> None:
+        self._workspaces = workspaces
+
+        self.create = to_streamed_response_wrapper(
+            workspaces.create,
+        )
+        self.retrieve = to_streamed_response_wrapper(
+            workspaces.retrieve,
+        )
+        self.update = to_streamed_response_wrapper(
+            workspaces.update,
+        )
+        self.list = to_streamed_response_wrapper(
+            workspaces.list,
+        )
+        self.archive = to_streamed_response_wrapper(
+            workspaces.archive,
+        )
+
+    @cached_property
+    def rate_limits(self) -> RateLimitsWithStreamingResponse:
+        return RateLimitsWithStreamingResponse(self._workspaces.rate_limits)
+
+    @cached_property
+    def members(self) -> MembersWithStreamingResponse:
+        return MembersWithStreamingResponse(self._workspaces.members)
+
+    @cached_property
+    def service_accounts(self) -> ServiceAccountsWithStreamingResponse:
+        return ServiceAccountsWithStreamingResponse(self._workspaces.service_accounts)
+
+
+class AsyncWorkspacesWithStreamingResponse:
+    def __init__(self, workspaces: AsyncWorkspaces) -> None:
+        self._workspaces = workspaces
+
+        self.create = async_to_streamed_response_wrapper(
+            workspaces.create,
+        )
+        self.retrieve = async_to_streamed_response_wrapper(
+            workspaces.retrieve,
+        )
+        self.update = async_to_streamed_response_wrapper(
+            workspaces.update,
+        )
+        self.list = async_to_streamed_response_wrapper(
+            workspaces.list,
+        )
+        self.archive = async_to_streamed_response_wrapper(
+            workspaces.archive,
+        )
+
+    @cached_property
+    def rate_limits(self) -> AsyncRateLimitsWithStreamingResponse:
+        return AsyncRateLimitsWithStreamingResponse(self._workspaces.rate_limits)
+
+    @cached_property
+    def members(self) -> AsyncMembersWithStreamingResponse:
+        return AsyncMembersWithStreamingResponse(self._workspaces.members)
+
+    @cached_property
+    def service_accounts(self) -> AsyncServiceAccountsWithStreamingResponse:
+        return AsyncServiceAccountsWithStreamingResponse(self._workspaces.service_accounts)

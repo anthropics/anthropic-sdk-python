@@ -138,7 +138,10 @@ class Dreams(SyncAPIResource):
                 "output_behavior": output_behavior,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDream,
         )
@@ -202,7 +205,10 @@ class Dreams(SyncAPIResource):
         return self._get(
             path_template("/v1/dreams/{dream_id}?beta=true", dream_id=dream_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDream,
         )
@@ -364,7 +370,10 @@ class Dreams(SyncAPIResource):
         return self._post(
             path_template("/v1/dreams/{dream_id}/archive?beta=true", dream_id=dream_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDream,
         )
@@ -431,7 +440,10 @@ class Dreams(SyncAPIResource):
         return self._post(
             path_template("/v1/dreams/{dream_id}/cancel?beta=true", dream_id=dream_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDream,
         )
@@ -547,7 +559,10 @@ class AsyncDreams(AsyncAPIResource):
                 "output_behavior": output_behavior,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDream,
         )
@@ -611,7 +626,10 @@ class AsyncDreams(AsyncAPIResource):
         return await self._get(
             path_template("/v1/dreams/{dream_id}?beta=true", dream_id=dream_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDream,
         )
@@ -773,7 +791,10 @@ class AsyncDreams(AsyncAPIResource):
         return await self._post(
             path_template("/v1/dreams/{dream_id}/archive?beta=true", dream_id=dream_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDream,
         )
@@ -840,7 +861,10 @@ class AsyncDreams(AsyncAPIResource):
         return await self._post(
             path_template("/v1/dreams/{dream_id}/cancel?beta=true", dream_id=dream_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaDream,
         )

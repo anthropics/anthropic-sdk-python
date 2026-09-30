@@ -108,7 +108,10 @@ class Resources(SyncAPIResource):
                     resource_id=resource_id,
                 ),
                 options=make_request_options(
-                    extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                    extra_headers=extra_headers,
+                    extra_query=extra_query,
+                    extra_body=extra_body,
+                    timeout=timeout,
                 ),
                 cast_to=cast(
                     Any, ResourceRetrieveResponse
@@ -181,7 +184,10 @@ class Resources(SyncAPIResource):
                 ),
                 body={"authorization_token": authorization_token},
                 options=make_request_options(
-                    extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                    extra_headers=extra_headers,
+                    extra_query=extra_query,
+                    extra_body=extra_body,
+                    timeout=timeout,
                 ),
                 cast_to=cast(
                     Any, ResourceUpdateResponse
@@ -320,7 +326,10 @@ class Resources(SyncAPIResource):
                 resource_id=resource_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeleteSessionResource,
         )
@@ -388,7 +397,10 @@ class Resources(SyncAPIResource):
                 "mount_path": mount_path,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsFileResource,
         )
@@ -474,7 +486,10 @@ class AsyncResources(AsyncAPIResource):
                     resource_id=resource_id,
                 ),
                 options=make_request_options(
-                    extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                    extra_headers=extra_headers,
+                    extra_query=extra_query,
+                    extra_body=extra_body,
+                    timeout=timeout,
                 ),
                 cast_to=cast(
                     Any, ResourceRetrieveResponse
@@ -547,7 +562,10 @@ class AsyncResources(AsyncAPIResource):
                 ),
                 body={"authorization_token": authorization_token},
                 options=make_request_options(
-                    extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                    extra_headers=extra_headers,
+                    extra_query=extra_query,
+                    extra_body=extra_body,
+                    timeout=timeout,
                 ),
                 cast_to=cast(
                     Any, ResourceUpdateResponse
@@ -686,7 +704,10 @@ class AsyncResources(AsyncAPIResource):
                 resource_id=resource_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsDeleteSessionResource,
         )
@@ -754,7 +775,10 @@ class AsyncResources(AsyncAPIResource):
                 "mount_path": mount_path,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaManagedAgentsFileResource,
         )

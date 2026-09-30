@@ -147,7 +147,10 @@ class Workspaces(SyncAPIResource):
                 "tags": tags,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspace,
         )
@@ -182,7 +185,10 @@ class Workspaces(SyncAPIResource):
         return self._get(
             path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspace,
         )
@@ -248,7 +254,10 @@ class Workspaces(SyncAPIResource):
                 "tags": tags,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspace,
         )
@@ -337,7 +346,10 @@ class Workspaces(SyncAPIResource):
         return self._post(
             path_template("/v1/organizations/workspaces/{workspace_id}/archive?beta=true", workspace_id=workspace_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspace,
         )
@@ -442,7 +454,10 @@ class AsyncWorkspaces(AsyncAPIResource):
                 "tags": tags,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspace,
         )
@@ -477,7 +492,10 @@ class AsyncWorkspaces(AsyncAPIResource):
         return await self._get(
             path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspace,
         )
@@ -543,7 +561,10 @@ class AsyncWorkspaces(AsyncAPIResource):
                 "tags": tags,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspace,
         )
@@ -632,7 +653,10 @@ class AsyncWorkspaces(AsyncAPIResource):
         return await self._post(
             path_template("/v1/organizations/workspaces/{workspace_id}/archive?beta=true", workspace_id=workspace_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
             ),
             cast_to=BetaWorkspace,
         )

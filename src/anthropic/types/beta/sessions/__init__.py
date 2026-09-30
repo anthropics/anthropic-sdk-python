@@ -21,6 +21,7 @@ from .beta_managed_agents_unknown_error import BetaManagedAgentsUnknownError as 
 from .beta_managed_agents_document_block import BetaManagedAgentsDocumentBlock as BetaManagedAgentsDocumentBlock
 from .beta_managed_agents_redacted_block import BetaManagedAgentsRedactedBlock as BetaManagedAgentsRedactedBlock
 from .beta_managed_agents_session_thread import BetaManagedAgentsSessionThread as BetaManagedAgentsSessionThread
+from .beta_managed_agents_session_refusal import BetaManagedAgentsSessionRefusal as BetaManagedAgentsSessionRefusal
 from .beta_managed_agents_session_end_turn import BetaManagedAgentsSessionEndTurn as BetaManagedAgentsSessionEndTurn
 from .beta_managed_agents_session_resource import BetaManagedAgentsSessionResource as BetaManagedAgentsSessionResource
 from .beta_managed_agents_span_model_usage import BetaManagedAgentsSpanModelUsage as BetaManagedAgentsSpanModelUsage
@@ -112,6 +113,9 @@ from .beta_managed_agents_base64_document_source import (
 from .beta_managed_agents_model_overloaded_error import (
     BetaManagedAgentsModelOverloadedError as BetaManagedAgentsModelOverloadedError,
 )
+from .beta_managed_agents_repository_clone_error import (
+    BetaManagedAgentsRepositoryCloneError as BetaManagedAgentsRepositoryCloneError,
+)
 from .beta_managed_agents_retry_status_exhausted import (
     BetaManagedAgentsRetryStatusExhausted as BetaManagedAgentsRetryStatusExhausted,
 )
@@ -147,6 +151,9 @@ from .beta_managed_agents_model_rate_limited_error import (
 )
 from .beta_managed_agents_base64_image_source_param import (
     BetaManagedAgentsBase64ImageSourceParam as BetaManagedAgentsBase64ImageSourceParam,
+)
+from .beta_managed_agents_repository_checkout_error import (
+    BetaManagedAgentsRepositoryCheckoutError as BetaManagedAgentsRepositoryCheckoutError,
 )
 from .beta_managed_agents_search_result_block_param import (
     BetaManagedAgentsSearchResultBlockParam as BetaManagedAgentsSearchResultBlockParam,
@@ -184,6 +191,12 @@ from .beta_managed_agents_model_request_failed_error import (
 from .beta_managed_agents_plain_text_document_source import (
     BetaManagedAgentsPlainTextDocumentSource as BetaManagedAgentsPlainTextDocumentSource,
 )
+from .beta_managed_agents_repository_forbidden_error import (
+    BetaManagedAgentsRepositoryForbiddenError as BetaManagedAgentsRepositoryForbiddenError,
+)
+from .beta_managed_agents_repository_not_found_error import (
+    BetaManagedAgentsRepositoryNotFoundError as BetaManagedAgentsRepositoryNotFoundError,
+)
 from .beta_managed_agents_agent_custom_tool_use_event import (
     BetaManagedAgentsAgentCustomToolUseEvent as BetaManagedAgentsAgentCustomToolUseEvent,
 )
@@ -204,6 +217,9 @@ from .beta_managed_agents_user_interrupt_event_params import (
 )
 from .beta_managed_agents_base64_document_source_param import (
     BetaManagedAgentsBase64DocumentSourceParam as BetaManagedAgentsBase64DocumentSourceParam,
+)
+from .beta_managed_agents_session_refusal_stop_details import (
+    BetaManagedAgentsSessionRefusalStopDetails as BetaManagedAgentsSessionRefusalStopDetails,
 )
 from .beta_managed_agents_session_status_running_event import (
     BetaManagedAgentsSessionStatusRunningEvent as BetaManagedAgentsSessionStatusRunningEvent,
@@ -240,6 +256,9 @@ from .beta_managed_agents_agent_thread_message_sent_event import (
 )
 from .beta_managed_agents_mcp_authentication_failed_error import (
     BetaManagedAgentsMCPAuthenticationFailedError as BetaManagedAgentsMCPAuthenticationFailedError,
+)
+from .beta_managed_agents_repository_authentication_error import (
+    BetaManagedAgentsRepositoryAuthenticationError as BetaManagedAgentsRepositoryAuthenticationError,
 )
 from .beta_managed_agents_session_status_terminated_event import (
     BetaManagedAgentsSessionStatusTerminatedEvent as BetaManagedAgentsSessionStatusTerminatedEvent,
