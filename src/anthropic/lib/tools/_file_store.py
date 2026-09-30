@@ -242,6 +242,7 @@ class FileStore:
             except FileNotFoundError:
                 return
             if stat.S_ISDIR(st.st_mode):
+
                 def on_error(
                     _function: object,
                     _path: str,

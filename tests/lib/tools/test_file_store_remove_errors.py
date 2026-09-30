@@ -1,6 +1,6 @@
-import asyncio
-import errno
 import os
+import errno
+import asyncio
 
 import pytest
 
