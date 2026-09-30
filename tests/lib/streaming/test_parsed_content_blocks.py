@@ -70,7 +70,7 @@ def test_streamed_fallback_block_is_constructed_as_fallback_block() -> None:
         type="message",
         role="assistant",
         content=[],
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-5-5",
         stop_reason=None,
         stop_sequence=None,
         usage=BetaUsage(input_tokens=10, output_tokens=10),

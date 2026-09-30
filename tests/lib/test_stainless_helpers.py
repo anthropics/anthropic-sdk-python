@@ -70,7 +70,7 @@ class TestSyncWireHeaders:
         tool = _Tool()
         tag_helper(tool, "mcp_tool")
         client.beta.messages.create(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             tools=[tool],
@@ -100,7 +100,7 @@ class TestSyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             tools=[_Tool()],
@@ -114,7 +114,7 @@ class TestSyncWireHeaders:
     def test_count_tokens_takes_a_tool_object(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
         respx_mock.post("/v1/messages/count_tokens").mock(return_value=httpx2.Response(200, json={"input_tokens": 3}))
         result = client.beta.messages.count_tokens(
-            model="claude-sonnet-4-5", messages=[{"role": "user", "content": "hello"}], tools=[_Tool()]
+            model="claude-sonnet-5-5", messages=[{"role": "user", "content": "hello"}], tools=[_Tool()]
         )
         assert result.input_tokens == 3
         assert json.loads(respx_mock.calls.last.request.content)["tools"] == [_Tool().to_dict()]
@@ -126,7 +126,7 @@ class TestSyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             betas=["fake-beta-2026-01-01"],
@@ -147,7 +147,7 @@ class TestSyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             extra_headers={"anthropic-beta": "explicit-only"},
@@ -167,7 +167,7 @@ class TestAsyncWireHeaders:
         tool = _Tool()
         tag_helper(tool, "mcp_tool")
         await async_client.beta.messages.create(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             tools=[tool],
@@ -199,7 +199,7 @@ class TestAsyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         await async_client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             tools=[_Tool()],
@@ -215,7 +215,7 @@ class TestAsyncWireHeaders:
     ) -> None:
         respx_mock.post("/v1/messages/count_tokens").mock(return_value=httpx2.Response(200, json={"input_tokens": 3}))
         result = await async_client.beta.messages.count_tokens(
-            model="claude-sonnet-4-5", messages=[{"role": "user", "content": "hello"}], tools=[_Tool()]
+            model="claude-sonnet-5-5", messages=[{"role": "user", "content": "hello"}], tools=[_Tool()]
         )
         assert result.input_tokens == 3
         assert json.loads(respx_mock.calls.last.request.content)["tools"] == [_Tool().to_dict()]
@@ -227,7 +227,7 @@ class TestAsyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         await async_client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             betas=["fake-beta-2026-01-01"],
@@ -248,7 +248,7 @@ class TestAsyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         await async_client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             extra_headers={"anthropic-beta": "explicit-only"},

@@ -40,6 +40,7 @@ from .beta_api_key_created_by import BetaAPIKeyCreatedBy as BetaAPIKeyCreatedBy
 from .beta_api_key_user_actor import BetaAPIKeyUserActor as BetaAPIKeyUserActor
 from .beta_plugin_marketplace import BetaPluginMarketplace as BetaPluginMarketplace
 from .beta_spend_limit_period import BetaSpendLimitPeriod as BetaSpendLimitPeriod
+from .spend_limit_list_params import SpendLimitListParams as SpendLimitListParams
 from .workspace_create_params import WorkspaceCreateParams as WorkspaceCreateParams
 from .workspace_update_params import WorkspaceUpdateParams as WorkspaceUpdateParams
 from .beta_analytics_cost_type import BetaAnalyticsCostType as BetaAnalyticsCostType

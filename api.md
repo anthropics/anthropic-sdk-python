@@ -2437,6 +2437,7 @@ from anthropic.types.beta.organization import (
 Methods:
 
 - <code title="get /v1/organizations/spend_limits/{spend_limit_id}?beta=true">client.beta.organization.spend_limits.<a href="./src/anthropic/resources/beta/organization/spend_limits/spend_limits.py">retrieve</a>(spend_limit_id) -> <a href="./src/anthropic/types/beta/organization/beta_spend_limit.py">BetaSpendLimit</a></code>
+- <code title="get /v1/organizations/spend_limits?beta=true">client.beta.organization.spend_limits.<a href="./src/anthropic/resources/beta/organization/spend_limits/spend_limits.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/spend_limit_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_spend_limit.py">SyncPageCursor[BetaSpendLimit]</a></code>
 - <code title="delete /v1/organizations/spend_limits/{spend_limit_id}?beta=true">client.beta.organization.spend_limits.<a href="./src/anthropic/resources/beta/organization/spend_limits/spend_limits.py">delete</a>(spend_limit_id) -> <a href="./src/anthropic/types/beta/organization/spend_limit_delete_response.py">SpendLimitDeleteResponse</a></code>
 - <code title="post /v1/organizations/spend_limits?beta=true">client.beta.organization.spend_limits.<a href="./src/anthropic/resources/beta/organization/spend_limits/spend_limits.py">set</a>(\*\*<a href="src/anthropic/types/beta/organization/spend_limit_set_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_spend_limit.py">BetaSpendLimit</a></code>
 

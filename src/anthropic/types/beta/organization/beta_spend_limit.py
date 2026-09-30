@@ -45,6 +45,14 @@ class BetaSpendLimit(BaseModel):
     currency: str
     """ISO 4217 code of the organization's billing currency; the unit for `amount`."""
 
+    is_enabled: bool
+    """Read-only.
+
+    `false` when extra usage is switched off for this organization (`organization`
+    limit) or for this member (`user` limit); `amount` is kept and applies again
+    when it's switched back on. Always `true` for other limits.
+    """
+
     period: BetaSpendLimitPeriod
     """Length of the window the limit resets over.
 
