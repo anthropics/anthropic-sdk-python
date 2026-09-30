@@ -55,8 +55,8 @@ class BetaPlugin(BaseModel):
     changes when its owner renames it in claude.ai, while its `id` stays the same.
     """
 
-    organization_installation_preference: Union[
-        Literal["auto_install", "available", "not_available", "required"], str, None
+    organization_installation_preference: Optional[
+        Literal["auto_install", "available", "not_available", "required"]
     ] = None
     """
     Organization-owned Plugin: the organization-wide installation setting every

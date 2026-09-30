@@ -18,9 +18,7 @@ class BetaPluginMarketplace(BaseModel):
     created_at: datetime
     """RFC 3339."""
 
-    default_installation_preference: Union[
-        Literal["auto_install", "available", "not_available", "required"], str, None
-    ] = None
+    default_installation_preference: Optional[Literal["auto_install", "available", "not_available", "required"]] = None
     """
     Organization plugin marketplace: the organization-wide setting every Plugin in
     it with no setting of its own gets. Null for a member's personal plugin
@@ -52,7 +50,7 @@ class BetaPluginMarketplace(BaseModel):
     owner: Owner
     """The organization, or the member whose personal plugin marketplace it is."""
 
-    source: Union[Literal["directory", "github", "gitlab", "manual", "public_git"], str]
+    source: Literal["directory", "github", "gitlab", "manual", "public_git"]
     """
     Where the plugin marketplace's Plugins come from: `manual` when they are
     uploaded; `github`, `gitlab` or `public_git` when they are synchronized from the
@@ -61,10 +59,8 @@ class BetaPluginMarketplace(BaseModel):
     this API does not yet name is returned as stored.
     """
 
-    sync_status: Union[
-        Literal["failed_auth", "failed_content", "failed_limits", "failed_transient", "in_progress", "success"],
-        str,
-        None,
+    sync_status: Optional[
+        Literal["failed_auth", "failed_content", "failed_limits", "failed_transient", "in_progress", "success"]
     ] = None
     """
     Outcome of the plugin marketplace's most recent synchronization: one of

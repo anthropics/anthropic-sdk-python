@@ -26,7 +26,7 @@ class BetaPluginInstallationSetting(BaseModel):
     created_at: datetime
     """When the target was first given a setting for this Plugin."""
 
-    installation_preference: Union[Literal["auto_install", "available", "not_available", "required"], str]
+    installation_preference: Literal["auto_install", "available", "not_available", "required"]
     """The setting the target holds for this Plugin.
 
     One of `required`, `auto_install`, `available`, `not_available`; a value this
