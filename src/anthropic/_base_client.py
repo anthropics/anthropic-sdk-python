@@ -219,9 +219,9 @@ class BasePage(GenericModel, Generic[_T]):
     _model: Type[_T] = PrivateAttr()
 
     def has_next_page(self) -> bool:
-        items = self._get_page_items()
-        if not items:
-            return False
+        # A cursor is independent of the rows returned with it, so an empty page that
+        # still provides one is not the end of the list. Only `next_page_info()` knows
+        # whether the response carries a way forward.
         return self.next_page_info() is not None
 
     def next_page_info(self) -> Optional[PageInfo]: ...
