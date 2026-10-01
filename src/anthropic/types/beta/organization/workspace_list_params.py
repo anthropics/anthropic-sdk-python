@@ -21,6 +21,9 @@ class WorkspaceListParams(TypedDict, total=False):
     include_archived: bool
     """Whether to include Workspaces that have been archived in the response"""
 
+    include_default: bool
+    """Whether to include the organization's default Workspace in the response"""
+
     limit: int
     """Number of items to return per page.
 
