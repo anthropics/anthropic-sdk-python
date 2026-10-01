@@ -326,6 +326,7 @@ from anthropic.types import (
     EffortCapability,
     ModelCapabilities,
     ModelInfo,
+    ModelLine,
     ThinkingCapability,
     ThinkingTypes,
 )
@@ -720,6 +721,7 @@ from anthropic.types.beta import (
     BetaEffortCapability,
     BetaModelCapabilities,
     BetaModelInfo,
+    BetaModelLine,
     BetaThinkingCapability,
     BetaThinkingTypes,
 )

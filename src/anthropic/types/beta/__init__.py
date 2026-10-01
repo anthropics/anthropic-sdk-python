@@ -10,6 +10,7 @@ from .beta_packages import BetaPackages as BetaPackages
 from .beta_container import BetaContainer as BetaContainer
 from .beta_file_scope import BetaFileScope as BetaFileScope
 from .beta_model_info import BetaModelInfo as BetaModelInfo
+from .beta_model_line import BetaModelLine as BetaModelLine
 from .beta_text_block import BetaTextBlock as BetaTextBlock
 from .beta_text_delta import BetaTextDelta as BetaTextDelta
 from .beta_tool_param import BetaToolParam as BetaToolParam

@@ -21,6 +21,7 @@ from .message import Message as Message
 from .container import Container as Container
 from .beta_error import BetaError as BetaError
 from .model_info import ModelInfo as ModelInfo
+from .model_line import ModelLine as ModelLine
 from .text_block import TextBlock as TextBlock
 from .text_delta import TextDelta as TextDelta
 from .tool_param import ToolParam as ToolParam

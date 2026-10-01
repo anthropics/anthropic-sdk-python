@@ -3,6 +3,7 @@ from datetime import datetime
 from typing_extensions import Literal
 
 from .._models import BaseModel
+from .model_line import ModelLine
 from .model_capabilities import ModelCapabilities
 
 __all__ = ["ModelInfo"]
@@ -26,6 +27,13 @@ class ModelInfo(BaseModel):
 
     display_name: str
     """A human-readable name for the model."""
+
+    line: Optional[ModelLine] = None
+    """
+    The model line this model belongs to, such as `opus` for both Claude Opus 4.5
+    and Claude Opus 4.6. More lines may be added. `null` when the model belongs to
+    no line, as a fine-tuned model does; do not infer a line from the `id`.
+    """
 
     max_input_tokens: Optional[int] = None
     """Maximum input context window size in tokens for this model."""
