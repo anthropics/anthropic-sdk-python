@@ -443,11 +443,12 @@ class TestBetaLocalFilesystemMemoryTool:
                 BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories/nonexistent.txt")
             )
 
+    @pytest.mark.parametrize("path", ["/memories", "/memories/", "/memories/."])
     def test_delete_not_allow_deleting_memories_directory(
-        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool, path: str
     ) -> None:
         with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
-            sync_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories"))
+            sync_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path=path))
 
     def test_rename(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
         sync_local_filesystem_tool.create(
@@ -980,12 +981,13 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
                 BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories/nonexistent.txt")
             )
 
+    @pytest.mark.parametrize("path", ["/memories", "/memories/", "/memories/."])
     async def test_delete_not_allow_deleting_memories_directory(
-        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool, path: str
     ) -> None:
         with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
             await async_local_filesystem_tool.delete(
-                BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories")
+                BetaMemoryTool20250818DeleteCommand(command="delete", path=path)
             )
 
     async def test_rename(self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool) -> None:
