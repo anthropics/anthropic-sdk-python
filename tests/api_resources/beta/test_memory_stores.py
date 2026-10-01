@@ -159,13 +159,11 @@ class TestMemoryStores:
                 memory_store_id="",
             )
 
-    @pytest.mark.skip(reason="mock server returns an empty object for this endpoint")
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         memory_store = client.beta.memory_stores.list()
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryStore], memory_store, path=["response"])
 
-    @pytest.mark.skip(reason="mock server returns an empty object for this endpoint")
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         memory_store = client.beta.memory_stores.list(
@@ -179,7 +177,6 @@ class TestMemoryStores:
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryStore], memory_store, path=["response"])
 
-    @pytest.mark.skip(reason="mock server returns an empty object for this endpoint")
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.memory_stores.with_raw_response.list()
@@ -189,7 +186,6 @@ class TestMemoryStores:
         memory_store = response.parse()
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryStore], memory_store, path=["response"])
 
-    @pytest.mark.skip(reason="mock server returns an empty object for this endpoint")
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.memory_stores.with_streaming_response.list() as response:
@@ -440,13 +436,11 @@ class TestAsyncMemoryStores:
                 memory_store_id="",
             )
 
-    @pytest.mark.skip(reason="mock server returns an empty object for this endpoint")
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         memory_store = await async_client.beta.memory_stores.list()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryStore], memory_store, path=["response"])
 
-    @pytest.mark.skip(reason="mock server returns an empty object for this endpoint")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         memory_store = await async_client.beta.memory_stores.list(
@@ -460,7 +454,6 @@ class TestAsyncMemoryStores:
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryStore], memory_store, path=["response"])
 
-    @pytest.mark.skip(reason="mock server returns an empty object for this endpoint")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.memory_stores.with_raw_response.list()
@@ -470,7 +463,6 @@ class TestAsyncMemoryStores:
         memory_store = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryStore], memory_store, path=["response"])
 
-    @pytest.mark.skip(reason="mock server returns an empty object for this endpoint")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.memory_stores.with_streaming_response.list() as response:
