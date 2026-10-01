@@ -392,7 +392,6 @@ class TestCredentials:
                 vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             )
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     def test_method_mcp_oauth_validate(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.mcp_oauth_validate(
@@ -401,7 +400,6 @@ class TestCredentials:
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     def test_method_mcp_oauth_validate_with_all_params(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.mcp_oauth_validate(
@@ -412,7 +410,6 @@ class TestCredentials:
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     def test_raw_response_mcp_oauth_validate(self, client: Anthropic) -> None:
         response = client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
@@ -425,7 +422,6 @@ class TestCredentials:
         credential = response.parse()
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     def test_streaming_response_mcp_oauth_validate(self, client: Anthropic) -> None:
         with client.beta.vaults.credentials.with_streaming_response.mcp_oauth_validate(
@@ -440,7 +436,6 @@ class TestCredentials:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     def test_path_params_mcp_oauth_validate(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
@@ -832,7 +827,6 @@ class TestAsyncCredentials:
                 vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             )
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     async def test_method_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.mcp_oauth_validate(
@@ -841,7 +835,6 @@ class TestAsyncCredentials:
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     async def test_method_mcp_oauth_validate_with_all_params(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.mcp_oauth_validate(
@@ -852,7 +845,6 @@ class TestAsyncCredentials:
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     async def test_raw_response_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
@@ -865,7 +857,6 @@ class TestAsyncCredentials:
         credential = await response.parse()
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     async def test_streaming_response_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.credentials.with_streaming_response.mcp_oauth_validate(
@@ -880,7 +871,6 @@ class TestAsyncCredentials:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     async def test_path_params_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
