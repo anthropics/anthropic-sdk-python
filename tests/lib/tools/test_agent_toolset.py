@@ -5,6 +5,7 @@ import re
 import sys
 import time
 import base64
+import threading
 from typing import Any, cast
 from pathlib import Path
 from typing_extensions import Required, get_args, get_origin, get_type_hints
@@ -615,6 +616,43 @@ def test_text_io_is_utf8_under_ascii_locale(tmp_path: Path) -> None:
     assert proc.returncode == 0, proc.stderr.decode("utf-8", errors="replace")
     assert proc.stdout.decode("utf-8") == "café — naïve\n"
     assert (tmp_path / "notes.txt").read_text(encoding="utf-8") == "thé — naïve\n"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="FIFOs are POSIX-only")
+async def test_write_rejects_fifo_instead_of_blocking(tmp_path: Path) -> None:
+    """`write` must reject a FIFO the same way `read`/`edit` do.
+
+    Unlike a plain directory (which fails fast with ``IsADirectoryError``),
+    opening an unconnected FIFO for writing *blocks the calling thread
+    forever* waiting for a reader. `read`/`edit` avoid this with an
+    ``S_ISREG`` stat() guard before ever calling ``open()``; `write` had no
+    such guard, so pointing it at a FIFO hangs instead of raising. Run the
+    call off-thread with a bounded join so an unfixed SDK fails this test
+    quickly instead of hanging the whole run.
+    """
+    fifo_path = tmp_path / "pipe"
+    os.mkfifo(fifo_path)
+    env = AgentToolContext(workdir=str(tmp_path))
+
+    box: dict[str, object] = {}
+
+    def runner() -> None:
+        try:
+            anyio.run(beta_write_tool(env).call, {"file_path": "pipe", "content": "hello"})
+        except BaseException as e:  # noqa: BLE001 - captured across the thread boundary
+            box["exc"] = e
+
+    thread = threading.Thread(target=runner, daemon=True)
+    thread.start()
+    thread.join(timeout=5.0)
+
+    if thread.is_alive():
+        pytest.fail("write() hung opening a FIFO instead of rejecting it as a non-regular file")
+
+    exc = box.get("exc")
+    assert isinstance(exc, ToolError), f"expected ToolError, got {exc!r}"
+    assert "not a regular file" in str(exc)
 
 
 @pytest.mark.parametrize(
