@@ -922,6 +922,7 @@ async def test_held_ask_call_does_not_block_other_dispatches() -> None:
     ]
 
     by_id = {it.tool_use_id: it for it in items}
+    
     assert set(by_id) == {"tu_gated", "tu_echo"}
     assert by_id["tu_echo"].confirmation is None
     assert by_id["tu_echo"].posted is True
@@ -1792,3 +1793,18 @@ def test_to_session_content_tool_reference_stringified() -> None:
     block = {"type": "tool_reference", "tool_name": "weather"}
     out = _to_session_content([block])
     assert out == [{"type": "text", "text": session_runner_mod.json.dumps(block)}]
+
+
+@pytest.mark.asyncio()
+async def test_tool_error_preserves_generator_content() -> None:
+    """One-shot structured-content iterables must survive ToolError creation."""
+    structured = [{"type": "text", "text": "structured error"}]
+    async def boom(_input: dict[str, Any]) -> str:
+        content = (block for block in structured)
+        raise ToolError(content=cast(Any, content))
+    tool = _FakeTool("boom", boom)
+    events = FakeAsyncEvents(stream_events=[_tool_use("tu_1", "boom", {}), _terminated()])
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+    assert len(items) == 1
+    assert items[0].is_error is True
+    assert _result_content(items[0]) == structured
