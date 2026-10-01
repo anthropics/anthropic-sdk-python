@@ -31,6 +31,44 @@ SupportedStringFormats = {
     "uuid",
 }
 
+_SUPPORTED_TYPES: frozenset[str] = frozenset(SupportedTypes.__args__)
+
+# The keywords each type actually consumes below. When a type array is split
+# into branches, only these travel to the matching branch; anything else stays
+# on the parent, so it is described once rather than repeated in every branch.
+# Keep in step with the per-type handling in transform_schema().
+_TYPE_SPECIFIC_KEYS: dict[str, tuple[str, ...]] = {
+    "object": ("properties", "additionalProperties", "required"),
+    "string": ("format",),
+    "array": ("items", "minItems"),
+}
+
+
+def _validate_type_array(type_: list[Any]) -> list[str]:
+    """Validate a JSON Schema `type` array and return its members.
+
+    JSON Schema (draft 4 onward) allows `type` to be an array of type names,
+    which is what `z.string().nullable()` and `Optional[str]` emit. The array
+    must be non-empty and its members must be unique type names.
+    """
+    if not type_:
+        raise ValueError("Schema 'type' array must not be empty.")
+
+    seen: set[str] = set()
+    for member in type_:
+        if not isinstance(member, str):
+            raise ValueError(f"Schema 'type' array must contain strings, got {member!r}.")
+        if member not in _SUPPORTED_TYPES:
+            raise ValueError(
+                f"Unsupported schema type {member!r} in 'type' array. Supported types: "
+                f"{', '.join(sorted(_SUPPORTED_TYPES))}."
+            )
+        if member in seen:
+            raise ValueError(f"Schema 'type' array must not repeat {member!r}.")
+        seen.add(member)
+
+    return cast("list[str]", type_)
+
 
 def get_transformed_string(
     schema: dict[str, Any],
@@ -96,21 +134,52 @@ def transform_schema(
         strict_schema["$ref"] = ref
         return strict_schema
 
-    type_: Optional[SupportedTypes] = json_schema.pop("type", None)
+    raw_type: Any = json_schema.pop("type", None)
     any_of = json_schema.pop("anyOf", None)
     one_of = json_schema.pop("oneOf", None)
     all_of = json_schema.pop("allOf", None)
 
-    if is_list(any_of):
+    # stays None when the schema is a combinator or a type array, so the
+    # per-type handling further down is skipped for those
+    type_: Optional[SupportedTypes] = None
+
+    if is_list(raw_type):
+        # `{"type": ["string", "null"]}` is valid JSON Schema and is what
+        # `z.string().nullable()` and `Optional[str]` emit. It means the same
+        # thing as the `anyOf` spelling, so rewrite it that way -- the same
+        # move this function already makes for `oneOf` just below.
+        members = _validate_type_array(cast("list[Any]", raw_type))
+
+        # Give each branch only the keywords its own type consumes. Handing the
+        # whole schema to every branch would, for `["object", "null"]`, stringify
+        # the entire `properties` dict into the null branch's description.
+        # Whatever no branch claims stays on the parent and is described once.
+        branches: list[dict[str, Any]] = []
+        for member in members:
+            branch: dict[str, Any] = {"type": member}
+            for key in _TYPE_SPECIFIC_KEYS.get(member, ()):
+                if key in json_schema:
+                    branch[key] = json_schema[key]
+            branches.append(branch)
+
+        for key in {key for member in members for key in _TYPE_SPECIFIC_KEYS.get(member, ())}:
+            json_schema.pop(key, None)
+
+        strict_schema["anyOf"] = [transform_schema(branch) for branch in branches]
+    elif is_list(any_of):
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in any_of]
     elif is_list(one_of):
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in one_of]
     elif is_list(all_of):
         strict_schema["allOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in all_of]
     else:
-        if type_ is None:
+        if raw_type is None:
             raise ValueError("Schema must have a 'type', 'anyOf', 'oneOf', or 'allOf' field.")
 
+        # An unrecognised type *name* still reaches assert_never below, which
+        # test_unsupported_type_asserts pins deliberately. That path is left
+        # alone: a type array is not a bad type name, it is a different shape.
+        type_ = cast("SupportedTypes", raw_type)
         strict_schema["type"] = type_
 
     enum = json_schema.pop("enum", None)
