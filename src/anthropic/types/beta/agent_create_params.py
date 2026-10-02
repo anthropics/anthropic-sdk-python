@@ -62,7 +62,7 @@ class AgentCreateParams(TypedDict, total=False):
     tools: Iterable[Tool]
     """Tool configurations available to the agent.
 
-    Maximum of 128 tools across all toolsets allowed.
+    Maximum of 256 tools across all toolsets allowed.
     """
 
     betas: List[AnthropicBetaParam]
