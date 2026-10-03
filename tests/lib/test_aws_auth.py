@@ -38,6 +38,30 @@ class TestValidateCredentials:
 
 
 class TestResolveAuthMode:
+    def test_explicit_auth_mode_sigv4_overrides_env_api_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("ANTHROPIC_AWS_API_KEY", "env-key")
+        assert (
+            resolve_auth_mode(
+                auth_mode="sigv4",
+                api_key=None,
+                aws_access_key=None,
+                aws_secret_key=None,
+                aws_profile=None,
+            )
+            is True
+        )
+
+    def test_explicit_auth_mode_api_key_overrides_creds(self) -> None:
+        assert (
+            resolve_auth_mode(
+                auth_mode="api_key",
+                api_key="my-key",
+                aws_access_key="AKID",
+                aws_secret_key="secret",
+                aws_profile=None,
+            )
+            is False
+        )
     def test_api_key_arg_returns_false(self) -> None:
         assert (
             resolve_auth_mode(
