@@ -443,7 +443,7 @@ class TestBetaLocalFilesystemMemoryTool:
                 BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories/nonexistent.txt")
             )
 
-    @pytest.mark.parametrize("path", ["/memories", "/memories/", "/memories/."])
+    @pytest.mark.parametrize("path", ["/memories", "/memories/", "/memories/.", "/memories/./", "/memories/sub/.."])
     def test_delete_not_allow_deleting_memories_directory(
         self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool, path: str
     ) -> None:
@@ -981,7 +981,7 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
                 BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories/nonexistent.txt")
             )
 
-    @pytest.mark.parametrize("path", ["/memories", "/memories/", "/memories/."])
+    @pytest.mark.parametrize("path", ["/memories", "/memories/", "/memories/.", "/memories/./", "/memories/sub/.."])
     async def test_delete_not_allow_deleting_memories_directory(
         self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool, path: str
     ) -> None:
