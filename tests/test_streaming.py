@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import TypeVar, Iterator, AsyncIterator
+from typing import TypeVar, Iterator, AsyncIterator, get_args
 
 import httpx2
 import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
-from anthropic._streaming import Stream, AsyncStream, ServerSentEvent
+from anthropic.types import ErrorType
+from anthropic._streaming import _STREAM_ERROR_TYPE_TO_CLASS, Stream, AsyncStream, ServerSentEvent
 from anthropic._exceptions import (
     NotFoundError,
     APIStatusError,
@@ -299,6 +300,12 @@ async def test_error_of_unknown_type_stays_generic(
 
     assert type(exc_info.value) is APIStatusError
     assert exc_info.value.type == "billing_error"
+
+
+def test_every_error_type_is_mapped_or_deliberately_unmapped() -> None:
+    # no client has a class for billing_error, and timeout_error's class differs by client
+    deliberately_unmapped = {"billing_error", "timeout_error"}
+    assert set(get_args(ErrorType)) == set(_STREAM_ERROR_TYPE_TO_CLASS) | deliberately_unmapped
 
 
 def test_isinstance_check(client: Anthropic, async_client: AsyncAnthropic) -> None:
