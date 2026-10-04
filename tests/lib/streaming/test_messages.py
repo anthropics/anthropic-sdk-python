@@ -702,3 +702,50 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+def test_message_delta_omitted_stop_fields_keeps_previous() -> None:
+    from anthropic.lib.streaming._messages import accumulate_event
+    from anthropic.types.raw_message_start_event import RawMessageStartEvent
+
+    start_event = RawMessageStartEvent.construct(
+        type="message_start",
+        message=Message.construct(
+            id="msg_test",
+            model="claude-sonnet-4-5",
+            role="assistant",
+            type="message",
+            content=[],
+            usage={"input_tokens": 10, "output_tokens": 0},
+            stop_reason=None,
+            stop_sequence=None,
+        ),
+    )
+
+    snapshot = accumulate_event(event=start_event, current_snapshot=None, json_bufs={})
+
+    delta1 = RawMessageDeltaEvent.construct(
+        type="message_delta",
+        delta=RawMessageDelta.construct(
+            stop_reason="end_turn",
+            stop_sequence="</stop>",
+        ),
+        usage=MessageDeltaUsage.construct(output_tokens=5),
+    )
+    snapshot = accumulate_event(event=delta1, current_snapshot=snapshot, json_bufs={})
+    assert snapshot.stop_reason == "end_turn"
+    assert snapshot.stop_sequence == "</stop>"
+
+    # Later delta omitting stop_reason / stop_sequence must not clear them
+    delta2 = RawMessageDeltaEvent.construct(
+        type="message_delta",
+        delta=RawMessageDelta.construct(
+            stop_reason=None,
+            stop_sequence=None,
+        ),
+        usage=MessageDeltaUsage.construct(output_tokens=10),
+    )
+    snapshot = accumulate_event(event=delta2, current_snapshot=snapshot, json_bufs={})
+    assert snapshot.stop_reason == "end_turn"
+    assert snapshot.stop_sequence == "</stop>"
+    assert snapshot.usage.output_tokens == 10
