@@ -518,7 +518,9 @@ class BashSession:
                     # the buffer cannot grow without bound.
                     del buf[: len(buf) - BASH_OUTPUT_LIMIT]
                     truncated = True
-                if marker in buf:
+                # The exit status and its newline can arrive in a later read than the marker.
+                marker_index = buf.find(marker)
+                if marker_index >= 0 and buf.find(b"\n", marker_index + len(marker)) >= 0:
                     return
 
         try:
