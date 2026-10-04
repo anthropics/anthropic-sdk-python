@@ -449,14 +449,15 @@ class SessionToolRunner:
         self.tools: Sequence[BetaAnyRunnableTool] = tools
         self.max_idle = max_idle
         if tool_timeout is not None:
-            if tool_timeout <= 0:
+            # Require the comparison to succeed so NaN cannot bypass the guard.
+            if not tool_timeout > 0:
                 raise ValueError("tool_timeout must be positive or None")
             if any(tool.name == "bash" for tool in tools):
                 # Import lazily to keep agent_toolset's host-only dependencies
                 # out of a plain SessionToolRunner import.
                 from .agent_toolset import BASH_DEFAULT_TIMEOUT
 
-                if tool_timeout <= BASH_DEFAULT_TIMEOUT:
+                if not tool_timeout > BASH_DEFAULT_TIMEOUT:
                     raise ValueError("tool_timeout must exceed the bash tool's default timeout")
         self.tool_timeout = tool_timeout
         # All event stream / list / send requests are issued via this scoped

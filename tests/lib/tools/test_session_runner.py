@@ -1461,9 +1461,39 @@ async def test_tool_timeout_can_be_disabled() -> None:
 
 
 def test_tool_timeout_rejects_nonpositive_values() -> None:
-    for timeout in (0.0, -1.0):
+    for timeout in (0.0, -1.0, float("-inf")):
         with pytest.raises(ValueError, match="tool_timeout must be positive"):
             SessionToolRunner(cast(Any, _FakeClient(FakeAsyncEvents())), "s_1", tools=[], tool_timeout=timeout)
+
+
+@pytest.mark.parametrize("tool_name", ["echo", "bash"])
+def test_tool_timeout_rejects_nan(tool_name: str) -> None:
+    async def echo(_input: dict[str, Any]) -> str:
+        return "done"
+
+    with pytest.raises(ValueError, match="tool_timeout must be positive"):
+        SessionToolRunner(
+            cast(Any, _FakeClient(FakeAsyncEvents())),
+            "s_1",
+            tools=cast(Any, [_FakeTool(tool_name, echo)]),
+            tool_timeout=float("nan"),
+        )
+
+
+@pytest.mark.parametrize("tool_name", ["echo", "bash"])
+@pytest.mark.parametrize("timeout", [None, float("inf")])
+def test_tool_timeout_accepts_unbounded_values(tool_name: str, timeout: float | None) -> None:
+    async def echo(_input: dict[str, Any]) -> str:
+        return "done"
+
+    runner = SessionToolRunner(
+        cast(Any, _FakeClient(FakeAsyncEvents())),
+        "s_1",
+        tools=cast(Any, [_FakeTool(tool_name, echo)]),
+        tool_timeout=timeout,
+    )
+
+    assert runner.tool_timeout == timeout
 
 
 def test_tool_timeout_must_exceed_bash_default() -> None:
