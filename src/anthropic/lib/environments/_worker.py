@@ -63,6 +63,7 @@ from ..tools._memories import (
 from ..tools._deprecations import UNRESTRICTED_PATHS_DEPRECATION, reject_unrestricted_paths
 from ...types.beta.environments import BetaSelfHostedWork, BetaSessionWorkData
 from ..tools._beta_session_runner import (
+    TOOL_TIMEOUT,
     DEFAULT_MAX_IDLE,
     BetaAnyRunnableTool,
     _run_session_tools,
@@ -382,6 +383,9 @@ class EnvironmentWorker:
         after the session goes idle with any `stop_reason` but `requires_action`.
         Defaults to `anthropic.lib.environments.DEFAULT_MAX_IDLE` (60s). `None`
         disables it.
+      tool_timeout: Maximum seconds for each tool call. Defaults to 150;
+        `None` disables the outer timeout. When using the bundled bash tool,
+        this must exceed its 120-second default timeout.
       memory_sync_interval: How often (seconds) to sync the session's
         attached memory stores back while it runs — checked after each
         dispatched tool call, plus one final sync when the session ends
@@ -431,6 +435,7 @@ class EnvironmentWorker:
         workdir: str | os.PathLike[str] | None = None,
         max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None = DEFAULT_MAX_IDLE,
+        tool_timeout: float | None = TOOL_TIMEOUT,
         memory_sync_interval: float | None = DEFAULT_MEMORY_SYNC_INTERVAL,
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
@@ -450,6 +455,7 @@ class EnvironmentWorker:
         unrestricted_paths: bool,
         max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None = DEFAULT_MAX_IDLE,
+        tool_timeout: float | None = TOOL_TIMEOUT,
         memory_sync_interval: float | None = DEFAULT_MEMORY_SYNC_INTERVAL,
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
@@ -467,6 +473,7 @@ class EnvironmentWorker:
         unrestricted_paths: bool | NotGiven = not_given,
         max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None = DEFAULT_MAX_IDLE,
+        tool_timeout: float | None = TOOL_TIMEOUT,
         memory_sync_interval: float | None = DEFAULT_MEMORY_SYNC_INTERVAL,
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
@@ -483,6 +490,7 @@ class EnvironmentWorker:
         self._workdir: str | os.PathLike[str] = os.getcwd() if workdir is None else workdir
         self._max_file_bytes = max_file_bytes
         self._max_idle = max_idle
+        self._tool_timeout = tool_timeout
         if memory_sync_interval is not None:
             _check_sync_interval(memory_sync_interval)
         self._memory_sync_interval = memory_sync_interval
@@ -775,6 +783,7 @@ class EnvironmentWorker:
                         session_id,
                         tools=tools,
                         max_idle=self._max_idle,
+                        tool_timeout=self._tool_timeout,
                         # Despite the parameter name, this is just the
                         # runner's Bearer credential (see its docstring).
                         environment_key=item_credential,
