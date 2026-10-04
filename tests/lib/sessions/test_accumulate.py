@@ -191,3 +191,67 @@ def test_unknown_fragment_type_on_an_existing_index_is_a_noop_forward_compat() -
     )
     next_ = fold(msg, ev)
     assert next_.content == [BetaManagedAgentsTextBlock(type="text", text="x")]
+
+
+@pytest.mark.parametrize("completed", [False, True])
+def test_repeated_start_preserves_the_existing_snapshot(completed: bool) -> None:
+    snapshot = fold(seed("evt_1"), delta("evt_1", "partial", 0))
+    if completed:
+        snapshot = accumulate_managed_agents_event(
+            snapshot,
+            BetaManagedAgentsAgentMessageEvent(
+                id="evt_1",
+                type="agent.message",
+                content=[BetaManagedAgentsTextBlock(type="text", text="complete")],
+                processed_at=datetime(2024, 1, 1, tzinfo=timezone.utc),
+            ),
+        )
+    before = snapshot.model_dump()
+    for _ in range(3):
+        result = accumulate_managed_agents_event(snapshot, start("evt_1"))
+        assert result is snapshot
+        assert result is not None
+        assert result.model_dump() == before
+
+
+def test_repeated_start_keeps_all_preview_content_indices() -> None:
+    snapshot = fold(seed("evt_1"), delta("evt_1", "first", 0))
+    snapshot = fold(snapshot, delta("evt_1", "second", 1))
+    restarted = accumulate_managed_agents_event(snapshot, start("evt_1"))
+    assert restarted is not None
+    result = fold(restarted, delta("evt_1", " appended", 1))
+    assert result.content == [
+        BetaManagedAgentsTextBlock(type="text", text="first"),
+        BetaManagedAgentsTextBlock(type="text", text="second appended"),
+    ]
+    assert snapshot.content[1] == BetaManagedAgentsTextBlock(type="text", text="second")
+
+
+@pytest.mark.parametrize(
+    "timestamp", [datetime(1970, 1, 1, tzinfo=timezone.utc), datetime(2024, 1, 1, tzinfo=timezone.utc)]
+)
+def test_final_message_before_any_preview_survives_repeated_start(timestamp: datetime) -> None:
+    final = BetaManagedAgentsAgentMessageEvent(
+        id="evt_1",
+        type="agent.message",
+        content=[BetaManagedAgentsTextBlock(type="text", text="canonical")],
+        processed_at=timestamp,
+    )
+    snapshot = accumulate_managed_agents_event(None, final)
+    assert snapshot is not final
+    result = accumulate_managed_agents_event(snapshot, start("evt_1"))
+    assert result == final
+    assert result is snapshot
+
+
+@pytest.mark.parametrize("completed", [False, True])
+def test_start_for_a_different_id_still_opens_a_new_preview(completed: bool) -> None:
+    snapshot = fold(seed("evt_1"), delta("evt_1", "old", 0))
+    if completed:
+        snapshot.processed_at = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    result = accumulate_managed_agents_event(snapshot, start("evt_2"))
+    assert result is not None
+    assert result is not snapshot
+    assert result.id == "evt_2"
+    assert result.content == []
+    assert snapshot.content == [BetaManagedAgentsTextBlock(type="text", text="old")]
