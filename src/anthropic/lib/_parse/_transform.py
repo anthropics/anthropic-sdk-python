@@ -96,10 +96,32 @@ def transform_schema(
         strict_schema["$ref"] = ref
         return strict_schema
 
-    type_: Optional[SupportedTypes] = json_schema.pop("type", None)
+    type_: Optional[SupportedTypes | list[SupportedTypes]] = json_schema.pop("type", None)
     any_of = json_schema.pop("anyOf", None)
     one_of = json_schema.pop("oneOf", None)
     all_of = json_schema.pop("allOf", None)
+
+    if is_list(type_):
+        if not type_:
+            raise ValueError("Schema 'type' array must contain at least one type.")
+        type_constraints = {
+            key: json_schema.pop(key) for key in tuple(json_schema) if key not in ("enum", "description", "title")
+        }
+        type_union = {
+            "anyOf": [{"type": variant, **(type_constraints if variant != "null" else {})} for variant in type_]
+        }
+        if is_list(any_of):
+            all_of = [type_union, {"anyOf": any_of}]
+            any_of = None
+        elif is_list(one_of):
+            all_of = [type_union, {"oneOf": one_of}]
+            one_of = None
+        elif is_list(all_of):
+            all_of = [type_union, *all_of]
+        else:
+            any_of = type_union["anyOf"]
+        type_ = None
+    type_ = cast("Optional[SupportedTypes]", type_)
 
     if is_list(any_of):
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in any_of]
