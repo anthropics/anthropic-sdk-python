@@ -536,7 +536,8 @@ def accumulate_event(
         elif event.delta.type == "compaction_delta":
             if content.type == "compaction":
                 content.content = event.delta.content
-                content.encrypted_content = event.delta.encrypted_content
+                if "encrypted_content" in event.delta.model_fields_set:
+                    content.encrypted_content = event.delta.encrypted_content
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
