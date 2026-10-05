@@ -48,7 +48,7 @@ webhooks = ["standardwebhooks >= 1.0.1, < 2"]
 [project.urls]
 Homepage = "https://github.com/anthropics/anthropic-sdk-python"
 Repository = "https://github.com/anthropics/anthropic-sdk-python"
-
+Changelog = "https://github.com/anthropics/anthropic-sdk-python/blob/main/CHANGELOG.md"
 
 [tool.uv]
 managed = true
