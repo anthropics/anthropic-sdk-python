@@ -373,7 +373,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
         set_default_query: Mapping[str, object] | None = None,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
-        """Create a new client re-using the current options, with optional overrides.
+        """Create a new client reusing the current options, with optional overrides.
 
         Passing either of `token_provider` / `credentials` replaces the
         inherited credential configuration wholesale — the source not passed is
@@ -606,7 +606,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
         set_default_query: Mapping[str, object] | None = None,
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
-        """Create a new client re-using the current options, with optional overrides.
+        """Create a new client reusing the current options, with optional overrides.
 
         See `AnthropicGoogleCloud.copy` for the override semantics.
         """

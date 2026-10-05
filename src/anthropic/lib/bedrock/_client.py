@@ -255,7 +255,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
-        Create a new client instance re-using the same options given to the current client with optional overriding.
+        Create a new client instance reusing the same options given to the current client with optional overriding.
         """
         if default_headers is not None and set_default_headers is not None:
             raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
@@ -433,7 +433,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
         _extra_kwargs: Mapping[str, Any] = {},
     ) -> Self:
         """
-        Create a new client instance re-using the same options given to the current client with optional overriding.
+        Create a new client instance reusing the same options given to the current client with optional overriding.
         """
         if default_headers is not None and set_default_headers is not None:
             raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
