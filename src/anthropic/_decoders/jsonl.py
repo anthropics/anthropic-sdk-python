@@ -41,18 +41,30 @@ class JSONLDecoder(Generic[_T]):
         self.http_response.close()
 
     def __decode__(self) -> Iterator[_T]:
+        # JSON Lines uses `\n` as the line separator; `\r\n` is also valid.
+        # Do not finalize on a lone `\r` — batch results are read with a small
+        # `iter_bytes` chunk size, so CRLF often arrives split across chunks.
         buf = b""
         for chunk in self._raw_iterator:
-            for line in chunk.splitlines(keepends=True):
-                buf += line
-                if buf.endswith((b"\r", b"\n", b"\r\n")):
-                    yield construct_type_unchecked(
-                        value=json.loads(buf),
-                        type_=self._line_type,
-                    )
-                    buf = b""
+            buf += chunk
+            while True:
+                newline = buf.find(b"\n")
+                if newline < 0:
+                    break
+
+                line = buf[:newline]
+                buf = buf[newline + 1 :]
+                if line.endswith(b"\r"):
+                    line = line[:-1]
+
+                yield construct_type_unchecked(
+                    value=json.loads(line),
+                    type_=self._line_type,
+                )
 
         # flush
+        if buf.endswith(b"\r"):
+            buf = buf[:-1]
         if buf:
             yield construct_type_unchecked(
                 value=json.loads(buf),
@@ -97,18 +109,30 @@ class AsyncJSONLDecoder(Generic[_T]):
         await self.http_response.aclose()
 
     async def __decode__(self) -> AsyncIterator[_T]:
+        # JSON Lines uses `\n` as the line separator; `\r\n` is also valid.
+        # Do not finalize on a lone `\r` — batch results are read with a small
+        # `iter_bytes` chunk size, so CRLF often arrives split across chunks.
         buf = b""
         async for chunk in self._raw_iterator:
-            for line in chunk.splitlines(keepends=True):
-                buf += line
-                if buf.endswith((b"\r", b"\n", b"\r\n")):
-                    yield construct_type_unchecked(
-                        value=json.loads(buf),
-                        type_=self._line_type,
-                    )
-                    buf = b""
+            buf += chunk
+            while True:
+                newline = buf.find(b"\n")
+                if newline < 0:
+                    break
+
+                line = buf[:newline]
+                buf = buf[newline + 1 :]
+                if line.endswith(b"\r"):
+                    line = line[:-1]
+
+                yield construct_type_unchecked(
+                    value=json.loads(line),
+                    type_=self._line_type,
+                )
 
         # flush
+        if buf.endswith(b"\r"):
+            buf = buf[:-1]
         if buf:
             yield construct_type_unchecked(
                 value=json.loads(buf),
