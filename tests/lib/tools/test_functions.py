@@ -4,13 +4,19 @@ from typing import Any, cast
 from contextlib import contextmanager, asynccontextmanager
 from collections.abc import Callable, Iterator, Awaitable, AsyncIterator
 
+import anyio
 import pytest
+import pydantic
 from pydantic import BaseModel
 
 from anthropic import beta_tool
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools._beta_functions import BaseFunctionTool
 from anthropic.types.beta.beta_tool_param import InputSchema
+
+
+class UnsupportedContextArgument:
+    pass
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="only applicable in pydantic v2")
@@ -560,3 +566,54 @@ class TestContextManagerTool:
 
         with pytest.raises(TypeError, match="needs an explicit input_schema"):
             beta_async_tool(name="noschema")(cast(Any, noschema_cm))
+
+    @pytest.mark.parametrize("suppress", [False, True])
+    async def test_async_context_manager_validation_failure_releases_resource(self, suppress: bool) -> None:
+        from anthropic.lib.tools._beta_functions import beta_async_tool, aclose_runnable_tool
+
+        seen: list[str | BaseException] = []
+
+        @asynccontextmanager
+        async def invalid_cm() -> AsyncIterator[Callable[[UnsupportedContextArgument], Awaitable[str]]]:
+            async def inner(value: UnsupportedContextArgument) -> str:
+                return str(value)
+
+            seen.append("enter")
+            try:
+                yield inner
+            except Exception as error:
+                seen.append(error)
+                if not suppress:
+                    raise
+            finally:
+                await anyio.sleep(0)
+                seen.append("exit")
+
+        tool = beta_async_tool(name="invalid", input_schema={"type": "object"})(cast(Any, invalid_cm))
+        assert seen == []
+        with pytest.raises(pydantic.PydanticSchemaGenerationError) as failure:
+            await tool.call({"value": "irrelevant"})
+        assert seen == ["enter", failure.value, "exit"]
+        await aclose_runnable_tool(tool)
+        assert seen == ["enter", failure.value, "exit"]
+
+    def test_sync_context_manager_validation_failure_releases_resource(self) -> None:
+        seen: list[str | BaseException] = []
+
+        @contextmanager
+        def invalid_cm() -> Iterator[Callable[[UnsupportedContextArgument], str]]:
+            def inner(value: UnsupportedContextArgument) -> str:
+                return str(value)
+
+            seen.append("enter")
+            try:
+                yield inner
+            except Exception as error:
+                seen.append(error)
+                raise
+            finally:
+                seen.append("exit")
+
+        with pytest.raises(pydantic.PydanticSchemaGenerationError) as failure:
+            beta_tool(cast(Any, invalid_cm))
+        assert seen == ["enter", failure.value, "exit"]
