@@ -702,3 +702,77 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+def bom_stream_response(first_field: str, chunk_size: int, prefix: bool) -> Iterator[bytes]:
+    payload = b"".join(get_response("basic_response.txt"))
+    # A later U+FEFF is response text, not another transport byte-order mark.
+    payload = payload.replace(b"Hello", "\ufeffHello".encode())
+    if first_field == "data":
+        first, second, rest = payload.split(b"\n", 2)
+        payload = second + b"\n" + first + b"\n" + rest
+    first, second, rest = payload.split(b"\n", 2)
+    payload = first + b"\n" + second + b"\n\xef\xbb\xbfdata: ignored field\n" + rest
+    if prefix:
+        payload = b"\xef\xbb\xbf" + payload
+    return (payload[i : i + chunk_size] for i in range(0, len(payload), chunk_size))
+
+
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("first_field", ["event", "data"])
+@pytest.mark.parametrize("chunk_size", [1, 2, 64])
+@pytest.mark.parametrize("prefix", [False, True])
+@pytest.mark.parametrize("beta", [False, True])
+def test_stream_preserves_initial_bom_and_literal_text_sync(
+    respx_mock: MockRouter,
+    first_field: str,
+    chunk_size: int,
+    prefix: bool,
+    beta: bool,
+) -> None:
+    respx_mock.post("/v1/messages").mock(
+        return_value=httpx2.Response(
+            200,
+            content=bom_stream_response(first_field, chunk_size, prefix),
+            headers={"content-type": "text/event-stream"},
+        )
+    )
+    messages = sync_client.beta.messages if beta else sync_client.messages
+    with messages.stream(
+        max_tokens=32, model="claude-sonnet-5-5", messages=[{"role": "user", "content": "hello"}]
+    ) as stream:
+        result = stream.get_final_message()
+        text = result.content[0]
+        assert text.type == "text"
+        assert text.text == "\ufeffHello there!"
+        assert result.stop_reason == "end_turn"
+
+
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("first_field", ["event", "data"])
+@pytest.mark.parametrize("chunk_size", [1, 2, 64])
+@pytest.mark.parametrize("prefix", [False, True])
+@pytest.mark.parametrize("beta", [False, True])
+async def test_stream_preserves_initial_bom_and_literal_text_async(
+    respx_mock: MockRouter,
+    first_field: str,
+    chunk_size: int,
+    prefix: bool,
+    beta: bool,
+) -> None:
+    respx_mock.post("/v1/messages").mock(
+        return_value=httpx2.Response(
+            200,
+            content=to_async_iter(bom_stream_response(first_field, chunk_size, prefix)),
+            headers={"content-type": "text/event-stream"},
+        )
+    )
+    messages = async_client.beta.messages if beta else async_client.messages
+    async with messages.stream(
+        max_tokens=32, model="claude-sonnet-5-5", messages=[{"role": "user", "content": "hello"}]
+    ) as stream:
+        result = await stream.get_final_message()
+        text = result.content[0]
+        assert text.type == "text"
+        assert text.text == "\ufeffHello there!"
+        assert result.stop_reason == "end_turn"
