@@ -7,7 +7,7 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._streaming import Stream, AsyncStream, ServerSentEvent
-from anthropic._exceptions import APIStatusError
+from anthropic._exceptions import APIStatusError, APITimeoutError, APIConnectionError
 
 _T = TypeVar("_T")
 
@@ -236,6 +236,45 @@ async def test_error_type(
 
     assert exc_info.value.type == "overloaded_error"
     assert "Overloaded" in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_mid_stream_timeout_wrapped_as_api_timeout_error(
+    sync: bool, client: Anthropic, async_client: AsyncAnthropic
+) -> None:
+    def body() -> Iterator[bytes]:
+        yield b"event: completion\n"
+        yield b'data: {"foo":true}\n'
+        yield b"\n"
+        raise httpx2.ReadTimeout("timed out while reading the stream")
+
+    iterator = make_stream_iterator(content=body(), sync=sync, client=client, async_client=async_client)
+
+    # the first event still comes through fine
+    assert await iter_next(iterator) == {"foo": True}
+
+    with pytest.raises(APITimeoutError):
+        await iter_next(iterator)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_mid_stream_transport_error_wrapped_as_api_connection_error(
+    sync: bool, client: Anthropic, async_client: AsyncAnthropic
+) -> None:
+    def body() -> Iterator[bytes]:
+        yield b"event: completion\n"
+        yield b'data: {"foo":true}\n'
+        yield b"\n"
+        raise httpx2.RemoteProtocolError("connection dropped mid-stream")
+
+    iterator = make_stream_iterator(content=body(), sync=sync, client=client, async_client=async_client)
+
+    assert await iter_next(iterator) == {"foo": True}
+
+    with pytest.raises(APIConnectionError):
+        await iter_next(iterator)
 
 
 def test_isinstance_check(client: Anthropic, async_client: AsyncAnthropic) -> None:
