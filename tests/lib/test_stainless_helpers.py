@@ -7,7 +7,7 @@ import httpx2
 import pytest
 
 from anthropic import Anthropic, AsyncAnthropic, _compat
-from anthropic.types.beta import BetaToolParam
+from anthropic.types.beta import BetaToolParam, BetaMessageParam
 from anthropic._base_client import _APPEND_HEADERS
 from anthropic.lib._stainless_helpers import (
     STAINLESS_HELPER_HEADER,
@@ -156,6 +156,52 @@ class TestSyncWireHeaders:
         headers = respx_mock.calls.last.request.headers
         assert headers["anthropic-beta"] == "explicit-only"
 
+    def test_create_reads_messages_from_a_one_shot_iterable(
+        self, client: Anthropic, respx_mock: respx.MockRouter
+    ) -> None:
+        # regression: collecting the tags walked `messages`, so a generator
+        # reached the body exhausted and the request went out with none
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
+
+        message: BetaMessageParam = {"role": "user", "content": "hello"}
+        client.beta.messages.create(
+            model="claude-sonnet-5-5",
+            max_tokens=16,
+            messages=(item for item in [message]),
+        )
+
+        assert json.loads(respx_mock.calls.last.request.content)["messages"] == [message]
+
+    @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
+    def test_parse_reads_messages_from_a_one_shot_iterable(
+        self, client: Anthropic, respx_mock: respx.MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
+
+        message: BetaMessageParam = {"role": "user", "content": "hello"}
+        client.beta.messages.parse(
+            model="claude-sonnet-5-5",
+            max_tokens=16,
+            messages=(item for item in [message]),
+        )
+
+        assert json.loads(respx_mock.calls.last.request.content)["messages"] == [message]
+
+    def test_tool_runner_reads_messages_from_a_one_shot_iterable(
+        self, client: Anthropic, respx_mock: respx.MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
+
+        message: BetaMessageParam = {"role": "user", "content": "hello"}
+        client.beta.messages.tool_runner(
+            model="claude-sonnet-5-5",
+            max_tokens=16,
+            messages=(item for item in [message]),
+            tools=[_Tool()],
+        ).until_done()
+
+        assert json.loads(respx_mock.calls.last.request.content)["messages"] == [message]
+
 
 @pytest.mark.respx(base_url=base_url)
 class TestAsyncWireHeaders:
@@ -256,3 +302,47 @@ class TestAsyncWireHeaders:
 
         headers = respx_mock.calls.last.request.headers
         assert headers["anthropic-beta"] == "explicit-only"
+
+    async def test_create_reads_messages_from_a_one_shot_iterable(
+        self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
+
+        message: BetaMessageParam = {"role": "user", "content": "hello"}
+        await async_client.beta.messages.create(
+            model="claude-sonnet-5-5",
+            max_tokens=16,
+            messages=(item for item in [message]),
+        )
+
+        assert json.loads(respx_mock.calls.last.request.content)["messages"] == [message]
+
+    @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
+    async def test_parse_reads_messages_from_a_one_shot_iterable(
+        self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
+
+        message: BetaMessageParam = {"role": "user", "content": "hello"}
+        await async_client.beta.messages.parse(
+            model="claude-sonnet-5-5",
+            max_tokens=16,
+            messages=(item for item in [message]),
+        )
+
+        assert json.loads(respx_mock.calls.last.request.content)["messages"] == [message]
+
+    async def test_tool_runner_reads_messages_from_a_one_shot_iterable(
+        self, async_client: AsyncAnthropic, respx_mock: respx.MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
+
+        message: BetaMessageParam = {"role": "user", "content": "hello"}
+        await async_client.beta.messages.tool_runner(
+            model="claude-sonnet-5-5",
+            max_tokens=16,
+            messages=(item for item in [message]),
+            tools=[_Tool()],
+        ).until_done()
+
+        assert json.loads(respx_mock.calls.last.request.content)["messages"] == [message]

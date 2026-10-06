@@ -160,7 +160,8 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         }
         helper_header = stainless_helper_header(
             tools=self._tools_by_name.values(),
-            messages=params.get("messages"),
+            # the list above, not `params`, whose iterable building it consumed
+            messages=self._params["messages"],
         )
         if helper_header:
             merged_headers = merge_headers(helper_header, options.get("extra_headers") or {})

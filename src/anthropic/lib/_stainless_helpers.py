@@ -8,7 +8,7 @@ we only carry the constants and the per-object tagging machinery.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping, TypeVar, cast
+from typing import Any, Dict, Mapping, TypeVar, Sequence, cast
 from typing_extensions import Literal
 
 __all__ = [
@@ -127,7 +127,11 @@ def collect_helpers(
         for tool in tools:
             _add(get_helper_tag(tool))
 
-    if messages:
+    # `messages` is typed as an iterable, so a caller may hand over a generator
+    # it can only walk once, and the request body is built from that same object
+    # after this returns. Reading one here would leave the body with no messages
+    # at all, so only a sequence, which can be read again, is inspected.
+    if isinstance(messages, Sequence):
         for message in messages:
             _add(get_helper_tag(message))
 
