@@ -65,9 +65,10 @@ class FederationRule(BaseModel):
     """Space-separated OAuth scopes granted on the minted token."""
 
     target: ServiceAccountTarget
-    """Identity that tokens minted via this rule act as.
+    """What this rule targets.
 
-    Currently always a `service_account` target.
+    Check `type` before reading the other fields. Tokens minted via a rule whose
+    target `type` is `service_account` act as that service account.
     """
 
     token_lifetime_seconds: int

@@ -127,6 +127,7 @@ from .raw_content_block_delta import RawContentBlockDelta as RawContentBlockDelt
 from .raw_message_delta_event import RawMessageDeltaEvent as RawMessageDeltaEvent
 from .raw_message_start_event import RawMessageStartEvent as RawMessageStartEvent
 from .redacted_thinking_block import RedactedThinkingBlock as RedactedThinkingBlock
+from .server_tools_capability import ServerToolsCapability as ServerToolsCapability
 from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockParam
 from .web_search_result_block import WebSearchResultBlock as WebSearchResultBlock
 from .browser_key_config_param import BrowserKeyConfigParam as BrowserKeyConfigParam

@@ -107,8 +107,7 @@ class Agents(SyncAPIResource):
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
 
-          multiagent: Multiagent orchestration configuration. Currently supports the `coordinator`
-              topology with a roster of 1-20 agents.
+          multiagent: Multiagent orchestration configuration.
 
           skills: Skills available to the agent.
 
@@ -560,8 +559,7 @@ class AsyncAgents(AsyncAPIResource):
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
 
-          multiagent: Multiagent orchestration configuration. Currently supports the `coordinator`
-              topology with a roster of 1-20 agents.
+          multiagent: Multiagent orchestration configuration.
 
           skills: Skills available to the agent.
 

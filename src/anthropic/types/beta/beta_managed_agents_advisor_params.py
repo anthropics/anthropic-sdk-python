@@ -13,8 +13,7 @@ class BetaManagedAgentsAdvisorParams(TypedDict, total=False):
     model: Required[str]
     """A Claude model id.
 
-    The model must be permitted as an advisor for this agent's model — see the
-    sessions/threads/advisor spec.
+    The model must be permitted as an advisor for this agent's model.
     """
 
     type: Required[Literal["advisor"]]

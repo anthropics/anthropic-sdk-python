@@ -7,7 +7,7 @@ __all__ = ["BetaManagedAgentsSessionThreadCreatedEvent"]
 
 
 class BetaManagedAgentsSessionThreadCreatedEvent(BaseModel):
-    """Emitted when a subagent is spawned as a new thread.
+    """Emitted when a child thread is created.
 
     Written to the parent thread's output stream so clients observing the session see child creation.
     """

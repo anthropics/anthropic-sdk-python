@@ -19,7 +19,7 @@ Agent: TypeAlias = Annotated[
 class BetaManagedAgentsSessionThread(BaseModel):
     """An execution thread within a `session`.
 
-    Each session has one primary thread plus zero or more child threads spawned by the coordinator.
+    Each session has one primary thread plus zero or more child threads.
     """
 
     id: str

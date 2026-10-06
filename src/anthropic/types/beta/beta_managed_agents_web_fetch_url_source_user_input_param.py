@@ -1,0 +1,13 @@
+from __future__ import annotations
+
+from typing import Union
+from typing_extensions import TypeAlias
+
+from .beta_managed_agents_web_fetch_url_source_all_param import BetaManagedAgentsWebFetchURLSourceAllParam
+from .beta_managed_agents_web_fetch_url_source_none_param import BetaManagedAgentsWebFetchURLSourceNoneParam
+
+__all__ = ["BetaManagedAgentsWebFetchURLSourceUserInputParam"]
+
+BetaManagedAgentsWebFetchURLSourceUserInputParam: TypeAlias = Union[
+    BetaManagedAgentsWebFetchURLSourceAllParam, BetaManagedAgentsWebFetchURLSourceNoneParam
+]

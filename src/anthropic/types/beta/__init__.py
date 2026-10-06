@@ -205,6 +205,7 @@ from .beta_raw_content_block_delta import BetaRawContentBlockDelta as BetaRawCon
 from .beta_raw_message_delta_event import BetaRawMessageDeltaEvent as BetaRawMessageDeltaEvent
 from .beta_raw_message_start_event import BetaRawMessageStartEvent as BetaRawMessageStartEvent
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock as BetaRedactedThinkingBlock
+from .beta_server_tools_capability import BetaServerToolsCapability as BetaServerToolsCapability
 from .beta_token_task_budget_param import BetaTokenTaskBudgetParam as BetaTokenTaskBudgetParam
 from .beta_tool_result_block_param import BetaToolResultBlockParam as BetaToolResultBlockParam
 from .beta_tool_uses_trigger_param import BetaToolUsesTriggerParam as BetaToolUsesTriggerParam
@@ -720,6 +721,9 @@ from .beta_managed_agents_url_mcp_server_params import (
 from .beta_managed_agents_web_fetch_tool_config import (
     BetaManagedAgentsWebFetchToolConfig as BetaManagedAgentsWebFetchToolConfig,
 )
+from .beta_managed_agents_web_fetch_url_sources import (
+    BetaManagedAgentsWebFetchURLSources as BetaManagedAgentsWebFetchURLSources,
+)
 from .beta_tool_change_mcp_tool_reference_param import (
     BetaToolChangeMCPToolReferenceParam as BetaToolChangeMCPToolReferenceParam,
 )
@@ -885,6 +889,9 @@ from .beta_managed_agents_schedule_trigger_context import (
 from .beta_managed_agents_vault_archived_run_error import (
     BetaManagedAgentsVaultArchivedRunError as BetaManagedAgentsVaultArchivedRunError,
 )
+from .beta_managed_agents_web_fetch_url_source_all import (
+    BetaManagedAgentsWebFetchURLSourceAll as BetaManagedAgentsWebFetchURLSourceAll,
+)
 from .beta_managed_agents_write_tool_config_params import (
     BetaManagedAgentsWriteToolConfigParams as BetaManagedAgentsWriteToolConfigParams,
 )
@@ -932,6 +939,12 @@ from .beta_managed_agents_skill_not_found_run_error import (
 )
 from .beta_managed_agents_vault_not_found_run_error import (
     BetaManagedAgentsVaultNotFoundRunError as BetaManagedAgentsVaultNotFoundRunError,
+)
+from .beta_managed_agents_web_fetch_url_source_none import (
+    BetaManagedAgentsWebFetchURLSourceNone as BetaManagedAgentsWebFetchURLSourceNone,
+)
+from .beta_managed_agents_web_fetch_url_source_only import (
+    BetaManagedAgentsWebFetchURLSourceOnly as BetaManagedAgentsWebFetchURLSourceOnly,
 )
 from .beta_memory_tool_20250818_str_replace_command import (
     BetaMemoryTool20250818StrReplaceCommand as BetaMemoryTool20250818StrReplaceCommand,
@@ -981,6 +994,9 @@ from .beta_managed_agents_memory_store_resource_param import (
 from .beta_managed_agents_outcome_evaluation_resource import (
     BetaManagedAgentsOutcomeEvaluationResource as BetaManagedAgentsOutcomeEvaluationResource,
 )
+from .beta_managed_agents_web_fetch_url_source_except import (
+    BetaManagedAgentsWebFetchURLSourceExcept as BetaManagedAgentsWebFetchURLSourceExcept,
+)
 from .beta_response_tool_change_mcp_toolset_reference import (
     BetaResponseToolChangeMCPToolsetReference as BetaResponseToolChangeMCPToolsetReference,
 )
@@ -1016,6 +1032,9 @@ from .beta_managed_agents_memory_store_resource_config import (
 )
 from .beta_managed_agents_web_fetch_tool_config_params import (
     BetaManagedAgentsWebFetchToolConfigParams as BetaManagedAgentsWebFetchToolConfigParams,
+)
+from .beta_managed_agents_web_fetch_url_sources_params import (
+    BetaManagedAgentsWebFetchURLSourcesParams as BetaManagedAgentsWebFetchURLSourcesParams,
 )
 from .beta_managed_agents_workspace_archived_run_error import (
     BetaManagedAgentsWorkspaceArchivedRunError as BetaManagedAgentsWorkspaceArchivedRunError,
@@ -1080,6 +1099,12 @@ from .beta_managed_agents_session_multiagent_coordinator import (
 from .beta_managed_agents_session_rate_limited_run_error import (
     BetaManagedAgentsSessionRateLimitedRunError as BetaManagedAgentsSessionRateLimitedRunError,
 )
+from .beta_managed_agents_web_fetch_url_source_all_param import (
+    BetaManagedAgentsWebFetchURLSourceAllParam as BetaManagedAgentsWebFetchURLSourceAllParam,
+)
+from .beta_managed_agents_web_fetch_url_source_shorthand import (
+    BetaManagedAgentsWebFetchURLSourceShorthand as BetaManagedAgentsWebFetchURLSourceShorthand,
+)
 from .beta_webhook_session_status_rescheduled_event_data import (
     BetaWebhookSessionStatusRescheduledEventData as BetaWebhookSessionStatusRescheduledEventData,
 )
@@ -1104,6 +1129,15 @@ from .beta_managed_agents_memory_store_archived_run_error import (
 from .beta_managed_agents_organization_disabled_run_error import (
     BetaManagedAgentsOrganizationDisabledRunError as BetaManagedAgentsOrganizationDisabledRunError,
 )
+from .beta_managed_agents_web_fetch_url_source_none_param import (
+    BetaManagedAgentsWebFetchURLSourceNoneParam as BetaManagedAgentsWebFetchURLSourceNoneParam,
+)
+from .beta_managed_agents_web_fetch_url_source_only_param import (
+    BetaManagedAgentsWebFetchURLSourceOnlyParam as BetaManagedAgentsWebFetchURLSourceOnlyParam,
+)
+from .beta_managed_agents_web_fetch_url_source_user_input import (
+    BetaManagedAgentsWebFetchURLSourceUserInput as BetaManagedAgentsWebFetchURLSourceUserInput,
+)
 from .beta_text_editor_code_execution_create_result_block import (
     BetaTextEditorCodeExecutionCreateResultBlock as BetaTextEditorCodeExecutionCreateResultBlock,
 )
@@ -1125,6 +1159,9 @@ from .beta_managed_agents_agent_toolset20260401_grep_input import (
 from .beta_managed_agents_agent_toolset20260401_read_input import (
     BetaManagedAgentsAgentToolset20260401ReadInput as BetaManagedAgentsAgentToolset20260401ReadInput,
 )
+from .beta_managed_agents_web_fetch_url_source_tool_filter import (
+    BetaManagedAgentsWebFetchURLSourceToolFilter as BetaManagedAgentsWebFetchURLSourceToolFilter,
+)
 from .beta_managed_agents_agent_toolset20260401_write_input import (
     BetaManagedAgentsAgentToolset20260401WriteInput as BetaManagedAgentsAgentToolset20260401WriteInput,
 )
@@ -1137,6 +1174,9 @@ from .beta_managed_agents_github_repository_resource_params import (
 from .beta_managed_agents_mcp_toolset_default_config_params import (
     BetaManagedAgentsMCPToolsetDefaultConfigParams as BetaManagedAgentsMCPToolsetDefaultConfigParams,
 )
+from .beta_managed_agents_web_fetch_url_source_except_param import (
+    BetaManagedAgentsWebFetchURLSourceExceptParam as BetaManagedAgentsWebFetchURLSourceExceptParam,
+)
 from .beta_web_search_tool_result_block_param_content_param import (
     BetaWebSearchToolResultBlockParamContentParam as BetaWebSearchToolResultBlockParamContentParam,
 )
@@ -1145,6 +1185,9 @@ from .beta_managed_agents_agent_toolset_default_config_params import (
 )
 from .beta_managed_agents_session_creation_rejected_run_error import (
     BetaManagedAgentsSessionCreationRejectedRunError as BetaManagedAgentsSessionCreationRejectedRunError,
+)
+from .beta_managed_agents_web_fetch_url_source_tool_reference import (
+    BetaManagedAgentsWebFetchURLSourceToolReference as BetaManagedAgentsWebFetchURLSourceToolReference,
 )
 from .beta_text_editor_code_execution_tool_result_block_param import (
     BetaTextEditorCodeExecutionToolResultBlockParam as BetaTextEditorCodeExecutionToolResultBlockParam,
@@ -1173,11 +1216,26 @@ from .beta_webhook_session_outcome_evaluation_ended_event_data import (
 from .beta_code_execution_tool_result_block_param_content_param import (
     BetaCodeExecutionToolResultBlockParamContentParam as BetaCodeExecutionToolResultBlockParamContentParam,
 )
+from .beta_managed_agents_web_fetch_url_source_user_input_param import (
+    BetaManagedAgentsWebFetchURLSourceUserInputParam as BetaManagedAgentsWebFetchURLSourceUserInputParam,
+)
 from .beta_text_editor_code_execution_create_result_block_param import (
     BetaTextEditorCodeExecutionCreateResultBlockParam as BetaTextEditorCodeExecutionCreateResultBlockParam,
 )
 from .beta_managed_agents_unknown_deployment_paused_reason_error import (
     BetaManagedAgentsUnknownDeploymentPausedReasonError as BetaManagedAgentsUnknownDeploymentPausedReasonError,
+)
+from .beta_managed_agents_web_fetch_url_source_tool_filter_param import (
+    BetaManagedAgentsWebFetchURLSourceToolFilterParam as BetaManagedAgentsWebFetchURLSourceToolFilterParam,
+)
+from .beta_managed_agents_web_fetch_url_source_user_input_params import (
+    BetaManagedAgentsWebFetchURLSourceUserInputParams as BetaManagedAgentsWebFetchURLSourceUserInputParams,
+)
+from .beta_managed_agents_web_fetch_url_source_tool_filter_params import (
+    BetaManagedAgentsWebFetchURLSourceToolFilterParams as BetaManagedAgentsWebFetchURLSourceToolFilterParams,
+)
+from .beta_managed_agents_web_fetch_url_source_tool_reference_param import (
+    BetaManagedAgentsWebFetchURLSourceToolReferenceParam as BetaManagedAgentsWebFetchURLSourceToolReferenceParam,
 )
 from .beta_text_editor_code_execution_str_replace_result_block_param import (
     BetaTextEditorCodeExecutionStrReplaceResultBlockParam as BetaTextEditorCodeExecutionStrReplaceResultBlockParam,

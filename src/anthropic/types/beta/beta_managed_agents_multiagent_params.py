@@ -9,10 +9,7 @@ __all__ = ["BetaManagedAgentsMultiagentParams"]
 
 
 class BetaManagedAgentsMultiagentParams(TypedDict, total=False):
-    """Multiagent orchestration configuration.
-
-    Currently supports the `coordinator` topology.
-    """
+    """Multiagent orchestration configuration."""
 
     agents: Required[SequenceNotStr[BetaManagedAgentsMultiagentRosterEntryParams]]
     """Agents the coordinator may spawn as session threads.

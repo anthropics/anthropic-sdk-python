@@ -20,6 +20,20 @@ from anthropic.types.beta.messages import (
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 
+def mock_results(respx_mock: MockRouter) -> None:
+    # the mock server's example results_url points at the production API
+    respx_mock.get("/v1/messages/batches/message_batch_id?beta=true").mock(
+        return_value=httpx2.Response(
+            200, json={"results_url": "/v1/messages/batches/message_batch_id/results?beta=true"}
+        )
+    )
+    respx_mock.get("/v1/messages/batches/message_batch_id/results?beta=true").mock(
+        return_value=httpx2.Response(
+            200, content=json.dumps({"custom_id": "my-custom-id-1", "result": {"type": "canceled"}})
+        )
+    )
+
+
 class TestBatches:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
@@ -458,9 +472,10 @@ class TestBatches:
                 message_batch_id="",
             )
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    def test_raw_response_results(self, client: Anthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("client", [False], indirect=True)
+    def test_raw_response_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         response = client.beta.messages.batches.with_raw_response.results(
             message_batch_id="message_batch_id",
         )
@@ -470,9 +485,10 @@ class TestBatches:
         for item in stream:
             assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    def test_streaming_response_results(self, client: Anthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("client", [False], indirect=True)
+    def test_streaming_response_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         with client.beta.messages.batches.with_streaming_response.results(
             message_batch_id="message_batch_id",
         ) as response:
@@ -927,9 +943,10 @@ class TestAsyncBatches:
                 message_batch_id="",
             )
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    async def test_raw_response_results(self, async_client: AsyncAnthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("async_client", [False], indirect=True)
+    async def test_raw_response_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         response = await async_client.beta.messages.batches.with_raw_response.results(
             message_batch_id="message_batch_id",
         )
@@ -938,3 +955,19 @@ class TestAsyncBatches:
         stream = await response.parse()
         async for item in stream:
             assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["line"])
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("async_client", [False], indirect=True)
+    async def test_streaming_response_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
+        async with async_client.beta.messages.batches.with_streaming_response.results(
+            message_batch_id="message_batch_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            stream = await response.parse()
+            async for item in stream:
+                assert_matches_type(BetaMessageBatchIndividualResponse, item, path=["item"])
+
+        assert cast(Any, response.is_closed) is True

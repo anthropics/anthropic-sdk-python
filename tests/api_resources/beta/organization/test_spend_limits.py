@@ -150,6 +150,7 @@ class TestSpendLimits:
                 "user_id": "user_01WCz1FkmYMm4gnmykNKUu3Q",
             },
             period="monthly",
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaSpendLimit, spend_limit, path=["response"])
 
@@ -322,6 +323,7 @@ class TestAsyncSpendLimits:
                 "user_id": "user_01WCz1FkmYMm4gnmykNKUu3Q",
             },
             period="monthly",
+            betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(BetaSpendLimit, spend_limit, path=["response"])
 

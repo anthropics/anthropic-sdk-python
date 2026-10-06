@@ -48,10 +48,7 @@ class AgentCreateParams(TypedDict, total=False):
     """
 
     multiagent: Optional[BetaManagedAgentsMultiagentParams]
-    """Multiagent orchestration configuration.
-
-    Currently supports the `coordinator` topology with a roster of 1-20 agents.
-    """
+    """Multiagent orchestration configuration."""
 
     skills: Iterable[BetaManagedAgentsSkillParams]
     """Skills available to the agent."""

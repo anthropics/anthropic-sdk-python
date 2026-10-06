@@ -19,7 +19,7 @@ class TestEvents:
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         event = client.beta.sessions.threads.events.list(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
@@ -27,7 +27,7 @@ class TestEvents:
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         event = client.beta.sessions.threads.events.list(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             limit=0,
             page="page",
@@ -39,7 +39,7 @@ class TestEvents:
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.sessions.threads.events.with_raw_response.list(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
 
@@ -51,7 +51,7 @@ class TestEvents:
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.sessions.threads.events.with_streaming_response.list(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         ) as response:
             assert not response.is_closed
@@ -66,7 +66,7 @@ class TestEvents:
     def test_path_params_list(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `session_id` but received ''"):
             client.beta.sessions.threads.events.with_raw_response.list(
-                thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+                thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
                 session_id="",
             )
 
@@ -79,7 +79,7 @@ class TestEvents:
     @parametrize
     def test_method_stream(self, client: Anthropic) -> None:
         event_stream = client.beta.sessions.threads.events.stream(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
         event_stream.response.close()
@@ -87,7 +87,7 @@ class TestEvents:
     @parametrize
     def test_method_stream_with_all_params(self, client: Anthropic) -> None:
         event_stream = client.beta.sessions.threads.events.stream(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             event_deltas=["agent.message"],
             betas=["message-batches-2024-09-24"],
@@ -98,7 +98,7 @@ class TestEvents:
     @parametrize
     def test_raw_response_stream(self, client: Anthropic) -> None:
         response = client.beta.sessions.threads.events.with_raw_response.stream(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
 
@@ -109,7 +109,7 @@ class TestEvents:
     @parametrize
     def test_streaming_response_stream(self, client: Anthropic) -> None:
         with client.beta.sessions.threads.events.with_streaming_response.stream(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         ) as response:
             assert not response.is_closed
@@ -124,7 +124,7 @@ class TestEvents:
     def test_path_params_stream(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `session_id` but received ''"):
             client.beta.sessions.threads.events.with_raw_response.stream(
-                thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+                thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
                 session_id="",
             )
 
@@ -143,7 +143,7 @@ class TestAsyncEvents:
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         event = await async_client.beta.sessions.threads.events.list(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
@@ -151,7 +151,7 @@ class TestAsyncEvents:
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         event = await async_client.beta.sessions.threads.events.list(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             limit=0,
             page="page",
@@ -163,7 +163,7 @@ class TestAsyncEvents:
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.sessions.threads.events.with_raw_response.list(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
 
@@ -175,7 +175,7 @@ class TestAsyncEvents:
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.sessions.threads.events.with_streaming_response.list(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         ) as response:
             assert not response.is_closed
@@ -190,7 +190,7 @@ class TestAsyncEvents:
     async def test_path_params_list(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `session_id` but received ''"):
             await async_client.beta.sessions.threads.events.with_raw_response.list(
-                thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+                thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
                 session_id="",
             )
 
@@ -203,7 +203,7 @@ class TestAsyncEvents:
     @parametrize
     async def test_method_stream(self, async_client: AsyncAnthropic) -> None:
         event_stream = await async_client.beta.sessions.threads.events.stream(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
         await event_stream.response.aclose()
@@ -211,7 +211,7 @@ class TestAsyncEvents:
     @parametrize
     async def test_method_stream_with_all_params(self, async_client: AsyncAnthropic) -> None:
         event_stream = await async_client.beta.sessions.threads.events.stream(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             event_deltas=["agent.message"],
             betas=["message-batches-2024-09-24"],
@@ -222,7 +222,7 @@ class TestAsyncEvents:
     @parametrize
     async def test_raw_response_stream(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.sessions.threads.events.with_raw_response.stream(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
 
@@ -233,7 +233,7 @@ class TestAsyncEvents:
     @parametrize
     async def test_streaming_response_stream(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.sessions.threads.events.with_streaming_response.stream(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         ) as response:
             assert not response.is_closed
@@ -248,7 +248,7 @@ class TestAsyncEvents:
     async def test_path_params_stream(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `session_id` but received ''"):
             await async_client.beta.sessions.threads.events.with_raw_response.stream(
-                thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+                thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
                 session_id="",
             )
 
