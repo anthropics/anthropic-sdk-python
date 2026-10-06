@@ -29,6 +29,7 @@ from ..._utils import is_given, consume_sync_iterator, consume_async_iterator
 from ..streaming import BetaMessageStream, BetaAsyncMessageStream, ParsedBetaMessageStreamEvent
 from ...types.beta import (
     BetaMessage,
+    BetaContainer,
     BetaMessageParam,
     BetaToolUseBlock,
     BetaToolUnionParam,
@@ -175,6 +176,15 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         self._pending_tool_changes: list[BetaRequestToolAdditionBlockParam | BetaRequestToolRemovalBlockParam] = []
         self._eager_tool_calls: EagerToolCalls | None = None
         """The tool calls of the streamed reply being handled. It is `None` without `run_tools_eagerly`."""
+
+    def _adopt_container(self, container: BetaContainer | None) -> None:
+        if container is None:
+            return
+        current = self._params.get("container")
+        if current is None or not is_given(current):
+            self._params["container"] = container.id
+        elif isinstance(current, dict) and current.get("id") is None:
+            self._params["container"] = {**current, "id": container.id}
 
     def set_messages_params(
         self,
@@ -426,8 +436,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
                 # Update container from response for programmatic tool calling support
                 last_assistant_message = self._get_last_assistant_message()
-                if last_assistant_message is not None and last_assistant_message.container is not None:
-                    self._params["container"] = last_assistant_message.container.id
+                if last_assistant_message is not None:
+                    self._adopt_container(last_assistant_message.container)
 
             self._iteration_count += 1
 
@@ -750,8 +760,8 @@ class BaseAsyncToolRunner(
 
                 # Update container from response for programmatic tool calling support
                 last_assistant_message = await self._get_last_assistant_message()
-                if last_assistant_message is not None and last_assistant_message.container is not None:
-                    self._params["container"] = last_assistant_message.container.id
+                if last_assistant_message is not None:
+                    self._adopt_container(last_assistant_message.container)
 
             self._iteration_count += 1
 
