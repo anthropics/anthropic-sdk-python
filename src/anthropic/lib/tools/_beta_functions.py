@@ -171,7 +171,7 @@ class BaseFunctionTool(Generic[CallableT]):
         self._cache_control = cache_control
         self._allowed_callers = allowed_callers
         self._eager_input_streaming = eager_input_streaming
-        self._input_examples = input_examples
+        self._input_examples = list(input_examples) if input_examples is not None else None
         self._strict = strict
 
         self.description = description or self._get_description_from_docstring()
