@@ -21,6 +21,7 @@ def test_basic() -> None:
     assert stringify({"a": False}) == "a=false"
     assert stringify({"a": 1.23456}) == "a=1.23456"
     assert stringify({"a": None}) == ""
+    assert stringify({"a": ""}) == "a="
 
 
 def test_datetime() -> None:
@@ -81,6 +82,7 @@ def test_array_brackets(method: str) -> None:
     assert unquote(serialise({"in": ["foo", "bar"]})) == "in[]=foo&in[]=bar"
     assert unquote(serialise({"a": {"b": [True, False]}})) == "a[b][]=true&a[b][]=false"
     assert unquote(serialise({"a": {"b": [True, False, None, True]}})) == "a[b][]=true&a[b][]=false&a[b][]=true"
+    assert unquote(serialise({"in": ["", "foo"]})) == "in[]=&in[]=foo"
 
 
 def test_unknown_array_format() -> None:

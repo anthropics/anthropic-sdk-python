@@ -644,7 +644,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         for key, value in items:
             existing = serialized.get(key)
 
-            if not existing:
+            if existing is None:
                 serialized[key] = value
                 continue
 
