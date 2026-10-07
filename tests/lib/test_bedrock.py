@@ -348,6 +348,10 @@ def test_chunk_bytes_to_sse_drops_chunk_without_type_or_completion() -> None:
     assert _chunk_bytes_to_sse(raw) is None
 
 
+def test_chunk_bytes_to_sse_handles_none_or_non_bytes() -> None:
+    assert _chunk_bytes_to_sse(None) is None
+
+
 def _eventstream_chunk_frame(payload: t.Mapping[str, object]) -> bytes:
     """Encode `payload` as one `chunk` event in AWS eventstream binary framing."""
     body = json.dumps({"bytes": base64.b64encode(json.dumps(payload).encode()).decode()}).encode()
