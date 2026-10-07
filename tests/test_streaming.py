@@ -277,6 +277,25 @@ async def test_mid_stream_transport_error_wrapped_as_api_connection_error(
         await iter_next(iterator)
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_mid_stream_decoder_error_keeps_original_identity(
+    sync: bool, client: Anthropic, async_client: AsyncAnthropic
+) -> None:
+    # malformed UTF-8 in an SSE line: the default decoder raises
+    # UnicodeDecodeError, which is not a transport failure and must not
+    # be relabeled as APIConnectionError.
+    def body() -> Iterator[bytes]:
+        yield b"event: completion\n"
+        yield b"data: \xff\xfe not utf-8\n"
+        yield b"\n"
+
+    iterator = make_event_iterator(content=body(), sync=sync, client=client, async_client=async_client)
+
+    with pytest.raises(UnicodeDecodeError):
+        await iter_next(iterator)
+
+
 def test_isinstance_check(client: Anthropic, async_client: AsyncAnthropic) -> None:
     async_stream = AsyncStream(cast_to=object, client=async_client, response=httpx2.Response(200, content=b"foo"))
     assert isinstance(async_stream, AsyncStream)
