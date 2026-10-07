@@ -31,7 +31,7 @@ import anyio
 
 from .._retry import TRANSIENT_ERRORS, jitter, backoff, is_fatal_status_error
 from ..._types import Headers
-from ._tool_dispatch import tool_registry, run_runnable_tool, tool_error_content
+from ._tool_dispatch import tool_registry, run_runnable_tool, tool_error_content, tool_result_content
 from .._scoped_client import _copy_client_with_bearer_auth
 from ._beta_functions import (
     ToolError,
@@ -305,13 +305,15 @@ def _scoped_client(client: AsyncAnthropic, environment_key: str | None) -> Async
     return client.with_options(default_headers=helper_header("session-tool-runner"))
 
 
-def _to_session_content(content: BetaFunctionToolResultType) -> list[_SessionContent]:
+def _to_session_content(content: BetaFunctionToolResultType | None) -> list[_SessionContent]:
     """Bridge Messages-API tool-result content to the narrower Sessions-API content union.
 
     The two APIs share text/image/document/search_result block shapes but use
     distinct nominal TypedDicts; ToolReference blocks have no Sessions equivalent
-    so they are stringified.
+    so they are stringified. A tool that returned `None` reads `(no output)`.
     """
+    if content is None:
+        return [{"type": "text", "text": "(no output)"}]
     if isinstance(content, str):
         return [{"type": "text", "text": content or "(no output)"}]
     out: list[_SessionContent] = []
@@ -329,7 +331,7 @@ def _to_session_content(content: BetaFunctionToolResultType) -> list[_SessionCon
 
 def _build_result_event(
     ev: DispatchedToolUseEvent,
-    content: BetaFunctionToolResultType,
+    content: BetaFunctionToolResultType | None,
     is_error: bool,
 ) -> DispatchedToolResultParams:
     """Build the result-event params matching `ev`'s tool-call kind.
@@ -879,12 +881,12 @@ class SessionToolRunner:
             is_error = False
             sent = False
         else:
-            content: BetaFunctionToolResultType
+            content: BetaFunctionToolResultType | None  # a tool may return None whatever its annotation says
             is_error = False
             input_ = dict(ev.input)
             try:
                 with anyio.fail_after(TOOL_TIMEOUT):
-                    content = await run_runnable_tool(tool, input_)
+                    content = tool_result_content(await run_runnable_tool(tool, input_))
             except TimeoutError:
                 content = f"tool {ev.name!r} timed out"
                 is_error = True

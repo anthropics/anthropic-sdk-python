@@ -221,3 +221,6 @@ known-first-party = ["anthropic", "tests"]
 "scripts/**.py" = ["T201", "T203"]
 "tests/**.py" = ["T201", "T203"]
 "examples/**.py" = ["T201", "T203"]
+# the abstract toolsets' default member bodies ignore their arguments; subclasses use them
+"src/anthropic/lib/tools/_toolsets/_browser.py" = ["ARG002"]
+"src/anthropic/lib/tools/_toolsets/_computer.py" = ["ARG002"]

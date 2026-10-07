@@ -104,6 +104,8 @@ Here, `break` means the held call never runs. A call that ran while the reply st
 
 The calls run one at a time, in the order the model has moved on from them, and reading the stream waits while one runs.
 
+A toolset call, such as a browser or computer action, runs while the reply streams too, and its toolset's `confirm` is still asked before it runs. Once a toolset's call is held, that toolset's later calls in the reply wait with it until your loop body ends. Once one fails, they are not run at all.
+
 ### Compacting the conversation
 
 With the `compact-2026-09-04` beta you decide when a conversation is compacted: a request with the `compaction` param returns a single `compaction` block, which then replaces the messages it summarizes. In a tool runner, call `runner.compact_before_next_turn()` and the runner does this for you.
@@ -160,7 +162,7 @@ for message in runner:
         runner.remove_tools(find_free_slots)  # or by name: "find_free_slots"
 ```
 
-`add_tools()` takes what `tool_runner(tools=...)` takes: function tools and raw tool definitions. The whole definition is sent to the model either way.
+`add_tools()` takes function tools and raw tool definitions, as `tool_runner(tools=...)` does, but not a runnable toolset, a raw definition of a toolset the runner has, or a tool named like one of its toolsets. The whole definition is sent to the model either way.
 
 - A function tool can be called from the request that carries its definition. If a tool of the same name is already there, the new function replaces it straight away: a call the model has already made in the message you're handling runs the new one.
 - Raw definitions are for server tools, such as `{"type": "web_search_20250305", "name": "web_search"}`, which the API runs. The tool runner never runs one: a call to it gets a "not found" error result and a warning, and it stops running a function tool of the same name straight away.
@@ -177,9 +179,18 @@ A few things to know:
 - After a paused turn (`pause_turn`) the turn is sent back as it came, and the changes go out with the request after that.
 - Changes still waiting when the run ends are never sent.
 - The runner doesn't add the beta for you, so pass `betas=["inline-tools-2026-09-15"]`.
-- Changing `tools` with `set_messages_params()` still works, but misses the prompt cache.
+- Changing `tools` with `set_messages_params()` misses the prompt cache and changes only what is sent, not which function tools the runner runs: one added this way is answered "not found", and one dropped this way still runs if the model calls it.
 - Use either these methods or `tool_addition` / `tool_removal` blocks you append yourself for a given tool, not both.
 - In the rare case where a compaction response comes back without `tool_changes` even though the messages it summarized added or removed tools, the model goes back to the tools in `tools`, and the tool runner doesn't detect it. Call `add_tools()` / `remove_tools()` again after that compaction if you need the change restored.
+- Runnable toolsets, such as a browser or computer toolset, can't be added or removed this way: a runner keeps the ones it was created with.
+
+## Browser toolset
+
+The browser toolset has its own guide, [browser-toolset.md](browser-toolset.md): subclassing `BetaAbstractBrowserToolset20260801` (or its async twin) to drive a real browser, its options, policies and result types, and how to run one safely.
+
+## Computer toolset
+
+The computer toolset has its own guide, [computer-toolset.md](computer-toolset.md): subclassing `BetaAbstractComputerToolset20260801` (or its async twin) to drive a desktop, its options and result types, coordinate scaling, the image-size limit, and how to run one safely.
 
 ## ToolError
 
@@ -204,4 +215,4 @@ def take_screenshot(url: str) -> str:
     return result.data
 ```
 
-If a plain exception is raised, its `repr()` will be sent to the model as a text error and logged. `ToolError` is not logged since it represents an intentional error response.
+If a plain exception is raised, its `repr()` will be sent to the model as a text error and logged. `ToolError` is not logged since it represents an intentional error response. From a browser or computer toolset, only a `ToolError`'s text blocks are sent.

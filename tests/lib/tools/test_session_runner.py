@@ -340,6 +340,32 @@ async def test_yields_completed_tool_call() -> None:
 
 
 @pytest.mark.asyncio()
+async def test_a_tool_that_returns_none_posts_no_output_and_the_loop_goes_on() -> None:
+    # A tool with nothing to say returns None: the result reads "(no output)", it is not an error, and the next
+    # call in the stream is still dispatched.
+    async def silent(_input: dict[str, Any]) -> Any:
+        return None
+
+    async def echo(input: dict[str, Any]) -> str:
+        return f"got {input.get('x')}"
+
+    events = FakeAsyncEvents(
+        stream_events=[_tool_use("tu_1", "silent", {}), _tool_use("tu_2", "echo", {"x": 1}), _terminated()]
+    )
+
+    items = [
+        item
+        async for item in _run_with_fakes(events=events, tools=[_FakeTool("silent", silent), _FakeTool("echo", echo)])
+    ]
+
+    assert [item.tool_use_id for item in items] == ["tu_1", "tu_2"]
+    assert items[0].is_error is False and items[0].posted is True
+    assert _result_text(items[0]) == "(no output)"
+    assert _result_text(items[1]) == "got 1"
+    assert len(events.send_calls) == 2
+
+
+@pytest.mark.asyncio()
 async def test_yields_error_for_failing_tool() -> None:
     async def boom(_input: dict[str, Any]) -> str:
         raise RuntimeError("nope")

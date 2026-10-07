@@ -48,7 +48,9 @@ HELPER_METHOD_STREAM = "stream"
 StainlessHelperHeaderValue = Literal[
     "beta.messages.parse",
     "BetaToolRunner",
+    "browser-toolset",
     "compaction",
+    "computer-toolset",
     "environments-work-poller",
     "environments-worker",
     "fallback-refusal-middleware",

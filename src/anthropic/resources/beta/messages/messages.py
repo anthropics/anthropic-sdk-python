@@ -50,6 +50,7 @@ from ...._base_client import (
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ....types.model_param import ModelParam
+from ....lib.tools._toolsets import BetaRunnableToolset, BetaAsyncRunnableToolset
 from ....lib._parse._response import ResponseFormatT, parse_beta_response
 from ....lib._parse._transform import transform_schema
 from ....lib._stainless_helpers import (
@@ -61,13 +62,10 @@ from ....lib._stainless_helpers import (
 )
 from ....lib.tools._tool_params import BetaToolLike, to_tool_params as _to_tool_params
 from ....types.beta.beta_message import BetaMessage
+from ....lib.tools._tool_dispatch import partition_sync_tools, partition_async_tools
 from ....lib.tools._beta_functions import (
-    BetaFunctionTool,
     BetaRunnableTool,
-    BetaAsyncFunctionTool,
     BetaAsyncRunnableTool,
-    BetaBuiltinFunctionTool,
-    BetaAsyncBuiltinFunctionTool,
 )
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_message_param import BetaMessageParam
@@ -90,6 +88,7 @@ from ....types.beta.beta_request_mcp_server_url_definition_param import BetaRequ
 
 if TYPE_CHECKING:
     from ...._client import Anthropic, AsyncAnthropic
+
 
 __all__ = ["Messages", "AsyncMessages"]
 
@@ -1383,7 +1382,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1421,7 +1420,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
@@ -1460,7 +1459,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
         stream: bool,
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
@@ -1498,7 +1497,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
@@ -1536,7 +1535,8 @@ class Messages(SyncAPIResource):
               once you are done with the reply. This is optimistic: if the reply is interrupted or changes
               course, the tool may have already run, so use `runner.defer_tool_call()` to hold the calls that
               aren't safe to run twice. The calls run one at a time, and reading the stream waits while one
-              runs. Requires `stream=True`.
+              runs. A toolset call, such as a browser or computer action, runs early too, and its toolset's
+              `confirm` is still asked before it runs. Requires `stream=True`.
 
               This will be the default in a future version.
         """
@@ -1575,18 +1575,10 @@ class Messages(SyncAPIResource):
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
-            _stainless_helper_header(tools, messages),
             extra_headers or {},
         )
 
-        runnable_tools: list[BetaRunnableTool] = []
-        raw_tools: list[BetaToolUnionParam] = []
-
-        for tool in tools:
-            if isinstance(tool, (BetaFunctionTool, BetaBuiltinFunctionTool)):
-                runnable_tools.append(tool)
-            else:
-                raw_tools.append(tool)
+        runnable_tools, raw_tools = partition_sync_tools(tools)
 
         params = cast(
             message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
@@ -3353,7 +3345,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3391,7 +3383,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
         stream: Literal[True],
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
@@ -3430,7 +3422,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
         stream: bool,
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
@@ -3468,7 +3460,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
@@ -3506,7 +3498,8 @@ class AsyncMessages(AsyncAPIResource):
               once you are done with the reply. This is optimistic: if the reply is interrupted or changes
               course, the tool may have already run, so use `runner.defer_tool_call()` to hold the calls that
               aren't safe to run twice. The calls run one at a time, and reading the stream waits while one
-              runs. Requires `stream=True`.
+              runs. A toolset call, such as a browser or computer action, runs early too, and its toolset's
+              `confirm` is still asked before it runs. Requires `stream=True`.
 
               This will be the default in a future version.
         """
@@ -3538,18 +3531,10 @@ class AsyncMessages(AsyncAPIResource):
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
-            _stainless_helper_header(tools, messages),
             extra_headers or {},
         )
 
-        runnable_tools: list[BetaAsyncRunnableTool] = []
-        raw_tools: list[BetaToolUnionParam] = []
-
-        for tool in tools:
-            if isinstance(tool, (BetaAsyncFunctionTool, BetaAsyncBuiltinFunctionTool)):
-                runnable_tools.append(tool)
-            else:
-                raw_tools.append(tool)
+        runnable_tools, raw_tools = partition_async_tools(tools)
 
         params = cast(
             message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],

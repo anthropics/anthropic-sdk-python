@@ -25,7 +25,7 @@ from typing_extensions import Literal, TypedDict, override
 import httpx2
 
 from ..._types import Body, Query, Headers, NotGiven
-from ..._utils import is_given, consume_sync_iterator, consume_async_iterator
+from ..._utils import is_list, is_given, is_mapping, consume_sync_iterator, consume_async_iterator
 from ..streaming import BetaMessageStream, BetaAsyncMessageStream, ParsedBetaMessageStreamEvent
 from ...types.beta import (
     BetaMessage,
@@ -36,7 +36,13 @@ from ...types.beta import (
     BetaRequestToolAdditionBlockParam,
 )
 from ..._base_client import merge_headers
-from ._tool_dispatch import tool_registry, tool_error_content, available_tool_names
+from ._tool_dispatch import (
+    tool_family,
+    index_runnables,
+    tool_error_content,
+    tool_result_content,
+    available_tool_names,
+)
 from ._beta_functions import (
     ToolError,
     BetaFunctionTool,
@@ -46,7 +52,17 @@ from ._beta_functions import (
     BetaBuiltinFunctionTool,
     BetaAsyncBuiltinFunctionTool,
 )
+from ._toolsets._errors import ToolsetsFixedError, ToolsetContractError
 from .._stainless_helpers import stainless_helper_header
+from ._toolsets._runnable import (
+    TOOLSET_CLASSES,
+    BetaRunnableToolset,
+    BetaAnyRunnableToolset,
+    BetaAsyncRunnableToolset,
+    not_executed_result,
+    toolset_result_block,
+)
+from ._toolsets._sanitize import quoted_name
 from ...types.beta.beta_stop_reason import BetaStopReason
 from ...types.beta.parsed_beta_message import ResponseFormatT, ParsedBetaMessage, ParsedBetaContentBlock
 from ...types.beta.message_create_params import ParseMessageCreateParamsBase
@@ -64,10 +80,12 @@ AnyFunctionToolT = TypeVar(
         BetaFunctionTool[Any], BetaAsyncFunctionTool[Any], BetaBuiltinFunctionTool, BetaAsyncBuiltinFunctionTool
     ],
 )
+AnyToolsetT = TypeVar("AnyToolsetT", bound=BetaAnyRunnableToolset)
 RunnerItemT = TypeVar("RunnerItemT")
 
 
 log = logging.getLogger(__name__)
+
 
 _Step = Literal["run_tools", "resume", "stop"]
 
@@ -143,25 +161,23 @@ class RequestOptions(TypedDict, total=False):
     timeout: float | httpx2.Timeout | None | NotGiven
 
 
-class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
+class BaseToolRunner(Generic[AnyFunctionToolT, AnyToolsetT, ResponseFormatT]):
     def __init__(
         self,
         *,
         params: ParseMessageCreateParamsBase[ResponseFormatT],
         options: RequestOptions,
-        tools: Iterable[AnyFunctionToolT],
+        tools: Iterable[AnyFunctionToolT | AnyToolsetT],
         max_iterations: int | None = None,
     ) -> None:
         _reject_compaction_param(params)
-        self._tools_by_name = tool_registry(tools)
+        tools = list(tools)
+        self._tools_by_name, self._toolsets_by_family = index_runnables(tools)
         self._params: ParseMessageCreateParamsBase[ResponseFormatT] = {
             **params,
             "messages": [message for message in params["messages"]],
         }
-        helper_header = stainless_helper_header(
-            tools=self._tools_by_name.values(),
-            messages=params.get("messages"),
-        )
+        helper_header = stainless_helper_header(tools=tools, messages=params.get("messages"))
         if helper_header:
             merged_headers = merge_headers(helper_header, options.get("extra_headers") or {})
             options = {**options, "extra_headers": merged_headers}
@@ -198,6 +214,10 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
             )
         if self._pending_compaction is not None or self._messages_being_compacted is not None:
             self._check_can_compact(params)
+        if iter(messages := params["messages"]) is messages:  # a generator is used up by the first request
+            params = {**params, "messages": list(messages)}
+        if (tools := params.get("tools")) and iter(tools) is tools:
+            params = {**params, "tools": list(tools)}
         self._params = params
 
     def append_messages(self, *messages: BetaMessageParam | ParsedBetaMessage[ResponseFormatT]) -> None:
@@ -292,11 +312,25 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         away, in place of any tool of the same name, even for a call already in the message being handled. A call
         that ran while the reply streamed keeps its result. A raw definition is for server tools, such as web
         search: the tool runner never runs it, and it stops running a function tool of the same name. Requires the
-        `inline-tools-2026-09-15` beta.
+        `inline-tools-2026-09-15` beta. Passing a runnable toolset, a raw definition of a toolset the runner has, or a
+        tool named like one of its toolsets raises `ToolsetContractError` and adds nothing: a runner's toolsets are
+        fixed when it is created, and the API rejects another tool with a toolset's name.
 
         Args:
             *tools: Function tools, such as `@beta_tool` functions, or raw tool definitions.
         """
+        for tool in tools:
+            if isinstance(tool, TOOLSET_CLASSES):
+                raise ToolsetsFixedError("add", tool.toolset_name)
+            # The API reads a definition of one of the runner's toolset families as replacing that toolset.
+            if isinstance(tool, dict) and (family := tool_family(tool)) in self._toolsets_by_family:
+                raise ToolsetsFixedError("replace", family)
+            name = tool.get("name") if isinstance(tool, dict) else tool.name
+            if isinstance(name, str) and name in self._toolsets_by_family:
+                raise ToolsetContractError(
+                    f"add_tools() can't add a tool named '{quoted_name(name)}': the runner's {quoted_name(name)} "
+                    "toolset has that name; give the tool another name"
+                )
         for tool in tools:
             if isinstance(tool, dict):
                 definition: BetaToolUnionParam = copy(tool)
@@ -314,11 +348,18 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         """Take tools away from the model without changing the `tools` param, which would miss the prompt cache.
 
         The tools stop being run at once, and the model is told in `tool_removal` blocks with the next request. A
-        call that ran while the reply streamed keeps its result. Requires the `inline-tools-2026-09-15` beta.
+        call that ran while the reply streamed keeps its result. Requires the `inline-tools-2026-09-15` beta. Passing
+        a toolset, or the name of one of the runner's toolsets, raises `ToolsetContractError` and removes nothing.
 
         Args:
             *tools: The tools to remove, or their names.
         """
+        for tool in tools:
+            if isinstance(tool, TOOLSET_CLASSES):
+                raise ToolsetsFixedError("remove", tool.toolset_name)
+            name = tool if isinstance(tool, str) else tool.name
+            if name in self._toolsets_by_family:
+                raise ToolsetsFixedError("remove", name)
         for tool in tools:
             name = tool if isinstance(tool, str) else tool.name
             self._tools_by_name.pop(name, None)
@@ -349,19 +390,48 @@ class BaseToolRunner(Generic[AnyFunctionToolT, ResponseFormatT]):
         Removal is only a hint to the model, which can still emit a `tool_use`
         for a withdrawn tool; a name absent from this set routes that call down
         the same unknown-tool path as a tool that was never declared.
+
+        Toolsets are not in this set: a `tool_reference` names a tool,
+        not a toolset, and member names are not reserved, so a toolset stays
+        available for as long as it is registered.
         """
         # Changes made since the last request are not in the history yet.
         pending: BetaMessageParam = {"role": "system", "content": self._pending_tool_changes}
         return available_tool_names([*self._params["messages"], pending], self._tools_by_name)
 
+    def _toolset_for(self, tool_use: BetaToolUseBlock) -> AnyToolsetT | None:
+        assert tool_use.toolset_name is not None
+        toolset = self._toolsets_by_family.get(tool_use.toolset_name)
+        if toolset is None:
+            # both names are model output: folded to one bounded line before they reach a log
+            warnings.warn(
+                f"Toolset '{quoted_name(tool_use.toolset_name)}' (member '{quoted_name(tool_use.name)}') not found in tool runner. "
+                f"Registered toolsets: {list(self._toolsets_by_family.keys())}. "
+                f"If using a raw toolset definition, handle the tool call manually and use `append_messages()` to add the result. "
+                f"Otherwise, pass a `BetaRunnableToolset` / `BetaAsyncRunnableToolset` instance.",
+                UserWarning,
+                stacklevel=5,  # points the warning at the user's call into generate_tool_call_response
+            )
+        return toolset
 
-class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Generic[RunnerItemT, ResponseFormatT], ABC):
+    @staticmethod
+    def _toolset_not_found_result(tool_use: BetaToolUseBlock) -> BetaToolResultBlockParam:
+        return toolset_result_block(
+            tool_use,
+            f"Error: Toolset '{quoted_name(tool_use.toolset_name)}' member '{quoted_name(tool_use.name)}' not found",
+            is_error=True,
+        )
+
+
+class BaseSyncToolRunner(
+    BaseToolRunner[BetaRunnableTool, BetaRunnableToolset, ResponseFormatT], Generic[RunnerItemT, ResponseFormatT], ABC
+):
     def __init__(
         self,
         *,
         params: ParseMessageCreateParamsBase[ResponseFormatT],
         options: RequestOptions,
-        tools: Iterable[BetaRunnableTool],
+        tools: Iterable[BetaRunnableTool | BetaRunnableToolset],
         client: Anthropic,
         max_iterations: int | None = None,
     ) -> None:
@@ -490,14 +560,35 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
         results: list[BetaToolResultBlockParam] = []
         available = self._available_tool_names()
+        failed_toolsets: set[str] = set()  # a toolset whose member failed this turn: its later members are not run
         eager_calls = self._eager_tool_calls
 
         for tool_use in tool_use_blocks:
+            if tool_use.toolset_name is not None:
+                if tool_use.toolset_name in failed_toolsets:
+                    results.append(not_executed_result(tool_use))
+                    continue
+                # With `run_tools_eagerly`, the result of a member that ran while the reply streamed is kept, so that
+                # it doesn't run twice.
+                member_result = eager_calls.results.get(tool_use.id) if eager_calls is not None else None
+                if member_result is None:
+                    member_result = self._run_toolset_member(tool_use)
+                    if eager_calls is not None:
+                        eager_calls.record(tool_use, member_result)
+                if member_result.get("is_error") and tool_use.toolset_name in self._toolsets_by_family:
+                    failed_toolsets.add(tool_use.toolset_name)
+                results.append(member_result)
+                continue
+
             result: BetaToolResultBlockParam | None = None
             if eager_calls is not None:
                 result = eager_calls.results.get(tool_use.id)
             if result is None:
                 tool = self._tools_by_name.get(tool_use.name) if tool_use.name in available else None
+                if tool is None and tool_use.name in self._toolsets_by_family:
+                    failed_toolsets.add(tool_use.name)
+                    results.append(malformed_toolset_call_result(tool_use))
+                    continue
                 if tool is None:
                     warnings.warn(
                         f"Tool '{tool_use.name}' not found in tool runner. "
@@ -525,7 +616,11 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
     def _run_tool(self, tool: BetaRunnableTool, tool_use: BetaToolUseBlock) -> BetaToolResultBlockParam:
         try:
-            return {"type": "tool_result", "tool_use_id": tool_use.id, "content": tool.call(tool_use.input)}
+            return {
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": tool_result_content(tool.call(tool_use.input)),
+            }
         except ToolError as exc:
             return {
                 "type": "tool_result",
@@ -541,6 +636,12 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
                 "content": tool_error_content(exc),
                 "is_error": True,
             }
+
+    def _run_toolset_member(self, tool_use: BetaToolUseBlock) -> BetaToolResultBlockParam:
+        toolset = self._toolset_for(tool_use)
+        if toolset is None:
+            return self._toolset_not_found_result(tool_use)
+        return toolset.tool_result(tool_use)
 
     def _get_last_message(self) -> ParsedBetaMessage[ResponseFormatT] | None:
         if callable(self._last_message):
@@ -579,7 +680,7 @@ class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream[ResponseForma
         *,
         params: ParseMessageCreateParamsBase[ResponseFormatT],
         options: RequestOptions,
-        tools: Iterable[BetaRunnableTool],
+        tools: Iterable[BetaRunnableTool | BetaRunnableToolset],
         client: Anthropic,
         max_iterations: int | None = None,
         run_tools_eagerly: bool = False,
@@ -594,8 +695,9 @@ class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream[ResponseForma
         With `run_tools_eagerly` the runner otherwise runs each call while the reply streams, once the model has
         moved on from it: when the next block starts, or the reply stops with `tool_use`. The call runs when you ask
         for the event after that one, so you can hold it while you handle any event up to and including that one.
-        The other calls of the reply still run early. It does nothing for a call that has run, outside the loop
-        body, and without `run_tools_eagerly`.
+        The other calls of the reply still run early, except the later calls of the same toolset, which a toolset
+        runs in order. It does nothing for a call that has run, outside the loop body, and without
+        `run_tools_eagerly`.
 
         ```py
         for stream in runner:
@@ -658,11 +760,28 @@ class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream[ResponseForma
         moved_on_from: BetaToolUseBlock | None = None
         # The next event is read first, so that no call runs once reading the reply has failed.
         for event in events:
-            if moved_on_from is not None and not calls.is_held(moved_on_from):
+            if moved_on_from is not None:
                 name = moved_on_from.name
-                tool = self._tools_by_name.get(name) if name in self._available_tool_names() else None
+                family = moved_on_from.toolset_name
+                tool = (
+                    self._tools_by_name.get(name) if family is None and name in self._available_tool_names() else None
+                )
+                if family is None and tool is None and name in self._toolsets_by_family:
+                    # A call named like a toolset, with no `toolset_name`, is a malformed toolset call.
+                    family = name
+                    calls.waiting_toolsets.add(family)
+                if family is not None:
+                    # A toolset runs its calls in the model's order. So once one of its calls waits for the tool
+                    # response, or fails, its later calls wait for the tool response too.
+                    if calls.is_held(moved_on_from):
+                        calls.waiting_toolsets.add(family)
+                    if family not in calls.waiting_toolsets:
+                        member_result = self._run_toolset_member(moved_on_from)
+                        calls.record(moved_on_from, member_result)
+                        if member_result.get("is_error"):
+                            calls.waiting_toolsets.add(family)
                 # A call to a tool the runner doesn't have gets its error result with the tool response.
-                if tool is not None:
+                elif tool is not None and not calls.is_held(moved_on_from):
                     calls.record(moved_on_from, self._run_tool(tool, moved_on_from))
 
             moved_on_from = calls.track(event)
@@ -670,14 +789,16 @@ class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream[ResponseForma
 
 
 class BaseAsyncToolRunner(
-    BaseToolRunner[BetaAsyncRunnableTool, ResponseFormatT], Generic[RunnerItemT, ResponseFormatT], ABC
+    BaseToolRunner[BetaAsyncRunnableTool, BetaAsyncRunnableToolset, ResponseFormatT],
+    Generic[RunnerItemT, ResponseFormatT],
+    ABC,
 ):
     def __init__(
         self,
         *,
         params: ParseMessageCreateParamsBase[ResponseFormatT],
         options: RequestOptions,
-        tools: Iterable[BetaAsyncRunnableTool],
+        tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset],
         client: AsyncAnthropic,
         max_iterations: int | None = None,
     ) -> None:
@@ -836,14 +957,35 @@ class BaseAsyncToolRunner(
 
         results: list[BetaToolResultBlockParam] = []
         available = self._available_tool_names()
+        failed_toolsets: set[str] = set()  # a toolset whose member failed this turn: its later members are not run
         eager_calls = self._eager_tool_calls
 
         for tool_use in tool_use_blocks:
+            if tool_use.toolset_name is not None:
+                if tool_use.toolset_name in failed_toolsets:
+                    results.append(not_executed_result(tool_use))
+                    continue
+                # With `run_tools_eagerly`, the result of a member that ran while the reply streamed is kept, so that
+                # it doesn't run twice.
+                member_result = eager_calls.results.get(tool_use.id) if eager_calls is not None else None
+                if member_result is None:
+                    member_result = await self._run_toolset_member(tool_use)
+                    if eager_calls is not None:
+                        eager_calls.record(tool_use, member_result)
+                if member_result.get("is_error") and tool_use.toolset_name in self._toolsets_by_family:
+                    failed_toolsets.add(tool_use.toolset_name)
+                results.append(member_result)
+                continue
+
             result: BetaToolResultBlockParam | None = None
             if eager_calls is not None:
                 result = eager_calls.results.get(tool_use.id)
             if result is None:
                 tool = self._tools_by_name.get(tool_use.name) if tool_use.name in available else None
+                if tool is None and tool_use.name in self._toolsets_by_family:
+                    failed_toolsets.add(tool_use.name)
+                    results.append(malformed_toolset_call_result(tool_use))
+                    continue
                 if tool is None:
                     warnings.warn(
                         f"Tool '{tool_use.name}' not found in tool runner. "
@@ -871,7 +1013,11 @@ class BaseAsyncToolRunner(
 
     async def _run_tool(self, tool: BetaAsyncRunnableTool, tool_use: BetaToolUseBlock) -> BetaToolResultBlockParam:
         try:
-            return {"type": "tool_result", "tool_use_id": tool_use.id, "content": await tool.call(tool_use.input)}
+            return {
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": tool_result_content(await tool.call(tool_use.input)),
+            }
         except ToolError as exc:
             return {
                 "type": "tool_result",
@@ -887,6 +1033,12 @@ class BaseAsyncToolRunner(
                 "content": tool_error_content(exc),
                 "is_error": True,
             }
+
+    async def _run_toolset_member(self, tool_use: BetaToolUseBlock) -> BetaToolResultBlockParam:
+        toolset = self._toolset_for(tool_use)
+        if toolset is None:
+            return self._toolset_not_found_result(tool_use)
+        return await toolset.tool_result(tool_use)
 
 
 class BetaAsyncToolRunner(BaseAsyncToolRunner[ParsedBetaMessage[ResponseFormatT], ResponseFormatT]):
@@ -906,7 +1058,7 @@ class BetaAsyncStreamingToolRunner(BaseAsyncToolRunner[BetaAsyncMessageStream[Re
         *,
         params: ParseMessageCreateParamsBase[ResponseFormatT],
         options: RequestOptions,
-        tools: Iterable[BetaAsyncRunnableTool],
+        tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset],
         client: AsyncAnthropic,
         max_iterations: int | None = None,
         run_tools_eagerly: bool = False,
@@ -921,8 +1073,9 @@ class BetaAsyncStreamingToolRunner(BaseAsyncToolRunner[BetaAsyncMessageStream[Re
         With `run_tools_eagerly` the runner otherwise runs each call while the reply streams, once the model has
         moved on from it: when the next block starts, or the reply stops with `tool_use`. The call runs when you ask
         for the event after that one, so you can hold it while you handle any event up to and including that one.
-        The other calls of the reply still run early. It does nothing for a call that has run, outside the loop
-        body, and without `run_tools_eagerly`.
+        The other calls of the reply still run early, except the later calls of the same toolset, which a toolset
+        runs in order. It does nothing for a call that has run, outside the loop body, and without
+        `run_tools_eagerly`.
 
         ```py
         async for stream in runner:
@@ -985,11 +1138,28 @@ class BetaAsyncStreamingToolRunner(BaseAsyncToolRunner[BetaAsyncMessageStream[Re
         moved_on_from: BetaToolUseBlock | None = None
         # The next event is read first, so that no call runs once reading the reply has failed.
         async for event in events:
-            if moved_on_from is not None and not calls.is_held(moved_on_from):
+            if moved_on_from is not None:
                 name = moved_on_from.name
-                tool = self._tools_by_name.get(name) if name in self._available_tool_names() else None
+                family = moved_on_from.toolset_name
+                tool = (
+                    self._tools_by_name.get(name) if family is None and name in self._available_tool_names() else None
+                )
+                if family is None and tool is None and name in self._toolsets_by_family:
+                    # A call named like a toolset, with no `toolset_name`, is a malformed toolset call.
+                    family = name
+                    calls.waiting_toolsets.add(family)
+                if family is not None:
+                    # A toolset runs its calls in the model's order. So once one of its calls waits for the tool
+                    # response, or fails, its later calls wait for the tool response too.
+                    if calls.is_held(moved_on_from):
+                        calls.waiting_toolsets.add(family)
+                    if family not in calls.waiting_toolsets:
+                        member_result = await self._run_toolset_member(moved_on_from)
+                        calls.record(moved_on_from, member_result)
+                        if member_result.get("is_error"):
+                            calls.waiting_toolsets.add(family)
                 # A call to a tool the runner doesn't have gets its error result with the tool response.
-                if tool is not None:
+                elif tool is not None and not calls.is_held(moved_on_from):
                     calls.record(moved_on_from, await self._run_tool(tool, moved_on_from))
 
             moved_on_from = calls.track(event)
@@ -1008,6 +1178,9 @@ class EagerToolCalls:
 
         self._held_ids: set[str] = set()
         """The ids of the calls that `defer_tool_call()` is holding."""
+
+        self.waiting_toolsets: set[str] = set()
+        """The toolsets that have a call waiting for the tool response. Their later calls wait for it too."""
 
         self._closed: BetaToolUseBlock | None = None
         """The last `tool_use` block to close, until the model moves on from it."""
@@ -1056,3 +1229,46 @@ class EagerToolCalls:
 
         moved_on_from, self._closed = self._closed, None
         return moved_on_from
+
+
+MAX_NAMED_ACTIONS = 10
+
+
+def malformed_toolset_call_result(tool_use: BetaToolUseBlock) -> BetaToolResultBlockParam:
+    """Build the error result for a call that is named after a toolset in the run but has no `toolset_name`.
+
+    Its input holds actions for that toolset in a form the runner cannot run. The text says what is wrong and names
+    the actions where it can. Apart from action names, it does not repeat the model's input.
+    """
+    detail = malformed_call_detail(tool_use.input)
+    return {
+        "type": "tool_result",
+        "tool_use_id": tool_use.id,
+        "content": f"Error: the '{quoted_name(tool_use.name)}' toolset could not run this call{detail}; "
+        "nothing in the batch was executed",
+        "is_error": True,
+    }
+
+
+def malformed_call_detail(input: Dict[str, object]) -> str:
+    if "actions" not in input:
+        action = input.get("action")
+        if isinstance(action, str):
+            return f": the call has no 'actions' list (action: '{quoted_name(action)}')"
+        return ": the call has no 'actions' list"
+    actions = input["actions"]
+    if isinstance(actions, str):
+        return ": 'actions' is text, not a list of actions"
+    if not is_list(actions):
+        return ": 'actions' is not a list of actions"
+    if not actions:
+        return ": the 'actions' list is empty"
+    names: List[str] = []
+    for i, entry in enumerate(actions):
+        name = entry.get("action") if is_mapping(entry) else None
+        if not isinstance(name, str):
+            return f": action {i} must be an object with a string 'action' field"
+        names.append(f"'{quoted_name(name)}'")
+    more = len(names) - MAX_NAMED_ACTIONS
+    shown = ", ".join(names[:MAX_NAMED_ACTIONS]) + (f", and {more} more" if more > 0 else "")
+    return f": its actions could not be run as sent (actions: {shown})"

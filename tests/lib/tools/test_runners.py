@@ -16,7 +16,7 @@ from anthropic import Anthropic, AsyncAnthropic, InternalServerError, beta_tool,
 from anthropic._types import Omit, omit
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
-from anthropic.lib.tools import BetaFunctionTool, BetaAsyncFunctionTool, BetaFunctionToolResultType
+from anthropic.lib.tools import ToolError, BetaFunctionTool, BetaAsyncFunctionTool, BetaFunctionToolResultType
 from anthropic.lib.tools._beta_runner import (
     _STOP_REASON_STEPS,
     BetaToolRunner,
@@ -2222,6 +2222,200 @@ async def test_tool_changes_when_streaming(
         _ran_result("toolu_time", "get_time"),
         _tool_changes_message(_addition(get_weather.to_dict())),
     ]
+
+
+def _weather_tool(sync: bool, run: Callable[[str, Literal["c", "f"]], BetaFunctionToolResultType]) -> Any:
+    """A `get_weather(location, units)` tool over `run`, synchronous or asynchronous."""
+
+    async def run_async(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        return run(location, units)
+
+    if sync:
+        return beta_tool(run, name="get_weather", description="Lookup the weather for a given city.")
+    return beta_async_tool(run_async, name="get_weather", description="Lookup the weather for a given city.")
+
+
+async def _run_tool_use(
+    client: Anthropic | AsyncAnthropic, *, tools: List[Any], messages: List[BetaMessageParam]
+) -> List[BetaMessageParam]:
+    """`_run_sync_tool_use` for either client."""
+    runner: Any = client.beta.messages.tool_runner(
+        max_tokens=1024, model="claude-haiku-4-5", tools=tools, messages=messages
+    )
+    responses: List[BetaMessageParam] = []
+    if isinstance(client, Anthropic):
+        for _ in runner:
+            response = runner.generate_tool_call_response()
+            if response is not None:
+                responses.append(response)
+    else:
+        async for _ in runner:
+            response = await runner.generate_tool_call_response()
+            if response is not None:
+                responses.append(response)
+    return responses
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_tool_error_text_with_a_lone_surrogate_does_not_break_the_next_request(
+    sync: bool,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+    respx_mock: MockRouter,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # A tool's exception text lands in the tool_result the next request carries. An unpaired
+    # surrogate in it cannot be encoded as UTF-8, so it must be repaired before it is sent, or
+    # that request (and every retry over the same history) fails in the client's JSON encoder.
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_weather", "toolu_surrogate"),
+            _end_turn_response(),
+        ]
+    )
+
+    def run(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
+        raise ValueError(f"bad \ud800 value for {location} in {units}")
+
+    # the runner logs the raw exception text; kept out of the captured log so the test report stays encodable
+    with caplog.at_level(logging.CRITICAL, logger="anthropic.lib.tools._beta_runner"):
+        results = await _run_tool_use(
+            (client if sync else async_client).with_options(max_retries=0),
+            tools=[_weather_tool(sync, run)],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
+
+    assert len(respx_mock.calls) == 2, "the follow-up request carrying the tool_result was sent"
+    [result_message] = results
+    [tool_result] = cast(List[BetaToolResultBlockParam], result_message["content"])
+    assert tool_result.get("is_error") is True
+    content = tool_result.get("content")
+    assert isinstance(content, str)
+    content.encode("utf-8")  # well formed: raises on a lone surrogate
+    assert content == "ValueError('bad \\ud800 value for San Francisco, CA in f')"  # `repr` escapes the surrogate
+    sent = json.loads(respx_mock.calls.last.request.content)
+    assert sent["messages"][-1]["content"][0]["content"] == content
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_tool_error_content_with_a_lone_surrogate_does_not_break_the_next_request(
+    sync: bool,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+    respx_mock: MockRouter,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # A ToolError's content is the tool_result as the tool wrote it; an unpaired surrogate in it is
+    # repaired the same way, and nothing else about it changes.
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_weather", "toolu_surrogate"),
+            _end_turn_response(),
+        ]
+    )
+
+    def run(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:  # noqa: ARG001
+        raise ToolError("rate limited \ud800 proxy")
+
+    with caplog.at_level(logging.CRITICAL, logger="anthropic.lib.tools._beta_runner"):
+        results = await _run_tool_use(
+            (client if sync else async_client).with_options(max_retries=0),
+            tools=[_weather_tool(sync, run)],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
+
+    assert len(respx_mock.calls) == 2, "the follow-up request carrying the tool_result was sent"
+    [result_message] = results
+    [tool_result] = cast(List[BetaToolResultBlockParam], result_message["content"])
+    assert tool_result.get("is_error") is True
+    content = tool_result.get("content")
+    assert isinstance(content, str)
+    content.encode("utf-8")  # well formed: raises on a lone surrogate
+    assert content == "rate limited \ufffd proxy"
+    sent = json.loads(respx_mock.calls.last.request.content)
+    assert sent["messages"][-1]["content"][0]["content"] == content
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_tool_result_text_with_a_lone_surrogate_does_not_break_the_next_request(
+    sync: bool,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+    respx_mock: MockRouter,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # A tool's plain string result is sent as it was returned, except that an unpaired surrogate
+    # in it is repaired so the request can be encoded at all.
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_weather", "toolu_surrogate"),
+            _end_turn_response(),
+        ]
+    )
+
+    def run(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:  # noqa: ARG001
+        return "ok \ud800 done"
+
+    with caplog.at_level(logging.CRITICAL, logger="anthropic.lib.tools._beta_runner"):
+        results = await _run_tool_use(
+            (client if sync else async_client).with_options(max_retries=0),
+            tools=[_weather_tool(sync, run)],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
+
+    assert len(respx_mock.calls) == 2, "the follow-up request carrying the tool_result was sent"
+    [result_message] = results
+    [tool_result] = cast(List[BetaToolResultBlockParam], result_message["content"])
+    assert tool_result.get("is_error") is None
+    content = tool_result.get("content")
+    assert isinstance(content, str)
+    content.encode("utf-8")  # well formed: raises on a lone surrogate
+    assert content == "ok \ufffd done"
+    sent = json.loads(respx_mock.calls.last.request.content)
+    assert sent["messages"][-1]["content"][0]["content"] == content
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_a_tool_that_returns_none_sends_a_null_tool_result(
+    sync: bool,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+    respx_mock: MockRouter,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # A tool with nothing to say returns None; the tool_result carries content null, not an error.
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("get_weather", "toolu_none"),
+            _end_turn_response(),
+        ]
+    )
+
+    def run(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:  # noqa: ARG001
+        return cast(BetaFunctionToolResultType, None)  # what a tool with no return statement hands the runner
+
+    with caplog.at_level(logging.CRITICAL, logger="anthropic.lib.tools._beta_runner"):
+        results = await _run_tool_use(
+            (client if sync else async_client).with_options(max_retries=0),
+            tools=[_weather_tool(sync, run)],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+        )
+
+    assert len(respx_mock.calls) == 2, "the follow-up request carrying the tool_result was sent"
+    [result_message] = results
+    [tool_result] = cast(List[BetaToolResultBlockParam], result_message["content"])
+    assert tool_result.get("is_error") is None
+    assert tool_result.get("content") is None
+    sent = json.loads(respx_mock.calls.last.request.content)
+    assert sent["messages"][-1]["content"][0]["content"] is None
 
 
 def _get_weather(location: str, units: Literal["c", "f"]) -> Dict[str, Any]:
