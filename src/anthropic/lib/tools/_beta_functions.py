@@ -575,7 +575,11 @@ def beta_async_tool(
                     async with enter_lock:
                         if not state["entered"]:
                             inner = await cm.__aenter__()
-                            state["validated"] = pydantic.validate_call(inner)
+                            try:
+                                state["validated"] = pydantic.validate_call(inner)
+                            except BaseException:
+                                await cm.__aexit__(*sys.exc_info())
+                                raise
                             state["entered"] = True
                             # Only now is there an entered __aexit__ to drive on
                             # the cleanup path.
