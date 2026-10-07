@@ -25,8 +25,27 @@ class ModelInfo(BaseModel):
     May be set to an epoch value if the release date is unknown.
     """
 
+    deprecated_at: Optional[datetime] = None
+    """
+    RFC 3339 datetime string representing the time of the model's most recent
+    deprecation. Populated for `deprecated` and `retired` models; `null` while the
+    model is `active`.
+    """
+
     display_name: str
     """A human-readable name for the model."""
+
+    lifecycle: Literal["active", "deprecated", "retired"]
+    """The model's current lifecycle stage.
+
+    - `active`: The model is available for use, open to new adopters, and not
+      scheduled for retirement.
+    - `deprecated`: The model remains callable for organizations with existing
+      access, but is headed for retirement and closed to new adopters.
+    - `retired`: The model is no longer available for use; inference requests naming
+      it fail. It remains in the catalogue as the historical record of its
+      retirement.
+    """
 
     line: Optional[ModelLine] = None
     """
@@ -40,6 +59,15 @@ class ModelInfo(BaseModel):
 
     max_tokens: Optional[int] = None
     """Maximum value for the `max_tokens` parameter when using this model."""
+
+    retires_at: Optional[datetime] = None
+    """
+    RFC 3339 datetime string representing the model's currently scheduled retirement
+    date. The schedule can be revised until retirement occurs; `null` while the
+    model is `active` or while no retirement is scheduled. A past date on a
+    `deprecated` model means retirement is overdue, not that it has occurred:
+    `lifecycle` is the retirement signal.
+    """
 
     type: Literal["model"]
     """Object type.
