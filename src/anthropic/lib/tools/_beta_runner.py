@@ -136,6 +136,31 @@ def _without_compaction_incompatible_params(params: ParseMessageCreateParamsBase
     return trimmed
 
 
+def _update_container_from_response(
+    params: ParseMessageCreateParamsBase[Any],
+    response_container: Any,
+) -> None:
+    """Update container parameter from assistant response while preserving caller settings."""
+    if response_container is None:
+        return
+    response_id = getattr(response_container, "id", None)
+    if not response_id:
+        return
+
+    caller_container = params.get("container")
+    if not is_given(caller_container) or caller_container is None:
+        params["container"] = response_id
+    elif isinstance(caller_container, str):
+        # Caller provided an explicit string ID; preserve caller's explicit ID
+        pass
+    elif isinstance(caller_container, dict):
+        current_id = caller_container.get("id")
+        if not current_id:
+            # Caller didn't specify an ID; adopt the server-created ID while retaining skills
+            params["container"] = {**caller_container, "id": response_id}
+        # If caller already specified an explicit ID, preserve it
+
+
 class RequestOptions(TypedDict, total=False):
     extra_headers: Headers | None
     extra_query: Query | None
@@ -426,8 +451,8 @@ class BaseSyncToolRunner(BaseToolRunner[BetaRunnableTool, ResponseFormatT], Gene
 
                 # Update container from response for programmatic tool calling support
                 last_assistant_message = self._get_last_assistant_message()
-                if last_assistant_message is not None and last_assistant_message.container is not None:
-                    self._params["container"] = last_assistant_message.container.id
+                if last_assistant_message is not None:
+                    _update_container_from_response(self._params, last_assistant_message.container)
 
             self._iteration_count += 1
 
@@ -750,8 +775,8 @@ class BaseAsyncToolRunner(
 
                 # Update container from response for programmatic tool calling support
                 last_assistant_message = await self._get_last_assistant_message()
-                if last_assistant_message is not None and last_assistant_message.container is not None:
-                    self._params["container"] = last_assistant_message.container.id
+                if last_assistant_message is not None:
+                    _update_container_from_response(self._params, last_assistant_message.container)
 
             self._iteration_count += 1
 
