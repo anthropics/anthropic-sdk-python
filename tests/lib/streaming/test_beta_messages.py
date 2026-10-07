@@ -570,6 +570,43 @@ class TestSyncMessages:
             assert_compaction_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
+    def test_compaction_delta_without_encrypted_content_retains_metadata(self, respx_mock: MockRouter) -> None:
+        sse_lines = [
+            "event: message_start\n",
+            'data: {"type":"message_start","message":{"id":"msg_01","type":"message","role":"assistant","content":[],"model":"claude-opus-4-7","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":30,"output_tokens":1}}}\n\n',
+            "event: content_block_start\n",
+            'data: {"type":"content_block_start","index":0,"content_block":{"type":"compaction","content":null,"encrypted_content":null}}\n\n',
+            "event: content_block_delta\n",
+            'data: {"type":"content_block_delta","index":0,"delta":{"type":"compaction_delta","content":"Initial summary.","encrypted_content":"opaque_meta"}}\n\n',
+            "event: content_block_delta\n",
+            'data: {"type":"content_block_delta","index":0,"delta":{"type":"compaction_delta","content":"Updated summary."}}\n\n',
+            "event: content_block_stop\n",
+            'data: {"type":"content_block_stop","index":0}\n\n',
+            "event: message_delta\n",
+            'data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":10}}\n\n',
+            "event: message_stop\n",
+            'data: {"type":"message_stop"}\n\n',
+        ]
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content="".join(sse_lines).encode("utf-8"))
+        )
+
+        with sync_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+        ) as stream:
+            events = list(stream)
+            final_message = stream.get_final_message()
+
+        compaction_events = [e for e in events if isinstance(e, BetaCompactionEvent)]
+        assert len(compaction_events) == 2
+        assert compaction_events[0].encrypted_content == "opaque_meta"
+        assert compaction_events[1].encrypted_content == "opaque_meta"
+        assert final_message.content[0].type == "compaction"
+        assert final_message.content[0].encrypted_content == "opaque_meta"
+
+    @pytest.mark.respx(base_url=base_url)
     def test_fallback_relabels_model(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(200, content=get_response("fallback_response.txt"))
