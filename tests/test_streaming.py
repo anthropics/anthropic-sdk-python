@@ -300,3 +300,20 @@ def make_stream_iterator(
         client=async_client,
         response=httpx2.Response(200, content=to_aiter(content), request=httpx2.Request("GET", "https://example.com")),
     ).__stream__()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_leading_utf8_bom(sync: bool, client: Anthropic, async_client: AsyncAnthropic) -> None:
+    def body() -> Iterator[bytes]:
+        yield b"\xef\xbb\xbfevent: message_start\n"
+        yield 'data: {"type":"message_start","content":"hello \ufeffworld"}\n'.encode("utf-8")
+        yield b"\n"
+
+    iterator = make_event_iterator(content=body(), sync=sync, client=client, async_client=async_client)
+
+    sse = await iter_next(iterator)
+    assert sse.event == "message_start"
+    assert sse.json() == {"type": "message_start", "content": "hello \ufeffworld"}
+
+    await assert_empty_iter(iterator)
