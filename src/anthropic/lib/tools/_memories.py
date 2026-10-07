@@ -135,6 +135,9 @@ class _AttachedStore:
     refused_shas: dict[str, str] = field(default_factory=dict[str, str])
     #: `{rel_path → monotonic time first seen missing}`; the server delete waits for a later sync.
     pending_deletes: dict[str, float] = field(default_factory=dict[str, float])
+    #: `{rel_path → sha}` of content sent whose outcome is unknown — recorded before the
+    #: request, dropped after a successful response, else settled by the next listing.
+    sent_shas: dict[str, str] = field(default_factory=dict[str, str])
 
 
 @dataclass
@@ -175,6 +178,10 @@ class SessionMemoryStores:
     - a file the server refuses (too large, invalid content) is skipped —
       warned once and retried only after the file changes; other files keep
       syncing;
+    - an upload whose response never arrives may still have been saved, so
+      the sha of the bytes sent is remembered until the next sync has listed
+      the server: a memory holding exactly that sha is this sync's own
+      upload, not a remote edit, and a newer local edit goes out over it;
     - a file deleted locally is deleted on the server, guarded by an
       `expected_content_sha256` precondition — a concurrent server-side
       edit wins and the file is restored instead. The delete never goes
@@ -378,12 +385,13 @@ class SessionMemoryStores:
                     return
                 await self._recover(store, "the folder or its marker is gone")
                 return
-            # One file gone is a delete; every file gone at once is a wipe.
+            remote = {item.path.lstrip("/"): item async for item in self._list_memories(store.memory_store_id)}
+            self._settle_sent(store, remote)
+            # One file gone is a delete; every file gone at once is a wipe —
+            # counted after settling, so an upload that landed unheard counts.
             if not local and len(store.baseline) > 1:
                 await self._recover(store, "every memory file is gone at once")
                 return
-
-            remote = {item.path.lstrip("/"): item async for item in self._list_memories(store.memory_store_id)}
 
             deletes = _DeletePass(
                 mode=self._sync_deletions,
@@ -470,15 +478,18 @@ class SessionMemoryStores:
                     store.memory_store_id,
                 )
                 return
+            # A path with an unsettled send counts even at its baseline sha:
+            # the send may have landed, leaving the server ahead of the file.
             dirty = {
                 rel: sha
                 for rel, sha in scan.files.items()
-                if sha != store.baseline.get(rel) and store.refused_shas.get(rel) != sha
+                if (sha != store.baseline.get(rel) or rel in store.sent_shas) and store.refused_shas.get(rel) != sha
             }
             if not dirty:
                 return
             unsent.update(dirty)
             remote = {item.path.lstrip("/"): item async for item in self._list_memories(store.memory_store_id)}
+            self._settle_sent(store, remote)
             limiter = anyio.CapacityLimiter(_UPLOAD_CONCURRENCY)
 
             async def upload_one(rel: str, local_sha: str, existing: BetaManagedAgentsMemory | None) -> None:
@@ -493,6 +504,11 @@ class SessionMemoryStores:
                     local_sha = dirty[rel]
                     base_sha = store.baseline.get(rel)
                     existing = remote.get(rel)
+                    if local_sha == base_sha:
+                        # Listed only for its unsettled send, which never
+                        # landed: the file holds nothing the server lacks.
+                        unsent.discard(rel)
+                        continue
                     if existing is not None and existing.content_sha256 == local_sha:
                         store.baseline[rel] = local_sha
                         unsent.discard(rel)
@@ -565,6 +581,20 @@ class SessionMemoryStores:
         await store.files.create_root()
         await self._stamp_and_pull(store)
 
+    def _settle_sent(self, store: _AttachedStore, remote: dict[str, BetaManagedAgentsMemory]) -> None:
+        """Resolve the uploads whose response never arrived, against a fresh listing.
+
+        A memory holding exactly the sha that was sent is that upload, saved
+        after all: it enters the baseline, so it reads as synced rather than as
+        a remote edit. Every record is then dropped — kept past this listing,
+        one would claim another writer's identical bytes.
+        """
+        for rel, sha in store.sent_shas.items():
+            listed = remote.get(rel)
+            if listed is not None and listed.content_sha256 == sha:
+                store.baseline[rel] = sha
+        store.sent_shas.clear()
+
     async def _stamp_and_pull(self, store: _AttachedStore) -> None:
         """Write the trust marker, then pull every remote memory; pushes nothing.
 
@@ -574,6 +604,7 @@ class SessionMemoryStores:
         pages cost far fewer round-trips than a request per memory.
         """
         store.baseline = {}
+        store.sent_shas.clear()
         # The disk was just rebuilt, so earlier absence observations mean nothing.
         store.pending_deletes.clear()
         await store.files.put(MARKER_PATH, f"version {_MARKER_VERSION}\n{store.memory_store_id}")
@@ -777,6 +808,7 @@ class SessionMemoryStores:
             data = await store.files.get(rel)
             if data is None:
                 return None
+            store.sent_shas[rel] = hashlib.sha256(data).hexdigest()
             if existing is None:
                 item = await self._client.beta.memory_stores.memories.create(
                     store.memory_store_id, path="/" + rel, content=data.decode("utf-8")
@@ -797,7 +829,9 @@ class SessionMemoryStores:
             if existing is not None and status == 409:
                 # The precondition lost a race: the remote moved under us, so
                 # the push is dropped. The next sync pulls the winner over the
-                # file; from the shutdown flush there is no next sync.
+                # file; from the shutdown flush there is no next sync. A client
+                # retry of an attempt that was saved ends here too, so the sent
+                # sha stays for the next listing to tell the two apart.
                 log.warning(
                     "memory changed both locally and remotely; the upload was refused and the "
                     "local edit loses path=%s memory_store_id=%s",
@@ -817,6 +851,7 @@ class SessionMemoryStores:
                 log.warning("failed to upload memory path=%s memory_store_id=%s: %s", rel, store.memory_store_id, e)
             return None
         store.refused_shas.pop(rel, None)
+        store.sent_shas.pop(rel, None)
         return item.content_sha256
 
     async def _corroborated_delete(

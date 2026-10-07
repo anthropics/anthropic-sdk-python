@@ -21,6 +21,7 @@ from .message import Message as Message
 from .container import Container as Container
 from .beta_error import BetaError as BetaError
 from .model_info import ModelInfo as ModelInfo
+from .model_line import ModelLine as ModelLine
 from .text_block import TextBlock as TextBlock
 from .text_delta import TextDelta as TextDelta
 from .tool_param import ToolParam as ToolParam
@@ -53,6 +54,7 @@ from .tool_use_block import ToolUseBlock as ToolUseBlock
 from .citations_delta import CitationsDelta as CitationsDelta
 from .container_skill import ContainerSkill as ContainerSkill
 from .signature_delta import SignatureDelta as SignatureDelta
+from .tool_use_caller import ToolUseCaller as ToolUseCaller
 from .web_fetch_block import WebFetchBlock as WebFetchBlock
 from .citations_config import CitationsConfig as CitationsConfig
 from .container_params import ContainerParams as ContainerParams
@@ -61,6 +63,7 @@ from .input_json_delta import InputJSONDelta as InputJSONDelta
 from .text_block_param import TextBlockParam as TextBlockParam
 from .tool_union_param import ToolUnionParam as ToolUnionParam
 from .base64_pdf_source import Base64PDFSource as Base64PDFSource
+from .browser_key_input import BrowserKeyInput as BrowserKeyInput
 from .cache_miss_reason import CacheMissReason as CacheMissReason
 from .diagnostics_param import DiagnosticsParam as DiagnosticsParam
 from .effort_capability import EffortCapability as EffortCapability
@@ -73,12 +76,26 @@ from .server_tool_usage import ServerToolUsage as ServerToolUsage
 from .skill_list_params import SkillListParams as SkillListParams
 from .tool_choice_param import ToolChoiceParam as ToolChoiceParam
 from .beta_billing_error import BetaBillingError as BetaBillingError
+from .browser_find_input import BrowserFindInput as BrowserFindInput
+from .browser_ref_target import BrowserRefTarget as BrowserRefTarget
+from .browser_type_input import BrowserTypeInput as BrowserTypeInput
+from .browser_wait_input import BrowserWaitInput as BrowserWaitInput
+from .browser_zoom_input import BrowserZoomInput as BrowserZoomInput
 from .capability_support import CapabilitySupport as CapabilitySupport
+from .computer_key_input import ComputerKeyInput as ComputerKeyInput
 from .file_upload_params import FileUploadParams as FileUploadParams
 from .message_stop_event import MessageStopEvent as MessageStopEvent
 from .model_capabilities import ModelCapabilities as ModelCapabilities
 from .server_tool_caller import ServerToolCaller as ServerToolCaller
 from .beta_error_response import BetaErrorResponse as BetaErrorResponse
+from .browser_hover_input import BrowserHoverInput as BrowserHoverInput
+from .browser_member_name import (
+    BROWSER_MEMBER_NAME_VALUES as BROWSER_MEMBER_NAME_VALUES,
+    BrowserMemberName as BrowserMemberName,
+)
+from .computer_type_input import ComputerTypeInput as ComputerTypeInput
+from .computer_wait_input import ComputerWaitInput as ComputerWaitInput
+from .computer_zoom_input import ComputerZoomInput as ComputerZoomInput
 from .content_block_param import ContentBlockParam as ContentBlockParam
 from .direct_caller_param import DirectCallerParam as DirectCallerParam
 from .message_delta_event import MessageDeltaEvent as MessageDeltaEvent
@@ -92,6 +109,13 @@ from .user_location_param import UserLocationParam as UserLocationParam
 from .anthropic_beta_param import AnthropicBetaParam as AnthropicBetaParam
 from .beta_monetary_amount import BetaMonetaryAmount as BetaMonetaryAmount
 from .beta_not_found_error import BetaNotFoundError as BetaNotFoundError
+from .browser_click_target import BrowserClickTarget as BrowserClickTarget
+from .browser_member_input import BrowserMemberInput as BrowserMemberInput
+from .browser_scroll_input import BrowserScrollInput as BrowserScrollInput
+from .computer_member_name import (
+    COMPUTER_MEMBER_NAME_VALUES as COMPUTER_MEMBER_NAME_VALUES,
+    ComputerMemberName as ComputerMemberName,
+)
 from .document_block_param import DocumentBlockParam as DocumentBlockParam
 from .message_stream_event import MessageStreamEvent as MessageStreamEvent
 from .message_tokens_count import MessageTokensCount as MessageTokensCount
@@ -103,12 +127,18 @@ from .url_pdf_source_param import URLPDFSourceParam as URLPDFSourceParam
 from .beta_overloaded_error import BetaOverloadedError as BetaOverloadedError
 from .beta_permission_error import BetaPermissionError as BetaPermissionError
 from .beta_rate_limit_error import BetaRateLimitError as BetaRateLimitError
+from .browser_new_tab_input import BrowserNewTabInput as BrowserNewTabInput
+from .computer_member_input import ComputerMemberInput as ComputerMemberInput
+from .computer_scroll_input import ComputerScrollInput as ComputerScrollInput
 from .message_create_params import MessageCreateParams as MessageCreateParams
 from .output_tokens_details import OutputTokensDetails as OutputTokensDetails
 from .server_tool_use_block import ServerToolUseBlock as ServerToolUseBlock
 from .thinking_config_param import ThinkingConfigParam as ThinkingConfigParam
 from .tool_choice_any_param import ToolChoiceAnyParam as ToolChoiceAnyParam
 from .web_fetch_block_param import WebFetchBlockParam as WebFetchBlockParam
+from .browser_hold_key_input import BrowserHoldKeyInput as BrowserHoldKeyInput
+from .browser_navigate_input import BrowserNavigateInput as BrowserNavigateInput
+from .browser_tool_use_block import BrowserToolUseBlock as BrowserToolUseBlock
 from .cache_miss_unavailable import CacheMissUnavailable as CacheMissUnavailable
 from .citation_char_location import CitationCharLocation as CitationCharLocation
 from .citation_page_location import CitationPageLocation as CitationPageLocation
@@ -118,17 +148,33 @@ from .raw_message_stop_event import RawMessageStopEvent as RawMessageStopEvent
 from .tool_choice_auto_param import ToolChoiceAutoParam as ToolChoiceAutoParam
 from .tool_choice_none_param import ToolChoiceNoneParam as ToolChoiceNoneParam
 from .tool_choice_tool_param import ToolChoiceToolParam as ToolChoiceToolParam
+from .toolset_tool_use_block import ToolsetToolUseBlock as ToolsetToolUseBlock
 from .url_image_source_param import URLImageSourceParam as URLImageSourceParam
 from .base64_pdf_source_param import Base64PDFSourceParam as Base64PDFSourceParam
+from .browser_close_tab_input import BrowserCloseTabInput as BrowserCloseTabInput
+from .browser_list_tabs_input import BrowserListTabsInput as BrowserListTabsInput
+from .browser_read_page_input import BrowserReadPageInput as BrowserReadPageInput
+from .browser_scroll_to_input import BrowserScrollToInput as BrowserScrollToInput
+from .computer_hold_key_input import ComputerHoldKeyInput as ComputerHoldKeyInput
+from .computer_tool_use_block import ComputerToolUseBlock as ComputerToolUseBlock
 from .file_image_source_param import FileImageSourceParam as FileImageSourceParam
 from .plain_text_source_param import PlainTextSourceParam as PlainTextSourceParam
 from .raw_content_block_delta import RawContentBlockDelta as RawContentBlockDelta
 from .raw_message_delta_event import RawMessageDeltaEvent as RawMessageDeltaEvent
 from .raw_message_start_event import RawMessageStartEvent as RawMessageStartEvent
 from .redacted_thinking_block import RedactedThinkingBlock as RedactedThinkingBlock
+from .server_tools_capability import ServerToolsCapability as ServerToolsCapability
 from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockParam
 from .web_search_result_block import WebSearchResultBlock as WebSearchResultBlock
+from .browser_form_input_input import BrowserFormInputInput as BrowserFormInputInput
+from .browser_form_input_value import BrowserFormInputValue as BrowserFormInputValue
 from .browser_key_config_param import BrowserKeyConfigParam as BrowserKeyConfigParam
+from .browser_left_click_input import BrowserLeftClickInput as BrowserLeftClickInput
+from .browser_mouse_move_input import BrowserMouseMoveInput as BrowserMouseMoveInput
+from .browser_read_page_filter import BrowserReadPageFilter as BrowserReadPageFilter
+from .browser_screenshot_input import BrowserScreenshotInput as BrowserScreenshotInput
+from .browser_scroll_direction import BrowserScrollDirection as BrowserScrollDirection
+from .browser_switch_tab_input import BrowserSwitchTabInput as BrowserSwitchTabInput
 from .cache_miss_model_changed import CacheMissModelChanged as CacheMissModelChanged
 from .cache_miss_tools_changed import CacheMissToolsChanged as CacheMissToolsChanged
 from .content_block_stop_event import ContentBlockStopEvent as ContentBlockStopEvent
@@ -138,21 +184,35 @@ from .server_tool_caller_param import ServerToolCallerParam as ServerToolCallerP
 from .tool_bash_20250124_param import ToolBash20250124Param as ToolBash20250124Param
 from .base64_image_source_param import Base64ImageSourceParam as Base64ImageSourceParam
 from .beta_authentication_error import BetaAuthenticationError as BetaAuthenticationError
+from .browser_coordinate_target import BrowserCoordinateTarget as BrowserCoordinateTarget
+from .browser_file_upload_input import BrowserFileUploadInput as BrowserFileUploadInput
 from .browser_find_config_param import BrowserFindConfigParam as BrowserFindConfigParam
+from .browser_right_click_input import BrowserRightClickInput as BrowserRightClickInput
 from .browser_state_block_param import BrowserStateBlockParam as BrowserStateBlockParam
 from .browser_type_config_param import BrowserTypeConfigParam as BrowserTypeConfigParam
 from .browser_wait_config_param import BrowserWaitConfigParam as BrowserWaitConfigParam
 from .browser_zoom_config_param import BrowserZoomConfigParam as BrowserZoomConfigParam
 from .cache_miss_system_changed import CacheMissSystemChanged as CacheMissSystemChanged
 from .computer_key_config_param import ComputerKeyConfigParam as ComputerKeyConfigParam
+from .computer_left_click_input import ComputerLeftClickInput as ComputerLeftClickInput
+from .computer_mouse_move_input import ComputerMouseMoveInput as ComputerMouseMoveInput
+from .computer_screenshot_input import ComputerScreenshotInput as ComputerScreenshotInput
+from .computer_scroll_direction import ComputerScrollDirection as ComputerScrollDirection
 from .content_block_delta_event import ContentBlockDeltaEvent as ContentBlockDeltaEvent
 from .content_block_start_event import ContentBlockStartEvent as ContentBlockStartEvent
 from .search_result_block_param import SearchResultBlockParam as SearchResultBlockParam
 from .beta_gateway_timeout_error import BetaGatewayTimeoutError as BetaGatewayTimeoutError
 from .beta_invalid_request_error import BetaInvalidRequestError as BetaInvalidRequestError
 from .beta_monetary_amount_param import BetaMonetaryAmountParam as BetaMonetaryAmountParam
+from .browser_double_click_input import BrowserDoubleClickInput as BrowserDoubleClickInput
 from .browser_hover_config_param import BrowserHoverConfigParam as BrowserHoverConfigParam
+from .browser_key_tool_use_block import BrowserKeyToolUseBlock as BrowserKeyToolUseBlock
+from .browser_middle_click_input import BrowserMiddleClickInput as BrowserMiddleClickInput
+from .browser_read_console_input import BrowserReadConsoleInput as BrowserReadConsoleInput
+from .browser_read_network_input import BrowserReadNetworkInput as BrowserReadNetworkInput
 from .browser_state_change_param import BrowserStateChangeParam as BrowserStateChangeParam
+from .browser_triple_click_input import BrowserTripleClickInput as BrowserTripleClickInput
+from .computer_right_click_input import ComputerRightClickInput as ComputerRightClickInput
 from .computer_type_config_param import ComputerTypeConfigParam as ComputerTypeConfigParam
 from .computer_wait_config_param import ComputerWaitConfigParam as ComputerWaitConfigParam
 from .computer_zoom_config_param import ComputerZoomConfigParam as ComputerZoomConfigParam
@@ -160,26 +220,45 @@ from .content_block_source_param import ContentBlockSourceParam as ContentBlockS
 from .file_document_source_param import FileDocumentSourceParam as FileDocumentSourceParam
 from .memory_tool_20250818_param import MemoryTool20250818Param as MemoryTool20250818Param
 from .tool_reference_block_param import ToolReferenceBlockParam as ToolReferenceBlockParam
+from .browser_find_tool_use_block import BrowserFindToolUseBlock as BrowserFindToolUseBlock
+from .browser_get_page_text_input import BrowserGetPageTextInput as BrowserGetPageTextInput
+from .browser_left_mouse_up_input import BrowserLeftMouseUpInput as BrowserLeftMouseUpInput
 from .browser_scroll_config_param import BrowserScrollConfigParam as BrowserScrollConfigParam
+from .browser_type_tool_use_block import BrowserTypeToolUseBlock as BrowserTypeToolUseBlock
+from .browser_wait_tool_use_block import BrowserWaitToolUseBlock as BrowserWaitToolUseBlock
+from .browser_zoom_tool_use_block import BrowserZoomToolUseBlock as BrowserZoomToolUseBlock
 from .cache_miss_messages_changed import CacheMissMessagesChanged as CacheMissMessagesChanged
 from .code_execution_output_block import CodeExecutionOutputBlock as CodeExecutionOutputBlock
 from .code_execution_result_block import CodeExecutionResultBlock as CodeExecutionResultBlock
+from .computer_double_click_input import ComputerDoubleClickInput as ComputerDoubleClickInput
+from .computer_key_tool_use_block import ComputerKeyToolUseBlock as ComputerKeyToolUseBlock
+from .computer_middle_click_input import ComputerMiddleClickInput as ComputerMiddleClickInput
+from .computer_triple_click_input import ComputerTripleClickInput as ComputerTripleClickInput
 from .image_transformations_param import ImageTransformationsParam as ImageTransformationsParam
 from .message_count_tokens_params import MessageCountTokensParams as MessageCountTokensParams
 from .server_tool_caller_20260120 import ServerToolCaller20260120 as ServerToolCaller20260120
 from .server_tool_use_block_param import ServerToolUseBlockParam as ServerToolUseBlockParam
 from .web_fetch_tool_result_block import WebFetchToolResultBlock as WebFetchToolResultBlock
 from .web_fetch_url_sources_param import WebFetchURLSourcesParam as WebFetchURLSourcesParam
+from .browser_hover_tool_use_block import BrowserHoverToolUseBlock as BrowserHoverToolUseBlock
 from .browser_new_tab_config_param import BrowserNewTabConfigParam as BrowserNewTabConfigParam
 from .citation_char_location_param import CitationCharLocationParam as CitationCharLocationParam
 from .citation_page_location_param import CitationPageLocationParam as CitationPageLocationParam
+from .computer_left_mouse_up_input import ComputerLeftMouseUpInput as ComputerLeftMouseUpInput
 from .computer_scroll_config_param import ComputerScrollConfigParam as ComputerScrollConfigParam
+from .computer_type_tool_use_block import ComputerTypeToolUseBlock as ComputerTypeToolUseBlock
+from .computer_wait_tool_use_block import ComputerWaitToolUseBlock as ComputerWaitToolUseBlock
+from .computer_zoom_tool_use_block import ComputerZoomToolUseBlock as ComputerZoomToolUseBlock
 from .container_upload_block_param import ContainerUploadBlockParam as ContainerUploadBlockParam
 from .raw_content_block_stop_event import RawContentBlockStopEvent as RawContentBlockStopEvent
 from .web_search_tool_result_block import WebSearchToolResultBlock as WebSearchToolResultBlock
 from .web_search_tool_result_error import WebSearchToolResultError as WebSearchToolResultError
 from .browser_hold_key_config_param import BrowserHoldKeyConfigParam as BrowserHoldKeyConfigParam
+from .browser_javascript_exec_input import BrowserJavascriptExecInput as BrowserJavascriptExecInput
+from .browser_left_click_drag_input import BrowserLeftClickDragInput as BrowserLeftClickDragInput
+from .browser_left_mouse_down_input import BrowserLeftMouseDownInput as BrowserLeftMouseDownInput
 from .browser_navigate_config_param import BrowserNavigateConfigParam as BrowserNavigateConfigParam
+from .browser_scroll_tool_use_block import BrowserScrollToolUseBlock as BrowserScrollToolUseBlock
 from .browser_state_tab_entry_param import BrowserStateTabEntryParam as BrowserStateTabEntryParam
 from .browser_toolset_configs_param import BrowserToolsetConfigsParam as BrowserToolsetConfigsParam
 from .cache_control_ephemeral_param import CacheControlEphemeralParam as CacheControlEphemeralParam
@@ -187,6 +266,7 @@ from .context_management_capability import ContextManagementCapability as Contex
 from .raw_content_block_delta_event import RawContentBlockDeltaEvent as RawContentBlockDeltaEvent
 from .raw_content_block_start_event import RawContentBlockStartEvent as RawContentBlockStartEvent
 from .redacted_thinking_block_param import RedactedThinkingBlockParam as RedactedThinkingBlockParam
+from .response_tool_use_block_union import ResponseToolUseBlockUnion as ResponseToolUseBlockUnion
 from .thinking_config_enabled_param import ThinkingConfigEnabledParam as ThinkingConfigEnabledParam
 from .tool_search_tool_result_block import ToolSearchToolResultBlock as ToolSearchToolResultBlock
 from .tool_search_tool_result_error import ToolSearchToolResultError as ToolSearchToolResultError
@@ -197,10 +277,15 @@ from .web_fetch_tool_20260318_param import WebFetchTool20260318Param as WebFetch
 from .web_search_result_block_param import WebSearchResultBlockParam as WebSearchResultBlockParam
 from .browser_close_tab_config_param import BrowserCloseTabConfigParam as BrowserCloseTabConfigParam
 from .browser_list_tabs_config_param import BrowserListTabsConfigParam as BrowserListTabsConfigParam
+from .browser_new_tab_tool_use_block import BrowserNewTabToolUseBlock as BrowserNewTabToolUseBlock
 from .browser_read_page_config_param import BrowserReadPageConfigParam as BrowserReadPageConfigParam
 from .browser_scroll_to_config_param import BrowserScrollToConfigParam as BrowserScrollToConfigParam
 from .browser_toolset_20260801_param import BrowserToolset20260801Param as BrowserToolset20260801Param
+from .computer_cursor_position_input import ComputerCursorPositionInput as ComputerCursorPositionInput
 from .computer_hold_key_config_param import ComputerHoldKeyConfigParam as ComputerHoldKeyConfigParam
+from .computer_left_click_drag_input import ComputerLeftClickDragInput as ComputerLeftClickDragInput
+from .computer_left_mouse_down_input import ComputerLeftMouseDownInput as ComputerLeftMouseDownInput
+from .computer_scroll_tool_use_block import ComputerScrollToolUseBlock as ComputerScrollToolUseBlock
 from .computer_toolset_configs_param import ComputerToolsetConfigsParam as ComputerToolsetConfigsParam
 from .thinking_config_adaptive_param import ThinkingConfigAdaptiveParam as ThinkingConfigAdaptiveParam
 from .thinking_config_disabled_param import ThinkingConfigDisabledParam as ThinkingConfigDisabledParam
@@ -209,13 +294,16 @@ from .web_search_tool_20250305_param import WebSearchTool20250305Param as WebSea
 from .web_search_tool_20260209_param import WebSearchTool20260209Param as WebSearchTool20260209Param
 from .web_search_tool_20260318_param import WebSearchTool20260318Param as WebSearchTool20260318Param
 from .browser_form_input_config_param import BrowserFormInputConfigParam as BrowserFormInputConfigParam
+from .browser_hold_key_tool_use_block import BrowserHoldKeyToolUseBlock as BrowserHoldKeyToolUseBlock
 from .browser_left_click_config_param import BrowserLeftClickConfigParam as BrowserLeftClickConfigParam
 from .browser_mouse_move_config_param import BrowserMouseMoveConfigParam as BrowserMouseMoveConfigParam
+from .browser_navigate_tool_use_block import BrowserNavigateToolUseBlock as BrowserNavigateToolUseBlock
 from .browser_screenshot_config_param import BrowserScreenshotConfigParam as BrowserScreenshotConfigParam
 from .browser_switch_tab_config_param import BrowserSwitchTabConfigParam as BrowserSwitchTabConfigParam
 from .citation_content_block_location import CitationContentBlockLocation as CitationContentBlockLocation
 from .computer_toolset_20260801_param import ComputerToolset20260801Param as ComputerToolset20260801Param
 from .message_count_tokens_tool_param import MessageCountTokensToolParam as MessageCountTokensToolParam
+from .response_browser_tool_use_block import ResponseBrowserToolUseBlock as ResponseBrowserToolUseBlock
 from .tool_text_editor_20250124_param import ToolTextEditor20250124Param as ToolTextEditor20250124Param
 from .tool_text_editor_20250429_param import ToolTextEditor20250429Param as ToolTextEditor20250429Param
 from .tool_text_editor_20250728_param import ToolTextEditor20250728Param as ToolTextEditor20250728Param
@@ -223,19 +311,30 @@ from .web_fetch_url_source_none_param import WebFetchURLSourceNoneParam as WebFe
 from .web_fetch_url_source_only_param import WebFetchURLSourceOnlyParam as WebFetchURLSourceOnlyParam
 from .bash_code_execution_output_block import BashCodeExecutionOutputBlock as BashCodeExecutionOutputBlock
 from .bash_code_execution_result_block import BashCodeExecutionResultBlock as BashCodeExecutionResultBlock
+from .browser_close_tab_tool_use_block import BrowserCloseTabToolUseBlock as BrowserCloseTabToolUseBlock
 from .browser_file_upload_config_param import BrowserFileUploadConfigParam as BrowserFileUploadConfigParam
+from .browser_list_tabs_tool_use_block import BrowserListTabsToolUseBlock as BrowserListTabsToolUseBlock
+from .browser_read_page_tool_use_block import BrowserReadPageToolUseBlock as BrowserReadPageToolUseBlock
 from .browser_right_click_config_param import BrowserRightClickConfigParam as BrowserRightClickConfigParam
+from .browser_scroll_to_tool_use_block import BrowserScrollToToolUseBlock as BrowserScrollToToolUseBlock
 from .citations_search_result_location import CitationsSearchResultLocation as CitationsSearchResultLocation
 from .code_execution_tool_result_block import CodeExecutionToolResultBlock as CodeExecutionToolResultBlock
 from .code_execution_tool_result_error import CodeExecutionToolResultError as CodeExecutionToolResultError
+from .computer_hold_key_tool_use_block import ComputerHoldKeyToolUseBlock as ComputerHoldKeyToolUseBlock
 from .computer_left_click_config_param import ComputerLeftClickConfigParam as ComputerLeftClickConfigParam
 from .computer_mouse_move_config_param import ComputerMouseMoveConfigParam as ComputerMouseMoveConfigParam
 from .computer_screenshot_config_param import ComputerScreenshotConfigParam as ComputerScreenshotConfigParam
+from .response_computer_tool_use_block import ResponseComputerToolUseBlock as ResponseComputerToolUseBlock
 from .web_fetch_tool_result_error_code import WebFetchToolResultErrorCode as WebFetchToolResultErrorCode
 from .browser_double_click_config_param import BrowserDoubleClickConfigParam as BrowserDoubleClickConfigParam
+from .browser_form_input_tool_use_block import BrowserFormInputToolUseBlock as BrowserFormInputToolUseBlock
+from .browser_left_click_tool_use_block import BrowserLeftClickToolUseBlock as BrowserLeftClickToolUseBlock
 from .browser_middle_click_config_param import BrowserMiddleClickConfigParam as BrowserMiddleClickConfigParam
+from .browser_mouse_move_tool_use_block import BrowserMouseMoveToolUseBlock as BrowserMouseMoveToolUseBlock
 from .browser_read_console_config_param import BrowserReadConsoleConfigParam as BrowserReadConsoleConfigParam
 from .browser_read_network_config_param import BrowserReadNetworkConfigParam as BrowserReadNetworkConfigParam
+from .browser_screenshot_tool_use_block import BrowserScreenshotToolUseBlock as BrowserScreenshotToolUseBlock
+from .browser_switch_tab_tool_use_block import BrowserSwitchTabToolUseBlock as BrowserSwitchTabToolUseBlock
 from .browser_triple_click_config_param import BrowserTripleClickConfigParam as BrowserTripleClickConfigParam
 from .code_execution_output_block_param import CodeExecutionOutputBlockParam as CodeExecutionOutputBlockParam
 from .code_execution_result_block_param import CodeExecutionResultBlockParam as CodeExecutionResultBlockParam
@@ -245,27 +344,49 @@ from .web_fetch_tool_result_block_param import WebFetchToolResultBlockParam as W
 from .web_fetch_tool_result_error_block import WebFetchToolResultErrorBlock as WebFetchToolResultErrorBlock
 from .web_fetch_url_source_except_param import WebFetchURLSourceExceptParam as WebFetchURLSourceExceptParam
 from .web_search_tool_result_error_code import WebSearchToolResultErrorCode as WebSearchToolResultErrorCode
+from .browser_file_upload_tool_use_block import BrowserFileUploadToolUseBlock as BrowserFileUploadToolUseBlock
 from .browser_get_page_text_config_param import BrowserGetPageTextConfigParam as BrowserGetPageTextConfigParam
 from .browser_left_mouse_up_config_param import BrowserLeftMouseUpConfigParam as BrowserLeftMouseUpConfigParam
+from .browser_right_click_tool_use_block import BrowserRightClickToolUseBlock as BrowserRightClickToolUseBlock
 from .code_execution_tool_20250522_param import CodeExecutionTool20250522Param as CodeExecutionTool20250522Param
 from .code_execution_tool_20250825_param import CodeExecutionTool20250825Param as CodeExecutionTool20250825Param
 from .code_execution_tool_20260120_param import CodeExecutionTool20260120Param as CodeExecutionTool20260120Param
 from .code_execution_tool_20260521_param import CodeExecutionTool20260521Param as CodeExecutionTool20260521Param
 from .computer_double_click_config_param import ComputerDoubleClickConfigParam as ComputerDoubleClickConfigParam
+from .computer_left_click_tool_use_block import ComputerLeftClickToolUseBlock as ComputerLeftClickToolUseBlock
 from .computer_middle_click_config_param import ComputerMiddleClickConfigParam as ComputerMiddleClickConfigParam
+from .computer_mouse_move_tool_use_block import ComputerMouseMoveToolUseBlock as ComputerMouseMoveToolUseBlock
+from .computer_screenshot_tool_use_block import ComputerScreenshotToolUseBlock as ComputerScreenshotToolUseBlock
 from .computer_triple_click_config_param import ComputerTripleClickConfigParam as ComputerTripleClickConfigParam
 from .content_block_source_content_param import ContentBlockSourceContentParam as ContentBlockSourceContentParam
 from .tool_search_tool_result_error_code import ToolSearchToolResultErrorCode as ToolSearchToolResultErrorCode
 from .web_search_tool_result_block_param import WebSearchToolResultBlockParam as WebSearchToolResultBlockParam
+from .browser_double_click_tool_use_block import BrowserDoubleClickToolUseBlock as BrowserDoubleClickToolUseBlock
+from .browser_middle_click_tool_use_block import BrowserMiddleClickToolUseBlock as BrowserMiddleClickToolUseBlock
+from .browser_read_console_tool_use_block import BrowserReadConsoleToolUseBlock as BrowserReadConsoleToolUseBlock
+from .browser_read_network_tool_use_block import BrowserReadNetworkToolUseBlock as BrowserReadNetworkToolUseBlock
+from .browser_triple_click_tool_use_block import BrowserTripleClickToolUseBlock as BrowserTripleClickToolUseBlock
 from .computer_left_mouse_up_config_param import ComputerLeftMouseUpConfigParam as ComputerLeftMouseUpConfigParam
+from .computer_right_click_tool_use_block import ComputerRightClickToolUseBlock as ComputerRightClickToolUseBlock
+from .response_browser_key_tool_use_block import ResponseBrowserKeyToolUseBlock as ResponseBrowserKeyToolUseBlock
 from .thinking_config_between_tools_param import ThinkingConfigBetweenToolsParam as ThinkingConfigBetweenToolsParam
 from .tool_search_tool_result_block_param import ToolSearchToolResultBlockParam as ToolSearchToolResultBlockParam
 from .tool_search_tool_result_error_param import ToolSearchToolResultErrorParam as ToolSearchToolResultErrorParam
 from .web_search_tool_request_error_param import WebSearchToolRequestErrorParam as WebSearchToolRequestErrorParam
+from .browser_get_page_text_tool_use_block import BrowserGetPageTextToolUseBlock as BrowserGetPageTextToolUseBlock
 from .browser_javascript_exec_config_param import BrowserJavascriptExecConfigParam as BrowserJavascriptExecConfigParam
 from .browser_left_click_drag_config_param import BrowserLeftClickDragConfigParam as BrowserLeftClickDragConfigParam
 from .browser_left_mouse_down_config_param import BrowserLeftMouseDownConfigParam as BrowserLeftMouseDownConfigParam
+from .browser_left_mouse_up_tool_use_block import BrowserLeftMouseUpToolUseBlock as BrowserLeftMouseUpToolUseBlock
 from .citations_web_search_result_location import CitationsWebSearchResultLocation as CitationsWebSearchResultLocation
+from .computer_double_click_tool_use_block import ComputerDoubleClickToolUseBlock as ComputerDoubleClickToolUseBlock
+from .computer_middle_click_tool_use_block import ComputerMiddleClickToolUseBlock as ComputerMiddleClickToolUseBlock
+from .computer_triple_click_tool_use_block import ComputerTripleClickToolUseBlock as ComputerTripleClickToolUseBlock
+from .response_browser_find_tool_use_block import ResponseBrowserFindToolUseBlock as ResponseBrowserFindToolUseBlock
+from .response_browser_type_tool_use_block import ResponseBrowserTypeToolUseBlock as ResponseBrowserTypeToolUseBlock
+from .response_browser_wait_tool_use_block import ResponseBrowserWaitToolUseBlock as ResponseBrowserWaitToolUseBlock
+from .response_browser_zoom_tool_use_block import ResponseBrowserZoomToolUseBlock as ResponseBrowserZoomToolUseBlock
+from .response_computer_key_tool_use_block import ResponseComputerKeyToolUseBlock as ResponseComputerKeyToolUseBlock
 from .tool_search_tool_bm25_20251119_param import ToolSearchToolBm25_20251119Param as ToolSearchToolBm25_20251119Param
 from .tool_search_tool_search_result_block import ToolSearchToolSearchResultBlock as ToolSearchToolSearchResultBlock
 from .web_search_tool_result_block_content import WebSearchToolResultBlockContent as WebSearchToolResultBlockContent
@@ -285,12 +406,17 @@ from .computer_cursor_position_config_param import (
 )
 from .computer_left_click_drag_config_param import ComputerLeftClickDragConfigParam as ComputerLeftClickDragConfigParam
 from .computer_left_mouse_down_config_param import ComputerLeftMouseDownConfigParam as ComputerLeftMouseDownConfigParam
+from .computer_left_mouse_up_tool_use_block import ComputerLeftMouseUpToolUseBlock as ComputerLeftMouseUpToolUseBlock
 from .encrypted_code_execution_result_block import (
     EncryptedCodeExecutionResultBlock as EncryptedCodeExecutionResultBlock,
 )
 from .message_create_params_container_param import (
     MessageCreateParamsContainerParam as MessageCreateParamsContainerParam,
 )
+from .response_browser_hover_tool_use_block import ResponseBrowserHoverToolUseBlock as ResponseBrowserHoverToolUseBlock
+from .response_computer_type_tool_use_block import ResponseComputerTypeToolUseBlock as ResponseComputerTypeToolUseBlock
+from .response_computer_wait_tool_use_block import ResponseComputerWaitToolUseBlock as ResponseComputerWaitToolUseBlock
+from .response_computer_zoom_tool_use_block import ResponseComputerZoomToolUseBlock as ResponseComputerZoomToolUseBlock
 from .tool_search_tool_regex_20251119_param import ToolSearchToolRegex20251119Param as ToolSearchToolRegex20251119Param
 from .bash_code_execution_output_block_param import (
     BashCodeExecutionOutputBlockParam as BashCodeExecutionOutputBlockParam,
@@ -298,11 +424,34 @@ from .bash_code_execution_output_block_param import (
 from .bash_code_execution_result_block_param import (
     BashCodeExecutionResultBlockParam as BashCodeExecutionResultBlockParam,
 )
+from .browser_javascript_exec_tool_use_block import (
+    BrowserJavascriptExecToolUseBlock as BrowserJavascriptExecToolUseBlock,
+)
+from .browser_left_click_drag_tool_use_block import BrowserLeftClickDragToolUseBlock as BrowserLeftClickDragToolUseBlock
+from .browser_left_mouse_down_tool_use_block import BrowserLeftMouseDownToolUseBlock as BrowserLeftMouseDownToolUseBlock
 from .code_execution_tool_result_block_param import (
     CodeExecutionToolResultBlockParam as CodeExecutionToolResultBlockParam,
 )
 from .code_execution_tool_result_error_param import (
     CodeExecutionToolResultErrorParam as CodeExecutionToolResultErrorParam,
+)
+from .response_browser_scroll_tool_use_block import (
+    ResponseBrowserScrollToolUseBlock as ResponseBrowserScrollToolUseBlock,
+)
+from .computer_cursor_position_tool_use_block import (
+    ComputerCursorPositionToolUseBlock as ComputerCursorPositionToolUseBlock,
+)
+from .computer_left_click_drag_tool_use_block import (
+    ComputerLeftClickDragToolUseBlock as ComputerLeftClickDragToolUseBlock,
+)
+from .computer_left_mouse_down_tool_use_block import (
+    ComputerLeftMouseDownToolUseBlock as ComputerLeftMouseDownToolUseBlock,
+)
+from .response_browser_new_tab_tool_use_block import (
+    ResponseBrowserNewTabToolUseBlock as ResponseBrowserNewTabToolUseBlock,
+)
+from .response_computer_scroll_tool_use_block import (
+    ResponseComputerScrollToolUseBlock as ResponseComputerScrollToolUseBlock,
 )
 from .web_fetch_tool_result_error_block_param import (
     WebFetchToolResultErrorBlockParam as WebFetchToolResultErrorBlockParam,
@@ -310,8 +459,29 @@ from .web_fetch_tool_result_error_block_param import (
 from .code_execution_tool_result_block_content import (
     CodeExecutionToolResultBlockContent as CodeExecutionToolResultBlockContent,
 )
+from .response_browser_hold_key_tool_use_block import (
+    ResponseBrowserHoldKeyToolUseBlock as ResponseBrowserHoldKeyToolUseBlock,
+)
+from .response_browser_navigate_tool_use_block import (
+    ResponseBrowserNavigateToolUseBlock as ResponseBrowserNavigateToolUseBlock,
+)
 from .citation_web_search_result_location_param import (
     CitationWebSearchResultLocationParam as CitationWebSearchResultLocationParam,
+)
+from .response_browser_close_tab_tool_use_block import (
+    ResponseBrowserCloseTabToolUseBlock as ResponseBrowserCloseTabToolUseBlock,
+)
+from .response_browser_list_tabs_tool_use_block import (
+    ResponseBrowserListTabsToolUseBlock as ResponseBrowserListTabsToolUseBlock,
+)
+from .response_browser_read_page_tool_use_block import (
+    ResponseBrowserReadPageToolUseBlock as ResponseBrowserReadPageToolUseBlock,
+)
+from .response_browser_scroll_to_tool_use_block import (
+    ResponseBrowserScrollToToolUseBlock as ResponseBrowserScrollToToolUseBlock,
+)
+from .response_computer_hold_key_tool_use_block import (
+    ResponseComputerHoldKeyToolUseBlock as ResponseComputerHoldKeyToolUseBlock,
 )
 from .web_fetch_url_source_tool_reference_param import (
     WebFetchURLSourceToolReferenceParam as WebFetchURLSourceToolReferenceParam,
@@ -321,6 +491,21 @@ from .bash_code_execution_tool_result_error_code import (
 )
 from .browser_state_change_download_failed_param import (
     BrowserStateChangeDownloadFailedParam as BrowserStateChangeDownloadFailedParam,
+)
+from .response_browser_form_input_tool_use_block import (
+    ResponseBrowserFormInputToolUseBlock as ResponseBrowserFormInputToolUseBlock,
+)
+from .response_browser_left_click_tool_use_block import (
+    ResponseBrowserLeftClickToolUseBlock as ResponseBrowserLeftClickToolUseBlock,
+)
+from .response_browser_mouse_move_tool_use_block import (
+    ResponseBrowserMouseMoveToolUseBlock as ResponseBrowserMouseMoveToolUseBlock,
+)
+from .response_browser_screenshot_tool_use_block import (
+    ResponseBrowserScreenshotToolUseBlock as ResponseBrowserScreenshotToolUseBlock,
+)
+from .response_browser_switch_tab_tool_use_block import (
+    ResponseBrowserSwitchTabToolUseBlock as ResponseBrowserSwitchTabToolUseBlock,
 )
 from .tool_search_tool_search_result_block_param import (
     ToolSearchToolSearchResultBlockParam as ToolSearchToolSearchResultBlockParam,
@@ -337,6 +522,39 @@ from .browser_state_change_download_started_param import (
 from .encrypted_code_execution_result_block_param import (
     EncryptedCodeExecutionResultBlockParam as EncryptedCodeExecutionResultBlockParam,
 )
+from .response_browser_file_upload_tool_use_block import (
+    ResponseBrowserFileUploadToolUseBlock as ResponseBrowserFileUploadToolUseBlock,
+)
+from .response_browser_right_click_tool_use_block import (
+    ResponseBrowserRightClickToolUseBlock as ResponseBrowserRightClickToolUseBlock,
+)
+from .response_computer_left_click_tool_use_block import (
+    ResponseComputerLeftClickToolUseBlock as ResponseComputerLeftClickToolUseBlock,
+)
+from .response_computer_mouse_move_tool_use_block import (
+    ResponseComputerMouseMoveToolUseBlock as ResponseComputerMouseMoveToolUseBlock,
+)
+from .response_computer_screenshot_tool_use_block import (
+    ResponseComputerScreenshotToolUseBlock as ResponseComputerScreenshotToolUseBlock,
+)
+from .response_browser_double_click_tool_use_block import (
+    ResponseBrowserDoubleClickToolUseBlock as ResponseBrowserDoubleClickToolUseBlock,
+)
+from .response_browser_middle_click_tool_use_block import (
+    ResponseBrowserMiddleClickToolUseBlock as ResponseBrowserMiddleClickToolUseBlock,
+)
+from .response_browser_read_console_tool_use_block import (
+    ResponseBrowserReadConsoleToolUseBlock as ResponseBrowserReadConsoleToolUseBlock,
+)
+from .response_browser_read_network_tool_use_block import (
+    ResponseBrowserReadNetworkToolUseBlock as ResponseBrowserReadNetworkToolUseBlock,
+)
+from .response_browser_triple_click_tool_use_block import (
+    ResponseBrowserTripleClickToolUseBlock as ResponseBrowserTripleClickToolUseBlock,
+)
+from .response_computer_right_click_tool_use_block import (
+    ResponseComputerRightClickToolUseBlock as ResponseComputerRightClickToolUseBlock,
+)
 from .text_editor_code_execution_tool_result_block import (
     TextEditorCodeExecutionToolResultBlock as TextEditorCodeExecutionToolResultBlock,
 )
@@ -349,8 +567,44 @@ from .text_editor_code_execution_view_result_block import (
 from .browser_state_change_download_completed_param import (
     BrowserStateChangeDownloadCompletedParam as BrowserStateChangeDownloadCompletedParam,
 )
+from .response_browser_get_page_text_tool_use_block import (
+    ResponseBrowserGetPageTextToolUseBlock as ResponseBrowserGetPageTextToolUseBlock,
+)
+from .response_browser_left_mouse_up_tool_use_block import (
+    ResponseBrowserLeftMouseUpToolUseBlock as ResponseBrowserLeftMouseUpToolUseBlock,
+)
+from .response_computer_double_click_tool_use_block import (
+    ResponseComputerDoubleClickToolUseBlock as ResponseComputerDoubleClickToolUseBlock,
+)
+from .response_computer_middle_click_tool_use_block import (
+    ResponseComputerMiddleClickToolUseBlock as ResponseComputerMiddleClickToolUseBlock,
+)
+from .response_computer_triple_click_tool_use_block import (
+    ResponseComputerTripleClickToolUseBlock as ResponseComputerTripleClickToolUseBlock,
+)
+from .response_computer_left_mouse_up_tool_use_block import (
+    ResponseComputerLeftMouseUpToolUseBlock as ResponseComputerLeftMouseUpToolUseBlock,
+)
 from .text_editor_code_execution_create_result_block import (
     TextEditorCodeExecutionCreateResultBlock as TextEditorCodeExecutionCreateResultBlock,
+)
+from .response_browser_javascript_exec_tool_use_block import (
+    ResponseBrowserJavascriptExecToolUseBlock as ResponseBrowserJavascriptExecToolUseBlock,
+)
+from .response_browser_left_click_drag_tool_use_block import (
+    ResponseBrowserLeftClickDragToolUseBlock as ResponseBrowserLeftClickDragToolUseBlock,
+)
+from .response_browser_left_mouse_down_tool_use_block import (
+    ResponseBrowserLeftMouseDownToolUseBlock as ResponseBrowserLeftMouseDownToolUseBlock,
+)
+from .response_computer_cursor_position_tool_use_block import (
+    ResponseComputerCursorPositionToolUseBlock as ResponseComputerCursorPositionToolUseBlock,
+)
+from .response_computer_left_click_drag_tool_use_block import (
+    ResponseComputerLeftClickDragToolUseBlock as ResponseComputerLeftClickDragToolUseBlock,
+)
+from .response_computer_left_mouse_down_tool_use_block import (
+    ResponseComputerLeftMouseDownToolUseBlock as ResponseComputerLeftMouseDownToolUseBlock,
 )
 from .web_search_tool_result_block_param_content_param import (
     WebSearchToolResultBlockParamContentParam as WebSearchToolResultBlockParamContentParam,

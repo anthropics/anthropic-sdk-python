@@ -172,6 +172,7 @@ class TestWorkspaces:
             after_id="after_id",
             before_id="before_id",
             include_archived=True,
+            include_default=True,
             limit=1,
         )
         assert_matches_type(SyncPage[Workspace], workspace, path=["response"])
@@ -394,6 +395,7 @@ class TestAsyncWorkspaces:
             after_id="after_id",
             before_id="before_id",
             include_archived=True,
+            include_default=True,
             limit=1,
         )
         assert_matches_type(AsyncPage[Workspace], workspace, path=["response"])

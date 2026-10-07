@@ -1,0 +1,8 @@
+from .beta_computer_cursor_position_tool_use_block import BetaComputerCursorPositionToolUseBlock
+
+__all__ = ["BetaResponseComputerCursorPositionToolUseBlock"]
+
+BetaResponseComputerCursorPositionToolUseBlock = BetaComputerCursorPositionToolUseBlock
+"""
+BetaResponseComputerCursorPositionToolUseBlock has been renamed to BetaComputerCursorPositionToolUseBlock
+"""

@@ -156,13 +156,11 @@ class TestVaults:
                 vault_id="",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         vault = client.beta.vaults.list()
         assert_matches_type(SyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.list(
@@ -174,7 +172,6 @@ class TestVaults:
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.vaults.with_raw_response.list()
@@ -184,7 +181,6 @@ class TestVaults:
         vault = response.parse()
         assert_matches_type(SyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.vaults.with_streaming_response.list() as response:
@@ -433,13 +429,11 @@ class TestAsyncVaults:
                 vault_id="",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.list()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.list(
@@ -451,7 +445,6 @@ class TestAsyncVaults:
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.with_raw_response.list()
@@ -461,7 +454,6 @@ class TestAsyncVaults:
         vault = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.with_streaming_response.list() as response:

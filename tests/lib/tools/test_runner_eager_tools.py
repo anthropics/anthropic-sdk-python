@@ -27,8 +27,12 @@ from respx import MockRouter
 from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError
-from anthropic.types.beta import BetaMessageParam
+from anthropic.types.beta import BetaMessageParam, BetaBrowserJavascriptExecInput
 from anthropic.lib.streaming import BetaMessageStream, BetaAsyncMessageStream
+from anthropic.tools.browser import BetaToolsetCallContext
+
+from .toolsets._fakes import World, FakeBrowser, AsyncFakeBrowser
+from .toolsets._computer_fakes import Desktop, FakeDesktop, AsyncFakeDesktop
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -438,6 +442,35 @@ async def test_gives_the_timing_from_before_when_the_caller_defers_every_call(se
     ]
 
 
+async def test_lists_only_the_call_that_the_caller_defers_and_not_the_calls_after_it(setup: SetupFactory) -> None:
+    test = setup([reply(call("a"), call("b"), call("c"))])
+
+    async for stream in replies_of(test.runner):
+        async for event in events_of(stream):
+            if event.type == "content_block_stop" and event.content_block.type == "tool_use":
+                if event.content_block.id == "toolu_b":
+                    test.runner.defer_tool_call(event.content_block)
+
+        assert ids(test.runner.deferred_tool_calls) == ["toolu_b"]
+        break
+
+
+async def test_defers_the_calls_of_one_reply_only(setup: SetupFactory) -> None:
+    test = setup([reply(call("a"), call("b")), reply(call("c"), call("d")), done()])
+
+    async for stream in replies_of(test.runner):
+        async for event in events_of(stream):
+            test.see(event)
+            if event.type == "content_block_stop" and event.content_block.type == "tool_use":
+                if event.content_block.id == "toolu_a":
+                    test.runner.defer_tool_call(event.content_block)
+        test.timeline.append("loop body ends")
+
+    second_reply = test.timeline[test.timeline.index("request 2") : test.timeline.index("request 3")]
+    starts = [line for line in second_reply if "STARTS" in line or line == "loop body ends"]
+    assert starts == ["lookup(c) STARTS", "lookup(d) STARTS", "loop body ends"]  # the next reply starts early again
+
+
 async def test_defer_tool_call_does_nothing_before_the_loop_starts_because_there_is_no_reply_yet(
     setup: SetupFactory,
 ) -> None:
@@ -771,6 +804,20 @@ def call(key: str, json_input: str | None = None) -> Block:
     return {"type": "tool_use", "key": key, "json": json.dumps({"key": key}) if json_input is None else json_input}
 
 
+def toolset_call(
+    key: str, name: str = "key", input: dict[str, Any] | None = None, toolset_name: str | None = "computer"
+) -> Block:
+    """The model calls the tool `name` of a toolset with the id `toolu_<key>`. By default it is the computer toolset's
+    `key` tool. Without a `toolset_name` it is a call named like a toolset, which the runner can't route."""
+    return {
+        "type": "tool_use",
+        "key": key,
+        "json": json.dumps({"text": key} if input is None else input),
+        "name": name,
+        **({"toolset_name": toolset_name} if toolset_name is not None else {}),
+    }
+
+
 def text(value: str) -> Block:
     return {"type": "text", "text": value}
 
@@ -866,7 +913,14 @@ def to_events(canned: Reply) -> list[dict[str, Any]]:
         start: dict[str, Any] = block
         delta: dict[str, Any] | None = None
         if block["type"] == "tool_use":
-            start = {"type": "tool_use", "id": f"toolu_{block['key']}", "name": "lookup", "input": {}}
+            start = {
+                "type": "tool_use",
+                "id": f"toolu_{block['key']}",
+                "name": block.get("name", "lookup"),
+                "input": {},
+            }
+            if "toolset_name" in block:
+                start["toolset_name"] = block["toolset_name"]
             delta = {"type": "input_json_delta", "partial_json": block["json"]}
         elif block["type"] == "text":
             start = {"type": "text", "text": ""}
@@ -889,7 +943,13 @@ def to_events(canned: Reply) -> list[dict[str, Any]]:
 def to_message(canned: Reply) -> dict[str, Any]:
     """The reply as the message the API sends for it when not streaming."""
     content = [
-        {"type": "tool_use", "id": f"toolu_{block['key']}", "name": "lookup", "input": json.loads(block["json"])}
+        {
+            "type": "tool_use",
+            "id": f"toolu_{block['key']}",
+            "name": block.get("name", "lookup"),
+            "input": json.loads(block["json"]),
+            **({"toolset_name": block["toolset_name"]} if "toolset_name" in block else {}),
+        }
         if block["type"] == "tool_use"
         else block
         for block in canned.blocks
@@ -966,12 +1026,55 @@ def lookup_tool(
     return async_lookup
 
 
+class TimelineDesktop(Desktop):
+    """A desktop that writes to `timeline` when a tool of the computer toolset starts."""
+
+    def __init__(self, timeline: list[str]) -> None:
+        super().__init__()
+        self._timeline = timeline
+
+    @override
+    def do(self, name: str, context: BetaToolsetCallContext, input: Any) -> Any:
+        self._timeline.append(f"computer {name} STARTS")
+        return super().do(name, context, input)
+
+
+class TimelineWorld(World):
+    """A browser that writes to `timeline` when a tool of the browser toolset starts."""
+
+    def __init__(self, timeline: list[str]) -> None:
+        super().__init__()
+        self._timeline = timeline
+
+    @override
+    def do(self, name: str, context: BetaToolsetCallContext, input: Any) -> None:
+        self._timeline.append(f"browser {name} STARTS")
+        super().do(name, context, input)
+
+
+class JsBrowser(FakeBrowser):
+    """A browser toolset whose driver implements `javascript_exec`."""
+
+    @override
+    def javascript_exec(self, context: BetaToolsetCallContext, input: BetaBrowserJavascriptExecInput) -> str:
+        self.world.do("javascript_exec", context, input)
+        return "ran"
+
+
+class AsyncJsBrowser(AsyncFakeBrowser):
+    @override
+    async def javascript_exec(self, context: BetaToolsetCallContext, input: BetaBrowserJavascriptExecInput) -> str:
+        self.world.do("javascript_exec", context, input)
+        return "ran"
+
+
 class Setup:
-    def __init__(self, *, sync: bool, runner: Any, timeline: list[str], requests: list[Any]) -> None:
+    def __init__(self, *, sync: bool, runner: Any, timeline: list[str], requests: list[Any], desktop: Desktop) -> None:
         self.sync = sync
         self.runner = runner
         self.timeline = timeline
         self.requests = requests
+        self.desktop = desktop
         self._blocks: dict[int, str] = {}
 
     def label(self, event: Any) -> str:
@@ -1001,6 +1104,9 @@ class SetupFactory:
         lookup: Callable[[str], str] | None = None,
         log_returns: bool = False,
         messages: list[Any] | None = None,
+        computer: dict[str, Any] | None = None,
+        browser: dict[str, Any] | None = None,
+        extra_tools: list[Any] | None = None,
     ) -> Setup:
         timeline: list[str] = []
         requests: list[Any] = []
@@ -1025,14 +1131,23 @@ class SetupFactory:
 
         self._respx_mock.post("/v1/messages").mock(side_effect=respond)
 
+        tools: list[Any] = [lookup_tool(self._sync, timeline, lookup=lookup, log_returns=log_returns)]
+        desktop = TimelineDesktop(timeline)
+        if computer is not None:
+            # a computer toolset over a desktop that writes its calls to the timeline, with these options
+            tools.append((FakeDesktop if self._sync else AsyncFakeDesktop)(desktop=desktop, **computer))
+        if browser is not None:
+            tools.append((JsBrowser if self._sync else AsyncJsBrowser)(world=TimelineWorld(timeline), **browser))
+        tools.extend(extra_tools or [])
+
         tool_runner: Any = self._client.beta.messages.tool_runner
         runner = tool_runner(
             **{**PARAMS, "messages": messages or PARAMS["messages"]},
-            tools=[lookup_tool(self._sync, timeline, lookup=lookup, log_returns=log_returns)],
+            tools=tools,
             stream=stream,
             **({"run_tools_eagerly": True} if run_tools_eagerly and stream else {}),
         )
-        return Setup(sync=self._sync, runner=runner, timeline=timeline, requests=requests)
+        return Setup(sync=self._sync, runner=runner, timeline=timeline, requests=requests, desktop=desktop)
 
 
 @pytest.fixture(params=[True, False], ids=["sync", "async"])

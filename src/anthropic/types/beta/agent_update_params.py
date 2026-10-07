@@ -65,7 +65,7 @@ class AgentUpdateParams(TypedDict, total=False):
     """Tool configurations available to the agent.
 
     Full replacement. Omit to preserve; send empty array or null to clear. Maximum
-    of 128 tools across all toolsets allowed.
+    of 256 tools across all toolsets allowed.
     """
 
     version: int

@@ -515,7 +515,7 @@ class Anthropic(SyncAPIClient):
                 if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
-        return self.__class__(
+        client = self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
             webhook_key=webhook_key or self.webhook_key,
@@ -528,6 +528,8 @@ class Anthropic(SyncAPIClient):
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
+        client._timeout_overridden = self._timeout_overridden or is_given(timeout)
+        return client
 
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)
@@ -941,7 +943,7 @@ class AsyncAnthropic(AsyncAPIClient):
                 if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
-        return self.__class__(
+        client = self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
             webhook_key=webhook_key or self.webhook_key,
@@ -954,6 +956,8 @@ class AsyncAnthropic(AsyncAPIClient):
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
+        client._timeout_overridden = self._timeout_overridden or is_given(timeout)
+        return client
 
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)

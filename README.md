@@ -6,6 +6,8 @@ The Claude SDK for Python provides access to the [Claude API](https://docs.anthr
 
 ## Documentation
 
+Tool helpers (`@beta_tool`, the tool runner and `ToolError`) are documented in [tools.md](tools.md). The browser and computer toolset classes have their own guides, [browser-toolset.md](browser-toolset.md) and [computer-toolset.md](computer-toolset.md).
+
 Full documentation is available at **[platform.claude.com/docs/en/api/sdks/python](https://platform.claude.com/docs/en/api/sdks/python)**.
 
 ## Installation

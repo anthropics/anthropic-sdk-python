@@ -107,14 +107,13 @@ class Agents(SyncAPIResource):
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
 
-          multiagent: Multiagent orchestration configuration. Currently supports the `coordinator`
-              topology with a roster of 1-20 agents.
+          multiagent: Multiagent orchestration configuration.
 
           skills: Skills available to the agent.
 
           system: System prompt for the agent.
 
-          tools: Tool configurations available to the agent. Maximum of 128 tools across all
+          tools: Tool configurations available to the agent. Maximum of 256 tools across all
               toolsets allowed.
 
           betas: Optional header to specify the beta version(s) you want to use.
@@ -290,7 +289,7 @@ class Agents(SyncAPIResource):
           system: System prompt. Omit to preserve; send empty string or null to clear.
 
           tools: Tool configurations available to the agent. Full replacement. Omit to preserve;
-              send empty array or null to clear. Maximum of 128 tools across all toolsets
+              send empty array or null to clear. Maximum of 256 tools across all toolsets
               allowed.
 
           version: The agent's current version, used to prevent concurrent overwrites. Obtain this
@@ -560,14 +559,13 @@ class AsyncAgents(AsyncAPIResource):
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
 
-          multiagent: Multiagent orchestration configuration. Currently supports the `coordinator`
-              topology with a roster of 1-20 agents.
+          multiagent: Multiagent orchestration configuration.
 
           skills: Skills available to the agent.
 
           system: System prompt for the agent.
 
-          tools: Tool configurations available to the agent. Maximum of 128 tools across all
+          tools: Tool configurations available to the agent. Maximum of 256 tools across all
               toolsets allowed.
 
           betas: Optional header to specify the beta version(s) you want to use.
@@ -743,7 +741,7 @@ class AsyncAgents(AsyncAPIResource):
           system: System prompt. Omit to preserve; send empty string or null to clear.
 
           tools: Tool configurations available to the agent. Full replacement. Omit to preserve;
-              send empty array or null to clear. Maximum of 128 tools across all toolsets
+              send empty array or null to clear. Maximum of 256 tools across all toolsets
               allowed.
 
           version: The agent's current version, used to prevent concurrent overwrites. Obtain this

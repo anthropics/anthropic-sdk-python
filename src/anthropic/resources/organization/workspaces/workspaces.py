@@ -260,6 +260,7 @@ class Workspaces(SyncAPIResource):
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
         include_archived: bool | Omit = omit,
+        include_default: bool | Omit = omit,
         limit: int | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -279,6 +280,8 @@ class Workspaces(SyncAPIResource):
               page of results immediately before this object.
 
           include_archived: Whether to include Workspaces that have been archived in the response
+
+          include_default: Whether to include the organization's default Workspace in the response
 
           limit: Number of items to return per page.
 
@@ -304,6 +307,7 @@ class Workspaces(SyncAPIResource):
                     "after_id": after_id,
                     "before_id": before_id,
                     "include_archived": include_archived,
+                    "include_default": include_default,
                     "limit": limit,
                 },
             ),
@@ -560,6 +564,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
         include_archived: bool | Omit = omit,
+        include_default: bool | Omit = omit,
         limit: int | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -579,6 +584,8 @@ class AsyncWorkspaces(AsyncAPIResource):
               page of results immediately before this object.
 
           include_archived: Whether to include Workspaces that have been archived in the response
+
+          include_default: Whether to include the organization's default Workspace in the response
 
           limit: Number of items to return per page.
 
@@ -604,6 +611,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                     "after_id": after_id,
                     "before_id": before_id,
                     "include_archived": include_archived,
+                    "include_default": include_default,
                     "limit": limit,
                 },
             ),

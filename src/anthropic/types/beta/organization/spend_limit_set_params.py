@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Union, Optional
+from typing import List, Union, Optional
 from typing_extensions import Required, TypeAlias, TypedDict
 
+from ...anthropic_beta_param import AnthropicBetaParam
 from .beta_spend_limit_period import BetaSpendLimitPeriod
 from .beta_spend_limit_user_scope_param import BetaSpendLimitUserScopeParam
 from .beta_spend_limit_workspace_scope_param import BetaSpendLimitWorkspaceScopeParam
@@ -30,6 +31,9 @@ class SpendLimitSetParams(TypedDict, total=False):
     """
 
     period: BetaSpendLimitPeriod
+
+    betas: List[AnthropicBetaParam]
+    """Optional header to specify the beta version(s) you want to use."""
 
 
 Scope: TypeAlias = Union[

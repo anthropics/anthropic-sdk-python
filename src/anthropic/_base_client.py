@@ -405,7 +405,8 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     _version: str
     _base_url: URL
     max_retries: int
-    timeout: Union[float, Timeout, None]
+    _timeout: Union[float, Timeout, None]
+    _timeout_overridden: bool
     _strict_response_validation: bool
     _idempotency_header: str | None
     _default_stream_cls: type[_DefaultStreamT] | None = None
@@ -428,7 +429,8 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         self._version = version
         self._base_url = self._enforce_trailing_slash(URL(base_url))
         self.max_retries = max_retries
-        self.timeout = timeout
+        self._timeout = timeout
+        self._timeout_overridden = False
         self._custom_headers = custom_headers or {}
         self._custom_query = custom_query or {}
         self._strict_response_validation = _strict_response_validation
@@ -642,7 +644,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         for key, value in items:
             existing = serialized.get(key)
 
-            if not existing:
+            if existing is None:
                 serialized[key] = value
                 continue
 
@@ -750,6 +752,15 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     @property
     def user_agent(self) -> str:
         return f"{self.__class__.__name__}/Python {self._version}"
+
+    @property
+    def timeout(self) -> Union[float, Timeout, None]:
+        return self._timeout
+
+    @timeout.setter
+    def timeout(self, timeout: Union[float, Timeout, None]) -> None:
+        self._timeout = timeout
+        self._timeout_overridden = True
 
     @property
     def base_url(self) -> URL:
@@ -1007,6 +1018,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
     ) -> None:
         _reject_httpx_object("http_client", http_client)
 
+        timeout_overridden = is_given(timeout)
         if not is_given(timeout):
             # if the user passed in a custom http client with a non-default
             # timeout set then we use that timeout.
@@ -1017,6 +1029,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
             # pass in a timeout and will ignore it
             if http_client and http_client.timeout != HTTPX_DEFAULT_TIMEOUT:
                 timeout = http_client.timeout
+                timeout_overridden = timeout != DEFAULT_TIMEOUT
             else:
                 timeout = DEFAULT_TIMEOUT
 
@@ -1043,6 +1056,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
             middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
+        self._timeout_overridden = timeout_overridden
         self._middleware_chain = self._build_middleware_chain()
         self._client = http_client or SyncHttpxClientWrapper(
             base_url=base_url,
@@ -1725,6 +1739,7 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
     ) -> None:
         _reject_httpx_object("http_client", http_client)
 
+        timeout_overridden = is_given(timeout)
         if not is_given(timeout):
             # if the user passed in a custom http client with a non-default
             # timeout set then we use that timeout.
@@ -1735,6 +1750,7 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
             # pass in a timeout and will ignore it
             if http_client and http_client.timeout != HTTPX_DEFAULT_TIMEOUT:
                 timeout = http_client.timeout
+                timeout_overridden = timeout != DEFAULT_TIMEOUT
             else:
                 timeout = DEFAULT_TIMEOUT
 
@@ -1761,6 +1777,7 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
             middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
+        self._timeout_overridden = timeout_overridden
         self._middleware_chain = self._build_middleware_chain()
         self._client = http_client or AsyncHttpxClientWrapper(
             base_url=base_url,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import List
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 from ..anthropic_beta_param import AnthropicBetaParam
 
@@ -19,6 +19,14 @@ class ModelListParams(TypedDict, total=False):
     """ID of the object to use as a cursor for pagination.
 
     When provided, returns the page of results immediately before this object.
+    """
+
+    lifecycle: List[Literal["active", "deprecated", "retired"]]
+    """
+    Filter the list to models in any of the given lifecycle stages (`active`,
+    `deprecated`, or `retired`). Up to 3 values. When omitted, the list contains the
+    `active` and `deprecated` models; `retired` models appear only when `retired` is
+    requested explicitly.
     """
 
     limit: int

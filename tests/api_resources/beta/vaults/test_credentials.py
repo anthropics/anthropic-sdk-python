@@ -98,7 +98,7 @@ class TestCredentials:
     @parametrize
     def test_method_retrieve(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.retrieve(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
@@ -106,7 +106,7 @@ class TestCredentials:
     @parametrize
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.retrieve(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -116,7 +116,7 @@ class TestCredentials:
     @parametrize
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.vaults.credentials.with_raw_response.retrieve(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
 
@@ -128,7 +128,7 @@ class TestCredentials:
     @parametrize
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.vaults.credentials.with_streaming_response.retrieve(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         ) as response:
             assert not response.is_closed
@@ -143,7 +143,7 @@ class TestCredentials:
     def test_path_params_retrieve(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
             client.beta.vaults.credentials.with_raw_response.retrieve(
-                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
                 vault_id="",
             )
 
@@ -156,7 +156,7 @@ class TestCredentials:
     @parametrize
     def test_method_update(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.update(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
@@ -164,7 +164,7 @@ class TestCredentials:
     @parametrize
     def test_method_update_with_all_params(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.update(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             auth={
                 "type": "mcp_oauth",
@@ -189,7 +189,7 @@ class TestCredentials:
     @parametrize
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.vaults.credentials.with_raw_response.update(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
 
@@ -201,7 +201,7 @@ class TestCredentials:
     @parametrize
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.vaults.credentials.with_streaming_response.update(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         ) as response:
             assert not response.is_closed
@@ -216,7 +216,7 @@ class TestCredentials:
     def test_path_params_update(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
             client.beta.vaults.credentials.with_raw_response.update(
-                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
                 vault_id="",
             )
 
@@ -226,7 +226,6 @@ class TestCredentials:
                 vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.list(
@@ -234,7 +233,6 @@ class TestCredentials:
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.list(
@@ -247,7 +245,6 @@ class TestCredentials:
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.vaults.credentials.with_raw_response.list(
@@ -259,7 +256,6 @@ class TestCredentials:
         credential = response.parse()
         assert_matches_type(SyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.vaults.credentials.with_streaming_response.list(
@@ -273,7 +269,6 @@ class TestCredentials:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_path_params_list(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
@@ -284,7 +279,7 @@ class TestCredentials:
     @parametrize
     def test_method_delete(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.delete(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
@@ -292,7 +287,7 @@ class TestCredentials:
     @parametrize
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.delete(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -302,7 +297,7 @@ class TestCredentials:
     @parametrize
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.vaults.credentials.with_raw_response.delete(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
 
@@ -314,7 +309,7 @@ class TestCredentials:
     @parametrize
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.vaults.credentials.with_streaming_response.delete(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         ) as response:
             assert not response.is_closed
@@ -329,7 +324,7 @@ class TestCredentials:
     def test_path_params_delete(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
             client.beta.vaults.credentials.with_raw_response.delete(
-                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
                 vault_id="",
             )
 
@@ -342,7 +337,7 @@ class TestCredentials:
     @parametrize
     def test_method_archive(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.archive(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
@@ -350,7 +345,7 @@ class TestCredentials:
     @parametrize
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.archive(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -360,7 +355,7 @@ class TestCredentials:
     @parametrize
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.vaults.credentials.with_raw_response.archive(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
 
@@ -372,7 +367,7 @@ class TestCredentials:
     @parametrize
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.vaults.credentials.with_streaming_response.archive(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         ) as response:
             assert not response.is_closed
@@ -387,7 +382,7 @@ class TestCredentials:
     def test_path_params_archive(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
             client.beta.vaults.credentials.with_raw_response.archive(
-                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
                 vault_id="",
             )
 
@@ -397,31 +392,28 @@ class TestCredentials:
                 vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             )
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     def test_method_mcp_oauth_validate(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.mcp_oauth_validate(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     def test_method_mcp_oauth_validate_with_all_params(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.mcp_oauth_validate(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     def test_raw_response_mcp_oauth_validate(self, client: Anthropic) -> None:
         response = client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
 
@@ -430,11 +422,10 @@ class TestCredentials:
         credential = response.parse()
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     def test_streaming_response_mcp_oauth_validate(self, client: Anthropic) -> None:
         with client.beta.vaults.credentials.with_streaming_response.mcp_oauth_validate(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         ) as response:
             assert not response.is_closed
@@ -445,12 +436,11 @@ class TestCredentials:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     def test_path_params_mcp_oauth_validate(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
             client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
-                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
                 vault_id="",
             )
 
@@ -543,7 +533,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.retrieve(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
@@ -551,7 +541,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.retrieve(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -561,7 +551,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.credentials.with_raw_response.retrieve(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
 
@@ -573,7 +563,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.credentials.with_streaming_response.retrieve(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         ) as response:
             assert not response.is_closed
@@ -588,7 +578,7 @@ class TestAsyncCredentials:
     async def test_path_params_retrieve(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
             await async_client.beta.vaults.credentials.with_raw_response.retrieve(
-                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
                 vault_id="",
             )
 
@@ -601,7 +591,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.update(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
@@ -609,7 +599,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_method_update_with_all_params(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.update(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             auth={
                 "type": "mcp_oauth",
@@ -634,7 +624,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.credentials.with_raw_response.update(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
 
@@ -646,7 +636,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.credentials.with_streaming_response.update(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         ) as response:
             assert not response.is_closed
@@ -661,7 +651,7 @@ class TestAsyncCredentials:
     async def test_path_params_update(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
             await async_client.beta.vaults.credentials.with_raw_response.update(
-                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
                 vault_id="",
             )
 
@@ -671,7 +661,6 @@ class TestAsyncCredentials:
                 vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.list(
@@ -679,7 +668,6 @@ class TestAsyncCredentials:
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.list(
@@ -692,7 +680,6 @@ class TestAsyncCredentials:
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.credentials.with_raw_response.list(
@@ -704,7 +691,6 @@ class TestAsyncCredentials:
         credential = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.credentials.with_streaming_response.list(
@@ -718,7 +704,6 @@ class TestAsyncCredentials:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_path_params_list(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
@@ -729,7 +714,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.delete(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
@@ -737,7 +722,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.delete(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -747,7 +732,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.credentials.with_raw_response.delete(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
 
@@ -759,7 +744,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.credentials.with_streaming_response.delete(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         ) as response:
             assert not response.is_closed
@@ -774,7 +759,7 @@ class TestAsyncCredentials:
     async def test_path_params_delete(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
             await async_client.beta.vaults.credentials.with_raw_response.delete(
-                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
                 vault_id="",
             )
 
@@ -787,7 +772,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.archive(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
@@ -795,7 +780,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.archive(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -805,7 +790,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.credentials.with_raw_response.archive(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
 
@@ -817,7 +802,7 @@ class TestAsyncCredentials:
     @parametrize
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.credentials.with_streaming_response.archive(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         ) as response:
             assert not response.is_closed
@@ -832,7 +817,7 @@ class TestAsyncCredentials:
     async def test_path_params_archive(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
             await async_client.beta.vaults.credentials.with_raw_response.archive(
-                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
                 vault_id="",
             )
 
@@ -842,31 +827,28 @@ class TestAsyncCredentials:
                 vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             )
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     async def test_method_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.mcp_oauth_validate(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     async def test_method_mcp_oauth_validate_with_all_params(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.mcp_oauth_validate(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     async def test_raw_response_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         )
 
@@ -875,11 +857,10 @@ class TestAsyncCredentials:
         credential = await response.parse()
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     async def test_streaming_response_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.credentials.with_streaming_response.mcp_oauth_validate(
-            credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+            credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
         ) as response:
             assert not response.is_closed
@@ -890,12 +871,11 @@ class TestAsyncCredentials:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="prism can't find endpoint with beta only tag")
     @parametrize
     async def test_path_params_mcp_oauth_validate(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `vault_id` but received ''"):
             await async_client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
-                credential_id="vcrd_011CZkZEMt8gZan2iYOQfSkw",
+                credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
                 vault_id="",
             )
 
