@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Type, Union, cast
 from collections.abc import Callable
 from typing_extensions import Literal, get_args
 
+import anyio
 import httpx2
 import pytest
 import pydantic
@@ -3327,3 +3328,56 @@ async def test_compact_before_next_turn_when_streaming_async(respx_mock: MockRou
     assert compaction["compaction"] == {"type": "summarize"}
     assert compaction["stream"] is True
     assert after["messages"] == _compaction_block_alone()
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+async def test_concurrent_generate_tool_call_response_executes_tool_once(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            _tool_use_response("slow_tool", "toolu_1"),
+        ]
+    )
+
+    execution_count = 0
+
+    @beta_async_tool
+    async def slow_tool(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:  # noqa: ARG001
+        """Lookup the weather slowly.
+
+        Args:
+            location: The city and state
+            units: Unit
+        """
+        nonlocal execution_count
+        execution_count += 1
+        await anyio.sleep(0.05)
+        return "20 degrees"
+
+    async with AsyncAnthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[slow_tool],
+            messages=[{"role": "user", "content": "What is the weather?"}],
+        )
+
+        # Advance one turn so the assistant response with tool_use is received
+        first_turn = await runner.__anext__()
+        assert first_turn.stop_reason == "tool_use"
+
+        # Concurrently call generate_tool_call_response 3 times
+        async with anyio.create_task_group() as tg:
+            results: List[Any] = [None, None, None]
+
+            async def call_worker(idx: int) -> None:
+                results[idx] = await runner.generate_tool_call_response()
+
+            for i in range(3):
+                tg.start_soon(call_worker, i)
+
+        assert execution_count == 1
+        assert results[0] is not None
+        assert results[0] == results[1] == results[2]
