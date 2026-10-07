@@ -431,6 +431,7 @@ class EnvironmentWorker:
         workdir: str | os.PathLike[str] | None = None,
         max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None = DEFAULT_MAX_IDLE,
+        tool_timeout: float | None | NotGiven = not_given,
         memory_sync_interval: float | None = DEFAULT_MEMORY_SYNC_INTERVAL,
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
@@ -450,6 +451,7 @@ class EnvironmentWorker:
         unrestricted_paths: bool,
         max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None = DEFAULT_MAX_IDLE,
+        tool_timeout: float | None | NotGiven = not_given,
         memory_sync_interval: float | None = DEFAULT_MEMORY_SYNC_INTERVAL,
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
@@ -467,6 +469,7 @@ class EnvironmentWorker:
         unrestricted_paths: bool | NotGiven = not_given,
         max_file_bytes: int | None | NotGiven = not_given,
         max_idle: float | None = DEFAULT_MAX_IDLE,
+        tool_timeout: float | None | NotGiven = not_given,
         memory_sync_interval: float | None = DEFAULT_MEMORY_SYNC_INTERVAL,
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
@@ -477,6 +480,7 @@ class EnvironmentWorker:
         self._environment_id = environment_id
         self._environment_key = environment_key
         self._tools = tools
+        self._tool_timeout = tool_timeout
         # Snapshot the cwd at construction time when no explicit workdir was
         # given (TS parity: `process.cwd()` captured up front). Resolving "."
         # lazily at first tool use would instead pick up any intervening chdir.
@@ -775,6 +779,7 @@ class EnvironmentWorker:
                         session_id,
                         tools=tools,
                         max_idle=self._max_idle,
+                        tool_timeout=self._tool_timeout,
                         # Despite the parameter name, this is just the
                         # runner's Bearer credential (see its docstring).
                         environment_key=item_credential,
