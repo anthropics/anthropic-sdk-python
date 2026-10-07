@@ -1,6 +1,8 @@
 from copy import deepcopy
+from typing import Any, List
 
 import pytest
+import pydantic
 from inline_snapshot import snapshot
 
 from anthropic.lib._parse._transform import transform_schema
@@ -141,6 +143,57 @@ A list of strings
 {minItems: 2}\
 """,
             "items": {"type": "string"},
+        }
+    )
+
+
+def test_empty_schema():
+    # pydantic emits a bare `{}` for an `Any`-typed field; an empty schema is a
+    # valid, unconstrained ("any") schema and must not raise.
+    assert transform_schema({}) == snapshot({})
+
+
+def test_array_with_untyped_items():
+    # `list` / `List[Any]` produces `{"type": "array", "items": {}}`.
+    schema: dict[str, Any] = {"type": "array", "items": {}}
+    result = transform_schema(schema)
+    assert result == snapshot({"type": "array", "items": {}})
+
+
+def test_object_with_any_property():
+    schema: dict[str, Any] = {"type": "object", "properties": {"x": {}}, "required": ["x"], "title": "M"}
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "type": "object",
+            "title": "M",
+            "properties": {"x": {}},
+            "additionalProperties": False,
+            "required": ["x"],
+        }
+    )
+
+
+def test_model_with_untyped_list_and_any_field():
+    # Regression: previously raised ValueError("Schema must have a 'type', ...") because
+    # the untyped `list` items / `Any` field transform to an empty `{}` sub-schema.
+    class Result(pydantic.BaseModel):
+        summary: str
+        tags: List[Any]
+        extra: Any
+
+    result = transform_schema(Result)
+    assert result == snapshot(
+        {
+            "type": "object",
+            "title": "Result",
+            "properties": {
+                "summary": {"type": "string", "title": "Summary"},
+                "tags": {"type": "array", "title": "Tags", "items": {}},
+                "extra": {"title": "Extra"},
+            },
+            "additionalProperties": False,
+            "required": ["summary", "tags", "extra"],
         }
     )
 
