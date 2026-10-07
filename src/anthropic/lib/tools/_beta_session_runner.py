@@ -449,6 +449,14 @@ class SessionToolRunner:
         self.tools: Sequence[BetaAnyRunnableTool] = tools
         self.max_idle = max_idle
         self.tool_timeout = TOOL_TIMEOUT if isinstance(tool_timeout, NotGiven) else tool_timeout
+        if self.tool_timeout is not None:
+            from .agent_toolset import BASH_DEFAULT_TIMEOUT
+
+            if any(getattr(t, "name", None) == "bash" for t in self.tools) and self.tool_timeout <= BASH_DEFAULT_TIMEOUT:
+                raise ValueError(
+                    f"tool_timeout ({self.tool_timeout}s) must exceed BASH_DEFAULT_TIMEOUT "
+                    f"({BASH_DEFAULT_TIMEOUT}s) when the bash tool is present"
+                )
         # All event stream / list / send requests are issued via this scoped
         # sub-client: Bearer-only when an environment key is set, otherwise the
         # caller's own client with the helper-telemetry header layered on.

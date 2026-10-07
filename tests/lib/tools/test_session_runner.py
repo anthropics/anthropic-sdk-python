@@ -1536,6 +1536,28 @@ def test_tool_timeout_exceeds_bash_default() -> None:
     assert session_runner_mod.TOOL_TIMEOUT > BASH_DEFAULT_TIMEOUT
 
 
+def test_tool_timeout_below_or_equal_bash_default_raises() -> None:
+    """Configuring a `tool_timeout` at or below `BASH_DEFAULT_TIMEOUT` raises ValueError
+    when the bash tool is in the toolset to prevent outer cancellation preempting bash."""
+    from anthropic import AsyncAnthropic
+    from anthropic.lib.tools._beta_session_runner import SessionToolRunner
+    from anthropic.lib.tools.agent_toolset import BASH_DEFAULT_TIMEOUT, AgentToolContext, beta_bash_tool
+
+    client = AsyncAnthropic(api_key="dummy")
+    ctx = AgentToolContext(workdir=".")
+    bash_tool = beta_bash_tool(ctx)
+
+    with pytest.raises(ValueError, match="must exceed BASH_DEFAULT_TIMEOUT"):
+        SessionToolRunner(client, "s_1", tools=[bash_tool], tool_timeout=BASH_DEFAULT_TIMEOUT)
+
+    with pytest.raises(ValueError, match="must exceed BASH_DEFAULT_TIMEOUT"):
+        SessionToolRunner(client, "s_1", tools=[bash_tool], tool_timeout=60.0)
+
+    # Exceeding BASH_DEFAULT_TIMEOUT succeeds
+    runner = SessionToolRunner(client, "s_1", tools=[bash_tool], tool_timeout=BASH_DEFAULT_TIMEOUT + 1.0)
+    assert runner.tool_timeout == BASH_DEFAULT_TIMEOUT + 1.0
+
+
 @pytest.mark.asyncio()
 async def test_tool_error_preserves_structured_content() -> None:
     """`ToolError` raised by the tool preserves its structured content rather
