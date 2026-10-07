@@ -641,6 +641,49 @@ class TestAsyncMessages:
         stop_event.model_dump()
         stop_event.model_dump_json()
 
+    def test_message_delta_subsequent_delta_preserves_stop_fields(self) -> None:
+        from anthropic.types import Usage, Message, MessageDeltaUsage, RawMessageDeltaEvent, RawMessageStartEvent
+        from anthropic.lib.streaming._messages import accumulate_event
+        from anthropic.types.raw_message_delta_event import Delta as MessageDelta
+
+        start_event = RawMessageStartEvent(
+            type="message_start",
+            message=Message(
+                id="msg_123",
+                type="message",
+                role="assistant",
+                content=[],
+                model="claude-3-7-sonnet-20250219",
+                stop_reason=None,
+                stop_sequence=None,
+                usage=Usage(input_tokens=10, output_tokens=0),
+            ),
+        )
+        snapshot = accumulate_event(event=start_event, current_snapshot=None, json_bufs={})
+
+        delta_1 = RawMessageDeltaEvent(
+            type="message_delta",
+            delta=MessageDelta(
+                stop_reason="end_turn",
+                stop_sequence=None,
+            ),
+            usage=MessageDeltaUsage(output_tokens=5),
+        )
+        snapshot = accumulate_event(event=delta_1, current_snapshot=snapshot, json_bufs={})
+        assert snapshot.stop_reason == "end_turn"
+
+        delta_2 = RawMessageDeltaEvent(
+            type="message_delta",
+            delta=MessageDelta(
+                stop_reason=None,
+                stop_sequence=None,
+            ),
+            usage=MessageDeltaUsage(output_tokens=8),
+        )
+        snapshot = accumulate_event(event=delta_2, current_snapshot=snapshot, json_bufs={})
+        assert snapshot.stop_reason == "end_turn"
+        assert snapshot.usage.output_tokens == 8
+
 
 def test_message_delta_fields_are_all_accumulated() -> None:
     # tripwire: handle a new field in accumulate_event (src/anthropic/lib/streaming/_messages.py), then list it here
