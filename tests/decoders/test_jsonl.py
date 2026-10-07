@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any, Iterator, AsyncIterator
 from typing_extensions import TypeVar
 
@@ -58,6 +59,62 @@ async def test_multi_byte_character_multiple_chunks(
     iterator = make_jsonl_iterator(content=body(), sync=sync, line_type=object)
 
     assert await iter_next(iterator) == {"content": "известни"}
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_close_on_json_decode_error(sync: bool) -> None:
+    response = httpx2.Response(200, stream=httpx2.ByteStream(b"invalid json\n" + b" " * 64))
+    if sync:
+        decoder = JSONLDecoder(
+            raw_iterator=response.iter_bytes(chunk_size=64),
+            line_type=object,
+            http_response=response,
+        )
+        with pytest.raises(json.JSONDecodeError):
+            list(decoder)
+    else:
+        decoder = AsyncJSONLDecoder(
+            raw_iterator=response.aiter_bytes(chunk_size=64),
+            line_type=object,
+            http_response=response,
+        )
+        with pytest.raises(json.JSONDecodeError):
+            async for _ in decoder:
+                pass
+
+    assert response.is_closed
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_close_on_stream_error(sync: bool) -> None:
+    def failing_sync_stream() -> Iterator[bytes]:
+        yield b'{"valid": 1}\n'
+        raise httpx2.ReadError("network dropped")
+
+    async def failing_async_stream() -> AsyncIterator[bytes]:
+        yield b'{"valid": 1}\n'
+        raise httpx2.ReadError("network dropped")
+
+    response = httpx2.Response(200)
+    if sync:
+        decoder = JSONLDecoder(
+            raw_iterator=failing_sync_stream(),
+            line_type=object,
+            http_response=response,
+        )
+        with pytest.raises(httpx2.ReadError):
+            list(decoder)
+    else:
+        decoder = AsyncJSONLDecoder(
+            raw_iterator=failing_async_stream(),
+            line_type=object,
+            http_response=response,
+        )
+        with pytest.raises(httpx2.ReadError):
+            async for _ in decoder:
+                pass
+
+    assert response.is_closed
 
 
 async def to_aiter(iter: Iterator[bytes]) -> AsyncIterator[bytes]:
