@@ -4773,3 +4773,19 @@ class TestNoSecretsInTracebackFrameLocals:
                 ),
             )
         _assert_not_in_sdk_frame_locals(exc_info.value, _SECRET_ASSERTION)
+
+    def test_atomic_write_credentials_succeeds_without_fchmod(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """On platforms without os.fchmod (such as Windows), _atomic_write_credentials
+        succeeds without AttributeError."""
+        import os
+        import json
+
+        creds = tmp_path / "credentials" / "default.json"
+        p = CredentialsFile()
+        p._credentials_path = creds  # pyright: ignore[reportPrivateUsage]
+        monkeypatch.delattr(os, "fchmod", raising=False)
+
+        p._atomic_write_credentials({"refresh_token": "rt-test"})  # pyright: ignore[reportPrivateUsage]
+        assert json.loads(creds.read_text()) == {"refresh_token": "rt-test"}
