@@ -199,14 +199,17 @@ def _install_run_session_tools(
         *,
         tools: Any,
         max_idle: Any = None,
+        tool_timeout: Any = None,
         environment_key: Any = None,
         extra_headers: Any = None,
         send_retry_window: Any = None,
+        **kwargs: Any,  # noqa: ARG001
     ):
         record["run"] = {
             "session_id": session_id,
             "tools": tools,
             "max_idle": max_idle,
+            "tool_timeout": tool_timeout,
             "environment_key": environment_key,
             "extra_headers": extra_headers,
         }
@@ -247,6 +250,7 @@ async def test_environment_worker_serves_session(monkeypatch: pytest.MonkeyPatch
         environment_key="env_key",
         workdir=".",
         max_idle=12.0,
+        tool_timeout=45.0,
     )
     await asyncio.wait_for(worker.run(), timeout=5)
 
@@ -257,6 +261,7 @@ async def test_environment_worker_serves_session(monkeypatch: pytest.MonkeyPatch
     # tools) was bound.
     assert record["run"]["session_id"] == "s_1"
     assert record["run"]["max_idle"] == 12.0
+    assert record["run"]["tool_timeout"] == 45.0
     assert record["run"]["environment_key"] == "env_key"
     assert [t.name for t in record["run"]["tools"]] == ["bash", "read", "write", "edit", "glob", "grep"]
     # The lease was heartbeated, and the lease TTL it reported (60s) became the
@@ -1025,6 +1030,7 @@ async def test_heartbeat_starts_before_skill_download(monkeypatch: pytest.Monkey
         environment_key: Any = None,  # noqa: ARG001
         extra_headers: Any = None,  # noqa: ARG001
         send_retry_window: Any = None,  # noqa: ARG001
+        **kwargs: Any,  # noqa: ARG001
     ):
         async def _iter() -> AsyncIterator[Any]:
             return

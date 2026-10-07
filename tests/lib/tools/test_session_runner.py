@@ -20,6 +20,7 @@ import httpx2
 import pytest
 
 from anthropic import APIStatusError
+from anthropic._types import NotGiven, not_given
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError, BetaBuiltinFunctionTool, _beta_session_runner as session_runner_mod
 from anthropic.types.beta import BetaToolParam
@@ -286,6 +287,7 @@ async def _run_with_fakes(
     events: FakeAsyncEvents,
     tools: list[Any],
     max_idle: float | None = None,
+    tool_timeout: float | None | NotGiven = not_given,
     environment_key: str | None = None,
     extra_headers: dict[str, Any] | None = None,
 ) -> AsyncIterator[DispatchedToolCall]:
@@ -295,6 +297,7 @@ async def _run_with_fakes(
         "s_1",
         tools=tools,
         max_idle=max_idle,
+        tool_timeout=tool_timeout,
         environment_key=environment_key,
         extra_headers=extra_headers,
     )
@@ -1489,6 +1492,34 @@ async def test_tool_timeout_fires_for_blocking_sync_tool(monkeypatch: pytest.Mon
     assert len(events.send_calls) == 1
 
 
+@pytest.mark.asyncio()
+async def test_custom_tool_timeout_fires_at_specified_duration() -> None:
+    """A configured tool_timeout takes precedence over TOOL_TIMEOUT."""
+    release = threading.Event()
+
+    def slow(_input: object) -> str:
+        release.wait(timeout=2)
+        return "late"
+
+    events = FakeAsyncEvents(stream_events=[_custom_tool_use("ctu_1", "slow", {}), _terminated()])
+    try:
+        items = [
+            item
+            async for item in _run_with_fakes(
+                events=events,
+                tools=[_SyncTool("slow", slow)],
+                tool_timeout=0.05,
+            )
+        ]
+    finally:
+        release.set()
+
+    assert len(items) == 1
+    assert items[0].is_error is True
+    assert "timed out" in _result_text(items[0])
+    assert len(events.send_calls) == 1
+
+
 def test_tool_timeout_exceeds_bash_default() -> None:
     """`TOOL_TIMEOUT` MUST stay strictly greater than the bash tool's own
     `BASH_DEFAULT_TIMEOUT`.
@@ -1503,6 +1534,28 @@ def test_tool_timeout_exceeds_bash_default() -> None:
     from anthropic.lib.tools.agent_toolset import BASH_DEFAULT_TIMEOUT
 
     assert session_runner_mod.TOOL_TIMEOUT > BASH_DEFAULT_TIMEOUT
+
+
+def test_tool_timeout_below_or_equal_bash_default_raises() -> None:
+    """Configuring a `tool_timeout` at or below `BASH_DEFAULT_TIMEOUT` raises ValueError
+    when the bash tool is in the toolset to prevent outer cancellation preempting bash."""
+    from anthropic import AsyncAnthropic
+    from anthropic.lib.tools._beta_session_runner import SessionToolRunner
+    from anthropic.lib.tools.agent_toolset import BASH_DEFAULT_TIMEOUT, AgentToolContext, beta_bash_tool
+
+    client = AsyncAnthropic(api_key="dummy")
+    ctx = AgentToolContext(workdir=".")
+    bash_tool = beta_bash_tool(ctx)
+
+    with pytest.raises(ValueError, match="must exceed BASH_DEFAULT_TIMEOUT"):
+        SessionToolRunner(client, "s_1", tools=[bash_tool], tool_timeout=BASH_DEFAULT_TIMEOUT)
+
+    with pytest.raises(ValueError, match="must exceed BASH_DEFAULT_TIMEOUT"):
+        SessionToolRunner(client, "s_1", tools=[bash_tool], tool_timeout=60.0)
+
+    # Exceeding BASH_DEFAULT_TIMEOUT succeeds
+    runner = SessionToolRunner(client, "s_1", tools=[bash_tool], tool_timeout=BASH_DEFAULT_TIMEOUT + 1.0)
+    assert runner.tool_timeout == BASH_DEFAULT_TIMEOUT + 1.0
 
 
 @pytest.mark.asyncio()

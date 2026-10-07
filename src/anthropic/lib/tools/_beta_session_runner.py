@@ -30,7 +30,7 @@ from collections.abc import Callable, Sequence, AsyncIterator
 import anyio
 
 from .._retry import TRANSIENT_ERRORS, jitter, backoff, is_fatal_status_error
-from ..._types import Headers
+from ..._types import Headers, NotGiven, not_given
 from ._tool_dispatch import tool_registry, run_runnable_tool, tool_error_content
 from .._scoped_client import _copy_client_with_bearer_auth
 from ._beta_functions import (
@@ -441,12 +441,22 @@ class SessionToolRunner:
         *,
         tools: Sequence[BetaAnyRunnableTool],
         max_idle: float | None = DEFAULT_MAX_IDLE,
+        tool_timeout: float | None | NotGiven = not_given,
         environment_key: str | None = None,
         extra_headers: Headers | None = None,
     ) -> None:
         self.session_id = session_id
         self.tools: Sequence[BetaAnyRunnableTool] = tools
         self.max_idle = max_idle
+        self.tool_timeout = TOOL_TIMEOUT if isinstance(tool_timeout, NotGiven) else tool_timeout
+        if self.tool_timeout is not None:
+            from .agent_toolset import BASH_DEFAULT_TIMEOUT
+
+            if any(getattr(t, "name", None) == "bash" for t in self.tools) and self.tool_timeout <= BASH_DEFAULT_TIMEOUT:
+                raise ValueError(
+                    f"tool_timeout ({self.tool_timeout}s) must exceed BASH_DEFAULT_TIMEOUT "
+                    f"({BASH_DEFAULT_TIMEOUT}s) when the bash tool is present"
+                )
         # All event stream / list / send requests are issued via this scoped
         # sub-client: Bearer-only when an environment key is set, otherwise the
         # caller's own client with the helper-telemetry header layered on.
@@ -883,7 +893,8 @@ class SessionToolRunner:
             is_error = False
             input_ = dict(ev.input)
             try:
-                with anyio.fail_after(TOOL_TIMEOUT):
+                scope = anyio.fail_after(self.tool_timeout) if self.tool_timeout is not None else contextlib.nullcontext()
+                with scope:
                     content = await run_runnable_tool(tool, input_)
             except TimeoutError:
                 content = f"tool {ev.name!r} timed out"
@@ -1015,6 +1026,7 @@ async def _run_session_tools(
     *,
     tools: Sequence[BetaAnyRunnableTool],
     max_idle: float | None = DEFAULT_MAX_IDLE,
+    tool_timeout: float | None | NotGiven = not_given,
     environment_key: str | None = None,
     extra_headers: Headers | None = None,
     send_retry_window: Callable[[], float | None] | None = None,
@@ -1034,6 +1046,7 @@ async def _run_session_tools(
         session_id,
         tools=tools,
         max_idle=max_idle,
+        tool_timeout=tool_timeout,
         environment_key=environment_key,
         extra_headers=extra_headers,
     )
