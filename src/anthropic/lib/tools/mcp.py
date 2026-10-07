@@ -99,16 +99,26 @@ class _TaggedTuple(tuple):  # type: ignore[type-arg]
     """A tuple subclass that can carry a `_stainless_helper` attribute."""
 
 
-def _is_supported_image_type(mime_type: str) -> bool:
-    return mime_type in _SUPPORTED_IMAGE_TYPES
+def _normalize_mime_type(mime_type: str | None) -> str | None:
+    if mime_type is None:
+        return None
+    return mime_type.split(";", 1)[0].strip().lower()
+
+
+def _is_supported_image_type(mime_type: str | None) -> bool:
+    norm = _normalize_mime_type(mime_type)
+    return norm in _SUPPORTED_IMAGE_TYPES if norm else False
 
 
 def _is_supported_resource_mime_type(mime_type: str | None) -> bool:
+    if mime_type is None:
+        return True
+    norm = _normalize_mime_type(mime_type)
+    assert norm is not None
     return (
-        mime_type is None
-        or mime_type.startswith("text/")
-        or mime_type == "application/pdf"
-        or _is_supported_image_type(mime_type)
+        norm.startswith("text/")
+        or norm == "application/pdf"
+        or norm in _SUPPORTED_IMAGE_TYPES
     )
 
 
@@ -137,13 +147,14 @@ def mcp_content(
         mime_type = _mcp_field_v1_or_v2(content, "mime_type")
         if not _is_supported_image_type(mime_type):
             raise UnsupportedMCPValueError(f"Unsupported image MIME type: {mime_type}")
+        canonical_mime = _normalize_mime_type(mime_type)
         image_block = _TaggedDict(
             {
                 "type": "image",
                 "source": BetaBase64ImageSourceParam(
                     type="base64",
                     data=content.data,
-                    media_type=mime_type,  # type: ignore[typeddict-item]
+                    media_type=canonical_mime,  # type: ignore[typeddict-item]
                 ),
             }
         )
@@ -165,8 +176,8 @@ def _resource_contents_to_block(
     *,
     cache_control: BetaCacheControlEphemeralParam | None = None,
 ) -> BetaContent:
-    """Convert MCP resource contents to an Anthropic content block."""
-    mime_type = _mcp_field_v1_or_v2(resource, "mime_type")
+    raw_mime_type = _mcp_field_v1_or_v2(resource, "mime_type")
+    mime_type = _normalize_mime_type(raw_mime_type)
 
     if mime_type is not None and _is_supported_image_type(mime_type):
         if not isinstance(resource, BlobResourceContents):
