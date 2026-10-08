@@ -6,6 +6,7 @@
 
 * **ci:** check that pull requests update the changelog
 * **docs:** note that listing Claude Console spend limits is in early access
+* **internal:** match the package version in uv.lock
 
 ## 1.12.0 (2026-10-07)
 
