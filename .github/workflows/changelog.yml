@@ -1,0 +1,30 @@
+name: Changelog
+on:
+  pull_request:
+    branches:
+      - 'synced/published'
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  changelog:
+    name: changelog
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
+    if: |-
+      github.repository == 'anthropics/anthropic-sdk-python-private' &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-changelog')
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 2
+
+      - name: Check that the pull request changes CHANGELOG.md
+        run: |
+          changed="$(git diff --name-only HEAD^1 HEAD -- ':(glob)**/CHANGELOG.md')"
+          if [ -z "$changed" ]; then
+            echo "::error::Add your line to CHANGELOG.md, or add the skip-changelog label to this pull request."
+            exit 1
+          fi
