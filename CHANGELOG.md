@@ -6,6 +6,11 @@
 
 * **api:** add types for the Chat and Cowork unified analytics metrics
 
+
+### Chores
+
+* **internal:** name the default API version header value
+
 ## [1.12.1](https://github.com/anthropics/anthropic-sdk-python/compare/v1.12.0...v1.12.1) (2026-10-08)
 
 ### Chores
