@@ -5,43 +5,14 @@ from .beta_analytics_connector_chat_metrics import BetaAnalyticsConnectorChatMet
 from .beta_analytics_connector_cowork_metrics import BetaAnalyticsConnectorCoworkMetrics
 from .beta_analytics_connector_office_metrics import BetaAnalyticsConnectorOfficeMetrics
 from .beta_analytics_connector_claude_code_metrics import BetaAnalyticsConnectorClaudeCodeMetrics
+from .beta_analytics_connector_chat_cowork_unified_chat_metrics import (
+    BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics,
+)
+from .beta_analytics_connector_chat_cowork_unified_sessions_metrics import (
+    BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics,
+)
 
-__all__ = [
-    "BetaAnalyticsConnectorActivity",
-    "ChatCoworkUnifiedMetrics",
-    "ChatCoworkUnifiedMetricsChat",
-    "ChatCoworkUnifiedMetricsSessions",
-]
-
-
-class ChatCoworkUnifiedMetricsChat(BaseModel):
-    """
-    A connector's use in chat conversations recorded while members had
-    Chat and Cowork unified turned on.
-    """
-
-    distinct_conversation_connector_used_count: Optional[int] = None
-    """
-    Same measure as `chat_metrics.distinct_conversation_connector_used_count`, for
-    activity recorded while members had Chat and Cowork unified turned on.
-    Approximate (HLL, typical error <2%) in date-range mode. Null on aggregated rows
-    where a distinct count cannot be computed.
-    """
-
-
-class ChatCoworkUnifiedMetricsSessions(BaseModel):
-    """
-    A connector's use in Cowork sessions recorded while members had
-    Chat and Cowork unified turned on.
-    """
-
-    distinct_session_connector_used_count: Optional[int] = None
-    """
-    Same measure as `cowork_metrics.distinct_session_connector_used_count`, for
-    activity recorded while members had Chat and Cowork unified turned on.
-    Approximate (HLL, typical error <2%) in date-range mode. Null on aggregated rows
-    where a distinct count cannot be computed.
-    """
+__all__ = ["BetaAnalyticsConnectorActivity", "ChatCoworkUnifiedMetrics"]
 
 
 class ChatCoworkUnifiedMetrics(BaseModel):
@@ -49,13 +20,13 @@ class ChatCoworkUnifiedMetrics(BaseModel):
     Connector use recorded while members had Chat and Cowork unified (Cowork's features inside claude.ai chat) turned on, split into chat conversations and Cowork sessions. A count is null in date-range mode where it cannot be computed. Omitted from the response on deployments that do not offer Chat and Cowork unified.
     """
 
-    chat: ChatCoworkUnifiedMetricsChat
+    chat: BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics
     """
     A connector's use in chat conversations recorded while members had Chat and
     Cowork unified turned on.
     """
 
-    sessions: ChatCoworkUnifiedMetricsSessions
+    sessions: BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics
     """
     A connector's use in Cowork sessions recorded while members had Chat and Cowork
     unified turned on.

@@ -2640,10 +2640,14 @@ Types:
 ```python
 from anthropic.types.beta.organization import (
     BetaAnalyticsArtifactActivity,
+    BetaAnalyticsChatCoworkUnifiedChatMetrics,
+    BetaAnalyticsChatCoworkUnifiedSessionsMetrics,
     BetaAnalyticsChatMetrics,
     BetaAnalyticsClaudeCodeMetrics,
     BetaAnalyticsClaudeTagCategory,
     BetaAnalyticsConnectorActivity,
+    BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics,
+    BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics,
     BetaAnalyticsConnectorChatMetrics,
     BetaAnalyticsConnectorClaudeCodeMetrics,
     BetaAnalyticsConnectorCoworkMetrics,
@@ -2670,6 +2674,8 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsServerToolUse,
     BetaAnalyticsSingleDayActivitySummary,
     BetaAnalyticsSkillActivity,
+    BetaAnalyticsSkillChatCoworkUnifiedChatMetrics,
+    BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics,
     BetaAnalyticsSkillChatMetrics,
     BetaAnalyticsSkillClaudeCodeMetrics,
     BetaAnalyticsSkillCoworkMetrics,
