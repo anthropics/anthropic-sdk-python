@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/anthropics/anthropic-sdk-python/compare/v1.12.0...v1.12.1) (2026-10-08)
+
+### Chores
+
+* **ci:** check that pull requests update the changelog
+* **docs:** note that listing Claude Console spend limits is in early access
+
 ## 1.12.0 (2026-10-07)
 
 Full Changelog: [v1.11.0...v1.12.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.11.0...v1.12.0)
