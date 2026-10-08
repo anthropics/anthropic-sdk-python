@@ -12,6 +12,7 @@ from ._types import (
 from ._workload import (
     WorkloadIdentityError as WorkloadIdentityError,
     WorkloadIdentityCredentials as WorkloadIdentityCredentials,
+    AsyncWorkloadIdentityCredentials as AsyncWorkloadIdentityCredentials,
     exchange_federation_assertion as exchange_federation_assertion,
 )
 from ._providers import (
@@ -35,6 +36,7 @@ __all__ = [
     "InMemoryConfig",
     "IdentityTokenFile",
     "WorkloadIdentityCredentials",
+    "AsyncWorkloadIdentityCredentials",
     "WorkloadIdentityError",
     "exchange_federation_assertion",
     "TokenCache",

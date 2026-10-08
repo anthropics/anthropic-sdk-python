@@ -6,6 +6,7 @@ import copy
 import json
 import time
 import asyncio
+import inspect
 import logging
 import pathlib
 import functools
@@ -40,8 +41,16 @@ from anthropic import (
 )
 from anthropic._version import __version__
 from anthropic._base_client import FinalRequestOptions
-from anthropic.lib.credentials import BaseURLBoundProvider
-from anthropic.lib.credentials._types import is_async_token_provider
+from anthropic.lib.credentials import (
+    BaseURLBoundProvider,
+    AsyncWorkloadIdentityCredentials,
+)
+from anthropic.lib.credentials._types import (
+    IdentityTokenProvider,
+    AsyncIdentityTokenProvider,
+    is_async_token_provider,
+    is_async_identity_token_provider,
+)
 from anthropic.lib.credentials._constants import (
     TOKEN_ENDPOINT,
     GRANT_TYPE_JWT_BEARER,
@@ -1383,6 +1392,415 @@ class TestWorkloadIdentityCredentials:
         )
         with pytest.raises(WorkloadIdentityError, match="response body exceeds"):
             creds()
+
+
+class TestAsyncWorkloadIdentityCredentials:
+    """Async twin of `TestWorkloadIdentityCredentials` for issue #1901.
+
+    `AsyncWorkloadIdentityCredentials` is the `AsyncAnthropic` counterpart to
+    `WorkloadIdentityCredentials`: it uses `httpx2.AsyncClient` so the token
+    exchange does not block the event loop, and it accepts an async
+    `identity_token_provider` for users whose identity token source (e.g. AWS
+    STS) is itself an async API call.
+    """
+
+    @pytest.mark.respx()
+    async def test_exchange_with_async_identity_provider(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOKEN_URL).mock(
+            return_value=httpx2.Response(
+                200,
+                json={"access_token": "sk-ant-oat01-async", "token_type": "Bearer", "expires_in": 600},
+            )
+        )
+
+        async def async_jwt_provider() -> str:
+            return "ext.jwt.value"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=async_jwt_provider,
+            federation_rule_id="fdrl_01abc",
+            organization_id="00000000-0000-0000-0000-000000000000",
+        )
+
+        before = time.time()
+        token = await creds()
+        after = time.time()
+
+        assert token.token == "sk-ant-oat01-async"
+        assert token.expires_at is not None
+        assert before + 600 - 2 <= token.expires_at <= after + 600 + 2
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 1
+        req = calls[0].request
+        beta_flags = {f.strip() for f in req.headers["anthropic-beta"].split(",")}
+        assert OAUTH_API_BETA_HEADER in beta_flags
+        assert FEDERATION_BETA_HEADER in beta_flags
+        assert req.headers["User-Agent"] == f"anthropic-python/{__version__}"
+        body = json.loads(req.content)
+        assert body["grant_type"] == GRANT_TYPE_JWT_BEARER
+        assert body["assertion"] == "ext.jwt.value"
+        assert body["federation_rule_id"] == "fdrl_01abc"
+        assert body["organization_id"] == "00000000-0000-0000-0000-000000000000"
+        assert "service_account_id" not in body
+        assert "workspace_id" not in body
+        assert "scope" not in body
+
+    @pytest.mark.respx()
+    async def test_exchange_with_sync_identity_provider(self, respx_mock: MockRouter) -> None:
+        """A sync `identity_token_provider` is still accepted on the async class
+        (it just runs synchronously inside the coroutine). This keeps users
+        migrating from `WorkloadIdentityCredentials` to the async twin from
+        having to wrap an already-sync function in `async def`."""
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=lambda: "sync-jwt",
+            federation_rule_id="f",
+            organization_id="o",
+        )
+        token = await creds()
+        assert token.token == "t"
+        body = json.loads(cast("list[MockRequestCall]", respx_mock.calls)[0].request.content)
+        assert body["assertion"] == "sync-jwt"
+
+    @pytest.mark.respx()
+    async def test_service_account_included(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
+
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider,
+            federation_rule_id="fdrl_01abc",
+            organization_id="org",
+            service_account_id="svac_01xyz",
+        )
+        await creds()
+        body = json.loads(cast("list[MockRequestCall]", respx_mock.calls)[0].request.content)
+        assert body["service_account_id"] == "svac_01xyz"
+        assert "scope" not in body
+
+    @pytest.mark.respx()
+    async def test_workspace_id_included(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
+
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider,
+            federation_rule_id="fdrl_01abc",
+            organization_id="org",
+            workspace_id="wrkspc_01abc",
+        )
+        await creds()
+        body = json.loads(cast("list[MockRequestCall]", respx_mock.calls)[0].request.content)
+        assert body["workspace_id"] == "wrkspc_01abc"
+
+    @pytest.mark.respx()
+    async def test_scope_is_display_only(self, respx_mock: MockRouter) -> None:
+        """`scope` is stored on the provider for parity but never sent on the
+        wire, same as the sync class."""
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
+
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider,
+            federation_rule_id="fdrl_x",
+            organization_id="org",
+            scope="api:read api:write",
+        )
+        await creds()
+        assert creds.scope == "api:read api:write"
+        body = json.loads(cast("list[MockRequestCall]", respx_mock.calls)[0].request.content)
+        assert "scope" not in body
+
+    @pytest.mark.respx()
+    async def test_reinvokes_async_identity_provider(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
+        calls: List[int] = []
+
+        async def jwt_provider() -> str:
+            calls.append(1)
+            return f"jwt-{len(calls)}"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=jwt_provider,
+            federation_rule_id="f",
+            organization_id="o",
+        )
+        await creds()
+        await creds()
+        assert len(calls) == 2
+        bodies = [json.loads(c.request.content) for c in cast("list[MockRequestCall]", respx_mock.calls)]
+        assert bodies[0]["assertion"] == "jwt-1"
+        assert bodies[1]["assertion"] == "jwt-2"
+
+    @pytest.mark.respx()
+    async def test_403_raises(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(403, json={"error": "assertion rejected"}))
+
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            await creds()
+        assert exc_info.value.status_code == 403
+        assert "assertion rejected" in str(exc_info.value)
+
+    @pytest.mark.respx()
+    async def test_503_raises(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(503, text="overloaded"))
+
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )
+        with pytest.raises(WorkloadIdentityError) as exc_info:
+            await creds()
+        assert exc_info.value.status_code == 503
+
+    @pytest.mark.respx()
+    async def test_missing_required_fields_raises(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t"}))
+
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )
+        with pytest.raises(WorkloadIdentityError, match="missing required fields"):
+            await creds()
+
+    async def test_async_provider_returning_non_str_raises(self) -> None:
+        """The contract is `Awaitable[str]`; a coroutine that resolves to a
+        non-str (e.g. `bytes`, `None`) is a programming error and surfaces as
+        a `WorkloadIdentityError` rather than crashing inside `SecretStr`."""
+
+        async def bad_provider() -> bytes:
+            return b"raw-bytes-not-a-jwt"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=bad_provider,  # type: ignore[arg-type]
+            federation_rule_id="f",
+            organization_id="o",
+        )
+        with pytest.raises(WorkloadIdentityError, match="non-str"):
+            await creds()
+
+    @pytest.mark.respx()
+    async def test_for_base_url(self, respx_mock: MockRouter) -> None:
+        """Same in-place bind / cross-host copy semantics as the sync class."""
+        _mock_token_exchange(respx_mock, BASE_URL, "tok-primary")
+        _mock_token_exchange(respx_mock, OTHER_BASE_URL, "tok-other")
+
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )
+        assert creds.for_base_url(f"{BASE_URL}/") is creds
+        assert creds.for_base_url(BASE_URL) is creds
+        other = creds.for_base_url(OTHER_BASE_URL)
+        assert other is not creds
+
+        assert (await other()).token == "tok-other"
+        assert (await creds()).token == "tok-primary"
+        # The per-host provider borrows the original's connection pool, so
+        # closing it must not take the original down with it.
+        await other.aclose()
+        assert (await creds()).token == "tok-primary"
+        assert [str(r.url) for r in _requests_to(respx_mock, BASE_URL)] == [TOKEN_URL, TOKEN_URL]
+
+    async def test_for_base_url_http_rejected(self) -> None:
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )
+        creds.for_base_url(BASE_URL)
+        with pytest.raises(AnthropicError, match="must use https"):
+            creds.for_base_url("http://evil.example")
+
+    @pytest.mark.respx()
+    async def test_bind_base_url(self, respx_mock: MockRouter) -> None:
+        bound = "https://bound.example"
+
+        # No bind → DEFAULT_BASE_URL
+        respx_mock.post(TOKEN_URL).mock(return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60}))
+
+        async def provider() -> str:
+            return "j"
+
+        await AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )()
+        assert str(cast("list[MockRequestCall]", respx_mock.calls)[-1].request.url) == TOKEN_URL
+
+        # bound → bound
+        respx_mock.post(f"{bound}{TOKEN_ENDPOINT}").mock(
+            return_value=httpx2.Response(200, json={"access_token": "t", "expires_in": 60})
+        )
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )
+        creds.bind_base_url(bound)
+        await creds()
+        assert str(cast("list[MockRequestCall]", respx_mock.calls)[-1].request.url) == f"{bound}{TOKEN_ENDPOINT}"
+
+    async def test_aclose_closes_owned_client(self) -> None:
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )
+        # The owned client should be alive before close and closed after.
+        assert creds._http_client.is_closed is False  # type: ignore[attr-defined]
+        await creds.aclose()
+        assert creds._http_client.is_closed is True  # type: ignore[attr-defined]
+
+    async def test_aclose_does_not_close_borrowed_client(self) -> None:
+        """`for_base_url(other)` returns a copy that shares (never closes) the
+        parent's `httpx2.AsyncClient`. Closing the child must not close the
+        parent; only the parent closing closes its owned client."""
+        async def provider() -> str:
+            return "j"
+
+        parent = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )
+        parent.bind_base_url(BASE_URL)
+        child = parent.for_base_url(OTHER_BASE_URL)
+        await child.aclose()
+        assert parent._http_client.is_closed is False  # type: ignore[attr-defined]
+        await parent.aclose()
+        assert parent._http_client.is_closed is True  # type: ignore[attr-defined]
+
+    async def test_async_context_manager_closes(self) -> None:
+        async def provider() -> str:
+            return "j"
+
+        async with AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        ) as creds:
+            assert creds._http_client.is_closed is False  # type: ignore[attr-defined]
+        assert creds._http_client.is_closed is True  # type: ignore[attr-defined]
+
+    def test_is_detected_as_async_token_provider(self) -> None:
+        """The async twin must register as an `AsyncAccessTokenProvider` so
+        `AsyncAnthropic` routes it through the async credentials path and the
+        sync `Anthropic` constructor rejects it with `TypeError`."""
+
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )
+        assert is_async_token_provider(creds) is True
+
+        def sync_provider() -> str:
+            return "j"
+
+        sync = WorkloadIdentityCredentials(
+            identity_token_provider=sync_provider, federation_rule_id="f", organization_id="o"
+        )
+        assert is_async_token_provider(sync) is False
+
+    def test_sync_anthropic_rejects_async_class(self) -> None:
+        """`Anthropic(credentials=AsyncWorkloadIdentityCredentials(...))` must
+        raise `TypeError` so a user who reaches for the async class from a sync
+        client gets a clear, early failure rather than a hang on the network
+        call. The host's `ANTHROPIC_BASE_URL` is irrelevant here but is
+        unset for symmetry with the integration test below."""
+
+        async def provider() -> str:
+            return "j"
+
+        creds = AsyncWorkloadIdentityCredentials(
+            identity_token_provider=provider, federation_rule_id="f", organization_id="o"
+        )
+        # The constructor's `credentials=` type is `AccessTokenProvider | None`;
+        # passing the async class is the misconfiguration we want to test, so
+        # silence the type checker here.
+        with pytest.raises(TypeError, match="cannot await an async"):
+            Anthropic(credentials=creds)  # type: ignore[arg-type]
+
+    @pytest.mark.respx()
+    @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
+    async def test_works_with_async_anthropic(self, respx_mock: MockRouter) -> None:
+        """End-to-end: `AsyncAnthropic(credentials=AsyncWorkloadIdentityCredentials(...))`
+        exchanges the JWT via the token endpoint and attaches the resulting
+        Bearer token to the messages request."""
+        _mock_token_endpoint(respx_mock)
+        _mock_messages_endpoint(respx_mock)
+
+        async def provider() -> str:
+            return "ext-jwt"
+
+        client = AsyncAnthropic(
+            credentials=AsyncWorkloadIdentityCredentials(
+                identity_token_provider=provider,
+                federation_rule_id="fdrl_01abc",
+                organization_id="org-uuid",
+            ),
+        )
+        await _send_message_async(client)
+        msg_calls = [
+            c for c in cast("list[MockRequestCall]", respx_mock.calls) if str(c.request.url).endswith("/v1/messages")
+        ]
+        assert len(msg_calls) == 1
+        assert msg_calls[0].request.headers["Authorization"] == "Bearer sk-ant-oat01-test"
+
+    def test_is_async_identity_token_provider_helper(self) -> None:
+        """Unit-test the helper directly so a future refactor that re-uses
+        the sync `is_async_token_provider` keeps the two layers consistent."""
+        async def async_p() -> str:
+            return "x"
+
+        def sync_p() -> str:
+            return "x"
+
+        assert is_async_identity_token_provider(async_p) is True
+        assert is_async_identity_token_provider(sync_p) is False
+        assert is_async_identity_token_provider(lambda: "x") is False
+        # `functools.partial` of an async callable is detected (matches the
+        # behavior of `is_async_token_provider`).
+        assert is_async_identity_token_provider(functools.partial(async_p)) is True
+
+    def test_identity_token_provider_alias_accepts_both(self) -> None:
+        """Type-level check: the widened `IdentityTokenProvider` alias accepts
+        both the sync and async shapes. Pure-typing; this exists to keep the
+        documented contract honest across refactors."""
+        sync: IdentityTokenProvider = lambda: "x"
+        async_p: IdentityTokenProvider = async_p_factory()  # type: ignore[assignment]
+        assert callable(sync)
+        assert callable(async_p)
+
+        # The narrow `AsyncIdentityTokenProvider` is the precise shape the
+        # async class's `__call__` runtime-branches on.
+        async_p2: AsyncIdentityTokenProvider = async_p_factory()
+        assert inspect.iscoroutinefunction(async_p2)
+
+
+def async_p_factory() -> Any:
+    async def _p() -> str:
+        return "x"
+
+    return _p
 
 
 # --------------------------------------------------------------------------- #

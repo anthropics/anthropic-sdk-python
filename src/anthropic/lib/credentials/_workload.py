@@ -4,12 +4,16 @@ import copy
 import time
 import logging
 from types import TracebackType
-from typing import Any, Dict, Type, Union, NoReturn, Optional
+from typing import Any, Dict, Type, Union, Callable, NoReturn, Optional, Awaitable, cast
 from typing_extensions import override
 
 import httpx2
 
-from ._types import AccessToken, IdentityTokenProvider
+from ._types import (
+    AccessToken,
+    IdentityTokenProvider,
+    is_async_identity_token_provider,
+)
 from ._secrets import (
     SecretStr,
     _unwrap_secret,
@@ -102,7 +106,12 @@ def _raise_token_endpoint_error(resp: httpx2.Response, *, message_prefix: str, h
     )
 
 
-__all__ = ["WorkloadIdentityCredentials", "WorkloadIdentityError", "exchange_federation_assertion"]
+__all__ = [
+    "WorkloadIdentityCredentials",
+    "AsyncWorkloadIdentityCredentials",
+    "WorkloadIdentityError",
+    "exchange_federation_assertion",
+]
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -402,3 +411,273 @@ def exchange_federation_assertion(
         return creds()
     finally:
         creds.close()
+
+
+class AsyncWorkloadIdentityCredentials:
+    """Async twin of `WorkloadIdentityCredentials` for `AsyncAnthropic`.
+
+    Exchanges an external OIDC JWT for an Anthropic access token via the
+    RFC 7523 `jwt-bearer` grant, using `httpx2.AsyncClient` so the network
+    I/O does not block the event loop. `__call__` is `async def`, which
+    `is_async_token_provider` recognizes and routes the client to the
+    async credentials path; passing this class to the sync `Anthropic`
+    constructor raises `TypeError` from the same guard.
+
+    `identity_token_provider` may be either a sync callable returning `str`
+    (the same shape `WorkloadIdentityCredentials` takes) or an async callable
+    returning `Awaitable[str]`. The runtime branch lives in `__call__`; the
+    widening of `IdentityTokenProvider` from `Callable[[], str]` to
+    `Callable[[], str | Awaitable[str]]` is backward-compatible.
+
+    This is an `AsyncAccessTokenProvider`: awaiting it performs a *fresh* token
+    exchange. Wrap in a `TokenCache` (done automatically when passed as
+    `credentials=` to `anthropic.AsyncAnthropic`) to avoid exchanging on every
+    request.
+
+    Args:
+        organization_id: The organization's raw UUID string (organizations do
+            not use tagged IDs).
+        workspace_id: Optional `wrkspc_*` tagged ID, or the literal
+            `"default"` to scope the token to the organization's default
+            workspace. When omitted the server picks the rule's sole enabled
+            workspace, else the org default if the rule covers it. Required
+            when the rule enables more than one non-default workspace, or to
+            target a specific workspace other than the one the server would
+            pick. The minted token is workspace-scoped: per-request workspace
+            selection (the `anthropic-workspace-id` header) is not supported
+            for federation tokens, switching workspaces requires a new token
+            exchange with a different `workspace_id`.
+    """
+
+    def __init__(
+        self,
+        *,
+        # The async class accepts a sync provider too (the same `Callable[[], str]`
+        # shape the sync class takes); we union with `Awaitable[str]` here rather
+        # than widening the public `IdentityTokenProvider` alias, which would
+        # leak the async shape into the sync class's strict contract.
+        identity_token_provider: Callable[[], Union[str, Awaitable[str]]],
+        federation_rule_id: str,
+        organization_id: str,
+        service_account_id: Optional[str] = None,
+        workspace_id: Optional[str] = None,
+        scope: Optional[str] = None,
+        http_client: Optional[httpx2.AsyncClient] = None,
+    ) -> None:
+        self._identity_token_provider = identity_token_provider
+        self._federation_rule_id = federation_rule_id
+        self._organization_id = organization_id
+        self._service_account_id = service_account_id
+        self._workspace_id = workspace_id
+        # Scope is informational only for federation: the server derives the
+        # effective scope from the matching federation rule and the gateway
+        # transform drops unknown body fields, so it is intentionally NOT sent
+        # on the jwt-bearer request.
+        self._scope = scope
+        # The client passing this object as `credentials=` calls
+        # `for_base_url` to set its own endpoint, so the token exchange
+        # and the API calls hit the same deployment. There is intentionally no
+        # constructor kwarg for this: a token minted by one deployment is only
+        # valid against that deployment, so splitting exchange-base from
+        # client-base is always a bug.
+        self._bound_base_url: Optional[str] = None
+        if http_client is None:
+            self._http_client = httpx2.AsyncClient(timeout=TOKEN_EXCHANGE_TIMEOUT)
+            self._owns_http_client = True
+        else:
+            self._http_client = http_client
+            self._owns_http_client = False
+
+    @property
+    def scope(self) -> Optional[str]:
+        return self._scope
+
+    @property
+    def _base_url(self) -> str:
+        return self._bound_base_url or DEFAULT_BASE_URL
+
+    def bind_base_url(self, base_url: str) -> None:
+        """Set the API `base_url` the token exchange POSTs to.
+
+        For standalone use (no client) or tests. Clients bind through
+        `for_base_url`, which never rebinds an instance another client
+        is already exchanging through.
+        """
+        bound = base_url.rstrip("/")
+        _require_https(bound, field="base_url")
+        self._bound_base_url = bound
+
+    def for_base_url(self, base_url: str) -> "AsyncWorkloadIdentityCredentials":
+        """Return the provider a client with `base_url` should exchange through.
+
+        Binds in place, unless another client already bound this instance to a
+        different host (e.g. the parent of `copy(base_url=...)`). Rebinding
+        would move that client's token exchange too, so a copy bound to
+        `base_url` is returned instead; it shares the identity token and
+        borrows (never closes) this instance's `httpx2.AsyncClient`.
+        """
+        bound = base_url.rstrip("/")
+        provider = self
+        if self._bound_base_url is not None and self._bound_base_url != bound:
+            provider = copy.copy(self)
+            provider._owns_http_client = False
+        provider.bind_base_url(bound)
+        return provider
+
+    async def aclose(self) -> None:
+        """Close the underlying `httpx2.AsyncClient` if we created it."""
+        if self._owns_http_client:
+            await self._http_client.aclose()
+
+    async def __aenter__(self) -> "AsyncWorkloadIdentityCredentials":
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc: Optional[BaseException],
+        tb: Optional[TracebackType],
+    ) -> None:
+        await self.aclose()
+
+    async def __call__(self, *, force_refresh: bool = False) -> AccessToken:
+        # Re-invoke the identity token provider every time, since the underlying
+        # file (e.g. a k8s projected SA token) may have rotated. force_refresh
+        # is a no-op: this provider has no cache to bypass.
+        del force_refresh
+        # The identity_token_provider can be either a sync `Callable[[], str]`
+        # (the same shape `WorkloadIdentityCredentials` takes) or an async
+        # `Callable[[], Awaitable[str]]`. Discriminate by shape, then either
+        # await the result or read it synchronously. The shape of the provider
+        # determines the branch, not the runtime type of the result. The cast
+        # below is sound because `is_async_identity_token_provider` is a
+        # structural check: an `async def` callable can only return an awaitable,
+        # and a plain `def` callable can only return a value.
+        provider = self._identity_token_provider
+        if is_async_identity_token_provider(provider):
+            jwt_value: str = await cast(Callable[[], Awaitable[str]], provider)()
+        else:
+            jwt_value = cast(Callable[[], str], provider)()
+        # Guard against a coroutine that resolved to a non-str (e.g. a
+        # misconfigured async provider returning `bytes` or `None`), or a
+        # sync provider that returned a non-str. Keeping the `SecretStr`
+        # boundary at the next line means the bad value is never bound to a
+        # local past this check. The `type: ignore` covers a known false
+        # positive: the cast above narrows the static type to `str` but the
+        # runtime check is the whole point of this branch.
+        if not isinstance(jwt_value, str):  # type: ignore[reportUnnecessaryIsInstance]
+            raise WorkloadIdentityError(
+                "identity_token_provider returned a non-str value; "
+                "async providers must return `Awaitable[str]`."
+            )
+        jwt = SecretStr(jwt_value)
+
+        assertion_bytes = len(jwt.get_secret_value().encode("utf-8"))
+        if assertion_bytes > _MAX_ASSERTION_BYTES:
+            raise WorkloadIdentityError(
+                f"Identity token assertion is {assertion_bytes} bytes, which exceeds the "
+                f"{_MAX_ASSERTION_BYTES}-byte limit. This is almost certainly not a JWT, check "
+                f"that the identity-token path points at the projected token, not a key or cert."
+            )
+
+        body: Dict[str, Union[str, SecretStr]] = {
+            "grant_type": GRANT_TYPE_JWT_BEARER,
+            "assertion": jwt,
+            "federation_rule_id": self._federation_rule_id,
+            "organization_id": self._organization_id,
+        }
+        if self._service_account_id is not None:
+            body["service_account_id"] = self._service_account_id
+        if self._workspace_id is not None:
+            body["workspace_id"] = self._workspace_id
+
+        url = f"{self._base_url}{TOKEN_ENDPOINT}"
+        try:
+            resp = await self._http_client.post(
+                url,
+                # Serialized inline so the raw request bytes are never bound
+                # to a local here; SecretStr values unwrap at dump time.
+                content=_json_dumps_secrets(body),
+                headers={
+                    "anthropic-beta": _JWT_BEARER_BETA_HEADER,
+                    "Content-Type": "application/json",
+                    "User-Agent": _user_agent(),
+                },
+            )
+        except httpx2.HTTPError as err:
+            raise WorkloadIdentityError(f"Failed to reach token endpoint {url}: {err}") from _strip_traceback(err)
+
+        request_id = _request_id(resp)
+
+        if len(resp.content) > _MAX_TOKEN_RESPONSE_BYTES:
+            raise WorkloadIdentityError(
+                f"Token endpoint response body exceeds {_MAX_TOKEN_RESPONSE_BYTES} bytes "
+                f"(got {len(resp.content)}); refusing to parse.",
+                status_code=resp.status_code,
+                request_id=request_id,
+            )
+
+        if resp.status_code >= 400:
+            # A 401 is almost always a federation-rule mismatch. Point at the
+            # rule and the Console auth-event log; when the caller hasn't pinned
+            # a workspace, also surface the multi-workspace fix rather than
+            # making them dig through docs.
+            hint: Optional[str] = None
+            if resp.status_code == 401:
+                hint = "Ensure your federation rule matches your identity token. "
+                if self._workspace_id is None:
+                    hint += (
+                        "If your federation rule is scoped to multiple workspaces, set the "
+                        "ANTHROPIC_WORKSPACE_ID environment variable, the 'workspace_id' "
+                        "config key, or the workspace_id= argument. "
+                    )
+                hint += (
+                    "View your authentication events in the Workload identity page of Claude Console for more details."
+                )
+            _raise_token_endpoint_error(resp, message_prefix="Token exchange failed", hint=hint)
+
+        try:
+            # Token values are SecretStr-wrapped in place at the parse
+            # boundary, so every error path below may hold `data` in its
+            # frame without retaining raw credential material.
+            data = _wrap_secret_fields(resp.json())
+        except ValueError as err:
+            redacted = _redact_body(resp.text)
+            raise WorkloadIdentityError(
+                f"Token endpoint returned non-JSON response (status {resp.status_code}): {redacted}",
+                status_code=resp.status_code,
+                body=redacted,
+                request_id=request_id,
+            ) from _strip_traceback(err)
+        except _NonObjectPayloadError as err:
+            # A non-object payload can be an echo of the request (assertion
+            # included), so it is rejected inside the helper (no frame in
+            # this traceback holds it) and only its type name is reported.
+            raise WorkloadIdentityError(
+                f"Token endpoint returned a JSON {err.type_name} (status {resp.status_code}); expected an object.",
+                status_code=resp.status_code,
+                request_id=request_id,
+            ) from None
+
+        token_type = data.get("token_type")
+        if token_type is not None and str(token_type).lower() != "bearer":
+            raise WorkloadIdentityError(
+                f"Token endpoint returned unsupported token_type {token_type!r} (expected 'Bearer').",
+                status_code=resp.status_code,
+                body=_redact_body(data),
+                request_id=request_id,
+            )
+
+        try:
+            token = data["access_token"]
+            # `expires_in` is a JSON number per RFC 6749 §5.1; coerce to int seconds.
+            expires_in = int(data["expires_in"])
+        except (KeyError, TypeError, ValueError, OverflowError) as err:
+            raise WorkloadIdentityError(
+                "Token endpoint response missing required fields (access_token / expires_in).",
+                status_code=resp.status_code,
+                body=_redact_body(data),
+                request_id=request_id,
+            ) from err
+
+        return AccessToken(token=_unwrap_secret(token), expires_at=int(time.time()) + expires_in)
