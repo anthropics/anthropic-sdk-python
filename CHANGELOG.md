@@ -1,11 +1,12 @@
 # Changelog
 
-## [1.13.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.12.0...v1.13.0) (2026-10-08)
+## [1.13.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.12.1...v1.13.0) (2026-10-08)
 
 ### Features
 
 * **api:** add types for the Chat and Cowork unified analytics metrics
 
+## [1.12.1](https://github.com/anthropics/anthropic-sdk-python/compare/v1.12.0...v1.12.1) (2026-10-08)
 
 ### Chores
 
