@@ -73,6 +73,27 @@ class BetaAnalyticsSingleDayActivitySummary(BaseModel):
     group.
     """
 
+    chat_cowork_unified_daily_active_user_count: Optional[int] = None
+    """Number of users with activity in Chat and Cowork unified on the requested day.
+
+    Omitted from the response on deployments that do not offer Chat and Cowork
+    unified.
+    """
+
+    chat_cowork_unified_monthly_active_user_count: Optional[int] = None
+    """
+    Number of users with activity in Chat and Cowork unified in the 30-day rolling
+    window. Omitted from the response on deployments that do not offer Chat and
+    Cowork unified.
+    """
+
+    chat_cowork_unified_weekly_active_user_count: Optional[int] = None
+    """
+    Number of users with activity in Chat and Cowork unified in the 7-day rolling
+    window. Omitted from the response on deployments that do not offer Chat and
+    Cowork unified.
+    """
+
     chat_daily_active_user_count: Optional[int] = None
     """Number of users with claude.ai (chat) activity on the requested day.
 
