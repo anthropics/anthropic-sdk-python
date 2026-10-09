@@ -14,6 +14,7 @@ from anthropic.types.beta.beta_server_tool_use_block import BetaServerToolUseBlo
 
 from ..._types import NotGiven, not_given
 from ..._utils import consume_sync_iterator, consume_async_iterator
+from ..._compat import model_fields_set
 from ..._models import build, construct_type, construct_type_unchecked
 from ._beta_types import (
     BetaCitationEvent,
@@ -536,7 +537,8 @@ def accumulate_event(
         elif event.delta.type == "compaction_delta":
             if content.type == "compaction":
                 content.content = event.delta.content
-                content.encrypted_content = event.delta.encrypted_content
+                if "encrypted_content" in model_fields_set(event.delta):
+                    content.encrypted_content = event.delta.encrypted_content
         else:
             # we only want exhaustive checking for linters, not at runtime
             if TYPE_CHECKING:  # type: ignore[unreachable]
