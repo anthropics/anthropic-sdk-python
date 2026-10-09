@@ -28,6 +28,7 @@ from anthropic.types.beta.beta_tool_param import BetaToolParam
 from anthropic.types.beta.beta_stop_reason import BetaStopReason
 from anthropic.types.beta.beta_message_param import BetaMessageParam
 from anthropic.types.beta.beta_fallback_param import BetaFallbackParam
+from anthropic.types.beta.beta_container_params import BetaContainerParams
 from anthropic.types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from anthropic.types.beta.beta_content_block_param import BetaContentBlockParam
 from anthropic.types.beta.beta_output_config_param import BetaOutputConfigParam
@@ -1672,6 +1673,7 @@ async def _run_with_tool_changes(
     max_iterations: int | Omit = omit,
     messages: list[BetaMessageParam] | None = None,
     stream: bool = False,
+    container: BetaContainerParams | str | None | Omit = omit,
 ) -> None:
     """Drive a tool runner to the end, running `script[message.id]` while each message is being handled."""
     runner: Any = client.beta.messages.tool_runner(
@@ -1681,6 +1683,7 @@ async def _run_with_tool_changes(
         messages=messages or [{"role": "user", "content": "What time is it, and what is the weather in SF?"}],
         max_iterations=max_iterations,
         stream=stream,
+        container=container,
     )
     if before_first_request is not None:
         before_first_request(runner)
@@ -3425,7 +3428,9 @@ async def test_runner_sends_no_beta_header_when_given_no_betas(
     assert [call.request.headers.get("anthropic-beta") for call in cast("List[Any]", respx_mock.calls)] == [None] * 2
 
 
-def _sse_message(content_block: Dict[str, Any], stop_reason: str, *deltas: Dict[str, Any]) -> httpx2.Response:
+def _sse_message(
+    content_block: Dict[str, Any], stop_reason: str, *deltas: Dict[str, Any], container: dict[str, str] | None = None
+) -> httpx2.Response:
     events: List[Dict[str, Any]] = [
         {
             "type": "message_start",
@@ -3445,7 +3450,11 @@ def _sse_message(content_block: Dict[str, Any], stop_reason: str, *deltas: Dict[
         {"type": "content_block_stop", "index": 0},
         {
             "type": "message_delta",
-            "delta": {"stop_reason": stop_reason, "stop_sequence": None},
+            "delta": {
+                "stop_reason": stop_reason,
+                "stop_sequence": None,
+                **({"container": container} if container is not None else {}),
+            },
             "usage": {"output_tokens": 1},
         },
         {"type": "message_stop"},
@@ -3521,3 +3530,70 @@ async def test_compact_before_next_turn_when_streaming_async(respx_mock: MockRou
     assert compaction["compaction"] == {"type": "summarize"}
     assert compaction["stream"] is True
     assert after["messages"] == _compaction_block_alone()
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.parametrize("stream", [False, True], ids=["nonstreaming", "streaming"])
+@pytest.mark.parametrize("returned_container", [False, True], ids=["no-response-container", "response-container"])
+@pytest.mark.parametrize(
+    "container, expected",
+    [
+        pytest.param(omit, "server-created", id="omitted"),
+        pytest.param(None, "server-created", id="automatic"),
+        pytest.param("caller-pinned", "caller-pinned", id="pinned-id"),
+        pytest.param({"skills": []}, {"id": "server-created", "skills": []}, id="empty-skills"),
+        pytest.param(
+            {"skills": [{"type": "custom", "skill_id": "skill_test", "version": "1"}]},
+            {"id": "server-created", "skills": [{"type": "custom", "skill_id": "skill_test", "version": "1"}]},
+            id="skills",
+        ),
+        pytest.param(
+            {"id": None, "skills": [{"type": "custom", "skill_id": "skill_test", "version": "1"}]},
+            {"id": "server-created", "skills": [{"type": "custom", "skill_id": "skill_test", "version": "1"}]},
+            id="null-id",
+        ),
+        pytest.param({"id": "caller-pinned", "skills": []}, {"id": "caller-pinned", "skills": []}, id="pinned-object"),
+    ],
+)
+@pytest.mark.respx(base_url=base_url)
+async def test_runner_preserves_container_configuration(
+    sync: bool,
+    stream: bool,
+    returned_container: bool,
+    container: BetaContainerParams | str | None | Omit,
+    expected: BetaContainerParams | str,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+    respx_mock: MockRouter,
+) -> None:
+    initial = None if isinstance(container, Omit) else container
+    original = json.dumps(initial)
+    server_container = {"id": "server-created", "expires_at": "2030-01-01T00:00:00Z"} if returned_container else None
+    if stream:
+        first = _sse_message({"type": "text", "text": "Working."}, "pause_turn", container=server_container)
+        final = _sse_message({"type": "text", "text": "Done."}, "end_turn")
+    else:
+        payload = _end_turn_response().json()
+        payload["stop_reason"] = "pause_turn"
+        if server_container is not None:
+            payload["container"] = server_container
+        first = httpx2.Response(200, json=payload)
+        final = _end_turn_response()
+    respx_mock.post("/v1/messages").mock(side_effect=[first, final])
+
+    await _run_with_tool_changes(
+        client if sync else async_client,
+        tools=[],
+        script={},
+        stream=stream,
+        container=container,
+    )
+
+    requests = _sent_request_bodies(respx_mock)
+    assert len(requests) == 2
+    assert requests[0].get("container") == initial
+    assert requests[1].get("container") == (expected if returned_container else initial)
+    assert json.dumps(None if isinstance(container, Omit) else container) == original
+    assert requests[1]["messages"][-1]["role"] == "assistant"
+    assert requests[0]["tools"] == requests[1]["tools"]
