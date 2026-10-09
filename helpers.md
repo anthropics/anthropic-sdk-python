@@ -173,7 +173,9 @@ async with stdio_client(StdioServerParameters(command="mcp-server")) as (read, w
 ```
 
 > [!TIP]
-> If you're using the sync client, replace `async_mcp_tool` with `mcp_tool`.
+> `mcp_tool` is the sync counterpart of `async_mcp_tool`. Because an MCP `ClientSession` must be driven by the
+> event loop that owns it, the tools it returns can only be called from an AnyIO worker thread — drive the sync
+> `tool_runner()` from inside `anyio.to_thread.run_sync()` so that it can call back into that loop.
 
 ### Using MCP prompts
 
