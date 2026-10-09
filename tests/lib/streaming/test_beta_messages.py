@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import json
-from typing import Any, Set, Dict, List, Tuple, TypeVar, cast
+from typing import Any, Set, Dict, List, Tuple, TypeVar, cast, get_args
 
 import httpx2
 import pytest
@@ -11,6 +11,7 @@ from respx import MockRouter
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._utils import assert_overloads_in_sync, assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1, get_model_fields
+from anthropic.lib.middleware import BetaFallbackState, BetaRefusalFallbackMiddleware, _fallbacks
 from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_types import (
     BetaInputJsonEvent,
@@ -20,10 +21,21 @@ from anthropic.lib.streaming._beta_types import (
 from anthropic.types.beta.beta_tool_param import BetaToolParam
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
 from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
+from anthropic.types.beta.beta_iterations_usage import BetaIterationsUsageItem
 from anthropic.types.beta.beta_message_delta_usage import BetaMessageDeltaUsage
 from anthropic.types.beta.beta_raw_message_delta_event import Delta as BetaRawMessageDelta, BetaRawMessageDeltaEvent
 
 from .helpers import get_response, to_async_iter
+from ..test_refusal_fallback_streaming import (
+    PARAMS,
+    STREAM_A,
+    STREAM_B,
+    FALLBACKS,
+    FALLBACK_MODEL,
+    sse_response,
+    make_sync_client,
+    make_async_client,
+)
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -982,3 +994,133 @@ def test_tracks_tool_input_type_alias_is_up_to_date() -> None:
             f"ContentBlock type {block_type.__name__} has an input property, "
             f"but is not included in TRACKS_TOOL_INPUT. You probably need to update the TRACKS_TOOL_INPUT type alias."
         )
+
+
+def iteration(kind: str, input_tokens: int, output_tokens: int, **extra: Any) -> dict[str, Any]:
+    return {
+        "type": kind,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        **extra,
+    }
+
+
+FIRST = iteration(
+    "message",
+    210_001,
+    8,
+    model=FALLBACK_MODEL,
+    cache_read_input_tokens=17,
+    cache_creation_input_tokens=23,
+    cache_creation={"ephemeral_5m_input_tokens": 11, "ephemeral_1h_input_tokens": 12},
+    future_detail={"source": "synthetic"},
+)
+FINAL = iteration("message", 31, 547)
+COMPACTION = iteration("compaction", 205_000, 64)
+ADVISOR = iteration("advisor_message", 50, 12, model="claude-sonnet-4-6")
+COMPLETER = {**FINAL, "type": "fallback_message", "model": FALLBACK_MODEL}
+AGGREGATE = {**COMPLETER, "cache_creation": None}
+
+USAGE_CASES = [
+    pytest.param(None, [AGGREGATE], id="absent-breakdown"),
+    pytest.param([], [AGGREGATE], id="empty-breakdown"),
+    pytest.param([FINAL], [COMPLETER], id="single-sampling"),
+    pytest.param([COMPLETER], [COMPLETER], id="reported-fallback-sampling"),
+    pytest.param([COMPACTION], [COMPACTION, AGGREGATE], id="compaction-only-breakdown"),
+    pytest.param([FIRST, FINAL], [FIRST, COMPLETER], id="server-tool-loop"),
+    pytest.param([FIRST, FINAL, FINAL], [FIRST, FINAL, COMPLETER], id="multiple-sampling"),
+    pytest.param([FIRST, COMPACTION, ADVISOR, FINAL], [FIRST, COMPACTION, ADVISOR, COMPLETER], id="mixed-breakdown"),
+    pytest.param([FIRST, FINAL, COMPACTION], [FIRST, COMPLETER, COMPACTION], id="trailing-compaction"),
+    pytest.param(
+        [{**FINAL, "model": "claude-opus-4-8-canonical"}],
+        [{**COMPLETER, "model": "claude-opus-4-8-canonical"}],
+        id="reported-model",
+    ),
+]
+
+
+def serving_with_iterations(iterations: list[dict[str, Any]] | None) -> str:
+    """Keep the synthetic serving wire, supplying an independently specified usage breakdown."""
+    lines: list[str] = []
+    for line in STREAM_B.splitlines(keepends=True):
+        if line.startswith("data: "):
+            event = json.loads(line[6:])
+            if event["type"] == "message_delta":
+                if iterations is None:
+                    event["usage"].pop("iterations", None)
+                else:
+                    event["usage"]["iterations"] = iterations
+                line = "data: " + json.dumps(event) + "\n"
+        lines.append(line)
+    return "".join(lines)
+
+
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("iterations, expected", USAGE_CASES)
+def test_serving_usage_retains_each_iteration(
+    respx_mock: MockRouter, iterations: list[dict[str, Any]] | None, expected: list[dict[str, Any]]
+) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[sse_response(STREAM_A), sse_response(serving_with_iterations(iterations))]
+    )
+    with make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)]) as client, BetaFallbackState():
+        with client.beta.messages.stream(**PARAMS) as stream:
+            events = list(stream)
+            message = stream.get_final_message()
+
+    assert len(respx_mock.calls) == 2
+    request = cast(httpx2.Request, respx_mock.calls[1][0])
+    assert request.method == "POST"
+    assert request.url.path == "/v1/messages"
+    assert "fallback-credit-2026-07-01" in request.headers["anthropic-beta"]
+    assert json.loads(request.content)["model"] == FALLBACK_MODEL
+    delta = next(event for event in events if event.type == "message_delta")
+    assert delta.usage.iterations is not None
+    assert [entry.to_dict() for entry in delta.usage.iterations[1:]] == expected
+    assert message.usage.iterations is not None
+    assert [entry.to_dict() for entry in message.usage.iterations[1:]] == expected
+    assert len([event for event in events if event.type == "message_start"]) == 1
+    assert len([event for event in events if event.type == "message_stop"]) == 1
+    assert message.stop_reason == "end_turn"
+    assert message.usage.output_tokens == 547
+
+
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("iterations, expected", USAGE_CASES)
+async def test_async_serving_usage_retains_each_iteration(
+    respx_mock: MockRouter, iterations: list[dict[str, Any]] | None, expected: list[dict[str, Any]]
+) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[sse_response(STREAM_A), sse_response(serving_with_iterations(iterations))]
+    )
+    with BetaFallbackState():
+        async with make_async_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)]) as client:
+            async with client.beta.messages.stream(**PARAMS) as stream:
+                events = [event async for event in stream]
+                message = await stream.get_final_message()
+
+    assert len(respx_mock.calls) == 2
+    request = cast(httpx2.Request, respx_mock.calls[1][0])
+    assert request.method == "POST"
+    assert request.url.path == "/v1/messages"
+    assert "fallback-credit-2026-07-01" in request.headers["anthropic-beta"]
+    assert json.loads(request.content)["model"] == FALLBACK_MODEL
+    delta = next(event for event in events if event.type == "message_delta")
+    assert delta.usage.iterations is not None
+    assert [entry.to_dict() for entry in delta.usage.iterations[1:]] == expected
+    assert message.usage.iterations is not None
+    assert [entry.to_dict() for entry in message.usage.iterations[1:]] == expected
+    assert len([event for event in events if event.type == "message_start"]) == 1
+    assert len([event for event in events if event.type == "message_stop"]) == 1
+    assert message.stop_reason == "end_turn"
+    assert message.usage.output_tokens == 547
+
+
+def test_serving_iteration_types_track_generated_union() -> None:
+    variants = get_args(get_args(BetaIterationsUsageItem)[0])
+    generated_types = {get_args(get_model_fields(variant)["type"].annotation)[0] for variant in variants}
+    assert generated_types == {*_fallbacks.SAMPLING_ITERATION_TYPES, "compaction", "advisor_message"}, (
+        "Update _HopReader when the generated usage iteration variants change."
+    )

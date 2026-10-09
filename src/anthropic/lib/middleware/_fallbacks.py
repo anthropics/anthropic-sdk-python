@@ -45,6 +45,7 @@ __all__ = [
 log: logging.Logger = logging.getLogger("anthropic.lib.middleware")
 
 _MESSAGES_PATH = "/v1/messages"
+SAMPLING_ITERATION_TYPES = ("message", "fallback_message")
 
 DEFAULT_BETAS: tuple[AnthropicBetaParam, ...] = ("fallback-credit-2026-07-01",)
 """Betas sent by default; override with the `betas` option."""
@@ -940,19 +941,20 @@ class _HopReader:
                     stop_details = _as_dict(delta.get("stop_details"))
                     if stop_details is not None:
                         stop_details.setdefault("recommended_model", None)
-                # Terminal hop. Replace iterations, don't append: this hop's own
-                # message_delta self-reports its iterations without a `model` (a
-                # fresh non-fallback request doesn't know it served a chain).
-                # Server-side `fallbacks` relabels the whole chain instead —
-                # refused hops as `message`, the serving hop as
-                # `fallback_message` — so the recorded chain replaces the
-                # self-report, with this hop's own entry relabeled as the
-                # `fallback_message` completer.
+                # Earlier tool-loop and compaction entries must survive the chain splice.
                 usage = _as_dict(event.get("usage")) or {}
-                usage["iterations"] = [
-                    *splice.iterations,
-                    _serving_iteration_entry(usage, splice.model),
-                ]
+                reported = usage.get("iterations")
+                entries: list[dict[str, Any]] = []
+                if isinstance(reported, list):
+                    entries = cast("list[dict[str, Any]]", reported)
+                for entry in reversed(entries):
+                    if entry.get("type") in SAMPLING_ITERATION_TYPES:
+                        entry["type"] = "fallback_message"
+                        entry["model"] = entry.get("model") or splice.model
+                        break
+                else:
+                    entries.append(_to_iteration_usage("fallback_message", splice.model, usage))
+                usage["iterations"] = [*splice.iterations, *entries]
                 event["usage"] = usage
                 _forward_input_transformations(event, self._suppressed_start_message())
                 return [*frames, _emit("message_delta", event)]
@@ -1235,17 +1237,6 @@ def _declined_iteration_entries(refusal: _Refusal, model_label: str) -> list[dic
                 entries[0]["model"] = model_label
             return entries
     return [_to_iteration_usage("message", model_label, refusal.usage)]
-
-
-def _serving_iteration_entry(delta_usage: dict[str, Any], model: str) -> dict[str, Any]:
-    """The serving hop's `fallback_message` completer entry: its own
-    self-reported iteration relabeled, or one built from its delta usage."""
-    reported = delta_usage.get("iterations")
-    if isinstance(reported, list) and reported:
-        last = _as_dict(cast("List[Any]", reported)[-1])
-        if last is not None:
-            return {**last, "type": "fallback_message", "model": last.get("model") or model}
-    return _to_iteration_usage("fallback_message", model, delta_usage)
 
 
 class _BlockTracker:
