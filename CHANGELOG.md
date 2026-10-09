@@ -10,6 +10,7 @@
 ### Chores
 
 * **docs:** correct prefill, thinking, fallback and model descriptions
+* **docs:** update model examples
 
 
 ### Documentation
