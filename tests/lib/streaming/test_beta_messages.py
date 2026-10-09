@@ -15,6 +15,7 @@ from anthropic.types.beta.beta_message import BetaMessage
 from anthropic.lib.streaming._beta_types import (
     BetaInputJsonEvent,
     BetaCompactionEvent,
+    ParsedBetaTextEvent,
     ParsedBetaMessageStreamEvent,
 )
 from anthropic.types.beta.beta_tool_param import BetaToolParam
@@ -921,6 +922,20 @@ def test_message_delta_fields_are_all_accumulated() -> None:
         "output_tokens_details",
         "server_tool_use",
     }
+
+
+def test_parsed_beta_text_event_parsed_snapshot() -> None:
+    # ordinary prose and the empty first delta must not raise
+    assert ParsedBetaTextEvent(type="text", text="", snapshot="Hello, world!").parsed_snapshot() is None
+    assert ParsedBetaTextEvent(type="text", text="", snapshot="").parsed_snapshot() is None
+
+    # non-object JSON is not a Dict[str, Any], so it also returns None
+    assert ParsedBetaTextEvent(type="text", text="", snapshot="[1, 2]").parsed_snapshot() is None
+    assert ParsedBetaTextEvent(type="text", text="", snapshot='"just a string"').parsed_snapshot() is None
+
+    # JSON objects still parse, including a mid-stream partial
+    assert ParsedBetaTextEvent(type="text", text="", snapshot='{"name": "Ada"}').parsed_snapshot() == {"name": "Ada"}
+    assert ParsedBetaTextEvent(type="text", text="", snapshot='{"name": "Ad').parsed_snapshot() == {"name": "Ad"}
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
