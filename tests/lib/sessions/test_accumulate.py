@@ -69,6 +69,24 @@ def test_event_start_for_a_non_agent_message_preview_returns_none() -> None:
     assert accumulate_managed_agents_event(None, ev) is None
 
 
+def test_repeated_event_start_same_id_preserves_snapshot() -> None:
+    msg = seed("evt_1")
+    msg = fold(msg, delta("evt_1", "Hello", 0))
+    repeated = accumulate_managed_agents_event(msg, start("evt_1"))
+    assert repeated is not None
+    assert repeated.id == "evt_1"
+    assert repeated.content == [BetaManagedAgentsTextBlock(type="text", text="Hello")]
+
+
+def test_repeated_event_start_different_id_opens_new_snapshot() -> None:
+    msg = seed("evt_1")
+    msg = fold(msg, delta("evt_1", "Hello", 0))
+    fresh = accumulate_managed_agents_event(msg, start("evt_2"))
+    assert fresh is not None
+    assert fresh.id == "evt_2"
+    assert fresh.content == []
+
+
 def test_new_index_inserts_the_fragment_as_a_fresh_block() -> None:
     msg = seed("evt_1")
     next_ = fold(msg, delta("evt_1", "Hello", 0))
