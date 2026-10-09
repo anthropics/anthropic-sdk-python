@@ -68,7 +68,9 @@ class AWSEventStreamDecoder:
         return _chunk_bytes_to_sse(chunk.get("bytes"))
 
 
-def _chunk_bytes_to_sse(raw: bytes) -> ServerSentEvent | None:
+def _chunk_bytes_to_sse(raw: bytes | None) -> ServerSentEvent | None:
+    if not isinstance(raw, bytes):
+        return None
     decoded = raw.decode()
     data: Any
     try:
