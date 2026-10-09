@@ -9,7 +9,9 @@ from .._types import FileTypes
 
 
 def files_from_dir(directory: str | os.PathLike[str]) -> list[FileTypes]:
-    path = Path(directory)
+    # the names carry the directory itself, so where it sits has to be known:
+    # `.` has no parent to take the name from, and `..` would put one in a name
+    path = Path(os.path.abspath(directory))
 
     files: list[FileTypes] = []
     _collect_files(path, path.parent, files)
@@ -26,7 +28,7 @@ def _collect_files(directory: Path, relative_to: Path, files: list[FileTypes]) -
 
 
 async def async_files_from_dir(directory: str | os.PathLike[str]) -> list[FileTypes]:
-    path = anyio.Path(directory)
+    path = anyio.Path(os.path.abspath(directory))
 
     files: list[FileTypes] = []
     await _async_collect_files(path, path.parent, files)
