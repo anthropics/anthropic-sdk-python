@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.13.1](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.13.1) (2026-10-09)
+
+### Documentation
+
+* **api:** clarify when custom tool results can be sent
+
 ## [1.13.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.12.1...v1.13.0) (2026-10-09)
 
 ### Features
