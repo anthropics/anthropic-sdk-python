@@ -395,6 +395,7 @@ class SSEDecoder:
     _retry: int | None
     _last_event_id: str | None
     _raw: list[str]
+    _has_read_bom: bool
 
     def __init__(self) -> None:
         self._event = None
@@ -402,6 +403,7 @@ class SSEDecoder:
         self._last_event_id = None
         self._retry = None
         self._raw = []
+        self._has_read_bom = False
 
     def iter_bytes(self, iterator: Iterator[bytes]) -> Iterator[ServerSentEvent]:
         """Given an iterator that yields raw binary data, iterate over it & yield every event encountered"""
@@ -409,6 +411,10 @@ class SSEDecoder:
             # Split before decoding so splitlines() only uses \r and \n
             for raw_line in chunk.splitlines():
                 line = raw_line.decode("utf-8")
+                if not self._has_read_bom:
+                    self._has_read_bom = True
+                    if line.startswith("\ufeff"):
+                        line = line[1:]
                 sse = self.decode(line)
                 if sse:
                     yield sse
@@ -431,6 +437,10 @@ class SSEDecoder:
             # Split before decoding so splitlines() only uses \r and \n
             for raw_line in chunk.splitlines():
                 line = raw_line.decode("utf-8")
+                if not self._has_read_bom:
+                    self._has_read_bom = True
+                    if line.startswith("\ufeff"):
+                        line = line[1:]
                 sse = self.decode(line)
                 if sse:
                     yield sse
