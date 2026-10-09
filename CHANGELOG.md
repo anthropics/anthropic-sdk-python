@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Bug Fixes
+
+* **middleware:** preserve serving-hop usage iterations and relabel only the final sampling iteration during streaming refusal fallback.
+
 ## [1.13.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.12.1...v1.13.0) (2026-10-09)
 
 ### Features
