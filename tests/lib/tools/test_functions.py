@@ -168,6 +168,21 @@ class TestFunctionTool:
             "required": ["location"],
         }
 
+    def test_input_examples_materialized_from_iterable(self) -> None:
+        def lookup(city: str) -> str:
+            return city
+
+        generator_examples = ({"city": c} for c in ["Kraków", "London"])
+        tool = beta_tool(lookup, input_examples=generator_examples)
+
+        # First call to to_dict
+        first_dict = tool.to_dict()
+        assert first_dict["input_examples"] == [{"city": "Kraków"}, {"city": "London"}]
+
+        # Second call to to_dict must still have the examples
+        second_dict = tool.to_dict()
+        assert second_dict["input_examples"] == [{"city": "Kraków"}, {"city": "London"}]
+
     def test_to_dict_method(self) -> None:
         def simple_func(message: str) -> str:
             """A simple function."""
