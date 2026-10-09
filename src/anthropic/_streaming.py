@@ -390,6 +390,7 @@ class ServerSentEvent:
 
 
 class SSEDecoder:
+    _first_line: bool
     _data: list[str]
     _event: str | None
     _retry: int | None
@@ -397,6 +398,7 @@ class SSEDecoder:
     _raw: list[str]
 
     def __init__(self) -> None:
+        self._first_line = True
         self._event = None
         self._data = []
         self._last_event_id = None
@@ -448,6 +450,10 @@ class SSEDecoder:
             yield data
 
     def decode(self, line: str) -> ServerSentEvent | None:
+        if self._first_line:
+            self._first_line = False
+            line = line.removeprefix("\ufeff")
+
         # See: https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation  # noqa: E501
 
         if not line:
