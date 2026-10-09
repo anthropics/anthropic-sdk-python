@@ -7,9 +7,9 @@ from .beta_managed_agents_mcp_toolset import BetaManagedAgentsMCPToolset
 from .beta_managed_agents_custom_skill import BetaManagedAgentsCustomSkill
 from .beta_managed_agents_model_config import BetaManagedAgentsModelConfig
 from .beta_managed_agents_anthropic_skill import BetaManagedAgentsAnthropicSkill
+from .beta_managed_agents_session_multiagent import BetaManagedAgentsSessionMultiagent
 from .beta_managed_agents_agent_toolset20260401 import BetaManagedAgentsAgentToolset20260401
 from .beta_managed_agents_mcp_server_url_definition import BetaManagedAgentsMCPServerURLDefinition
-from .beta_managed_agents_session_multiagent_coordinator import BetaManagedAgentsSessionMultiagentCoordinator
 
 __all__ = ["BetaManagedAgentsSessionAgent", "Skill", "Tool"]
 
@@ -38,7 +38,7 @@ class BetaManagedAgentsSessionAgent(BaseModel):
     model: BetaManagedAgentsModelConfig
     """Model identifier and configuration."""
 
-    multiagent: Optional[BetaManagedAgentsSessionMultiagentCoordinator] = None
+    multiagent: Optional[BetaManagedAgentsSessionMultiagent] = None
     """Resolved multiagent orchestration configuration.
 
     Null when the agent is single-threaded.

@@ -37,4 +37,11 @@ BetaManagedAgentsSessionEventType: TypeAlias = Literal[
     "session.updated",
     "system.message",
     "session.usage",
+    "workflow_run.created",
+    "workflow_run.status_running",
+    "workflow_run.status_idle",
+    "workflow_run.status_ended",
+    "workflow_run.error",
+    "workflow_run.phase_started",
+    "workflow_run.phase_ended",
 ]

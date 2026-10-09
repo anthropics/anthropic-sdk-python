@@ -119,6 +119,13 @@ class Stream(Generic[_T]):
                     or sse.event == "event_start"
                     or sse.event == "event_delta"
                     or sse.event == "system.message"
+                    or sse.event == "workflow_run.created"
+                    or sse.event == "workflow_run.status_running"
+                    or sse.event == "workflow_run.status_idle"
+                    or sse.event == "workflow_run.status_ended"
+                    or sse.event == "workflow_run.error"
+                    or sse.event == "workflow_run.phase_started"
+                    or sse.event == "workflow_run.phase_ended"
                 ):
                     data = sse.json()
                     if is_dict(data) and "type" not in data:
@@ -271,6 +278,13 @@ class AsyncStream(Generic[_T]):
                     or sse.event == "event_start"
                     or sse.event == "event_delta"
                     or sse.event == "system.message"
+                    or sse.event == "workflow_run.created"
+                    or sse.event == "workflow_run.status_running"
+                    or sse.event == "workflow_run.status_idle"
+                    or sse.event == "workflow_run.status_ended"
+                    or sse.event == "workflow_run.error"
+                    or sse.event == "workflow_run.phase_started"
+                    or sse.event == "workflow_run.phase_ended"
                 ):
                     data = sse.json()
                     if is_dict(data) and "type" not in data:
