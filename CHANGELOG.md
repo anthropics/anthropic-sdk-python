@@ -2,6 +2,11 @@
 
 ## [1.13.1](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.13.1) (2026-10-09)
 
+### Chores
+
+* **docs:** correct prefill, thinking, fallback and model descriptions
+
+
 ### Documentation
 
 * **api:** clarify when custom tool results can be sent
