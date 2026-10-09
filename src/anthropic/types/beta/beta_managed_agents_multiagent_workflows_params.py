@@ -1,0 +1,13 @@
+from __future__ import annotations
+
+from typing import Union
+from typing_extensions import TypeAlias
+
+from .beta_managed_agents_multiagent_workflows_enabled_params import BetaManagedAgentsMultiagentWorkflowsEnabledParams
+from .beta_managed_agents_multiagent_workflows_disabled_params import BetaManagedAgentsMultiagentWorkflowsDisabledParams
+
+__all__ = ["BetaManagedAgentsMultiagentWorkflowsParams"]
+
+BetaManagedAgentsMultiagentWorkflowsParams: TypeAlias = Union[
+    BetaManagedAgentsMultiagentWorkflowsEnabledParams, BetaManagedAgentsMultiagentWorkflowsDisabledParams
+]

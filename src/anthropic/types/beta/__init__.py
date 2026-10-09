@@ -618,6 +618,15 @@ from .beta_managed_agents_effort_xhigh_param import (
 from .beta_managed_agents_mcp_toolset_params import (
     BetaManagedAgentsMCPToolsetParams as BetaManagedAgentsMCPToolsetParams,
 )
+from .beta_managed_agents_multiagent20261001 import (
+    BetaManagedAgentsMultiagent20261001 as BetaManagedAgentsMultiagent20261001,
+)
+from .beta_managed_agents_multiagent_advisor import (
+    BetaManagedAgentsMultiagentAdvisor as BetaManagedAgentsMultiagentAdvisor,
+)
+from .beta_managed_agents_session_multiagent import (
+    BetaManagedAgentsSessionMultiagent as BetaManagedAgentsSessionMultiagent,
+)
 from .beta_memory_tool_20250818_view_command import (
     BetaMemoryTool20250818ViewCommand as BetaMemoryTool20250818ViewCommand,
 )
@@ -774,6 +783,12 @@ from .beta_managed_agents_file_resource_config import (
 )
 from .beta_managed_agents_file_resource_params import (
     BetaManagedAgentsFileResourceParams as BetaManagedAgentsFileResourceParams,
+)
+from .beta_managed_agents_multiagent_subagents import (
+    BetaManagedAgentsMultiagentSubagents as BetaManagedAgentsMultiagentSubagents,
+)
+from .beta_managed_agents_multiagent_workflows import (
+    BetaManagedAgentsMultiagentWorkflows as BetaManagedAgentsMultiagentWorkflows,
 )
 from .beta_managed_agents_session_thread_agent import (
     BetaManagedAgentsSessionThreadAgent as BetaManagedAgentsSessionThreadAgent,
@@ -955,6 +970,9 @@ from .beta_managed_agents_manual_trigger_context import (
 from .beta_managed_agents_mcp_tool_config_params import (
     BetaManagedAgentsMCPToolConfigParams as BetaManagedAgentsMCPToolConfigParams,
 )
+from .beta_managed_agents_multiagent_coordinator import (
+    BetaManagedAgentsMultiagentCoordinator as BetaManagedAgentsMultiagentCoordinator,
+)
 from .beta_managed_agents_multiagent_self_params import (
     BetaManagedAgentsMultiagentSelfParams as BetaManagedAgentsMultiagentSelfParams,
 )
@@ -1084,6 +1102,9 @@ from .beta_managed_agents_deployment_paused_reason import (
 from .beta_managed_agents_file_not_found_run_error import (
     BetaManagedAgentsFileNotFoundRunError as BetaManagedAgentsFileNotFoundRunError,
 )
+from .beta_managed_agents_multiagent_inline_agents import (
+    BetaManagedAgentsMultiagentInlineAgents as BetaManagedAgentsMultiagentInlineAgents,
+)
 from .beta_managed_agents_schedule_trigger_context import (
     BetaManagedAgentsScheduleTriggerContext as BetaManagedAgentsScheduleTriggerContext,
 )
@@ -1141,6 +1162,12 @@ from .beta_managed_agents_always_allow_policy_param import (
 from .beta_managed_agents_mcp_server_url_definition import (
     BetaManagedAgentsMCPServerURLDefinition as BetaManagedAgentsMCPServerURLDefinition,
 )
+from .beta_managed_agents_multiagent20261001_params import (
+    BetaManagedAgentsMultiagent20261001Params as BetaManagedAgentsMultiagent20261001Params,
+)
+from .beta_managed_agents_multiagent_advisor_params import (
+    BetaManagedAgentsMultiagentAdvisorParams as BetaManagedAgentsMultiagentAdvisorParams,
+)
 from .beta_managed_agents_skill_not_found_run_error import (
     BetaManagedAgentsSkillNotFoundRunError as BetaManagedAgentsSkillNotFoundRunError,
 )
@@ -1174,8 +1201,14 @@ from .beta_citation_web_search_result_location_param import (
 from .beta_managed_agents_mcp_toolset_default_config import (
     BetaManagedAgentsMCPToolsetDefaultConfig as BetaManagedAgentsMCPToolsetDefaultConfig,
 )
+from .beta_managed_agents_multiagent_advisor_enabled import (
+    BetaManagedAgentsMultiagentAdvisorEnabled as BetaManagedAgentsMultiagentAdvisorEnabled,
+)
 from .beta_managed_agents_session_agent_update_param import (
     BetaManagedAgentsSessionAgentUpdateParam as BetaManagedAgentsSessionAgentUpdateParam,
+)
+from .beta_managed_agents_session_multiagent20261001 import (
+    BetaManagedAgentsSessionMultiagent20261001 as BetaManagedAgentsSessionMultiagent20261001,
 )
 from .beta_managed_agents_system_content_block_param import (
     BetaManagedAgentsSystemContentBlockParam as BetaManagedAgentsSystemContentBlockParam,
@@ -1218,6 +1251,15 @@ from .beta_managed_agents_agent_with_overrides_params import (
 )
 from .beta_managed_agents_memory_store_resource_param import (
     BetaManagedAgentsMemoryStoreResourceParam as BetaManagedAgentsMemoryStoreResourceParam,
+)
+from .beta_managed_agents_multiagent_advisor_disabled import (
+    BetaManagedAgentsMultiagentAdvisorDisabled as BetaManagedAgentsMultiagentAdvisorDisabled,
+)
+from .beta_managed_agents_multiagent_subagents_params import (
+    BetaManagedAgentsMultiagentSubagentsParams as BetaManagedAgentsMultiagentSubagentsParams,
+)
+from .beta_managed_agents_multiagent_workflows_params import (
+    BetaManagedAgentsMultiagentWorkflowsParams as BetaManagedAgentsMultiagentWorkflowsParams,
 )
 from .beta_managed_agents_outcome_evaluation_resource import (
     BetaManagedAgentsOutcomeEvaluationResource as BetaManagedAgentsOutcomeEvaluationResource,
@@ -1273,6 +1315,18 @@ from .beta_managed_agents_mcp_egress_blocked_run_error import (
 from .beta_managed_agents_memory_store_resource_config import (
     BetaManagedAgentsMemoryStoreResourceConfig as BetaManagedAgentsMemoryStoreResourceConfig,
 )
+from .beta_managed_agents_multiagent_subagents_enabled import (
+    BetaManagedAgentsMultiagentSubagentsEnabled as BetaManagedAgentsMultiagentSubagentsEnabled,
+)
+from .beta_managed_agents_multiagent_workflows_enabled import (
+    BetaManagedAgentsMultiagentWorkflowsEnabled as BetaManagedAgentsMultiagentWorkflowsEnabled,
+)
+from .beta_managed_agents_session_multiagent_subagents import (
+    BetaManagedAgentsSessionMultiagentSubagents as BetaManagedAgentsSessionMultiagentSubagents,
+)
+from .beta_managed_agents_session_multiagent_workflows import (
+    BetaManagedAgentsSessionMultiagentWorkflows as BetaManagedAgentsSessionMultiagentWorkflows,
+)
 from .beta_managed_agents_web_fetch_tool_config_params import (
     BetaManagedAgentsWebFetchToolConfigParams as BetaManagedAgentsWebFetchToolConfigParams,
 )
@@ -1311,6 +1365,15 @@ from .beta_webhook_vault_credential_deleted_event_data import (
 )
 from .beta_managed_agents_deployment_user_message_event import (
     BetaManagedAgentsDeploymentUserMessageEvent as BetaManagedAgentsDeploymentUserMessageEvent,
+)
+from .beta_managed_agents_multiagent_coordinator_params import (
+    BetaManagedAgentsMultiagentCoordinatorParams as BetaManagedAgentsMultiagentCoordinatorParams,
+)
+from .beta_managed_agents_multiagent_subagents_disabled import (
+    BetaManagedAgentsMultiagentSubagentsDisabled as BetaManagedAgentsMultiagentSubagentsDisabled,
+)
+from .beta_managed_agents_multiagent_workflows_disabled import (
+    BetaManagedAgentsMultiagentWorkflowsDisabled as BetaManagedAgentsMultiagentWorkflowsDisabled,
 )
 from .beta_managed_agents_web_search_tool_config_params import (
     BetaManagedAgentsWebSearchToolConfigParams as BetaManagedAgentsWebSearchToolConfigParams,
@@ -1417,6 +1480,9 @@ from .beta_managed_agents_manual_deployment_paused_reason import (
 from .beta_managed_agents_memory_store_archived_run_error import (
     BetaManagedAgentsMemoryStoreArchivedRunError as BetaManagedAgentsMemoryStoreArchivedRunError,
 )
+from .beta_managed_agents_multiagent_inline_agents_params import (
+    BetaManagedAgentsMultiagentInlineAgentsParams as BetaManagedAgentsMultiagentInlineAgentsParams,
+)
 from .beta_managed_agents_organization_disabled_run_error import (
     BetaManagedAgentsOrganizationDisabledRunError as BetaManagedAgentsOrganizationDisabledRunError,
 )
@@ -1453,6 +1519,9 @@ from .beta_managed_agents_agent_toolset20260401_grep_input import (
 from .beta_managed_agents_agent_toolset20260401_read_input import (
     BetaManagedAgentsAgentToolset20260401ReadInput as BetaManagedAgentsAgentToolset20260401ReadInput,
 )
+from .beta_managed_agents_multiagent_inline_agents_enabled import (
+    BetaManagedAgentsMultiagentInlineAgentsEnabled as BetaManagedAgentsMultiagentInlineAgentsEnabled,
+)
 from .beta_managed_agents_web_fetch_url_source_tool_filter import (
     BetaManagedAgentsWebFetchURLSourceToolFilter as BetaManagedAgentsWebFetchURLSourceToolFilter,
 )
@@ -1477,6 +1546,12 @@ from .beta_managed_agents_github_repository_resource_params import (
 from .beta_managed_agents_mcp_toolset_default_config_params import (
     BetaManagedAgentsMCPToolsetDefaultConfigParams as BetaManagedAgentsMCPToolsetDefaultConfigParams,
 )
+from .beta_managed_agents_multiagent_advisor_enabled_params import (
+    BetaManagedAgentsMultiagentAdvisorEnabledParams as BetaManagedAgentsMultiagentAdvisorEnabledParams,
+)
+from .beta_managed_agents_multiagent_inline_agents_disabled import (
+    BetaManagedAgentsMultiagentInlineAgentsDisabled as BetaManagedAgentsMultiagentInlineAgentsDisabled,
+)
 from .beta_managed_agents_web_fetch_url_source_except_param import (
     BetaManagedAgentsWebFetchURLSourceExceptParam as BetaManagedAgentsWebFetchURLSourceExceptParam,
 )
@@ -1492,8 +1567,20 @@ from .beta_response_computer_left_mouse_down_tool_use_block import (
 from .beta_web_search_tool_result_block_param_content_param import (
     BetaWebSearchToolResultBlockParamContentParam as BetaWebSearchToolResultBlockParamContentParam,
 )
+from .beta_managed_agents_multiagent_advisor_disabled_params import (
+    BetaManagedAgentsMultiagentAdvisorDisabledParams as BetaManagedAgentsMultiagentAdvisorDisabledParams,
+)
+from .beta_managed_agents_multiagent_predefined_agent_params import (
+    BetaManagedAgentsMultiagentPredefinedAgentParams as BetaManagedAgentsMultiagentPredefinedAgentParams,
+)
 from .beta_managed_agents_agent_toolset_default_config_params import (
     BetaManagedAgentsAgentToolsetDefaultConfigParams as BetaManagedAgentsAgentToolsetDefaultConfigParams,
+)
+from .beta_managed_agents_multiagent_subagents_enabled_params import (
+    BetaManagedAgentsMultiagentSubagentsEnabledParams as BetaManagedAgentsMultiagentSubagentsEnabledParams,
+)
+from .beta_managed_agents_multiagent_workflows_enabled_params import (
+    BetaManagedAgentsMultiagentWorkflowsEnabledParams as BetaManagedAgentsMultiagentWorkflowsEnabledParams,
 )
 from .beta_managed_agents_session_creation_rejected_run_error import (
     BetaManagedAgentsSessionCreationRejectedRunError as BetaManagedAgentsSessionCreationRejectedRunError,
@@ -1515,6 +1602,18 @@ from .beta_webhook_vault_credential_refresh_failed_event_data import (
 )
 from .beta_managed_agents_deployment_user_define_outcome_event import (
     BetaManagedAgentsDeploymentUserDefineOutcomeEvent as BetaManagedAgentsDeploymentUserDefineOutcomeEvent,
+)
+from .beta_managed_agents_multiagent_subagents_disabled_params import (
+    BetaManagedAgentsMultiagentSubagentsDisabledParams as BetaManagedAgentsMultiagentSubagentsDisabledParams,
+)
+from .beta_managed_agents_multiagent_workflows_disabled_params import (
+    BetaManagedAgentsMultiagentWorkflowsDisabledParams as BetaManagedAgentsMultiagentWorkflowsDisabledParams,
+)
+from .beta_managed_agents_session_multiagent_subagents_enabled import (
+    BetaManagedAgentsSessionMultiagentSubagentsEnabled as BetaManagedAgentsSessionMultiagentSubagentsEnabled,
+)
+from .beta_managed_agents_session_multiagent_workflows_enabled import (
+    BetaManagedAgentsSessionMultiagentWorkflowsEnabled as BetaManagedAgentsSessionMultiagentWorkflowsEnabled,
 )
 from .beta_managed_agents_session_resource_not_found_run_error import (
     BetaManagedAgentsSessionResourceNotFoundRunError as BetaManagedAgentsSessionResourceNotFoundRunError,
@@ -1543,8 +1642,14 @@ from .beta_managed_agents_web_fetch_url_source_tool_filter_param import (
 from .beta_managed_agents_web_fetch_url_source_user_input_params import (
     BetaManagedAgentsWebFetchURLSourceUserInputParams as BetaManagedAgentsWebFetchURLSourceUserInputParams,
 )
+from .beta_managed_agents_multiagent_inline_agents_enabled_params import (
+    BetaManagedAgentsMultiagentInlineAgentsEnabledParams as BetaManagedAgentsMultiagentInlineAgentsEnabledParams,
+)
 from .beta_managed_agents_web_fetch_url_source_tool_filter_params import (
     BetaManagedAgentsWebFetchURLSourceToolFilterParams as BetaManagedAgentsWebFetchURLSourceToolFilterParams,
+)
+from .beta_managed_agents_multiagent_inline_agents_disabled_params import (
+    BetaManagedAgentsMultiagentInlineAgentsDisabledParams as BetaManagedAgentsMultiagentInlineAgentsDisabledParams,
 )
 from .beta_managed_agents_web_fetch_url_source_tool_reference_param import (
     BetaManagedAgentsWebFetchURLSourceToolReferenceParam as BetaManagedAgentsWebFetchURLSourceToolReferenceParam,

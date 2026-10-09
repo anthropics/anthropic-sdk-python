@@ -4,6 +4,7 @@ from typing import List
 from typing_extensions import TypedDict
 
 from ...anthropic_beta_param import AnthropicBetaParam
+from .beta_managed_agents_session_thread_status import BetaManagedAgentsSessionThreadStatus
 
 __all__ = ["ThreadListParams"]
 
@@ -14,6 +15,13 @@ class ThreadListParams(TypedDict, total=False):
 
     page: str
     """Opaque pagination cursor from a previous response's `next_page`. Forward-only."""
+
+    statuses: List[BetaManagedAgentsSessionThreadStatus]
+    """Return only threads that have one of these statuses.
+
+    Repeat the parameter to give more than one status. Leave it out to return
+    threads of every status.
+    """
 
     betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""

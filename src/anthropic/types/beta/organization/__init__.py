@@ -219,6 +219,9 @@ from .plugin_marketplace_validate_repository_params import (
 from .beta_organization_rate_limit_token_count_group import (
     BetaOrganizationRateLimitTokenCountGroup as BetaOrganizationRateLimitTokenCountGroup,
 )
+from .beta_analytics_chat_cowork_unified_chat_metrics import (
+    BetaAnalyticsChatCoworkUnifiedChatMetrics as BetaAnalyticsChatCoworkUnifiedChatMetrics,
+)
 from .beta_analytics_connector_office_product_metrics import (
     BetaAnalyticsConnectorOfficeProductMetrics as BetaAnalyticsConnectorOfficeProductMetrics,
 )
@@ -230,4 +233,19 @@ from .beta_plugin_marketplace_validation_plugin_warning import (
 )
 from .beta_plugin_marketplace_validation_plugin_warnings import (
     BetaPluginMarketplaceValidationPluginWarnings as BetaPluginMarketplaceValidationPluginWarnings,
+)
+from .beta_analytics_chat_cowork_unified_sessions_metrics import (
+    BetaAnalyticsChatCoworkUnifiedSessionsMetrics as BetaAnalyticsChatCoworkUnifiedSessionsMetrics,
+)
+from .beta_analytics_skill_chat_cowork_unified_chat_metrics import (
+    BetaAnalyticsSkillChatCoworkUnifiedChatMetrics as BetaAnalyticsSkillChatCoworkUnifiedChatMetrics,
+)
+from .beta_analytics_connector_chat_cowork_unified_chat_metrics import (
+    BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics as BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics,
+)
+from .beta_analytics_skill_chat_cowork_unified_sessions_metrics import (
+    BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics as BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics,
+)
+from .beta_analytics_connector_chat_cowork_unified_sessions_metrics import (
+    BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics as BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics,
 )
