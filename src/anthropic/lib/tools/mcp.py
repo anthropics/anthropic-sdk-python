@@ -99,11 +99,17 @@ class _TaggedTuple(tuple):  # type: ignore[type-arg]
     """A tuple subclass that can carry a `_stainless_helper` attribute."""
 
 
+def _normalize_mime_type(mime_type: str) -> str:
+    return mime_type.partition(";")[0].strip().lower()
+
+
 def _is_supported_image_type(mime_type: str) -> bool:
-    return mime_type in _SUPPORTED_IMAGE_TYPES
+    return _normalize_mime_type(mime_type) in _SUPPORTED_IMAGE_TYPES
 
 
 def _is_supported_resource_mime_type(mime_type: str | None) -> bool:
+    if mime_type is not None:
+        mime_type = _normalize_mime_type(mime_type)
     return (
         mime_type is None
         or mime_type.startswith("text/")
@@ -143,7 +149,7 @@ def mcp_content(
                 "source": BetaBase64ImageSourceParam(
                     type="base64",
                     data=content.data,
-                    media_type=mime_type,  # type: ignore[typeddict-item]
+                    media_type=_normalize_mime_type(mime_type),  # type: ignore[typeddict-item]
                 ),
             }
         )
@@ -177,7 +183,7 @@ def _resource_contents_to_block(
                 "source": BetaBase64ImageSourceParam(
                     type="base64",
                     data=resource.blob,
-                    media_type=mime_type,  # type: ignore[typeddict-item]
+                    media_type=_normalize_mime_type(mime_type),  # type: ignore[typeddict-item]
                 ),
             }
         )
@@ -186,7 +192,7 @@ def _resource_contents_to_block(
         tag_helper(image_block, "mcp_resource_to_content")
         return image_block  # type: ignore[return-value]
 
-    if mime_type == "application/pdf":
+    if mime_type is not None and _normalize_mime_type(mime_type) == "application/pdf":
         if not isinstance(resource, BlobResourceContents):
             raise UnsupportedMCPValueError(f"PDF resource must have blob data, not text. URI: {resource.uri}")
         pdf_block = _TaggedDict(
@@ -204,7 +210,7 @@ def _resource_contents_to_block(
         tag_helper(pdf_block, "mcp_resource_to_content")
         return pdf_block  # type: ignore[return-value]
 
-    if mime_type is None or mime_type.startswith("text/"):
+    if mime_type is None or _normalize_mime_type(mime_type).startswith("text/"):
         if isinstance(resource, TextResourceContents):
             data = resource.text
         else:

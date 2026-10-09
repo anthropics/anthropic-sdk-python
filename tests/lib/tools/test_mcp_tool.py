@@ -86,8 +86,16 @@ class TestMCPContent:
         assert "cache_control" in result
         assert result["cache_control"] == {"type": "ephemeral"}
 
-    def test_image_content_png(self) -> None:
-        result = mcp_content(ImageContent(type="image", data="abc123", mimeType="image/png"))
+    @pytest.mark.parametrize(
+        "mime_type", ["image/png", "IMAGE/PNG", "image/png; charset=binary", ' Image/PNG ; profile="A;B" ']
+    )
+    def test_image_content_png(self, mime_type: str) -> None:
+        content = ImageContent(type="image", data="abc123", mimeType=mime_type)
+        original = content.model_dump()
+        result = mcp_content(content, cache_control={"type": "ephemeral"})
+        assert content.model_dump() == original
+        assert "cache_control" in result
+        assert result["cache_control"] == {"type": "ephemeral"}
         assert result["type"] == "image"
         source = result["source"]
         assert source["type"] == "base64"
@@ -109,27 +117,31 @@ class TestMCPContent:
         result = mcp_content(ImageContent(type="image", data="abc", mimeType="image/webp"))
         assert result["type"] == "image"
 
-    def test_image_unsupported_mime_type(self) -> None:
-        with pytest.raises(UnsupportedMCPValueError, match="image/bmp"):
-            mcp_content(ImageContent(type="image", data="abc", mimeType="image/bmp"))
+    @pytest.mark.parametrize("mime_type", ["image/bmp", "IMAGE/BMP; version=1", "image/pngx", " ", "; charset=utf-8"])
+    def test_image_unsupported_mime_type(self, mime_type: str) -> None:
+        with pytest.raises(UnsupportedMCPValueError, match="Unsupported image MIME type"):
+            mcp_content(ImageContent(type="image", data="abc", mimeType=mime_type))
 
-    def test_embedded_resource_text(self) -> None:
-        resource = _text_resource(text="doc content", mime="text/plain")
+    @pytest.mark.parametrize("mime_type", ["text/plain", "TEXT/PLAIN", ' TEXT/PLAIN ; profile="A;B" '])
+    def test_embedded_resource_text(self, mime_type: str) -> None:
+        resource = _text_resource(text="doc content", mime=mime_type)
         result = mcp_content(EmbeddedResource(type="resource", resource=resource))
         assert result["type"] == "document"
         assert result["source"]["type"] == "text"
         assert result["source"]["data"] == "doc content"
 
-    def test_embedded_resource_pdf(self) -> None:
+    @pytest.mark.parametrize("mime_type", ["application/pdf", "APPLICATION/PDF", ' APPLICATION/PDF ; profile="A;B" '])
+    def test_embedded_resource_pdf(self, mime_type: str) -> None:
         pdf_data = base64.b64encode(b"pdf bytes").decode()
-        resource = _blob_resource(uri="file:///doc.pdf", blob=pdf_data, mime="application/pdf")
+        resource = _blob_resource(uri="file:///doc.pdf", blob=pdf_data, mime=mime_type)
         result = mcp_content(EmbeddedResource(type="resource", resource=resource))
         assert result["type"] == "document"
         assert result["source"]["type"] == "base64"
         assert result["source"]["media_type"] == "application/pdf"
 
-    def test_embedded_resource_image(self) -> None:
-        resource = _blob_resource(uri="file:///img.png", blob="aW1nZGF0YQ==", mime="image/png")
+    @pytest.mark.parametrize("mime_type", ["image/png", "IMAGE/PNG", ' IMAGE/PNG ; profile="A;B" '])
+    def test_embedded_resource_image(self, mime_type: str) -> None:
+        resource = _blob_resource(uri="file:///img.png", blob="aW1nZGF0YQ==", mime=mime_type)
         result = mcp_content(EmbeddedResource(type="resource", resource=resource))
         assert result["type"] == "image"
         assert "media_type" in result["source"]
@@ -157,13 +169,15 @@ class TestMCPContent:
         with pytest.raises(UnsupportedMCPValueError, match="application/octet-stream"):
             mcp_content(EmbeddedResource(type="resource", resource=resource))
 
-    def test_embedded_resource_image_requires_blob(self) -> None:
-        resource = _text_resource(text="not blob", mime="image/png")
+    @pytest.mark.parametrize("mime_type", ["image/png", "IMAGE/PNG; version=1"])
+    def test_embedded_resource_image_requires_blob(self, mime_type: str) -> None:
+        resource = _text_resource(text="not blob", mime=mime_type)
         with pytest.raises(UnsupportedMCPValueError, match="blob data"):
             mcp_content(EmbeddedResource(type="resource", resource=resource))
 
-    def test_embedded_resource_pdf_requires_blob(self) -> None:
-        resource = _text_resource(text="not blob", mime="application/pdf")
+    @pytest.mark.parametrize("mime_type", ["application/pdf", "APPLICATION/PDF; version=1"])
+    def test_embedded_resource_pdf_requires_blob(self, mime_type: str) -> None:
+        resource = _text_resource(text="not blob", mime=mime_type)
         with pytest.raises(UnsupportedMCPValueError, match="blob data"):
             mcp_content(EmbeddedResource(type="resource", resource=resource))
 
@@ -231,6 +245,27 @@ class TestMCPResourceToContent:
         result = mcp_resource_to_content(_read_result([_blob_resource(blob="aW1n", mime="image/png").model_dump()]))
         assert result["type"] == "image"
 
+    @pytest.mark.parametrize(
+        "mime_type, expected",
+        [("IMAGE/PNG; profile=srgb", "image/png"), (" Application/PDF; version=1.7 ", "application/pdf")],
+    )
+    def test_binary_media_type_selection(self, mime_type: str, expected: str) -> None:
+        resource = _blob_resource(blob="ZXhhY3QgYnl0ZXM=", mime=mime_type)
+        result = _read_result(
+            [resource.model_dump(), _text_resource(text="wrong item", mime="text/plain").model_dump()]
+        )
+        original = result.model_dump()
+        block = mcp_resource_to_content(result, cache_control={"type": "ephemeral"})
+        assert block["type"] == "image" or block["type"] == "document"
+        source = block["source"]
+        assert source["type"] == "base64"
+        assert source["media_type"] == expected
+        assert source["data"] == "ZXhhY3QgYnl0ZXM="
+        assert "cache_control" in block
+        assert block["cache_control"] == {"type": "ephemeral"}
+        assert result.model_dump() == original
+        assert mcp_resource_to_file(result)[1:] == (b"exact bytes", mime_type)
+
     def test_empty_contents_raises(self) -> None:
         with pytest.raises(UnsupportedMCPValueError, match="at least one item"):
             mcp_resource_to_content(ReadResourceResult(contents=[]))
@@ -241,12 +276,14 @@ class TestMCPResourceToContent:
                 _read_result([_blob_resource(blob="", mime="application/octet-stream").model_dump()])
             )
 
-    def test_selects_first_supported(self) -> None:
+    @pytest.mark.parametrize("mime_type", ["text/plain", "TEXT/PLAIN", " Text/Markdown; charset=utf-8 "])
+    def test_selects_first_supported(self, mime_type: str) -> None:
         result = mcp_resource_to_content(
             _read_result(
                 [
                     _blob_resource(blob="", mime="application/octet-stream").model_dump(),
-                    _text_resource(text="found it", mime="text/plain").model_dump(),
+                    _text_resource(text="found it", mime=mime_type).model_dump(),
+                    _text_resource(text="wrong item", mime="text/plain").model_dump(),
                 ]
             )
         )
