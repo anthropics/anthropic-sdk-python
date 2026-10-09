@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import json
 from typing import Any, Set, Dict, List, Tuple, TypeVar, cast
+from collections.abc import Iterator
 
 import httpx2
 import pytest
@@ -23,7 +24,7 @@ from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessag
 from anthropic.types.beta.beta_message_delta_usage import BetaMessageDeltaUsage
 from anthropic.types.beta.beta_raw_message_delta_event import Delta as BetaRawMessageDelta, BetaRawMessageDeltaEvent
 
-from .helpers import get_response, to_async_iter
+from .helpers import get_response, load_fixture, to_async_iter
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -385,6 +386,33 @@ def assert_input_transformations_response(message: BetaMessage, expected: List[D
     assert [entry.to_dict() for entry in message.input_transformations] == expected
 
 
+def compaction_metadata_response(update: dict[str, str | None]) -> Iterator[bytes]:
+    response = load_fixture("compaction_response.txt")
+    delta = {"type": "compaction_delta", "content": "Updated summary.", **update}
+    event = {"type": "content_block_delta", "index": 0, "delta": delta}
+    response = response.replace(
+        "event: content_block_stop\n",
+        "event: content_block_delta\ndata: " + json.dumps(event) + "\n\nevent: content_block_stop\n",
+        1,
+    )
+    return iter([response.encode()])
+
+
+def assert_compaction_metadata(
+    events: list[ParsedBetaMessageStreamEvent], message: BetaMessage, expected: str | None
+) -> None:
+    block = message.content[0]
+    assert block.type == "compaction"
+    assert block.content == "Updated summary."
+    assert block.encrypted_content == expected
+    snapshots = [event for event in events if isinstance(event, BetaCompactionEvent)]
+    assert len(snapshots) == 2
+    assert snapshots[0].encrypted_content == "EpwBCioIDxgCEAEYASJALd_opaque_compaction_payload"
+    assert snapshots[1].encrypted_content == expected
+    serialized = message.to_dict()
+    assert cast(list[dict[str, object]], serialized["content"])[0]["encrypted_content"] == expected
+
+
 class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     def test_basic_response(self, respx_mock: MockRouter) -> None:
@@ -568,6 +596,28 @@ class TestSyncMessages:
             assert isinstance(cast(Any, stream), BetaMessageStream)
 
             assert_compaction_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize(
+        "metadata,expected",
+        [
+            ({}, "EpwBCioIDxgCEAEYASJALd_opaque_compaction_payload"),
+            ({"encrypted_content": "replacement"}, "replacement"),
+            ({"encrypted_content": ""}, ""),
+            ({"encrypted_content": None}, None),
+        ],
+        ids=["omitted", "replaced", "empty", "null"],
+    )
+    def test_compaction_metadata_presence(
+        self, respx_mock: MockRouter, metadata: dict[str, str | None], expected: str | None
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=compaction_metadata_response(metadata))
+        )
+        with sync_client.beta.messages.stream(
+            max_tokens=1024, messages=[{"role": "user", "content": "Summarize"}], model="claude-opus-4-7"
+        ) as stream:
+            assert_compaction_metadata(list(stream), stream.get_final_message(), expected)
 
     @pytest.mark.respx(base_url=base_url)
     def test_fallback_relabels_model(self, respx_mock: MockRouter) -> None:
@@ -819,6 +869,29 @@ class TestAsyncMessages:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_compaction_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize(
+        "metadata,expected",
+        [
+            ({}, "EpwBCioIDxgCEAEYASJALd_opaque_compaction_payload"),
+            ({"encrypted_content": "replacement"}, "replacement"),
+            ({"encrypted_content": ""}, ""),
+            ({"encrypted_content": None}, None),
+        ],
+        ids=["omitted", "replaced", "empty", "null"],
+    )
+    async def test_compaction_metadata_presence(
+        self, respx_mock: MockRouter, metadata: dict[str, str | None], expected: str | None
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=to_async_iter(compaction_metadata_response(metadata)))
+        )
+        async with async_client.beta.messages.stream(
+            max_tokens=1024, messages=[{"role": "user", "content": "Summarize"}], model="claude-opus-4-7"
+        ) as stream:
+            assert_compaction_metadata([event async for event in stream], await stream.get_final_message(), expected)
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
