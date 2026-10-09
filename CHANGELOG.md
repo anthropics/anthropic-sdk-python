@@ -1,6 +1,11 @@
 # Changelog
 
-## [1.13.1](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.13.1) (2026-10-09)
+## [1.14.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.14.0) (2026-10-09)
+
+### Features
+
+* **api:** add organization_type_not_supported error to spend limit lists
+
 
 ### Chores
 
