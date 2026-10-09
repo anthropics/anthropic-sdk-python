@@ -17,6 +17,7 @@ from ._utils import (
 from ._compat import model_copy, cached_property
 from ._models import FinalRequestOptions
 from ._version import __version__
+from ._constants import ANTHROPIC_API_VERSION
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
 from ._middleware import MiddlewareInput
@@ -392,7 +393,7 @@ class Anthropic(SyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": "false",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_API_VERSION,
             **self._custom_headers,
         }
 
@@ -826,7 +827,7 @@ class AsyncAnthropic(AsyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": f"async:{get_async_library()}",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_API_VERSION,
             **self._custom_headers,
         }
 

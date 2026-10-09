@@ -4,17 +4,30 @@ from ...._models import BaseModel
 from .beta_analytics_plugin_cowork_metrics import BetaAnalyticsPluginCoworkMetrics
 from .beta_analytics_plugin_claude_code_metrics import BetaAnalyticsPluginClaudeCodeMetrics
 
-__all__ = ["BetaAnalyticsPluginActivity"]
+__all__ = ["BetaAnalyticsPluginActivity", "ChatCoworkUnifiedMetrics"]
+
+
+class ChatCoworkUnifiedMetrics(BaseModel):
+    """
+    Plugin use recorded while members had Chat and Cowork unified (Cowork's features inside claude.ai chat) turned on. A count is null in date-range mode where it cannot be computed. Omitted from the response on deployments that do not offer Chat and Cowork unified.
+    """
+
+    distinct_session_plugin_used_count: Optional[int] = None
+    """
+    Same measure as `cowork_metrics.distinct_session_plugin_used_count`, for
+    activity recorded while members had Chat and Cowork unified turned on. Null on
+    aggregated rows where a distinct count cannot be computed.
+    """
 
 
 class BetaAnalyticsPluginActivity(BaseModel):
     """Per-plugin install + invocation activity for a given day.
 
-    With `group_by[]=user_id` / `rbac_group_id` / `product` (`cowork` /
-    `claude_code` only on this endpoint) each row is one (plugin, user),
-    (plugin, group), or (plugin, product) cut: the flat `user_id` /
-    `rbac_group_id` / `product` keys carry the cut and the counts are
-    scoped to it.
+    With `group_by[]=user_id` / `rbac_group_id` / `product` (`cowork`,
+    `claude_code` and `chat_cowork_unified` only on this endpoint) each row is
+    one (plugin, user), (plugin, group), or (plugin, product) cut: the flat
+    `user_id` / `rbac_group_id` / `product` keys carry the cut and the counts
+    are scoped to it.
     """
 
     claude_code_metrics: BetaAnalyticsPluginClaudeCodeMetrics
@@ -44,6 +57,14 @@ class BetaAnalyticsPluginActivity(BaseModel):
     plugin_name: str
     """Name of the plugin"""
 
+    chat_cowork_unified_metrics: Optional[ChatCoworkUnifiedMetrics] = None
+    """
+    Plugin use recorded while members had Chat and Cowork unified (Cowork's features
+    inside claude.ai chat) turned on. A count is null in date-range mode where it
+    cannot be computed. Omitted from the response on deployments that do not offer
+    Chat and Cowork unified.
+    """
+
     plugin_id: Optional[str] = None
     """Stable plugin identifier when available (e.g.
 
@@ -54,13 +75,15 @@ class BetaAnalyticsPluginActivity(BaseModel):
     product: Optional[str] = None
     """
     Product that produced this row's activity: one of `chat`, `claude_code`,
-    `cowork`, or `office_agent` (the canonical Cost & Usage product naming; an
-    `office_agent` row's per-surface breakdown is in its `office_metrics`). On
-    `/plugins` only `cowork` and `claude_code` occur (the only surfaces with plugin
-    attribution); on `/artifacts` only `chat`, `claude_code`, and `cowork` occur
-    (the surfaces that create artifacts); `/apps/chat/projects` does not support the
-    product dimension (a `product` entry in `group_by[]` or `filter[]` there is
-    rejected). Present only when the request grouped by `product`.
+    `cowork`, `office_agent`, or `chat_cowork_unified` (Chat and Cowork unified).
+    These are the canonical Cost & Usage product names; an `office_agent` row's
+    per-surface breakdown is in its `office_metrics`. On `/plugins` only `cowork`,
+    `claude_code` and `chat_cowork_unified` occur (the only surfaces with plugin
+    attribution); on `/artifacts` only `chat`, `claude_code`, `cowork` and
+    `chat_cowork_unified` occur (the surfaces that create artifacts);
+    `/apps/chat/projects` does not support the product dimension (a `product` entry
+    in `group_by[]` or `filter[]` there is rejected). Present only when the request
+    grouped by `product`.
     """
 
     rbac_group_id: Optional[str] = None

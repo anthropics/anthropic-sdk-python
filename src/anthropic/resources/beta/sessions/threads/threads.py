@@ -27,6 +27,7 @@ from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.anthropic_beta_param import AnthropicBetaParam
 from .....types.beta.sessions.beta_managed_agents_session_thread import BetaManagedAgentsSessionThread
+from .....types.beta.sessions.beta_managed_agents_session_thread_status import BetaManagedAgentsSessionThreadStatus
 
 __all__ = ["Threads", "AsyncThreads"]
 
@@ -125,6 +126,7 @@ class Threads(SyncAPIResource):
         *,
         limit: int | Omit = omit,
         page: str | Omit = omit,
+        statuses: List[BetaManagedAgentsSessionThreadStatus] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -142,6 +144,11 @@ class Threads(SyncAPIResource):
         Defaults to 1000.
 
           page: Opaque pagination cursor from a previous response's `next_page`. Forward-only.
+
+          statuses: Return only threads that have one of these statuses.
+
+              Repeat the parameter to give more than one status. Leave it out to return
+              threads of every status.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -185,6 +192,7 @@ class Threads(SyncAPIResource):
                 query={
                     "limit": limit,
                     "page": page,
+                    "statuses": statuses,
                 },
             ),
             model=BetaManagedAgentsSessionThread,
@@ -351,6 +359,7 @@ class AsyncThreads(AsyncAPIResource):
         *,
         limit: int | Omit = omit,
         page: str | Omit = omit,
+        statuses: List[BetaManagedAgentsSessionThreadStatus] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -368,6 +377,11 @@ class AsyncThreads(AsyncAPIResource):
         Defaults to 1000.
 
           page: Opaque pagination cursor from a previous response's `next_page`. Forward-only.
+
+          statuses: Return only threads that have one of these statuses.
+
+              Repeat the parameter to give more than one status. Leave it out to return
+              threads of every status.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -411,6 +425,7 @@ class AsyncThreads(AsyncAPIResource):
                 query={
                     "limit": limit,
                     "page": page,
+                    "statuses": statuses,
                 },
             ),
             model=BetaManagedAgentsSessionThread,

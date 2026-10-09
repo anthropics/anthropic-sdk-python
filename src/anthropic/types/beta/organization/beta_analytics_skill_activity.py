@@ -6,8 +6,30 @@ from .beta_analytics_skill_chat_metrics import BetaAnalyticsSkillChatMetrics
 from .beta_analytics_skill_cowork_metrics import BetaAnalyticsSkillCoworkMetrics
 from .beta_analytics_skill_office_metrics import BetaAnalyticsSkillOfficeMetrics
 from .beta_analytics_skill_claude_code_metrics import BetaAnalyticsSkillClaudeCodeMetrics
+from .beta_analytics_skill_chat_cowork_unified_chat_metrics import BetaAnalyticsSkillChatCoworkUnifiedChatMetrics
+from .beta_analytics_skill_chat_cowork_unified_sessions_metrics import (
+    BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics,
+)
 
-__all__ = ["BetaAnalyticsSkillActivity"]
+__all__ = ["BetaAnalyticsSkillActivity", "ChatCoworkUnifiedMetrics"]
+
+
+class ChatCoworkUnifiedMetrics(BaseModel):
+    """
+    Skill use recorded while members had Chat and Cowork unified (Cowork's features inside claude.ai chat) turned on, split into chat conversations and Cowork sessions. A count is null in date-range mode where it cannot be computed. Omitted from the response on deployments that do not offer Chat and Cowork unified.
+    """
+
+    chat: BetaAnalyticsSkillChatCoworkUnifiedChatMetrics
+    """
+    A skill's use in chat conversations recorded while members had Chat and Cowork
+    unified turned on.
+    """
+
+    sessions: BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics
+    """
+    A skill's use in Cowork sessions recorded while members had Chat and Cowork
+    unified turned on.
+    """
 
 
 class BetaAnalyticsSkillActivity(BaseModel):
@@ -64,6 +86,15 @@ class BetaAnalyticsSkillActivity(BaseModel):
     below the ungrouped value for the same skill over the same date or range: spend
     attributed to a member–skill pair with no counted usage on that day is excluded
     from those cuts.
+    """
+
+    chat_cowork_unified_metrics: Optional[ChatCoworkUnifiedMetrics] = None
+    """
+    Skill use recorded while members had Chat and Cowork unified (Cowork's features
+    inside claude.ai chat) turned on, split into chat conversations and Cowork
+    sessions. A count is null in date-range mode where it cannot be computed.
+    Omitted from the response on deployments that do not offer Chat and Cowork
+    unified.
     """
 
     currency: Optional[str] = None
@@ -130,13 +161,15 @@ class BetaAnalyticsSkillActivity(BaseModel):
     product: Optional[str] = None
     """
     Product that produced this row's activity: one of `chat`, `claude_code`,
-    `cowork`, or `office_agent` (the canonical Cost & Usage product naming; an
-    `office_agent` row's per-surface breakdown is in its `office_metrics`). On
-    `/plugins` only `cowork` and `claude_code` occur (the only surfaces with plugin
-    attribution); on `/artifacts` only `chat`, `claude_code`, and `cowork` occur
-    (the surfaces that create artifacts); `/apps/chat/projects` does not support the
-    product dimension (a `product` entry in `group_by[]` or `filter[]` there is
-    rejected). Present only when the request grouped by `product`.
+    `cowork`, `office_agent`, or `chat_cowork_unified` (Chat and Cowork unified).
+    These are the canonical Cost & Usage product names; an `office_agent` row's
+    per-surface breakdown is in its `office_metrics`. On `/plugins` only `cowork`,
+    `claude_code` and `chat_cowork_unified` occur (the only surfaces with plugin
+    attribution); on `/artifacts` only `chat`, `claude_code`, `cowork` and
+    `chat_cowork_unified` occur (the surfaces that create artifacts);
+    `/apps/chat/projects` does not support the product dimension (a `product` entry
+    in `group_by[]` or `filter[]` there is rejected). Present only when the request
+    grouped by `product`.
     """
 
     rbac_group_id: Optional[str] = None
