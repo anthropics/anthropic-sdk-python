@@ -60,6 +60,27 @@ async def test_multi_byte_character_multiple_chunks(
     assert await iter_next(iterator) == {"content": "известни"}
 
 
+def test_sync_closes_response_on_decode_error() -> None:
+    response = httpx2.Response(200, stream=httpx2.ByteStream(b"invalid json\n"))
+    decoder = JSONLDecoder(line_type=object, raw_iterator=response.iter_bytes(), http_response=response)
+
+    with pytest.raises(Exception):
+        list(decoder)
+
+    assert response.is_closed
+
+
+async def test_async_closes_response_on_decode_error() -> None:
+    response = httpx2.Response(200, stream=httpx2.ByteStream(b"invalid json\n"))
+    decoder = AsyncJSONLDecoder(line_type=object, raw_iterator=response.aiter_bytes(), http_response=response)
+
+    with pytest.raises(Exception):
+        async for _ in decoder:
+            pass
+
+    assert response.is_closed
+
+
 async def to_aiter(iter: Iterator[bytes]) -> AsyncIterator[bytes]:
     for chunk in iter:
         yield chunk
