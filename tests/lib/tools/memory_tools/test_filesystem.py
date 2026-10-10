@@ -73,17 +73,19 @@ class TestBetaLocalFilesystemMemoryTool:
         finally:
             os.umask(old_umask)
 
-    def test_create(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
+    @pytest.mark.parametrize(
+        "file_text", ["Hello, World!", "first\nsecond\n", "first\r\nsecond\r\n", "héllo\r\n世界\n"]
+    )
+    def test_create(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool, file_text: str) -> None:
         result = sync_local_filesystem_tool.create(
             BetaMemoryTool20250818CreateCommand(
                 command="create",
-                file_text="Hello, World!",
+                file_text=file_text,
                 path="/memories/test_file.txt",
             )
         )
         assert result == "File created successfully at: /memories/test_file.txt"
-        dir_snapshot = get_directory_snapshot(str(sync_local_filesystem_tool.base_path))
-        assert dir_snapshot == {"memories/test_file.txt": "Hello, World!"}
+        assert (sync_local_filesystem_tool.memory_root / "test_file.txt").read_bytes() == file_text.encode("utf-8")
 
     def test_create_nested_directories(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
         result = sync_local_filesystem_tool.create(
@@ -594,17 +596,23 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
         finally:
             os.umask(old_umask)
 
-    async def test_create(self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool) -> None:
+    @pytest.mark.parametrize(
+        "file_text", ["Hello, World!", "first\nsecond\n", "first\r\nsecond\r\n", "héllo\r\n世界\n"]
+    )
+    async def test_create(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool, file_text: str
+    ) -> None:
         result = await async_local_filesystem_tool.create(
             BetaMemoryTool20250818CreateCommand(
                 command="create",
-                file_text="Hello, World!",
+                file_text=file_text,
                 path="/memories/test_file.txt",
             )
         )
         assert result == "File created successfully at: /memories/test_file.txt"
-        dir_snapshot = get_directory_snapshot(str(async_local_filesystem_tool.base_path))
-        assert dir_snapshot == {"memories/test_file.txt": "Hello, World!"}
+        assert await (async_local_filesystem_tool.memory_root / "test_file.txt").read_bytes() == file_text.encode(
+            "utf-8"
+        )
 
     async def test_create_nested_directories(
         self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
