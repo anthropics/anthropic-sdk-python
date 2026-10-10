@@ -808,6 +808,33 @@ class TestCredentialsFile:
         )
         assert CredentialsFile()().token == "x"
 
+    @pytest.mark.parametrize(
+        "base_url",
+        [
+            # A host that merely *starts with* "localhost" is not localhost.
+            "http://localhost.evil.example",
+            "http://127.0.0.1.evil.example",
+            "http://localhostfoo.example",
+            # Userinfo before the real host: the request goes to evil.example.
+            "http://localhost:8080@evil.example",
+        ],
+    )
+    def test_config_base_url_localhost_lookalike_http_rejected(self, tmp_path: pathlib.Path, base_url: str) -> None:
+        """Only the loopback hosts themselves get the cleartext exemption.
+
+        A prefix match on the URL string lets a malicious config point the
+        token exchange at any cleartext host — the exact exfiltration
+        `test_config_base_url_http_rejected` guards against.
+        """
+        _write_profile(
+            tmp_path,
+            "default",
+            {"type": "external", "base_url": base_url},
+            {"access_token": "x"},
+        )
+        with pytest.raises(AnthropicError, match="must use https"):
+            CredentialsFile()()
+
     def test_workload_identity_http_rejected(self) -> None:
         from anthropic.lib.credentials import WorkloadIdentityCredentials
 
