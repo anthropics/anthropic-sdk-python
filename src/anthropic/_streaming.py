@@ -20,6 +20,20 @@ if TYPE_CHECKING:
 _T = TypeVar("_T")
 
 
+def _is_error_event(sse: ServerSentEvent) -> bool:
+    """Whether the event carries an error payload.
+
+    The `type` in the payload is what identifies an event, and the `event:` line
+    is optional, so an error sent without one still has to be raised.
+    """
+    try:
+        data = sse.json()
+    except Exception:
+        return False
+
+    return is_dict(data) and data.get("type") == "error"
+
+
 class Stream(Generic[_T]):
     """Provides the core interface to iterate over a synchronous stream response."""
 
@@ -136,7 +150,7 @@ class Stream(Generic[_T]):
                 if sse.event == "ping":
                     continue
 
-                if sse.event == "error":
+                if sse.event == "error" or _is_error_event(sse):
                     body = sse.data
 
                     try:
@@ -295,7 +309,7 @@ class AsyncStream(Generic[_T]):
                 if sse.event == "ping":
                     continue
 
-                if sse.event == "error":
+                if sse.event == "error" or _is_error_event(sse):
                     body = sse.data
 
                     try:
