@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.14.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.14.0) (2026-10-09)
+## [1.14.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.14.0) (2026-10-10)
 
 ### Features
 
@@ -16,6 +16,7 @@
 ### Documentation
 
 * **api:** clarify when custom tool results can be sent
+* **api:** say is_enabled is always true for user spend limits
 
 ## [1.13.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.12.1...v1.13.0) (2026-10-09)
 
