@@ -19,9 +19,15 @@ from anthropic.lib.streaming._beta_types import (
 )
 from anthropic.types.beta.beta_tool_param import BetaToolParam
 from anthropic.resources.messages.messages import DEPRECATED_MODELS
-from anthropic.lib.streaming._beta_messages import TRACKS_TOOL_INPUT, BetaMessageStream, BetaAsyncMessageStream
+from anthropic.lib.streaming._beta_messages import (
+    TRACKS_TOOL_INPUT,
+    BetaMessageStream,
+    BetaAsyncMessageStream,
+    accumulate_event,
+)
 from anthropic.types.beta.beta_message_delta_usage import BetaMessageDeltaUsage
 from anthropic.types.beta.beta_raw_message_delta_event import Delta as BetaRawMessageDelta, BetaRawMessageDeltaEvent
+from anthropic.types.beta.beta_raw_message_start_event import BetaRawMessageStartEvent
 
 from .helpers import get_response, to_async_iter
 
@@ -921,6 +927,73 @@ def test_message_delta_fields_are_all_accumulated() -> None:
         "output_tokens_details",
         "server_tool_use",
     }
+
+
+def test_later_message_delta_omitting_stop_fields_keeps_snapshot() -> None:
+    # a usage-only later message_delta must not reset stop_* a prior delta already set
+    snap = accumulate_event(
+        event=BetaRawMessageStartEvent.model_validate(
+            {
+                "type": "message_start",
+                "message": {
+                    "id": "msg_1",
+                    "type": "message",
+                    "role": "assistant",
+                    "model": "claude-haiku-4-5",
+                    "content": [],
+                    "stop_reason": None,
+                    "stop_sequence": None,
+                    "usage": {"input_tokens": 10, "output_tokens": 0},
+                },
+            }
+        ),
+        current_snapshot=None,
+        json_bufs={},
+        request_headers=httpx2.Headers(),
+    )
+    snap = accumulate_event(
+        event=BetaRawMessageDeltaEvent.model_validate(
+            {
+                "type": "message_delta",
+                "delta": {
+                    "stop_reason": "end_turn",
+                    "stop_sequence": "STOP",
+                    "stop_details": {
+                        "type": "refusal",
+                        "category": "cyber",
+                        "explanation": "policy",
+                    },
+                },
+                "usage": {"output_tokens": 5},
+            }
+        ),
+        current_snapshot=snap,
+        json_bufs={},
+        request_headers=httpx2.Headers(),
+    )
+    assert snap.stop_reason == "end_turn"
+    assert snap.stop_sequence == "STOP"
+    assert snap.stop_details is not None
+    assert snap.stop_details.type == "refusal"
+    assert snap.usage.output_tokens == 5
+
+    snap = accumulate_event(
+        event=BetaRawMessageDeltaEvent.model_validate(
+            {
+                "type": "message_delta",
+                "delta": {},
+                "usage": {"output_tokens": 9},
+            }
+        ),
+        current_snapshot=snap,
+        json_bufs={},
+        request_headers=httpx2.Headers(),
+    )
+    assert snap.stop_reason == "end_turn"
+    assert snap.stop_sequence == "STOP"
+    assert snap.stop_details is not None
+    assert snap.stop_details.category == "cyber"
+    assert snap.usage.output_tokens == 9
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
