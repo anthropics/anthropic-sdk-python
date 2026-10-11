@@ -94,6 +94,14 @@ def transform_schema(
     ref = json_schema.pop("$ref", None)
     if ref is not None:
         strict_schema["$ref"] = ref
+        # Pydantic places Field(description=...) / title beside $ref for
+        # enum and model fields; the API accepts and follows them.
+        description = json_schema.pop("description", None)
+        if description is not None:
+            strict_schema["description"] = description
+        title = json_schema.pop("title", None)
+        if title is not None:
+            strict_schema["title"] = title
         return strict_schema
 
     type_: Optional[SupportedTypes] = json_schema.pop("type", None)
