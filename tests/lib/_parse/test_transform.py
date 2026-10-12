@@ -73,6 +73,31 @@ def test_enum_schema():
     assert result == snapshot({"type": "string", "enum": ["foo", "bar"]})
 
 
+def test_const_schema():
+    schema = {"type": "string", "const": "cat", "description": "Discriminator"}
+    result = transform_schema(schema)
+    assert result == snapshot({"type": "string", "const": "cat", "description": "Discriminator"})
+
+
+def test_const_from_pydantic_literal_discriminator():
+    from typing import Union, Literal
+
+    import pydantic
+
+    class Cat(pydantic.BaseModel):
+        kind: Literal["cat"]
+
+    class Dog(pydantic.BaseModel):
+        kind: Literal["dog"]
+
+    class Pet(pydantic.BaseModel):
+        pet: Union[Cat, Dog] = pydantic.Field(discriminator="kind")
+
+    result = transform_schema(Pet)
+    assert result["$defs"]["Cat"]["properties"]["kind"] == snapshot({"type": "string", "const": "cat", "title": "Kind"})
+    assert result["$defs"]["Dog"]["properties"]["kind"] == snapshot({"type": "string", "const": "dog", "title": "Kind"})
+
+
 def test_allof():
     schema = {
         "allOf": [

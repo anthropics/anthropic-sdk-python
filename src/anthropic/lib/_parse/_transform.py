@@ -117,6 +117,10 @@ def transform_schema(
     if is_list(enum):
         strict_schema["enum"] = enum
 
+    # `const` is supported by the API; pydantic emits it for a single-value `Literal`
+    if "const" in json_schema:
+        strict_schema["const"] = json_schema.pop("const")
+
     description = json_schema.pop("description", None)
     if description is not None:
         strict_schema["description"] = description
