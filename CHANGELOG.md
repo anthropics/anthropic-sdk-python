@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.14.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.14.0) (2026-10-10)
+## [1.14.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.14.0) (2026-10-13)
 
 ### Features
 
@@ -17,6 +17,7 @@
 
 * **docs:** correct prefill, thinking, fallback and model descriptions
 * **docs:** update model examples
+* **internal:** narrow the tripwire test rule in the contributor guides
 
 
 ### Documentation
