@@ -84,6 +84,32 @@ def assert_basic_response(events: list[ParsedMessageStreamEvent[None]], message:
     ]
 
 
+def assert_unknown_events_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
+    event_types: list[str] = [e.type for e in events]
+    assert event_types == [
+        "future_event",
+        "content_block_stop",
+        "message_start",
+        "content_block_start",
+        "content_block_delta",
+        "text",
+        "content_block_delta",
+        "text",
+        "content_block_delta",
+        "text",
+        "content_block_stop",
+        "future_event",
+        "message_delta",
+        "message_stop",
+        "future_event",
+    ]
+    assert events[0].to_dict() == {"type": "future_event", "usage": {"input_tokens": 99, "output_tokens": 99}}
+
+    assert message.to_dict()["content"] == [{"type": "text", "text": "Hello there!"}]
+    assert message.stop_reason == "end_turn"
+    assert message.usage.to_dict() == {"input_tokens": 11, "output_tokens": 6}
+
+
 def assert_tool_use_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
     assert message.id == "msg_019Q1hrJbZG26Fb9BQhrkHEr"
     assert message.model == "claude-sonnet-4-20250514"
@@ -244,6 +270,25 @@ class TestSyncMessages:
             assert not isinstance(cast(Any, stream), Stream)
 
             assert_basic_response([event for event in stream], stream.get_final_message())
+
+    @pytest.mark.parametrize("client", [False], indirect=True)
+    @pytest.mark.respx(base_url=base_url)
+    def test_unknown_events_are_passed_through(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_response("unknown_events_response.txt"))
+        )
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-3-opus-latest",
+        ) as stream:
+            assert_unknown_events_response([event for event in stream], stream.get_final_message())
 
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
@@ -465,6 +510,28 @@ class TestAsyncMessages:
             assert not isinstance(cast(Any, stream), AsyncStream)
 
             assert_basic_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.parametrize("async_client", [False], indirect=True)
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_unknown_events_are_passed_through(
+        self, async_client: AsyncAnthropic, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("unknown_events_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-3-opus-latest",
+        ) as stream:
+            assert_unknown_events_response([event async for event in stream], await stream.get_final_message())
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)

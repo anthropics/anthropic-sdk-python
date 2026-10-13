@@ -7,6 +7,12 @@
 * **api:** add organization_type_not_supported error to spend limit lists
 
 
+### Bug Fixes
+
+* **streaming:** pass unknown event types through the message stream helpers
+* **streaming:** stop raising "Unexpected event order" for an event before message_start
+
+
 ### Chores
 
 * **docs:** correct prefill, thinking, fallback and model descriptions

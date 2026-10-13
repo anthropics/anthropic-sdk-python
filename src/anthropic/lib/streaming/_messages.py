@@ -131,6 +131,10 @@ class MessageStream(Generic[ResponseFormatT]):
 
     def __stream__(self) -> Iterator[ParsedMessageStreamEvent[ResponseFormatT]]:
         for sse_event in self._raw_stream:
+            if self.__final_message_snapshot is None and sse_event.type != "message_start":
+                yield cast("ParsedMessageStreamEvent[ResponseFormatT]", sse_event)
+                continue
+
             self.__final_message_snapshot = accumulate_event(
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
@@ -284,6 +288,10 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
 
     async def __stream__(self) -> AsyncIterator[ParsedMessageStreamEvent[ResponseFormatT]]:
         async for sse_event in self._raw_stream:
+            if self.__final_message_snapshot is None and sse_event.type != "message_start":
+                yield cast("ParsedMessageStreamEvent[ResponseFormatT]", sse_event)
+                continue
+
             self.__final_message_snapshot = accumulate_event(
                 event=sse_event,
                 current_snapshot=self.__final_message_snapshot,
@@ -425,9 +433,7 @@ def build_events(
 
         events_to_fire.append(event_to_fire)
     else:
-        # we only want exhaustive checking for linters, not at runtime
-        if TYPE_CHECKING:  # type: ignore[unreachable]
-            assert_never(event)
+        events_to_fire.append(cast("ParsedMessageStreamEvent[ResponseFormatT]", event))
 
     return events_to_fire
 
